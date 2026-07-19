@@ -1,0 +1,70 @@
+@import "tailwindcss";
+
+:root {
+  --navy: #142847;
+  --navy-deep: #0A1628;
+  --ink: #06101F;
+  --gold: #C9A961;
+  --gold-bright: #E8C77A;
+  --cream: #F4ECD8;
+  --paper: #EFE6CC;
+  --charcoal: #1A1F2E;
+  --red: #B23B2C;
+  --mute: rgba(244, 236, 216, 0.6);
+  --hairline: rgba(201, 169, 97, 0.25);
+  --hairline-strong: rgba(201, 169, 97, 0.55);
+}
+
+*, *::before, *::after {
+  box-sizing: border-box;
+}
+
+html, body, #root {
+  margin: 0;
+  padding: 0;
+  background: var(--ink);
+  font-family: Inter, sans-serif;
+  color: var(--cream);
+  min-height: 100vh;
+}
+
+::-webkit-scrollbar { width: 10px; height: 10px; }
+::-webkit-scrollbar-track { background: #0A1628; }
+::-webkit-scrollbar-thumb { background: rgba(201, 169, 97, 0.33); border-radius: 0; }
+::-webkit-scrollbar-thumb:hover { background: rgba(201, 169, 97, 0.53); }
+
+/* ── Animations ── */
+@keyframes hp-cw   { to { transform: rotate(360deg); } }
+@keyframes hp-ccw  { to { transform: rotate(-360deg); } }
+@keyframes hp-blink { 50% { opacity: 0.25; } }
+@keyframes hp-glow {
+  0%, 100% { filter: drop-shadow(0 0 8px rgba(201,169,97,0.35)) drop-shadow(0 0 18px rgba(201,169,97,0.18)); }
+  50%      { filter: drop-shadow(0 0 16px rgba(201,169,97,0.65)) drop-shadow(0 0 32px rgba(201,169,97,0.35)); }
+}
+@keyframes hp-bar  { 0% { transform: scaleX(0); } 100% { transform: scaleX(1); } }
+@keyframes hp-fade { 0% { opacity: 0; transform: translateY(8px); } 100% { opacity: 1; transform: translateY(0); } }
+@keyframes hp-splash-out {
+  0%   { opacity: 1; pointer-events: all; }
+  100% { opacity: 0; pointer-events: none; visibility: hidden; }
+}
+@keyframes lg-breathe { 0%, 100% { transform: scale(0.96); } 50% { transform: scale(1.04); } }
+@keyframes ring-trace {
+  0%   { stroke-dashoffset: 565; }
+  50%  { stroke-dashoffset: 0; }
+  100% { stroke-dashoffset: -565; }
+}
+
+.hp-cw-3  { animation: hp-cw  3s  linear infinite; transform-origin: 50% 50%; transform-box: fill-box; }
+.hp-cw-6  { animation: hp-cw  6s  linear infinite; transform-origin: 50% 50%; transform-box: fill-box; }
+.hp-cw-8  { animation: hp-cw  8s  linear infinite; transform-origin: 50% 50%; transform-box: fill-box; }
+.hp-cw-12 { animation: hp-cw  12s linear infinite; transform-origin: 50% 50%; transform-box: fill-box; }
+.hp-ccw-9 { animation: hp-ccw 9s  linear infinite; transform-origin: 50% 50%; transform-box: fill-box; }
+.hp-blink { animation: hp-blink 1.2s ease-in-out infinite; }
+.hp-glow  { animation: hp-glow  2.6s ease-in-out infinite; }
+.hp-breathe { animation: lg-breathe 3s ease-in-out infinite; }
+.ring-traced {
+  animation: ring-trace 3s cubic-bezier(.65,0,.35,1) infinite,
+             hp-cw 6s linear infinite;
+  transform-origin: 50% 50%;
+  transform-box: fill-box;
+}

@@ -1,0 +1,40 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 660 200" width="660" height="200" role="img" aria-label="DISPATCH — Trojan Battalion S-6 Net Control">
+  <defs>
+    <linearGradient id="gold" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#E8C77A"/>
+      <stop offset="1" stop-color="#C9A961"/>
+    </linearGradient>
+  </defs>
+
+  <!-- plate -->
+  <rect x="0" y="0" width="660" height="200" fill="#142847"/>
+  <rect x="8" y="8" width="644" height="184" fill="none" stroke="#C9A961" stroke-opacity="0.35" stroke-width="1"/>
+  <rect x="14" y="14" width="632" height="172" fill="none" stroke="#C9A961" stroke-opacity="0.14" stroke-width="1"/>
+
+  <!-- corner ticks -->
+  <g stroke="#C9A961" stroke-width="2">
+    <path d="M8 26 V8 H26" fill="none"/>
+    <path d="M652 26 V8 H634" fill="none"/>
+    <path d="M8 174 V192 H26" fill="none"/>
+    <path d="M652 174 V192 H634" fill="none"/>
+  </g>
+
+  <!-- signal mark: node + three broadcast arcs opening right -->
+  <g transform="translate(78 100)" fill="none" stroke="url(#gold)" stroke-linecap="round">
+    <circle cx="0" cy="0" r="7" fill="url(#gold)" stroke="none"/>
+    <path d="M14 -18 A26 26 0 0 1 14 18" stroke-width="5"/>
+    <path d="M30 -34 A50 50 0 0 1 30 34" stroke-width="4" stroke-opacity="0.7"/>
+    <path d="M46 -50 A74 74 0 0 1 46 50" stroke-width="3" stroke-opacity="0.4"/>
+    <!-- rank chevron beneath, tying comms to battalion -->
+    <path d="M-24 44 L0 32 L24 44" stroke-width="4" stroke-opacity="0.85"/>
+  </g>
+
+  <!-- wordmark -->
+  <text x="180" y="104" font-family="Oswald, 'Arial Narrow', sans-serif" font-size="62" font-weight="700"
+        letter-spacing="14" fill="#F4ECD8">DISPATCH</text>
+
+  <!-- divider + mono tag -->
+  <line x1="182" y1="128" x2="596" y2="128" stroke="#C9A961" stroke-opacity="0.3" stroke-width="1"/>
+  <text x="182" y="150" font-family="'JetBrains Mono', ui-monospace, monospace" font-size="14"
+        letter-spacing="7" fill="#C9A961">TROJAN BATTALION · S-6 · NET CONTROL</text>
+</svg>
