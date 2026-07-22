@@ -207,6 +207,7 @@
 
 .rv-chip.approve { color: var(--rv-green); background: var(--rv-green-soft); }
 .rv-chip.deny { color: var(--rv-red); background: var(--rv-red-soft); }
+.rv-chip.delete { color: var(--rv-red); background: var(--rv-red-soft); }
 
 /* ── draft detail ────────────────────────────────────────────────────── */
 

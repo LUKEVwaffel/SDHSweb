@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
+import { FunctionsHttpError } from '@supabase/supabase-js';
 import { supabase as SB } from '../../lib/supabaseClient';
 import ReviewLogin from './ReviewLogin';
 import ForcePasswordChange from './ForcePasswordChange';
@@ -57,6 +58,7 @@ export default function ReviewPortal() {
   const [flash, setFlash] = useState('');
   const [shake, setShake] = useState(false);
   const [resultFlash, setResultFlash] = useState(null); // 'approve' | 'deny' | null
+  const [deletedNotice, setDeletedNotice] = useState(false);
   const shakeTimer = useRef(null);
 
   const loadAll = useCallback(async () => {
@@ -127,11 +129,34 @@ export default function ReviewPortal() {
     setOpenMode('pending');
     setFeedback('');
     setFlash('');
+    setDeletedNotice(false);
   }
 
   function openSent(row) {
     setOpen(row);
     setOpenMode('sent');
+    setDeletedNotice(false);
+  }
+
+  // supabase-js's functions.invoke() does NOT surface the edge function's
+  // JSON error body on a non-2xx response — `data` is null and `error` is a
+  // FunctionsHttpError whose .message is the fixed generic string "Edge
+  // Function returned a non-2xx status code". The real { error: "..." } body
+  // only lives on error.context, an unread Response — must be parsed here.
+  async function invokeErrorMessage(data, error) {
+    if (data?.error) return data.error;
+    if (error instanceof FunctionsHttpError) {
+      const body = await error.context.json().catch(() => null);
+      if (body?.error) return body.error;
+    }
+    return error?.message || 'Unknown error';
+  }
+
+  // A stale/reused link or a race with the admin side (or another reviewer)
+  // deciding/deleting the same request lands here as a 404/409 from the edge
+  // function — surface it as a plain "gone" state, not a raw error string.
+  function isGoneError(msg) {
+    return /not found|no longer pending review|already gone/i.test(msg);
   }
 
   async function decide(decision) {
@@ -150,7 +175,14 @@ export default function ReviewPortal() {
     });
     setBusy(false);
     if (error || data?.error) {
-      setFlash(`Failed: ${data?.error || error.message}`);
+      const msg = await invokeErrorMessage(data, error);
+      if (isGoneError(msg)) {
+        setOpen(null);
+        setDeletedNotice(true);
+        loadAll();
+        return;
+      }
+      setFlash(`Failed: ${msg}`);
       return;
     }
     setResultFlash(decision);
@@ -159,6 +191,31 @@ export default function ReviewPortal() {
       setResultFlash(null);
       loadAll();
     }, 480);
+  }
+
+  async function deleteRequest() {
+    if (!open) return;
+    if (!confirm(`Delete this pending request — "${open.subject}"? This cannot be undone.`)) return;
+    setBusy(true);
+    setFlash('');
+    const { data, error } = await SB.functions.invoke('delete-review-request', {
+      body: { message_id: open.id },
+    });
+    setBusy(false);
+    if (error || data?.error) {
+      const msg = await invokeErrorMessage(data, error);
+      if (isGoneError(msg)) {
+        setOpen(null);
+        setDeletedNotice(true);
+        loadAll();
+        return;
+      }
+      setFlash(`Delete failed: ${msg}`);
+      return;
+    }
+    setOpen(null);
+    setDeletedNotice(true);
+    loadAll();
   }
 
   const shell = (children) => (
@@ -229,6 +286,14 @@ export default function ReviewPortal() {
                   Request changes
                 </button>
               </div>
+              <button
+                className="rv-link"
+                style={{ color: 'var(--rv-red)', marginTop: 14 }}
+                onClick={deleteRequest}
+                disabled={busy}
+              >
+                Delete this request
+              </button>
             </div>
           ) : (
             <div className="rv-detail-foot">
@@ -281,6 +346,13 @@ export default function ReviewPortal() {
       <p className="rv-sub" style={{ marginBottom: 22 }}>
         {myRows.length} draft{myRows.length === 1 ? '' : 's'} awaiting your review.
       </p>
+
+      {deletedNotice && (
+        <div className="rv-panel" style={{ borderColor: 'var(--rv-red)', padding: '12px 16px', marginBottom: 18, display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12 }}>
+          <span style={{ color: 'var(--rv-red)', fontSize: 13 }}>Request deleted.</span>
+          <button className="rv-link" onClick={() => setDeletedNotice(false)}>Dismiss</button>
+        </div>
+      )}
 
       <div className="rv-tabs">
         {tabs.map((t) => (
@@ -366,7 +438,9 @@ export default function ReviewPortal() {
                     <div className="rv-row-title" style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
                       {h.subject || 'Message no longer available'}
                     </div>
-                    <span className={`rv-chip ${h.decision}`}>{h.decision === 'approve' ? 'Approved' : 'Changes requested'}</span>
+                    <span className={`rv-chip ${h.decision}`}>
+                      {h.decision === 'approve' ? 'Approved' : h.decision === 'delete' ? 'Deleted' : 'Changes requested'}
+                    </span>
                   </div>
                   <div className="rv-row-meta">{fmtDate(h.decided_at)}</div>
                   {h.feedback && (
