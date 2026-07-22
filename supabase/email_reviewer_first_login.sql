@@ -1,4 +1,13 @@
 -- ============================================================================
+-- ⚠ DO NOT RE-RUN THIS FILE. SECTION 1's backfill below is a ONE-TIME
+-- correction dated 2026-07-22 — it unconditionally sets must_change_password
+-- = false for the 3 named reviewer emails. Re-applying it (e.g. during a
+-- fresh-environment setup that replays every supabase/*.sql file in order)
+-- will silently re-disable the forced-password-change gate again, the exact
+-- bug fixed in email_reviewer_password_gate_fix.sql. That file's SECTION 2
+-- trigger (on_reviewer_password_changed) now keeps the flag correct going
+-- forward without needing this file to run again.
+--
 -- EMAIL REVIEW PORTAL — forced password change on first login. Run in the
 -- Supabase SQL editor. Idempotent. Depends on email_review.sql (email_reviewers).
 --
