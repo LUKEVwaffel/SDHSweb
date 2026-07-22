@@ -1,5 +1,15 @@
 @import "tailwindcss";
 
+/* Self-hosted theme faces (latin subset). These back the tokens in
+   src/components/admin/theme.js (oswald/inter/mono) which previously fell back
+   to system fonts because nothing loaded them. woff2 live in public/fonts/. */
+@font-face { font-family: 'Oswald'; font-style: normal; font-weight: 500; font-display: swap; src: url('/fonts/oswald-500.woff2') format('woff2'); }
+@font-face { font-family: 'Oswald'; font-style: normal; font-weight: 600; font-display: swap; src: url('/fonts/oswald-600.woff2') format('woff2'); }
+@font-face { font-family: 'Inter'; font-style: normal; font-weight: 400; font-display: swap; src: url('/fonts/inter-400.woff2') format('woff2'); }
+@font-face { font-family: 'Inter'; font-style: normal; font-weight: 600; font-display: swap; src: url('/fonts/inter-600.woff2') format('woff2'); }
+@font-face { font-family: 'JetBrains Mono'; font-style: normal; font-weight: 400; font-display: swap; src: url('/fonts/jbmono-400.woff2') format('woff2'); }
+@font-face { font-family: 'JetBrains Mono'; font-style: normal; font-weight: 500; font-display: swap; src: url('/fonts/jbmono-500.woff2') format('woff2'); }
+
 :root {
   --navy: #142847;
   --navy-deep: #0A1628;
