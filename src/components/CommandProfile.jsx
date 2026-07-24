@@ -1,16 +1,25 @@
 import { useState, useEffect } from 'react';
-import { createClient } from '@supabase/supabase-js';
-
-const SB = createClient(
-  'https://bjgyvmdzcymruunzavni.supabase.co',
-  'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJqZ3l2bWR6Y3ltcnV1bnphdm5pIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc1NjMxMTQsImV4cCI6MjA5MzEzOTExNH0.HsRE4RreQU6yZSYxoYtvsC615e-EBpIIeDTC50EW0Cs'
-);
+import { supabase as SB } from '../lib/supabaseClient';
 
 const P = {
   ink: '#06101F', navy: '#142847', deep: '#0A1628',
   gold: '#C9A961', bright: '#E8C77A', cream: '#F4ECD8',
   mute: 'rgba(244,236,216,0.55)', hair: 'rgba(201,169,97,0.22)',
 };
+
+// Light-tier grid — matches Raiders.jsx PageBg / About.jsx hero, not the
+// heavier BattalionCommand tactical overlay (that one's landing-hero-only).
+function PageGrid() {
+  return (
+    <div style={{ position: 'absolute', inset: 0, pointerEvents: 'none', overflow: 'hidden' }}>
+      <div style={{
+        position: 'absolute', inset: 0,
+        backgroundImage: `linear-gradient(${P.hair} 1px, transparent 1px), linear-gradient(90deg, ${P.hair} 1px, transparent 1px)`,
+        backgroundSize: '52px 52px', opacity: 0.22,
+      }} />
+    </div>
+  );
+}
 
 const ROLE_LABELS = {
   BC:  'Battalion Commander',
@@ -33,14 +42,16 @@ export default function CommandProfile({ personId, backTarget, backLabel, setAct
 
   useEffect(() => {
     async function load() {
-      // Try direct id match first
-      const { data: all } = await SB.from('personnel').select('*').eq('visible', true).limit(200);
-      const match = (all || []).find(p =>
-        String(p.id) === String(personId) ||
-        p.slug === personId ||
-        (p.role_short && p.role_short.toLowerCase() === personId.toLowerCase())
-      );
-      let resolved = match || null;
+      // Try direct id match first, then slug, then role_short — strict priority
+      // so an id that happens to equal another row's shared role_short (e.g.
+      // 'xo') can't lose to that row. See: Mya Sneidman routing bug.
+      const list = await SB.from('personnel').select('*').eq('visible', true).limit(200).then(r => r.data || []);
+      const match =
+        list.find(p => String(p.id) === String(personId)) ||
+        list.find(p => p.slug === personId) ||
+        list.find(p => p.role_short && p.role_short.toLowerCase() === personId.toLowerCase()) ||
+        null;
+      let resolved = match;
       // Mya guaranteed: synthesize XO placeholder if no row exists.
       if (!resolved && personId && personId.toLowerCase() === 'xo') {
         resolved = {
@@ -59,8 +70,9 @@ export default function CommandProfile({ personId, backTarget, backLabel, setAct
 
   if (loading) {
     return (
-      <div style={{ background: P.ink, minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-        <div style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: 10, color: P.mute, letterSpacing: '0.2em' }}>
+      <div style={{ background: P.ink, minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', position: 'relative' }}>
+        <PageGrid />
+        <div style={{ position: 'relative', zIndex: 1, fontFamily: "'JetBrains Mono', monospace", fontSize: 10, color: P.mute, letterSpacing: '0.2em' }}>
           LOADING…
         </div>
       </div>
@@ -69,9 +81,11 @@ export default function CommandProfile({ personId, backTarget, backLabel, setAct
 
   if (!person) {
     return (
-      <div style={{ background: P.ink, minHeight: '100vh', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 16 }}>
-        <div style={{ fontFamily: 'Oswald, sans-serif', fontSize: 28, color: P.cream }}>PROFILE NOT FOUND</div>
+      <div style={{ background: P.ink, minHeight: '100vh', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 16, position: 'relative' }}>
+        <PageGrid />
+        <div style={{ position: 'relative', zIndex: 1, fontFamily: 'Oswald, sans-serif', fontSize: 28, color: P.cream }}>PROFILE NOT FOUND</div>
         <button onClick={back} style={{
+          position: 'relative', zIndex: 1,
           background: 'none', border: `1px solid ${P.hair}`, color: P.gold, cursor: 'pointer',
           fontFamily: "'JetBrains Mono', monospace", fontSize: 10, letterSpacing: '0.2em', padding: '10px 20px',
         }}>← {backLabel || 'BACK'}</button>
@@ -80,10 +94,12 @@ export default function CommandProfile({ personId, backTarget, backLabel, setAct
   }
 
   const roleLabel = ROLE_LABELS[person.role_short] || person.role_long || person.role_short;
+  const bioText = person.bio_long || person.bio;
 
   return (
-    <section style={{ background: P.ink, minHeight: '100vh', fontFamily: 'Inter, sans-serif' }}>
-      <div style={{ maxWidth: 1100, margin: '0 auto', padding: '60px 40px 80px' }}>
+    <section style={{ background: P.ink, minHeight: '100vh', fontFamily: 'Inter, sans-serif', position: 'relative' }}>
+      <PageGrid />
+      <div style={{ maxWidth: 1100, margin: '0 auto', padding: '60px 40px 80px', position: 'relative', zIndex: 1 }}>
 
         {/* Back button */}
         <button onClick={back} style={{
@@ -198,12 +214,12 @@ export default function CommandProfile({ personId, backTarget, backLabel, setAct
                 // BIOGRAPHY
               </div>
               <div style={{ padding: '20px 20px' }}>
-                {person.bio ? (
+                {bioText ? (
                   <p style={{
                     fontFamily: 'Inter, sans-serif', fontSize: 14,
                     color: P.mute, lineHeight: 1.8, margin: 0,
                   }}>
-                    {person.bio}
+                    {bioText}
                   </p>
                 ) : (
                   <div style={{

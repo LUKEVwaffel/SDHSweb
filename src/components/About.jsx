@@ -1,11 +1,6 @@
-import { createClient } from '@supabase/supabase-js';
 import { useEffect, useState } from 'react';
+import { supabase as SB } from '../lib/supabaseClient';
 import VerifiedTooltip from './VerifiedTooltip';
-
-const SB = createClient(
-  'https://bjgyvmdzcymruunzavni.supabase.co',
-  'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJqZ3l2bWR6Y3ltcnV1bnphdm5pIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc1NjMxMTQsImV4cCI6MjA5MzEzOTExNH0.HsRE4RreQU6yZSYxoYtvsC615e-EBpIIeDTC50EW0Cs'
-);
 
 const P = {
   ink: '#06101F', navy: '#142847', deep: '#0A1628',
@@ -38,8 +33,78 @@ function StatBox({ value, label }) {
   );
 }
 
+// ─── Leadership card — adult instructors (SAI, AI, 1SGT), click through to CommandProfile ──
+function LeadershipCard({ person, onViewProfile }) {
+  const [hovered, setHovered] = useState(false);
+  const bioText = person.bio_long || person.bio;
+  const view = () => onViewProfile(person);
+
+  return (
+    <div
+      role="button"
+      tabIndex={0}
+      aria-label={`View profile: ${person.name}, ${person.role_long || person.role_short}`}
+      onClick={view}
+      onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); view(); } }}
+      onMouseEnter={() => setHovered(true)}
+      onMouseLeave={() => setHovered(false)}
+      onFocus={() => setHovered(true)}
+      onBlur={() => setHovered(false)}
+      style={{
+        cursor: 'pointer', display: 'flex', gap: 16,
+        border: `1px solid ${hovered ? P.gold : P.hair}`,
+        background: P.navy, padding: 16,
+        transition: 'border-color 0.2s, transform 0.2s',
+        transform: hovered ? 'translateY(-3px)' : 'translateY(0)',
+      }}
+    >
+      <div style={{ width: 76, height: 96, flexShrink: 0, position: 'relative', overflow: 'hidden', background: P.deep }}>
+        {person.photo_url ? (
+          <img src={person.photo_url} alt={person.name} style={{ width: '100%', height: '100%', objectFit: 'cover', objectPosition: 'top', display: 'block' }} />
+        ) : (
+          <div style={{
+            width: '100%', height: '100%', display: 'flex', flexDirection: 'column',
+            alignItems: 'center', justifyContent: 'center', gap: 6,
+            background: `repeating-linear-gradient(135deg, ${P.deep} 0px, ${P.deep} 7px, ${P.navy} 7px, ${P.navy} 8px)`,
+          }}>
+            <svg width="24" height="24" viewBox="0 0 48 48" fill="none" style={{ opacity: 0.28 }}>
+              <circle cx="24" cy="24" r="8" stroke={P.gold} strokeWidth="1.2" />
+              <line x1="24" y1="3" x2="24" y2="13" stroke={P.gold} strokeWidth="1.2" />
+              <line x1="24" y1="35" x2="24" y2="45" stroke={P.gold} strokeWidth="1.2" />
+              <line x1="3" y1="24" x2="13" y2="24" stroke={P.gold} strokeWidth="1.2" />
+              <line x1="35" y1="24" x2="45" y2="24" stroke={P.gold} strokeWidth="1.2" />
+            </svg>
+          </div>
+        )}
+      </div>
+      <div style={{ minWidth: 0, display: 'flex', flexDirection: 'column' }}>
+        <div style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: 9, color: P.gold, letterSpacing: '0.18em', marginBottom: 4 }}>
+          {person.role_short}
+        </div>
+        <div style={{ fontFamily: 'Oswald, sans-serif', fontWeight: 700, fontSize: 16, color: P.cream, letterSpacing: '0.04em', lineHeight: 1.15 }}>
+          {person.name.toUpperCase()}
+        </div>
+        <div style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: 9, color: P.mute, marginTop: 4, letterSpacing: '0.1em' }}>
+          {person.role_long}
+        </div>
+        {bioText ? (
+          <p style={{
+            fontFamily: 'Inter, sans-serif', fontSize: 11, color: P.mute, lineHeight: 1.5, margin: '8px 0 0',
+            display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden',
+          }}>{bioText}</p>
+        ) : (
+          <div style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: 9, color: `${P.gold}77`, letterSpacing: '0.14em', marginTop: 8 }}>
+            // AWAITING BIOGRAPHY
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
+
 export default function About({ setActive }) {
   const [content, setContent] = useState({});
+  const [leadership, setLeadership] = useState([]);
 
   useEffect(() => {
     SB.from('page_content').select('*').then(({ data }) => {
@@ -47,7 +112,11 @@ export default function About({ setActive }) {
       (data || []).forEach(r => { map[r.key] = r.value; });
       setContent(map);
     });
+    SB.from('personnel').select('*').eq('section', 'leadership').eq('visible', true).order('sort_order')
+      .then(({ data }) => setLeadership(data || []));
   }, []);
+
+  function goProfile(person) { setActive(`profile-${person.id}`); }
 
   return (
     <section style={{ background: P.ink, minHeight: '100vh', fontFamily: 'Inter, sans-serif' }}>
@@ -87,6 +156,16 @@ export default function About({ setActive }) {
       </div>
 
       <div style={{ maxWidth: 1400, margin: '0 auto', padding: '0 40px 80px' }}>
+
+        {/* Leadership */}
+        {leadership.length > 0 && (
+          <div style={{ padding: '48px 0', borderBottom: `1px solid ${P.hair}` }}>
+            <div style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: 9, color: P.gold, letterSpacing: '0.28em', marginBottom: 24 }}>PROGRAM LEADERSHIP</div>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 16 }}>
+              {leadership.map(p => <LeadershipCard key={p.id} person={p} onViewProfile={goProfile} />)}
+            </div>
+          </div>
+        )}
 
         {/* Mission + Stats */}
         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 32, padding: '56px 0 48px', borderBottom: `1px solid ${P.hair}` }}>
