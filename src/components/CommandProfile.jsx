@@ -39,6 +39,7 @@ const ROLE_LABELS = {
 export default function CommandProfile({ personId, backTarget, backLabel, setActive }) {
   const [person, setPerson] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [achievements, setAchievements] = useState([]);
 
   useEffect(() => {
     async function load() {
@@ -62,6 +63,16 @@ export default function CommandProfile({ personId, backTarget, backLabel, setAct
       }
       setPerson(resolved);
       setLoading(false);
+
+      if (resolved && !resolved.synthetic) {
+        const { data } = await SB
+          .from('cadet_achievements')
+          .select('date_earned, achievements(id, name, description, icon_url)')
+          .eq('personnel_id', resolved.id);
+        setAchievements((data || []).filter(r => r.achievements));
+      } else {
+        setAchievements([]);
+      }
     }
     load();
   }, [personId]);
@@ -157,6 +168,24 @@ export default function CommandProfile({ personId, backTarget, backLabel, setAct
               }}>
                 {person.role_short}
               </div>
+
+              {/* Commendation count teaser — top-right, only when achievements exist */}
+              {achievements.length > 0 && (
+                <div style={{
+                  position: 'absolute', top: 0, right: 0,
+                  background: 'rgba(6,16,31,0.78)',
+                  padding: '6px 10px 6px 12px',
+                  backdropFilter: 'blur(4px)',
+                  display: 'flex', alignItems: 'center', gap: 6,
+                }}>
+                  <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke={P.gold} strokeWidth="1.6">
+                    <path d="M12 2l2.4 6.6L21 10l-5 4.6L17.4 21 12 17.3 6.6 21 8 14.6 3 10l6.6-1.4z" />
+                  </svg>
+                  <span style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: 9, color: P.gold, letterSpacing: '0.14em' }}>
+                    {achievements.length} COMMENDATION{achievements.length === 1 ? '' : 'S'}
+                  </span>
+                </div>
+              )}
             </div>
 
             {/* Metadata rows below photo */}
@@ -240,6 +269,51 @@ export default function CommandProfile({ personId, backTarget, backLabel, setAct
                 )}
               </div>
             </div>
+
+            {/* Accomplishments — omitted entirely when cadet has none */}
+            {achievements.length > 0 && (
+              <div style={{ border: `1px solid ${P.hair}`, background: P.deep, marginTop: 24 }}>
+                <div style={{
+                  display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+                  padding: '12px 20px',
+                  borderBottom: `1px solid ${P.hair}`,
+                  fontFamily: "'JetBrains Mono', monospace", fontSize: 9,
+                  color: P.gold, letterSpacing: '0.25em',
+                }}>
+                  <span>// ACCOMPLISHMENTS</span>
+                  <span style={{ color: P.mute, letterSpacing: '0.1em' }}>{achievements.length} EARNED</span>
+                </div>
+                <div style={{
+                  padding: 20,
+                  display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(90px, 1fr))', gap: 10,
+                }}>
+                  {achievements.map((a) => (
+                    <div
+                      key={a.achievements.id}
+                      title={a.achievements.description || a.achievements.name}
+                      style={{
+                        background: P.navy, border: `1px solid ${P.hair}`, padding: '16px 12px',
+                        display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 10, textAlign: 'center',
+                      }}
+                    >
+                      <img
+                        src={a.achievements.icon_url}
+                        alt={a.achievements.name}
+                        style={{ width: 40, height: 40, objectFit: 'contain' }}
+                      />
+                      <div style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: 9.5, color: P.cream, letterSpacing: '0.06em', lineHeight: 1.4 }}>
+                        {a.achievements.name.toUpperCase()}
+                      </div>
+                      {a.date_earned && (
+                        <div style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: 8, color: P.mute, letterSpacing: '0.08em' }}>
+                          {new Date(a.date_earned).toLocaleDateString('en-US', { month: 'short', year: 'numeric' }).toUpperCase()}
+                        </div>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
 
             {/* Rank / LET if available */}
             {(person.rank || person.let_level) && (

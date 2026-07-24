@@ -1,5 +1,4 @@
 import { useState } from 'react';
-import NewsletterSignup from './NewsletterSignup';
 
 const P = {
   navyDeep: '#0A1628',
@@ -123,10 +122,6 @@ export default function Footer({ setActive }) {
               </div>
             </div>
           ))}
-        </div>
-
-        <div style={{ paddingTop: 32, marginBottom: 8, borderTop: `1px solid ${P.hairline}` }}>
-          <NewsletterSignup />
         </div>
 
         <div style={{

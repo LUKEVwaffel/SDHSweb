@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { supabase as SB } from '../../../../lib/supabaseClient';
-import { P, mono, oswald } from '../../theme';
-import { Btn, Card, Label, PanelHeader } from '../../shared/ui';
+import { P, mono, oswald, fs, sp } from '../../theme';
+import { Btn, Card, Label, PanelHeader, EmptyState } from '../../shared/ui';
 import { downloadWinnerCard } from '../../lib/winnerCard';
 import { RAIDER_BUCKET, RCATS, defaultCloses } from './pollHelpers';
 
@@ -68,79 +68,83 @@ export default function RaiderPolls({ adminId }) {
   const evTitle = selEvt?.title;
 
   return (
-    <div style={{ display: 'grid', gridTemplateColumns: '260px 1fr', gap: 12 }}>
+    <div style={{ display: 'grid', gridTemplateColumns: '300px 1fr', gap: sp[4] }}>
       {/* event list */}
       <div>
-        <PanelHeader title="EVENTS" action={<Btn onClick={load} variant="ghost" style={{ fontSize: 9 }}>↺</Btn>} />
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
+        <PanelHeader title="EVENTS" action={<Btn onClick={load} variant="ghost" size="sm">↺</Btn>} />
+        <div style={{ display: 'flex', flexDirection: 'column', gap: sp[2] }}>
           {events.map((ev) => {
             const p = polls[ev.id];
             const tag = p?.status === 'open' ? '● OPEN' : p?.status === 'closed' ? '✓ CLOSED' : '';
             return (
-              <Card key={ev.id} style={{ cursor: 'pointer', padding: '8px 10px', border: `1px solid ${selEvt?.id === ev.id ? P.gold : P.hair}` }}
+              <Card key={ev.id} style={{ cursor: 'pointer', padding: `${sp[3]}px ${sp[4]}px`, border: `1px solid ${selEvt?.id === ev.id ? P.gold : P.hair}` }}
                 onClick={() => loadPhotos(ev)}>
-                <div style={{ fontFamily: oswald, fontSize: 12, color: P.cream }}>{ev.title}</div>
-                <div style={{ fontFamily: mono, fontSize: 9, color: P.mute }}>
+                <div style={{ fontFamily: oswald, fontSize: fs.base, color: P.cream }}>{ev.title}</div>
+                <div style={{ fontFamily: mono, fontSize: fs.tiny, color: P.mute, marginTop: 3 }}>
                   {ev.date} {tag && <span style={{ color: p.status === 'open' ? P.green : P.gold, marginLeft: 6 }}>{tag}</span>}
                 </div>
               </Card>
             );
           })}
-          {!events.length && <div style={{ fontFamily: mono, fontSize: 10, color: P.mute }}>No events. Add one in EVENTS.</div>}
+          {!events.length && <EmptyState icon="◷" title="NO EVENTS" hint="Add an event in the Events section first, then open a poll for it here." />}
         </div>
       </div>
 
       {/* poll control */}
       <div>
         {!selEvt ? (
-          <div style={{ fontFamily: mono, fontSize: 10, color: P.mute, textAlign: 'center', marginTop: 40 }}>← SELECT AN EVENT</div>
+          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', height: '100%', minHeight: 240, gap: sp[3], color: P.faint }}>
+            <div style={{ fontFamily: oswald, fontSize: fs.xxl, color: P.hairStrong }}>⊞</div>
+            <div style={{ fontFamily: mono, fontSize: fs.xs, color: P.mute, letterSpacing: '0.14em' }}>SELECT AN EVENT</div>
+            <div style={{ fontFamily: 'Inter, sans-serif', fontSize: fs.sm, color: P.faint }}>to open, manage, or freeze its photo poll</div>
+          </div>
         ) : (
           <>
             <PanelHeader title={`POLL · ${evTitle}`} />
-            <Card style={{ marginBottom: 12 }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: 12, flexWrap: 'wrap' }}>
+            <Card style={{ marginBottom: sp[4] }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: sp[6], flexWrap: 'wrap' }}>
                 <div>
-                  <Label>STATUS</Label>
-                  <div style={{ fontFamily: oswald, fontSize: 16, color: poll?.status === 'open' ? P.green : poll?.status === 'closed' ? P.bright : P.mute }}>
+                  <Label>Status</Label>
+                  <div style={{ fontFamily: oswald, fontSize: fs.lg, color: poll?.status === 'open' ? P.green : poll?.status === 'closed' ? P.bright : P.mute }}>
                     {poll?.status?.toUpperCase() || 'NO POLL'}
                   </div>
                 </div>
                 {poll?.closes_at && (
                   <div>
-                    <Label>CLOSES</Label>
-                    <div style={{ fontFamily: mono, fontSize: 11, color: P.cream }}>{new Date(poll.closes_at).toLocaleString()}</div>
+                    <Label>Closes</Label>
+                    <div style={{ fontFamily: mono, fontSize: fs.sm, color: P.cream }}>{new Date(poll.closes_at).toLocaleString()}</div>
                   </div>
                 )}
               </div>
-              <div style={{ marginTop: 12 }}>
-                <Label>CLOSE TIME (auto-close fires within ~10 min after)</Label>
+              <div style={{ marginTop: sp[4] }}>
+                <Label>Close time (auto-close fires within ~10 min after)</Label>
                 <input type="datetime-local" value={closesInput} onChange={(e) => setClosesInput(e.target.value)}
-                  style={{ background: P.deep, border: `1px solid ${P.hair}`, color: P.cream, fontFamily: mono, fontSize: 11, padding: '6px 8px', outline: 'none' }} />
+                  style={{ background: P.deep, border: `1px solid ${P.hair}`, color: P.cream, fontFamily: mono, fontSize: fs.sm, padding: '11px 13px', outline: 'none', borderRadius: 5 }} />
               </div>
-              <div style={{ display: 'flex', gap: 6, marginTop: 12 }}>
-                <Btn onClick={openPoll} variant="gold" disabled={busy} style={{ fontSize: 9 }}>
+              <div style={{ display: 'flex', gap: sp[2], marginTop: sp[4] }}>
+                <Btn onClick={openPoll} variant="gold" size="sm" disabled={busy}>
                   {poll?.status === 'open' ? 'UPDATE / REOPEN' : 'OPEN POLL'}
                 </Btn>
-                {poll?.status === 'open' && <Btn onClick={closePoll} variant="danger" disabled={busy} style={{ fontSize: 9 }}>CLOSE NOW + FREEZE WINNERS</Btn>}
+                {poll?.status === 'open' && <Btn onClick={closePoll} variant="danger" size="sm" disabled={busy}>CLOSE NOW + FREEZE WINNERS</Btn>}
               </div>
             </Card>
 
             {/* winners export (closed) */}
             {poll?.status === 'closed' && (
-              <Card style={{ marginBottom: 12 }}>
-                <Label>WINNERS · DOWNLOAD SHARE CARD FOR SOCIAL</Label>
-                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 6, marginTop: 6 }}>
+              <Card style={{ marginBottom: sp[4] }}>
+                <Label>Winners · download share card for social</Label>
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: sp[3], marginTop: sp[2] }}>
                   {RCATS.map((c) => {
                     const win = photos.find((p) => p.id === poll[`winner_${c.key}`]);
                     return (
                       <div key={c.key} style={{ textAlign: 'center' }}>
-                        <div style={{ fontFamily: mono, fontSize: 9, color: P.gold, marginBottom: 4 }}>{c.label}</div>
+                        <div style={{ fontFamily: mono, fontSize: fs.tiny, color: P.gold, marginBottom: sp[1] }}>{c.label}</div>
                         {win ? (
                           <>
-                            <img src={win.thumb_url || win.photo_url} alt="" style={{ width: '100%', aspectRatio: '1', objectFit: 'cover' }} />
-                            <Btn onClick={() => downloadWinnerCard(win.photo_url, c.label, evTitle, win.uploader_name)} variant="ghost" style={{ fontSize: 8, marginTop: 4, width: '100%' }}>↓ CARD</Btn>
+                            <img src={win.thumb_url || win.photo_url} alt="" style={{ width: '100%', aspectRatio: '1', objectFit: 'cover', borderRadius: 5 }} />
+                            <Btn onClick={() => downloadWinnerCard(win.photo_url, c.label, evTitle, win.uploader_name)} variant="ghost" size="sm" style={{ marginTop: sp[1], width: '100%' }}>↓ CARD</Btn>
                           </>
-                        ) : <div style={{ fontFamily: mono, fontSize: 8, color: P.mute }}>no votes</div>}
+                        ) : <div style={{ fontFamily: mono, fontSize: fs.tiny, color: P.mute }}>no votes</div>}
                       </div>
                     );
                   })}
@@ -150,20 +154,20 @@ export default function RaiderPolls({ adminId }) {
 
             {/* photo tallies */}
             <PanelHeader title={`PHOTOS · ${photos.length}`} />
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 6 }}>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(140px, 1fr))', gap: sp[2] }}>
               {photos.map((p) => (
-                <div key={p.id} style={{ position: 'relative' }}>
+                <div key={p.id} style={{ position: 'relative', borderRadius: 6, overflow: 'hidden' }}>
                   <img src={p.thumb_url || p.photo_url} alt="" style={{ width: '100%', aspectRatio: '1', objectFit: 'cover', display: 'block' }} />
-                  <div style={{ position: 'absolute', bottom: 0, left: 0, right: 0, background: 'rgba(6,16,31,0.85)', padding: '3px 5px' }}>
-                    <div style={{ fontFamily: mono, fontSize: 8, color: P.gold }}>F{p.votes_funny} · A{p.votes_aura} · T{p.votes_team}</div>
-                    <div style={{ display: 'flex', gap: 4, marginTop: 2 }}>
-                      <button onClick={() => resetVotes(p)} style={{ background: 'none', border: 'none', color: P.mute, cursor: 'pointer', fontSize: 9 }}>reset</button>
-                      <button onClick={() => deletePhoto(p)} style={{ background: 'none', border: 'none', color: P.red, cursor: 'pointer', fontSize: 11 }}>×</button>
+                  <div style={{ position: 'absolute', bottom: 0, left: 0, right: 0, background: 'rgba(6,16,31,0.88)', padding: '5px 7px' }}>
+                    <div style={{ fontFamily: mono, fontSize: fs.tiny, color: P.gold }}>F{p.votes_funny} · A{p.votes_aura} · T{p.votes_team}</div>
+                    <div style={{ display: 'flex', gap: sp[2], marginTop: 3 }}>
+                      <button onClick={() => resetVotes(p)} style={{ background: 'none', border: 'none', color: P.mute, cursor: 'pointer', fontSize: fs.tiny }}>reset</button>
+                      <button onClick={() => deletePhoto(p)} style={{ background: 'none', border: 'none', color: P.red, cursor: 'pointer', fontSize: fs.sm }}>×</button>
                     </div>
                   </div>
                 </div>
               ))}
-              {!photos.length && <div style={{ gridColumn: '1/-1', fontFamily: mono, fontSize: 10, color: P.mute, textAlign: 'center', padding: 20 }}>NO PHOTOS UPLOADED YET</div>}
+              {!photos.length && <div style={{ gridColumn: '1/-1' }}><EmptyState icon="⊞" title="NO PHOTOS UPLOADED YET" hint="Cadets upload from the public Submit Photos page; they'll appear here to tally and moderate." /></div>}
             </div>
           </>
         )}

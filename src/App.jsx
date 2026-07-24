@@ -3,6 +3,7 @@ import TopNav from './components/TopNav';
 import Hero from './components/Hero';
 import TabGrid from './components/TabGrid';
 import Bulletin from './components/Bulletin';
+import HomeNewsletterBand from './components/HomeNewsletterBand';
 import Footer from './components/Footer';
 import TabPlaceholder from './components/TabPlaceholder';
 import CadetManual from './components/CadetManual';
@@ -16,6 +17,7 @@ import About from './components/About';
 import CommandProfile from './components/CommandProfile';
 import BattalionCommand from './components/BattalionCommand';
 import Admin from './components/admin';
+import ReviewPortal from './components/review/ReviewPortal';
 
 const TABS = [
   { id: 'cadet-manual', label: 'Cadet Manual',  short: 'MANUAL' },
@@ -70,6 +72,11 @@ export default function App() {
   const activeTab = TABS.find(t => t.id === active);
 
   if (active === 'admin') return <Admin setActive={setActive} />;
+  // Reviewer portal deep-links carry a query string in the hash
+  // (#review?token_hash=...&draft=...) which hashToState folds into `active`
+  // verbatim — match on prefix and let ReviewPortal parse window.location.hash
+  // itself rather than trusting the mangled `active` string.
+  if (active.startsWith('review')) return <ReviewPortal />;
 
   return (
     <div style={{ minHeight: '100vh', background: '#06101F', fontFamily: 'Inter, sans-serif' }}>
@@ -81,6 +88,7 @@ export default function App() {
           <BattalionCommand setActive={navigateFrom('home')} />
           <TabGrid setActive={setActive} />
           <Bulletin />
+          <HomeNewsletterBand />
         </>
       ) : active === 'cadet-manual' ? (
         <CadetManual setActive={setActive} />

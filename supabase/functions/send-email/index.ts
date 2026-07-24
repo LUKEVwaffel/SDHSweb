@@ -1,9 +1,11 @@
 // Supabase Edge Function: send-email
 // Sends a signed email_messages row to all active subscribers via Resend.
 //
-// SIGNATURE GATE (enforced server-side): refuses unless the message row is
-// status='signed'. The client button being disabled is convenience; THIS is the
-// real lock — even a crafted request cannot send an unsigned message.
+// SEND GATE (enforced server-side): refuses unless the message row is
+// status IN ('approved','signed') — 'approved' covers the digital review-portal
+// path, 'signed' covers Kaiden's paper-override fallback. The client button
+// being disabled is convenience; THIS is the real lock — even a crafted
+// request cannot send a draft that hasn't cleared one of those two paths.
 //
 // Secrets (set with `supabase secrets set`, NEVER in .env / client bundle):
 //   RESEND_API_KEY   required
@@ -55,7 +57,9 @@ Deno.serve(async (req) => {
       .from("email_messages").select("*").eq("id", message_id).single();
     if (mErr || !msg) return json({ error: "message not found" }, 404);
     if (msg.status === "sent") return json({ error: "already sent" }, 409);
-    if (msg.status !== "signed") return json({ error: "not cleared to send — message must be signed" }, 403);
+    if (!["approved", "signed"].includes(msg.status)) {
+      return json({ error: "not cleared to send — message must be approved or signed" }, 403);
+    }
 
     // Active recipients.
     const { data: subs, error: sErr } = await supabase
@@ -64,19 +68,43 @@ Deno.serve(async (req) => {
     const emails = (subs ?? []).map((s: { email: string }) => s.email).filter(Boolean);
     if (!emails.length) return json({ error: "no active subscribers" }, 400);
 
+    // Branded HTML is the primary body; plaintext `body` is the text fallback.
+    // Older drafts without body_html still send as plaintext only.
+    const html = msg.body_html || undefined;
+
+    // Real email attachments come from the builder's `attachment` blocks. Resend
+    // fetches each file by its public storage URL (`path`).
+    type Block = { type?: string; url?: string; filename?: string };
+    const blocks: Block[] = Array.isArray(msg.content_json) ? msg.content_json : [];
+    const attachments = blocks
+      .filter((b) => b?.type === "attachment" && typeof b.url === "string" && b.url)
+      .map((b) => ({ filename: b.filename || "attachment", path: b.url as string }));
+
+    // Deliverability: bulk mail without a List-Unsubscribe header is a
+    // spam-filter signal (and a hard requirement for Gmail/Yahoo bulk
+    // senders). No one-click unsubscribe endpoint exists yet, so this is a
+    // mailto fallback — still a valid, recognized header value.
+    const fromAddress = FROM.replace(/.*<(.+)>.*/, "$1");
+    const unsubscribeHeader = `<mailto:${fromAddress}?subject=unsubscribe>`;
+
     // Resend caps recipients per send — batch as BCC to protect privacy.
     let sent = 0;
     for (const batch of chunk(emails, 45)) {
+      const payload: Record<string, unknown> = {
+        from: FROM,
+        to: [fromAddress],
+        bcc: batch,
+        subject: msg.subject,
+        text: msg.body,
+        headers: { "List-Unsubscribe": unsubscribeHeader },
+      };
+      if (html) payload.html = html;
+      if (attachments.length) payload.attachments = attachments;
+
       const res = await fetch("https://api.resend.com/emails", {
         method: "POST",
         headers: { Authorization: `Bearer ${RESEND_API_KEY}`, "Content-Type": "application/json" },
-        body: JSON.stringify({
-          from: FROM,
-          to: [FROM.replace(/.*<(.+)>.*/, "$1")],
-          bcc: batch,
-          subject: msg.subject,
-          text: msg.body,
-        }),
+        body: JSON.stringify(payload),
       });
       if (!res.ok) {
         const detail = await res.text();

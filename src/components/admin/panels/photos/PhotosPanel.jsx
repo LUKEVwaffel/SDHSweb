@@ -1,34 +1,37 @@
 import { useState } from 'react';
 import { TEAMS } from '../../../../lib/teams';
-import { P, mono } from '../../theme';
+import { P, mono, fs, sp } from '../../theme';
 import { Btn } from '../../shared/ui';
 import RaiderPolls from './RaiderPolls';
 import RaiderGallery from './RaiderGallery';
+import PhotoSubmissions from './PhotoSubmissions';
 
-// Single home for all team photos. Polls are voting-teams-only (Raiders today —
-// flip `voting: true` in lib/teams.js + add a tab to expand). Gallery is
-// team-aware for every team via its own in-panel team picker.
+// Single home for all team photos. SUBMISSIONS is the default — that's where
+// every public upload (battalion + specialty teams) lives. Polls are
+// voting-teams-only (Raiders today). Gallery is the curated "last year" set.
 const VOTING_TEAMS = TEAMS.filter((t) => t.voting);
 
 export default function PhotosPanel({ adminId }) {
-  const [tab, setTab] = useState('polls-raiders');
+  const [tab, setTab] = useState('submissions');
 
   const tabs = [
+    { id: 'submissions', label: 'SUBMISSIONS · ALL PHOTOS' },
     ...VOTING_TEAMS.map((t) => ({ id: `polls-${t.id}`, label: `${t.label.toUpperCase()} POLLS` })),
-    { id: 'gallery', label: 'GALLERY · ALL TEAMS' },
+    { id: 'gallery', label: 'CURATED GALLERY' },
   ];
 
   return (
     <div>
-      <div style={{ display: 'flex', gap: 6, marginBottom: 12, flexWrap: 'wrap' }}>
+      <div style={{ display: 'flex', gap: sp[2], marginBottom: sp[4], flexWrap: 'wrap' }}>
         {tabs.map((t) => (
-          <Btn key={t.id} variant={tab === t.id ? 'gold' : 'ghost'} onClick={() => setTab(t.id)} style={{ fontSize: 9 }}>{t.label}</Btn>
+          <Btn key={t.id} variant={tab === t.id ? 'gold' : 'ghost'} size="sm" onClick={() => setTab(t.id)}>{t.label}</Btn>
         ))}
       </div>
+      {tab === 'submissions' && <PhotoSubmissions adminId={adminId} />}
       {tab === 'polls-raiders' && <RaiderPolls adminId={adminId} />}
       {tab === 'gallery' && <RaiderGallery />}
       {tab.startsWith('polls-') && tab !== 'polls-raiders' && (
-        <div style={{ fontFamily: mono, fontSize: 10, color: P.mute, textAlign: 'center', marginTop: 40 }}>
+        <div style={{ fontFamily: mono, fontSize: fs.xs, color: P.mute, textAlign: 'center', marginTop: sp[10] }}>
           POLLS FOR THIS TEAM NOT ENABLED YET
         </div>
       )}

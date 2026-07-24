@@ -1,7 +1,8 @@
-import { P, mono, oswald } from '../theme';
+import { useState } from 'react';
+import { P, mono, oswald, fs, sp, ease } from '../theme';
 
-// Grouped, text-labelled navigation. Replaces the old 52px single-glyph rail.
-// Daily tasks up top; dev/danger tools isolated at the bottom under SYSTEM.
+// Grouped, text-labelled navigation. Daily tasks up top; dev/danger tools
+// isolated at the bottom under SYSTEM.
 export const NAV_GROUPS = [
   {
     heading: 'DAILY',
@@ -17,6 +18,7 @@ export const NAV_GROUPS = [
     heading: 'LIBRARY',
     items: [
       { id: 'media', icon: '⊡', label: 'Media' },
+      { id: 'achievements', icon: '◈', label: 'Achievements' },
     ],
   },
   {
@@ -27,38 +29,53 @@ export const NAV_GROUPS = [
   },
 ];
 
-export default function Sidebar({ active, setActive }) {
+function NavItem({ item, on, onClick }) {
+  const [hover, setHover] = useState(false);
+  const dangerColor = 'rgba(192,57,43,0.9)';
+  const restColor = item.danger ? dangerColor : P.mute;
+  return (
+    <button
+      onClick={onClick}
+      onMouseEnter={() => setHover(true)}
+      onMouseLeave={() => setHover(false)}
+      style={{
+        width: '100%', textAlign: 'left', display: 'flex', alignItems: 'center', gap: sp[3],
+        background: on ? P.navy : (hover ? P.goldWash : 'transparent'),
+        borderLeft: `3px solid ${on ? P.gold : 'transparent'}`,
+        borderTop: 'none', borderRight: 'none', borderBottom: 'none',
+        color: on ? P.cream : restColor,
+        cursor: 'pointer', fontFamily: mono, fontSize: fs.sm, letterSpacing: '0.06em',
+        padding: '13px 20px', transition: `all 0.14s ${ease}`,
+      }}
+    >
+      <span style={{ fontSize: fs.md, color: on ? P.gold : (hover ? P.gold : 'inherit'), width: 20, transition: `color 0.14s ${ease}` }}>{item.icon}</span>
+      {item.label}
+    </button>
+  );
+}
+
+export default function Sidebar({ active, setActive, allowed = null }) {
+  // allowed = list of section ids this role may see; null = all.
+  const groups = allowed
+    ? NAV_GROUPS.map((g) => ({ ...g, items: g.items.filter((i) => allowed.includes(i.id)) })).filter((g) => g.items.length)
+    : NAV_GROUPS;
   return (
     <div style={{
-      width: 208, background: P.deep, borderRight: `1px solid ${P.hair}`,
-      display: 'flex', flexDirection: 'column', flexShrink: 0, overflowY: 'auto', paddingBottom: 16,
+      width: 244, background: P.deep, borderRight: `1px solid ${P.hairStrong}`,
+      display: 'flex', flexDirection: 'column', flexShrink: 0, overflowY: 'auto', paddingBottom: sp[4],
     }}>
-      <div style={{ padding: '16px 16px 12px', borderBottom: `1px solid ${P.hair}`, marginBottom: 8 }}>
-        <div style={{ fontFamily: oswald, fontSize: 17, color: P.cream, letterSpacing: '0.28em' }}>DISPATCH</div>
-        <div style={{ fontFamily: mono, fontSize: 8, color: P.gold, letterSpacing: '0.2em', marginTop: 3 }}>S-6 · NET CONTROL</div>
+      <div style={{ padding: '20px 20px 16px', borderBottom: `1px solid ${P.hair}`, marginBottom: sp[3] }}>
+        <div style={{ fontFamily: oswald, fontSize: fs.lg, color: P.cream, letterSpacing: '0.26em', fontWeight: 600 }}>DISPATCH</div>
+        <div style={{ fontFamily: mono, fontSize: fs.micro, color: P.gold, letterSpacing: '0.2em', marginTop: 5 }}>S-6 · NET CONTROL</div>
       </div>
-      {NAV_GROUPS.map((group) => (
-        <div key={group.heading} style={{ marginBottom: 10 }}>
-          <div style={{ fontFamily: mono, fontSize: 8, color: P.mute, letterSpacing: '0.25em', padding: '4px 16px 6px' }}>
+      {groups.map((group) => (
+        <div key={group.heading} style={{ marginBottom: sp[3] }}>
+          <div style={{ fontFamily: mono, fontSize: fs.micro, color: P.faint, letterSpacing: '0.24em', padding: '6px 20px 8px' }}>
             {group.heading}
           </div>
-          {group.items.map((item) => {
-            const on = active === item.id;
-            return (
-              <button key={item.id} onClick={() => setActive(item.id)} style={{
-                width: '100%', textAlign: 'left', display: 'flex', alignItems: 'center', gap: 10,
-                background: on ? P.navy : 'transparent',
-                borderLeft: `2px solid ${on ? P.gold : 'transparent'}`,
-                borderTop: 'none', borderRight: 'none', borderBottom: 'none',
-                color: on ? P.cream : (item.danger ? 'rgba(192,57,43,0.85)' : P.mute),
-                cursor: 'pointer', fontFamily: mono, fontSize: 11, letterSpacing: '0.08em',
-                padding: '9px 16px', transition: 'all 0.12s',
-              }}>
-                <span style={{ fontSize: 13, color: on ? P.gold : 'inherit', width: 16 }}>{item.icon}</span>
-                {item.label}
-              </button>
-            );
-          })}
+          {group.items.map((item) => (
+            <NavItem key={item.id} item={item} on={active === item.id} onClick={() => setActive(item.id)} />
+          ))}
         </div>
       ))}
     </div>

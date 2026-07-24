@@ -1,4 +1,6 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { supabase as SB } from '../lib/supabaseClient';
+import { toCalendarItem } from '../lib/calendar';
 
 const P = {
   ink: '#06101F',
@@ -23,51 +25,11 @@ const CAT = {
   BATTALION: { label: 'BATTALION', color: '#E8C77A' },
   CEREMONY:  { label: 'CEREMONY',  color: '#D6889B' },
   BREAK:     { label: 'BREAK',     color: 'rgba(244,236,216,0.45)' },
+  EVENT:     { label: 'EVENT',     color: '#C9A961' },
 };
 
-// Long-range calendar — AY 2025–26, maintained by the S-5 shop.
-// `d2` marks a multi-day event. Chronological; grouped by month at render.
-const EVENTS = [
-  { y: 2025, m: 7,  d: 21,        cat: 'FOOTBALL',  title: 'Home Football Game' },
-  { y: 2025, m: 7,  d: 29,        cat: 'RAIDER',    title: 'Rhea County Raider Competition' },
-
-  { y: 2025, m: 8,  d: 4,         cat: 'FOOTBALL',  title: 'Home Football Game' },
-  { y: 2025, m: 8,  d: 5,         cat: 'BATTALION', title: 'Battalion Rafting Trip' },
-  { y: 2025, m: 8,  d: 12,        cat: 'RAIDER',    title: 'Spring Hill Raider Competition' },
-  { y: 2025, m: 8,  d: 18,        cat: 'FOOTBALL',  title: 'Home Football Game' },
-  { y: 2025, m: 8,  d: 19,        cat: 'RAIDER',    title: 'East Hamilton HS Hurricane Battalion Raider Competition' },
-  { y: 2025, m: 8,  d: 25,        cat: 'FOOTBALL',  title: 'Home Football Game' },
-  { y: 2025, m: 8,  d: 26,        cat: 'RAIDER',    title: 'Warren County Raider Competition' },
-  { y: 2025, m: 8,  d: 30,        cat: 'BATTALION', title: 'JROTC Blood Drive' },
-
-  { y: 2025, m: 9,  d: 3,         cat: 'CEREMONY',  title: 'Competition & Trophy Ceremony', where: 'Chattanooga Central HS' },
-  { y: 2025, m: 9,  d: 12, d2: 16, cat: 'BREAK',    title: 'Fall Break' },
-  { y: 2025, m: 9,  d: 27,        cat: 'RIFLE',     title: 'Rifle Shoulder to Shoulder', where: 'SD @ HOW' },
-  { y: 2025, m: 9,  d: 30,        cat: 'FOOTBALL',  title: 'Home Football Game — Senior Night' },
-
-  { y: 2025, m: 10, d: 3,         cat: 'RIFLE',     title: 'Rifle Shoulder to Shoulder', where: 'SD @ EH' },
-  { y: 2025, m: 10, d: 10,        cat: 'RIFLE',     title: 'Rifle Shoulder to Shoulder', where: 'SC @ SD' },
-  { y: 2025, m: 10, d: 17,        cat: 'RIFLE',     title: 'Rifle Shoulder to Shoulder', where: 'BRA @ SD' },
-
-  { y: 2025, m: 11, d: 1,         cat: 'RIFLE',     title: 'Rifle Shoulder to Shoulder', where: 'SD @ CEN' },
-  { y: 2025, m: 11, d: 1,         cat: 'BATTALION', title: 'JROTC Blood Drive' },
-  { y: 2025, m: 11, d: 6,         cat: 'BATTALION', title: 'SD Christmas Parade', where: 'Predicted' },
-  { y: 2025, m: 11, d: 8,         cat: 'RIFLE',     title: 'Superintendent’s Match', where: 'Ooltewah HS' },
-
-  { y: 2026, m: 0,  d: 16,        cat: 'DRILL',     title: 'Red Bank Invitational Drill Competition' },
-  { y: 2026, m: 0,  d: 19, d2: 21, cat: 'ACADEMIC', title: 'East Hamilton HS Academic Bowl' },
-  { y: 2026, m: 0,  d: 23,        cat: 'DRILL',     title: 'Sale Creek Pot-Licker Drill / Academic Competition' },
-
-  { y: 2026, m: 2,  d: 22, d2: 26, cat: 'BREAK',    title: 'Spring Break' },
-  { y: 2026, m: 2,  d: 29,        cat: 'BATTALION', title: 'JROTC Blood Drive' },
-
-  { y: 2026, m: 3,  d: 20,        cat: 'JROTC',     title: 'JROTC Olympics', where: 'Academic / Raiders / Drill / Rifle @ Hixson HS' },
-
-  { y: 2026, m: 4,  d: 7,         cat: 'BATTALION', title: '78th Annual Armed Forces Day Parade' },
-  { y: 2026, m: 4,  d: 14,        cat: 'ACADEMIC',  title: 'Black-Jack Best Cadet Competition', where: 'East Hamilton HS' },
-  { y: 2026, m: 4,  d: 15,        cat: 'CEREMONY',  title: 'Graduation', where: 'Predicted' },
-];
-
+// Long-range calendar — now DB-backed. Events live in the `events` table,
+// managed by S-6 in DISPATCH → Calendar. Only status='posted' rows show here.
 const MONTHS = ['JANUARY','FEBRUARY','MARCH','APRIL','MAY','JUNE','JULY','AUGUST','SEPTEMBER','OCTOBER','NOVEMBER','DECEMBER'];
 const MON3   = ['JAN','FEB','MAR','APR','MAY','JUN','JUL','AUG','SEP','OCT','NOV','DEC'];
 
@@ -88,7 +50,7 @@ function groupByMonth(events) {
 
 function EventRow({ ev }) {
   const [hovered, setHovered] = useState(false);
-  const c = CAT[ev.cat];
+  const c = CAT[ev.cat] || CAT.EVENT;
   const dayLabel = ev.d2 ? `${ev.d}–${ev.d2}` : String(ev.d).padStart(2, '0');
   return (
     <div
@@ -166,16 +128,29 @@ function MonthPanel({ group }) {
 }
 
 export default function Bulletin() {
-  const groups = groupByMonth(EVENTS);
+  const [events, setEvents] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [selected, setSelected] = useState(null);
 
-  // Default to the current/upcoming month; fall back to the first on the calendar.
-  const [selected, setSelected] = useState(() => {
-    const now = new Date();
-    const upcoming = groups.find(g => g.y > now.getFullYear() || (g.y === now.getFullYear() && g.m >= now.getMonth()));
-    return (upcoming || groups[0]).key;
-  });
+  useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      const { data } = await SB.from('events').select('*').eq('status', 'posted').order('date', { ascending: true });
+      if (cancelled) return;
+      const items = (data || []).map(toCalendarItem);
+      setEvents(items);
+      setLoading(false);
+      // Default to the current/upcoming month; fall back to the first.
+      const grps = groupByMonth(items);
+      const now = new Date();
+      const upcoming = grps.find(g => g.y > now.getFullYear() || (g.y === now.getFullYear() && g.m >= now.getMonth()));
+      setSelected((upcoming || grps[0])?.key || null);
+    })();
+    return () => { cancelled = true; };
+  }, []);
 
-  const activeGroup = groups.find(g => g.key === selected);
+  const groups = groupByMonth(events);
+  const activeGroup = groups.find(g => g.key === selected) || groups[0];
 
   return (
     <section style={{
@@ -211,7 +186,7 @@ export default function Bulletin() {
             <div style={{
               fontFamily: "'JetBrains Mono', monospace", fontSize: 10,
               letterSpacing: '0.22em', color: P.gold, opacity: 0.75,
-            }}>{EVENTS.length} EVENTS · AY 2025–26</div>
+            }}>{events.length} EVENTS · AY 2025–26</div>
             <div style={{
               fontFamily: "'JetBrains Mono', monospace", fontSize: 8.5,
               letterSpacing: '0.18em', color: P.faint, marginTop: 6,
@@ -258,14 +233,20 @@ export default function Bulletin() {
         </div>
 
         {/* Selected month */}
-        {activeGroup && <MonthPanel key={activeGroup.key} group={activeGroup} />}
+        {loading ? (
+          <div style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: 11, color: P.mute, letterSpacing: '0.2em', padding: '48px 0', textAlign: 'center' }}>LOADING CALENDAR…</div>
+        ) : events.length === 0 ? (
+          <div style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: 11, color: P.mute, letterSpacing: '0.16em', padding: '48px 0', textAlign: 'center' }}>NO EVENTS POSTED YET</div>
+        ) : (
+          activeGroup && <MonthPanel key={activeGroup.key} group={activeGroup} />
+        )}
 
         {/* Legend */}
         <div style={{
           display: 'flex', gap: 16, flexWrap: 'wrap', alignItems: 'center',
           marginTop: 24, paddingTop: 18, borderTop: `1px solid ${P.hairline}`,
         }}>
-          {Object.keys(CAT).map(k => (
+          {Object.keys(CAT).filter(k => k !== 'EVENT').map(k => (
             <div key={k} style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
               <span style={{ width: 8, height: 8, background: CAT[k].color }} />
               <span style={{

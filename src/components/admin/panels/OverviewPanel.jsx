@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { supabase as SB } from '../../../lib/supabaseClient';
-import { P, mono, oswald } from '../theme';
+import { P, mono, oswald, inter } from '../theme';
 
 // "Front door" of DISPATCH. At-a-glance status of what genuinely needs action,
 // with progress on consent collection, then a compact roll-up of standing counts.
@@ -17,6 +17,33 @@ async function safeCount(table, apply) {
   } catch {
     return null;
   }
+}
+
+// Fetch a small list; degrade to [] on any error (table may not exist yet).
+async function safeList(table, apply) {
+  try {
+    let q = SB.from(table).select('*');
+    if (apply) q = apply(q);
+    const { data, error } = await q;
+    if (error) return [];
+    return data || [];
+  } catch {
+    return [];
+  }
+}
+
+// Known admin logins → friendly first name. Falls back to a prettified email
+// local-part so a new admin still gets a reasonable greeting with zero config.
+const ADMIN_NAMES = {
+  'nositenoproblem12@gmail.com': 'Luke',
+};
+function displayName(email) {
+  if (!email) return 'Admin';
+  const known = ADMIN_NAMES[email.toLowerCase()];
+  if (known) return known;
+  const local = email.split('@')[0].replace(/[._-]+/g, ' ').replace(/\d+/g, '').trim();
+  const first = local.split(' ')[0] || 'Admin';
+  return first.charAt(0).toUpperCase() + first.slice(1);
 }
 
 function useClock() {
@@ -85,19 +112,32 @@ export default function OverviewPanel({ adminId, goto }) {
   const [stats, setStats] = useState(null);
   const now = useClock();
 
+  const [upcoming, setUpcoming] = useState([]);
+  const [activity, setActivity] = useState([]);
+
   useEffect(() => {
+    const todayIso = new Date().toISOString().slice(0, 10);
     (async () => {
-      const [openPolls, events, people, photos, pendingEmail, consentTotal, consentCollected, consentPending] = await Promise.all([
+      const [
+        openPolls, events, people, photos, subscribers, pendingEmail,
+        consentTotal, consentCollected, consentPending,
+        upcomingRows, activityRows,
+      ] = await Promise.all([
         safeCount('polls', (q) => q.eq('status', 'open')),
-        safeCount('upcoming_events'),
+        safeCount('events'),
         safeCount('personnel'),
         safeCount('photos'),
+        safeCount('email_subscribers', (q) => q.eq('active', true)),
         safeCount('email_messages', (q) => q.eq('status', 'pending_signature')),
         safeCount('cadet_consent'),
         safeCount('cadet_consent', (q) => q.eq('consent_status', 'collected')),
         safeCount('cadet_consent', (q) => q.eq('consent_status', 'pending')),
+        safeList('events', (q) => q.gte('date', todayIso).order('date', { ascending: true }).limit(3)),
+        safeList('change_log', (q) => q.order('created_at', { ascending: false }).limit(6)),
       ]);
-      setStats({ openPolls, events, people, photos, pendingEmail, consentTotal, consentCollected, consentPending });
+      setStats({ openPolls, events, people, photos, subscribers, pendingEmail, consentTotal, consentCollected, consentPending });
+      setUpcoming(upcomingRows);
+      setActivity(activityRows);
     })();
   }, []);
 
@@ -132,8 +172,9 @@ export default function OverviewPanel({ adminId, goto }) {
         display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 12,
       }}>
         <div>
-          <div style={{ fontFamily: mono, fontSize: 9, color: P.gold, letterSpacing: '0.3em' }}>{greeting} · {adminId}</div>
-          <div style={{ fontFamily: oswald, fontSize: 30, color: P.cream, letterSpacing: '0.06em', lineHeight: 1.1, marginTop: 4 }}>NET CONTROL</div>
+          <div style={{ fontFamily: mono, fontSize: 9, color: P.gold, letterSpacing: '0.3em' }}>{greeting} · S-6 NET CONTROL</div>
+          <div style={{ fontFamily: oswald, fontSize: 30, color: P.cream, letterSpacing: '0.06em', lineHeight: 1.1, marginTop: 4 }}>WELCOME, {displayName(adminId).toUpperCase()}</div>
+          <div style={{ fontFamily: mono, fontSize: 8, color: P.faint, letterSpacing: '0.15em', marginTop: 5 }}>{adminId}</div>
         </div>
         <div style={{ textAlign: 'right' }}>
           <div style={{ fontFamily: oswald, fontSize: 24, color: P.bright, lineHeight: 1 }}>{timeStr}</div>
@@ -176,13 +217,69 @@ export default function OverviewPanel({ adminId, goto }) {
         </div>
       </button>
 
+      {/* upcoming + recent activity, side by side */}
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: 12 }}>
+        <div>
+          <div style={{ fontFamily: mono, fontSize: 9, color: P.mute, letterSpacing: '0.25em', marginBottom: 8 }}>UPCOMING · NEXT 3</div>
+          <div style={{ background: P.deep, border: `1px solid ${P.hair}` }}>
+            {upcoming.length === 0 ? (
+              <div style={{ fontFamily: mono, fontSize: 9, color: P.mute, padding: '16px 18px' }}>No upcoming events on the calendar.</div>
+            ) : upcoming.map((ev, i) => {
+              const d = ev.date ? new Date(`${ev.date}T00:00:00`) : null;
+              const days = d ? Math.max(0, Math.round((d - new Date().setHours(0, 0, 0, 0)) / 86400000)) : null;
+              return (
+                <button key={ev.id || i} onClick={() => goto?.('events')} style={{
+                  width: '100%', textAlign: 'left', cursor: 'pointer', background: 'transparent',
+                  border: 'none', borderBottom: i < upcoming.length - 1 ? `1px solid ${P.hair}` : 'none',
+                  padding: '11px 16px', display: 'flex', alignItems: 'center', gap: 12,
+                }}>
+                  <div style={{ minWidth: 42 }}>
+                    <div style={{ fontFamily: oswald, fontSize: 20, color: P.bright, lineHeight: 1 }}>{d ? d.getDate() : '—'}</div>
+                    <div style={{ fontFamily: mono, fontSize: 8, color: P.gold, letterSpacing: '0.1em' }}>{d ? d.toLocaleString(undefined, { month: 'short' }).toUpperCase() : ''}</div>
+                  </div>
+                  <div style={{ flex: 1, minWidth: 0 }}>
+                    <div style={{ fontFamily: inter, fontSize: 13, color: P.cream, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{ev.title || 'Untitled event'}</div>
+                    <div style={{ fontFamily: mono, fontSize: 8, color: P.mute, letterSpacing: '0.08em', marginTop: 2 }}>{(ev.team || 'battalion').toUpperCase()}{days != null ? ` · in ${days}d` : ''}</div>
+                  </div>
+                </button>
+              );
+            })}
+          </div>
+        </div>
+
+        <div>
+          <div style={{ fontFamily: mono, fontSize: 9, color: P.mute, letterSpacing: '0.25em', marginBottom: 8 }}>RECENT ACTIVITY</div>
+          <div style={{ background: P.deep, border: `1px solid ${P.hair}` }}>
+            {activity.length === 0 ? (
+              <div style={{ fontFamily: mono, fontSize: 9, color: P.mute, padding: '16px 18px' }}>No changes logged yet.</div>
+            ) : activity.map((a, i) => (
+              <button key={a.id || i} onClick={() => goto?.('advanced')} style={{
+                width: '100%', textAlign: 'left', cursor: 'pointer', background: 'transparent',
+                border: 'none', borderBottom: i < activity.length - 1 ? `1px solid ${P.hair}` : 'none',
+                padding: '10px 16px',
+              }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', gap: 10 }}>
+                  <span style={{ fontFamily: inter, fontSize: 12, color: P.cream, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                    {a.is_revert ? '↩ ' : ''}{a.label || `${a.page} · ${a.element}`}
+                  </span>
+                  <span style={{ fontFamily: mono, fontSize: 8, color: P.faint, whiteSpace: 'nowrap' }}>{a.created_at ? new Date(a.created_at).toLocaleDateString() : ''}</span>
+                </div>
+                <div style={{ fontFamily: mono, fontSize: 8, color: P.mute, marginTop: 2 }}>{a.admin_id}</div>
+              </button>
+            ))}
+          </div>
+        </div>
+      </div>
+
       {/* standing counts */}
       <div>
         <div style={{ fontFamily: mono, fontSize: 9, color: P.mute, letterSpacing: '0.25em', marginBottom: 8 }}>STANDING COUNTS</div>
         <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
-          <StatChip value={fmt(stats.events)} label="UPCOMING EVENTS" onClick={() => goto?.('events')} />
+          <StatChip value={fmt(stats.events)} label="EVENTS ON CALENDAR" onClick={() => goto?.('events')} />
           <StatChip value={fmt(stats.people)} label="PEOPLE ON ROSTER" onClick={() => goto?.('people')} />
           <StatChip value={fmt(stats.photos)} label="PHOTOS STORED" onClick={() => goto?.('photos')} />
+          <StatChip value={fmt(stats.openPolls)} label="OPEN POLLS" onClick={() => goto?.('photos')} />
+          <StatChip value={fmt(stats.subscribers)} label="ACTIVE SUBSCRIBERS" onClick={() => goto?.('email')} />
         </div>
       </div>
     </div>

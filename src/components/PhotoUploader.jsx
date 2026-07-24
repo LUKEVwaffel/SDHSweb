@@ -2,7 +2,7 @@ import { useState, useRef, useEffect, useCallback } from 'react';
 import { supabase as SB } from '../lib/supabaseClient';
 import { getDeviceId } from '../lib/fingerprint';
 import { resizeForUpload } from '../lib/imageResize';
-import { TEAMS, getTeam } from '../lib/teams';
+import { TEAMS } from '../lib/teams';
 
 const P = {
   ink: '#06101F', navy: '#142847', deep: '#0A1628',
@@ -14,6 +14,13 @@ const mono = "'JetBrains Mono', monospace";
 const oswald = 'Oswald, sans-serif';
 const inter = 'Inter, sans-serif';
 const BUCKET = 'team-photos';
+
+// Upload targets = general Battalion (default, most photos) + the 4 specialty
+// teams. Battalion is NOT in lib/teams.js on purpose — it must not appear in the
+// public nav / team pages, only here as a submission bucket (team='battalion').
+const BATTALION_OPT = { id: 'battalion', label: 'Battalion', accent: '#F4ECD8', voting: false };
+const UPLOAD_OPTIONS = [BATTALION_OPT, ...TEAMS];
+const getOption = (id) => UPLOAD_OPTIONS.find((t) => t.id === id) || null;
 
 // Corner-bracket frame — reused site motif.
 function Brackets({ color = P.gold }) {
@@ -32,7 +39,7 @@ function Brackets({ color = P.gold }) {
  * @param {(photo:object)=>void} [onUploaded] callback after a successful post
  */
 export default function PhotoUploader({ presetTeam = null, onUploaded }) {
-  const [team, setTeam] = useState(presetTeam || 'raiders');
+  const [team, setTeam] = useState(presetTeam || 'battalion');
   const [file, setFile] = useState(null);
   const [previewUrl, setPreviewUrl] = useState(null);
   const [credit, setCredit] = useState('');
@@ -44,7 +51,7 @@ export default function PhotoUploader({ presetTeam = null, onUploaded }) {
   const [deviceId, setDeviceId] = useState(null);
   const inputRef = useRef();
 
-  const teamCfg = getTeam(team);
+  const teamCfg = getOption(team);
   const needsEvent = !!teamCfg?.voting; // raiders must attach to an event (feeds voting)
 
   useEffect(() => { getDeviceId().then(setDeviceId); }, []);
@@ -78,7 +85,7 @@ export default function PhotoUploader({ presetTeam = null, onUploaded }) {
     if (previewUrl) URL.revokeObjectURL(previewUrl);
     setFile(null); setPreviewUrl(null); setCredit(''); setEventId('');
     setPhase('idle'); setErrMsg('');
-    if (!keepTeam && !presetTeam) setTeam('raiders');
+    if (!keepTeam && !presetTeam) setTeam('battalion');
   }
 
   const canSubmit = file && team && (!needsEvent || eventId) && phase !== 'optimizing' && phase !== 'uploading';
@@ -145,7 +152,7 @@ export default function PhotoUploader({ presetTeam = null, onUploaded }) {
         <div style={{ marginBottom: 20 }}>
           <div style={label}>TEAM</div>
           <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
-            {TEAMS.map((t) => {
+            {UPLOAD_OPTIONS.map((t) => {
               const on = team === t.id;
               return (
                 <button key={t.id} onClick={() => setTeam(t.id)}

@@ -1,7 +1,8 @@
 import { useState, useEffect } from 'react';
 import { supabase as SB } from '../lib/supabaseClient';
 import RaiderVoting from './RaiderVoting';
-import TeamGallery from './TeamGallery';
+import RaiderCarousel from './RaiderCarousel';
+import RaiderFAQ from './RaiderFAQ';
 
 // Palette mirrors Rifle.jsx for a consistent specialty-team look. Green is the
 // raider live/event accent; gold stays the structural/command accent.
@@ -476,54 +477,57 @@ export default function Raiders({ setActive }) {
 
       <div style={{ maxWidth: 1200, margin: '0 auto', padding: '60px 40px 100px', position: 'relative', zIndex: 1 }}>
 
-        {/* ── Page header ── */}
-        <div style={{ marginBottom: 52 }}>
+        {/* ── Page header — small label above, large title below ── */}
+        <div style={{ marginBottom: 44 }}>
           <button onClick={() => setActive('home')} style={{
             background: 'transparent', border: 'none', cursor: 'pointer', color: P.gold,
-            fontFamily: mono, fontSize: 10, letterSpacing: '0.28em', padding: 0, marginBottom: 24, display: 'block',
+            fontFamily: mono, fontSize: 10, letterSpacing: '0.28em', padding: 0, marginBottom: 28, display: 'block',
           }}>← HOME</button>
 
-          <div style={{ display: 'flex', alignItems: 'center', gap: 14, marginBottom: 10 }}>
-            <div style={{ fontFamily: mono, fontSize: 9, color: P.gold, letterSpacing: '0.32em', opacity: 0.7 }}>
-              // SPECIALTY TEAMS · RAIDERS
-            </div>
-            <div style={{ flex: 1, height: 1, background: P.hair }} />
-            <div style={{ fontFamily: mono, fontSize: 8, color: `${P.gold}55`, letterSpacing: '0.2em' }}>TN-051 · AY 2025-26</div>
+          <div style={{ fontFamily: mono, fontSize: 11, color: P.gold, letterSpacing: '0.38em', opacity: 0.75, marginBottom: 10 }}>
+            SPECIALTY TEAM
           </div>
-
-          <h1 style={{ fontFamily: oswald, fontWeight: 700, fontSize: 72, color: P.cream, letterSpacing: '0.04em', margin: '0 0 6px', lineHeight: 1 }}>
+          <h1 style={{ fontFamily: oswald, fontWeight: 700, fontSize: 84, color: P.cream, letterSpacing: '0.02em', margin: 0, lineHeight: 0.95 }}>
             RAIDERS
           </h1>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginTop: 18 }}>
             <div style={{ width: 5, height: 5, background: `${P.green}80` }} />
             <div style={{ width: 7, height: 7, background: P.green }} />
             <div style={{ width: 5, height: 5, background: `${P.green}80` }} />
             <div style={{ fontFamily: mono, fontSize: 9, letterSpacing: '0.22em', color: P.gold, opacity: 0.55, marginLeft: 8 }}>
-              ELITE COMPETITION TEAM
+              ELITE COMPETITION TEAM · TN-051
             </div>
           </div>
-
-          {/* Submit CTA → #submit hub (defaults to raiders) */}
-          <button onClick={() => setActive('submit')} style={{
-            marginTop: 28, background: P.gold, color: P.ink, border: 'none', cursor: 'pointer',
-            fontFamily: mono, fontSize: 11, letterSpacing: '0.16em', fontWeight: 600, padding: '13px 24px',
-          }}
-            onMouseEnter={(e) => (e.currentTarget.style.background = P.bright)}
-            onMouseLeave={(e) => (e.currentTarget.style.background = P.gold)}>
-            📸 SUBMIT A RAIDER PHOTO →
-          </button>
         </div>
 
-        {/* ── Command staff ── */}
-        <div>
-          <SectionLabel tag="// LEADERSHIP" title="COMMAND STAFF" subtitle="Tap a commander for their full profile." />
-          {commanders.length > 0 ? (
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: 20, maxWidth: 560 }}>
-              {commanders.map((c) => <CommanderCard key={c.id} person={c} onOpen={openProfile} />)}
-            </div>
-          ) : (
-            <div style={{ fontFamily: mono, fontSize: 10, color: P.mute, letterSpacing: '0.2em' }}>LOADING…</div>
-          )}
+        {/* ── Hero carousel ── */}
+        <div style={{ marginBottom: 64 }}>
+          <RaiderCarousel />
+        </div>
+
+        {/* ── Meet your commanders + about, side by side (stacks on narrow viewports) ── */}
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(380px, 1fr))', gap: 44, alignItems: 'start' }}>
+          <div>
+            <SectionLabel tag="// ABOUT THE TEAM" title="WHAT IS RAIDERS" />
+            <p style={{ fontFamily: 'Inter, sans-serif', fontSize: 14, color: P.mute, lineHeight: 1.75, margin: '0 0 14px' }}>
+              Raiders is the battalion's physical fitness and tactical skills competition team. Cadets train in rope bridge construction,
+              obstacle courses, land navigation, and team relays, then compete against other JROTC battalions at regional meets.
+            </p>
+            <p style={{ fontFamily: 'Inter, sans-serif', fontSize: 14, color: P.mute, lineHeight: 1.75, margin: 0 }}>
+              No prior fitness level or JROTC experience is required to join — training builds up over the season, and every cadet
+              is welcome at practice regardless of where they're starting from.
+            </p>
+          </div>
+          <div>
+            <SectionLabel tag="// LEADERSHIP" title="MEET YOUR COMMANDERS" subtitle="Tap a commander for their full profile." />
+            {commanders.length > 0 ? (
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: 20 }}>
+                {commanders.map((c) => <CommanderCard key={c.id} person={c} onOpen={openProfile} />)}
+              </div>
+            ) : (
+              <div style={{ fontFamily: mono, fontSize: 10, color: P.mute, letterSpacing: '0.2em' }}>LOADING…</div>
+            )}
+          </div>
         </div>
 
         <Divider />
@@ -533,30 +537,53 @@ export default function Raiders({ setActive }) {
 
         <Divider />
 
-        {/* ── Photo winners ── */}
-        <PhotoWinners cards={winnerCards} />
-
-        <Divider />
-
-        {/* ── Live photo voting ── */}
-        <div>
-          <SectionLabel tag="// LIVE · VOTE" title="PHOTO VOTING" subtitle="Funny · Aura · Team Leading. You don't have to be a raider to vote." />
-          <RaiderVoting setActive={setActive} compact />
-        </div>
-
-        <Divider />
-
         {/* ── Event calendar ── */}
         <EventCalendar events={events} />
 
         <Divider />
 
-        {/* ── Photo gallery ── */}
-        <div>
-          <SectionLabel tag="// GALLERY" title="TEAM PHOTOS" />
-          <div style={{ marginTop: 24 }}>
-            <TeamGallery teamId="raiders" setActive={setActive} />
+        {/* ── Raider Photos hub: winners + live voting + gallery CTA, one themed block ── */}
+        <div style={{ border: `1px solid ${P.hairStrong}`, background: 'rgba(201,169,97,0.03)', padding: '40px 36px' }}>
+          <SectionLabel tag="// PHOTOS · VOTING" title="RAIDER PHOTOS" subtitle="Latest winners, live voting, and the full event gallery." />
+
+          <PhotoWinners cards={winnerCards} />
+
+          <div style={{ marginTop: 40 }}>
+            <div style={{ fontFamily: mono, fontSize: 9, color: P.gold, letterSpacing: '0.28em', opacity: 0.7, marginBottom: 16 }}>
+              // LIVE VOTE — FUNNY · AURA · TEAM LEADING
+            </div>
+            <RaiderVoting setActive={setActive} compact />
           </div>
+
+          <div style={{
+            marginTop: 32, paddingTop: 28, borderTop: `1px solid ${P.hair}`,
+            display: 'flex', gap: 16, flexWrap: 'wrap', alignItems: 'center',
+          }}>
+            <button onClick={() => setActive('submit')} style={{
+              background: P.gold, color: P.ink, border: 'none', cursor: 'pointer',
+              fontFamily: mono, fontSize: 11, letterSpacing: '0.16em', fontWeight: 600, padding: '13px 24px',
+            }}
+              onMouseEnter={(e) => (e.currentTarget.style.background = P.bright)}
+              onMouseLeave={(e) => (e.currentTarget.style.background = P.gold)}>
+              📸 SUBMIT A RAIDER PHOTO →
+            </button>
+            <button onClick={() => setActive('pictures')} style={{
+              background: 'transparent', color: P.cream, border: `1px solid ${P.hairStrong}`, cursor: 'pointer',
+              fontFamily: mono, fontSize: 11, letterSpacing: '0.16em', fontWeight: 600, padding: '13px 24px',
+            }}
+              onMouseEnter={(e) => (e.currentTarget.style.borderColor = P.gold)}
+              onMouseLeave={(e) => (e.currentTarget.style.borderColor = P.hairStrong)}>
+              VIEW FULL PHOTO GALLERY →
+            </button>
+          </div>
+        </div>
+
+        <Divider />
+
+        {/* ── FAQ ── */}
+        <div>
+          <SectionLabel tag="// FAQ" title="COMMON QUESTIONS" subtitle="What parents and cadets usually ask about Raiders — edit freely." />
+          <RaiderFAQ />
         </div>
 
       </div>

@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { sp } from '../../theme';
 import { Btn } from '../../shared/ui';
 import Subscribers from './Subscribers';
 import Messages from './Messages';
@@ -7,9 +8,9 @@ export default function EmailPanel({ adminId }) {
   const [tab, setTab] = useState('messages');
   return (
     <div>
-      <div style={{ display: 'flex', gap: 6, marginBottom: 12 }}>
-        <Btn variant={tab === 'messages' ? 'gold' : 'ghost'} onClick={() => setTab('messages')} style={{ fontSize: 9 }}>MESSAGES</Btn>
-        <Btn variant={tab === 'subscribers' ? 'gold' : 'ghost'} onClick={() => setTab('subscribers')} style={{ fontSize: 9 }}>SUBSCRIBERS</Btn>
+      <div style={{ display: 'flex', gap: sp[2], marginBottom: sp[4] }}>
+        <Btn variant={tab === 'messages' ? 'gold' : 'ghost'} size="sm" onClick={() => setTab('messages')}>MESSAGES</Btn>
+        <Btn variant={tab === 'subscribers' ? 'gold' : 'ghost'} size="sm" onClick={() => setTab('subscribers')}>SUBSCRIBERS</Btn>
       </div>
       {tab === 'messages' ? <Messages adminId={adminId} /> : <Subscribers />}
     </div>

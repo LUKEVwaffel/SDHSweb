@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { supabase as SB } from '../../../../lib/supabaseClient';
-import { P, mono, inter } from '../../theme';
-import { Btn, Card, Label, Input, PanelHeader } from '../../shared/ui';
+import { P, mono, inter, fs, sp } from '../../theme';
+import { Btn, Card, Label, Input, PanelHeader, EmptyState } from '../../shared/ui';
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
@@ -68,40 +68,43 @@ export default function Subscribers() {
   const filtered = search ? rows.filter((r) => r.email.includes(search.toLowerCase())) : rows;
 
   return (
-    <div>
-      <PanelHeader title={`SUBSCRIBERS · ${active} active / ${rows.length} total`} />
-      <Card style={{ marginBottom: 10 }}>
-        <Label>ADD ONE</Label>
-        <div style={{ display: 'flex', gap: 6, marginBottom: 12 }}>
-          <Input value={single} onChange={(e) => setSingle(e.target.value)} style={{ flex: 1, fontSize: 11 }}
+    <div style={{ maxWidth: 760 }}>
+      <PanelHeader title="SUBSCRIBERS" sub={`${active} active · ${rows.length} total`} />
+      <Card style={{ marginBottom: sp[3] }}>
+        <Label>Add one</Label>
+        <div style={{ display: 'flex', gap: sp[2], marginBottom: sp[4] }}>
+          <Input value={single} onChange={(e) => setSingle(e.target.value)} style={{ flex: 1 }} placeholder="parent@example.com"
             onKeyDown={(e) => e.key === 'Enter' && addSingle()} />
-          <Btn onClick={addSingle} variant="gold" style={{ fontSize: 9 }}>+ ADD</Btn>
+          <Btn onClick={addSingle} variant="gold" size="sm">+ ADD</Btn>
         </div>
-        <Label>PASTE / IMPORT (any separators)</Label>
-        <Input value={bulk} onChange={(e) => setBulk(e.target.value)} multiline style={{ marginBottom: 8 }} />
-        <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
-          <Btn onClick={importBulk} variant="ghost" style={{ fontSize: 9 }}>IMPORT LIST</Btn>
-          {msg && <span style={{ fontFamily: mono, fontSize: 9, color: msg.includes('✓') ? P.green : P.red }}>{msg}</span>}
+        <Label>Paste / import (any separators)</Label>
+        <Input value={bulk} onChange={(e) => setBulk(e.target.value)} multiline style={{ marginBottom: sp[2] }} placeholder="Paste emails separated by commas, spaces, or new lines…" />
+        <div style={{ display: 'flex', gap: sp[3], alignItems: 'center' }}>
+          <Btn onClick={importBulk} variant="ghost" size="sm">IMPORT LIST</Btn>
+          {msg && <span style={{ fontFamily: mono, fontSize: fs.tiny, color: msg.includes('✓') ? P.green : P.red }}>{msg}</span>}
         </div>
       </Card>
 
-      <div style={{ marginBottom: 8 }}>
-        <Input value={search} onChange={(e) => setSearch(e.target.value)} style={{ fontSize: 11 }} />
+      <div style={{ marginBottom: sp[2] }}>
+        <Input value={search} onChange={(e) => setSearch(e.target.value)} placeholder="Search subscribers…" />
       </div>
-      <div style={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
+      <div style={{ display: 'flex', flexDirection: 'column', gap: sp[1] }}>
         {filtered.map((r) => (
-          <Card key={r.id} style={{ padding: '6px 10px' }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+          <Card key={r.id} style={{ padding: `${sp[2]}px ${sp[4]}px` }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: sp[3] }}>
+              <span style={{ width: 8, height: 8, borderRadius: '50%', background: r.active ? P.green : P.faint, flexShrink: 0 }} />
               <div style={{ flex: 1, minWidth: 0 }}>
-                <div style={{ fontFamily: inter, fontSize: 12, color: r.active ? P.cream : P.mute, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{r.email}</div>
-                <div style={{ fontFamily: mono, fontSize: 8, color: P.mute }}>{r.source}{r.company ? ` · ${r.company}` : ''}</div>
+                <div style={{ fontFamily: inter, fontSize: fs.sm, color: r.active ? P.cream : P.mute, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{r.email}</div>
+                <div style={{ fontFamily: mono, fontSize: fs.tiny, color: P.mute, marginTop: 2 }}>{r.source}{r.company ? ` · ${r.company}` : ''}</div>
               </div>
-              <Btn onClick={() => toggleActive(r)} variant={r.active ? 'ghost' : 'default'} style={{ fontSize: 8 }}>{r.active ? 'ACTIVE' : 'INACTIVE'}</Btn>
-              <button onClick={() => del(r)} style={{ background: 'none', border: 'none', color: P.red, cursor: 'pointer', fontSize: 12 }}>×</button>
+              <Btn onClick={() => toggleActive(r)} variant={r.active ? 'ghost' : 'default'} size="sm">{r.active ? 'ACTIVE' : 'INACTIVE'}</Btn>
+              <button onClick={() => del(r)} style={{ background: 'none', border: 'none', color: P.red, cursor: 'pointer', fontSize: fs.md }}>×</button>
             </div>
           </Card>
         ))}
-        {!filtered.length && <div style={{ fontFamily: mono, fontSize: 10, color: P.mute, textAlign: 'center', padding: 20 }}>NO SUBSCRIBERS YET</div>}
+        {!filtered.length && (
+          <EmptyState icon="✉" title={search ? 'NO MATCHING SUBSCRIBERS' : 'NO SUBSCRIBERS YET'} hint={search ? 'Try a different search.' : 'Parents subscribe from the home page, or add them here manually.'} />
+        )}
       </div>
     </div>
   );
