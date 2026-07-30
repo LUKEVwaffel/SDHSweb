@@ -23,12 +23,12 @@ export default function SubmitHub() {
   return (
     <section style={{ background: P.ink, minHeight: '100vh', fontFamily: inter }}>
       {/* Header */}
-      <div style={{ borderBottom: `1px solid ${P.hair}`, padding: '60px 40px 36px', maxWidth: 1200, margin: '0 auto' }}>
+      <div className="submit-header" style={{ borderBottom: `1px solid ${P.hair}`, padding: '60px 40px 36px', maxWidth: 1200, margin: '0 auto' }}>
         <button onClick={() => navigate('/')} style={backBtn}>← HOME</button>
         <div style={{ fontFamily: mono, fontSize: 10, color: P.gold, letterSpacing: '0.32em', marginBottom: 12 }}>
           // OPTIC · PHOTO SUBMISSIONS
         </div>
-        <h1 style={{ fontFamily: oswald, fontWeight: 700, fontSize: 66, color: P.cream, letterSpacing: '0.02em', margin: 0, lineHeight: 0.9 }}>
+        <h1 className="submit-title" style={{ fontFamily: oswald, fontWeight: 700, fontSize: 66, color: P.cream, letterSpacing: '0.02em', margin: 0, lineHeight: 0.9 }}>
           SUBMIT PHOTOS
         </h1>
         <p style={{ color: P.mute, fontSize: 15, lineHeight: 1.7, maxWidth: 640, margin: '18px 0 0' }}>
@@ -38,7 +38,7 @@ export default function SubmitHub() {
         </p>
       </div>
 
-      <div style={{ maxWidth: 1200, margin: '0 auto', padding: '36px 40px 90px' }}>
+      <div className="submit-body" style={{ maxWidth: 1200, margin: '0 auto', padding: '36px 40px 90px' }}>
         {/* Uploader */}
         <div style={{ maxWidth: 640, margin: '0 auto 56px' }}>
           <PhotoUploader onUploaded={(photo) => { setBrowseTeam(photo.team); setRefreshKey((k) => k + 1); }} />
@@ -76,6 +76,13 @@ export default function SubmitHub() {
           ? <RaiderVoting key={`vote-${refreshKey}`} compact />
           : <TeamGallery key={`gal-${browseTeam}-${refreshKey}`} teamId={browseTeam} showSubmit={false} />}
       </div>
+      <style>{`
+        @media (max-width: 767px) {
+          .submit-header { padding: 24px 20px 28px !important; }
+          .submit-title { font-size: 34px !important; }
+          .submit-body { padding: 24px 20px 60px !important; }
+        }
+      `}</style>
     </section>
   );
 }

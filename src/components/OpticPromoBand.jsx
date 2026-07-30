@@ -15,7 +15,7 @@ export default function OpticPromoBand() {
   const navigate = useNavigate();
 
   return (
-    <section style={{
+    <section className="optic-section" style={{
       background: `linear-gradient(160deg, ${P.navy} 0%, ${P.deep} 60%, ${P.ink} 100%)`,
       padding: '72px 32px', borderBottom: `1px solid ${P.hairline}`,
       position: 'relative', overflow: 'hidden',
@@ -87,7 +87,10 @@ export default function OpticPromoBand() {
         </div>
       </div>
 
-      <style>{`@media (max-width: 760px) { .optic-grid { grid-template-columns: 1fr !important; gap: 36px !important; } }`}</style>
+      <style>{`
+        @media (max-width: 760px) { .optic-grid { grid-template-columns: 1fr !important; gap: 36px !important; } }
+        @media (max-width: 767px) { .optic-section { padding: 32px 20px !important; } }
+      `}</style>
     </section>
   );
 }

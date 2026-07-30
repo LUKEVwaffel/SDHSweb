@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { supabase as SB } from '../lib/supabaseClient';
+import useIsMobile from '../hooks/useIsMobile';
 
 const P = {
   ink: '#06101F', navy: '#142847', deep: '#0A1628',
@@ -401,7 +402,7 @@ function PhotoPending() {
 }
 
 // ─── Command portrait card ─────────────────────────────────────────────────
-function CommandCard({ person, onViewProfile }) {
+function CommandCard({ person, onViewProfile, widthStyle }) {
   const [hovered, setHovered] = useState(false);
   const view = () => onViewProfile(person);
 
@@ -414,6 +415,7 @@ function CommandCard({ person, onViewProfile }) {
       style={{
         flex: '0 0 200px',
         maxWidth: 200,
+        ...widthStyle,
         cursor: 'pointer',
         display: 'flex',
         flexDirection: 'column',
@@ -534,6 +536,7 @@ function RoleBriefStrip({ roles }) {
 // ─── Main export ────────────────────────────────────────────────────────────────
 export default function BattalionCommand() {
   const navigate = useNavigate();
+  const isMobile = useIsMobile();
   const [command, setCommand] = useState([]);
 
   useEffect(() => {
@@ -568,6 +571,39 @@ export default function BattalionCommand() {
 
   // Nothing loaded yet (e.g. offline) — render nothing rather than a stub.
   if (!command.length) return null;
+
+  if (isMobile) {
+    return (
+      <section style={{ padding: '28px 0 22px', borderBottom: `1px solid ${P.hair}` }}>
+        <div style={{ padding: '0 20px', marginBottom: 16 }}>
+          <div style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: 9, color: P.gold, letterSpacing: '0.24em', opacity: 0.75 }}>
+            // AY 2025–26 · COMMAND
+          </div>
+          <div style={{ fontFamily: 'Oswald, sans-serif', fontWeight: 700, fontSize: 24, color: P.cream, letterSpacing: '0.03em', marginTop: 6 }}>
+            THE BATTALION
+          </div>
+        </div>
+        <div style={{ display: 'flex', gap: 12, overflowX: 'auto', padding: '0 20px 8px', scrollSnapType: 'x mandatory', boxSizing: 'border-box' }}>
+          {trio.map(({ p }) => (
+            <CommandCard key={p.id} person={p} onViewProfile={goProfile}
+              widthStyle={{ flex: '0 0 68%', maxWidth: 'none', scrollSnapAlign: 'center' }} />
+          ))}
+          {extras.map((p) => (
+            <CommandCard key={p.id} person={p} onViewProfile={goProfile}
+              widthStyle={{ flex: '0 0 68%', maxWidth: 'none', scrollSnapAlign: 'center' }} />
+          ))}
+        </div>
+        <div style={{ display: 'flex', justifyContent: 'center', gap: 6, marginTop: 12 }}>
+          {[...trio, ...extras].map((_, i) => (
+            <span key={i} style={{ width: i === 1 ? 7 : 5, height: i === 1 ? 7 : 5, background: i === 1 ? P.gold : `${P.gold}80`, display: 'block' }} />
+          ))}
+        </div>
+        <div style={{ textAlign: 'center', fontFamily: "'JetBrains Mono', monospace", fontSize: 9, color: P.mute, letterSpacing: '0.08em', marginTop: 8 }}>
+          ← SWIPE · TAP A CARD FOR PROFILE →
+        </div>
+      </section>
+    );
+  }
 
   return (
     <section style={{

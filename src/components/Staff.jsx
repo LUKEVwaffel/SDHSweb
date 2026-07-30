@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { supabase as SB } from '../lib/supabaseClient';
+import useIsMobile from '../hooks/useIsMobile';
 
 const P = {
   ink: '#06101F', navy: '#142847', deep: '#0A1628',
@@ -232,8 +233,10 @@ function SectionHeader({ label, name, desc, count }) {
 // ─── Main ─────────────────────────────────────────────────────────────────────
 export default function Staff() {
   const navigate = useNavigate();
+  const isMobile = useIsMobile();
   const [personnel, setPersonnel] = useState({});
   const [loading, setLoading] = useState(true);
+  const [openSection, setOpenSection] = useState('command');
 
   useEffect(() => {
     async function load() {
@@ -250,6 +253,63 @@ export default function Staff() {
   }, []);
 
   function goProfile(person) { navigate(`/profile/${person.id}`, { state: { from: 'staff' } }); }
+
+  if (isMobile) {
+    return (
+      <div style={{ background: P.ink, minHeight: '100vh', fontFamily: 'Inter, sans-serif' }}>
+        <div style={{ padding: '24px 20px 40px' }}>
+          <div style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: 9, color: P.gold, letterSpacing: '0.28em', opacity: 0.8 }}>
+            // AY 2025–26
+          </div>
+          <div style={{ fontFamily: 'Oswald, sans-serif', fontWeight: 700, fontSize: 32, color: P.cream, letterSpacing: '0.05em', marginTop: 8, marginBottom: 20 }}>
+            BATTALION STAFF
+          </div>
+          {loading ? (
+            <div style={{ textAlign: 'center', padding: 60, fontFamily: "'JetBrains Mono', monospace", fontSize: 10, color: P.mute, letterSpacing: '0.2em' }}>
+              LOADING…
+            </div>
+          ) : (
+            S_SECTIONS.map(sec => {
+              const members = personnel[sec.key] || [];
+              if (!members.length) return null;
+              const isOpen = openSection === sec.key;
+              return (
+                <div key={sec.key} style={{ borderBottom: `1px solid ${P.hair}` }}>
+                  <button
+                    onClick={() => setOpenSection(isOpen ? null : sec.key)}
+                    style={{
+                      width: '100%', background: 'none', border: 'none', cursor: 'pointer',
+                      display: 'flex', alignItems: 'center', gap: 12, padding: '16px 0',
+                      textAlign: 'left', minHeight: 52, boxSizing: 'border-box',
+                    }}
+                  >
+                    <div style={{ width: 3, height: 28, background: P.gold, flexShrink: 0 }} />
+                    <div style={{ flex: 1 }}>
+                      <div style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: 9, color: P.gold, letterSpacing: '0.24em' }}>
+                        {sec.label} · {sec.name}
+                      </div>
+                      <div style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: 9, color: P.mute, marginTop: 3 }}>
+                        {members.length} PERSONNEL
+                      </div>
+                    </div>
+                    <span style={{
+                      color: P.gold, fontFamily: "'JetBrains Mono', monospace", fontSize: 14,
+                      display: 'inline-block', transform: isOpen ? 'rotate(180deg)' : 'rotate(0deg)', transition: 'transform 0.15s',
+                    }}>⌄</span>
+                  </button>
+                  {isOpen && (
+                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10, paddingBottom: 18 }}>
+                      {members.map(p => <StaffCard key={p.id} person={p} onViewProfile={goProfile} />)}
+                    </div>
+                  )}
+                </div>
+              );
+            })
+          )}
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div style={{ position: 'relative', background: P.ink, minHeight: '100vh', fontFamily: 'Inter, sans-serif' }}>

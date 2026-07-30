@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { supabase as SB } from '../lib/supabaseClient';
+import useIsMobile from '../hooks/useIsMobile';
 
 const P = {
   ink: '#06101F', navy: '#142847', deep: '#0A1628',
@@ -64,6 +65,7 @@ export default function Companies() {
   const navigate = useNavigate();
   const { id } = useParams();
   const activeCompany = id || 'alpha';
+  const isMobile = useIsMobile();
   const [personnel, setPersonnel] = useState({});
   const [loading, setLoading] = useState(true);
 
@@ -83,6 +85,87 @@ export default function Companies() {
   const members = (personnel[company?.section] || []).sort((a, b) =>
     ROLE_ORDER.indexOf(a.role_short) - ROLE_ORDER.indexOf(b.role_short)
   );
+
+  if (isMobile) {
+    return (
+      <section style={{ background: P.ink, minHeight: '100vh', fontFamily: 'Inter, sans-serif' }}>
+        <div style={{ padding: '24px 20px 40px' }}>
+          <button onClick={() => navigate('/')} style={{
+            background: 'none', border: 'none', color: P.gold, cursor: 'pointer',
+            fontFamily: "'JetBrains Mono', monospace", fontSize: 10, letterSpacing: '0.24em',
+            padding: 0, marginBottom: 18,
+          }}>← HOME</button>
+          <div style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: 9, color: P.gold, letterSpacing: '0.28em' }}>
+            // UNIT STRUCTURE
+          </div>
+          <div style={{ fontFamily: 'Oswald, sans-serif', fontWeight: 700, fontSize: 42, color: P.cream, letterSpacing: '0.02em', lineHeight: 0.92, marginTop: 8 }}>
+            COMPANIES
+          </div>
+
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8, marginTop: 20 }}>
+            {COMPANIES.map(co => (
+              <button key={co.id} onClick={() => navigate(`/company/${co.id}`)} style={{
+                background: activeCompany === co.id ? P.gold : 'transparent',
+                border: `1px solid ${activeCompany === co.id ? P.gold : P.hair}`,
+                color: activeCompany === co.id ? P.ink : P.mute,
+                fontFamily: "'JetBrains Mono', monospace", fontSize: 11, letterSpacing: '0.14em',
+                padding: 13, cursor: 'pointer', fontWeight: 700, minHeight: 44, boxSizing: 'border-box',
+              }}>{co.label}</button>
+            ))}
+          </div>
+
+          {loading ? (
+            <div style={{ textAlign: 'center', padding: 60, fontFamily: "'JetBrains Mono', monospace", fontSize: 10, color: P.mute, letterSpacing: '0.2em' }}>LOADING…</div>
+          ) : (
+            <>
+              <div style={{ background: company.color, border: `1px solid ${P.hair}`, padding: 22, marginTop: 18, boxSizing: 'border-box' }}>
+                <div style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: 9, color: P.gold, letterSpacing: '0.28em' }}>TROJAN BATTALION</div>
+                <div style={{ fontFamily: 'Oswald, sans-serif', fontWeight: 700, fontSize: 26, color: P.cream, letterSpacing: '0.1em', marginTop: 6 }}>
+                  {company.phonetic}
+                </div>
+                <div style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: 9, color: P.mute, marginTop: 10 }}>
+                  {members.length} CADETS DISPLAYED
+                </div>
+              </div>
+
+              {members.length > 0 ? (
+                <div style={{ display: 'flex', flexDirection: 'column', gap: 12, marginTop: 16 }}>
+                  {members.map(p => (
+                    <div key={p.id} style={{
+                      display: 'grid', gridTemplateColumns: '84px 1fr', gap: 14,
+                      border: `1px solid ${P.hair}`, background: P.navy, padding: 12, boxSizing: 'border-box',
+                    }}>
+                      <div style={{ aspectRatio: '3/4', overflow: 'hidden', background: P.deep }}>
+                        {p.photo_url ? (
+                          <img src={p.photo_url} alt={p.name} style={{ width: '100%', height: '100%', objectFit: 'cover', objectPosition: 'top', display: 'block' }} />
+                        ) : (
+                          <div style={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                            <div style={{ fontFamily: 'Oswald, sans-serif', fontSize: 24, color: P.hair }}>◉</div>
+                          </div>
+                        )}
+                      </div>
+                      <div style={{ display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
+                        <div style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: 8, color: P.gold, letterSpacing: '0.2em' }}>
+                          {p.role_short} · {p.role_long}
+                        </div>
+                        <div style={{ fontFamily: 'Oswald, sans-serif', fontWeight: 700, fontSize: 16, color: P.cream, letterSpacing: '0.03em', marginTop: 6 }}>
+                          {p.name.toUpperCase()}
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <div style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: 10, color: P.mute, textAlign: 'center', padding: 40 }}>
+                  NO PERSONNEL ON FILE
+                </div>
+              )}
+            </>
+          )}
+        </div>
+      </section>
+    );
+  }
 
   return (
     <section style={{ background: P.ink, minHeight: '100vh', fontFamily: 'Inter, sans-serif' }}>

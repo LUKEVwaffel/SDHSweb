@@ -1,6 +1,7 @@
 import { useState, useRef, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { legacyIdToPath, pathToLegacyId } from '../lib/routes';
+import useIsMobile from '../hooks/useIsMobile';
 
 const P = {
   ink: '#06101F', navyDeep: '#0A1628', navy: '#142847',
@@ -55,6 +56,57 @@ const NAV_ITEMS = [
   },
   { id: 'about', label: 'ABOUT' },
 ];
+
+// Flattened for the mobile drawer — dropdown children become their own rows,
+// dropdown parents (which have no route of their own) are dropped.
+const MOBILE_DRAWER_ITEMS = NAV_ITEMS.flatMap(item =>
+  item.dropdown ? item.dropdown : [item]
+);
+
+function MobileDrawer({ setActive, onClose }) {
+  return (
+    <div style={{ position: 'fixed', inset: 0, zIndex: 200, background: P.navyDeep, display: 'flex', flexDirection: 'column' }}>
+      <div style={{
+        display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+        padding: '18px 20px', borderBottom: `1px solid ${P.hairline}`,
+      }}>
+        <div style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: 10, letterSpacing: '0.28em', color: P.gold }}>MENU</div>
+        <button onClick={onClose} aria-label="Close menu" style={{
+          width: 40, height: 40, background: 'transparent', border: `1px solid ${P.hairline}`,
+          color: P.cream, fontSize: 16, cursor: 'pointer',
+        }}>✕</button>
+      </div>
+      <div style={{ flex: 1, overflowY: 'auto', padding: '6px 0' }}>
+        {MOBILE_DRAWER_ITEMS.map(item => (
+          <button key={item.id}
+            onClick={() => { setActive(item.id); onClose(); }}
+            style={{
+              display: 'flex', flexDirection: 'column', width: '100%', textAlign: 'left',
+              background: 'transparent', border: 'none',
+              borderBottom: `1px solid ${P.hairline}`,
+              padding: '15px 20px', cursor: 'pointer', minHeight: 52,
+              justifyContent: 'center', boxSizing: 'border-box',
+            }}
+          >
+            <span style={{ fontFamily: 'Oswald, sans-serif', fontWeight: 600, fontSize: 14, color: P.cream, letterSpacing: '0.08em' }}>
+              {item.label}
+            </span>
+            {item.sub && (
+              <span style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: 9, color: P.mute, marginTop: 4, letterSpacing: '0.06em' }}>
+                {item.sub}
+              </span>
+            )}
+          </button>
+        ))}
+      </div>
+      <div style={{ padding: '16px 20px', borderTop: `1px solid ${P.hairline}`, display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+        <span style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: 9, color: P.gold, letterSpacing: '0.2em' }}>
+          <span className="hp-blink">●</span> ACTIVE
+        </span>
+      </div>
+    </div>
+  );
+}
 
 function DropdownMenu({ items, active, setActive, onClose }) {
   return (
@@ -168,6 +220,50 @@ export default function TopNav() {
   const location = useLocation();
   const active = pathToLegacyId(location.pathname);
   const setActive = (id) => navigate(legacyIdToPath(id));
+  const isMobile = useIsMobile();
+  const [drawerOpen, setDrawerOpen] = useState(false);
+
+  useEffect(() => { setDrawerOpen(false); }, [location.pathname]);
+
+  if (isMobile) {
+    return (
+      <header style={{
+        position: 'sticky', top: 0, zIndex: 20,
+        background: `linear-gradient(180deg, ${P.ink} 0%, ${P.navyDeep} 100%)`,
+        borderBottom: `1px solid ${P.hairline}`,
+      }}>
+        <div style={{
+          display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+          padding: '14px 16px', boxSizing: 'border-box',
+        }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 8, cursor: 'pointer' }}
+            onClick={() => setActive('home')}>
+            <img src={LOGO} alt="" style={{ height: 32, width: 'auto', display: 'block' }} />
+            <div>
+              <div style={{ fontFamily: 'Oswald, sans-serif', fontWeight: 700, fontSize: 12, color: P.cream, letterSpacing: '0.13em', lineHeight: 1 }}>
+                TROJAN BATTALION
+              </div>
+              <div style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: 7, color: P.gold, letterSpacing: '0.2em', marginTop: 3, opacity: 0.85 }}>
+                SODDY DAISY HS · AJROTC
+              </div>
+            </div>
+          </div>
+          <button onClick={() => setDrawerOpen(true)} aria-label="Open menu" style={{
+            width: 44, height: 44, background: 'transparent', border: `1px solid ${P.hairline}`,
+            cursor: 'pointer', display: 'flex', flexDirection: 'column', alignItems: 'center',
+            justifyContent: 'center', gap: 4, flexShrink: 0,
+          }}>
+            <span style={{ width: 18, height: 2, background: P.gold, display: 'block' }} />
+            <span style={{ width: 18, height: 2, background: P.gold, display: 'block' }} />
+            <span style={{ width: 18, height: 2, background: P.gold, display: 'block' }} />
+          </button>
+        </div>
+        {drawerOpen && (
+          <MobileDrawer active={active} setActive={setActive} onClose={() => setDrawerOpen(false)} />
+        )}
+      </header>
+    );
+  }
 
   return (
     <header style={{

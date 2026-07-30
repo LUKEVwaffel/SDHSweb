@@ -15,6 +15,7 @@
   "13": "About.jsx",
   "14": "PeoplePanel.jsx",
   "15": ".oxlintrc.json",
+  "16": "TopNav.jsx",
   "17": "admin_roles.sql",
   "18": "CadetManual.jsx",
   "19": "Footer.jsx",
@@ -70,5 +71,6 @@
   "69": "AarsPanel.jsx",
   "70": "RaiderVoting.jsx",
   "71": "admin_password_gate.sql",
+  "72": "TabGrid.jsx",
   "73": "imageResize.js"
 }

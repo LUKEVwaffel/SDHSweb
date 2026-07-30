@@ -193,7 +193,7 @@ function SubmitQuestion() {
         <input aria-hidden="true" tabIndex={-1} autoComplete="off" value={honeypot}
           onChange={(e) => setHoneypot(e.target.value)} name="company_website"
           style={{ position: 'absolute', left: '-9999px', width: 1, height: 1, opacity: 0 }} />
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 14, marginBottom: 14 }}>
+        <div className="faq-name-email-grid" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 14, marginBottom: 14 }}>
           <FocusField value={name} onChange={(e) => setName(e.target.value)} placeholder="Name · optional" />
           <FocusField type="email" required value={email} onChange={(e) => setEmail(e.target.value)} placeholder="Email · we'll reply here" />
         </div>
@@ -204,6 +204,11 @@ function SubmitQuestion() {
         }}>{state === 'busy' ? 'SUBMITTING…' : 'SUBMIT QUESTION →'}</button>
         {state === 'err' && <div style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: 10, color: P.red, marginTop: 10 }}>{msg}</div>}
       </div>
+      <style>{`
+        @media (max-width: 767px) {
+          .faq-name-email-grid { grid-template-columns: 1fr !important; }
+        }
+      `}</style>
     </form>
   );
 }

@@ -1,4 +1,5 @@
 import { useNavigate } from 'react-router-dom';
+import useIsMobile from '../hooks/useIsMobile';
 
 const P = {
   navy: '#142847',
@@ -12,8 +13,88 @@ const P = {
 
 const JROTC = '/assets/army-jrotc.png';
 
+const HERO_STATS = [
+  { v: 'TOP 5%', l: 'Programs nationally' },
+  { v: '7',      l: 'Specialty teams' },
+  { v: '30+',    l: 'Years strong' },
+];
+
 export default function Hero() {
   const navigate = useNavigate();
+  const isMobile = useIsMobile();
+
+  if (isMobile) {
+    return (
+      <section style={{
+        background: `radial-gradient(ellipse at 30% 10%, ${P.navy} 0%, ${P.ink} 70%)`,
+        borderBottom: `1px solid ${P.hairline}`,
+        padding: '26px 20px 24px', boxSizing: 'border-box',
+      }}>
+        <div style={{
+          display: 'inline-flex', alignItems: 'center', gap: 8,
+          padding: '5px 10px', border: `1px solid ${P.hairline}`,
+          fontFamily: "'JetBrains Mono', monospace", fontSize: 8,
+          letterSpacing: '0.22em', color: P.gold, marginBottom: 16,
+        }}>
+          <span className="hp-blink" style={{ color: P.goldBright }}>●</span>
+          <span>EST · TOP 5% NATIONAL</span>
+        </div>
+
+        <h1 style={{
+          color: P.cream, fontFamily: 'Oswald, sans-serif', fontWeight: 700,
+          fontSize: 36, lineHeight: 0.95, margin: 0,
+        }}>
+          HONOR.<br />
+          <span style={{ color: P.gold }}>COURAGE.</span><br />
+          COMMITMENT.
+        </h1>
+
+        <p style={{
+          color: P.mute, fontFamily: 'Inter, sans-serif',
+          fontSize: '13.5px', lineHeight: 1.6, margin: '14px 0 0',
+        }}>
+          We are the Trojan Battalion, a U.S. Army Junior ROTC program at Soddy
+          Daisy High School. We train cadets to lead, serve, and excel.
+        </p>
+
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 10, marginTop: 20 }}>
+          <button onClick={() => navigate('/cadet-manual')} style={{
+            background: P.gold, border: 'none', color: P.ink,
+            fontFamily: 'Oswald, sans-serif', fontWeight: 700, fontSize: 13,
+            letterSpacing: '0.12em', padding: 15, cursor: 'pointer',
+            minHeight: 48, boxSizing: 'border-box',
+          }}>
+            OPEN CADET MANUAL →
+          </button>
+          <button onClick={() => navigate('/about')} style={{
+            background: 'transparent', border: `1px solid ${P.hairline}`, color: P.cream,
+            fontFamily: 'Oswald, sans-serif', fontWeight: 600, fontSize: 13,
+            letterSpacing: '0.12em', padding: 15, cursor: 'pointer',
+            minHeight: 48, boxSizing: 'border-box',
+          }}>
+            ABOUT THE BATTALION
+          </button>
+        </div>
+
+        <div style={{
+          display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 10,
+          marginTop: 22, paddingTop: 16, borderTop: `1px solid ${P.hairline}`,
+        }}>
+          {HERO_STATS.map((s, i) => (
+            <div key={i}>
+              <div style={{ color: P.gold, fontFamily: 'Oswald, sans-serif', fontSize: 19, fontWeight: 700, lineHeight: 1 }}>
+                {s.v}
+              </div>
+              <div style={{ color: P.mute, fontFamily: "'JetBrains Mono', monospace", fontSize: '7.5px', letterSpacing: '0.1em', marginTop: 6 }}>
+                {s.l.toUpperCase()}
+              </div>
+            </div>
+          ))}
+        </div>
+      </section>
+    );
+  }
+
   return (
     <section style={{
       position: 'relative',

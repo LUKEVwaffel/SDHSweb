@@ -1,4 +1,7 @@
 import { useNavigate } from 'react-router-dom';
+import useIsMobile from '../hooks/useIsMobile';
+import { getTeam } from '../lib/teams';
+import TeamPageMobile from './team/TeamPageMobile';
 
 const P = {
   ink: '#06101F',
@@ -11,6 +14,15 @@ const P = {
 
 export default function TabPlaceholder({ tab }) {
   const navigate = useNavigate();
+  const isMobile = useIsMobile();
+
+  // Specialty teams without a dedicated desktop page yet (academic, drill)
+  // get the shared mobile team template instead of the generic placeholder.
+  // Desktop keeps the exact placeholder below, unchanged.
+  if (isMobile && getTeam(tab.id)) {
+    return <TeamPageMobile teamId={tab.id} />;
+  }
+
   return (
     <section style={{
       background: P.ink, minHeight: 720, padding: '80px 32px',

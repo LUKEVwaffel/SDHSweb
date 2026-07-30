@@ -80,17 +80,17 @@ function FooterLink({ label }) {
 
 export default function Footer() {
   return (
-    <footer style={{
+    <footer className="site-footer" style={{
       background: P.navyDeep, padding: '48px 32px 28px',
       borderTop: `1px solid ${P.hairline}`,
     }}>
       <div style={{ maxWidth: 1400, margin: '0 auto' }}>
-        <div style={{
+        <div className="footer-grid" style={{
           display: 'grid', gridTemplateColumns: '2fr 1fr 1fr 1fr',
           gap: 40, marginBottom: 40,
         }}>
           {/* brand block */}
-          <div>
+          <div className="footer-brand">
             <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 16 }}>
               <img src={JROTC} alt="" style={{ height: 44 }} />
               <div>
@@ -140,6 +140,13 @@ export default function Footer() {
           <span>v 1.0 Beta - Built By Assistant S-6 Luke Vetsch</span>
         </div>
       </div>
+      <style>{`
+        @media (max-width: 767px) {
+          .site-footer { padding: 32px 20px 26px !important; }
+          .footer-grid { grid-template-columns: 1fr 1fr !important; gap: 24px 16px !important; }
+          .footer-brand { grid-column: 1 / -1 !important; }
+        }
+      `}</style>
     </footer>
   );
 }

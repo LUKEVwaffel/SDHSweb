@@ -59,14 +59,14 @@ export default function Bulletin() {
   }, []);
 
   return (
-    <section style={{ background: P.ink, padding: '56px 32px', borderBottom: `1px solid ${P.hairline}` }}>
+    <section className="bulletin-section" style={{ background: P.ink, padding: '56px 32px', borderBottom: `1px solid ${P.hairline}` }}>
       <div style={{ maxWidth: 1400, margin: '0 auto' }}>
         <div style={{ display: 'flex', alignItems: 'flex-end', justifyContent: 'space-between', marginBottom: 22, gap: 24, flexWrap: 'wrap' }}>
           <div>
             <div style={{ color: P.gold, opacity: 0.7, fontFamily: "'JetBrains Mono', monospace", fontSize: 10, letterSpacing: '0.32em', marginBottom: 10 }}>
               // S-5 SHOP · UPCOMING
             </div>
-            <div style={{ color: P.cream, fontFamily: 'Oswald, sans-serif', fontWeight: 700, fontSize: 36, letterSpacing: '0.04em', lineHeight: 0.95 }}>
+            <div className="bulletin-title" style={{ color: P.cream, fontFamily: 'Oswald, sans-serif', fontWeight: 700, fontSize: 36, letterSpacing: '0.04em', lineHeight: 0.95 }}>
               WHAT'S NEXT
             </div>
           </div>
@@ -83,6 +83,12 @@ export default function Bulletin() {
           </div>
         )}
       </div>
+      <style>{`
+        @media (max-width: 767px) {
+          .bulletin-section { padding: 28px 20px !important; }
+          .bulletin-title { font-size: 22px !important; }
+        }
+      `}</style>
     </section>
   );
 }

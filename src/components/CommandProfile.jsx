@@ -122,7 +122,7 @@ export default function CommandProfile() {
   return (
     <section style={{ background: P.ink, minHeight: '100vh', fontFamily: 'Inter, sans-serif', position: 'relative' }}>
       <PageGrid />
-      <div style={{ maxWidth: 1100, margin: '0 auto', padding: '60px 40px 80px', position: 'relative', zIndex: 1 }}>
+      <div className="profile-wrap" style={{ maxWidth: 1100, margin: '0 auto', padding: '60px 40px 80px', position: 'relative', zIndex: 1 }}>
 
         {/* Back button */}
         <button onClick={back} style={{
@@ -132,7 +132,7 @@ export default function CommandProfile() {
         }}>← BACK TO {(backLabel || 'STAFF').toUpperCase()}</button>
 
         {/* Main layout: photo left, content right */}
-        <div style={{ display: 'grid', gridTemplateColumns: '380px 1fr', gap: 60, alignItems: 'start' }}>
+        <div className="profile-grid" style={{ display: 'grid', gridTemplateColumns: '380px 1fr', gap: 60, alignItems: 'start' }}>
 
           {/* ── Left: Photo + metadata ─────────────── */}
           <div>
@@ -233,7 +233,7 @@ export default function CommandProfile() {
           {/* ── Right: Name + Bio ──────────────────── */}
           <div>
             {/* Name */}
-            <h1 style={{
+            <h1 className="profile-name" style={{
               fontFamily: 'Oswald, sans-serif', fontWeight: 700,
               fontSize: 56, color: P.cream, letterSpacing: '0.02em',
               margin: '0 0 8px', lineHeight: 1,
@@ -411,6 +411,13 @@ export default function CommandProfile() {
           </div>
         </div>
       </div>
+      <style>{`
+        @media (max-width: 767px) {
+          .profile-wrap { padding: 24px 20px 40px !important; }
+          .profile-grid { grid-template-columns: 1fr !important; gap: 24px !important; }
+          .profile-name { font-size: 34px !important; margin-top: 24px !important; }
+        }
+      `}</style>
     </section>
   );
 }

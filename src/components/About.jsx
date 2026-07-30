@@ -208,11 +208,11 @@ function CreditCallout() {
         position: 'absolute', right: '-8%', top: '-30%', width: '60%', height: '220%',
         background: 'rgba(232,199,122,0.06)', transform: 'rotate(12deg)', pointerEvents: 'none',
       }} />
-      <div style={{
+      <div className="credit-grid" style={{
         maxWidth: 1400, margin: '0 auto', padding: '56px 40px', position: 'relative', zIndex: 1,
         display: 'grid', gridTemplateColumns: 'auto 1fr', gap: 48, alignItems: 'center',
       }}>
-        <div style={{ fontFamily: oswald, fontWeight: 700, fontSize: 'clamp(72px, 9vw, 148px)', lineHeight: 0.8, color: P.cream, letterSpacing: '-0.02em', whiteSpace: 'nowrap' }}>
+        <div className="credit-number" style={{ fontFamily: oswald, fontWeight: 700, fontSize: 'clamp(72px, 9vw, 148px)', lineHeight: 0.8, color: P.cream, letterSpacing: '-0.02em', whiteSpace: 'nowrap' }}>
           3<span style={{ fontSize: '0.3em', color: P.hairStrong, margin: '0 6px' }}>=</span><span style={{ color: P.bright }}>3</span>
         </div>
         <div>
@@ -341,6 +341,7 @@ function ValueCard({ value }) {
   const featured = !!value.featured;
   return (
     <div
+      className={featured ? 'value-card value-card-featured' : 'value-card'}
       onMouseEnter={() => setHovered(true)}
       onMouseLeave={() => setHovered(false)}
       style={{
@@ -416,14 +417,14 @@ export default function About() {
             <path d="M 100 100 L 100 5 A 95 95 0 0 1 195 100 Z" fill="url(#about-sweep)" />
           </svg>
         </div>
-        <div style={{ maxWidth: 1400, margin: '0 auto', position: 'relative', zIndex: 1, padding: '72px 40px 44px' }}>
+        <div className="about-hero-inner" style={{ maxWidth: 1400, margin: '0 auto', position: 'relative', zIndex: 1, padding: '72px 40px 44px' }}>
           <button onClick={() => navigate('/')} style={{
             background: 'none', border: 'none', color: P.gold, cursor: 'pointer',
             fontFamily: mono, fontSize: 10,
             letterSpacing: '0.28em', padding: 0, marginBottom: 28, display: 'block',
           }}>← BACK</button>
           <Eyebrow style={{ marginBottom: 14 }}>// ABOUT THE PROGRAM</Eyebrow>
-          <h1 style={{ fontFamily: oswald, fontWeight: 700, fontSize: 'clamp(52px, 8vw, 80px)', color: P.cream, letterSpacing: '0.02em', margin: 0, lineHeight: 0.88 }}>
+          <h1 className="about-hero-title" style={{ fontFamily: oswald, fontWeight: 700, fontSize: 'clamp(52px, 8vw, 80px)', color: P.cream, letterSpacing: '0.02em', margin: 0, lineHeight: 0.88 }}>
             TROJAN<br /><span style={{ color: P.gold }}>BATTALION</span>
           </h1>
           <p style={{ fontFamily: inter, fontSize: 17, color: P.mute2, maxWidth: 560, lineHeight: 1.7, margin: '22px 0 0' }}>
@@ -442,10 +443,10 @@ export default function About() {
         <Telemetry left="LAT 35.2438° N · LONG 85.1814° W" center="SODDY DAISY · TENNESSEE" right="[ STATUS · OK ]" />
       </div>
 
-      <div style={{ maxWidth: 1400, margin: '0 auto', padding: '0 40px' }}>
+      <div className="about-content" style={{ maxWidth: 1400, margin: '0 auto', padding: '0 40px' }}>
 
         {/* Mission + Stats */}
-        <div style={{ padding: '56px 0', borderBottom: `1px solid ${P.hair}`, display: 'grid', gridTemplateColumns: '1fr auto 1fr', gap: 40, alignItems: 'stretch' }}>
+        <div className="about-mission-grid" style={{ padding: '56px 0', borderBottom: `1px solid ${P.hair}`, display: 'grid', gridTemplateColumns: '1fr auto 1fr', gap: 40, alignItems: 'stretch' }}>
           <Reveal>
             <Eyebrow>MISSION STATEMENT</Eyebrow>
             <p style={{ fontFamily: inter, fontSize: 18, color: P.cream, lineHeight: 1.8, margin: '14px 0 0', maxWidth: 480 }}>
@@ -458,7 +459,7 @@ export default function About() {
               </p>
             </div>
           </Reveal>
-          <div style={{ width: 1, background: `linear-gradient(180deg, transparent, ${P.hairStrong} 15%, ${P.hairStrong} 85%, transparent)`, position: 'relative' }}>
+          <div className="about-mission-divider" style={{ width: 1, background: `linear-gradient(180deg, transparent, ${P.hairStrong} 15%, ${P.hairStrong} 85%, transparent)`, position: 'relative' }}>
             <span style={{ position: 'absolute', left: 10, top: 0, fontFamily: mono, fontSize: 8, color: P.mute, letterSpacing: '0.1em', whiteSpace: 'nowrap' }}>N35.24</span>
             <span style={{ position: 'absolute', left: 10, bottom: 0, fontFamily: mono, fontSize: 8, color: P.mute, letterSpacing: '0.1em', whiteSpace: 'nowrap' }}>W85.18</span>
           </div>
@@ -480,12 +481,12 @@ export default function About() {
 
       <CreditCallout />
 
-      <div style={{ maxWidth: 1400, margin: '0 auto', padding: '0 40px' }}>
+      <div className="about-content" style={{ maxWidth: 1400, margin: '0 auto', padding: '0 40px' }}>
 
         {/* What is JROTC */}
         <div style={{ padding: '56px 0', borderBottom: `1px solid ${P.hair}` }}>
           <PanelHead index="01" title="WHAT IS JROTC?" />
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 20 }}>
+          <div className="about-overview-grid" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 20 }}>
             <Reveal>
               <Bracket style={{ padding: '26px 28px', background: P.deep, border: `1px solid ${P.hair}` }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 14 }}>
@@ -535,7 +536,7 @@ export default function About() {
         <div style={{ padding: '56px 0', borderBottom: `1px solid ${P.hair}` }}>
           <PanelHead index="03" title="CORE VALUES" />
           <Reveal>
-            <div style={{ display: 'grid', gridTemplateColumns: '1.4fr 1fr 1fr', gridTemplateRows: 'auto auto', gap: 14 }}>
+            <div className="values-grid" style={{ display: 'grid', gridTemplateColumns: '1.4fr 1fr 1fr', gridTemplateRows: 'auto auto', gap: 14 }}>
               {CORE_VALUES.map(v => <ValueCard key={v.code} value={v} />)}
             </div>
           </Reveal>
@@ -545,7 +546,7 @@ export default function About() {
         <div style={{ padding: '56px 0', borderBottom: `1px solid ${P.hair}` }}>
           <PanelHead index="04" title="SPECIALTY TEAMS & ACTIVITIES" />
           <Reveal>
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 12 }}>
+            <div className="teams-about-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 12 }}>
               {TEAMS.map(t => <TeamCard key={t.id} team={t} />)}
             </div>
           </Reveal>
@@ -560,7 +561,7 @@ export default function About() {
         <div style={{ padding: '56px 0' }}>
           <PanelHead index="06" title="ENROLLMENT & CONTACT" />
           <Reveal>
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16 }}>
+            <div className="about-contact-grid" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16 }}>
               <div style={{ background: P.navy, border: `1px solid ${P.hair}`, padding: '24px 26px' }}>
                 <h3 style={{ fontFamily: oswald, fontSize: 16, color: P.cream, letterSpacing: '0.06em', margin: '0 0 14px', fontWeight: 600 }}>HOW TO ENROLL</h3>
                 <p style={{ fontFamily: inter, fontSize: 13, color: P.mute2, lineHeight: 1.7, margin: '0 0 10px' }}>
@@ -590,6 +591,22 @@ export default function About() {
       </div>
 
       <Telemetry left="TROJAN BATTALION // OPS PROFILE" center={`UNIT // ${content['battalion.unit'] || 'TN-051'}`} right="[ STATUS · OK ]" borderBottom />
+      <style>{`
+        @media (max-width: 767px) {
+          .about-hero-inner { padding: 40px 20px 32px !important; }
+          .about-hero-title { font-size: 40px !important; }
+          .about-content { padding: 0 20px !important; }
+          .about-mission-grid { grid-template-columns: 1fr !important; gap: 28px !important; }
+          .about-mission-divider { display: none !important; }
+          .credit-grid { grid-template-columns: 1fr !important; padding: 40px 20px !important; gap: 20px !important; }
+          .credit-number { font-size: 64px !important; }
+          .about-overview-grid { grid-template-columns: 1fr !important; }
+          .values-grid { grid-template-columns: 1fr !important; grid-template-rows: none !important; }
+          .value-card-featured { grid-row: auto !important; }
+          .teams-about-grid { grid-template-columns: 1fr !important; }
+          .about-contact-grid { grid-template-columns: 1fr !important; }
+        }
+      `}</style>
     </section>
   );
 }

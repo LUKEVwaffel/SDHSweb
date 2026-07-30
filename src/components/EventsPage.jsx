@@ -49,15 +49,20 @@ export default function EventsPage() {
       <style>{`
         .events-layout { display: grid; grid-template-columns: 380px 1fr; gap: 40px; align-items: start; }
         @media (max-width: 900px) { .events-layout { grid-template-columns: 1fr; } }
+        @media (max-width: 767px) {
+          .events-header { padding: 24px 20px 28px !important; }
+          .events-title { font-size: 42px !important; }
+          .events-body { padding: 24px 20px 60px !important; }
+        }
       `}</style>
 
       {/* Header */}
-      <div style={{ borderBottom: `1px solid ${P.hair}`, padding: '60px 40px 40px', maxWidth: 1400, margin: '0 auto' }}>
+      <div className="events-header" style={{ borderBottom: `1px solid ${P.hair}`, padding: '60px 40px 40px', maxWidth: 1400, margin: '0 auto' }}>
         <button onClick={() => navigate('/')} style={backBtn}>← BACK</button>
         <div style={{ fontFamily: mono, fontSize: 10, color: P.gold, letterSpacing: '0.32em', marginBottom: 12 }}>
           // BATTALION CALENDAR &amp; OPTIC PHOTOS
         </div>
-        <h1 style={{ fontFamily: oswald, fontWeight: 700, fontSize: 72, color: P.cream, letterSpacing: '0.02em', margin: 0, lineHeight: 0.9 }}>
+        <h1 className="events-title" style={{ fontFamily: oswald, fontWeight: 700, fontSize: 72, color: P.cream, letterSpacing: '0.02em', margin: 0, lineHeight: 0.9 }}>
           EVENTS
         </h1>
         <p style={{ color: P.mute, fontSize: 15, lineHeight: 1.7, marginTop: 20, maxWidth: 620, margin: '20px 0 0' }}>
@@ -65,7 +70,7 @@ export default function EventsPage() {
         </p>
       </div>
 
-      <div style={{ maxWidth: 1400, margin: '0 auto', padding: '36px 40px 90px' }}>
+      <div className="events-body" style={{ maxWidth: 1400, margin: '0 auto', padding: '36px 40px 90px' }}>
         <div className="events-layout">
           {/* Calendar column */}
           <div>

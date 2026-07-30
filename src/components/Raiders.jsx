@@ -4,6 +4,7 @@ import { supabase as SB } from '../lib/supabaseClient';
 import RaiderVoting from './RaiderVoting';
 import RaiderCarousel from './RaiderCarousel';
 import RaiderFAQ from './RaiderFAQ';
+import useIsMobile from '../hooks/useIsMobile';
 
 // Palette mirrors Rifle.jsx for a consistent specialty-team look. Green is the
 // raider live/event accent; gold stays the structural/command accent.
@@ -443,6 +444,7 @@ const navBtn = {
 // ── Main export ──────────────────────────────────────────────────────────────
 export default function Raiders() {
   const navigate = useNavigate();
+  const isMobile = useIsMobile();
   const [commanders, setCommanders] = useState([]);
   const [winners, setWinners] = useState(null);
   const [events, setEvents] = useState([]);
@@ -477,7 +479,7 @@ export default function Raiders() {
       <RaiderStyles />
       <PageBg />
 
-      <div style={{ maxWidth: 1200, margin: '0 auto', padding: '60px 40px 100px', position: 'relative', zIndex: 1 }}>
+      <div className="raiders-wrap" style={{ maxWidth: 1200, margin: '0 auto', padding: '60px 40px 100px', position: 'relative', zIndex: 1 }}>
 
         {/* ── Page header — small label above, large title below ── */}
         <div style={{ marginBottom: 44 }}>
@@ -489,7 +491,7 @@ export default function Raiders() {
           <div style={{ fontFamily: mono, fontSize: 11, color: P.gold, letterSpacing: '0.38em', opacity: 0.75, marginBottom: 10 }}>
             SPECIALTY TEAM
           </div>
-          <h1 style={{ fontFamily: oswald, fontWeight: 700, fontSize: 84, color: P.cream, letterSpacing: '0.02em', margin: 0, lineHeight: 0.95 }}>
+          <h1 className="raiders-title" style={{ fontFamily: oswald, fontWeight: 700, fontSize: 84, color: P.cream, letterSpacing: '0.02em', margin: 0, lineHeight: 0.95 }}>
             RAIDERS
           </h1>
           <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginTop: 18 }}>
@@ -537,10 +539,14 @@ export default function Raiders() {
         {/* ── Team stats ── */}
         <StatsSection stats={stats} />
 
-        <Divider />
-
-        {/* ── Event calendar ── */}
-        <EventCalendar events={events} />
+        {/* ── Event calendar — omitted on mobile, same as the unified team
+            template; full schedule stays reachable from /events. ── */}
+        {!isMobile && (
+          <>
+            <Divider />
+            <EventCalendar events={events} />
+          </>
+        )}
 
         <Divider />
 
@@ -589,6 +595,12 @@ export default function Raiders() {
         </div>
 
       </div>
+      <style>{`
+        @media (max-width: 767px) {
+          .raiders-wrap { padding: 24px 20px 60px !important; }
+          .raiders-title { font-size: 46px !important; }
+        }
+      `}</style>
     </div>
   );
 }

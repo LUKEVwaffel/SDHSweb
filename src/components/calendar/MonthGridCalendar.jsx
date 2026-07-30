@@ -92,9 +92,9 @@ export default function MonthGridCalendar({ events, selectedEventId, onSelectEve
   return (
     <div>
       {/* Month header */}
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 18 }}>
+      <div className="mgc-header" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 18 }}>
         <button onClick={prevMonth} aria-label="Previous month" style={navBtn}>‹</button>
-        <div style={{ fontFamily: oswald, fontWeight: 700, fontSize: 26, letterSpacing: '0.06em', color: P.cream }}>
+        <div className="mgc-header-label" style={{ fontFamily: oswald, fontWeight: 700, fontSize: 26, letterSpacing: '0.06em', color: P.cream }}>
           {MONTHS[month]} <span style={{ color: P.gold, opacity: 0.75 }}>{year}</span>
         </div>
         <button onClick={nextMonth} aria-label="Next month" style={navBtn}>›</button>
@@ -103,7 +103,7 @@ export default function MonthGridCalendar({ events, selectedEventId, onSelectEve
       {/* Weekday row */}
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(7, 1fr)', gap: 4, marginBottom: 6 }}>
         {WEEKDAYS.map((w) => (
-          <div key={w} style={{ textAlign: 'center', fontFamily: mono, fontSize: 9, color: P.faint, letterSpacing: '0.14em', padding: '4px 0' }}>{w}</div>
+          <div key={w} className="mgc-weekday" style={{ textAlign: 'center', fontFamily: mono, fontSize: 9, color: P.faint, letterSpacing: '0.14em', padding: '4px 0' }}>{w}</div>
         ))}
       </div>
 
@@ -117,6 +117,7 @@ export default function MonthGridCalendar({ events, selectedEventId, onSelectEve
           return (
             <button
               key={day}
+              className="mgc-cell"
               onClick={() => handleDayClick(day)}
               disabled={!hasEvents}
               aria-pressed={isSelected}
@@ -129,7 +130,7 @@ export default function MonthGridCalendar({ events, selectedEventId, onSelectEve
                 padding: 4, boxSizing: 'border-box',
               }}
             >
-              <span style={{ fontFamily: mono, fontSize: 12, color: hasEvents ? P.cream : P.faint }}>{day}</span>
+              <span className="mgc-daynum" style={{ fontFamily: mono, fontSize: 12, color: hasEvents ? P.cream : P.faint }}>{day}</span>
               {hasEvents && (
                 <div style={{ display: 'flex', gap: 3, flexWrap: 'wrap', justifyContent: 'center', maxWidth: 32 }}>
                   {dayEvents.slice(0, 4).map((ev) => (
@@ -174,6 +175,14 @@ export default function MonthGridCalendar({ events, selectedEventId, onSelectEve
           ← CLEAR FILTER
         </button>
       )}
+      <style>{`
+        @media (max-width: 767px) {
+          .mgc-header-label { font-size: 19px !important; }
+          .mgc-weekday { font-size: 7.5px !important; padding: 2px 0 !important; }
+          .mgc-cell { min-height: 40px !important; padding: 2px !important; }
+          .mgc-daynum { font-size: 10px !important; }
+        }
+      `}</style>
     </div>
   );
 }

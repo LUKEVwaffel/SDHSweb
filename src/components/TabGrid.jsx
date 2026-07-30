@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import useIsMobile from '../hooks/useIsMobile';
 
 const P = {
   navy: '#142847',
@@ -38,6 +39,45 @@ function TileBrackets({ active }) {
 export default function TabGrid() {
   const navigate = useNavigate();
   const [hovered, setHovered] = useState(null);
+  const isMobile = useIsMobile();
+
+  if (isMobile) {
+    const featured = ITEMS[0];
+    const gridItems = ITEMS.slice(1);
+    return (
+      <section style={{ background: P.cream, padding: '28px 20px 32px', borderBottom: `4px solid ${P.gold}`, boxSizing: 'border-box' }}>
+        <div style={{ color: P.navy, opacity: 0.6, fontFamily: "'JetBrains Mono', monospace", fontSize: 9, letterSpacing: '0.28em' }}>
+          // S-3 OPERATIONS
+        </div>
+        <div style={{ color: P.navy, fontFamily: 'Oswald, sans-serif', fontWeight: 700, fontSize: 30, letterSpacing: '0.03em', marginTop: 8 }}>
+          THE DIRECTORY
+        </div>
+        <button onClick={() => navigate(`/${featured.id}`)} style={{
+          textAlign: 'left', background: P.navy, color: P.cream, border: 'none', cursor: 'pointer',
+          padding: 20, marginTop: 20, minHeight: 140, display: 'flex', flexDirection: 'column',
+          boxSizing: 'border-box', width: '100%',
+        }}>
+          <div style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: 9, letterSpacing: '0.2em', opacity: 0.6 }}>{featured.code}</div>
+          <div style={{ fontFamily: 'Oswald, sans-serif', fontWeight: 700, fontSize: 28, marginTop: 'auto' }}>{featured.title.toUpperCase()}</div>
+          <div style={{ fontFamily: 'Inter, sans-serif', fontSize: '12.5px', opacity: 0.8, marginTop: 8, lineHeight: 1.5 }}>{featured.body}</div>
+          <div style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: 9, color: P.gold, letterSpacing: '0.2em', marginTop: 14 }}>OPEN →</div>
+        </button>
+        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10, marginTop: 10 }}>
+          {gridItems.map((it) => (
+            <button key={it.id} onClick={() => navigate(`/${it.id}`)} style={{
+              textAlign: 'left', background: P.white, border: '1px solid rgba(20,40,71,0.12)',
+              padding: '14px 12px', cursor: 'pointer', minHeight: 150, display: 'flex', flexDirection: 'column',
+              color: P.navy, boxSizing: 'border-box',
+            }}>
+              <div style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: 8, letterSpacing: '0.18em', opacity: 0.55 }}>{it.code}</div>
+              <div style={{ fontFamily: 'Oswald, sans-serif', fontWeight: 700, fontSize: 17, marginTop: 'auto', lineHeight: 1 }}>{it.title.toUpperCase()}</div>
+              <div style={{ fontFamily: 'Inter, sans-serif', fontSize: '10.5px', opacity: 0.75, marginTop: 8, lineHeight: 1.45 }}>{it.body}</div>
+            </button>
+          ))}
+        </div>
+      </section>
+    );
+  }
 
   return (
     <section style={{

@@ -1,16 +1,16 @@
-# Graph Report - Trojan Battalion Folder  (2026-07-30)
+# Graph Report - Trojan Battalion Folder  (2026-07-29)
 
 ## Corpus Check
-- 163 files · ~466,588 words
+- 161 files · ~463,585 words
 - Verdict: corpus is large enough that graph structure adds value.
 
 ## Summary
-- 689 nodes · 1521 edges · 72 communities (48 shown, 24 thin omitted)
+- 681 nodes · 1477 edges · 74 communities (50 shown, 24 thin omitted)
 - Extraction: 100% EXTRACTED · 0% INFERRED · 0% AMBIGUOUS · INFERRED: 3 edges (avg confidence: 0.7)
 - Token cost: 0 input · 0 output
 
 ## Graph Freshness
-- Built from commit: `bf8de896`
+- Built from commit: `175310a6`
 - Run `git rev-parse HEAD` and compare to check if the graph is stale.
 - Run `graphify update .` after code changes (no API cost).
 
@@ -31,6 +31,7 @@
 - About.jsx
 - PeoplePanel.jsx
 - .oxlintrc.json
+- TopNav.jsx
 - admin_roles.sql
 - CadetManual.jsx
 - Footer.jsx
@@ -70,10 +71,11 @@
 - AarsPanel.jsx
 - RaiderVoting.jsx
 - admin_password_gate.sql
+- TabGrid.jsx
 - imageResize.js
 
 ## God Nodes (most connected - your core abstractions)
-1. `react` - 68 edges
+1. `react` - 67 edges
 2. `supabase` - 49 edges
 3. `P` - 40 edges
 4. `sp` - 31 edges
@@ -85,8 +87,6 @@
 10. `Card()` - 19 edges
 
 ## Surprising Connections (you probably didn't know these)
-- `BattalionCommand()` --calls--> `useIsMobile()`  [EXTRACTED]
-  src/components/BattalionCommand.jsx → src/hooks/useIsMobile.js
 - `TeaserRow()` --calls--> `categoryColor()`  [EXTRACTED]
   src/components/Bulletin.jsx → src/lib/calendar.js
 - `Bulletin()` --indirect_call--> `toCalendarItem()`  [INFERRED]
@@ -95,19 +95,21 @@
   src/components/FaqSection.jsx → src/lib/fingerprint.js
 - `FooterLink()` --calls--> `legacyIdToPath()`  [EXTRACTED]
   src/components/Footer.jsx → src/lib/routes.js
+- `PhotoUploader()` --calls--> `getDeviceId()`  [EXTRACTED]
+  src/components/PhotoUploader.jsx → src/lib/fingerprint.js
 
 ## Import Cycles
 - None detected.
 
-## Communities (72 total, 24 thin omitted)
+## Communities (74 total, 24 thin omitted)
 
 ### Community 0 - "react"
 Cohesion: 0.08
 Nodes (61): react, downloadWinnerCard(), AccountAuth(), AccountGrid(), EyeIcon(), PasswordForm(), AccountsPanel(), AchievementCatalog() (+53 more)
 
 ### Community 1 - "PhotoUploader.jsx"
-Cohesion: 0.15
-Nodes (17): P, PhotoLightbox(), backBtn, P, SubmitHub(), P, TabPlaceholder(), P (+9 more)
+Cohesion: 0.18
+Nodes (13): P, PhotoLightbox(), backBtn, P, SubmitHub(), ghostBtn, loadingStyle, P (+5 more)
 
 ### Community 2 - "devDependencies"
 Cohesion: 0.04
@@ -123,7 +125,7 @@ Nodes (38): CATEGORY_OPTIONS, emptyForm(), EventsPanel(), missingCore(), selectS
 
 ### Community 5 - "BattalionCommand.jsx"
 Cohesion: 0.10
-Nodes (8): activate(), BOARD_MATH, boardColor(), CommandCard(), MathScatter(), P, ROLE_INFO, TacticalMap()
+Nodes (9): activate(), BattalionCommand(), BOARD_MATH, boardColor(), CommandCard(), MathScatter(), P, ROLE_INFO (+1 more)
 
 ### Community 6 - "Raiders.jsx"
 Cohesion: 0.09
@@ -138,8 +140,8 @@ Cohesion: 0.27
 Nodes (10): public.cast_raider_vote(), public.close_due_raider_polls(), public.finalize_raider_poll(), public.raider_bulletin, public.raider_gallery, public.raider_photos, public.raider_photos_rate_limit(), public.raider_polls (+2 more)
 
 ### Community 9 - "App.jsx"
-Cohesion: 0.14
-Nodes (13): App(), TabRoute(), TABS, Dashboard(), Admin(), ForcePasswordChange(), inputStyle(), LoginScreen() (+5 more)
+Cohesion: 0.16
+Nodes (11): App(), TabRoute(), TABS, Hero(), P, HomeNewsletterBand(), P, OpticPromoBand() (+3 more)
 
 ### Community 10 - "emailRender.js"
 Cohesion: 0.31
@@ -165,6 +167,10 @@ Nodes (24): cors, escapeHtml(), json(), preflight(), siteOrigin(), b64(), derive
 Cohesion: 0.25
 Nodes (7): plugins, rules, react/only-export-components, react/rules-of-hooks, $schema, oxc, warn
 
+### Community 16 - "TopNav.jsx"
+Cohesion: 0.29
+Nodes (4): NAV_ITEMS, P, TopNav(), pathToLegacyId()
+
 ### Community 17 - "admin_roles.sql"
 Cohesion: 0.33
 Nodes (3): public.admin_role(), public.admin_roles, public.events
@@ -174,12 +180,12 @@ Cohesion: 0.40
 Nodes (4): ALL_CHAPTERS, CadetManual(), P, UNITS
 
 ### Community 19 - "Footer.jsx"
-Cohesion: 0.12
-Nodes (14): CommandProfile(), P, ROLE_LABELS, COLS, Footer(), FooterLink(), NAV_MAP, P (+6 more)
+Cohesion: 0.21
+Nodes (9): CommandProfile(), P, ROLE_LABELS, COLS, Footer(), FooterLink(), NAV_MAP, P (+1 more)
 
 ### Community 20 - "Companies.jsx"
-Cohesion: 0.19
-Nodes (10): Companies, P, ROLE_ORDER, Hero(), HERO_STATS, P, ITEMS, P (+2 more)
+Cohesion: 0.50
+Nodes (3): Companies, P, ROLE_ORDER
 
 ### Community 24 - "FaqSection.jsx"
 Cohesion: 0.27
@@ -190,8 +196,8 @@ Cohesion: 0.17
 Nodes (3): P, Rifle(), SEASON
 
 ### Community 41 - "PhotoUploader.jsx"
-Cohesion: 0.07
-Nodes (29): ROLE_SECTIONS, SECTION_LABEL, NAV_GROUPS, Sidebar(), StatusBar(), TopBar(), AdvancedPanel(), EmailPanel() (+21 more)
+Cohesion: 0.06
+Nodes (34): Dashboard(), ROLE_SECTIONS, SECTION_LABEL, Admin(), ForcePasswordChange(), inputStyle(), LoginScreen(), NAV_GROUPS (+26 more)
 
 ### Community 42 - "RaiderVoting.jsx"
 Cohesion: 0.60
@@ -225,26 +231,30 @@ Nodes (8): CATS, centered, fmtCountdown(), ghostBtn, loadingStyle, P, RaiderVoti
 Cohesion: 0.53
 Nodes (5): on_admin_password_changed, public.admin_password_changed(), public.admin_role(), public.admin_roles, public.login_accounts
 
+### Community 72 - "TabGrid.jsx"
+Cohesion: 0.40
+Nodes (3): ITEMS, P, TabGrid()
+
 ### Community 73 - "imageResize.js"
 Cohesion: 0.70
 Nodes (4): drawScaled(), loadImage(), resizeForUpload(), toBlob()
 
 ## Knowledge Gaps
-- **165 isolated node(s):** `$schema`, `oxc`, `react/rules-of-hooks`, `warn`, `name` (+160 more)
+- **163 isolated node(s):** `$schema`, `oxc`, `react/rules-of-hooks`, `warn`, `name` (+158 more)
   These have ≤1 connection - possible missing edges or undocumented components.
 - **24 thin communities (<3 nodes) omitted from report** — run `graphify query` to explore isolated nodes.
 
 ## Suggested Questions
 _Questions this graph is uniquely positioned to answer:_
 
-- **Why does `react` connect `react` to `PhotoUploader.jsx`, `PhotoUploader.jsx`, `EventsPanel.jsx`, `AarsPanel.jsx`, `BattalionCommand.jsx`, `Raiders.jsx`, `RaiderVoting.jsx`, `App.jsx`, `PhotoUploader.jsx`, `blocks.js`, `About.jsx`, `imageResize.js`, `.oxlintrc.json`, `CadetManual.jsx`, `Footer.jsx`, `Companies.jsx`, `FaqSection.jsx`, `TabPlaceholder.jsx`?**
+- **Why does `react` connect `react` to `PhotoUploader.jsx`, `PhotoUploader.jsx`, `EventsPanel.jsx`, `BattalionCommand.jsx`, `Raiders.jsx`, `App.jsx`, `blocks.js`, `About.jsx`, `.oxlintrc.json`, `TopNav.jsx`, `CadetManual.jsx`, `Footer.jsx`, `Companies.jsx`, `FaqSection.jsx`, `TabPlaceholder.jsx`, `PhotoUploader.jsx`, `imageResize.js`, `AarsPanel.jsx`, `RaiderVoting.jsx`, `TabGrid.jsx`?**
   _High betweenness centrality (0.194) - this node is a cross-community bridge._
-- **Why does `supabase` connect `react` to `PhotoUploader.jsx`, `PhotoUploader.jsx`, `EventsPanel.jsx`, `AarsPanel.jsx`, `BattalionCommand.jsx`, `Raiders.jsx`, `RaiderVoting.jsx`, `App.jsx`, `PhotoUploader.jsx`, `blocks.js`, `About.jsx`, `imageResize.js`, `Footer.jsx`, `Companies.jsx`, `FaqSection.jsx`?**
+- **Why does `supabase` connect `react` to `PhotoUploader.jsx`, `PhotoUploader.jsx`, `EventsPanel.jsx`, `BattalionCommand.jsx`, `AarsPanel.jsx`, `Raiders.jsx`, `RaiderVoting.jsx`, `PhotoUploader.jsx`, `App.jsx`, `blocks.js`, `About.jsx`, `imageResize.js`, `Footer.jsx`, `Companies.jsx`, `FaqSection.jsx`?**
   _High betweenness centrality (0.057) - this node is a cross-community bridge._
 - **Why does `plugins` connect `.oxlintrc.json` to `react`?**
   _High betweenness centrality (0.014) - this node is a cross-community bridge._
 - **What connects `$schema`, `oxc`, `react/rules-of-hooks` to the rest of the system?**
-  _165 weakly-connected nodes found - possible documentation gaps or missing edges._
+  _163 weakly-connected nodes found - possible documentation gaps or missing edges._
 - **Should `react` be split into smaller, more focused modules?**
   _Cohesion score 0.07534807534807535 - nodes in this community are weakly interconnected._
 - **Should `devDependencies` be split into smaller, more focused modules?**

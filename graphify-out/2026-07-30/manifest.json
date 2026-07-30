@@ -30,18 +30,18 @@
     "semantic_hash": ""
   },
   "src/components/About.jsx": {
-    "mtime": 1785453206.0790734,
-    "ast_hash": "b723c50adbac55ad2e26a7f9f99e4f08",
+    "mtime": 1785244858.2140055,
+    "ast_hash": "d1b4a89ad149ada4626d4c99bd7e7894",
     "semantic_hash": ""
   },
   "src/components/BattalionCommand.jsx": {
-    "mtime": 1785452627.831684,
-    "ast_hash": "ea524140e66037530f32d5a3303bace1",
+    "mtime": 1785337952.1481736,
+    "ast_hash": "5b06be476b56aa3887c662c88db3920c",
     "semantic_hash": ""
   },
   "src/components/Bulletin.jsx": {
-    "mtime": 1785452685.4839294,
-    "ast_hash": "f754211184290f7ec27d8e187b0e5c43",
+    "mtime": 1785250994.4234025,
+    "ast_hash": "83b5a121822ff15e088aac2facc224c9",
     "semantic_hash": ""
   },
   "src/components/CadetManual.jsx": {
@@ -50,29 +50,29 @@
     "semantic_hash": ""
   },
   "src/components/CommandProfile.jsx": {
-    "mtime": 1785452833.4511943,
-    "ast_hash": "e7a66a48d9520fedb670345734087223",
+    "mtime": 1785244950.6263862,
+    "ast_hash": "c597e092f622f6afaff11fb77694b9ef",
     "semantic_hash": ""
   },
   "src/components/Companies.jsx": {
-    "mtime": 1785452809.97573,
-    "ast_hash": "378bc5792860ef96d6034a6544a20fc6",
+    "mtime": 1785245067.2666926,
+    "ast_hash": "0bfe91ed06e94dcb84d7b91c759a4dd9",
     "semantic_hash": ""
   },
   "src/components/Footer.jsx": {
-    "mtime": 1785452721.3334277,
-    "ast_hash": "9d75a2c9a172f1942dd8267b32353e9c",
+    "mtime": 1785250958.9782643,
+    "ast_hash": "014c6897f45c7d7657bdc013e613f2b2",
     "semantic_hash": ""
   },
   "src/components/Hero.jsx": {
-    "mtime": 1785452582.3997633,
-    "ast_hash": "57a659b8c144ca6f65843a56dc72f6cf",
+    "mtime": 1785337885.3624406,
+    "ast_hash": "9d12adc69b866d06d3fbc597bbd36aec",
     "semantic_hash": ""
   },
   "src/components/HomeNewsletterBand.jsx": {
-    "mtime": 1785452711.1047642,
-    "ast_hash": "fef4285a3d90ed4cf590cf43e280dbfe",
-    "semantic_hash": ""
+    "mtime": 1784919128.3984787,
+    "ast_hash": "a34d8f5070965fe6773d2cf9f4271484",
+    "semantic_hash": "a34d8f5070965fe6773d2cf9f4271484"
   },
   "src/components/PhotoUploader.jsx": {
     "mtime": 1784919128.3994517,
@@ -85,33 +85,33 @@
     "semantic_hash": ""
   },
   "src/components/Raiders.jsx": {
-    "mtime": 1785453030.4580693,
-    "ast_hash": "0b7f81c699bb070afa32e4447dcf0be5",
+    "mtime": 1785250923.4966524,
+    "ast_hash": "d41df84cbb0c546b355fac03c9602632",
     "semantic_hash": ""
   },
   "src/components/Rifle.jsx": {
-    "mtime": 1785452987.9592967,
-    "ast_hash": "d98114c87fff47c48ba19a8a198e7cc7",
+    "mtime": 1785244828.3481152,
+    "ast_hash": "8ecc7fe6e06af22de991b815893ff787",
     "semantic_hash": ""
   },
   "src/components/Staff.jsx": {
-    "mtime": 1785452771.9441614,
-    "ast_hash": "cd513aa5c6a297302fc7d9974cbbb6ad",
+    "mtime": 1785245011.6884444,
+    "ast_hash": "ce1409cfa79adda28de454598c1f17f7",
     "semantic_hash": ""
   },
   "src/components/SubmitHub.jsx": {
-    "mtime": 1785453105.9222991,
-    "ast_hash": "d814c937888eeb5d0bdeeee29842c395",
+    "mtime": 1785338041.0592327,
+    "ast_hash": "6f4ade1cb14e950b255c20f0aa79b5db",
     "semantic_hash": ""
   },
   "src/components/TabGrid.jsx": {
-    "mtime": 1785452732.6741743,
-    "ast_hash": "e210a1c1586d44c934564fb2932a4a4c",
+    "mtime": 1785338012.9061184,
+    "ast_hash": "b58858bce8b577033cbc1cf898013227",
     "semantic_hash": ""
   },
   "src/components/TabPlaceholder.jsx": {
-    "mtime": 1785452947.063699,
-    "ast_hash": "ecc2324a6690b1e5965b55f0da63ca7e",
+    "mtime": 1785244759.4615026,
+    "ast_hash": "99ad4b9e547685c10966ee4c2db85a57",
     "semantic_hash": ""
   },
   "src/components/TeamGallery.jsx": {
@@ -120,8 +120,8 @@
     "semantic_hash": ""
   },
   "src/components/TopNav.jsx": {
-    "mtime": 1785452735.3823519,
-    "ast_hash": "9631f8f48b77f0b8da14e45669ac48b5",
+    "mtime": 1785250951.2437813,
+    "ast_hash": "ec12e6cd638a1ba0c7fbf7affb1ae934",
     "semantic_hash": ""
   },
   "src/components/VerifiedTooltip.jsx": {
@@ -610,8 +610,8 @@
     "semantic_hash": ""
   },
   "src/components/FaqSection.jsx": {
-    "mtime": 1785453218.6429007,
-    "ast_hash": "4c0133052f33f4b51ccef7a4cf8af2e7",
+    "mtime": 1785244811.4194155,
+    "ast_hash": "f3cc537b6c6988dfecc40c6e7e4d2466",
     "semantic_hash": ""
   },
   "src/components/RaiderCarousel.jsx": {
@@ -800,8 +800,8 @@
     "semantic_hash": ""
   },
   "src/components/EventsPage.jsx": {
-    "mtime": 1785453086.9489284,
-    "ast_hash": "0c09b31f766942dea8a8a08ef9ccd985",
+    "mtime": 1785338050.3728185,
+    "ast_hash": "de1be4a0e9e47b8e6dd21a6872bfeb46",
     "semantic_hash": ""
   },
   "src/components/PhotoLightbox.jsx": {
@@ -820,8 +820,8 @@
     "semantic_hash": ""
   },
   "src/components/calendar/MonthGridCalendar.jsx": {
-    "mtime": 1785453076.7600527,
-    "ast_hash": "0cc43c151d6a6c98952ae6e024fe4371",
+    "mtime": 1785251478.1962495,
+    "ast_hash": "6873dc697dad1670e7d503f0b36b4054",
     "semantic_hash": ""
   },
   "src/lib/photoQueries.js": {
@@ -895,8 +895,8 @@
     "semantic_hash": ""
   },
   "src/components/OpticPromoBand.jsx": {
-    "mtime": 1785452703.939958,
-    "ast_hash": "d01a5e222a26da0ea555c48aee078e84",
+    "mtime": 1785338029.900992,
+    "ast_hash": "e287cbede9cda2751072d51345a18409",
     "semantic_hash": ""
   },
   "src/components/admin/login/ForcePasswordChange.jsx": {
@@ -912,16 +912,6 @@
   "supabase/functions/complete-admin-first-login/index.ts": {
     "mtime": 1785262886.6553981,
     "ast_hash": "32b1f3893002d0eac5250e04e90f2f23",
-    "semantic_hash": ""
-  },
-  "src/components/team/TeamPageMobile.jsx": {
-    "mtime": 1785452935.0279703,
-    "ast_hash": "a5e5336dcde58d74c10535131417ffa4",
-    "semantic_hash": ""
-  },
-  "src/hooks/useIsMobile.js": {
-    "mtime": 1785452513.45722,
-    "ast_hash": "e95395862931f9d798f330778744672b",
     "semantic_hash": ""
   }
 }

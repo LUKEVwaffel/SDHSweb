@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import TeamGallery from './TeamGallery';
+import useIsMobile from '../hooks/useIsMobile';
 
 const P = {
   ink: '#06101F', navy: '#142847', deep: '#0A1628',
@@ -106,7 +107,7 @@ function SectionLabel({ tag, title, subtitle }) {
 function CommanderCard() {
   const [hovered, setHovered] = useState(false);
   return (
-    <div style={{ display: 'grid', gridTemplateColumns: '320px 1fr', gap: 0, border: `1px solid ${P.hair}`, background: P.deep, position: 'relative' }}>
+    <div className="rifle-commander-grid" style={{ display: 'grid', gridTemplateColumns: '320px 1fr', gap: 0, border: `1px solid ${P.hair}`, background: P.deep, position: 'relative' }}>
       <Brackets size={18} opacity={hovered ? 0.7 : 0.3} />
 
       {/* Photo */}
@@ -226,8 +227,10 @@ function ScoreBoard() {
 
       {/* Table */}
       <div style={{ border: `1px solid ${P.hair}`, overflow: 'hidden' }}>
-        {/* Table header */}
-        <div style={{ display: 'grid', gridTemplateColumns: '48px 1fr 100px 100px 100px 100px 120px', background: P.deep, borderBottom: `1px solid ${P.hair}` }}>
+        {/* Table header — no rows exist until the season opens, so this is hidden
+            on mobile rather than squeezed; scores will render as stacked cards,
+            not this table, once real per-cadet data exists. */}
+        <div className="rifle-score-header" style={{ display: 'grid', gridTemplateColumns: '48px 1fr 100px 100px 100px 100px 120px', background: P.deep, borderBottom: `1px solid ${P.hair}` }}>
           {['#', 'CADET', 'PRONE', 'STANDING', 'KNEELING', 'TOTAL', 'STATUS'].map((h, i) => (
             <div key={h} style={{
               padding: '10px 14px', fontFamily: "'JetBrains Mono', monospace", fontSize: 8,
@@ -405,15 +408,16 @@ function EventCalendar() {
 
 // ── Main export ────────────────────────────────────────────────────────────────
 export default function Rifle() {
+  const isMobile = useIsMobile();
   return (
     <div style={{ background: P.ink, minHeight: '100vh', fontFamily: 'Inter, sans-serif', position: 'relative' }}>
       <RifleStyles />
       <PageBg />
 
-      <div style={{ maxWidth: 1200, margin: '0 auto', padding: '60px 40px 100px', position: 'relative', zIndex: 1 }}>
+      <div className="rifle-wrap" style={{ maxWidth: 1200, margin: '0 auto', padding: '60px 40px 100px', position: 'relative', zIndex: 1 }}>
 
         {/* ── Page header ── */}
-        <div style={{ marginBottom: 52 }}>
+        <div className="rifle-header" style={{ marginBottom: 52 }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 14, marginBottom: 10 }}>
             <div style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: 9, color: P.gold, letterSpacing: '0.32em', opacity: 0.7 }}>
               // SPECIALTY TEAMS · RIFLE
@@ -423,7 +427,7 @@ export default function Rifle() {
               TN-051 · AY 2025-26
             </div>
           </div>
-          <h1 style={{ fontFamily: 'Oswald, sans-serif', fontWeight: 700, fontSize: 72, color: P.cream, letterSpacing: '0.04em', margin: '0 0 6px', lineHeight: 1 }}>
+          <h1 className="rifle-title" style={{ fontFamily: 'Oswald, sans-serif', fontWeight: 700, fontSize: 72, color: P.cream, letterSpacing: '0.04em', margin: '0 0 6px', lineHeight: 1 }}>
             RIFLE TEAM
           </h1>
           <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
@@ -454,17 +458,21 @@ export default function Rifle() {
           <ScoreBoard />
         </div>
 
-        {/* ── Divider ── */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 72 }}>
-          <div style={{ flex: 1, height: 1, background: P.hair }} />
-          <div style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: 8, color: `${P.gold}55`, letterSpacing: '0.24em', padding: '0 4px' }}>
-            ◆
-          </div>
-          <div style={{ flex: 1, height: 1, background: P.hair }} />
-        </div>
-
-        {/* ── Calendar ── */}
-        <EventCalendar />
+        {/* ── Calendar — omitted on mobile; the design's mobile team template
+            doesn't carry a calendar, and the event list is already reachable
+            from /events. ── */}
+        {!isMobile && (
+          <>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 72 }}>
+              <div style={{ flex: 1, height: 1, background: P.hair }} />
+              <div style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: 8, color: `${P.gold}55`, letterSpacing: '0.24em', padding: '0 4px' }}>
+                ◆
+              </div>
+              <div style={{ flex: 1, height: 1, background: P.hair }} />
+            </div>
+            <EventCalendar />
+          </>
+        )}
 
         {/* ── Divider ── */}
         <div style={{ display: 'flex', alignItems: 'center', gap: 12, margin: '72px 0' }}>
@@ -482,6 +490,14 @@ export default function Rifle() {
         </div>
 
       </div>
+      <style>{`
+        @media (max-width: 767px) {
+          .rifle-wrap { padding: 24px 20px 60px !important; }
+          .rifle-title { font-size: 38px !important; }
+          .rifle-commander-grid { grid-template-columns: 1fr !important; }
+          .rifle-score-header { display: none !important; }
+        }
+      `}</style>
     </div>
   );
 }
