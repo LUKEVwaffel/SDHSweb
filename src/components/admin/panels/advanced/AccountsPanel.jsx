@@ -1,8 +1,8 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { supabase as SB } from '../../../../lib/supabaseClient';
-import { registerPasskey } from '../../../../lib/passkey';
 import { P, mono, inter, fs, sp, radius } from '../../theme';
 import { Btn, Card, Label, Input, PanelHeader, EmptyState } from '../../shared/ui';
+import SelfCredentialControls from './SelfCredentialControls';
 
 // DISPATCH login-account manager (S-6 only — lives under the Advanced wall).
 // Reads the public login_accounts view for the roster (name / photo / method
@@ -15,7 +15,6 @@ import { Btn, Card, Label, Input, PanelHeader, EmptyState } from '../../shared/u
 // deployed — surfaced inline, not hidden — so this panel is safe to ship now
 // and the buttons light up the moment Phase 2 lands.
 const AVATAR_BUCKET = 'admin-avatars';
-const PIN_LEN = 4; // product decision — brute-force guard is the server lockout
 
 function slug(email) {
   return String(email || '').toLowerCase().replace(/[^a-z0-9]+/g, '_');
@@ -29,7 +28,6 @@ export default function AccountsPanel({ adminId }) {
   const [title, setTitle] = useState('');      // picker rank/position label
   const [busy, setBusy] = useState('');        // transient status line
   const [err, setErr] = useState('');
-  const [pin, setPin] = useState('');
   const [uploading, setUploading] = useState(false);
   const fileRef = useRef(null);
 
@@ -53,7 +51,6 @@ export default function AccountsPanel({ adminId }) {
     setSel(r.email);
     setName(r.display_name || '');
     setTitle(r.title || '');
-    setPin('');
     setBusy('');
     setErr('');
   }
@@ -88,44 +85,6 @@ export default function AccountsPanel({ adminId }) {
     setUploading(false);
     if (error) { setErr(`Save failed: ${error.message}`); return; }
     flash('Photo updated ✓');
-    load();
-  }
-
-  // ---- Phase 2 edge-function calls (set-pin / clear-pin / revoke-passkeys) ----
-  async function setAccountPin() {
-    if (!selected) return;
-    setErr('');
-    if (!new RegExp(`^\\d{${PIN_LEN}}$`).test(pin)) { setErr(`PIN must be exactly ${PIN_LEN} digits.`); return; }
-    const { data, error } = await SB.functions.invoke('set-pin', { body: { email: selected.email, pin } });
-    if (error || data?.error) { setErr(`Set PIN failed: ${data?.error || error.message} (edge function may not be deployed yet — Phase 2)`); return; }
-    setPin('');
-    flash('PIN set ✓');
-    load();
-  }
-  async function clearAccountPin() {
-    if (!selected || !confirm(`Remove the PIN for ${selected.display_name || selected.email}?`)) return;
-    setErr('');
-    const { data, error } = await SB.functions.invoke('clear-pin', { body: { email: selected.email } });
-    if (error || data?.error) { setErr(`Clear PIN failed: ${data?.error || error.message} (Phase 2)`); return; }
-    flash('PIN cleared ✓');
-    load();
-  }
-  async function registerThisDevice() {
-    setErr('');
-    try {
-      await registerPasskey(navigator.platform || 'this device');
-      flash('Touch ID registered ✓');
-      load();
-    } catch (e) {
-      setErr(`Register failed: ${e.message}`);
-    }
-  }
-  async function revokePasskeys() {
-    if (!selected || !confirm(`Revoke ALL passkeys (Touch ID) for ${selected.display_name || selected.email}? They will need to re-register.`)) return;
-    setErr('');
-    const { data, error } = await SB.functions.invoke('revoke-passkeys', { body: { email: selected.email } });
-    if (error || data?.error) { setErr(`Revoke failed: ${data?.error || error.message} (Phase 2)`); return; }
-    flash('Passkeys revoked ✓');
     load();
   }
 
@@ -210,26 +169,12 @@ export default function AccountsPanel({ adminId }) {
                   manage passkeys only for your own account. Enforced server-side
                   too — set-pin / clear-pin / revoke-passkeys reject non-self. */}
               {isSelf ? (
-                <>
-                  <Label>PIN · {selected.has_pin ? <span style={{ color: P.green }}>set</span> : <span style={{ color: P.faint }}>none</span>}</Label>
-                  <div style={{ display: 'flex', gap: sp[2], marginBottom: sp[3], alignItems: 'center' }}>
-                    <Input value={pin} onChange={(e) => setPin(e.target.value.replace(/\D/g, '').slice(0, PIN_LEN))} placeholder={`${PIN_LEN}-digit PIN`} inputMode="numeric" style={{ maxWidth: 160, letterSpacing: '0.4em', fontFamily: mono }} />
-                    <Btn onClick={setAccountPin} variant="gold" size="sm">SET PIN</Btn>
-                    {selected.has_pin && <Btn onClick={clearAccountPin} variant="ghost" size="sm">CLEAR</Btn>}
-                  </div>
-                  <div style={{ fontFamily: mono, fontSize: fs.micro, color: P.faint, lineHeight: 1.7, marginBottom: sp[5] }}>
-                    4-digit PIN. Hashed server-side; the login enforces a 5-fail → 15-min lockout. PIN never stored in the browser.
-                  </div>
-
-                  <Label>Passkey / Touch ID · {selected.has_passkey ? <span style={{ color: P.green }}>registered</span> : <span style={{ color: P.faint }}>none</span>}</Label>
-                  <div style={{ display: 'flex', gap: sp[2], alignItems: 'center', flexWrap: 'wrap' }}>
-                    <Btn onClick={registerThisDevice} variant="gold" size="sm">+ REGISTER TOUCH ID (THIS DEVICE)</Btn>
-                    <Btn onClick={revokePasskeys} variant="ghost" size="sm" disabled={!selected.has_passkey}>REVOKE PASSKEYS</Btn>
-                  </div>
-                  <div style={{ fontFamily: mono, fontSize: fs.micro, color: P.faint, marginTop: sp[2] }}>
-                    Touch ID binds to the device you register it on — each person registers on their own machine, and only for their own account.
-                  </div>
-                </>
+                <SelfCredentialControls
+                  email={selected.email}
+                  hasPin={selected.has_pin}
+                  hasPasskey={selected.has_passkey}
+                  onChange={load}
+                />
               ) : (
                 <div style={{
                   fontFamily: mono, fontSize: fs.micro, color: P.faint, lineHeight: 1.8,

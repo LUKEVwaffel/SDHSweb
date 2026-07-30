@@ -3,6 +3,9 @@ import { supabase as SB } from '../../../../lib/supabaseClient';
 import { P, mono, inter, fs, sp } from '../../theme';
 import { Btn, Card, Label, Input, PanelHeader } from '../../shared/ui';
 import ConsentSection from './ConsentSection';
+import PersonAchievements from './PersonAchievements';
+
+const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
 // Section display order + friendly names. Personnel `section` values seen in the
 // app: staff / command / s-1..s-6 / company-alpha..delta. Unknown sections fall
@@ -45,10 +48,17 @@ function groupBySection(records) {
 export default function PeoplePanel({ adminId }) {
   const [records, setRecords] = useState([]);
   const [consentByName, setConsentByName] = useState({});
+  const [achievements, setAchievements] = useState([]);
   const [editing, setEditing] = useState(null);
   const [form, setForm] = useState({});
   const [saving, setSaving] = useState(false);
   const [view, setView] = useState('directory');
+
+  // staff contact record (cadet_consent row, company='staff') for the person being edited
+  const [cForm, setCForm] = useState({});
+  const [savingContact, setSavingContact] = useState(false);
+  const [contactMsg, setContactMsg] = useState('');
+  const [listMsg, setListMsg] = useState('');
 
   // filters
   const [search, setSearch] = useState('');
@@ -59,14 +69,16 @@ export default function PeoplePanel({ adminId }) {
   useEffect(() => { load(); }, []);
 
   async function load() {
-    const [{ data: people }, { data: consent }] = await Promise.all([
+    const [{ data: people }, { data: consent }, { data: ach }] = await Promise.all([
       SB.from('personnel').select('*').order('sort_order'),
-      SB.from('cadet_consent').select('name, consent_status, collected_at, school_email, parent_email'),
+      SB.from('cadet_consent').select('id, name, company, consent_status, collected_at, school_email, parent_email'),
+      SB.from('achievements').select('*').order('sort_order').order('name'),
     ]);
     setRecords(people || []);
     const map = {};
     for (const c of consent || []) map[normName(c.name)] = c;
     setConsentByName(map);
+    setAchievements(ach || []);
   }
 
   function consentFor(r) {
@@ -76,6 +88,9 @@ export default function PeoplePanel({ adminId }) {
   function startEdit(r) {
     setEditing(r.id);
     setForm({ ...r });
+    const c = consentFor(r);
+    setCForm(c ? { ...c } : { name: r.name, company: 'staff', school_email: '', parent_email: '' });
+    setContactMsg(''); setListMsg('');
   }
 
   async function save() {
@@ -85,6 +100,62 @@ export default function PeoplePanel({ adminId }) {
     setEditing(null);
     setSaving(false);
     load();
+  }
+
+  // Mark the consent form collected/pending/declined straight from the banner.
+  // Creates the cadet_consent row (company='staff') if this person has none yet.
+  async function setConsentStatus(status) {
+    const patch = {
+      consent_status: status,
+      collected_at: status === 'collected' ? new Date().toISOString() : null,
+      collected_by: status === 'collected' ? adminId : null,
+      updated_at: new Date().toISOString(),
+    };
+    if (cForm.id) {
+      await SB.from('cadet_consent').update(patch).eq('id', cForm.id);
+    } else {
+      const insertPatch = { name: form.name || cForm.name, company: 'staff', school_email: cForm.school_email || null, parent_email: cForm.parent_email || null, ...patch };
+      const { data } = await SB.from('cadet_consent').insert(insertPatch).select().single();
+      if (data) setCForm((f) => ({ ...f, id: data.id }));
+    }
+    setCForm((f) => ({ ...f, ...patch }));
+    load();
+  }
+
+  // Staff/command contact info lives in cadet_consent (company='staff'), same
+  // mechanism as the cadet database — matched by name, not a duplicate column
+  // on personnel. Creates the row on first save if this person has none yet.
+  async function saveContact() {
+    setSavingContact(true);
+    const patch = {
+      name: form.name || cForm.name,
+      company: 'staff',
+      school_email: (cForm.school_email || '').trim() || null,
+      parent_email: (cForm.parent_email || '').trim() || null,
+      updated_at: new Date().toISOString(),
+    };
+    if (cForm.id) {
+      await SB.from('cadet_consent').update(patch).eq('id', cForm.id);
+    } else {
+      const { data } = await SB.from('cadet_consent').insert(patch).select().single();
+      if (data) setCForm((f) => ({ ...f, id: data.id }));
+    }
+    setSavingContact(false);
+    setContactMsg('Saved ✓');
+    setTimeout(() => setContactMsg(''), 2500);
+    load();
+  }
+
+  // Promote the parent email into email_subscribers. Explicit action, deduped
+  // by email — mirrors ConsentSection's cadet-side "add to mailing list".
+  async function addParentToList() {
+    const email = (cForm.parent_email || '').trim().toLowerCase();
+    if (!EMAIL_RE.test(email)) { setListMsg('Enter a valid parent email first'); return; }
+    const { data: existing } = await SB.from('email_subscribers').select('id').eq('email', email).maybeSingle();
+    if (existing) { setListMsg('Already on the mailing list'); return; }
+    const { error } = await SB.from('email_subscribers').insert({ email, source: 'manual', company: 'staff' });
+    setListMsg(error ? (error.code === '23505' ? 'Already on the mailing list' : error.message) : 'Added to mailing list ✓');
+    setTimeout(() => setListMsg(''), 3000);
   }
 
   // Text-input field helper (visibility toggle intentionally removed — every
@@ -119,8 +190,7 @@ export default function PeoplePanel({ adminId }) {
   const sectionsPresent = SECTION_ORDER.filter((s) => records.some((r) => (r.section || 'other') === s));
   const letLevels = [...new Set(records.map((r) => String(r.let_level)).filter((v) => v && v !== 'undefined'))].sort();
 
-  const selConsent = editing ? consentFor(form) : null;
-  const selMeta = CONSENT_META[selConsent?.consent_status || 'none'] || CONSENT_META.none;
+  const selMeta = CONSENT_META[cForm.consent_status || 'none'] || CONSENT_META.none;
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', height: '100%', gap: 12 }}>
@@ -209,23 +279,66 @@ export default function PeoplePanel({ adminId }) {
 
             {/* admin-relevant summary: consent status + emails, always visible */}
             <div style={{ background: P.deep, border: `1px solid ${P.hair}`, borderLeft: `3px solid ${selMeta.color}`, padding: '10px 12px', marginBottom: sp[3] }}>
-              <div style={{ fontFamily: mono, fontSize: fs.tiny, color: selMeta.color, letterSpacing: '0.12em' }}>{selMeta.label}</div>
-              <div style={{ fontFamily: mono, fontSize: 9, color: P.mute, marginTop: 4, lineHeight: 1.8 }}>
-                {selConsent?.collected_at && <div>Signed {new Date(selConsent.collected_at).toLocaleDateString()}</div>}
-                <div>Email: <span style={{ color: P.cream }}>{form.email || '—'}</span></div>
-                {selConsent?.school_email && <div>School: <span style={{ color: P.cream }}>{selConsent.school_email}</span></div>}
-                {selConsent?.parent_email && <div>Parent: <span style={{ color: P.cream }}>{selConsent.parent_email}</span></div>}
-                {!selConsent && <div style={{ color: P.faint }}>No matching cadet_consent row (matched by name).</div>}
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: sp[2], flexWrap: 'wrap' }}>
+                <div style={{ fontFamily: mono, fontSize: fs.tiny, color: selMeta.color, letterSpacing: '0.12em' }}>{selMeta.label}</div>
+                <div style={{ display: 'flex', gap: 4 }}>
+                  {[
+                    { id: 'collected', label: 'COLLECTED' },
+                    { id: 'pending',   label: 'PENDING' },
+                    { id: 'declined',  label: 'DECLINED' },
+                  ].map((s) => {
+                    const active = cForm.consent_status === s.id;
+                    const color = CONSENT_META[s.id].color;
+                    return (
+                      <button key={s.id} onClick={() => setConsentStatus(s.id)} style={{
+                        background: active ? color : 'transparent',
+                        border: `1px solid ${active ? color : P.hair}`,
+                        color: active ? (s.id === 'pending' ? P.ink : '#fff') : P.mute,
+                        cursor: 'pointer', fontFamily: mono, fontSize: 8, letterSpacing: '0.1em', padding: '4px 7px',
+                      }}>{s.label}</button>
+                    );
+                  })}
+                </div>
               </div>
+              <div style={{ fontFamily: mono, fontSize: 9, color: P.mute, marginTop: 6, lineHeight: 1.8 }}>
+                {cForm.collected_at && <div>Signed {new Date(cForm.collected_at).toLocaleDateString()}</div>}
+                {cForm.school_email && <div>School: <span style={{ color: P.cream }}>{cForm.school_email}</span></div>}
+                {cForm.parent_email && <div>Parent: <span style={{ color: P.cream }}>{cForm.parent_email}</span></div>}
+                {!cForm.id && <div style={{ color: P.faint }}>No matching cadet_consent row yet — marking a status here creates one.</div>}
+              </div>
+            </div>
+
+            <div style={{ marginBottom: sp[4] }}>
+              <PanelHeader title="STAFF CONTACT" sub="cadet_consent · company = staff" />
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0 16px', marginBottom: 8 }}>
+                <div>
+                  <Label>SCHOOL EMAIL</Label>
+                  <Input value={cForm.school_email || ''} onChange={(e) => setCForm((f) => ({ ...f, school_email: e.target.value }))} />
+                </div>
+                <div>
+                  <Label>PARENT EMAIL</Label>
+                  <Input value={cForm.parent_email || ''} onChange={(e) => setCForm((f) => ({ ...f, parent_email: e.target.value }))} placeholder="feeds the mailing list" />
+                </div>
+              </div>
+              <div style={{ display: 'flex', gap: sp[2], alignItems: 'center', flexWrap: 'wrap' }}>
+                <Btn onClick={saveContact} variant="ghost" size="sm" disabled={savingContact}>{savingContact ? 'SAVING…' : 'SAVE CONTACT INFO'}</Btn>
+                <Btn onClick={addParentToList} variant="green" size="sm">+ ADD PARENT TO MAILING LIST</Btn>
+                {(contactMsg || listMsg) && (
+                  <span style={{ fontFamily: mono, fontSize: fs.tiny, color: (contactMsg + listMsg).includes('✓') ? P.green : P.mute }}>{contactMsg || listMsg}</span>
+                )}
+              </div>
+            </div>
+
+            <div style={{ marginBottom: sp[4] }}>
+              <PersonAchievements personnelId={form.id} achievements={achievements} />
             </div>
 
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0 16px' }}>
               {f('name', 'NAME')} {f('rank', 'RANK')}
               {f('role_short', 'ROLE SHORT')} {f('role_long', 'ROLE LONG')}
               {f('section', 'SECTION')} {f('let_level', 'LET LEVEL')}
-              {f('graduating', 'GRADUATING')} {f('sort_order', 'SORT ORDER')}
+              {f('graduating', 'GRADUATING')}
             </div>
-            {f('email', 'EMAIL')}
             {f('bio', 'SHORT BIO', { multiline: true })}
             {f('bio_long', 'FULL BIO', { multiline: true })}
             {f('photo_url', 'PHOTO URL')}

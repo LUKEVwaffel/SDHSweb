@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { P, mono, oswald, fs, sp, ease } from '../theme';
 
 // Grouped, text-labelled navigation. Daily tasks up top; dev/danger tools
@@ -9,8 +10,10 @@ export const NAV_GROUPS = [
     items: [
       { id: 'overview', icon: '◉', label: 'Overview' },
       { id: 'events',   icon: '◷', label: 'Events' },
+      { id: 'aars',     icon: '▤', label: 'AAR Tracker' },
       { id: 'people',   icon: '☰', label: 'People' },
       { id: 'photos',   icon: '⊞', label: 'Photos' },
+      { id: 'questions', icon: '?', label: 'FAQ Questions' },
       { id: 'email',    icon: '✉', label: 'Email List' },
     ],
   },
@@ -18,13 +21,18 @@ export const NAV_GROUPS = [
     heading: 'LIBRARY',
     items: [
       { id: 'media', icon: '⊡', label: 'Media' },
-      { id: 'achievements', icon: '◈', label: 'Achievements' },
     ],
   },
   {
     heading: 'SYSTEM',
     items: [
       { id: 'advanced', icon: '⚙', label: 'Advanced', danger: true },
+    ],
+  },
+  {
+    heading: 'ACCOUNT',
+    items: [
+      { id: 'account', icon: '⚿', label: 'My Account' },
     ],
   },
 ];
@@ -54,7 +62,8 @@ function NavItem({ item, on, onClick }) {
   );
 }
 
-export default function Sidebar({ active, setActive, allowed = null }) {
+export default function Sidebar({ active, allowed = null }) {
+  const navigate = useNavigate();
   // allowed = list of section ids this role may see; null = all.
   const groups = allowed
     ? NAV_GROUPS.map((g) => ({ ...g, items: g.items.filter((i) => allowed.includes(i.id)) })).filter((g) => g.items.length)
@@ -74,7 +83,7 @@ export default function Sidebar({ active, setActive, allowed = null }) {
             {group.heading}
           </div>
           {group.items.map((item) => (
-            <NavItem key={item.id} item={item} on={active === item.id} onClick={() => setActive(item.id)} />
+            <NavItem key={item.id} item={item} on={active === item.id} onClick={() => navigate(`/admin/${item.id}`)} />
           ))}
         </div>
       ))}

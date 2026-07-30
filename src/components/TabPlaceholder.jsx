@@ -1,3 +1,5 @@
+import { useNavigate } from 'react-router-dom';
+
 const P = {
   ink: '#06101F',
   navyDeep: '#0A1628',
@@ -7,14 +9,15 @@ const P = {
   hairline: 'rgba(201,169,97,0.25)',
 };
 
-export default function TabPlaceholder({ tab, setActive }) {
+export default function TabPlaceholder({ tab }) {
+  const navigate = useNavigate();
   return (
     <section style={{
       background: P.ink, minHeight: 720, padding: '80px 32px',
       borderBottom: `1px solid ${P.hairline}`,
     }}>
       <div style={{ maxWidth: 1400, margin: '0 auto' }}>
-        <button onClick={() => setActive('home')}
+        <button onClick={() => navigate('/')}
           style={{
             background: 'transparent', border: 'none', cursor: 'pointer',
             color: P.gold, fontFamily: "'JetBrains Mono', monospace",

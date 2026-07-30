@@ -404,7 +404,7 @@ function EventCalendar() {
 }
 
 // ── Main export ────────────────────────────────────────────────────────────────
-export default function Rifle({ setActive }) {
+export default function Rifle() {
   return (
     <div style={{ background: P.ink, minHeight: '100vh', fontFamily: 'Inter, sans-serif', position: 'relative' }}>
       <RifleStyles />
@@ -477,7 +477,7 @@ export default function Rifle({ setActive }) {
         <div>
           <SectionLabel tag="// GALLERY" title="TEAM PHOTOS" />
           <div style={{ marginTop: 24 }}>
-            <TeamGallery teamId="rifle" setActive={setActive} />
+            <TeamGallery teamId="rifle" />
           </div>
         </div>
 

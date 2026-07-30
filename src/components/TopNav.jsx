@@ -1,4 +1,6 @@
 import { useState, useRef, useEffect } from 'react';
+import { useNavigate, useLocation } from 'react-router-dom';
+import { legacyIdToPath, pathToLegacyId } from '../lib/routes';
 
 const P = {
   ink: '#06101F', navyDeep: '#0A1628', navy: '#142847',
@@ -41,9 +43,8 @@ const NAV_ITEMS = [
       { id: 'drill',    label: 'DRILL',    sub: 'Armed & unarmed routines' },
     ],
   },
-  { id: 'pictures', label: 'EVENTS' },
-  { id: 'submit',   label: 'SUBMIT PHOTOS' },
-  { id: 'staff',    label: 'STAFF' },
+  { id: 'events', label: 'EVENTS' },
+  { id: 'staff',  label: 'STAFF' },
   {
     id: 'companies', label: 'COMPANIES', dropdown: [
       { id: 'company-alpha',   label: 'ALPHA',   sub: 'Alpha Company leadership' },
@@ -162,7 +163,12 @@ function NavItem({ item, active, setActive }) {
   );
 }
 
-export default function TopNav({ active, setActive }) {
+export default function TopNav() {
+  const navigate = useNavigate();
+  const location = useLocation();
+  const active = pathToLegacyId(location.pathname);
+  const setActive = (id) => navigate(legacyIdToPath(id));
+
   return (
     <header style={{
       position: 'sticky', top: 0, zIndex: 20,

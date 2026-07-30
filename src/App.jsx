@@ -1,8 +1,10 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useEffect } from 'react';
+import { Routes, Route, Navigate, useParams, useLocation } from 'react-router-dom';
 import TopNav from './components/TopNav';
 import Hero from './components/Hero';
 import TabGrid from './components/TabGrid';
 import Bulletin from './components/Bulletin';
+import OpticPromoBand from './components/OpticPromoBand';
 import HomeNewsletterBand from './components/HomeNewsletterBand';
 import Footer from './components/Footer';
 import TabPlaceholder from './components/TabPlaceholder';
@@ -10,7 +12,7 @@ import CadetManual from './components/CadetManual';
 import Raiders from './components/Raiders';
 import Rifle from './components/Rifle';
 import Staff from './components/Staff';
-import Pictures from './components/Pictures';
+import EventsPage from './components/EventsPage';
 import SubmitHub from './components/SubmitHub';
 import Companies from './components/Companies';
 import About from './components/About';
@@ -25,105 +27,61 @@ const TABS = [
   { id: 'rifle',        label: 'Rifle',         short: 'RIFLE' },
   { id: 'academic',     label: 'Academic',      short: 'ACADEMIC' },
   { id: 'drill',        label: 'Drill',         short: 'DRILL' },
-  { id: 'pictures',     label: 'Pictures',      short: 'PICTURES' },
 ];
 
-function stateToHash(active) {
-  if (active === 'home') return '';
-  return active;
-}
-
-function hashToState(hash = window.location.hash) {
-  const fragment = hash.replace(/^#/, '').trim();
-  return fragment || 'home';
+// /:tabId catch-all — only ever reached for ids not covered by a static
+// route above (currently academic/drill). Anything not in TABS redirects
+// home instead of rendering a placeholder for an arbitrary string.
+function TabRoute() {
+  const { tabId } = useParams();
+  const tab = TABS.find(t => t.id === tabId);
+  if (!tab) return <Navigate to="/" replace />;
+  return <TabPlaceholder tab={tab} />;
 }
 
 export default function App() {
-  const [active, setActiveState] = useState(() => hashToState());
-  // Where the profile "back" button should return — set by whichever surface
-  // opened the profile (home command trio vs. staff roster).
-  const [profileBack, setProfileBack] = useState('staff');
-
-  const setActive = useCallback((next) => {
-    setActiveState(next);
-    const fragment = stateToHash(next);
-    const newHash = fragment ? `#${fragment}` : window.location.pathname;
-    if (window.location.hash !== (fragment ? `#${fragment}` : '')) {
-      history.pushState({ active: next }, '', newHash);
-    }
-  }, []);
-
-  // Navigate while recording the origin for profile back-navigation.
-  const navigateFrom = useCallback((origin) => (next) => {
-    if (typeof next === 'string' && next.startsWith('profile-')) setProfileBack(origin);
-    setActive(next);
-  }, [setActive]);
-
-  useEffect(() => {
-    const onPop = () => setActiveState(hashToState());
-    window.addEventListener('popstate', onPop);
-    return () => window.removeEventListener('popstate', onPop);
-  }, []);
+  const location = useLocation();
 
   useEffect(() => {
     window.scrollTo({ top: 0, behavior: 'instant' });
-  }, [active]);
+  }, [location.pathname]);
 
-  const activeTab = TABS.find(t => t.id === active);
-
-  if (active === 'admin') return <Admin setActive={setActive} />;
-  // Reviewer portal deep-links carry a query string in the hash
-  // (#review?token_hash=...&draft=...) which hashToState folds into `active`
-  // verbatim — match on prefix and let ReviewPortal parse window.location.hash
-  // itself rather than trusting the mangled `active` string.
-  if (active.startsWith('review')) return <ReviewPortal />;
+  // Admin and Review are self-contained subtrees (own auth gate, own chrome)
+  // — bypass TopNav/Footer entirely, same as the old hash early-return.
+  if (location.pathname === '/admin' || location.pathname.startsWith('/admin/')) return <Admin />;
+  if (location.pathname === '/review' || location.pathname.startsWith('/review/')) return <ReviewPortal />;
 
   return (
     <div style={{ minHeight: '100vh', background: '#06101F', fontFamily: 'Inter, sans-serif' }}>
-      <TopNav active={active} setActive={setActive} />
+      <TopNav />
 
-      {active === 'home' ? (
-        <>
-          <Hero setActive={setActive} />
-          <BattalionCommand setActive={navigateFrom('home')} />
-          <TabGrid setActive={setActive} />
-          <Bulletin />
-          <HomeNewsletterBand />
-        </>
-      ) : active === 'cadet-manual' ? (
-        <CadetManual setActive={setActive} />
-      ) : active === 'raiders' ? (
-        <Raiders setActive={navigateFrom('raiders')} />
-      ) : active === 'rifle' ? (
-        <Rifle setActive={setActive} />
-      ) : active === 'staff' ? (
-        <Staff setActive={navigateFrom('staff')} />
-      ) : active === 'pictures' ? (
-        <Pictures setActive={setActive} />
-      ) : active === 'submit' ? (
-        <SubmitHub setActive={setActive} />
-      ) : active === 'companies' || active.startsWith('company-') ? (
-        <Companies
-          setActive={setActive}
-          initialCompany={active.startsWith('company-') ? active.replace('company-', '') : 'alpha'}
-        />
-      ) : active === 'about' ? (
-        <About setActive={setActive} />
-      ) : active.startsWith('profile-') ? (
-        <CommandProfile
-          personId={active.replace('profile-', '')}
-          backTarget={profileBack}
-          backLabel={profileBack === 'home' ? 'HOME' : profileBack === 'raiders' ? 'RAIDERS' : 'STAFF'}
-          setActive={setActive}
-        />
-      ) : (
-        <TabPlaceholder
-          tab={activeTab || { id: active, label: active, short: active.toUpperCase() }}
-          setActive={setActive}
-        />
-      )}
+      <Routes>
+        <Route path="/" element={(
+          <>
+            <Hero />
+            <BattalionCommand />
+            <TabGrid />
+            <Bulletin />
+            <OpticPromoBand />
+            <HomeNewsletterBand />
+          </>
+        )} />
+        <Route path="/cadet-manual" element={<CadetManual />} />
+        <Route path="/raiders" element={<Raiders />} />
+        <Route path="/rifle" element={<Rifle />} />
+        <Route path="/staff" element={<Staff />} />
+        <Route path="/events" element={<EventsPage />} />
+        <Route path="/pictures" element={<Navigate to="/events" replace />} />
+        <Route path="/submit" element={<SubmitHub />} />
+        <Route path="/companies" element={<Companies />} />
+        <Route path="/company/:id" element={<Companies />} />
+        <Route path="/about" element={<About />} />
+        <Route path="/profile/:id" element={<CommandProfile />} />
+        <Route path="/:tabId" element={<TabRoute />} />
+        <Route path="*" element={<Navigate to="/" replace />} />
+      </Routes>
 
-      <Footer setActive={setActive} />
+      <Footer />
     </div>
   );
 }

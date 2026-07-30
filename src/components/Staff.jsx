@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { supabase as SB } from '../lib/supabaseClient';
 
 const P = {
@@ -229,7 +230,8 @@ function SectionHeader({ label, name, desc, count }) {
 }
 
 // ─── Main ─────────────────────────────────────────────────────────────────────
-export default function Staff({ setActive }) {
+export default function Staff() {
+  const navigate = useNavigate();
   const [personnel, setPersonnel] = useState({});
   const [loading, setLoading] = useState(true);
 
@@ -247,7 +249,7 @@ export default function Staff({ setActive }) {
     load();
   }, []);
 
-  function goProfile(person) { setActive(`profile-${person.id}`); }
+  function goProfile(person) { navigate(`/profile/${person.id}`, { state: { from: 'staff' } }); }
 
   return (
     <div style={{ position: 'relative', background: P.ink, minHeight: '100vh', fontFamily: 'Inter, sans-serif' }}>

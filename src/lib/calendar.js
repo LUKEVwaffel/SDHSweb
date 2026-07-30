@@ -11,12 +11,32 @@ export const EVENT_CATEGORIES = [
   { id: 'JROTC',     color: '#6BC7C0' },
   { id: 'BATTALION', color: '#E8C77A' },
   { id: 'CEREMONY',  color: '#D6889B' },
-  { id: 'BREAK',     color: 'rgba(244,236,216,0.55)' },
-  { id: 'EVENT',     color: '#C9A961' }, // neutral fallback for untagged rows
+  { id: 'BREAK',       color: 'rgba(244,236,216,0.55)' },
+  { id: 'UNIFORM_DAY', color: '#8FA9C9' },
+  { id: 'EVENT',       color: '#C9A961' }, // neutral fallback for untagged rows
 ];
 
 export const CATEGORY_COLOR = Object.fromEntries(EVENT_CATEGORIES.map((c) => [c.id, c.color]));
 export const categoryColor = (cat) => CATEGORY_COLOR[cat] || CATEGORY_COLOR.EVENT;
+
+// The 3 uniform types — event_ironclad.sql / events_uniform_khaki_polo_merge.sql
+// constrain `uniform` to exactly these.
+export const UNIFORM_TYPES = ['Class A', 'Class B', 'Khaki and Polo'];
+
+// Default POC every new event is pre-filled with (editable per-event) — Chief/SAI,
+// the standing point of contact when no one more specific is set. Only email is
+// on file. EventDetailCard links this exact name to mailto; any other poc text
+// (admin overwrote the default) renders as plain text like before.
+export const DEFAULT_POC = { name: 'Michael Thrasher (Chief/SAI)', email: 'thrasher_michael@hcde.org' };
+
+// DB stores event_time as postgres `time` ("HH:MM:SS"); render AM/PM for humans.
+export function formatEventTime(event_time) {
+  if (!event_time) return null;
+  const [h, m] = event_time.split(':').map(Number);
+  const period = h >= 12 ? 'PM' : 'AM';
+  const h12 = h % 12 === 0 ? 12 : h % 12;
+  return `${h12}:${String(m).padStart(2, '0')} ${period}`;
+}
 
 // team '' = battalion-wide (stored as NULL). The 4 specialty teams map to their
 // own calendars.

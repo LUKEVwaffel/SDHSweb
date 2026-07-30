@@ -26,6 +26,11 @@ Deno.serve(async (req) => {
     // (from the verified JWT) against the requested target.
     if (caller.email !== target) return json({ error: "forbidden" }, 403);
 
+    // PIN setup is blocked until the forced password change is done — a PIN
+    // is a secondary method layered on top of a real password, never a way
+    // to skip setting one. clear-pin (removal) is deliberately NOT gated.
+    if (caller.mustChangePassword) return json({ error: "password_change_required" }, 403);
+
     const svc = serviceClient();
 
     // Target must be a known admin account (FK-safe + avoids seeding stray rows).

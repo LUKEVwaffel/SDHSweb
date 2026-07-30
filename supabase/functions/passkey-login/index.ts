@@ -34,11 +34,15 @@ Deno.serve(async (req) => {
     if (!email) return json({ error: "email required" }, 400);
 
     const svc = serviceClient();
-    const { data: creds } = await svc
+    const { data: creds, error: credsErr } = await svc
       .from("webauthn_credentials")
       .select("credential_id, public_key, counter, transports")
       .eq("account_email", email);
 
+    // Fail CLOSED on a lookup error — a query failure must not fall through
+    // to "no passkey for this account," which callers may treat as a benign
+    // signal to try another method.
+    if (credsErr) { console.error("passkey-login creds lookup", credsErr); return json({ error: "internal error" }, 500); }
     if (!creds || creds.length === 0) return json({ error: "no passkey for this account" }, 404);
 
     if (body.action === "start") {
@@ -78,6 +82,17 @@ Deno.serve(async (req) => {
       await svc.from("webauthn_credentials")
         .update({ counter: verification.authenticationInfo.newCounter, last_used_at: new Date().toISOString() })
         .eq("credential_id", used.credential_id);
+
+      // Passkey is a secondary factor layered on top of an account that must
+      // already have a real (non-temp) password — same gate as pin-login.
+      // See admin_password_gate.sql.
+      const { data: gate, error: gateErr } = await svc
+        .from("admin_roles").select("must_change_password").eq("email", email).maybeSingle();
+      // Fail CLOSED on a lookup error — same reasoning as pin-login: this is
+      // the ONLY control blocking passkey login for a gated account
+      // (webauthn_credentials has no RLS policies at all, service-role only).
+      if (gateErr) { console.error("passkey-login gate check", gateErr); return json({ error: "internal error" }, 500); }
+      if (gate?.must_change_password) return json({ error: "password_change_required" }, 403);
 
       const token_hash = await mintSessionToken(email);
       return json({ ok: true, token_hash });

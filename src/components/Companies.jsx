@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { useNavigate, useParams } from 'react-router-dom';
 import { supabase as SB } from '../lib/supabaseClient';
 
 const P = {
@@ -59,8 +60,10 @@ function CadetCard({ person }) {
   );
 }
 
-export default function Companies({ setActive, initialCompany }) {
-  const [activeCompany, setActiveCompany] = useState(initialCompany || 'alpha');
+export default function Companies() {
+  const navigate = useNavigate();
+  const { id } = useParams();
+  const activeCompany = id || 'alpha';
   const [personnel, setPersonnel] = useState({});
   const [loading, setLoading] = useState(true);
 
@@ -85,7 +88,7 @@ export default function Companies({ setActive, initialCompany }) {
     <section style={{ background: P.ink, minHeight: '100vh', fontFamily: 'Inter, sans-serif' }}>
       {/* Header */}
       <div style={{ borderBottom: `1px solid ${P.hair}`, padding: '60px 40px 0', maxWidth: 1400, margin: '0 auto' }}>
-        <button onClick={() => setActive('home')} style={{
+        <button onClick={() => navigate('/')} style={{
           background: 'none', border: 'none', color: P.gold, cursor: 'pointer',
           fontFamily: "'JetBrains Mono', monospace", fontSize: 10,
           letterSpacing: '0.28em', padding: 0, marginBottom: 20, display: 'block',
@@ -103,7 +106,7 @@ export default function Companies({ setActive, initialCompany }) {
         {/* Company Tabs */}
         <div style={{ display: 'flex', gap: 0, marginTop: 36 }}>
           {COMPANIES.map(co => (
-            <button key={co.id} onClick={() => setActiveCompany(co.id)} style={{
+            <button key={co.id} onClick={() => navigate(`/company/${co.id}`)} style={{
               background: activeCompany === co.id ? P.gold : 'transparent',
               border: `1px solid ${activeCompany === co.id ? P.gold : P.hair}`,
               borderBottom: activeCompany === co.id ? `1px solid ${P.gold}` : `1px solid ${P.hair}`,

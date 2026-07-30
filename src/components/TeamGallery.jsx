@@ -1,6 +1,8 @@
 import { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { supabase as SB } from '../lib/supabaseClient';
 import { getTeam } from '../lib/teams';
+import PhotoLightbox from './PhotoLightbox';
 
 const P = {
   ink: '#06101F', navy: '#142847', deep: '#0A1628',
@@ -13,10 +15,10 @@ const PAGE_SIZE = 24;
 /**
  * Plain photo gallery for a non-voting team. Reads photos where team=teamId.
  * @param {string} teamId
- * @param {(id:string)=>void} [setActive] enables the "Submit a photo" link
  * @param {boolean} [showSubmit]
  */
-export default function TeamGallery({ teamId, setActive, showSubmit = true }) {
+export default function TeamGallery({ teamId, showSubmit = true }) {
+  const navigate = useNavigate();
   const [photos, setPhotos] = useState([]);
   const [loading, setLoading] = useState(true);
   const [visible, setVisible] = useState(PAGE_SIZE);
@@ -39,8 +41,8 @@ export default function TeamGallery({ teamId, setActive, showSubmit = true }) {
         <div style={{ fontFamily: mono, fontSize: 9, color: P.mute, letterSpacing: '0.2em' }}>
           {photos.length} {photos.length === 1 ? 'PHOTO' : 'PHOTOS'} · {team?.label?.toUpperCase()}
         </div>
-        {showSubmit && setActive && (
-          <button onClick={() => setActive('submit')} style={ghostBtn}>+ SUBMIT A PHOTO</button>
+        {showSubmit && (
+          <button onClick={() => navigate('/submit')} style={ghostBtn}>+ SUBMIT A PHOTO</button>
         )}
       </div>
 
@@ -71,16 +73,7 @@ export default function TeamGallery({ teamId, setActive, showSubmit = true }) {
         </>
       )}
 
-      {lightbox && (
-        <div onClick={() => setLightbox(null)} style={{ position: 'fixed', inset: 0, background: 'rgba(6,16,31,0.95)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1000, padding: 20 }}>
-          <div onClick={(e) => e.stopPropagation()} style={{ position: 'relative', maxWidth: '92vw', maxHeight: '92vh' }}>
-            <img src={lightbox.photo_url} alt="" style={{ maxWidth: '100%', maxHeight: '86vh', objectFit: 'contain', display: 'block' }} />
-            <div style={{ position: 'absolute', bottom: 0, left: 0, right: 0, background: 'rgba(6,16,31,0.85)', padding: '10px 16px', fontFamily: mono, fontSize: 10, color: P.gold }}>
-              {lightbox.uploader_name ? `📷 ${lightbox.uploader_name}` : (team?.label || 'PHOTO')}
-            </div>
-          </div>
-        </div>
-      )}
+      <PhotoLightbox photo={lightbox} onClose={() => setLightbox(null)} fallbackLabel={team?.label || 'PHOTO'} />
     </div>
   );
 }

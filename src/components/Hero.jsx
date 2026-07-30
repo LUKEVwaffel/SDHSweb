@@ -1,3 +1,5 @@
+import { useNavigate } from 'react-router-dom';
+
 const P = {
   navy: '#142847',
   ink: '#06101F',
@@ -10,7 +12,8 @@ const P = {
 
 const JROTC = '/assets/army-jrotc.png';
 
-export default function Hero({ setActive }) {
+export default function Hero() {
+  const navigate = useNavigate();
   return (
     <section style={{
       position: 'relative',
@@ -98,7 +101,7 @@ export default function Hero({ setActive }) {
           </p>
 
           <div style={{ display: 'flex', gap: 12, marginTop: 26, alignItems: 'center' }}>
-            <button onClick={() => setActive('cadet-manual')}
+            <button onClick={() => navigate('/cadet-manual')}
               onMouseEnter={e => { e.currentTarget.style.background = P.goldBright; e.currentTarget.style.transform = 'translateY(-2px)'; e.currentTarget.style.boxShadow = '0 10px 24px -12px rgba(201,169,97,0.7)'; }}
               onMouseLeave={e => { e.currentTarget.style.background = P.gold; e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.boxShadow = 'none'; }}
               style={{
@@ -110,7 +113,7 @@ export default function Hero({ setActive }) {
               }}>
               OPEN CADET MANUAL →
             </button>
-            <button onClick={() => setActive('staff')}
+            <button onClick={() => navigate('/about')}
               onMouseEnter={e => { e.currentTarget.style.borderColor = P.gold; e.currentTarget.style.color = P.goldBright; e.currentTarget.style.background = 'rgba(201,169,97,0.06)'; }}
               onMouseLeave={e => { e.currentTarget.style.borderColor = P.hairline; e.currentTarget.style.color = P.cream; e.currentTarget.style.background = 'transparent'; }}
               style={{
@@ -120,7 +123,7 @@ export default function Hero({ setActive }) {
                 padding: '14px 26px',
                 transition: 'border-color 0.18s, color 0.18s, background 0.18s',
               }}>
-              MEET THE CADETS
+              ABOUT THE BATTALION
             </button>
           </div>
 

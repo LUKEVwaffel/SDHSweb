@@ -26,6 +26,10 @@ Deno.serve(async (req) => {
     if (!caller) return json({ error: "not authenticated" }, 401);
     const email = caller.email; // self only — never a body-supplied target
 
+    // Passkey setup is blocked until the forced password change is done —
+    // same reasoning as set-pin. revoke-passkeys (removal) is NOT gated.
+    if (caller.mustChangePassword) return json({ error: "password_change_required" }, 403);
+
     const body = await req.json().catch(() => ({}));
     const svc = serviceClient();
 

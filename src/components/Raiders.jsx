@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { supabase as SB } from '../lib/supabaseClient';
 import RaiderVoting from './RaiderVoting';
 import RaiderCarousel from './RaiderCarousel';
@@ -440,7 +441,8 @@ const navBtn = {
 };
 
 // ── Main export ──────────────────────────────────────────────────────────────
-export default function Raiders({ setActive }) {
+export default function Raiders() {
+  const navigate = useNavigate();
   const [commanders, setCommanders] = useState([]);
   const [winners, setWinners] = useState(null);
   const [events, setEvents] = useState([]);
@@ -468,7 +470,7 @@ export default function Raiders({ setActive }) {
       })).filter((w) => w.url)
     : [];
 
-  const openProfile = (person) => setActive(`profile-${person.id}`);
+  const openProfile = (person) => navigate(`/profile/${person.id}`, { state: { from: 'raiders' } });
 
   return (
     <div style={{ background: P.ink, minHeight: '100vh', fontFamily: 'Inter, sans-serif', position: 'relative' }}>
@@ -479,7 +481,7 @@ export default function Raiders({ setActive }) {
 
         {/* ── Page header — small label above, large title below ── */}
         <div style={{ marginBottom: 44 }}>
-          <button onClick={() => setActive('home')} style={{
+          <button onClick={() => navigate('/')} style={{
             background: 'transparent', border: 'none', cursor: 'pointer', color: P.gold,
             fontFamily: mono, fontSize: 10, letterSpacing: '0.28em', padding: 0, marginBottom: 28, display: 'block',
           }}>← HOME</button>
@@ -552,14 +554,14 @@ export default function Raiders({ setActive }) {
             <div style={{ fontFamily: mono, fontSize: 9, color: P.gold, letterSpacing: '0.28em', opacity: 0.7, marginBottom: 16 }}>
               // LIVE VOTE — FUNNY · AURA · TEAM LEADING
             </div>
-            <RaiderVoting setActive={setActive} compact />
+            <RaiderVoting compact />
           </div>
 
           <div style={{
             marginTop: 32, paddingTop: 28, borderTop: `1px solid ${P.hair}`,
             display: 'flex', gap: 16, flexWrap: 'wrap', alignItems: 'center',
           }}>
-            <button onClick={() => setActive('submit')} style={{
+            <button onClick={() => navigate('/submit')} style={{
               background: P.gold, color: P.ink, border: 'none', cursor: 'pointer',
               fontFamily: mono, fontSize: 11, letterSpacing: '0.16em', fontWeight: 600, padding: '13px 24px',
             }}
@@ -567,7 +569,7 @@ export default function Raiders({ setActive }) {
               onMouseLeave={(e) => (e.currentTarget.style.background = P.gold)}>
               📸 SUBMIT A RAIDER PHOTO →
             </button>
-            <button onClick={() => setActive('pictures')} style={{
+            <button onClick={() => navigate('/events')} style={{
               background: 'transparent', color: P.cream, border: `1px solid ${P.hairStrong}`, cursor: 'pointer',
               fontFamily: mono, fontSize: 11, letterSpacing: '0.16em', fontWeight: 600, padding: '13px 24px',
             }}

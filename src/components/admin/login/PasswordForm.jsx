@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { supabase as SB } from '../../../lib/supabaseClient';
 import { P, mono, fs, sp, radius, shadow, focusRing, ease } from '../theme';
+import EyeIcon from './EyeIcon';
 
 // "Other account" fallback — the classic email + password sign-in, for accounts
 // not on the picker or a first-time login. Same signInWithPassword path the old
@@ -12,6 +13,7 @@ export default function PasswordForm({ onBack }) {
   const [shake, setShake] = useState(false);
   const [busy, setBusy] = useState(false);
   const [focused, setFocused] = useState(null);
+  const [showPw, setShowPw] = useState(false);
 
   async function attempt() {
     if (busy) return;
@@ -51,13 +53,25 @@ export default function PasswordForm({ onBack }) {
         style={inputStyle('email')}
       />
       <div style={{ fontFamily: mono, fontSize: fs.micro, color: P.gold, letterSpacing: '0.18em', marginBottom: sp[2] }}>PASSWORD</div>
-      <input
-        type="password" value={password} autoComplete="current-password"
-        onFocus={() => setFocused('password')} onBlur={() => setFocused(null)}
-        onChange={(e) => { setPassword(e.target.value); setErr(''); }}
-        onKeyDown={(e) => e.key === 'Enter' && attempt()}
-        style={inputStyle('password')}
-      />
+      <div style={{ position: 'relative', marginBottom: sp[4] }}>
+        <input
+          type={showPw ? 'text' : 'password'} value={password} autoComplete="current-password"
+          onFocus={() => setFocused('password')} onBlur={() => setFocused(null)}
+          onChange={(e) => { setPassword(e.target.value); setErr(''); }}
+          onKeyDown={(e) => e.key === 'Enter' && attempt()}
+          style={{ ...inputStyle('password'), marginBottom: 0, paddingRight: 40 }}
+        />
+        <button
+          type="button" onClick={() => setShowPw((v) => !v)} title={showPw ? 'Hide password' : 'Show password'}
+          style={{
+            position: 'absolute', right: 12, top: '50%', transform: 'translateY(-50%)',
+            background: 'transparent', border: 'none', color: P.mute, cursor: 'pointer',
+            padding: 4, display: 'flex', alignItems: 'center', justifyContent: 'center',
+          }}
+        >
+          <EyeIcon open={showPw} />
+        </button>
+      </div>
       {err && <div style={{ fontFamily: mono, fontSize: fs.tiny, color: P.red, letterSpacing: '0.12em', marginBottom: sp[3] }}>{err}</div>}
       <button onClick={attempt} disabled={busy} style={{
         width: '100%', background: P.gold, color: P.ink, border: 'none', borderRadius: radius.sm,

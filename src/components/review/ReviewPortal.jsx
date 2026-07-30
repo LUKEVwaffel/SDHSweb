@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
+import { Navigate, useLocation, useNavigate, useSearchParams } from 'react-router-dom';
 import { FunctionsHttpError } from '@supabase/supabase-js';
 import { supabase as SB } from '../../lib/supabaseClient';
 import ReviewLogin from './ReviewLogin';
@@ -13,7 +14,7 @@ import './review.css';
 //
 // Auth: each reviewer has their own Supabase Auth account (email + password,
 // same pattern as the admin accounts). The submit-for-review notification
-// email links here with #review?draft=<id> — a plain deep link, not an
+// email links here with /review?draft=<id> — a plain deep link, not an
 // auto-authenticating token. On mount we check for an existing session; if
 // none, ReviewLogin collects email+password via signInWithPassword. Either
 // way, the session is then checked against email_reviewers (the
@@ -27,22 +28,19 @@ import './review.css';
 // decisions + feedback, from email_review_decisions — an append-only log,
 // since email_messages.reviewer_feedback gets nulled on every resubmit and
 // can't answer "what have I ever said").
-function parseHashParams() {
-  const raw = window.location.hash.replace(/^#review\??/, '');
-  return new URLSearchParams(raw);
-}
-
 function fmtDate(v) {
   return v ? new Date(v).toLocaleString() : '—';
 }
 
 export default function ReviewPortal() {
+  const navigate = useNavigate();
+  const location = useLocation();
+  const [searchParams] = useSearchParams();
   const [phase, setPhase] = useState('checking'); // checking | login | force-password | ready | error
   const [errorMsg, setErrorMsg] = useState('');
   const [loginNotice, setLoginNotice] = useState('');
   const [reviewerName, setReviewerName] = useState('');
   const [reviewerEmail, setReviewerEmail] = useState('');
-  const [tab, setTab] = useState('pending'); // pending | sent | history
   const [showSettings, setShowSettings] = useState(false);
   const [hasPin, setHasPin] = useState(false);
 
@@ -115,8 +113,7 @@ export default function ReviewPortal() {
   }
 
   useEffect(() => {
-    const params = parseHashParams();
-    const draft = params.get('draft');
+    const draft = searchParams.get('draft');
     if (draft) setFocusId(draft);
     verifyReviewerAndLoad();
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -322,6 +319,12 @@ export default function ReviewPortal() {
     { id: 'sent', label: 'Sent', count: sentRows.length },
     { id: 'history', label: 'My History', count: historyRows.length },
   ];
+  const tabPath = (id) => (id === 'pending' ? '/review' : `/review/${id}`);
+  const tab = location.pathname === '/review/sent' ? 'sent'
+    : location.pathname === '/review/history' ? 'history'
+    : location.pathname === '/review' ? 'pending'
+    : null;
+  if (tab === null) return <Navigate to="/review" replace />;
 
   if (showSettings) return shell(
     <div>
@@ -359,7 +362,7 @@ export default function ReviewPortal() {
           <button
             key={t.id}
             className={`rv-tab${tab === t.id ? ' is-active' : ''}`}
-            onClick={() => setTab(t.id)}
+            onClick={() => navigate(tabPath(t.id))}
           >
             {t.label}<span className="rv-tab-count">{t.count}</span>
           </button>

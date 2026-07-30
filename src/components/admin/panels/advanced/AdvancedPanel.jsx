@@ -8,18 +8,20 @@ import RegistryPanel from './RegistryPanel';
 import DesignTokensPanel from './DesignTokensPanel';
 import QuickActionsPanel from './QuickActionsPanel';
 import SettingsPanel from './SettingsPanel';
+import AchievementCatalog from './AchievementCatalog';
 
 // Wall for developer + maintenance tools. A non-technical successor rarely opens
 // this; daily work lives in the top-level sections.
 const SUBTABS = [
-  { id: 'history',  label: 'CHANGE HISTORY', danger: false },
-  { id: 'accounts', label: 'ACCOUNTS',       danger: false },
-  { id: 'emails',   label: 'EMAIL HISTORY',  danger: false },
-  { id: 'health',   label: 'SITE HEALTH',    danger: false },
-  { id: 'settings', label: 'SETTINGS',       danger: false },
-  { id: 'registry', label: 'REGISTRIES',     danger: true },
-  { id: 'tokens',   label: 'DESIGN TOKENS',  danger: false },
-  { id: 'actions',  label: 'QUICK ACTIONS',  danger: true },
+  { id: 'history',      label: 'CHANGE HISTORY', danger: false },
+  { id: 'accounts',     label: 'ACCOUNTS',       danger: false },
+  { id: 'emails',       label: 'EMAIL HISTORY',  danger: false },
+  { id: 'achievements', label: 'ACHIEVEMENTS',   danger: false },
+  { id: 'health',       label: 'SITE HEALTH',    danger: false },
+  { id: 'settings',     label: 'SETTINGS',       danger: false },
+  { id: 'registry',     label: 'REGISTRIES',     danger: true },
+  { id: 'tokens',       label: 'DESIGN TOKENS',  danger: false },
+  { id: 'actions',      label: 'QUICK ACTIONS',  danger: true },
 ];
 
 export default function AdvancedPanel({ adminId }) {
@@ -47,6 +49,7 @@ export default function AdvancedPanel({ adminId }) {
       {tab === 'history'  && <HistoryPanel adminId={adminId} />}
       {tab === 'accounts' && <AccountsPanel adminId={adminId} />}
       {tab === 'emails'   && <EmailHistoryPanel />}
+      {tab === 'achievements' && <AchievementCatalog />}
       {tab === 'health'   && <HealthPanel />}
       {tab === 'settings' && <SettingsPanel adminId={adminId} />}
       {tab === 'registry' && <RegistryPanel />}

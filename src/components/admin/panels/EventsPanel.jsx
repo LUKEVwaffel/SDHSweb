@@ -2,7 +2,7 @@ import { useState, useEffect, useMemo } from 'react';
 import { supabase as SB } from '../../../lib/supabaseClient';
 import { P, mono, inter, fs, sp } from '../theme';
 import { Btn, Card, Label, Input, PanelHeader, EmptyState } from '../shared/ui';
-import { EVENT_CATEGORIES, EVENT_TEAMS, categoryColor, teamLabel, MONTHS, MON3, toCalendarItem, groupByMonth } from '../../../lib/calendar';
+import { EVENT_CATEGORIES, EVENT_TEAMS, UNIFORM_TYPES, DEFAULT_POC, categoryColor, teamLabel, MONTHS, MON3, toCalendarItem, groupByMonth } from '../../../lib/calendar';
 
 // S-6 manages the whole calendar here: the main battalion calendar (team NULL)
 // and all 4 specialty-team calendars, one row per event in `events`. Mirrors the
@@ -10,19 +10,27 @@ import { EVENT_CATEGORIES, EVENT_TEAMS, categoryColor, teamLabel, MONTHS, MON3, 
 // but this is backend-only: NO photos are shown here. `will_have_pictures` just
 // flags an event that a gallery will attach to later.
 const CATEGORY_OPTIONS = EVENT_CATEGORIES.filter((c) => c.id !== 'EVENT');
+const PERMISSION_SLIP_BUCKET = 'permission-slips';
 
 const emptyForm = () => ({
   title: '', date: '', end_date: '', team: '', category: 'BATTALION',
-  time_label: '', location: '', uniform: '', poc: '', transportation: '',
-  description: '', will_have_pictures: false, status: 'draft',
+  event_time: '', location: '', poc: DEFAULT_POC.name, description: '', will_have_pictures: false, status: 'draft',
+  uniform_required: false, uniform: '',
+  transportation_required: false, transportation: '',
+  permission_slip_required: false, permission_slip_url: '',
 });
 
-// Core fields required before an event can be POSTED to the public calendar.
+// Core fields required before an event can be POSTED to the public calendar —
+// mirrors the DB backstop in events_ironclad.sql (events_posted_requires_fields_check).
 function missingCore(f) {
   const gaps = [];
   if (!f.title?.trim()) gaps.push('title');
   if (!f.date) gaps.push('date');
   if (!f.category) gaps.push('category');
+  if (!f.event_time) gaps.push('time');
+  if (f.uniform_required && !f.uniform) gaps.push('uniform type');
+  if (f.transportation_required && !f.transportation?.trim()) gaps.push('transportation detail');
+  if (f.permission_slip_required && !f.permission_slip_url) gaps.push('permission slip PDF');
   return gaps;
 }
 
@@ -31,6 +39,7 @@ export default function EventsPanel({ adminId, battalionOnly = false }) {
   const [editing, setEditing] = useState(null); // 'new' | id | null
   const [form, setForm] = useState(emptyForm());
   const [saving, setSaving] = useState(false);
+  const [uploadingSlip, setUploadingSlip] = useState(false);
   const [msg, setMsg] = useState('');
   const [teamFilter, setTeamFilter] = useState(battalionOnly ? 'battalion' : 'all');
 
@@ -50,10 +59,12 @@ export default function EventsPanel({ adminId, battalionOnly = false }) {
     setEditing(r.id);
     setForm({
       title: r.title || '', date: r.date || '', end_date: r.end_date || '',
-      team: r.team || '', category: r.category || 'BATTALION', time_label: r.time_label || '',
-      location: r.location || '', uniform: r.uniform || '', poc: r.poc || '',
-      transportation: r.transportation || '', description: r.description || '',
+      team: r.team || '', category: r.category || 'BATTALION', event_time: r.event_time || '',
+      location: r.location || '', poc: r.poc || '', description: r.description || '',
       will_have_pictures: !!r.will_have_pictures, status: r.status || 'draft',
+      uniform_required: !!r.uniform_required, uniform: r.uniform || '',
+      transportation_required: !!r.transportation_required, transportation: r.transportation || '',
+      permission_slip_required: !!r.permission_slip_required, permission_slip_url: r.permission_slip_url || '',
     });
     setMsg('');
   }
@@ -64,12 +75,28 @@ export default function EventsPanel({ adminId, battalionOnly = false }) {
     const f = { ...form, ...overrides };
     const nz = (v) => (v && String(v).trim() ? v : null);
     return {
-      title: f.title.trim(), date: f.date, end_date: nz(f.end_date),
-      team: f.team || null, category: f.category, time_label: nz(f.time_label),
-      location: nz(f.location), uniform: nz(f.uniform), poc: nz(f.poc),
-      transportation: nz(f.transportation), description: nz(f.description),
+      title: f.title.trim(), date: f.date, end_date: f.category === 'BREAK' ? nz(f.end_date) : null,
+      team: f.team || null, category: f.category, event_time: nz(f.event_time),
+      location: nz(f.location), poc: nz(f.poc), description: nz(f.description),
       will_have_pictures: !!f.will_have_pictures, status: f.status,
+      uniform_required: !!f.uniform_required, uniform: f.uniform_required ? nz(f.uniform) : null,
+      transportation_required: !!f.transportation_required,
+      transportation: f.transportation_required ? nz(f.transportation) : null,
+      permission_slip_required: !!f.permission_slip_required,
+      permission_slip_url: f.permission_slip_required ? nz(f.permission_slip_url) : null,
     };
+  }
+
+  async function uploadPermissionSlip(file) {
+    if (!file) return;
+    if (file.type !== 'application/pdf') { setMsg('Permission slip must be a PDF'); return; }
+    setUploadingSlip(true);
+    const path = `${Date.now()}_${file.name.replace(/[^a-zA-Z0-9_.-]/g, '_')}`;
+    const { error } = await SB.storage.from(PERMISSION_SLIP_BUCKET).upload(path, file, { contentType: 'application/pdf' });
+    setUploadingSlip(false);
+    if (error) { setMsg(error.message); return; }
+    const url = SB.storage.from(PERMISSION_SLIP_BUCKET).getPublicUrl(path).data.publicUrl;
+    setForm((f) => ({ ...f, permission_slip_url: url }));
   }
 
   async function persist(body) {
@@ -171,7 +198,7 @@ export default function EventsPanel({ adminId, battalionOnly = false }) {
                           <div style={{ flex: 1, minWidth: 0 }}>
                             <div style={{ fontFamily: inter, fontSize: fs.sm, color: P.cream, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{r.title}</div>
                             <div style={{ fontFamily: mono, fontSize: 8, color: P.mute, marginTop: 2 }}>
-                              {teamLabel(r.team).toUpperCase()} · {r.category || 'EVENT'}{r.will_have_pictures ? ' · 📷' : ''}{r.location ? ` · ${r.location}` : ''}
+                              {teamLabel(r.team).toUpperCase()} · {(r.category || 'EVENT').replace('_', ' ')}{r.will_have_pictures ? ' · 📷' : ''}{r.location ? ` · ${r.location}` : ''}
                             </div>
                           </div>
                           <span style={{ fontFamily: mono, fontSize: 8, letterSpacing: '0.1em', color: posted ? P.green : P.bright, whiteSpace: 'nowrap' }}>{posted ? 'POSTED' : 'DRAFT'}</span>
@@ -200,15 +227,17 @@ export default function EventsPanel({ adminId, battalionOnly = false }) {
               <Input value={form.title} onChange={(e) => setForm((f) => ({ ...f, title: e.target.value }))} />
             </div>
 
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: sp[3], marginBottom: sp[3] }}>
+            <div style={{ display: 'grid', gridTemplateColumns: form.category === 'BREAK' ? '1fr 1fr' : '1fr', gap: sp[3], marginBottom: sp[3] }}>
               <div>
                 <Label>Date <span style={{ color: P.red }}>*</span></Label>
                 <Input type="date" value={form.date} onChange={(e) => setForm((f) => ({ ...f, date: e.target.value }))} />
               </div>
-              <div>
-                <Label>End date (multi-day)</Label>
-                <Input type="date" value={form.end_date} onChange={(e) => setForm((f) => ({ ...f, end_date: e.target.value }))} />
-              </div>
+              {form.category === 'BREAK' && (
+                <div>
+                  <Label>End date (multi-day / range)</Label>
+                  <Input type="date" value={form.end_date} onChange={(e) => setForm((f) => ({ ...f, end_date: e.target.value }))} />
+                </div>
+              )}
             </div>
 
             <div style={{ display: 'grid', gridTemplateColumns: battalionOnly ? '1fr' : '1fr 1fr', gap: sp[3], marginBottom: sp[3] }}>
@@ -222,16 +251,27 @@ export default function EventsPanel({ adminId, battalionOnly = false }) {
               )}
               <div>
                 <Label>Category <span style={{ color: P.red }}>*</span></Label>
-                <select value={form.category} onChange={(e) => setForm((f) => ({ ...f, category: e.target.value }))} style={selectStyle}>
-                  {CATEGORY_OPTIONS.map((c) => <option key={c.id} value={c.id}>{c.id}</option>)}
+                <select
+                  value={form.category}
+                  onChange={(e) => {
+                    const category = e.target.value;
+                    setForm((f) => ({
+                      ...f, category,
+                      end_date: category === 'BREAK' ? f.end_date : '',
+                      uniform_required: category === 'UNIFORM_DAY' ? true : f.uniform_required,
+                    }));
+                  }}
+                  style={selectStyle}
+                >
+                  {CATEGORY_OPTIONS.map((c) => <option key={c.id} value={c.id}>{c.id === 'UNIFORM_DAY' ? 'UNIFORM DAY' : c.id}</option>)}
                 </select>
               </div>
             </div>
 
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: sp[3], marginBottom: sp[3] }}>
               <div>
-                <Label>Time</Label>
-                <Input value={form.time_label} onChange={(e) => setForm((f) => ({ ...f, time_label: e.target.value }))} placeholder="e.g. 0800 · report 0730" />
+                <Label>Time <span style={{ color: P.red }}>*</span></Label>
+                <Input type="time" value={form.event_time} onChange={(e) => setForm((f) => ({ ...f, event_time: e.target.value }))} />
               </div>
               <div>
                 <Label>Location</Label>
@@ -239,21 +279,84 @@ export default function EventsPanel({ adminId, battalionOnly = false }) {
               </div>
             </div>
 
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: sp[3], marginBottom: sp[3] }}>
-              <div>
-                <Label>Uniform</Label>
-                <Input value={form.uniform} onChange={(e) => setForm((f) => ({ ...f, uniform: e.target.value }))} placeholder="ASU / ACU / PT / civilian" />
+            <div style={{ marginBottom: sp[3] }}>
+              <Label>Uniform{form.category === 'UNIFORM_DAY' ? <span style={{ color: P.red }}> *</span> : null}</Label>
+              <div style={{ display: 'flex', gap: sp[2], marginBottom: form.uniform_required ? sp[2] : 0 }}>
+                {[false, true].map((v) => (
+                  <Btn
+                    key={String(v)}
+                    variant={form.uniform_required === v ? 'gold' : 'ghost'}
+                    size="sm"
+                    disabled={form.category === 'UNIFORM_DAY'}
+                    onClick={() => setForm((f) => ({ ...f, uniform_required: v, uniform: v ? f.uniform : '' }))}
+                  >
+                    {v ? 'YES' : 'NO'}
+                  </Btn>
+                ))}
               </div>
-              <div>
-                <Label>POC</Label>
-                <Input value={form.poc} onChange={(e) => setForm((f) => ({ ...f, poc: e.target.value }))} placeholder="name / role" />
-              </div>
+              {form.uniform_required && (
+                <select value={form.uniform} onChange={(e) => setForm((f) => ({ ...f, uniform: e.target.value }))} style={selectStyle}>
+                  <option value="">Select type…</option>
+                  {UNIFORM_TYPES.map((u) => <option key={u} value={u}>{u}</option>)}
+                </select>
+              )}
+            </div>
+
+            <div style={{ marginBottom: sp[3] }}>
+              <Label>POC</Label>
+              <Input value={form.poc} onChange={(e) => setForm((f) => ({ ...f, poc: e.target.value }))} placeholder="name / role" />
             </div>
 
             <div style={{ marginBottom: sp[3] }}>
               <Label>Transportation</Label>
-              <Input value={form.transportation} onChange={(e) => setForm((f) => ({ ...f, transportation: e.target.value }))} placeholder="bus / POV · departure time" />
+              <div style={{ display: 'flex', gap: sp[2], marginBottom: form.transportation_required ? sp[2] : 0 }}>
+                {[false, true].map((v) => (
+                  <Btn
+                    key={String(v)}
+                    variant={form.transportation_required === v ? 'gold' : 'ghost'}
+                    size="sm"
+                    onClick={() => setForm((f) => ({ ...f, transportation_required: v, transportation: v ? f.transportation : '' }))}
+                  >
+                    {v ? 'YES' : 'NO'}
+                  </Btn>
+                ))}
+              </div>
+              {form.transportation_required && (
+                <Input value={form.transportation} onChange={(e) => setForm((f) => ({ ...f, transportation: e.target.value }))} placeholder="bus / van / walking…" />
+              )}
             </div>
+
+            <div style={{ marginBottom: sp[3] }}>
+              <Label>Permission Slip</Label>
+              <div style={{ display: 'flex', gap: sp[2], marginBottom: form.permission_slip_required ? sp[2] : 0 }}>
+                {[false, true].map((v) => (
+                  <Btn
+                    key={String(v)}
+                    variant={form.permission_slip_required === v ? 'gold' : 'ghost'}
+                    size="sm"
+                    onClick={() => setForm((f) => ({ ...f, permission_slip_required: v, permission_slip_url: v ? f.permission_slip_url : '' }))}
+                  >
+                    {v ? 'YES' : 'NO'}
+                  </Btn>
+                ))}
+              </div>
+              {form.permission_slip_required && (
+                <div>
+                  <input
+                    type="file" accept="application/pdf"
+                    onChange={(e) => uploadPermissionSlip(e.target.files?.[0])}
+                    style={{ fontFamily: inter, fontSize: fs.sm, color: P.cream }}
+                  />
+                  {uploadingSlip && <div style={{ fontFamily: mono, fontSize: fs.tiny, color: P.mute, marginTop: sp[1] }}>uploading…</div>}
+                  {form.permission_slip_url && !uploadingSlip && (
+                    <div style={{ fontFamily: mono, fontSize: fs.tiny, color: P.green, marginTop: sp[1] }}>
+                      ✓ uploaded — <a href={form.permission_slip_url} target="_blank" rel="noopener noreferrer" style={{ color: P.green }}>view PDF</a>
+                    </div>
+                  )}
+                </div>
+              )}
+            </div>
+
             <div style={{ marginBottom: sp[3] }}>
               <Label>Description / notes</Label>
               <Input value={form.description} onChange={(e) => setForm((f) => ({ ...f, description: e.target.value }))} multiline />

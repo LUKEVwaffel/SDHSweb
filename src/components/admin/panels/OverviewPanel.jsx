@@ -120,7 +120,7 @@ export default function OverviewPanel({ adminId, goto }) {
     (async () => {
       const [
         openPolls, events, people, photos, subscribers, pendingEmail,
-        consentTotal, consentCollected, consentPending,
+        consentTotal, consentCollected, consentPending, newQuestions,
         upcomingRows, activityRows,
       ] = await Promise.all([
         safeCount('polls', (q) => q.eq('status', 'open')),
@@ -132,10 +132,11 @@ export default function OverviewPanel({ adminId, goto }) {
         safeCount('cadet_consent'),
         safeCount('cadet_consent', (q) => q.eq('consent_status', 'collected')),
         safeCount('cadet_consent', (q) => q.eq('consent_status', 'pending')),
+        safeCount('faq_questions', (q) => q.eq('status', 'new')),
         safeList('events', (q) => q.gte('date', todayIso).order('date', { ascending: true }).limit(3)),
         safeList('change_log', (q) => q.order('created_at', { ascending: false }).limit(6)),
       ]);
-      setStats({ openPolls, events, people, photos, subscribers, pendingEmail, consentTotal, consentCollected, consentPending });
+      setStats({ openPolls, events, people, photos, subscribers, pendingEmail, consentTotal, consentCollected, consentPending, newQuestions });
       setUpcoming(upcomingRows);
       setActivity(activityRows);
     })();
@@ -158,6 +159,7 @@ export default function OverviewPanel({ adminId, goto }) {
     { value: fmt(stats.pendingEmail), label: 'EMAILS AWAITING SIGNATURE', hint: 'Printed · pending SAI/1SG signature', tone: P.red,   to: 'email',  alert: stats.pendingEmail > 0 },
     { value: fmt(stats.openPolls),    label: 'OPEN PHOTO POLLS',           hint: 'Raider voting live now',              tone: P.gold,  to: 'photos', alert: stats.openPolls > 0 },
     { value: fmt(stats.consentPending), label: 'CONSENT FORMS PENDING',    hint: 'Cadets without photo consent',        tone: P.blue,  to: 'people', alert: stats.consentPending > 0 },
+    { value: fmt(stats.newQuestions),  label: 'NEW FAQ QUESTIONS',         hint: 'Submitted from the About page',       tone: P.blue,  to: 'questions', alert: stats.newQuestions > 0 },
   ];
 
   // Sort alerts first so the front door leads with what's actionable.

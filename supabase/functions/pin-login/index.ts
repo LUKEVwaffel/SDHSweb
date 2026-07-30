@@ -56,8 +56,12 @@ Deno.serve(async (req) => {
     }
 
     // 2) Verify (attempt already recorded as a failure by step 1).
-    const { data: cred } = await svc
+    const { data: cred, error: credErr } = await svc
       .from("account_credentials").select("pin_hash").eq("email", account).maybeSingle();
+    // Fail CLOSED on a lookup error — falling through with cred undefined
+    // would verify against a null hash, which verifyPin must reject, but
+    // that's incidental safety, not intent. Match reserve_pin_attempt above.
+    if (credErr) { console.error("pin-login cred lookup", credErr); return json({ error: "internal error" }, 500); }
     const ok = await verifyPin(String(pin), cred?.pin_hash ?? null);
 
     if (!ok) {
@@ -68,8 +72,23 @@ Deno.serve(async (req) => {
       return json({ error: "invalid", remaining }, 401);
     }
 
-    // 3) Correct PIN → clear the optimistic increment, then mint the session.
+    // 3) Correct PIN → clear the optimistic increment.
     await svc.rpc("reset_pin_attempts", { p_email: account });
+
+    // PIN is a secondary factor layered on top of an account that must
+    // already have a real (non-temp) password — a correct PIN never bypasses
+    // a pending forced password change, including one re-armed by a later
+    // dashboard reset after the PIN was originally set. See
+    // admin_password_gate.sql.
+    const { data: gate, error: gateErr } = await svc
+      .from("admin_roles").select("must_change_password").eq("email", account).maybeSingle();
+    // Fail CLOSED on a lookup error — this is the ONLY control blocking PIN
+    // login for a gated account (account_credentials has no RLS policies at
+    // all, service-role only). Silently treating an error as "not gated"
+    // would let a stale PIN bypass a freshly re-armed forced password change.
+    if (gateErr) { console.error("pin-login gate check", gateErr); return json({ error: "internal error" }, 500); }
+    if (gate?.must_change_password) return json({ error: "password_change_required" }, 403);
+
     const token_hash = await mintSessionToken(account);
     return json({ ok: true, token_hash });
   } catch (e) {

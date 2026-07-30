@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import PhotoUploader from './PhotoUploader';
 import RaiderVoting from './RaiderVoting';
 import TeamGallery from './TeamGallery';
@@ -13,7 +14,8 @@ const mono = "'JetBrains Mono', monospace";
 const oswald = 'Oswald, sans-serif';
 const inter = 'Inter, sans-serif';
 
-export default function SubmitHub({ setActive }) {
+export default function SubmitHub() {
+  const navigate = useNavigate();
   const [browseTeam, setBrowseTeam] = useState('raiders');
   const [refreshKey, setRefreshKey] = useState(0);
   const team = getTeam(browseTeam);
@@ -22,9 +24,9 @@ export default function SubmitHub({ setActive }) {
     <section style={{ background: P.ink, minHeight: '100vh', fontFamily: inter }}>
       {/* Header */}
       <div style={{ borderBottom: `1px solid ${P.hair}`, padding: '60px 40px 36px', maxWidth: 1200, margin: '0 auto' }}>
-        <button onClick={() => setActive('home')} style={backBtn}>← HOME</button>
+        <button onClick={() => navigate('/')} style={backBtn}>← HOME</button>
         <div style={{ fontFamily: mono, fontSize: 10, color: P.gold, letterSpacing: '0.32em', marginBottom: 12 }}>
-          // PHOTO SUBMISSIONS · ALL SPECIALTY TEAMS
+          // OPTIC · PHOTO SUBMISSIONS
         </div>
         <h1 style={{ fontFamily: oswald, fontWeight: 700, fontSize: 66, color: P.cream, letterSpacing: '0.02em', margin: 0, lineHeight: 0.9 }}>
           SUBMIT PHOTOS
@@ -71,8 +73,8 @@ export default function SubmitHub({ setActive }) {
 
         {/* Voting for raiders, plain gallery otherwise */}
         {team?.voting
-          ? <RaiderVoting key={`vote-${refreshKey}`} setActive={setActive} compact />
-          : <TeamGallery key={`gal-${browseTeam}-${refreshKey}`} teamId={browseTeam} setActive={setActive} showSubmit={false} />}
+          ? <RaiderVoting key={`vote-${refreshKey}`} compact />
+          : <TeamGallery key={`gal-${browseTeam}-${refreshKey}`} teamId={browseTeam} showSubmit={false} />}
       </div>
     </section>
   );

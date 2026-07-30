@@ -1,4 +1,6 @@
 import { useState } from 'react';
+import { Link } from 'react-router-dom';
+import { legacyIdToPath } from '../lib/routes';
 
 const P = {
   navyDeep: '#0A1628',
@@ -17,7 +19,8 @@ const NAV_MAP = {
   'Rifle':        'rifle',
   'Academic':     'academic',
   'Drill':        'drill',
-  'Events':       'pictures',
+  'Events':       'events',
+  'Submit Photos': 'submit',
   'Staff':        'staff',
   'Companies':    'companies',
   'About':        'about',
@@ -26,11 +29,11 @@ const NAV_MAP = {
 
 const COLS = [
   { h: 'PROGRAMS',  items: ['Raiders', 'Rifle', 'Academic', 'Drill'] },
-  { h: 'BATTALION', items: ['Events', 'Staff', 'Companies', 'Cadet Manual', 'About'] },
+  { h: 'BATTALION', items: ['Events', 'Submit Photos', 'Staff', 'Companies', 'Cadet Manual', 'About'] },
   { h: 'INFO',      items: ['Soddy Daisy HS', '618 Sequoyah Access Rd', 'Soddy Daisy, TN 37379', 'thrasher_michael@hcde.org'] },
 ];
 
-function FooterLink({ label, setActive }) {
+function FooterLink({ label }) {
   const [hovered, setHovered] = useState(false);
   const tabId = NAV_MAP[label];
 
@@ -56,8 +59,9 @@ function FooterLink({ label, setActive }) {
   }
 
   return (
-    <button
-      onClick={() => { setActive(tabId); window.scrollTo({ top: 0, behavior: 'instant' }); }}
+    <Link
+      to={legacyIdToPath(tabId)}
+      onClick={() => window.scrollTo({ top: 0, behavior: 'instant' })}
       onMouseEnter={() => setHovered(true)}
       onMouseLeave={() => setHovered(false)}
       style={{
@@ -65,15 +69,16 @@ function FooterLink({ label, setActive }) {
         color: hovered ? P.goldBright : P.mute,
         fontFamily: 'Inter, sans-serif', fontSize: 13,
         padding: 0, textAlign: 'left',
+        textDecoration: 'none',
         transition: 'color 0.15s',
       }}
     >
       {label}
-    </button>
+    </Link>
   );
 }
 
-export default function Footer({ setActive }) {
+export default function Footer() {
   return (
     <footer style={{
       background: P.navyDeep, padding: '48px 32px 28px',
@@ -117,7 +122,7 @@ export default function Footer({ setActive }) {
               }}>{col.h}</div>
               <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
                 {col.items.map((x, j) => (
-                  <FooterLink key={j} label={x} setActive={setActive} />
+                  <FooterLink key={j} label={x} />
                 ))}
               </div>
             </div>

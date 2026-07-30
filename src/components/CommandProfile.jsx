@@ -1,5 +1,7 @@
 import { useState, useEffect } from 'react';
+import { useNavigate, useParams, useLocation } from 'react-router-dom';
 import { supabase as SB } from '../lib/supabaseClient';
+import { legacyIdToPath } from '../lib/routes';
 
 const P = {
   ink: '#06101F', navy: '#142847', deep: '#0A1628',
@@ -36,10 +38,20 @@ const ROLE_LABELS = {
   S6:  'Communications Officer',
 };
 
-export default function CommandProfile({ personId, backTarget, backLabel, setActive }) {
+export default function CommandProfile() {
+  const { id: personId } = useParams();
+  const location = useLocation();
+  const navigate = useNavigate();
+  // Where "back" returns to — set by whichever surface opened the profile
+  // (home command trio / raiders roster / staff roster), passed as router
+  // navigation state so it survives a hard refresh the same way a query
+  // param would, without cluttering the URL. Defaults to staff.
+  const backTarget = location.state?.from || 'staff';
+  const backLabel = backTarget === 'home' ? 'HOME' : backTarget === 'raiders' ? 'RAIDERS' : 'STAFF';
   const [person, setPerson] = useState(null);
   const [loading, setLoading] = useState(true);
   const [achievements, setAchievements] = useState([]);
+  const [selectedAchievement, setSelectedAchievement] = useState(null);
 
   useEffect(() => {
     async function load() {
@@ -77,7 +89,7 @@ export default function CommandProfile({ personId, backTarget, backLabel, setAct
     load();
   }, [personId]);
 
-  const back = () => setActive(backTarget || 'staff');
+  const back = () => navigate(legacyIdToPath(backTarget));
 
   if (loading) {
     return (
@@ -285,32 +297,94 @@ export default function CommandProfile({ personId, backTarget, backLabel, setAct
                 </div>
                 <div style={{
                   padding: 20,
-                  display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(90px, 1fr))', gap: 10,
+                  display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(110px, 1fr))', gap: 12,
                 }}>
                   {achievements.map((a) => (
-                    <div
+                    <button
                       key={a.achievements.id}
-                      title={a.achievements.description || a.achievements.name}
+                      type="button"
+                      onClick={() => setSelectedAchievement(a)}
+                      title={a.achievements.name}
                       style={{
-                        background: P.navy, border: `1px solid ${P.hair}`, padding: '16px 12px',
-                        display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 10, textAlign: 'center',
+                        background: P.navy, border: `1px solid ${P.hair}`, padding: '18px 12px',
+                        display: 'flex', alignItems: 'center', justifyContent: 'center',
+                        cursor: 'pointer', transition: 'border-color 150ms, background 150ms',
                       }}
+                      onMouseEnter={e => { e.currentTarget.style.borderColor = P.gold; e.currentTarget.style.background = P.deep; }}
+                      onMouseLeave={e => { e.currentTarget.style.borderColor = P.hair; e.currentTarget.style.background = P.navy; }}
                     >
                       <img
                         src={a.achievements.icon_url}
                         alt={a.achievements.name}
-                        style={{ width: 40, height: 40, objectFit: 'contain' }}
+                        style={{ width: 72, height: 72, objectFit: 'contain', display: 'block' }}
                       />
-                      <div style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: 9.5, color: P.cream, letterSpacing: '0.06em', lineHeight: 1.4 }}>
-                        {a.achievements.name.toUpperCase()}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* Accomplishment detail modal — click a badge to reveal name/description/date */}
+            {selectedAchievement && (
+              <div
+                onClick={() => setSelectedAchievement(null)}
+                style={{
+                  position: 'fixed', inset: 0, background: 'rgba(6,16,31,0.92)',
+                  display: 'flex', alignItems: 'center', justifyContent: 'center',
+                  zIndex: 1000, padding: 20,
+                }}
+              >
+                <div
+                  onClick={e => e.stopPropagation()}
+                  style={{
+                    position: 'relative', width: '100%', maxWidth: 360,
+                    background: P.deep, border: `1px solid ${P.gold}55`,
+                  }}
+                >
+                  <button
+                    onClick={() => setSelectedAchievement(null)}
+                    style={{
+                      position: 'absolute', top: 10, right: 10,
+                      background: 'none', border: `1px solid ${P.hair}`, color: P.mute, cursor: 'pointer',
+                      width: 26, height: 26, display: 'flex', alignItems: 'center', justifyContent: 'center',
+                      fontFamily: "'JetBrains Mono', monospace", fontSize: 12, lineHeight: 1,
+                    }}
+                  >×</button>
+
+                  <div style={{ padding: '36px 28px 28px', display: 'flex', flexDirection: 'column', alignItems: 'center', textAlign: 'center', gap: 16 }}>
+                    <img
+                      src={selectedAchievement.achievements.icon_url}
+                      alt={selectedAchievement.achievements.name}
+                      style={{ width: 120, height: 120, objectFit: 'contain' }}
+                    />
+                    <div>
+                      <div style={{
+                        fontFamily: 'Oswald, sans-serif', fontWeight: 700, fontSize: 20,
+                        color: P.cream, letterSpacing: '0.02em', lineHeight: 1.3,
+                      }}>
+                        {selectedAchievement.achievements.name.toUpperCase()}
                       </div>
-                      {a.date_earned && (
-                        <div style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: 8, color: P.mute, letterSpacing: '0.08em' }}>
-                          {new Date(a.date_earned).toLocaleDateString('en-US', { month: 'short', year: 'numeric' }).toUpperCase()}
+                      {selectedAchievement.date_earned && (
+                        <div style={{
+                          marginTop: 6,
+                          fontFamily: "'JetBrains Mono', monospace", fontSize: 9.5,
+                          color: P.gold, letterSpacing: '0.14em',
+                        }}>
+                          {new Date(selectedAchievement.date_earned).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }).toUpperCase()}
                         </div>
                       )}
                     </div>
-                  ))}
+                    {selectedAchievement.achievements.description && (
+                      <div style={{ width: '100%', paddingTop: 16, borderTop: `1px solid ${P.hair}` }}>
+                        <p style={{
+                          margin: 0, fontFamily: 'Inter, sans-serif', fontSize: 13,
+                          color: P.mute, lineHeight: 1.7,
+                        }}>
+                          {selectedAchievement.achievements.description}
+                        </p>
+                      </div>
+                    )}
+                  </div>
                 </div>
               </div>
             )}

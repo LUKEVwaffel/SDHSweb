@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { supabase as SB } from '../lib/supabaseClient';
 
 const P = {
@@ -377,8 +378,8 @@ function Brackets({ active, size = 14 }) {
 }
 
 // ─── Schematic placeholder for a missing portrait ─────────────────────────────
-function PhotoPending({ featured }) {
-  const r = featured ? 26 : 20;
+function PhotoPending() {
+  const r = 20;
   return (
     <div style={{
       width: '100%', height: '100%', position: 'relative',
@@ -399,14 +400,10 @@ function PhotoPending({ featured }) {
   );
 }
 
-// ─── Command portrait card (podium hero) ─────────────────────────────────────
-function CommandCard({ person, featured, onViewProfile }) {
+// ─── Command portrait card ─────────────────────────────────────────────────
+function CommandCard({ person, onViewProfile }) {
   const [hovered, setHovered] = useState(false);
   const view = () => onViewProfile(person);
-
-  // Podium geometry: featured lifts forward, flanks sit back + lower.
-  const baseY = featured ? -14 : 6;
-  const hoverY = featured ? -20 : 0;
 
   return (
     <div
@@ -415,14 +412,13 @@ function CommandCard({ person, featured, onViewProfile }) {
       tabIndex={0}
       aria-label={`View profile: ${person.name}, ${person.role_long || person.role_short}`}
       style={{
-        flex: featured ? '0 0 320px' : '0 0 240px',
-        maxWidth: featured ? 320 : 240,
+        flex: '0 0 200px',
+        maxWidth: 200,
         cursor: 'pointer',
         display: 'flex',
         flexDirection: 'column',
-        transform: `translateY(${hovered ? hoverY : baseY}px)`,
+        transform: `translateY(${hovered ? -4 : 0}px)`,
         transition: 'transform 0.35s cubic-bezier(0.16,1,0.3,1)',
-        zIndex: featured ? 3 : 1,
       }}
       onMouseEnter={() => setHovered(true)}
       onMouseLeave={() => setHovered(false)}
@@ -434,24 +430,22 @@ function CommandCard({ person, featured, onViewProfile }) {
       {/* Photo frame */}
       <div style={{
         position: 'relative',
-        aspectRatio: featured ? '3/4.25' : '3/4',
+        aspectRatio: '3/4',
         overflow: 'hidden',
         border: `1px solid ${hovered ? P.gold : P.hair}`,
         background: P.navy,
         transition: 'border-color 0.25s',
-        boxShadow: featured
-          ? `0 28px 64px -24px rgba(6,16,31,0.95)`
-          : `0 16px 40px -26px rgba(6,16,31,0.9)`,
+        boxShadow: `0 16px 40px -26px rgba(6,16,31,0.9)`,
       }}>
         {person.photo_url ? (
           <img src={person.photo_url} alt={person.name} style={{
             width: '100%', height: '100%', objectFit: 'cover', objectPosition: 'top', display: 'block',
             transition: 'transform 0.4s, filter 0.3s',
             transform: hovered ? 'scale(1.05)' : 'scale(1)',
-            filter: featured ? 'none' : (hovered ? 'none' : 'saturate(0.82) brightness(0.9)'),
+            filter: hovered ? 'none' : 'saturate(0.82) brightness(0.9)',
           }} />
         ) : (
-          <PhotoPending featured={featured} />
+          <PhotoPending />
         )}
         {/* Gradient */}
         <div style={{
@@ -459,25 +453,23 @@ function CommandCard({ person, featured, onViewProfile }) {
           background: 'linear-gradient(to bottom, transparent 42%, rgba(6,16,31,0.88) 100%)',
           pointerEvents: 'none',
         }} />
-        <Brackets active={hovered} size={featured ? 18 : 13} />
+        <Brackets active={hovered} size={13} />
         {/* Role chip */}
         <div style={{
-          position: 'absolute', top: 10, left: 12,
+          position: 'absolute', top: 8, left: 10,
           background: 'rgba(6,16,31,0.75)', border: `1px solid ${P.hair}`,
-          padding: '3px 9px', backdropFilter: 'blur(4px)',
+          padding: '3px 8px', backdropFilter: 'blur(4px)',
           fontFamily: "'JetBrains Mono', monospace", fontSize: 9, color: P.gold, letterSpacing: '0.2em',
         }}>{person.role_short}</div>
-        {/* Name overlay at bottom (flanks) */}
-        {!featured && (
-          <div style={{ position: 'absolute', bottom: 0, left: 0, right: 0, padding: '12px 14px' }}>
-            <div style={{ fontFamily: 'Oswald, sans-serif', fontWeight: 700, fontSize: 16, color: P.cream, letterSpacing: '0.05em', lineHeight: 1 }}>
-              {person.name.toUpperCase()}
-            </div>
-            <div style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: 8, color: P.mute, marginTop: 4, letterSpacing: '0.1em' }}>
-              {person.role_long}
-            </div>
+        {/* Name overlay */}
+        <div style={{ position: 'absolute', bottom: 0, left: 0, right: 0, padding: '10px 12px' }}>
+          <div style={{ fontFamily: 'Oswald, sans-serif', fontWeight: 700, fontSize: 15, color: P.cream, letterSpacing: '0.05em', lineHeight: 1 }}>
+            {person.name.toUpperCase()}
           </div>
-        )}
+          <div style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: 8, color: P.mute, marginTop: 4, letterSpacing: '0.1em' }}>
+            {person.role_long}
+          </div>
+        </div>
         {/* Hover overlay */}
         <div style={{
           position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center',
@@ -485,32 +477,63 @@ function CommandCard({ person, featured, onViewProfile }) {
         }}>
           <div style={{
             border: `1px solid ${P.gold}`, background: 'rgba(201,169,97,0.13)',
-            backdropFilter: 'blur(4px)', padding: '8px 18px',
-            fontFamily: "'JetBrains Mono', monospace", fontSize: 10, color: P.cream, letterSpacing: '0.2em',
+            backdropFilter: 'blur(4px)', padding: '7px 16px',
+            fontFamily: "'JetBrains Mono', monospace", fontSize: 9, color: P.cream, letterSpacing: '0.2em',
           }}>VIEW PROFILE →</div>
         </div>
       </div>
+    </div>
+  );
+}
 
-      {/* Gold nameplate for featured (BC) */}
-      {featured && (
-        <div style={{
-          background: hovered ? P.bright : P.gold, padding: '14px 16px',
-          transition: 'background 0.2s',
-        }}>
-          <div style={{ fontFamily: 'Oswald, sans-serif', fontWeight: 700, fontSize: 20, color: P.ink, letterSpacing: '0.05em', lineHeight: 1 }}>
-            {person.name.toUpperCase()}
-          </div>
-          <div style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: 9, color: `${P.ink}88`, letterSpacing: '0.18em', marginTop: 5 }}>
-            {(person.role_long || 'BATTALION COMMANDER').toUpperCase()}
-          </div>
-        </div>
-      )}
+// ─── Role brief strip — what each position does + why it's competitive ───────
+const ROLE_INFO = {
+  BC:  { title: 'Battalion Commander', blurb: "Owns the battalion's mission — sets priorities, represents Trojan Battalion to command staff and the school, and is accountable for every cadet's performance." },
+  XO:  { title: 'Executive Officer', blurb: "Runs day-to-day operations and keeps every specialty team, staff section, and event synced to the Commander's intent." },
+  CSM: { title: 'Command Sergeant Major', blurb: 'Senior enlisted advisor — owns cadet standards, discipline, and welfare, and is the direct link between the Commander and the cadet corps.' },
+};
+
+function RoleBriefStrip({ roles }) {
+  return (
+    <div style={{ marginTop: 36 }}>
+      <div style={{
+        display: 'grid', gridTemplateColumns: `repeat(${roles.length}, 1fr)`, gap: 0,
+        borderTop: `1px solid ${P.hair}`, borderBottom: `1px solid ${P.hair}`,
+      }}>
+        {roles.map((code, i) => {
+          const info = ROLE_INFO[code];
+          if (!info) return null;
+          return (
+            <div key={code} style={{
+              padding: '18px 24px',
+              borderLeft: i > 0 ? `1px solid ${P.hair}` : 'none',
+            }}>
+              <div style={{
+                fontFamily: "'JetBrains Mono', monospace", fontSize: 9, color: P.gold,
+                letterSpacing: '0.22em', marginBottom: 8,
+              }}>{info.title.toUpperCase()}</div>
+              <div style={{
+                fontFamily: 'Inter, sans-serif', fontSize: 13, lineHeight: 1.55, color: P.mute,
+              }}>{info.blurb}</div>
+            </div>
+          );
+        })}
+      </div>
+      <div style={{
+        textAlign: 'center', marginTop: 18,
+        fontFamily: "'JetBrains Mono', monospace", fontSize: 10, color: P.mute,
+        letterSpacing: '0.08em', fontStyle: 'italic', lineHeight: 1.6, maxWidth: 720, marginLeft: 'auto', marginRight: 'auto',
+      }}>
+        These three positions are filled once a year through a formal application and interview
+        process — selected from a battalion-wide pool of cadets competing for the role.
+      </div>
     </div>
   );
 }
 
 // ─── Main export ────────────────────────────────────────────────────────────────
-export default function BattalionCommand({ setActive }) {
+export default function BattalionCommand() {
+  const navigate = useNavigate();
   const [command, setCommand] = useState([]);
 
   useEffect(() => {
@@ -523,7 +546,7 @@ export default function BattalionCommand({ setActive }) {
     load();
   }, []);
 
-  function goProfile(person) { setActive(`profile-${person.id}`); }
+  function goProfile(person) { navigate(`/profile/${person.id}`, { state: { from: 'home' } }); }
 
   const roleOrder = ['BC', 'XO', 'CSM'];
   const sorted = [...command].sort((a, b) => {
@@ -536,11 +559,11 @@ export default function BattalionCommand({ setActive }) {
   const extras = sorted.filter(p => !roleOrder.includes(p.role_short));
   const cmdCount = sorted.length;
 
-  // Podium order: XO left, BC center (featured), CSM right.
+  // Podium order: XO left, BC center, CSM right — equal footing now, no featured lift.
   const trio = [
-    xo  && { p: xo,  featured: false, delay: '0.08s' },
-    bc  && { p: bc,  featured: true,  delay: '0.22s' },
-    csm && { p: csm, featured: false, delay: '0.36s' },
+    xo  && { p: xo,  code: 'XO',  delay: '0.08s' },
+    bc  && { p: bc,  code: 'BC',  delay: '0.22s' },
+    csm && { p: csm, code: 'CSM', delay: '0.36s' },
   ].filter(Boolean);
 
   // Nothing loaded yet (e.g. offline) — render nothing rather than a stub.
@@ -549,7 +572,7 @@ export default function BattalionCommand({ setActive }) {
   return (
     <section style={{
       background: P.ink, borderBottom: `1px solid ${P.hair}`,
-      padding: '72px 48px 88px', position: 'relative', overflow: 'hidden',
+      padding: '44px 48px 56px', position: 'relative', overflow: 'hidden',
     }}>
       <HeroStyles />
       <SectionBg />
@@ -557,41 +580,41 @@ export default function BattalionCommand({ setActive }) {
       <div style={{ maxWidth: 1400, margin: '0 auto', position: 'relative', zIndex: 1 }}>
 
         {/* ── Header — perfectly centered ── */}
-        <div style={{ textAlign: 'center', marginBottom: 32 }}>
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 16, marginBottom: 14 }}>
-            <div style={{ height: 1, width: 48, background: P.hair }} />
+        <div style={{ textAlign: 'center', marginBottom: 20 }}>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 16, marginBottom: 10 }}>
+            <div style={{ height: 1, width: 40, background: P.hair }} />
             <div style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: 9, color: P.gold, letterSpacing: '0.3em', opacity: 0.75 }}>
               // AY 2025–26 · TROJAN BATTALION · COMMAND
             </div>
-            <div style={{ height: 1, width: 48, background: P.hair }} />
+            <div style={{ height: 1, width: 40, background: P.hair }} />
           </div>
           <h2 style={{
-            fontFamily: 'Oswald, sans-serif', fontWeight: 700, fontSize: 68,
+            fontFamily: 'Oswald, sans-serif', fontWeight: 700, fontSize: 40,
             color: P.cream, letterSpacing: '0.04em', margin: 0, lineHeight: 1,
           }}>THE BATTALION</h2>
           {/* Dot indicator — middle dot marks center, aligns with BC card */}
-          <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', gap: 8, marginTop: 20 }}>
-            <div style={{ width: 40, height: 1, background: P.hair }} />
+          <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', gap: 8, marginTop: 12 }}>
+            <div style={{ width: 32, height: 1, background: P.hair }} />
             <div style={{ width: 5, height: 5, background: `${P.gold}50` }} />
             <div style={{ width: 7, height: 7, background: P.gold }} />
             <div style={{ width: 5, height: 5, background: `${P.gold}50` }} />
-            <div style={{ width: 40, height: 1, background: P.hair }} />
+            <div style={{ width: 32, height: 1, background: P.hair }} />
           </div>
-          <div style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: 9, color: P.mute, letterSpacing: '0.2em', marginTop: 18 }}>
+          <div style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: 9, color: P.mute, letterSpacing: '0.2em', marginTop: 12 }}>
             {cmdCount} PERSONNEL · COMMAND ECHELON
           </div>
         </div>
 
         {/* ── Podium stage with reticle ── */}
-        <div style={{ position: 'relative', padding: '20px 0 8px' }}>
+        <div style={{ position: 'relative', padding: '8px 0' }}>
           <CommandReticle />
           <div style={{
             position: 'relative', zIndex: 1,
-            display: 'flex', gap: 24, alignItems: 'flex-end', justifyContent: 'center', flexWrap: 'wrap',
+            display: 'flex', gap: 16, alignItems: 'flex-end', justifyContent: 'center', flexWrap: 'wrap',
           }}>
-            {trio.map(({ p, featured, delay }) => (
+            {trio.map(({ p, delay }) => (
               <div key={p.id} className="cmd-enter" style={{ animationDelay: delay }}>
-                <CommandCard person={p} featured={featured} onViewProfile={goProfile} />
+                <CommandCard person={p} onViewProfile={goProfile} />
               </div>
             ))}
             {extras.map((p, i) => (
@@ -601,6 +624,8 @@ export default function BattalionCommand({ setActive }) {
             ))}
           </div>
         </div>
+
+        <RoleBriefStrip roles={trio.map((t) => t.code)} />
       </div>
     </section>
   );

@@ -28,6 +28,7 @@ Deno.serve(async (req) => {
   try {
     const caller = await getCaller(req);
     if (!caller || caller.role !== "s6") return json({ error: "not authorized" }, 403);
+    if (caller.mustChangePassword) return json({ error: "password_change_required" }, 403);
 
     const { message_id, reviewer_email } = await req.json().catch(() => ({}));
     if (!message_id) return json({ error: "message_id required" }, 400);
@@ -69,7 +70,7 @@ Deno.serve(async (req) => {
     if (!RESEND_API_KEY) return json({ error: "RESEND_API_KEY not configured" }, 500);
     if (!origin) return json({ error: "WEBAUTHN_ORIGIN not configured (reused as site origin)" }, 500);
 
-    const link = `${origin}/#review?draft=${encodeURIComponent(message_id)}`;
+    const link = `${origin}/review?draft=${encodeURIComponent(message_id)}`;
 
     const res = await fetch("https://api.resend.com/emails", {
       method: "POST",

@@ -91,7 +91,7 @@ const UNITS = [
 
 const ALL_CHAPTERS = UNITS.flatMap(u => u.chapters.map(c => ({ ...c, unit: u.label, unitCode: u.code })));
 
-export default function CadetManual({ setActive }) {
+export default function CadetManual() {
   const [selected, setSelected] = useState(null); // null = list view, chapter = pdf view
   const [search, setSearch] = useState('');
   const [openUnits, setOpenUnits] = useState({ u0: true, u1: false, u2: false, u3: false, u4: false, u6: false });

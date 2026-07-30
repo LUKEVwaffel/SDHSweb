@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { supabase as SB } from '../lib/supabaseClient';
 import { getDeviceId } from '../lib/fingerprint';
 
@@ -30,10 +31,10 @@ function fmtCountdown(ms) {
 /**
  * Raiders 3-category photo voting. Reads photos where team='raiders'.
  * Embeddable on the Raiders page and the submit hub. Upload lives elsewhere.
- * @param {(id:string)=>void} [setActive] router; enables the "Submit a photo" link
  * @param {boolean} [compact] tighter padding when embedded in a page section
  */
-export default function RaiderVoting({ setActive, compact = false }) {
+export default function RaiderVoting({ compact = false }) {
+  const navigate = useNavigate();
   const [events, setEvents] = useState([]);
   const [selected, setSelected] = useState(null);
   const [photos, setPhotos] = useState([]);
@@ -163,9 +164,7 @@ export default function RaiderVoting({ setActive, compact = false }) {
             )}
             {!poll && <div style={{ fontFamily: inter, fontSize: 12, color: P.mute }}>Voting opens when an admin starts the poll for this event.</div>}
             {isClosing && <div style={{ fontFamily: inter, fontSize: 12, color: P.mute }}>Deadline reached — winners are being finalized.</div>}
-            {setActive && (
-              <button onClick={() => setActive('submit')} style={{ ...ghostBtn, marginLeft: 'auto' }}>+ SUBMIT A PHOTO</button>
-            )}
+            <button onClick={() => navigate('/submit')} style={{ ...ghostBtn, marginLeft: 'auto' }}>+ SUBMIT A PHOTO</button>
           </div>
 
           {/* Winners */}
