@@ -21,18 +21,25 @@ const SECTION_LABEL = {
 };
 
 // Which sections each role may see. s5 is scoped to the battalion calendar
-// only, but AAR tracking is its own dedicated grant — full is_admin() access,
-// not team-scoped like events (see supabase/aars.sql). s5 has no Advanced
-// access, so 'account' gives them a self-only PIN/Touch ID surface without
-// the full roster tool — same self-only enforcement AccountsPanel uses.
+// plus the Raiders team calendar (OpticSend requires S-5 to tag Raiders
+// events as photo events — see supabase/opticsend.sql SECTION 9). AAR
+// tracking is S-5 only (is_s5() on RLS, see supabase/aars.sql) — s6 gets no
+// nav entry and no RLS grant. s5 has no Advanced access, so 'account' gives
+// them a self-only PIN/Touch ID surface without the full roster tool — same
+// self-only enforcement AccountsPanel uses.
 const ROLE_SECTIONS = {
-  s6: ['overview', 'events', 'aars', 'people', 'photos', 'questions', 'email', 'media', 'advanced'],
+  s6: ['overview', 'events', 'people', 'photos', 'questions', 'email', 'media', 'advanced'],
   s5: ['events', 'aars', 'account'],
 };
 
+// team values s5 may create/edit/view events for. '' = battalion (team NULL).
+// Matches the RLS grant in opticsend.sql SECTION 9 exactly — expand both
+// together if s5's scope ever grows.
+const S5_ALLOWED_TEAMS = ['', 'raiders'];
+
 export default function Dashboard({ onLogout, adminId, role = 's6' }) {
   const allowed = ROLE_SECTIONS[role] || ROLE_SECTIONS.s6;
-  const battalionOnly = role === 's5';
+  const allowedTeams = role === 's5' ? S5_ALLOWED_TEAMS : undefined;
   const navigate = useNavigate();
   const location = useLocation();
 
@@ -53,7 +60,7 @@ export default function Dashboard({ onLogout, adminId, role = 's6' }) {
         <Sidebar active={section} allowed={allowed} />
         <div style={{ flex: 1, overflowY: 'auto', padding: `${sp[6]}px ${sp[8]}px`, maxWidth: 1500, width: '100%', margin: '0 auto' }}>
           {section === 'overview' && <OverviewPanel adminId={adminId} goto={goto} />}
-          {section === 'events'   && <EventsPanel adminId={adminId} battalionOnly={battalionOnly} />}
+          {section === 'events'   && <EventsPanel adminId={adminId} allowedTeams={allowedTeams} />}
           {section === 'aars'     && <AarsPanel adminId={adminId} />}
           {section === 'people'   && <PeoplePanel adminId={adminId} />}
           {section === 'photos'   && <PhotosPanel adminId={adminId} />}

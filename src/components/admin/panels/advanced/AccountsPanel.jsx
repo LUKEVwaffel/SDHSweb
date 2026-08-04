@@ -101,7 +101,7 @@ export default function AccountsPanel({ adminId }) {
 
   return (
     <div>
-      <PanelHeader title="ACCOUNTS" sub="Login picker — name, title & photo for anyone; PIN & passkey for your own account only" />
+      <PanelHeader title="ACCOUNTS" sub="Login picker: name, title & photo for anyone; PIN & passkey for your own account only" />
       <div style={{ display: 'grid', gridTemplateColumns: '320px 1fr', gap: sp[4] }}>
         {/* roster */}
         <div style={{ display: 'flex', flexDirection: 'column', gap: sp[2] }}>

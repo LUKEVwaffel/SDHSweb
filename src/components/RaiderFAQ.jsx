@@ -10,12 +10,12 @@ const oswald = 'Oswald, sans-serif';
 
 // Starter questions — content is a placeholder draft, meant to be edited.
 const FAQS = [
-  { q: 'What is the Raiders team?', a: 'Raiders is the Trojan Battalion’s physical fitness and tactical skills competition team — events include rope bridges, obstacle courses, land navigation, and team relays against other JROTC battalions.' },
+  { q: 'What is the Raiders team?', a: 'Raiders is the Trojan Battalion’s physical fitness and tactical skills competition team. Events include rope bridges, obstacle courses, land navigation, and team relays against other JROTC battalions.' },
   { q: 'How much time does it take?', a: 'Practices run a few times a week after school, with additional sessions in the weeks before a competition. Exact schedule is announced each season and posted on the calendar below.' },
-  { q: 'How do I join?', a: 'Any enrolled JROTC cadet can join — no tryout required to start. Talk to a Raiders commander or the Senior Army Instructor to get added to practices.' },
+  { q: 'How do I join?', a: 'Any enrolled JROTC cadet can join, no tryout required to start. Talk to a Raiders commander or the Senior Army Instructor to get added to practices.' },
   { q: 'Do I need to already be fit?', a: 'No prior fitness level is required. Training builds up over the season, and cadets of all starting fitness levels are welcome.' },
   { q: 'What does the competition schedule look like?', a: 'The team competes at scheduled meets throughout the school year, typically against other battalions in the region. See the Event Calendar section below for upcoming dates.' },
-  { q: 'Is prior JROTC experience needed?', a: 'No — Raiders is open to cadets at any point in the JROTC program, including first-year cadets.' },
+  { q: 'Is prior JROTC experience needed?', a: 'No. Raiders is open to cadets at any point in the JROTC program, including first-year cadets.' },
 ];
 
 function ChevronIcon({ open }) {

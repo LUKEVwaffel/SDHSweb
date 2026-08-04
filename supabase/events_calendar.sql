@@ -64,7 +64,7 @@ from (values
   ('Competition & Trophy Ceremony',                             '2025-10-03',       null,             'CEREMONY',        'Chattanooga Central HS',                          null),
   ('Fall Break',                                                 '2025-10-12',       null,             'BREAK',           null,                                              '2025-10-16'),
   ('Rifle Shoulder to Shoulder',                                '2025-10-27',       'rifle',          'RIFLE',           'SD @ HOW',                                        null),
-  ('Home Football Game — Senior Night',                         '2025-10-30',       null,             'FOOTBALL',        null,                                              null),
+  ('Home Football Game: Senior Night',                          '2025-10-30',       null,             'FOOTBALL',        null,                                              null),
   ('Rifle Shoulder to Shoulder',                                '2025-11-03',       'rifle',          'RIFLE',           'SD @ EH',                                         null),
   ('Rifle Shoulder to Shoulder',                                '2025-11-10',       'rifle',          'RIFLE',           'SC @ SD',                                         null),
   ('Rifle Shoulder to Shoulder',                                '2025-11-17',       'rifle',          'RIFLE',           'BRA @ SD',                                        null),

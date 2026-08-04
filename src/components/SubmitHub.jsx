@@ -31,8 +31,8 @@ export default function SubmitHub() {
         <h1 className="submit-title" style={{ fontFamily: oswald, fontWeight: 700, fontSize: 66, color: P.cream, letterSpacing: '0.02em', margin: 0, lineHeight: 0.9 }}>
           SUBMIT PHOTOS
         </h1>
-        <p style={{ color: P.mute, fontSize: 15, lineHeight: 1.7, maxWidth: 640, margin: '18px 0 0' }}>
-          Parents, photographers, and cadets — add your competition and practice photos for any
+        <p className="submit-lede" style={{ color: P.mute, fontSize: 15, lineHeight: 1.7, maxWidth: 640, margin: '18px 0 0' }}>
+          Parents, photographers, and cadets, add your competition and practice photos for any
           specialty team. Raider event photos go straight into the Funny / Aura / Team-Leading vote.
           You don't have to be a raider to submit or to vote.
         </p>
@@ -40,7 +40,7 @@ export default function SubmitHub() {
 
       <div className="submit-body" style={{ maxWidth: 1200, margin: '0 auto', padding: '36px 40px 90px' }}>
         {/* Uploader */}
-        <div style={{ maxWidth: 640, margin: '0 auto 56px' }}>
+        <div className="submit-uploader" style={{ maxWidth: 640, margin: '0 auto 56px' }}>
           <PhotoUploader onUploaded={(photo) => { setBrowseTeam(photo.team); setRefreshKey((k) => k + 1); }} />
         </div>
 
@@ -78,9 +78,11 @@ export default function SubmitHub() {
       </div>
       <style>{`
         @media (max-width: 767px) {
-          .submit-header { padding: 24px 20px 28px !important; }
-          .submit-title { font-size: 34px !important; }
-          .submit-body { padding: 24px 20px 60px !important; }
+          .submit-header { padding: 20px 20px 16px !important; }
+          .submit-title { font-size: 30px !important; }
+          .submit-lede { display: none; }
+          .submit-body { padding: 16px 20px 60px !important; }
+          .submit-uploader { margin-bottom: 40px !important; }
         }
       `}</style>
     </section>

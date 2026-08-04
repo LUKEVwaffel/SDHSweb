@@ -33,7 +33,7 @@ export default function AccountAuth({ account, onBack }) {
     try { await loginWithPasskey(account.email); }
     catch (e) {
       setBusy('');
-      if (e.message === 'password_change_required') { setShowPw(true); fail('Password reset required — sign in with your new password.'); return; }
+      if (e.message === 'password_change_required') { setShowPw(true); fail('Password reset required, sign in with your new password.'); return; }
       fail(e.message === 'invalid' ? 'Passkey rejected' : (e.message || 'Touch ID failed'));
     }
   }
@@ -43,9 +43,9 @@ export default function AccountAuth({ account, onBack }) {
     const { data, error } = await SB.functions.invoke('pin-login', { body: { email: account.email, pin: value } });
     if (error || data?.error) {
       setBusy(''); setPin('');
-      if (data?.error === 'password_change_required') { setShowPw(true); fail('Password reset required — sign in with your new password.'); return; }
-      if (data?.error === 'locked') fail(`Locked — too many tries. Try again after ${new Date(data.until).toLocaleTimeString()}.`);
-      else fail(typeof data?.remaining === 'number' ? `Wrong PIN — ${data.remaining} left before lockout` : 'Wrong PIN');
+      if (data?.error === 'password_change_required') { setShowPw(true); fail('Password reset required, sign in with your new password.'); return; }
+      if (data?.error === 'locked') fail(`Locked. Too many tries. Try again after ${new Date(data.until).toLocaleTimeString()}.`);
+      else fail(typeof data?.remaining === 'number' ? `Wrong PIN, ${data.remaining} left before lockout` : 'Wrong PIN');
       return;
     }
     const { error: otpErr } = await SB.auth.verifyOtp({ token_hash: data.token_hash, type: 'magiclink' });

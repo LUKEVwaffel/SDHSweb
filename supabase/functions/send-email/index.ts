@@ -2,10 +2,14 @@
 // Sends a signed email_messages row to all active subscribers via Resend.
 //
 // SEND GATE (enforced server-side): refuses unless the message row is
-// status IN ('approved','signed') — 'approved' covers the digital review-portal
-// path, 'signed' covers Kaiden's paper-override fallback. The client button
-// being disabled is convenience; THIS is the real lock — even a crafted
-// request cannot send a draft that hasn't cleared one of those two paths.
+// status = 'approved' — the digital review portal is the ONLY path to send,
+// for anyone. The paper wet-signature override ('signed'/'pending_signature')
+// was removed entirely: see supabase/email_review_revoke_override.sql, which
+// backfilled every pre-existing 'signed' row to 'approved' and dropped both
+// values from the status CHECK constraint, so 'signed' can no longer exist on
+// any row, old or new. The client button being disabled is convenience; THIS
+// is the real lock — even a crafted request cannot send a draft that hasn't
+// cleared digital review.
 //
 // Secrets (set with `supabase secrets set`, NEVER in .env / client bundle):
 //   RESEND_API_KEY   required
@@ -57,16 +61,25 @@ Deno.serve(async (req) => {
       .from("email_messages").select("*").eq("id", message_id).single();
     if (mErr || !msg) return json({ error: "message not found" }, 404);
     if (msg.status === "sent") return json({ error: "already sent" }, 409);
-    if (!["approved", "signed"].includes(msg.status)) {
-      return json({ error: "not cleared to send — message must be approved or signed" }, 403);
+    if (msg.status !== "approved") {
+      return json({ error: "not cleared to send, message must be approved by a reviewer" }, 403);
     }
 
-    // Active recipients.
-    const { data: subs, error: sErr } = await supabase
-      .from("email_subscribers").select("email").eq("active", true);
-    if (sErr) return json({ error: sErr.message }, 500);
-    const emails = (subs ?? []).map((s: { email: string }) => s.email).filter(Boolean);
-    if (!emails.length) return json({ error: "no active subscribers" }, 400);
+    // Recipients: a targeted send (msg.recipient_emails populated — currently
+    // only ever set by generate_opticsend_drafts(), never client-writable —
+    // see supabase/opticsend.sql SECTION 6) goes to exactly that list instead
+    // of broadcasting to every active subscriber. Every other message keeps
+    // the original full-broadcast behavior unchanged.
+    let emails: string[];
+    if (Array.isArray(msg.recipient_emails) && msg.recipient_emails.length > 0) {
+      emails = msg.recipient_emails.filter(Boolean);
+    } else {
+      const { data: subs, error: sErr } = await supabase
+        .from("email_subscribers").select("email").eq("active", true);
+      if (sErr) return json({ error: sErr.message }, 500);
+      emails = (subs ?? []).map((s: { email: string }) => s.email).filter(Boolean);
+    }
+    if (!emails.length) return json({ error: "no recipients, check recipient_emails or active subscribers" }, 400);
 
     // Branded HTML is the primary body; plaintext `body` is the text fallback.
     // Older drafts without body_html still send as plaintext only.

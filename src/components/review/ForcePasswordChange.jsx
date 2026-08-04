@@ -49,7 +49,7 @@ export default function ForcePasswordChange({ email, onDone }) {
       <div className="rv-panel">
         <h1 className="rv-h1" style={{ fontSize: 20, marginBottom: 6 }}>Password set ✓</h1>
         <p className="rv-sub" style={{ marginTop: 0, marginBottom: 20, fontSize: 14 }}>
-          One more thing — optional, you can also do this later from settings.
+          One more thing, optional, you can also do this later from settings.
         </p>
         <ReviewerPinControl email={email} hasPin={false} />
         <button className="rv-btn primary" onClick={onDone} style={{ marginTop: 20 }}>
@@ -63,7 +63,7 @@ export default function ForcePasswordChange({ email, onDone }) {
     <div className="rv-panel">
       <h1 className="rv-h1" style={{ fontSize: 20, marginBottom: 6 }}>Set your password</h1>
       <p className="rv-sub" style={{ marginTop: 0, marginBottom: 22, fontSize: 14 }}>
-        This is your first sign-in. Set your own password to continue — the temporary one won't work again after this.
+        This is your first sign-in. Set your own password to continue, the temporary one won't work again after this.
       </p>
       <label className="rv-label">New password</label>
       <input

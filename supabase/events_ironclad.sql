@@ -14,6 +14,10 @@
 -- added `not valid` so it only applies to future inserts/updates and never
 -- retroactively breaks already-posted historical rows (the AY2025-26 seed
 -- has no event_time / uniform / transportation / permission slip data).
+--
+-- EXEMPTIONS: Uniform Day events don't require event_time. Raiders-team
+-- events never require a uniform answer (uniform doesn't apply to that
+-- team) — this wins over the Uniform Day auto-force-yes on the client.
 -- Depends on: events_calendar.sql (adds category/uniform/transportation/
 -- status columns), admin_roles.sql (is_s5()/is_s6() for the storage policies).
 -- ============================================================================
@@ -35,10 +39,11 @@ alter table public.events
   check (end_date is null or category = 'BREAK') not valid;
 
 -- Uniform type constrained to the 4 options, only enforced when required=true.
+-- Raiders events are exempt entirely — uniform isn't applicable to that team.
 alter table public.events drop constraint if exists events_uniform_type_check;
 alter table public.events
   add constraint events_uniform_type_check
-  check (uniform_required = false or uniform in ('Class A', 'Class B', 'Khaki', 'Polo')) not valid;
+  check (team = 'raiders' or uniform_required = false or uniform in ('Class A', 'Class B', 'Khaki', 'Polo')) not valid;
 
 -- Transportation detail text required when flagged yes.
 alter table public.events drop constraint if exists events_transportation_check;
@@ -55,6 +60,8 @@ alter table public.events
 -- ── 3. THE iron-clad gate — cannot be 'posted' without every required
 -- field actually filled in, no matter what path the row was written
 -- through (UI bug, direct API call, etc). Drafts are unaffected.
+-- Uniform Day events don't need event_time set; Raiders events don't need
+-- a uniform answer at all — both mirrored from EventsPanel.jsx missingCore().
 alter table public.events drop constraint if exists events_posted_requires_fields_check;
 alter table public.events
   add constraint events_posted_requires_fields_check
@@ -63,8 +70,8 @@ alter table public.events
       title is not null and title <> '' and
       date is not null and
       category is not null and
-      event_time is not null and
-      (uniform_required = false or uniform in ('Class A', 'Class B', 'Khaki', 'Polo')) and
+      (category = 'UNIFORM_DAY' or event_time is not null) and
+      (team = 'raiders' or uniform_required = false or uniform in ('Class A', 'Class B', 'Khaki', 'Polo')) and
       (transportation_required = false or (transportation is not null and transportation <> '')) and
       (permission_slip_required = false or permission_slip_url is not null)
     )

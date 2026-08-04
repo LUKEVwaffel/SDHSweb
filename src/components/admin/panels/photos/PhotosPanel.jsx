@@ -3,12 +3,13 @@ import { TEAMS } from '../../../../lib/teams';
 import { P, mono, fs, sp } from '../../theme';
 import { Btn } from '../../shared/ui';
 import RaiderPolls from './RaiderPolls';
-import RaiderGallery from './RaiderGallery';
 import PhotoSubmissions from './PhotoSubmissions';
+import AdminBulkUpload from './AdminBulkUpload';
 
 // Single home for all team photos. SUBMISSIONS is the default — that's where
 // every public upload (battalion + specialty teams) lives. Polls are
-// voting-teams-only (Raiders today). Gallery is the curated "last year" set.
+// voting-teams-only (Raiders today). Bulk upload lets staff post a whole
+// batch on behalf of the team, tied to one posted event.
 const VOTING_TEAMS = TEAMS.filter((t) => t.voting);
 
 export default function PhotosPanel({ adminId }) {
@@ -16,8 +17,8 @@ export default function PhotosPanel({ adminId }) {
 
   const tabs = [
     { id: 'submissions', label: 'SUBMISSIONS · ALL PHOTOS' },
+    { id: 'bulk', label: 'BULK UPLOAD' },
     ...VOTING_TEAMS.map((t) => ({ id: `polls-${t.id}`, label: `${t.label.toUpperCase()} POLLS` })),
-    { id: 'gallery', label: 'CURATED GALLERY' },
   ];
 
   return (
@@ -28,8 +29,8 @@ export default function PhotosPanel({ adminId }) {
         ))}
       </div>
       {tab === 'submissions' && <PhotoSubmissions adminId={adminId} />}
+      {tab === 'bulk' && <AdminBulkUpload adminId={adminId} />}
       {tab === 'polls-raiders' && <RaiderPolls adminId={adminId} />}
-      {tab === 'gallery' && <RaiderGallery />}
       {tab.startsWith('polls-') && tab !== 'polls-raiders' && (
         <div style={{ fontFamily: mono, fontSize: fs.xs, color: P.mute, textAlign: 'center', marginTop: sp[10] }}>
           POLLS FOR THIS TEAM NOT ENABLED YET

@@ -6,6 +6,17 @@ const FULL_MAX = 1600;
 const THUMB_MAX = 400;
 const QUALITY = 0.82;
 
+// Camera RAW formats — the browser's <img>/canvas pipeline can't decode these
+// (no native codec), so resize would silently fail after the file is already
+// queued. Reject upfront with a message that tells the uploader what to do,
+// instead of a "Could not read image" dead end from the canvas step.
+const RAW_EXTENSIONS = ['cr2', 'cr3', 'nef', 'arw', 'dng', 'raf', 'orf', 'rw2', 'pef', 'srw'];
+
+export function isRawFile(file) {
+  const ext = file.name.split('.').pop()?.toLowerCase();
+  return RAW_EXTENSIONS.includes(ext);
+}
+
 function loadImage(file) {
   return new Promise((resolve, reject) => {
     const img = new Image();
@@ -46,6 +57,9 @@ function toBlob(canvas) {
  * @returns {Promise<{ full: Blob, thumb: Blob, width: number, height: number }>}
  */
 export async function resizeForUpload(file) {
+  if (isRawFile(file)) {
+    throw new Error('RAW files (.CR2, .NEF, etc.) aren\'t supported — export as JPEG first.');
+  }
   const img = await loadImage(file);
   const fullCanvas = drawScaled(img, FULL_MAX);
   const thumbCanvas = drawScaled(img, THUMB_MAX);

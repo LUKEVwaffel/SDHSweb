@@ -90,7 +90,7 @@ export default function PhotoSubmissions({ adminId }) {
       {loading ? (
         <div style={{ fontFamily: mono, fontSize: fs.xs, color: P.mute, textAlign: 'center', marginTop: sp[8] }}>LOADING…</div>
       ) : filtered.length === 0 ? (
-        <EmptyState icon="⊞" title="NO PHOTOS HERE YET" hint="Public submissions from the Submit Photos page appear here — battalion and every specialty team." />
+        <EmptyState icon="⊞" title="NO PHOTOS HERE YET" hint="Public submissions from the Submit Photos page appear here, battalion and every specialty team." />
       ) : (
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(180px, 1fr))', gap: sp[3] }}>
           {filtered.map((r) => {

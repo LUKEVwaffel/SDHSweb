@@ -2,6 +2,7 @@ import { useState, useEffect, useRef, useMemo } from 'react';
 import { supabase as SB } from '../../../../lib/supabaseClient';
 import { P, mono, oswald, inter, fs, sp, radius } from '../../theme';
 import { Btn, Card, Input, Label, PanelHeader, EmptyState } from '../../shared/ui';
+import posthog from '../../../../lib/posthog';
 
 // After Action Reports — usually tied to an event, but event_id is nullable
 // (standalone AARs supported). Two sources, one table (public.aars, see
@@ -124,6 +125,11 @@ export default function AarsPanel({ adminId }) {
     });
     setUploading(false);
     if (insErr) { alert(insErr.message); return; }
+    posthog.capture('aar_created', {
+      creation_method: 'file_upload',
+      confidentiality: pendingLevel,
+      is_linked_to_event: Boolean(pendingEventId),
+    });
     await SB.from('change_log').insert({
       admin_id: adminId, page: 'aars', element: path,
       label: `NEW AAR (upload): ${pendingTitle.trim()}`, value_before: {}, value_after: { title: pendingTitle.trim() },
@@ -175,6 +181,13 @@ export default function AarsPanel({ adminId }) {
     }
     setSavingDraft(false);
     if (error) { alert(error.message); return; }
+    if (!editingDraftId) {
+      posthog.capture('aar_created', {
+        creation_method: 'draft',
+        confidentiality: body.confidentiality,
+        is_linked_to_event: Boolean(body.event_id),
+      });
+    }
     await SB.from('change_log').insert({
       admin_id: adminId, page: 'aars', element: editingDraftId || 'new',
       label: `${editingDraftId ? 'EDIT' : 'NEW'} AAR (draft): ${body.title}`, value_before: {}, value_after: { title: body.title },
@@ -201,13 +214,13 @@ export default function AarsPanel({ adminId }) {
 
   function printFile(row) {
     const win = window.open(urls[row.storage_path], '_blank');
-    if (!win) { alert('Popup blocked — allow popups to print.'); return; }
+    if (!win) { alert('Popup blocked, allow popups to print.'); return; }
     win.addEventListener('load', () => win.print());
   }
 
   function printDraft(row) {
     const win = window.open('', '_blank');
-    if (!win) { alert('Popup blocked — allow popups to print.'); return; }
+    if (!win) { alert('Popup blocked, allow popups to print.'); return; }
     const eventLine = row.event_id ? (eventById[row.event_id]?.title || 'Linked event') : 'Standalone';
     win.document.write(`<!doctype html><html><head><title>${escapeHtml(row.title)}</title><style>
       body{font-family:Georgia,serif;max-width:720px;margin:40px auto;padding:0 20px;color:#111;line-height:1.5}
@@ -284,7 +297,7 @@ export default function AarsPanel({ adminId }) {
           <EmptyState
             icon="⊡"
             title={search ? 'NO MATCHING AARS' : statusFilter === 'archived' ? 'NO ARCHIVED AARS' : 'NO AARS YET'}
-            hint={dragOver ? 'Drop to upload.' : (search ? 'Try a different search term.' : 'Draft an AAR directly, or upload a PDF/Word file — optionally linked to an event, then track it here.')}
+            hint={dragOver ? 'Drop to upload.' : (search ? 'Try a different search term.' : 'Draft an AAR directly, or upload a PDF/Word file, optionally linked to an event, then track it here.')}
           />
         ) : (
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(220px, 1fr))', gap: sp[2] }}>
@@ -341,7 +354,7 @@ export default function AarsPanel({ adminId }) {
                 style={choiceBtnStyle(true)}
               >
                 <div style={{ fontFamily: mono, fontSize: fs.sm, color: P.cream, letterSpacing: '0.06em' }}>DRAFT IN DISPATCH</div>
-                <div style={{ fontFamily: inter, fontSize: fs.xs, color: P.mute, marginTop: 4 }}>Write it here — went well / needs improvement / summary. No file needed.</div>
+                <div style={{ fontFamily: inter, fontSize: fs.xs, color: P.mute, marginTop: 4 }}>Write it here: went well / needs improvement / summary. No file needed.</div>
               </button>
               <button
                 onClick={() => { setShowChoice(false); fileRef.current.click(); }}
@@ -362,7 +375,7 @@ export default function AarsPanel({ adminId }) {
       {pendingFile && (
         <div style={{ position: 'fixed', inset: 0, background: 'rgba(6,16,31,0.9)', zIndex: 60, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: sp[6] }}>
           <div style={{ background: P.navy, border: `1px solid ${P.hairStrong}`, borderRadius: radius.md, padding: sp[5], width: 420, maxWidth: '90vw' }}>
-            <Label>NEW AAR — FILE UPLOAD</Label>
+            <Label>NEW AAR: FILE UPLOAD</Label>
             <div style={{ fontFamily: mono, fontSize: fs.xs, color: P.mute, marginBottom: sp[3], overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{pendingFile.name}</div>
 
             <Label>TITLE</Label>
@@ -382,7 +395,7 @@ export default function AarsPanel({ adminId }) {
                   onChange={(e) => setPendingEventId(e.target.value)}
                   style={selectStyle}
                 >
-                  <option value="">— standalone —</option>
+                  <option value="">(standalone)</option>
                   {events.map((e) => <option key={e.id} value={e.id}>{e.title} ({e.date})</option>)}
                 </select>
               </div>
@@ -418,7 +431,7 @@ export default function AarsPanel({ adminId }) {
       {draftOpen && (
         <div style={{ position: 'fixed', inset: 0, background: 'rgba(6,16,31,0.9)', zIndex: 60, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: sp[6] }}>
           <div style={{ background: P.navy, border: `1px solid ${P.hairStrong}`, borderRadius: radius.md, padding: sp[5], width: 560, maxWidth: '92vw', maxHeight: '88vh', overflowY: 'auto' }}>
-            <Label>{editingDraftId ? 'EDIT DRAFTED AAR' : 'NEW AAR — DRAFT IN DISPATCH'}</Label>
+            <Label>{editingDraftId ? 'EDIT DRAFTED AAR' : 'NEW AAR: DRAFT IN DISPATCH'}</Label>
 
             <div style={{ marginTop: sp[3], marginBottom: sp[3] }}>
               <Label>TITLE</Label>
@@ -433,7 +446,7 @@ export default function AarsPanel({ adminId }) {
               <div>
                 <Label>LINKED EVENT (optional)</Label>
                 <select value={draft.eventId} onChange={(e) => setDraft((d) => ({ ...d, eventId: e.target.value }))} style={selectStyle}>
-                  <option value="">— standalone —</option>
+                  <option value="">(standalone)</option>
                   {events.map((e) => <option key={e.id} value={e.id}>{e.title} ({e.date})</option>)}
                 </select>
               </div>
@@ -510,7 +523,7 @@ export default function AarsPanel({ adminId }) {
               ) : isPdf(preview.file_name) ? (
                 <iframe title={preview.file_name} src={urls[preview.storage_path]} style={{ width: '86vw', height: '76vh', border: 'none', background: '#fff' }} />
               ) : (
-                <div style={{ fontFamily: mono, fontSize: fs.sm, color: P.mute, padding: sp[10] }}>No inline preview for this file type — use GET to download.</div>
+                <div style={{ fontFamily: mono, fontSize: fs.sm, color: P.mute, padding: sp[10] }}>No inline preview for this file type. Use GET to download.</div>
               )}
             </div>
           </div>

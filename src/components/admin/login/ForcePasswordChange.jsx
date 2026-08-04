@@ -60,7 +60,7 @@ export default function ForcePasswordChange({ email, onDone }) {
         <div style={panelStyle}>
           <div style={{ fontFamily: inter, fontSize: fs.md, color: P.cream, marginBottom: 6 }}>Password set ✓</div>
           <div style={{ fontFamily: mono, fontSize: fs.tiny, color: P.mute, marginBottom: sp[5], lineHeight: 1.6 }}>
-            Optional — set a PIN or Touch ID for faster sign-in next time. You can also do this later from Accounts.
+            Optional. Set a PIN or Touch ID for faster sign-in next time. You can also do this later from Accounts.
           </div>
           <SelfCredentialControls email={email} hasPin={false} hasPasskey={false} />
           <button onClick={onDone} style={{
@@ -78,7 +78,7 @@ export default function ForcePasswordChange({ email, onDone }) {
       <div style={panelStyle}>
         <div style={{ fontFamily: inter, fontSize: fs.md, color: P.cream, marginBottom: 6 }}>Set your password</div>
         <div style={{ fontFamily: mono, fontSize: fs.tiny, color: P.mute, marginBottom: sp[5], lineHeight: 1.6 }}>
-          This is your first sign-in. Set your own password to continue — the temporary one won't work again after this.
+          This is your first sign-in. Set your own password to continue, the temporary one won't work again after this.
         </div>
 
         <div style={{ fontFamily: mono, fontSize: fs.micro, color: P.gold, letterSpacing: '0.18em', marginBottom: sp[2] }}>NEW PASSWORD</div>

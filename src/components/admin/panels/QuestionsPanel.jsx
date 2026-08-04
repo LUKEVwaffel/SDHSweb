@@ -131,7 +131,7 @@ export default function QuestionsPanel() {
                   <textarea
                     value={drafts[r.id] || ''}
                     onChange={(e) => setDrafts((d) => ({ ...d, [r.id]: e.target.value }))}
-                    placeholder={`Write your answer — this is emailed directly to ${r.submitter_email}…`}
+                    placeholder={`Write your answer, this is emailed directly to ${r.submitter_email}…`}
                     rows={4}
                     style={{
                       width: '100%', background: P.ink, border: `1px solid ${P.hair}`, color: P.cream,

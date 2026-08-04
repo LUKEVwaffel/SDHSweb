@@ -1,7 +1,8 @@
 import { useState, useEffect, useCallback } from 'react';
 import { supabase as SB } from '../../../../lib/supabaseClient';
-import { P, mono, oswald, inter } from '../../theme';
-import { Btn, Card, Label, Input, PanelHeader } from '../../shared/ui';
+import { P, mono, oswald, inter, fs, sp, radius, shadow, ease } from '../../theme';
+import { Btn, Card, Label, Input, Select, SuffixEmailInput, StatusPills, Toast, Modal, PanelHeader, EmptyState } from '../../shared/ui';
+import { TEAMS } from '../../../../lib/teams';
 
 const COMPANIES = [
   { id: 'alpha',   label: 'ALPHA' },
@@ -19,6 +20,24 @@ const STATUSES = [
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
+const GRADE_OPTIONS = [
+  { value: '', label: '—' },
+  { value: '9',  label: '9TH' },
+  { value: '10', label: '10TH' },
+  { value: '11', label: '11TH' },
+  { value: '12', label: '12TH' },
+];
+
+const LET_OPTIONS = [
+  { value: '', label: '—' },
+  { value: '1', label: 'LET 1' },
+  { value: '2', label: 'LET 2' },
+  { value: '3', label: 'LET 3' },
+  { value: '4', label: 'LET 4' },
+];
+
+const BLANK_ADD_FORM = { name: '', grade: '', let_level: '', school_email: '', parent_email: '' };
+
 // Cadet database, organized by company. Each row is both a photo-consent record
 // AND the cadet's contact record — same `cadet_consent` table (run
 // supabase/cadet_consent.sql + supabase/cadet_consent_contact.sql first).
@@ -27,15 +46,31 @@ const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 export default function ConsentSection({ adminId }) {
   const [company, setCompany] = useState('alpha');
   const [rows, setRows] = useState([]);
+  const [counts, setCounts] = useState({});
   const [missing, setMissing] = useState(false);
-  const [newName, setNewName] = useState('');
+
+  // add-cadet popup
+  const [addOpen, setAddOpen] = useState(false);
+  const [addForm, setAddForm] = useState(BLANK_ADD_FORM);
+  const [addCompany, setAddCompany] = useState('alpha');
+  const [addNameErr, setAddNameErr] = useState(false);
+  const [adding, setAdding] = useState(false);
+  const [addMsg, setAddMsg] = useState('');
+  const [addErr, setAddErr] = useState(false);
 
   // detail view state
   const [selectedId, setSelectedId] = useState(null);
   const [form, setForm] = useState({});
   const [saving, setSaving] = useState(false);
   const [detailMsg, setDetailMsg] = useState('');
+  const [detailErr, setDetailErr] = useState(false);
   const [listMsg, setListMsg] = useState('');
+  const [listErr, setListErr] = useState(false);
+
+  // real team-membership — this is what OpticSend reads (via cadet_teams
+  // joined to school_email/parent_email on this same row). See
+  // supabase/opticsend.sql SECTION 3.
+  const [cadetTeams, setCadetTeams] = useState([]);
 
   const load = useCallback(async () => {
     const { data, error } = await SB.from('cadet_consent').select('*').eq('company', company).order('sort_order').order('name');
@@ -44,16 +79,42 @@ export default function ConsentSection({ adminId }) {
     setRows(data || []);
   }, [company]);
 
-  useEffect(() => { load(); }, [load]);
+  // Per-company counts for the tab row — independent of the active filter so
+  // every tab shows a real number, not just the one you're currently on.
+  const loadCounts = useCallback(async () => {
+    const { data } = await SB.from('cadet_consent').select('company');
+    const c = {};
+    for (const r of data || []) c[r.company] = (c[r.company] || 0) + 1;
+    setCounts(c);
+  }, []);
 
-  // Reset detail when switching companies.
-  useEffect(() => { setSelectedId(null); setForm({}); setDetailMsg(''); setListMsg(''); }, [company]);
+  useEffect(() => { load(); }, [load]);
+  useEffect(() => { loadCounts(); }, [loadCounts]);
+
+  // Reset detail when switching companies. Default the add-cadet popup's
+  // company to the active tab, but it stays independently editable there.
+  useEffect(() => { setSelectedId(null); setForm({}); setDetailMsg(''); setListMsg(''); setAddCompany(company); }, [company]);
 
   function openCadet(row) {
     setSelectedId(row.id);
     setForm({ ...row });
     setDetailMsg('');
     setListMsg('');
+    loadCadetTeams(row.id);
+  }
+
+  async function loadCadetTeams(cadetConsentId) {
+    const { data } = await SB.from('cadet_teams').select('team').eq('cadet_consent_id', cadetConsentId);
+    setCadetTeams((data || []).map((r) => r.team));
+  }
+
+  async function toggleCadetTeam(cadetConsentId, team, on) {
+    if (on) {
+      await SB.from('cadet_teams').delete().eq('cadet_consent_id', cadetConsentId).eq('team', team);
+    } else {
+      await SB.from('cadet_teams').insert({ cadet_consent_id: cadetConsentId, team });
+    }
+    loadCadetTeams(cadetConsentId);
   }
 
   async function setStatus(row, status) {
@@ -74,6 +135,8 @@ export default function ConsentSection({ adminId }) {
     const patch = {
       name: (form.name || '').trim(),
       role: form.role || null,
+      grade: form.grade || null,
+      let_level: form.let_level || null,
       school_email: (form.school_email || '').trim() || null,
       parent_email: (form.parent_email || '').trim() || null,
       note: form.note || null,
@@ -81,7 +144,8 @@ export default function ConsentSection({ adminId }) {
     };
     const { error } = await SB.from('cadet_consent').update(patch).eq('id', selectedId);
     setSaving(false);
-    setDetailMsg(error ? error.message : 'Saved ✓');
+    setDetailErr(!!error);
+    setDetailMsg(error ? error.message : 'Saved');
     setTimeout(() => setDetailMsg(''), 2500);
     load();
   }
@@ -90,20 +154,46 @@ export default function ConsentSection({ adminId }) {
   // deduped by email — no DB trigger.
   async function addParentToList() {
     const email = (form.parent_email || '').trim().toLowerCase();
-    if (!EMAIL_RE.test(email)) { setListMsg('Enter a valid parent email first'); return; }
+    if (!EMAIL_RE.test(email)) { setListErr(true); setListMsg('Enter a valid parent email first'); return; }
     const { data: existing } = await SB.from('email_subscribers').select('id').eq('email', email).maybeSingle();
-    if (existing) { setListMsg('Already on the mailing list'); return; }
+    if (existing) { setListErr(true); setListMsg('Already on the mailing list'); return; }
     const { error } = await SB.from('email_subscribers').insert({ email, source: 'manual', company });
-    setListMsg(error ? (error.code === '23505' ? 'Already on the mailing list' : error.message) : 'Added to mailing list ✓');
+    setListErr(!!error);
+    setListMsg(error ? (error.code === '23505' ? 'Already on the mailing list' : error.message) : 'Added to mailing list');
     setTimeout(() => setListMsg(''), 3000);
   }
 
-  async function addCadet() {
-    if (!newName.trim()) return;
+  function openAddModal() {
+    setAddForm(BLANK_ADD_FORM);
+    setAddCompany(company);
+    setAddNameErr(false);
+    setAddOpen(true);
+  }
+
+  async function submitAddCadet() {
+    const name = addForm.name.trim();
+    if (!name) { setAddNameErr(true); return; }
+    setAddNameErr(false);
+    setAdding(true);
     const maxOrder = Math.max(0, ...rows.map((r) => r.sort_order || 0));
-    await SB.from('cadet_consent').insert({ name: newName.trim(), company, sort_order: maxOrder + 1 });
-    setNewName('');
-    load();
+    const payload = {
+      name,
+      company: addCompany,
+      grade: addForm.grade || null,
+      let_level: addForm.let_level || null,
+      school_email: addForm.school_email.trim() || null,
+      parent_email: addForm.parent_email.trim() || null,
+      sort_order: maxOrder + 1,
+    };
+    const { error } = await SB.from('cadet_consent').insert(payload);
+    setAdding(false);
+    setAddErr(!!error);
+    setAddMsg(error ? error.message : `Added ${name} to ${addCompany.toUpperCase()}`);
+    if (error) return; // leave the popup open + message visible so they can fix and retry
+    setAddOpen(false);
+    setTimeout(() => setAddMsg(''), 3000);
+    loadCounts();
+    if (addCompany === company) load();
   }
 
   async function del(row) {
@@ -111,6 +201,7 @@ export default function ConsentSection({ adminId }) {
     await SB.from('cadet_consent').delete().eq('id', row.id);
     if (selectedId === row.id) { setSelectedId(null); setForm({}); }
     load();
+    loadCounts();
   }
 
   const collected = rows.filter((r) => r.consent_status === 'collected').length;
@@ -121,7 +212,7 @@ export default function ConsentSection({ adminId }) {
       <div>
         <PanelHeader title="CADET DATABASE · BY COMPANY" />
         <Card>
-          <div style={{ fontFamily: mono, fontSize: 10, color: P.mute, lineHeight: 1.9 }}>
+          <div style={{ fontFamily: mono, fontSize: fs.tiny, color: P.mute, lineHeight: 1.9 }}>
             <div style={{ color: P.gold }}>CADET TABLE NOT FOUND</div>
             <div>Run <span style={{ color: P.cream }}>supabase/cadet_consent.sql</span> then <span style={{ color: P.cream }}>supabase/cadet_consent_contact.sql</span> in the Supabase SQL editor.</div>
             <div>Then import the roster (sectioned by company) and it appears here.</div>
@@ -133,75 +224,137 @@ export default function ConsentSection({ adminId }) {
 
   return (
     <div>
-      <PanelHeader title="CADET DATABASE · BY COMPANY" />
-      <div style={{ display: 'flex', gap: 6, marginBottom: 12, flexWrap: 'wrap' }}>
-        {COMPANIES.map((c) => (
-          <Btn key={c.id} variant={company === c.id ? 'gold' : 'ghost'} onClick={() => setCompany(c.id)} style={{ fontSize: 9 }}>{c.label}</Btn>
-        ))}
+      <PanelHeader title="CADET DATABASE" />
+
+      {/* company tabs — subordinate to the Staff/Command ↔ Cadet Database
+          switch one level up (PeoplePanel), so this reads as "filter within
+          this view" rather than another top-level nav. */}
+      <div style={{ display: 'flex', gap: sp[5], borderBottom: `1px solid ${P.hair}`, marginBottom: sp[4], flexWrap: 'wrap' }}>
+        {COMPANIES.map((c) => {
+          const active = company === c.id;
+          return (
+            <button key={c.id} onClick={() => setCompany(c.id)} style={{
+              fontFamily: mono, fontSize: fs.tiny, letterSpacing: '0.14em', fontWeight: 500,
+              padding: `0 0 ${sp[2]}px`, marginBottom: -1, border: 'none', background: 'none', cursor: 'pointer',
+              color: active ? P.gold : P.faint, borderBottom: `2px solid ${active ? P.gold : 'transparent'}`,
+              transition: `color 0.15s ${ease}, border-color 0.15s ${ease}`,
+            }}>
+              {c.label} <span style={{ color: P.faint, fontSize: fs.micro }}>{counts[c.id] ?? 0}</span>
+            </button>
+          );
+        })}
       </div>
 
       {/* progress */}
-      <Card style={{ marginBottom: 12 }}>
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', marginBottom: 8 }}>
-          <Label>CONSENT COLLECTED</Label>
-          <div style={{ fontFamily: oswald, fontSize: 20, color: P.cream }}>
-            {collected} / {rows.length} <span style={{ fontSize: 13, color: P.gold }}>· {pct}%</span>
+      <Card style={{ marginBottom: sp[4] }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', marginBottom: sp[2] }}>
+          <Label style={{ marginBottom: 0 }}>CONSENT COLLECTED</Label>
+          <div style={{ fontFamily: oswald, fontSize: fs.lg, color: P.cream }}>
+            {collected} / {rows.length} <span style={{ fontSize: fs.sm, color: P.gold }}>· {pct}%</span>
           </div>
         </div>
-        <div style={{ height: 8, background: P.deep, border: `1px solid ${P.hair}` }}>
-          <div style={{ height: '100%', width: `${pct}%`, background: P.gold, transition: 'width 0.2s' }} />
+        <div style={{ height: 7, background: P.deep, border: `1px solid ${P.hair}`, borderRadius: radius.sm, overflow: 'hidden' }}>
+          <div style={{ height: '100%', width: `${pct}%`, background: `linear-gradient(90deg, ${P.gold}, ${P.bright})`, transition: `width 0.3s ${ease}` }} />
         </div>
       </Card>
 
       {/* add */}
-      <div style={{ display: 'flex', gap: 6, marginBottom: 10 }}>
-        <Input value={newName} onChange={(e) => setNewName(e.target.value)} style={{ flex: 1, fontSize: 11 }}
-          placeholder="Add cadet name…" onKeyDown={(e) => e.key === 'Enter' && addCadet()} />
-        <Btn onClick={addCadet} variant="ghost" style={{ fontSize: 9 }}>+ ADD CADET</Btn>
+      <div style={{ marginBottom: sp[2] }}>
+        <Btn onClick={openAddModal} variant="gold" size="sm">+ ADD CADET</Btn>
+      </div>
+      <div style={{ marginBottom: sp[4], minHeight: fs.tiny }}>
+        <Toast tone={addErr ? 'error' : 'success'}>{addMsg}</Toast>
       </div>
 
+      <Modal open={addOpen} onClose={() => setAddOpen(false)} title="ADD CADET" footer={<>
+        <Btn onClick={() => setAddOpen(false)} variant="ghost" size="sm">CANCEL</Btn>
+        <Btn onClick={submitAddCadet} variant="gold" size="sm" disabled={adding}>{adding ? 'ADDING…' : 'ADD CADET'}</Btn>
+      </>}>
+        <div style={{ marginBottom: sp[3] }}>
+          <Label>NAME *</Label>
+          <Input value={addForm.name} error={addNameErr} placeholder="Cadet full name" autoFocus
+            onChange={(e) => { setAddForm((f) => ({ ...f, name: e.target.value })); if (addNameErr) setAddNameErr(false); }} />
+          {addNameErr && <div style={{ fontFamily: mono, fontSize: fs.micro, color: P.red, marginTop: sp[1] }}>Enter a name first</div>}
+        </div>
+
+        <div style={{ marginBottom: sp[3] }}>
+          <Label>COMPANY *</Label>
+          <Select value={addCompany} onChange={(e) => setAddCompany(e.target.value)}
+            options={COMPANIES.map((c) => ({ value: c.id, label: c.label }))} />
+        </div>
+
+        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: `0 ${sp[3]}px`, marginBottom: sp[3] }}>
+          <div>
+            <Label>GRADE</Label>
+            <Select value={addForm.grade} onChange={(e) => setAddForm((f) => ({ ...f, grade: e.target.value }))} options={GRADE_OPTIONS} />
+          </div>
+          <div>
+            <Label>LET LEVEL</Label>
+            <Select value={addForm.let_level} onChange={(e) => setAddForm((f) => ({ ...f, let_level: e.target.value }))} options={LET_OPTIONS} />
+          </div>
+        </div>
+
+        <div style={{ marginBottom: sp[3] }}>
+          <Label>SCHOOL EMAIL</Label>
+          <SuffixEmailInput value={addForm.school_email} onChange={(v) => setAddForm((f) => ({ ...f, school_email: v }))} />
+        </div>
+
+        <div style={{ marginBottom: sp[1] }}>
+          <Label>PARENT EMAIL</Label>
+          <Input value={addForm.parent_email} onChange={(e) => setAddForm((f) => ({ ...f, parent_email: e.target.value }))} placeholder="feeds the mailing list" />
+        </div>
+
+        {/* lives inside the modal (not just the page-level toast below) so an
+            insert error is actually visible — the modal overlay would hide the
+            outer toast completely while open. */}
+        <Toast tone={addErr ? 'error' : 'success'} style={{ marginTop: sp[2] }}>{addMsg}</Toast>
+      </Modal>
+
       {/* roster (left) + detail (right) */}
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 360px', gap: 12, alignItems: 'start' }}>
+      <div style={{ display: 'grid', gridTemplateColumns: '1fr 380px', gap: sp[4], alignItems: 'start' }}>
         {/* roster */}
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: sp[1] }}>
           {rows.map((r) => {
             const on = selectedId === r.id;
             return (
-              <Card key={r.id} onClick={() => openCadet(r)} style={{
-                padding: '7px 10px', cursor: 'pointer',
-                background: on ? P.navy : P.deep,
+              <div key={r.id} onClick={() => openCadet(r)} style={{
+                display: 'flex', alignItems: 'center', gap: sp[3], cursor: 'pointer',
+                background: on ? P.navyLift : P.navy,
                 border: `1px solid ${on ? P.gold : P.hair}`,
+                borderRadius: radius.md, padding: `${sp[2]}px ${sp[3]}px`,
+                boxShadow: on ? shadow.sm : 'none',
+                transition: `border-color 0.15s ${ease}, box-shadow 0.15s ${ease}`,
               }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-                  <div style={{ flex: 1, minWidth: 0 }}>
-                    <div style={{ fontFamily: inter, fontSize: 12, color: P.cream, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{r.name}</div>
-                    <div style={{ fontFamily: mono, fontSize: 8, color: P.mute }}>
-                      {r.parent_email ? '✉ parent on file' : 'no parent email'}
-                      {r.consent_status === 'collected' && r.collected_at ? ` · signed ${new Date(r.collected_at).toLocaleDateString()}` : ''}
-                    </div>
-                  </div>
-                  <div style={{ display: 'flex', gap: 3 }} onClick={(e) => e.stopPropagation()}>
-                    {STATUSES.map((s) => {
-                      const active = r.consent_status === s.id;
-                      return (
-                        <button key={s.id} onClick={() => setStatus(r, s.id)} title={s.label} style={{
-                          background: active ? s.color : 'transparent',
-                          border: `1px solid ${active ? s.color : P.hair}`,
-                          color: active ? (s.id === 'pending' ? P.ink : '#fff') : P.mute,
-                          cursor: 'pointer', fontFamily: mono, fontSize: 8, letterSpacing: '0.1em', padding: '4px 7px',
-                        }}>{s.label}</button>
-                      );
-                    })}
-                    <button onClick={() => del(r)} style={{ background: 'none', border: 'none', color: P.red, cursor: 'pointer', fontSize: 12 }}>×</button>
+                <div style={{
+                  width: 36, height: 36, borderRadius: radius.sm, background: P.deep, border: `1px solid ${P.hair}`,
+                  display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0,
+                  fontFamily: mono, fontSize: fs.sm, color: P.faint,
+                }}>{(r.name || '?').charAt(0).toUpperCase()}</div>
+                <div style={{ flex: 1, minWidth: 0 }}>
+                  <div style={{ fontFamily: inter, fontSize: fs.sm, color: P.cream, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{r.name}</div>
+                  <div style={{ fontFamily: mono, fontSize: fs.micro, color: P.faint, marginTop: 2 }}>
+                    {r.grade ? `${r.grade}TH` : ''}{r.grade && r.let_level ? ' · ' : ''}{r.let_level ? `LET ${r.let_level}` : ''}{(r.grade || r.let_level) ? ' · ' : ''}
+                    {r.parent_email ? '✉ parent on file' : 'no parent email'}
+                    {r.consent_status === 'collected' && r.collected_at ? ` · signed ${new Date(r.collected_at).toLocaleDateString()}` : ''}
                   </div>
                 </div>
-              </Card>
+                <div style={{ display: 'flex', alignItems: 'center', gap: sp[2] }} onClick={(e) => e.stopPropagation()}>
+                  <StatusPills items={STATUSES} value={r.consent_status} onChange={(id) => setStatus(r, id)} size="compact" />
+                  <button onClick={() => del(r)} title="Remove cadet" style={{
+                    width: 30, height: 30, borderRadius: radius.sm, border: '1px solid transparent',
+                    background: 'transparent', color: P.faint, cursor: 'pointer', fontSize: fs.base,
+                    display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0,
+                    transition: `all 0.15s ${ease}`,
+                  }}
+                  onMouseEnter={(e) => { e.currentTarget.style.color = P.red; e.currentTarget.style.background = 'rgba(192,57,43,0.12)'; e.currentTarget.style.borderColor = 'rgba(192,57,43,0.3)'; }}
+                  onMouseLeave={(e) => { e.currentTarget.style.color = P.faint; e.currentTarget.style.background = 'transparent'; e.currentTarget.style.borderColor = 'transparent'; }}
+                  >✕</button>
+                </div>
+              </div>
             );
           })}
           {!rows.length && (
-            <div style={{ fontFamily: mono, fontSize: 10, color: P.mute, textAlign: 'center', padding: 24 }}>
-              NO CADETS FOR {company.toUpperCase()} YET · add above or import the roster
-            </div>
+            <EmptyState title={`NO CADETS FOR ${company.toUpperCase()} YET`} hint="Add one above, or import the roster." />
           )}
         </div>
 
@@ -210,61 +363,85 @@ export default function ConsentSection({ adminId }) {
           {form.id ? (
             <Card>
               <PanelHeader title={`CADET · ${(form.name || '').toUpperCase() || 'UNNAMED'}`} action={
-                <Btn onClick={saveDetail} variant="gold" disabled={saving} style={{ fontSize: 9 }}>
+                <Btn onClick={saveDetail} variant="gold" size="sm" disabled={saving}>
                   {saving ? 'SAVING…' : 'SAVE'}
                 </Btn>
               } />
 
-              <div style={{ marginBottom: 8 }}>
+              <div style={{ marginBottom: sp[3] }}>
                 <Label>NAME</Label>
                 <Input value={form.name || ''} onChange={(e) => setForm((f) => ({ ...f, name: e.target.value }))} />
               </div>
-              <div style={{ marginBottom: 8 }}>
+              <div style={{ marginBottom: sp[3] }}>
                 <Label>ROLE / RANK</Label>
                 <Input value={form.role || ''} onChange={(e) => setForm((f) => ({ ...f, role: e.target.value }))} placeholder="cadet, staff, rank…" />
               </div>
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: `0 ${sp[3]}px`, marginBottom: sp[3] }}>
+                <div>
+                  <Label>GRADE</Label>
+                  <Select value={form.grade || ''} onChange={(e) => setForm((f) => ({ ...f, grade: e.target.value }))} options={GRADE_OPTIONS} />
+                </div>
+                <div>
+                  <Label>LET LEVEL</Label>
+                  <Select value={form.let_level || ''} onChange={(e) => setForm((f) => ({ ...f, let_level: e.target.value }))} options={LET_OPTIONS} />
+                </div>
+              </div>
 
               {/* consent status */}
-              <div style={{ marginBottom: 10 }}>
+              <div style={{ marginBottom: sp[4] }}>
                 <Label>PHOTO CONSENT</Label>
-                <div style={{ display: 'flex', gap: 4 }}>
-                  {STATUSES.map((s) => {
-                    const active = form.consent_status === s.id;
+                <StatusPills items={STATUSES} value={form.consent_status} onChange={(id) => setStatus(form, id)} size="regular" style={{ width: '100%' }} />
+              </div>
+
+              <div style={{ marginBottom: sp[3] }}>
+                <Label>SCHOOL EMAIL</Label>
+                <SuffixEmailInput value={form.school_email || ''} onChange={(v) => setForm((f) => ({ ...f, school_email: v }))} />
+              </div>
+              <div style={{ marginBottom: sp[3] }}>
+                <Label>PARENT EMAIL</Label>
+                <Input value={form.parent_email || ''} onChange={(e) => setForm((f) => ({ ...f, parent_email: e.target.value }))} placeholder="feeds the mailing list" />
+                <div style={{ display: 'flex', gap: sp[3], alignItems: 'center', marginTop: sp[2], flexWrap: 'wrap' }}>
+                  <Btn onClick={addParentToList} variant="green" size="sm">+ ADD PARENT TO MAILING LIST</Btn>
+                  <Toast tone={listErr ? 'error' : 'success'}>{listMsg}</Toast>
+                </div>
+              </div>
+
+              <div style={{ marginBottom: sp[3] }}>
+                <Label>TEAM(S)</Label>
+                <div style={{ display: 'flex', flexWrap: 'wrap', gap: sp[2] }}>
+                  {TEAMS.map((t) => {
+                    const on = cadetTeams.includes(t.id);
                     return (
-                      <button key={s.id} onClick={() => setStatus(form, s.id)} style={{
-                        flex: 1, background: active ? s.color : 'transparent',
-                        border: `1px solid ${active ? s.color : P.hair}`,
-                        color: active ? (s.id === 'pending' ? P.ink : '#fff') : P.mute,
-                        cursor: 'pointer', fontFamily: mono, fontSize: 8, letterSpacing: '0.1em', padding: '6px 4px',
-                      }}>{s.label}</button>
+                      <Btn key={t.id} variant={on ? 'gold' : 'ghost'} size="sm" onClick={() => toggleCadetTeam(selectedId, t.id, on)}>
+                        {t.label}
+                      </Btn>
                     );
                   })}
                 </div>
+                {cadetTeams.includes('raiders') && (!form.school_email && !form.parent_email) && (
+                  <div style={{
+                    fontFamily: mono, fontSize: fs.micro, color: P.bright, marginTop: sp[2], lineHeight: 1.6,
+                    background: 'rgba(232,199,122,0.08)', border: '1px solid rgba(232,199,122,0.25)',
+                    borderRadius: radius.sm, padding: `${sp[2]}px ${sp[2]}px`,
+                  }}>
+                    ⚠ No email on file. OpticSend won't be able to reach this cadet yet.
+                  </div>
+                )}
               </div>
 
-              <div style={{ marginBottom: 8 }}>
-                <Label>SCHOOL EMAIL</Label>
-                <Input value={form.school_email || ''} onChange={(e) => setForm((f) => ({ ...f, school_email: e.target.value }))} placeholder="filled in by S-6" />
-              </div>
-              <div style={{ marginBottom: 8 }}>
-                <Label>PARENT EMAIL</Label>
-                <Input value={form.parent_email || ''} onChange={(e) => setForm((f) => ({ ...f, parent_email: e.target.value }))} placeholder="feeds the mailing list" />
-                <div style={{ display: 'flex', gap: 8, alignItems: 'center', marginTop: 6 }}>
-                  <Btn onClick={addParentToList} variant="green" style={{ fontSize: 8 }}>+ ADD PARENT TO MAILING LIST</Btn>
-                  {listMsg && <span style={{ fontFamily: mono, fontSize: 8, color: listMsg.includes('✓') ? P.green : P.mute }}>{listMsg}</span>}
-                </div>
-              </div>
-
-              <div style={{ marginBottom: 8 }}>
+              <div style={{ marginBottom: sp[3] }}>
                 <Label>NOTE</Label>
                 <Input value={form.note || ''} onChange={(e) => setForm((f) => ({ ...f, note: e.target.value }))} multiline />
               </div>
 
-              {detailMsg && <div style={{ fontFamily: mono, fontSize: 9, color: detailMsg.includes('✓') ? P.green : P.red }}>{detailMsg}</div>}
+              <Toast tone={detailErr ? 'error' : 'success'}>{detailMsg}</Toast>
             </Card>
           ) : (
-            <div style={{ fontFamily: mono, fontSize: 10, color: P.mute, textAlign: 'center', padding: '40px 16px', border: `1px dashed ${P.hair}` }}>
-              SELECT A CADET →<br />to edit contact info & consent
+            <div style={{
+              fontFamily: mono, fontSize: fs.tiny, color: P.mute, textAlign: 'center', lineHeight: 1.8,
+              padding: `${sp[10]}px ${sp[4]}px`, border: `1px dashed ${P.hair}`, borderRadius: radius.md,
+            }}>
+              SELECT A CADET →<br />to edit contact info &amp; consent
             </div>
           )}
         </div>

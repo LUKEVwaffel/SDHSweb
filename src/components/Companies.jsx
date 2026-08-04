@@ -18,10 +18,25 @@ const COMPANIES = [
 
 const ROLE_ORDER = ['CDR', 'XO', '1SG'];
 
-function CadetCard({ person }) {
+// Keyboard activation for click-through cards.
+function activate(e, fn) {
+  if (e.key === 'Enter' || e.key === ' ') {
+    e.preventDefault();
+    fn();
+  }
+}
+
+function CadetCard({ person, onViewProfile }) {
   const [expanded, setExpanded] = useState(false);
+  const view = () => onViewProfile(person);
   return (
-    <div style={{ background: P.navy, border: `1px solid ${P.hair}`, display: 'flex', flexDirection: 'column' }}>
+    <div
+      role="button"
+      tabIndex={0}
+      aria-label={`View profile: ${person.name}, ${person.role_long || person.role_short}`}
+      onClick={view}
+      onKeyDown={(e) => activate(e, view)}
+      style={{ background: P.navy, border: `1px solid ${P.hair}`, display: 'flex', flexDirection: 'column', cursor: 'pointer' }}>
       <div style={{ position: 'relative', aspectRatio: '3/4', overflow: 'hidden', background: P.deep }}>
         {person.photo_url ? (
           <img src={person.photo_url} alt={person.name}
@@ -49,7 +64,7 @@ function CadetCard({ person }) {
             maxHeight: expanded ? 'none' : 72, overflow: 'hidden',
           }}>{person.bio}</p>
           {person.bio.length > 130 && (
-            <button onClick={() => setExpanded(e => !e)} style={{
+            <button onClick={(e) => { e.stopPropagation(); setExpanded(x => !x); }} style={{
               background: 'none', border: 'none', color: P.gold, cursor: 'pointer',
               fontFamily: "'JetBrains Mono', monospace", fontSize: 9,
               letterSpacing: '0.15em', padding: '4px 0', marginTop: 2,
@@ -85,6 +100,8 @@ export default function Companies() {
   const members = (personnel[company?.section] || []).sort((a, b) =>
     ROLE_ORDER.indexOf(a.role_short) - ROLE_ORDER.indexOf(b.role_short)
   );
+
+  function goProfile(person) { navigate(`/profile/${person.id}`, { state: { from: 'companies' } }); }
 
   if (isMobile) {
     return (
@@ -131,9 +148,16 @@ export default function Companies() {
               {members.length > 0 ? (
                 <div style={{ display: 'flex', flexDirection: 'column', gap: 12, marginTop: 16 }}>
                   {members.map(p => (
-                    <div key={p.id} style={{
+                    <div key={p.id}
+                      role="button"
+                      tabIndex={0}
+                      aria-label={`View profile: ${p.name}, ${p.role_long || p.role_short}`}
+                      onClick={() => goProfile(p)}
+                      onKeyDown={(e) => activate(e, () => goProfile(p))}
+                      style={{
                       display: 'grid', gridTemplateColumns: '84px 1fr', gap: 14,
                       border: `1px solid ${P.hair}`, background: P.navy, padding: 12, boxSizing: 'border-box',
+                      cursor: 'pointer',
                     }}>
                       <div style={{ aspectRatio: '3/4', overflow: 'hidden', background: P.deep }}>
                         {p.photo_url ? (
@@ -234,7 +258,7 @@ export default function Companies() {
           {/* Leadership Cards */}
           {members.length > 0 ? (
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 20 }}>
-              {members.map(p => <CadetCard key={p.id} person={p} />)}
+              {members.map(p => <CadetCard key={p.id} person={p} onViewProfile={goProfile} />)}
             </div>
           ) : (
             <div style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: 10, color: P.mute, textAlign: 'center', padding: 60 }}>

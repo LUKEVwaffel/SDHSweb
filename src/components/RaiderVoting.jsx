@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { supabase as SB } from '../lib/supabaseClient';
 import { getDeviceId } from '../lib/fingerprint';
+import posthog from '../lib/posthog';
 
 const P = {
   ink: '#06101F', navy: '#142847', deep: '#0A1628',
@@ -105,6 +106,7 @@ export default function RaiderVoting({ compact = false }) {
     setVoting(photo.id);
     const { error } = await SB.rpc('cast_vote', { p_poll: poll.id, p_photo: photo.id, p_category: cat, p_fp: deviceId });
     if (!error) {
+      posthog.capture('raider_vote_cast', { vote_category: cat });
       await loadPhotos(selected);
       setMyVotes((v) => ({ ...v, [cat]: photo.id }));
     } else {
@@ -163,7 +165,7 @@ export default function RaiderVoting({ compact = false }) {
               </div>
             )}
             {!poll && <div style={{ fontFamily: inter, fontSize: 12, color: P.mute }}>Voting opens when an admin starts the poll for this event.</div>}
-            {isClosing && <div style={{ fontFamily: inter, fontSize: 12, color: P.mute }}>Deadline reached — winners are being finalized.</div>}
+            {isClosing && <div style={{ fontFamily: inter, fontSize: 12, color: P.mute }}>Deadline reached. Winners are being finalized.</div>}
             <button onClick={() => navigate('/submit')} style={{ ...ghostBtn, marginLeft: 'auto' }}>+ SUBMIT A PHOTO</button>
           </div>
 

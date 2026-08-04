@@ -89,9 +89,12 @@ Deno.serve(async (req) => {
     });
     if (logErr) console.error("email_review_decisions insert failed", logErr);
 
-    // Notify the submitting admin. Best-effort — the decision itself already
-    // landed above regardless of notification delivery.
-    if (msg.created_by) {
+    // Notify the submitting admin — and ONLY them, never a broadcast to every
+    // S-6 account. Best-effort — the decision itself already landed above
+    // regardless of notification delivery.
+    if (!msg.created_by) {
+      console.error(`submit-review-decision: message ${message_id} has no created_by, skipping notification`);
+    } else {
       const RESEND_API_KEY = Deno.env.get("RESEND_API_KEY");
       const FROM = Deno.env.get("FROM_EMAIL") ?? "Trojan Battalion <onboarding@resend.dev>";
       if (RESEND_API_KEY) {

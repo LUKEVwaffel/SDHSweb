@@ -1,7 +1,7 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { supabase as SB } from '../lib/supabaseClient';
 import { getTeam } from '../lib/teams';
+import { usePaginatedPhotos, useInfiniteScrollSentinel } from '../hooks/usePaginatedPhotos';
 import PhotoLightbox from './PhotoLightbox';
 
 const P = {
@@ -10,7 +10,6 @@ const P = {
   mute: 'rgba(244,236,216,0.55)', hair: 'rgba(201,169,97,0.22)', hairStrong: 'rgba(201,169,97,0.5)',
 };
 const mono = "'JetBrains Mono', monospace";
-const PAGE_SIZE = 24;
 
 /**
  * Plain photo gallery for a non-voting team. Reads photos where team=teamId.
@@ -19,27 +18,23 @@ const PAGE_SIZE = 24;
  */
 export default function TeamGallery({ teamId, showSubmit = true }) {
   const navigate = useNavigate();
-  const [photos, setPhotos] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [visible, setVisible] = useState(PAGE_SIZE);
   const [lightbox, setLightbox] = useState(null);
   const team = getTeam(teamId);
-
-  useEffect(() => {
-    let alive = true;
-    setLoading(true);
-    SB.from('photos').select('*').eq('team', teamId).eq('status', 'live').order('created_at', { ascending: false })
-      .then(({ data }) => { if (alive) { setPhotos(data || []); setLoading(false); } });
-    return () => { alive = false; };
-  }, [teamId]);
+  const { photos, loading, loadingMore, hasMore, loadMore } = usePaginatedPhotos({ team: teamId });
+  const sentinelRef = useInfiniteScrollSentinel(loadMore, { hasMore, disabled: loading });
 
   if (loading) return <div style={loadingStyle}>LOADING GALLERY…</div>;
 
   return (
     <div>
+      <style>{`
+        .team-gallery-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 8px; }
+        @media (max-width: 480px) { .team-gallery-grid { grid-template-columns: repeat(2, 1fr); gap: 6px; } }
+      `}</style>
+
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16, flexWrap: 'wrap', gap: 12 }}>
         <div style={{ fontFamily: mono, fontSize: 9, color: P.mute, letterSpacing: '0.2em' }}>
-          {photos.length} {photos.length === 1 ? 'PHOTO' : 'PHOTOS'} · {team?.label?.toUpperCase()}
+          {photos.length}{hasMore ? '+' : ''} {photos.length === 1 ? 'PHOTO' : 'PHOTOS'} · {team?.label?.toUpperCase()}
         </div>
         {showSubmit && (
           <button onClick={() => navigate('/submit')} style={ghostBtn}>+ SUBMIT A PHOTO</button>
@@ -47,11 +42,11 @@ export default function TeamGallery({ teamId, showSubmit = true }) {
       </div>
 
       {!photos.length ? (
-        <div style={{ ...loadingStyle, padding: 48 }}>NO PHOTOS YET — BE THE FIRST TO ADD ONE</div>
+        <div style={{ ...loadingStyle, padding: 48 }}>NO PHOTOS YET. BE THE FIRST TO ADD ONE</div>
       ) : (
         <>
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))', gap: 8 }}>
-            {photos.slice(0, visible).map((photo) => (
+          <div className="team-gallery-grid">
+            {photos.map((photo) => (
               <div key={photo.id} style={{ position: 'relative', overflow: 'hidden', background: P.deep, cursor: 'pointer' }} onClick={() => setLightbox(photo)}>
                 <img src={photo.thumb_url || photo.photo_url} alt="" loading="lazy"
                   style={{ width: '100%', aspectRatio: '1', objectFit: 'cover', display: 'block', transition: 'transform 0.2s' }}
@@ -65,15 +60,21 @@ export default function TeamGallery({ teamId, showSubmit = true }) {
               </div>
             ))}
           </div>
-          {visible < photos.length && (
-            <div style={{ textAlign: 'center', marginTop: 24 }}>
-              <button onClick={() => setVisible((v) => v + PAGE_SIZE)} style={ghostBtn}>LOAD MORE ({photos.length - visible})</button>
-            </div>
+
+          {hasMore && (
+            <>
+              <div ref={sentinelRef} style={{ height: 1 }} />
+              <div style={{ textAlign: 'center', marginTop: 24 }}>
+                <button onClick={loadMore} disabled={loadingMore} style={ghostBtn}>
+                  {loadingMore ? 'LOADING…' : 'LOAD MORE'}
+                </button>
+              </div>
+            </>
           )}
         </>
       )}
 
-      <PhotoLightbox photo={lightbox} onClose={() => setLightbox(null)} fallbackLabel={team?.label || 'PHOTO'} />
+      <PhotoLightbox photo={lightbox} photos={photos} onChange={setLightbox} onClose={() => setLightbox(null)} fallbackLabel={team?.label || 'PHOTO'} />
     </div>
   );
 }

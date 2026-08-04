@@ -39,7 +39,7 @@ const FAQ_CATEGORIES = [
       { q: 'Do I have to join the military after this?', a: "No. Zero obligation. JROTC is a high school elective, not a recruitment contract. Nobody signs anything committing them to service. Plenty of our cadets go straight into college, trade school, or the workforce with no military involvement at all." },
       { q: 'Will this help or hurt my GPA and college applications?', a: 'It helps. JROTC counts as a real elective credit, and having a genuine leadership role (not just a club membership) is something colleges specifically look for. Cadets in leadership positions get real, concrete things to talk about in applications and interviews, not just "I was in a club."' },
       { q: 'What opportunities does this open up later?', a: "Scholarship opportunities (including ROTC college scholarships, if that ever interests you), real leadership experience for job and college applications, and a genuine reference network of instructors who've watched you grow over years, not just one semester." },
-      { q: 'Does JROTC actually count for real school credit?', a: "Yes — three years of JROTC earns a Finance credit, a History credit, and a PE credit, all through the JROTC curriculum. Without it, that's three separate classes to get the same three credits." },
+      { q: 'Does JROTC actually count for real school credit?', a: "Yes, three years of JROTC earns a Finance credit, a History credit, and a PE credit, all through the JROTC curriculum. Without it, that's three separate classes to get the same three credits." },
     ],
   },
 ];
@@ -221,7 +221,7 @@ function CreditCallout() {
             Three years of JROTC earns three real school credits.
           </h3>
           <p style={{ fontFamily: inter, fontSize: 15, lineHeight: 1.7, color: 'rgba(244,236,216,0.85)', maxWidth: 520, margin: '0 0 18px' }}>
-            Finance, History, and PE — all through the JROTC curriculum. Without it, that's three separate classes. Nowhere else at this school can one program clear all three.
+            Finance, History, and PE, all through the JROTC curriculum. Without it, that's three separate classes. Nowhere else at this school can one program clear all three.
           </p>
           <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap' }}>
             {['FINANCE CREDIT', 'HISTORY CREDIT', 'PE CREDIT'].map((chip) => (
@@ -428,7 +428,7 @@ export default function About() {
             TROJAN<br /><span style={{ color: P.gold }}>BATTALION</span>
           </h1>
           <p style={{ fontFamily: inter, fontSize: 17, color: P.mute2, maxWidth: 560, lineHeight: 1.7, margin: '22px 0 0' }}>
-            {content['battalion.tagline'] || 'A leadership and citizenship program at Soddy Daisy High School — no military obligation, no dues, no pressure. Just a place to grow.'}
+            {content['battalion.tagline'] || 'A leadership and citizenship program at Soddy Daisy High School. No military obligation, no dues, no pressure. Just a place to grow.'}
           </p>
           <div style={{ display: 'flex', gap: 12, marginTop: 28, flexWrap: 'wrap' }}>
             {['SODDY DAISY HS', 'AJROTC', 'U.S. ARMY', 'TN-051', 'EST. 1990s'].map(tag => (

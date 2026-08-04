@@ -62,7 +62,7 @@ export default function ReviewPortal() {
   const loadAll = useCallback(async () => {
     const [pending, sent, history] = await Promise.all([
       SB.from('email_messages')
-        .select('id, subject, body_html, submitted_at, assigned_reviewer_email')
+        .select('id, subject, body_html, submitted_at, assigned_reviewer_email, created_by')
         .eq('status', 'pending_review')
         .order('submitted_at', { ascending: true }),
       SB.from('email_messages')
@@ -192,7 +192,7 @@ export default function ReviewPortal() {
 
   async function deleteRequest() {
     if (!open) return;
-    if (!confirm(`Delete this pending request — "${open.subject}"? This cannot be undone.`)) return;
+    if (!confirm(`Delete this pending request: "${open.subject}"? This cannot be undone.`)) return;
     setBusy(true);
     setFlash('');
     const { data, error } = await SB.functions.invoke('delete-review-request', {
@@ -257,6 +257,9 @@ export default function ReviewPortal() {
         >
           <div className="rv-detail-head">
             <h1 className="rv-detail-title">{open.subject}</h1>
+            {isPending && open.created_by && (
+              <div className="rv-row-meta">Drafted by {open.created_by}</div>
+            )}
           </div>
           <iframe
             title="Draft preview"
@@ -391,7 +394,7 @@ export default function ReviewPortal() {
               {otherRows.length > 0 && (
                 <div style={{ marginTop: 22 }}>
                   <div className="rv-sub" style={{ fontSize: 12, marginBottom: 8 }}>
-                    Assigned to another reviewer — open only if acting as a fallback.
+                    Assigned to another reviewer, open only if acting as a fallback.
                   </div>
                   <div className="rv-list">
                     {otherRows.map((r) => (

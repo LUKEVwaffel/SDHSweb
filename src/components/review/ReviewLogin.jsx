@@ -50,8 +50,8 @@ export default function ReviewLogin({ onSignedIn, notice }) {
     if (error || data?.error) {
       setBusy(false);
       setPin('');
-      if (data?.error === 'locked') fail(`Locked — too many tries. Try again after ${new Date(data.until).toLocaleTimeString()}.`);
-      else fail(typeof data?.remaining === 'number' ? `Wrong PIN — ${data.remaining} left before lockout.` : 'Incorrect email or PIN.');
+      if (data?.error === 'locked') fail(`Locked. Too many tries. Try again after ${new Date(data.until).toLocaleTimeString()}.`);
+      else fail(typeof data?.remaining === 'number' ? `Wrong PIN, ${data.remaining} left before lockout.` : 'Incorrect email or PIN.');
       return;
     }
     const { error: otpErr } = await SB.auth.verifyOtp({ token_hash: data.token_hash, type: 'magiclink' });

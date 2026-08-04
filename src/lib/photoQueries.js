@@ -1,15 +1,15 @@
-import { supabase as SB } from './supabaseClient';
+import { adminDisplayName } from './admins';
 
-// Single source of truth for "public, moderated" photo reads. Fixes two gaps
-// found in the old Pictures.jsx query: (1) it required event_id, which only
-// Raiders photos ever get (PhotoUploader only asks for an event on voting
-// teams), so non-Raiders submissions never showed; (2) it didn't filter
-// status, so admin-hidden photos still leaked onto the public page.
-export async function fetchRecentPhotos({ eventId = null, limit = 60 } = {}) {
-  let query = SB.from('photos').select('*').eq('status', 'live');
-  if (eventId) query = query.eq('event_id', eventId);
-  query = query.order('created_at', { ascending: false }).limit(limit);
-  const { data, error } = await query;
-  if (error) throw error;
-  return data || [];
+// Unified attribution for both attribution sources: a DISPATCH admin upload
+// (uploaded_by = the admin's login email, resolved to a display name — never
+// the raw email) and a public/cadet submission (uploader_name = the freetext
+// "credit" the submitter typed in). A DISPATCH upload can carry both, e.g. an
+// admin uploading photos credited to a team parent.
+export function getPhotoAttribution(photo) {
+  const credit = photo.uploader_name?.trim() || null;
+  const adminLabel = photo.uploaded_by ? adminDisplayName(photo.uploaded_by) : null;
+  if (adminLabel && credit) return { primary: `Uploaded by ${adminLabel}`, secondary: `Photo by ${credit}` };
+  if (adminLabel) return { primary: `Uploaded by ${adminLabel}`, secondary: null };
+  if (credit) return { primary: `📷 ${credit}`, secondary: null };
+  return { primary: null, secondary: null };
 }

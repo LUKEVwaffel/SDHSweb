@@ -490,9 +490,9 @@ function CommandCard({ person, onViewProfile, widthStyle }) {
 
 // ─── Role brief strip — what each position does + why it's competitive ───────
 const ROLE_INFO = {
-  BC:  { title: 'Battalion Commander', blurb: "Owns the battalion's mission — sets priorities, represents Trojan Battalion to command staff and the school, and is accountable for every cadet's performance." },
+  BC:  { title: 'Battalion Commander', blurb: "Owns the battalion's mission. Sets priorities, represents Trojan Battalion to command staff and the school, and is accountable for every cadet's performance." },
   XO:  { title: 'Executive Officer', blurb: "Runs day-to-day operations and keeps every specialty team, staff section, and event synced to the Commander's intent." },
-  CSM: { title: 'Command Sergeant Major', blurb: 'Senior enlisted advisor — owns cadet standards, discipline, and welfare, and is the direct link between the Commander and the cadet corps.' },
+  CSM: { title: 'Command Sergeant Major', blurb: 'Senior enlisted advisor, owns cadet standards, discipline, and welfare, and is the direct link between the Commander and the cadet corps.' },
 };
 
 function RoleBriefStrip({ roles }) {
@@ -527,7 +527,7 @@ function RoleBriefStrip({ roles }) {
         letterSpacing: '0.08em', fontStyle: 'italic', lineHeight: 1.6, maxWidth: 720, marginLeft: 'auto', marginRight: 'auto',
       }}>
         These three positions are filled once a year through a formal application and interview
-        process — selected from a battalion-wide pool of cadets competing for the role.
+        process, selected from a battalion-wide pool of cadets competing for the role.
       </div>
     </div>
   );

@@ -7,7 +7,7 @@ const P = {
 
 // Verification text for the "top 5% nationally" ranking claim.
 const VERIFY_TEXT =
-  "Soddy-Daisy JROTC earned 'Honor Unit with Distinction' — the U.S. Army's top designation, awarded to roughly the top 5% of JROTC programs nationally — for 35 consecutive years as of 2019 (Chattanooga Times Free Press).";
+  "Soddy-Daisy JROTC earned 'Honor Unit with Distinction,' the U.S. Army's top designation, awarded to roughly the top 5% of JROTC programs nationally, for 35 consecutive years as of 2019 (Chattanooga Times Free Press).";
 
 const SOURCE = 'SOURCE // CHATTANOOGA TIMES FREE PRESS · 2019';
 

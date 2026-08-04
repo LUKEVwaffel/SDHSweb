@@ -59,7 +59,7 @@ Deno.serve(async (req) => {
 
     if (body.action === "finish") {
       const expectedChallenge = await consumeChallenge(email, "login");
-      if (!expectedChallenge) return json({ error: "challenge expired — start again" }, 400);
+      if (!expectedChallenge) return json({ error: "challenge expired, start again" }, 400);
 
       // Match the credential the authenticator actually used.
       const used = creds.find((c) => c.credential_id === body.response?.id);

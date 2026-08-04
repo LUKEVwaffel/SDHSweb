@@ -1,4 +1,5 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import { P, mono, oswald, inter, fs, sp, radius, shadow, focusRing, ease } from '../theme';
 
 // Shared admin primitives. Rebuilt on the token system for a larger, more
@@ -96,6 +97,170 @@ export function Input({ value, onChange, multiline, error = false, style = {}, o
   const handleBlur = (e) => { setFocused(false); onBlur?.(e); };
   if (multiline) return <textarea value={value} onChange={onChange} onFocus={handleFocus} onBlur={handleBlur} style={{ ...base, minHeight: 96, lineHeight: 1.6 }} {...rest} />;
   return <input value={value} onChange={onChange} onFocus={handleFocus} onBlur={handleBlur} style={base} {...rest} />;
+}
+
+const SCHOOL_EMAIL_SUFFIX = '@students.hcde.org';
+
+// Username-only input with a fixed school-domain suffix rendered inline —
+// admins type just the username; onChange(fullEmail) gets the composed
+// address. Pasting a full address into the field strips a duplicate suffix
+// rather than doubling it up.
+export function SuffixEmailInput({ value, onChange, suffix = SCHOOL_EMAIL_SUFFIX, style = {}, ...rest }) {
+  const [focused, setFocused] = useState(false);
+  const raw = value || '';
+  const username = raw.toLowerCase().endsWith(suffix) ? raw.slice(0, -suffix.length) : raw;
+  const handleChange = (e) => {
+    let v = e.target.value;
+    if (v.toLowerCase().endsWith(suffix)) v = v.slice(0, -suffix.length);
+    onChange(v.trim() ? `${v}${suffix}` : '');
+  };
+  return (
+    <div style={{
+      width: '100%', display: 'flex', alignItems: 'center', background: P.deep,
+      border: `1px solid ${focused ? P.gold : P.hair}`, borderRadius: radius.sm,
+      boxShadow: focused ? focusRing : 'none', boxSizing: 'border-box',
+      transition: `border-color 0.15s ${ease}, box-shadow 0.15s ${ease}`,
+      ...style,
+    }}>
+      <input
+        value={username}
+        onChange={handleChange}
+        onFocus={() => setFocused(true)}
+        onBlur={() => setFocused(false)}
+        style={{
+          flex: 1, minWidth: 0, background: 'transparent', border: 'none', outline: 'none',
+          color: P.cream, fontFamily: inter, fontSize: fs.sm, padding: '11px 0 11px 13px',
+        }}
+        {...rest}
+      />
+      <span style={{
+        flexShrink: 0, color: P.faint, fontFamily: inter, fontSize: fs.sm,
+        padding: '11px 13px 11px 4px', userSelect: 'none',
+      }}>{suffix}</span>
+    </div>
+  );
+}
+
+// Select — same border/radius/focus treatment as Input, gold chevron instead
+// of the OS default arrow, so dropdowns stop looking bolted onto the form.
+export function Select({ value, onChange, options, style = {}, ...rest }) {
+  const [focused, setFocused] = useState(false);
+  return (
+    <select
+      value={value}
+      onChange={onChange}
+      onFocus={() => setFocused(true)}
+      onBlur={() => setFocused(false)}
+      style={{
+        width: '100%', background: P.deep, border: `1px solid ${focused ? P.gold : P.hair}`,
+        color: P.cream, fontFamily: mono, fontSize: fs.tiny, letterSpacing: '0.06em',
+        padding: '11px 30px 11px 13px', outline: 'none', cursor: 'pointer', boxSizing: 'border-box',
+        borderRadius: radius.sm, boxShadow: focused ? focusRing : 'none',
+        appearance: 'none', WebkitAppearance: 'none',
+        backgroundImage: "url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M0 0l5 6 5-6z' fill='%23C9A961'/%3E%3C/svg%3E\")",
+        backgroundRepeat: 'no-repeat', backgroundPosition: 'right 12px center',
+        transition: `border-color 0.15s ${ease}, box-shadow 0.15s ${ease}`,
+        ...style,
+      }}
+      {...rest}
+    >
+      {options.map((o) => <option key={o.value} value={o.value}>{o.label}</option>)}
+    </select>
+  );
+}
+
+const STATUS_PILL_SIZES = {
+  compact: { padding: '7px 10px', fontSize: fs.micro },
+  regular: { padding: '10px 8px', fontSize: fs.tiny, flex: 1 },
+};
+
+// Shared 3-state consent toggle (`items` = [{id,label,color}]). One component
+// at two sizes instead of the 3 hand-rolled copies that used to drift apart
+// (cadet roster row, cadet detail panel, staff consent banner).
+export function StatusPills({ items, value, onChange, size = 'regular', style = {} }) {
+  const s = STATUS_PILL_SIZES[size] || STATUS_PILL_SIZES.regular;
+  return (
+    <div style={{ display: 'flex', gap: 3, ...style }}>
+      {items.map((it) => {
+        const active = value === it.id;
+        return (
+          <button
+            key={it.id}
+            type="button"
+            onClick={() => onChange(it.id)}
+            style={{
+              fontFamily: mono, fontWeight: 600, letterSpacing: '0.1em', cursor: 'pointer',
+              borderRadius: radius.sm,
+              border: `1px solid ${active ? it.color : P.hair}`,
+              background: active ? it.color : 'transparent',
+              color: active ? (it.id === 'pending' ? P.ink : '#fff') : P.faint,
+              transition: `all 0.15s ${ease}`,
+              ...s,
+            }}
+          >
+            {it.label}
+          </button>
+        );
+      })}
+    </div>
+  );
+}
+
+// Inline confirmation/error line — one shape for messages that used to be
+// styled ad hoc at every call site (add-cadet, save, mailing list, contact).
+export function Toast({ children, tone = 'success', style = {} }) {
+  if (!children) return null;
+  return (
+    <div style={{
+      fontFamily: mono, fontSize: fs.tiny, color: tone === 'error' ? P.red : P.green,
+      display: 'flex', alignItems: 'center', gap: 6, ...style,
+    }}>
+      <span>{tone === 'error' ? '✕' : '✓'}</span>{children}
+    </div>
+  );
+}
+
+// Portal-based modal — overlay click and Escape both close. Used for flows
+// that need more than an inline row (e.g. add-cadet's full field set).
+export function Modal({ open, onClose, title, children, footer, width = 480 }) {
+  useEffect(() => {
+    if (!open) return;
+    const onKey = (e) => { if (e.key === 'Escape') onClose(); };
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  }, [open, onClose]);
+
+  if (!open) return null;
+  return createPortal(
+    <div onClick={onClose} style={{
+      position: 'fixed', inset: 0, background: 'rgba(6,16,31,0.72)', backdropFilter: 'blur(2px)',
+      display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1000, padding: sp[4],
+    }}>
+      <div onClick={(e) => e.stopPropagation()} style={{
+        width: '100%', maxWidth: width, maxHeight: '86vh', overflowY: 'auto',
+        background: P.navy, border: `1px solid ${P.gold}`, borderRadius: radius.lg,
+        boxShadow: shadow.lg, padding: sp[5], boxSizing: 'border-box',
+      }}>
+        <div style={{
+          display: 'flex', justifyContent: 'space-between', alignItems: 'center',
+          marginBottom: sp[4], paddingBottom: sp[3], borderBottom: `1px solid ${P.hair}`,
+        }}>
+          <div style={{ fontFamily: mono, fontSize: fs.sm, color: P.gold, letterSpacing: '0.16em' }}>{title}</div>
+          <button onClick={onClose} aria-label="Close" style={{
+            all: 'unset', cursor: 'pointer', color: P.faint, fontSize: fs.md, lineHeight: 1, padding: 4,
+          }}>✕</button>
+        </div>
+        {children}
+        {footer && (
+          <div style={{
+            display: 'flex', justifyContent: 'flex-end', gap: sp[2],
+            marginTop: sp[4], paddingTop: sp[3], borderTop: `1px solid ${P.hair}`,
+          }}>{footer}</div>
+        )}
+      </div>
+    </div>,
+    document.body
+  );
 }
 
 export function PanelHeader({ title, action, sub }) {

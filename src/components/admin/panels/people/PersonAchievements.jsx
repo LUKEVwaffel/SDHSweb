@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { supabase as SB } from '../../../../lib/supabaseClient';
-import { P, mono, inter, fs, sp, radius } from '../../theme';
-import { Btn, Label } from '../../shared/ui';
+import { P, mono, inter, fs, sp } from '../../theme';
+import { Btn, Label, Select } from '../../shared/ui';
 
 // Assign/remove achievement badges for one person — lives on the person's
 // PeoplePanel detail view instead of a standalone Achievements tab. Catalog
@@ -56,24 +56,16 @@ export default function PersonAchievements({ personnelId, achievements }) {
       {available.length > 0 ? (
         <div style={{ display: 'flex', gap: sp[2], alignItems: 'flex-end', flexWrap: 'wrap' }}>
           <div style={{ flex: 1, minWidth: 160 }}>
-            <select value={addId} onChange={(e) => setAddId(e.target.value)} style={selectStyle}>
-              <option value="">Add achievement…</option>
-              {available.map((a) => <option key={a.id} value={a.id}>{a.name}</option>)}
-            </select>
+            <Select value={addId} onChange={(e) => setAddId(e.target.value)}
+              options={[{ value: '', label: 'Add achievement…' }, ...available.map((a) => ({ value: a.id, label: a.name }))]} />
           </div>
           <Btn variant="gold" size="sm" onClick={add} disabled={!addId}>ADD</Btn>
         </div>
       ) : achievements.length > 0 ? (
         <div style={{ fontFamily: mono, fontSize: fs.tiny, color: P.faint, letterSpacing: '0.08em' }}>ALL DEFINED ACHIEVEMENTS ASSIGNED</div>
       ) : (
-        <div style={{ fontFamily: mono, fontSize: fs.tiny, color: P.faint, letterSpacing: '0.08em' }}>NO ACHIEVEMENT TYPES DEFINED YET — add one under Advanced → Achievements</div>
+        <div style={{ fontFamily: mono, fontSize: fs.tiny, color: P.faint, letterSpacing: '0.08em' }}>NO ACHIEVEMENT TYPES DEFINED YET. Add one under Advanced → Achievements</div>
       )}
     </div>
   );
 }
-
-const selectStyle = {
-  background: P.deep, border: `1px solid ${P.hair}`, color: P.cream,
-  fontFamily: mono, fontSize: 11, padding: '9px 10px', outline: 'none', cursor: 'pointer',
-  borderRadius: radius.sm, boxSizing: 'border-box',
-};

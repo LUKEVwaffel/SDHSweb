@@ -21,7 +21,7 @@ export default function BlockFields({ block, update, onPickAttachment, uploading
       );
 
     case 'text':
-      return <Input multiline value={block.text} onChange={(e) => update({ text: e.target.value })} placeholder="Body text — line breaks are kept." style={{ minHeight: 110 }} />;
+      return <Input multiline value={block.text} onChange={(e) => update({ text: e.target.value })} placeholder="Body text, line breaks are kept." style={{ minHeight: 110 }} />;
 
     case 'image':
       return (

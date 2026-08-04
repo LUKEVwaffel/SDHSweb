@@ -104,7 +104,7 @@ export default function AchievementCatalog() {
     <div style={{ maxWidth: 720 }}>
       <PanelHeader
         title="ACHIEVEMENT CATALOG"
-        sub={`${achievements.length} defined — assign to cadets from People`}
+        sub={`${achievements.length} defined, assign to cadets from People`}
         action={<Btn variant="gold" size="sm" onClick={() => setCreating((c) => !c)}>{creating ? 'CANCEL' : '+ DEFINE NEW'}</Btn>}
       />
 
@@ -118,7 +118,7 @@ export default function AchievementCatalog() {
           <div style={{ marginBottom: sp[3] }}>
             <Input value={description} onChange={(e) => setDescription(e.target.value)} multiline placeholder="Shown as a tooltip on the badge…" />
           </div>
-          <Label>ICON — PNG OR WEBP, SQUARE, TRANSPARENT BACKGROUND</Label>
+          <Label>ICON: PNG OR WEBP, SQUARE, TRANSPARENT BACKGROUND</Label>
           <div style={{ display: 'flex', alignItems: 'center', gap: sp[3], marginBottom: sp[4] }}>
             <input ref={fileRef} type="file" accept="image/png,image/webp" style={{ display: 'none' }} onChange={onPickFile} />
             <Btn variant="ghost" size="sm" onClick={() => fileRef.current.click()}>{file ? file.name : 'CHOOSE FILE'}</Btn>
@@ -131,7 +131,7 @@ export default function AchievementCatalog() {
       <input ref={replaceFileRef} type="file" accept="image/png,image/webp" style={{ display: 'none' }} onChange={onReplaceIconPick} />
 
       {achievements.length === 0 ? (
-        <EmptyState icon="◈" title="NO ACHIEVEMENTS DEFINED" hint="Define your first achievement type — name, description, icon — then assign it to cadets from People." />
+        <EmptyState icon="◈" title="NO ACHIEVEMENTS DEFINED" hint="Define your first achievement type (name, description, icon), then assign it to cadets from People." />
       ) : (
         <div style={{ display: 'flex', flexDirection: 'column', gap: sp[2] }}>
           {achievements.map((a) => (

@@ -9,6 +9,7 @@ import DesignTokensPanel from './DesignTokensPanel';
 import QuickActionsPanel from './QuickActionsPanel';
 import SettingsPanel from './SettingsPanel';
 import AchievementCatalog from './AchievementCatalog';
+import VotingTopicsCatalog from './VotingTopicsCatalog';
 
 // Wall for developer + maintenance tools. A non-technical successor rarely opens
 // this; daily work lives in the top-level sections.
@@ -17,6 +18,7 @@ const SUBTABS = [
   { id: 'accounts',     label: 'ACCOUNTS',       danger: false },
   { id: 'emails',       label: 'EMAIL HISTORY',  danger: false },
   { id: 'achievements', label: 'ACHIEVEMENTS',   danger: false },
+  { id: 'topics',       label: 'VOTING TOPICS',  danger: false },
   { id: 'health',       label: 'SITE HEALTH',    danger: false },
   { id: 'settings',     label: 'SETTINGS',       danger: false },
   { id: 'registry',     label: 'REGISTRIES',     danger: true },
@@ -31,7 +33,7 @@ export default function AdvancedPanel({ adminId }) {
     <div>
       <div style={{ background: 'rgba(192,57,43,0.12)', border: `1px solid ${P.red}`, borderRadius: radius.sm, padding: `${sp[3]}px ${sp[4]}px`, marginBottom: sp[4] }}>
         <span style={{ fontFamily: mono, fontSize: fs.tiny, color: P.red, letterSpacing: '0.12em' }}>
-          ⚠ ADVANCED · developer &amp; maintenance tools — some actions permanently change or delete data
+          ⚠ ADVANCED · developer &amp; maintenance tools. Some actions permanently change or delete data
         </span>
       </div>
       <div style={{ display: 'flex', gap: sp[2], marginBottom: sp[5], flexWrap: 'wrap' }}>
@@ -48,8 +50,9 @@ export default function AdvancedPanel({ adminId }) {
       </div>
       {tab === 'history'  && <HistoryPanel adminId={adminId} />}
       {tab === 'accounts' && <AccountsPanel adminId={adminId} />}
-      {tab === 'emails'   && <EmailHistoryPanel />}
+      {tab === 'emails'   && <EmailHistoryPanel adminId={adminId} />}
       {tab === 'achievements' && <AchievementCatalog />}
+      {tab === 'topics'   && <VotingTopicsCatalog />}
       {tab === 'health'   && <HealthPanel />}
       {tab === 'settings' && <SettingsPanel adminId={adminId} />}
       {tab === 'registry' && <RegistryPanel />}

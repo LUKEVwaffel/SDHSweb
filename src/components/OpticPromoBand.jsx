@@ -45,7 +45,7 @@ export default function OpticPromoBand() {
             color: P.mute, fontFamily: 'Inter, sans-serif', fontSize: 16,
             lineHeight: 1.7, maxWidth: 480, margin: 0,
           }}>
-            Every practice, competition, and formation now feeds <strong style={{ color: P.gold }}>OPTIC</strong> —
+            Every practice, competition, and formation now feeds <strong style={{ color: P.gold }}>OPTIC</strong>,
             the Official Photo Tracking &amp; Image Collection system. Upload from your phone in
             seconds and it's visible to the whole battalion, not just your team.
           </p>

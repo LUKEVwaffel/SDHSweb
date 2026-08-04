@@ -10,7 +10,7 @@ const P = {
 };
 
 const S_SECTIONS = [
-  { key: 'command', label: 'CMD', name: 'BATTALION COMMAND', desc: 'Battalion commander, executive officer, and command sergeant major — the senior leadership echelon.' },
+  { key: 'command', label: 'CMD', name: 'BATTALION COMMAND', desc: 'Battalion commander, executive officer, and command sergeant major, the senior leadership echelon.' },
   { key: 's1', label: 'S-1', name: 'PERSONNEL',      desc: 'Manages cadet records, awards, promotions, and official documentation.' },
   { key: 's2', label: 'S-2', name: 'INTELLIGENCE',   desc: 'Handles information operations, competition analysis, and situational awareness.' },
   { key: 's3', label: 'S-3', name: 'OPERATIONS',     desc: 'Plans and coordinates all battalion training events, formations, and official functions.' },

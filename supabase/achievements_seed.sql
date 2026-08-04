@@ -32,17 +32,17 @@ INSERT INTO achievements (slug, name, icon_url)
 SELECT v.slug, v.name, icon.url
 FROM (VALUES
   ('superior-cadet',                          'Superior Cadet'),
-  ('hamilton-county-best-cadet-4th',          'Hamilton County Best Cadet Competition — 4th Place'),
+  ('hamilton-county-best-cadet-4th',          'Hamilton County Best Cadet Competition (4th Place)'),
   ('solo-exhibition-county-championship',     'Solo Exhibition County Championship'),
   ('jclc-selection',                          'JCLC Selection'),
-  ('idr-knockout-county-championship',        'IDR Knockout County Championship — 1st Place'),
+  ('idr-knockout-county-championship',        'IDR Knockout County Championship (1st Place)'),
   ('distinguished-cadet',                     'Distinguished Cadet'),
   ('american-legion-military-excellence-award','American Legion Military Excellence Award'),
   ('korean-war-veteran-award',                'Korean War Veteran Award'),
-  ('county-dual-exhibition-1st',              'County Dual Exhibition — 1st Place'),
+  ('county-dual-exhibition-1st',              'County Dual Exhibition (1st Place)'),
   ('national-scholar-athlete-award',          'National Scholar-Athlete Award'),
   ('cadet-challenge-award',                   'Cadet Challenge Award'),
-  ('one-rope-bridge-event-1st',               'One Rope Bridge Event — 1st Place'),
+  ('one-rope-bridge-event-1st',               'One Rope Bridge Event (1st Place)'),
   ('dandelion-medal',                         'Dandelion Medal'),
   ('most-improved-female-raider',             'Most Improved Female Raider'),
   ('sharpshooter-badge',                      'Sharpshooter Badge'),
@@ -77,7 +77,7 @@ FROM (VALUES
   ('s4-draevin',     'american-legion-military-excellence-award', NULL),
   ('s4-draevin',     'korean-war-veteran-award',                  NULL),
   ('s6-kaiden',      'korean-war-veteran-award',                  NULL),
-  ('charlie-1sg',    'korean-war-veteran-award',                  'Bio phrases this as "Korean War Medal" — merged with Korean War Veteran Award'),
+  ('charlie-1sg',    'korean-war-veteran-award',                  'Bio phrases this as "Korean War Medal," merged with Korean War Veteran Award'),
 
   ('s5-michael',     'county-dual-exhibition-1st',                NULL),
 

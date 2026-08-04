@@ -13,7 +13,6 @@ export function serviceClient(): SupabaseClient {
 export interface Caller {
   email: string;              // lowercased
   role: string | null;        // 's6' | 's5' | null
-  canOverride: boolean;
   mustChangePassword: boolean;
 }
 
@@ -48,7 +47,7 @@ export async function getCaller(req: Request): Promise<Caller | null> {
   const svc = serviceClient();
   const { data, error } = await svc
     .from("admin_roles")
-    .select("role, can_override_review, must_change_password")
+    .select("role, must_change_password")
     .eq("email", email)
     .maybeSingle();
 
@@ -64,7 +63,6 @@ export async function getCaller(req: Request): Promise<Caller | null> {
   return {
     email,
     role: data?.role ?? null,
-    canOverride: !!data?.can_override_review,
     mustChangePassword: !!data?.must_change_password,
   };
 }

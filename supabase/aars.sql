@@ -8,12 +8,10 @@
 --     standalone AAR (no linked event) is a supported first-class case, same
 --     nullable-FK pattern as raider_photo_hub.sql's optional event_id.
 --   • Storage: dedicated private `aar-documents` bucket, separate from the
---     existing `documents` bucket. The generic documents bucket is
---     is_s6()-only; AARs need S-5 write access too, so reusing it would
---     either lock S-5 out or open every confidential doc to S-5. New bucket,
---     new policy tier: public.is_admin() (s6 OR s5), matching the fact that
---     AAR management is a dedicated S-5 responsibility, not scoped by team
---     the way the battalion calendar is.
+--     existing `documents` bucket. New bucket, new policy tier: is_s5()
+--     only — AAR tracking is S-5's dedicated tool, hidden entirely from S-6
+--     (no nav entry, no RLS grant), not scoped by team the way the
+--     battalion calendar is.
 --   • Backup = soft delete. There is no hard-delete path from the app. A
 --     "delete" sets status='archived' (+archived_at/archived_by); the file
 --     stays in storage and the row stays queryable/restorable. True
@@ -34,10 +32,10 @@ drop policy if exists aar_documents_obj_read   on storage.objects;
 drop policy if exists aar_documents_obj_insert on storage.objects;
 drop policy if exists aar_documents_obj_update on storage.objects;
 drop policy if exists aar_documents_obj_delete on storage.objects;
-create policy aar_documents_obj_read   on storage.objects for select to authenticated using (bucket_id = 'aar-documents' and public.is_admin());
-create policy aar_documents_obj_insert on storage.objects for insert to authenticated with check (bucket_id = 'aar-documents' and public.is_admin());
-create policy aar_documents_obj_update on storage.objects for update to authenticated using (bucket_id = 'aar-documents' and public.is_admin()) with check (bucket_id = 'aar-documents' and public.is_admin());
-create policy aar_documents_obj_delete on storage.objects for delete to authenticated using (bucket_id = 'aar-documents' and public.is_admin());
+create policy aar_documents_obj_read   on storage.objects for select to authenticated using (bucket_id = 'aar-documents' and public.is_s5());
+create policy aar_documents_obj_insert on storage.objects for insert to authenticated with check (bucket_id = 'aar-documents' and public.is_s5());
+create policy aar_documents_obj_update on storage.objects for update to authenticated using (bucket_id = 'aar-documents' and public.is_s5()) with check (bucket_id = 'aar-documents' and public.is_s5());
+create policy aar_documents_obj_delete on storage.objects for delete to authenticated using (bucket_id = 'aar-documents' and public.is_s5());
 
 -- ── 2. aars table ────────────────────────────────────────────────────────────
 create table if not exists public.aars (
@@ -85,8 +83,9 @@ alter table public.aars add constraint aars_source_content_check check (
 alter table public.aars enable row level security;
 
 drop policy if exists aars_all_admin on public.aars;
-create policy aars_all_admin on public.aars
-  for all to authenticated using (public.is_admin()) with check (public.is_admin());
+drop policy if exists aars_all_s5 on public.aars;
+create policy aars_all_s5 on public.aars
+  for all to authenticated using (public.is_s5()) with check (public.is_s5());
 
 -- ============================================================================
 -- Verify: select * from storage.buckets where id = 'aar-documents';

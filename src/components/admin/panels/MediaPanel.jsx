@@ -137,7 +137,7 @@ export default function MediaPanel({ adminId }) {
   // Open the file in a new tab and trigger print — used for the consent-form PDF.
   function printFile(name) {
     const win = window.open(getUrl(name), '_blank');
-    if (!win) { alert('Popup blocked — allow popups to print.'); return; }
+    if (!win) { alert('Popup blocked, allow popups to print.'); return; }
     win.addEventListener('load', () => win.print());
   }
 
@@ -282,7 +282,7 @@ export default function MediaPanel({ adminId }) {
                 ? <img src={preview.url} alt={preview.name} style={{ maxWidth: '86vw', maxHeight: '76vh', objectFit: 'contain', display: 'block' }} />
                 : isPdf(preview.name)
                   ? <iframe title={preview.name} src={preview.url} style={{ width: '86vw', height: '76vh', border: 'none', background: '#fff' }} />
-                  : <div style={{ fontFamily: mono, fontSize: fs.sm, color: P.mute, padding: sp[10] }}>No inline preview — use GET to download.</div>}
+                  : <div style={{ fontFamily: mono, fontSize: fs.sm, color: P.mute, padding: sp[10] }}>No inline preview. Use GET to download.</div>}
             </div>
           </div>
         </div>

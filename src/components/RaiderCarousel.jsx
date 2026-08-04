@@ -50,7 +50,7 @@ function Slide({ slide }) {
       src={slide.src}
       alt={slide.alt}
       onError={() => setFailed(true)}
-      style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }}
+      style={{ width: '100%', height: '100%', objectFit: 'contain', objectPosition: 'center', display: 'block' }}
     />
   );
 }

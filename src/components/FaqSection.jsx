@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { supabase as SB } from '../lib/supabaseClient';
 import { TEAMS } from '../lib/teams';
 import { getDeviceId } from '../lib/fingerprint';
+import posthog from '../lib/posthog';
 
 const P = {
   ink: '#06101F', navy: '#142847', deep: '#0A1628',
@@ -131,7 +132,7 @@ function SubmitQuestion() {
     const cleanEmail = email.trim();
     if (!clean) { setState('err'); setMsg('Enter a question.'); return; }
     if (!cleanEmail || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(cleanEmail)) {
-      setState('err'); setMsg('Enter a valid email — we reply there.'); return;
+      setState('err'); setMsg('Enter a valid email. We reply there.'); return;
     }
     setState('busy'); setMsg('');
     const fp = await getDeviceId().catch(() => null);
@@ -141,11 +142,12 @@ function SubmitQuestion() {
       submitter_email: cleanEmail,
       submitter_fp: fp,
     }).select('id').single();
-    if (error) { setState('err'); setMsg('Could not submit — please try again.'); return; }
+    if (error) { setState('err'); setMsg('Could not submit, please try again.'); return; }
     // Best-effort notify — insert already succeeded regardless of outcome.
     SB.functions.invoke('notify-question-submitted', { body: { question_id: data.id } }).catch(() => {});
+    posthog.capture('faq_question_submitted');
     setState('ok');
-    setMsg('Question submitted — thanks for asking.');
+    setMsg('Question submitted. Thanks for asking.');
     setQuestion(''); setName(''); setEmail('');
   }
 
@@ -181,7 +183,7 @@ function SubmitQuestion() {
           <div style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: 9, color: P.gold, letterSpacing: '0.28em' }}>DON'T SEE YOUR QUESTION?</div>
         </div>
         <h3 style={{ fontFamily: 'Oswald, sans-serif', fontSize: 22, color: P.cream, margin: '14px 0 8px', fontWeight: 700, letterSpacing: '0.01em' }}>
-          Ask us directly — we reply by email
+          Ask us directly, we reply by email
         </h3>
         <p style={{ fontFamily: 'Inter, sans-serif', fontSize: 13.5, color: P.mute, margin: '0 0 22px' }}>
           A real instructor answers, usually within a couple of days.

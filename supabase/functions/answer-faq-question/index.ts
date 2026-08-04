@@ -47,7 +47,7 @@ Deno.serve(async (req) => {
       .select("id");
     if (uErr) return json({ error: uErr.message }, 500);
     if (!updated || updated.length === 0) {
-      return json({ error: "question was updated by someone else — refresh and try again" }, 409);
+      return json({ error: "question was updated by someone else, refresh and try again" }, 409);
     }
 
     const RESEND_API_KEY = Deno.env.get("RESEND_API_KEY");
@@ -63,7 +63,7 @@ Deno.serve(async (req) => {
 <p>You asked:</p>
 <p style="margin:0 0 16px;padding:12px 16px;border-left:3px solid #C9A961;color:#444;">${escapeHtml(q.question)}</p>
 <p>${escapeHtml(answer).replace(/\n/g, "<br/>")}</p>
-<p>— Trojan Battalion</p>`;
+<p>Trojan Battalion</p>`;
     const text = `Hi ${q.submitter_name || "there"},
 
 You asked:
@@ -71,7 +71,7 @@ You asked:
 
 ${answer}
 
-— Trojan Battalion`;
+Trojan Battalion`;
 
     const res = await fetch("https://api.resend.com/emails", {
       method: "POST",

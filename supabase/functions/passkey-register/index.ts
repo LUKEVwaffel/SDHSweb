@@ -55,7 +55,7 @@ Deno.serve(async (req) => {
 
     if (body.action === "finish") {
       const expectedChallenge = await consumeChallenge(email, "register");
-      if (!expectedChallenge) return json({ error: "challenge expired — start again" }, 400);
+      if (!expectedChallenge) return json({ error: "challenge expired, start again" }, 400);
 
       const verification = await verifyRegistrationResponse({
         response: body.response,

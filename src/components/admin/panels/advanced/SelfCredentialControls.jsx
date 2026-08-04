@@ -82,7 +82,7 @@ export default function SelfCredentialControls({ email, hasPin, hasPasskey, onCh
         <Btn onClick={revokePasskeys} variant="ghost" size="sm" disabled={!hasPasskey}>REVOKE PASSKEYS</Btn>
       </div>
       <div style={{ fontFamily: mono, fontSize: fs.micro, color: P.faint, marginTop: sp[2] }}>
-        Touch ID binds to the device you register it on — each person registers on their own machine, and only for their own account.
+        Touch ID binds to the device you register it on. Each person registers on their own machine, and only for their own account.
       </div>
 
       {busy && <div style={{ fontFamily: mono, fontSize: fs.tiny, color: P.green, marginTop: sp[4] }}>{busy}</div>}

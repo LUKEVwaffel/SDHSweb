@@ -4,7 +4,7 @@ import { supabase as SB } from '../lib/supabaseClient';
 import RaiderCarousel from './RaiderCarousel';
 import RaiderFAQ from './RaiderFAQ';
 import useIsMobile from '../hooks/useIsMobile';
-import { categoryColor, eventOccursOnDate, formatRecurrenceDays, formatEventTime } from '../lib/calendar';
+import { categoryColor, eventOccursOnDate, formatRecurrenceDays, formatEventTime, formatEventTimeRange, teamLabel, DEFAULT_POC } from '../lib/calendar';
 
 // Palette mirrors Rifle.jsx for a consistent specialty-team look. Green is the
 // raider live/event accent; gold stays the structural/command accent.
@@ -394,21 +394,16 @@ function EventCalendar({ events }) {
           })}
         </div>
 
-        {/* expanded day panel */}
+        {/* expanded day panel — full event details, not just title/time/location,
+            so a cadet clicking a day gets everything (uniform, transportation,
+            permission slip, POC, description) without leaving the page. */}
         {openDay && openDayEvents.length > 0 && (
           <div style={{ margin: '0 6px 6px', border: `1px solid ${P.hairStrong}`, background: P.navy, padding: 14 }}>
             <div style={{ fontFamily: mono, fontSize: 9, color: P.gold, letterSpacing: '0.2em', marginBottom: 10 }}>
               {MONTHS[month]} {openDay} · {openDayEvents.length} EVENT{openDayEvents.length > 1 ? 'S' : ''}
             </div>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-              {openDayEvents.map((ev, idx) => (
-                <div key={ev.id || idx} style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-                  <span style={{ width: 7, height: 7, background: categoryColor(ev.category), flexShrink: 0 }} />
-                  <span style={{ fontFamily: 'Inter, sans-serif', fontSize: 13, color: P.cream }}>{ev.title}</span>
-                  {formatEventTime(ev.event_time) && <span style={{ fontFamily: mono, fontSize: 9, color: P.mute }}>{formatEventTime(ev.event_time)}</span>}
-                  {ev.location && <span style={{ fontFamily: mono, fontSize: 9, color: P.mute, marginLeft: 'auto' }}>{ev.location}</span>}
-                </div>
-              ))}
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+              {openDayEvents.map((ev, idx) => <DayEventDetail key={ev.id || idx} event={ev} />)}
             </div>
           </div>
         )}
@@ -469,6 +464,57 @@ function fmtDate(iso) {
   const [y, m, d] = iso.split('-').map(Number);
   const MON = ['JAN','FEB','MAR','APR','MAY','JUN','JUL','AUG','SEP','OCT','NOV','DEC'];
   return `${MON[m - 1]} ${String(d).padStart(2, '0')}, ${y}`;
+}
+
+// Full detail block for one event inside the day-expand panel — same field
+// set as the public /events page's EventDetailCard (date range, time, calendar,
+// location, POC, uniform/transportation/permission-slip, description), so a
+// cadet doesn't have to leave Raiders to see what an event actually requires.
+function DayEventDetail({ event }) {
+  const time = formatEventTimeRange(event.event_time, event.end_time);
+  const dateRange = event.end_date ? `${fmtDate(event.date)} – ${fmtDate(event.end_date)}` : fmtDate(event.date);
+  const hasLogistics = event.uniform_required || event.transportation_required || (event.permission_slip_required && event.permission_slip_url);
+  return (
+    <div style={{ borderLeft: `2px solid ${categoryColor(event.category)}`, paddingLeft: 12 }}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 8, flexWrap: 'wrap' }}>
+        <span style={{ fontFamily: mono, fontSize: 8, letterSpacing: '0.16em', color: P.gold, opacity: 0.75 }}>{(event.category || 'EVENT').replace('_', ' ')}</span>
+        <span style={{ fontFamily: oswald, fontWeight: 700, fontSize: 16, color: P.cream }}>{event.title}</span>
+      </div>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(130px, 1fr))', gap: 10, marginBottom: hasLogistics || event.description ? 10 : 0 }}>
+        <DetailField label="Date">{dateRange}</DetailField>
+        {time && <DetailField label="Time">{time}</DetailField>}
+        <DetailField label="Calendar">{teamLabel(event.team)}</DetailField>
+        {event.location && <DetailField label="Location">{event.location}</DetailField>}
+        <DetailField label="POC">{(!event.poc || event.poc === DEFAULT_POC.name) ? DEFAULT_POC.name : event.poc}</DetailField>
+      </div>
+      {hasLogistics && (
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(130px, 1fr))', gap: 10, paddingTop: 10, borderTop: `1px solid ${P.hair}`, marginBottom: event.description ? 10 : 0 }}>
+          {event.uniform_required && <DetailField label="Uniform">{event.uniform}</DetailField>}
+          {event.transportation_required && <DetailField label="Transportation">{event.transportation}</DetailField>}
+          {event.permission_slip_required && event.permission_slip_url && (
+            <div>
+              <div style={{ fontFamily: mono, fontSize: 8, letterSpacing: '0.14em', color: P.mute, marginBottom: 4 }}>PERMISSION SLIP</div>
+              <a href={event.permission_slip_url} target="_blank" rel="noopener noreferrer" download style={{ color: P.gold, fontFamily: mono, fontSize: 10, letterSpacing: '0.1em' }}>↓ DOWNLOAD PDF</a>
+            </div>
+          )}
+        </div>
+      )}
+      {event.description && (
+        <div style={{ fontFamily: 'Inter, sans-serif', fontSize: 12, color: P.mute, lineHeight: 1.6, paddingTop: hasLogistics ? 0 : 10, borderTop: hasLogistics ? 'none' : `1px solid ${P.hair}` }}>
+          {event.description}
+        </div>
+      )}
+    </div>
+  );
+}
+
+function DetailField({ label, children }) {
+  return (
+    <div>
+      <div style={{ fontFamily: mono, fontSize: 8, letterSpacing: '0.14em', color: P.mute, marginBottom: 4 }}>{label.toUpperCase()}</div>
+      <div style={{ fontFamily: 'Inter, sans-serif', fontSize: 12, color: P.cream }}>{children}</div>
+    </div>
+  );
 }
 
 const navBtn = {

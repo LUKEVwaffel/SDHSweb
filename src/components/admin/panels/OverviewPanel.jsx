@@ -120,7 +120,7 @@ export default function OverviewPanel({ adminId, goto }) {
     (async () => {
       const [
         openPolls, events, people, photos, subscribers, pendingEmail,
-        consentTotal, consentCollected, consentPending, newQuestions,
+        consentTotal, consentCollected, consentPending, newQuestions, opticsendReady,
         upcomingRows, activityRows,
       ] = await Promise.all([
         safeCount('polls', (q) => q.eq('status', 'open')),
@@ -128,15 +128,16 @@ export default function OverviewPanel({ adminId, goto }) {
         safeCount('personnel'),
         safeCount('photos'),
         safeCount('email_subscribers', (q) => q.eq('active', true)),
-        safeCount('email_messages', (q) => q.eq('status', 'pending_signature')),
+        safeCount('email_messages', (q) => q.eq('status', 'changes_requested')),
         safeCount('cadet_consent'),
         safeCount('cadet_consent', (q) => q.eq('consent_status', 'collected')),
         safeCount('cadet_consent', (q) => q.eq('consent_status', 'pending')),
         safeCount('faq_questions', (q) => q.eq('status', 'new')),
+        safeCount('email_messages', (q) => q.eq('source', 'opticsend').eq('status', 'draft')),
         safeList('events', (q) => q.gte('date', todayIso).order('date', { ascending: true }).limit(3)),
         safeList('change_log', (q) => q.order('created_at', { ascending: false }).limit(6)),
       ]);
-      setStats({ openPolls, events, people, photos, subscribers, pendingEmail, consentTotal, consentCollected, consentPending, newQuestions });
+      setStats({ openPolls, events, people, photos, subscribers, pendingEmail, consentTotal, consentCollected, consentPending, newQuestions, opticsendReady });
       setUpcoming(upcomingRows);
       setActivity(activityRows);
     })();
@@ -156,10 +157,11 @@ export default function OverviewPanel({ adminId, goto }) {
   const consentPct = stats.consentTotal ? Math.round((stats.consentCollected / stats.consentTotal) * 100) : 0;
 
   const actions = [
-    { value: fmt(stats.pendingEmail), label: 'EMAILS AWAITING SIGNATURE', hint: 'Printed · pending SAI/1SG signature', tone: P.red,   to: 'email',  alert: stats.pendingEmail > 0 },
+    { value: fmt(stats.pendingEmail), label: 'EMAILS NEED CHANGES', hint: 'Reviewer requested changes · needs a resubmit', tone: P.red,   to: 'email',  alert: stats.pendingEmail > 0 },
     { value: fmt(stats.openPolls),    label: 'OPEN PHOTO POLLS',           hint: 'Raider voting live now',              tone: P.gold,  to: 'photos', alert: stats.openPolls > 0 },
     { value: fmt(stats.consentPending), label: 'CONSENT FORMS PENDING',    hint: 'Cadets without photo consent',        tone: P.blue,  to: 'people', alert: stats.consentPending > 0 },
     { value: fmt(stats.newQuestions),  label: 'NEW FAQ QUESTIONS',         hint: 'Submitted from the About page',       tone: P.blue,  to: 'questions', alert: stats.newQuestions > 0 },
+    { value: fmt(stats.opticsendReady), label: 'OPTICSEND DRAFTS READY',   hint: 'Auto-generated · pick a reviewer & submit', tone: P.green, to: 'email', alert: stats.opticsendReady > 0 },
   ];
 
   // Sort alerts first so the front door leads with what's actionable.

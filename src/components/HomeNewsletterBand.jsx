@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { supabase as SB } from '../lib/supabaseClient';
+import posthog from '../lib/posthog';
 
 const P = {
   ink: '#06101F', navy: '#142847', deep: '#0A1628',
@@ -31,9 +32,12 @@ export default function HomeNewsletterBand() {
     const { error } = await SB.from('email_subscribers').insert({
       email: clean, name: name.trim() || null, source: 'signup',
     });
-    if (error && error.code !== '23505') { setState('err'); setMsg('Could not subscribe — please try again.'); return; }
+    if (error && error.code !== '23505') { setState('err'); setMsg('Could not subscribe, please try again.'); return; }
+    posthog.capture('newsletter_subscription_completed', {
+      subscription_status: error?.code === '23505' ? 'existing' : 'new',
+    });
     setState('ok');
-    setMsg(error?.code === '23505' ? "You're already on the roster — welcome back." : 'Subscribed. Watch your inbox for battalion updates.');
+    setMsg(error?.code === '23505' ? "You're already on the roster, welcome back." : 'Subscribed. Watch your inbox for battalion updates.');
     setEmail(''); setName('');
   }
 
@@ -79,7 +83,7 @@ export default function HomeNewsletterBand() {
             color: P.mute, fontFamily: 'Inter, sans-serif', fontSize: 16,
             lineHeight: 1.7, maxWidth: 460, margin: 0,
           }}>
-            Parents and cadets — get event notices, competition results, and
+            Parents and cadets, get event notices, competition results, and
             battalion announcements delivered straight to your inbox. No spam,
             just the signal.
           </p>
