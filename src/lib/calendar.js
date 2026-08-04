@@ -5,6 +5,7 @@
 export const EVENT_CATEGORIES = [
   { id: 'FOOTBALL',  color: '#7FA8D6' },
   { id: 'RAIDER',    color: '#7EC87E' },
+  { id: 'PRACTICE',  color: '#4E8F52' }, // recurring team practice — dimmer than RAIDER so competitions still pop
   { id: 'RIFLE',     color: '#C9A961' },
   { id: 'DRILL',     color: '#D69B6B' },
   { id: 'ACADEMIC',  color: '#B48FD4' },
@@ -38,6 +39,15 @@ export function formatEventTime(event_time) {
   return `${h12}:${String(m).padStart(2, '0')} ${period}`;
 }
 
+// "2:30 PM – 4:30 PM" when both start and end are set; falls back to just the
+// start time (old single-time behavior) when end_time is absent.
+export function formatEventTimeRange(event_time, end_time) {
+  const start = formatEventTime(event_time);
+  const end = formatEventTime(end_time);
+  if (start && end) return `${start} – ${end}`;
+  return start;
+}
+
 // team '' = battalion-wide (stored as NULL). The 4 specialty teams map to their
 // own calendars.
 export const EVENT_TEAMS = [
@@ -51,6 +61,34 @@ export const teamLabel = (id) => EVENT_TEAMS.find((t) => t.id === (id || ''))?.l
 
 export const MONTHS = ['JANUARY', 'FEBRUARY', 'MARCH', 'APRIL', 'MAY', 'JUNE', 'JULY', 'AUGUST', 'SEPTEMBER', 'OCTOBER', 'NOVEMBER', 'DECEMBER'];
 export const MON3 = ['JAN', 'FEB', 'MAR', 'APR', 'MAY', 'JUN', 'JUL', 'AUG', 'SEP', 'OCT', 'NOV', 'DEC'];
+
+// JS Date.getDay() order (0=Sun...6=Sat) — indexes match `recurrence_days`.
+export const WEEKDAY_SHORT = ['SUN', 'MON', 'TUE', 'WED', 'THU', 'FRI', 'SAT'];
+
+// Does `event` occur on calendar day `dateStr` ('YYYY-MM-DD')? An exact match
+// on `date` always counts (covers normal one-off events and a recurring
+// series' own start day). A recurring series (recurrence_days + end_date set)
+// also matches any day within [date, end_date] whose weekday is listed.
+// Expansion is opt-in per calendar — see events_recurrence.sql for why this
+// keeps recurrence rendering scoped to whichever calendar actually calls it.
+export function eventOccursOnDate(event, dateStr) {
+  if (event.date === dateStr) return true;
+  if (!event.recurrence_days?.length || !event.end_date) return false;
+  if (dateStr < event.date || dateStr > event.end_date) return false;
+  const dow = new Date(`${dateStr}T00:00:00`).getDay();
+  return event.recurrence_days.includes(dow);
+}
+
+// "MON-THU" for a contiguous run, "MON, WED, FRI" otherwise.
+export function formatRecurrenceDays(days) {
+  if (!days?.length) return '';
+  const sorted = [...days].sort((a, b) => a - b);
+  const isContiguous = sorted.every((d, i) => i === 0 || d === sorted[i - 1] + 1);
+  if (isContiguous && sorted.length > 1) {
+    return `${WEEKDAY_SHORT[sorted[0]]}-${WEEKDAY_SHORT[sorted[sorted.length - 1]]}`;
+  }
+  return sorted.map((d) => WEEKDAY_SHORT[d]).join(', ');
+}
 
 // A DB event row -> render-friendly shape used by the public calendar.
 export function toCalendarItem(row) {
