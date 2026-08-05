@@ -230,8 +230,8 @@
     "semantic_hash": "2fb87b9ddc035aa17907879b1bd5e130"
   },
   "src/components/admin/panels/email/Messages.jsx": {
-    "mtime": 1785880403.3736393,
-    "ast_hash": "6669a47e319514082c9841d43f6096f5",
+    "mtime": 1785882858.3661566,
+    "ast_hash": "c2cb007be9ab9b974cfe8fe3e72a561d",
     "semantic_hash": ""
   },
   "src/components/admin/panels/email/Subscribers.jsx": {
@@ -510,8 +510,8 @@
     "semantic_hash": ""
   },
   "index.html": {
-    "mtime": 1783775087.7813537,
-    "ast_hash": "254779ef1a137c70c8be82dd6f3453ac",
+    "mtime": 1785883680.912585,
+    "ast_hash": "e5ef466f7795d0d1ae537a2407bc06f1",
     "semantic_hash": ""
   },
   "public/assets/cadet-manual.pdf": {
@@ -540,8 +540,8 @@
     "semantic_hash": ""
   },
   "public/favicon.svg": {
-    "mtime": 1783775087.782328,
-    "ast_hash": "7e840862161341271697daa99a40d76b",
+    "mtime": 1785883663.9239147,
+    "ast_hash": "f6b87be3c4f2fb15ce65a05770c243d4",
     "semantic_hash": ""
   },
   "public/icons.svg": {
@@ -950,8 +950,8 @@
     "semantic_hash": ""
   },
   "supabase/email_review_revoke_override.sql": {
-    "mtime": 1785880357.5335944,
-    "ast_hash": "0ae02740c8ed2901f78a05c09248214e",
+    "mtime": 1785880690.1656952,
+    "ast_hash": "c95a85da482e076ecb97e6ea6c3f0edc",
     "semantic_hash": ""
   },
   "supabase/events_end_time.sql": {
@@ -1060,8 +1060,38 @@
     "semantic_hash": ""
   },
   "public/assets/raiders-season-calendar.pdf": {
-    "mtime": 1785864129.3920507,
-    "ast_hash": "cc726df9fe693ec809c885ec9ba791c2",
+    "mtime": 1785883025.269553,
+    "ast_hash": "3da3e4bbbb7b4594c4c5e66f36ee13bf",
+    "semantic_hash": ""
+  },
+  "vercel.json": {
+    "mtime": 1785883959.1199896,
+    "ast_hash": "6411d2fbb5f0e00aaff0ca0ded84e0b6",
+    "semantic_hash": ""
+  },
+  "public/android-chrome-192x192.png": {
+    "mtime": 1785883675.8605232,
+    "ast_hash": "f16bdfb8317f18ce0e28d77ec3340259",
+    "semantic_hash": ""
+  },
+  "public/android-chrome-512x512.png": {
+    "mtime": 1785883675.8706605,
+    "ast_hash": "f68ade6cc0ac52922c22f31fa2fef541",
+    "semantic_hash": ""
+  },
+  "public/apple-touch-icon.png": {
+    "mtime": 1785883675.8516965,
+    "ast_hash": "a1144676b4d3d6ec05aa364876dacd0e",
+    "semantic_hash": ""
+  },
+  "public/favicon-16x16.png": {
+    "mtime": 1785883675.8365114,
+    "ast_hash": "6558db807442fe6e223718d2e3940190",
+    "semantic_hash": ""
+  },
+  "public/favicon-32x32.png": {
+    "mtime": 1785883675.8436627,
+    "ast_hash": "e766f03dcd20ea84de53c0ee5b3f2fcb",
     "semantic_hash": ""
   }
 }

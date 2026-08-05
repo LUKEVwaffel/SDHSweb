@@ -11,12 +11,12 @@ const P = {
 
 const S_SECTIONS = [
   { key: 'command', label: 'CMD', name: 'BATTALION COMMAND', desc: 'Battalion commander, executive officer, and command sergeant major, the senior leadership echelon.' },
-  { key: 's1', label: 'S-1', name: 'PERSONNEL',      desc: 'Manages cadet records, awards, promotions, and official documentation.' },
-  { key: 's2', label: 'S-2', name: 'INTELLIGENCE',   desc: 'Handles information operations, competition analysis, and situational awareness.' },
-  { key: 's3', label: 'S-3', name: 'OPERATIONS',     desc: 'Plans and coordinates all battalion training events, formations, and official functions.' },
-  { key: 's4', label: 'S-4', name: 'LOGISTICS',      desc: 'Oversees uniform accountability, equipment inventories, and supply management.' },
-  { key: 's5', label: 'S-5', name: 'CIVIL AFFAIRS',  desc: 'Coordinates community service, color guards, and battalion public affairs.' },
-  { key: 's6', label: 'S-6', name: 'COMMUNICATIONS', desc: 'Manages battalion technology, digital platforms, and information systems.' },
+  { key: 's1', label: 'S-1', name: 'PERSONNEL',      desc: 'Principal staff for personnel readiness — maintains strength reports, rosters, and records, oversees bulletin boards and photo displays, and plans awards, promotion, and social events.' },
+  { key: 's2', label: 'S-2', name: 'INTELLIGENCE',   desc: 'Oversees battalion physical security and monthly key control inventory, and provides terrain, weather, and threat analysis for training and event planning.' },
+  { key: 's3', label: 'S-3', name: 'OPERATIONS',     desc: 'Plans, organizes, and supervises all cadet training happening within 30 days — allocating resources, finalizing instructions and schedules, and rehearsing classes before execution.' },
+  { key: 's4', label: 'S-4', name: 'LOGISTICS',      desc: 'Coordinates battalion logistics, supply, and equipment — receiving, distributing, and inventorying gear, and linking cadets with the cadre supply technician.' },
+  { key: 's5', label: 'S-5', name: 'CIVIL AFFAIRS',  desc: 'Plans training and operations more than 30 days out — allocating resources, building the long-range training calendar, and handing plans to S-3 a month before each event.' },
+  { key: 's6', label: 'S-6', name: 'COMMUNICATIONS', desc: 'Collects media waivers each fall, documents JROTC events through photography, builds the monthly battalion newsletter, and runs the battalion\'s social media and website.' },
 ];
 
 // Keyboard activation for click-through cards.
