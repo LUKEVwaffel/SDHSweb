@@ -147,7 +147,20 @@ export default function ConsentSection({ adminId }) {
     setDetailErr(!!error);
     setDetailMsg(error ? error.message : 'Saved');
     setTimeout(() => setDetailMsg(''), 2500);
+    if (!error && patch.school_email) enrollSchoolEmail(patch.school_email, company);
     load();
+  }
+
+  // school_email is always part of the battalion mailing list — unlike
+  // parent_email (opt-in via the button below), no explicit action needed.
+  // Same dedupe-by-email pattern as addParentToList, called silently on
+  // create/update whenever a school email is on the row.
+  async function enrollSchoolEmail(email, companyTag) {
+    const clean = (email || '').trim().toLowerCase();
+    if (!EMAIL_RE.test(clean)) return;
+    const { data: existing } = await SB.from('email_subscribers').select('id').eq('email', clean).maybeSingle();
+    if (existing) return;
+    await SB.from('email_subscribers').insert({ email: clean, source: 'manual', company: companyTag });
   }
 
   // Promote the cadet's parent email into email_subscribers. Explicit action,
@@ -190,6 +203,7 @@ export default function ConsentSection({ adminId }) {
     setAddErr(!!error);
     setAddMsg(error ? error.message : `Added ${name} to ${addCompany.toUpperCase()}`);
     if (error) return; // leave the popup open + message visible so they can fix and retry
+    if (payload.school_email) enrollSchoolEmail(payload.school_email, addCompany);
     setAddOpen(false);
     setTimeout(() => setAddMsg(''), 3000);
     loadCounts();

@@ -195,5 +195,10 @@
   "193": "photos_event_required.sql",
   "194": "photos_uploaded_by.sql",
   "195": "events_raider_tryouts_2026.sql",
-  "196": "gallery_removal.sql"
+  "196": "gallery_removal.sql",
+  "197": "emailRender.js",
+  "198": "TeamGallery.jsx",
+  "199": "Companies.jsx",
+  "200": "EmailHistoryPanel.jsx",
+  "201": "personnel_assistant_nco_titles.sql"
 }

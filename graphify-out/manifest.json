@@ -50,8 +50,8 @@
     "semantic_hash": ""
   },
   "src/components/CommandProfile.jsx": {
-    "mtime": 1785452833.4511943,
-    "ast_hash": "e7a66a48d9520fedb670345734087223",
+    "mtime": 1785942223.6665807,
+    "ast_hash": "165c2393a0c381cf1e8c9959c2acfe85",
     "semantic_hash": ""
   },
   "src/components/Companies.jsx": {
@@ -90,13 +90,13 @@
     "semantic_hash": ""
   },
   "src/components/Rifle.jsx": {
-    "mtime": 1785452987.9592967,
-    "ast_hash": "d98114c87fff47c48ba19a8a198e7cc7",
+    "mtime": 1785947218.9712312,
+    "ast_hash": "31d763bf462cb25db5768790ab9ff3a2",
     "semantic_hash": ""
   },
   "src/components/Staff.jsx": {
-    "mtime": 1785788422.373735,
-    "ast_hash": "e07d07eccb17898618133a16163fe062",
+    "mtime": 1785942235.9107678,
+    "ast_hash": "16a148dc54cb0d967759b92754a865af",
     "semantic_hash": ""
   },
   "src/components/SubmitHub.jsx": {
@@ -260,8 +260,8 @@
     "semantic_hash": "4dedb03706602a67f8be7d1f02bda71a"
   },
   "src/components/admin/panels/people/ConsentSection.jsx": {
-    "mtime": 1785845256.2655919,
-    "ast_hash": "495f38dc998862231df6f1f276e6339e",
+    "mtime": 1785949456.8133464,
+    "ast_hash": "e1a4254472f54b04878d4360f139bad5",
     "semantic_hash": ""
   },
   "src/components/admin/panels/people/PeoplePanel.jsx": {
@@ -620,8 +620,8 @@
     "semantic_hash": ""
   },
   "src/components/admin/panels/advanced/AchievementCatalog.jsx": {
-    "mtime": 1785788569.7504323,
-    "ast_hash": "2b1da37203aca3aeeeea78bddc92ee7b",
+    "mtime": 1785939809.758387,
+    "ast_hash": "821b0ba2562ee13e850a6e6cf5338781",
     "semantic_hash": ""
   },
   "src/components/admin/panels/people/PersonAchievements.jsx": {
@@ -940,8 +940,8 @@
     "semantic_hash": ""
   },
   "src/lib/posthog.js": {
-    "mtime": 1785876581.7015116,
-    "ast_hash": "04431d2bae938671b67d647de0e87cdf",
+    "mtime": 1785949279.6016724,
+    "ast_hash": "2ddd9f9fefef8e7182e7cf20e9f796fd",
     "semantic_hash": ""
   },
   "supabase/cadet_consent_grade_let.sql": {
@@ -1060,8 +1060,8 @@
     "semantic_hash": ""
   },
   "public/assets/raiders-season-calendar.pdf": {
-    "mtime": 1785883025.269553,
-    "ast_hash": "3da3e4bbbb7b4594c4c5e66f36ee13bf",
+    "mtime": 1785941316.4456606,
+    "ast_hash": "1fbe88c474f0bb071597b0c53651bc7f",
     "semantic_hash": ""
   },
   "vercel.json": {
@@ -1092,6 +1092,11 @@
   "public/favicon-32x32.png": {
     "mtime": 1785883675.8436627,
     "ast_hash": "e766f03dcd20ea84de53c0ee5b3f2fcb",
+    "semantic_hash": ""
+  },
+  "supabase/personnel_assistant_nco_titles.sql": {
+    "mtime": 1785942277.0992162,
+    "ast_hash": "47121bd434eb52497148078b88c6b81d",
     "semantic_hash": ""
   }
 }

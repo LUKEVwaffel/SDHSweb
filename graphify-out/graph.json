@@ -43,8 +43,8 @@
       "source_location": "L3",
       "_origin": "ast",
       "id": "ref_react",
-      "community": 12,
-      "community_name": "blocks.js",
+      "community": 0,
+      "community_name": "react",
       "norm_label": "react"
     },
     {
@@ -1363,8 +1363,8 @@
       "source_location": "L537",
       "_origin": "ast",
       "id": "src_components_battalioncommand_battalioncommand",
-      "community": 5,
-      "community_name": "BattalionCommand.jsx",
+      "community": 20,
+      "community_name": "Companies.jsx",
       "norm_label": "battalioncommand()"
     },
     {
@@ -1374,8 +1374,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "src_components_bulletin",
-      "community": 10,
-      "community_name": "emailRender.js",
+      "community": 4,
+      "community_name": "EventsPanel.jsx",
       "norm_label": "bulletin.jsx"
     },
     {
@@ -1385,8 +1385,8 @@
       "source_location": "L6",
       "_origin": "ast",
       "id": "src_components_bulletin_p",
-      "community": 10,
-      "community_name": "emailRender.js",
+      "community": 4,
+      "community_name": "EventsPanel.jsx",
       "norm_label": "p"
     },
     {
@@ -1396,8 +1396,8 @@
       "source_location": "L18",
       "_origin": "ast",
       "id": "src_components_bulletin_teaserrow",
-      "community": 10,
-      "community_name": "emailRender.js",
+      "community": 4,
+      "community_name": "EventsPanel.jsx",
       "norm_label": "teaserrow()"
     },
     {
@@ -1407,8 +1407,8 @@
       "source_location": "L43",
       "_origin": "ast",
       "id": "src_components_bulletin_bulletin",
-      "community": 10,
-      "community_name": "emailRender.js",
+      "community": 4,
+      "community_name": "EventsPanel.jsx",
       "norm_label": "bulletin()"
     },
     {
@@ -1418,8 +1418,8 @@
       "source_location": "L96",
       "_origin": "ast",
       "id": "src_components_bulletin_viewallbtn",
-      "community": 10,
-      "community_name": "emailRender.js",
+      "community": 4,
+      "community_name": "EventsPanel.jsx",
       "norm_label": "viewallbtn"
     },
     {
@@ -1429,8 +1429,8 @@
       "source_location": "L101",
       "_origin": "ast",
       "id": "src_components_bulletin_emptystyle",
-      "community": 10,
-      "community_name": "emailRender.js",
+      "community": 4,
+      "community_name": "EventsPanel.jsx",
       "norm_label": "emptystyle"
     },
     {
@@ -1561,7 +1561,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "src_components_companies",
-      "community": 20,
+      "community": 199,
       "community_name": "Companies.jsx",
       "norm_label": "companies.jsx"
     },
@@ -1572,7 +1572,7 @@
       "source_location": "L6",
       "_origin": "ast",
       "id": "src_components_companies_p",
-      "community": 20,
+      "community": 199,
       "community_name": "Companies.jsx",
       "norm_label": "p"
     },
@@ -1583,7 +1583,7 @@
       "source_location": "L79",
       "_origin": "ast",
       "id": "src_components_companies_companies",
-      "community": 20,
+      "community": 199,
       "community_name": "Companies.jsx",
       "norm_label": "companies"
     },
@@ -1594,7 +1594,7 @@
       "source_location": "L19",
       "_origin": "ast",
       "id": "src_components_companies_role_order",
-      "community": 20,
+      "community": 199,
       "community_name": "Companies.jsx",
       "norm_label": "role_order"
     },
@@ -1605,7 +1605,7 @@
       "source_location": "L22",
       "_origin": "ast",
       "id": "src_components_companies_activate",
-      "community": 20,
+      "community": 199,
       "community_name": "Companies.jsx",
       "norm_label": "activate()"
     },
@@ -1616,7 +1616,7 @@
       "source_location": "L29",
       "_origin": "ast",
       "id": "src_components_companies_cadetcard",
-      "community": 20,
+      "community": 199,
       "community_name": "Companies.jsx",
       "norm_label": "cadetcard()"
     },
@@ -1649,8 +1649,8 @@
       "source_location": "L22",
       "_origin": "ast",
       "id": "src_components_eventspage_eventspage",
-      "community": 1,
-      "community_name": "PhotoUploader.jsx",
+      "community": 198,
+      "community_name": "TeamGallery.jsx",
       "norm_label": "eventspage()"
     },
     {
@@ -1660,8 +1660,8 @@
       "source_location": "L145",
       "_origin": "ast",
       "id": "src_components_eventspage_photogrid",
-      "community": 86,
-      "community_name": "EventsPage.jsx",
+      "community": 1,
+      "community_name": "PhotoUploader.jsx",
       "norm_label": "photogrid()"
     },
     {
@@ -2639,8 +2639,8 @@
       "source_location": "L526",
       "_origin": "ast",
       "id": "src_components_raiders_raiders",
-      "community": 6,
-      "community_name": "Raiders.jsx",
+      "community": 20,
+      "community_name": "Companies.jsx",
       "norm_label": "raiders()"
     },
     {
@@ -2658,7 +2658,7 @@
       "label": "P",
       "file_type": "code",
       "source_file": "src/components/Rifle.jsx",
-      "source_location": "L5",
+      "source_location": "L6",
       "_origin": "ast",
       "id": "src_components_rifle_p",
       "community": 27,
@@ -2669,7 +2669,7 @@
       "label": "SEASON",
       "file_type": "code",
       "source_file": "src/components/Rifle.jsx",
-      "source_location": "L13",
+      "source_location": "L14",
       "_origin": "ast",
       "id": "src_components_rifle_season",
       "community": 27,
@@ -2680,7 +2680,7 @@
       "label": "RifleStyles()",
       "file_type": "code",
       "source_file": "src/components/Rifle.jsx",
-      "source_location": "L20",
+      "source_location": "L21",
       "_origin": "ast",
       "id": "src_components_rifle_riflestyles",
       "community": 27,
@@ -2688,10 +2688,21 @@
       "norm_label": "riflestyles()"
     },
     {
+      "label": "activate()",
+      "file_type": "code",
+      "source_file": "src/components/Rifle.jsx",
+      "source_location": "L39",
+      "_origin": "ast",
+      "id": "src_components_rifle_activate",
+      "community": 27,
+      "community_name": "TabPlaceholder.jsx",
+      "norm_label": "activate()"
+    },
+    {
       "label": "PageBg()",
       "file_type": "code",
       "source_file": "src/components/Rifle.jsx",
-      "source_location": "L37",
+      "source_location": "L47",
       "_origin": "ast",
       "id": "src_components_rifle_pagebg",
       "community": 27,
@@ -2702,7 +2713,7 @@
       "label": "Brackets()",
       "file_type": "code",
       "source_file": "src/components/Rifle.jsx",
-      "source_location": "L73",
+      "source_location": "L83",
       "_origin": "ast",
       "id": "src_components_rifle_brackets",
       "community": 27,
@@ -2713,7 +2724,7 @@
       "label": "SectionLabel()",
       "file_type": "code",
       "source_file": "src/components/Rifle.jsx",
-      "source_location": "L89",
+      "source_location": "L99",
       "_origin": "ast",
       "id": "src_components_rifle_sectionlabel",
       "community": 27,
@@ -2724,7 +2735,7 @@
       "label": "CommanderCard()",
       "file_type": "code",
       "source_file": "src/components/Rifle.jsx",
-      "source_location": "L107",
+      "source_location": "L117",
       "_origin": "ast",
       "id": "src_components_rifle_commandercard",
       "community": 27,
@@ -2735,7 +2746,7 @@
       "label": "SeasonPill()",
       "file_type": "code",
       "source_file": "src/components/Rifle.jsx",
-      "source_location": "L174",
+      "source_location": "L194",
       "_origin": "ast",
       "id": "src_components_rifle_seasonpill",
       "community": 27,
@@ -2746,7 +2757,7 @@
       "label": "ScoreBoard()",
       "file_type": "code",
       "source_file": "src/components/Rifle.jsx",
-      "source_location": "L196",
+      "source_location": "L216",
       "_origin": "ast",
       "id": "src_components_rifle_scoreboard",
       "community": 27,
@@ -2757,7 +2768,7 @@
       "label": "EventCalendar()",
       "file_type": "code",
       "source_file": "src/components/Rifle.jsx",
-      "source_location": "L291",
+      "source_location": "L311",
       "_origin": "ast",
       "id": "src_components_rifle_eventcalendar",
       "community": 27,
@@ -2768,11 +2779,11 @@
       "label": "Rifle()",
       "file_type": "code",
       "source_file": "src/components/Rifle.jsx",
-      "source_location": "L410",
+      "source_location": "L430",
       "_origin": "ast",
       "id": "src_components_rifle_rifle",
-      "community": 27,
-      "community_name": "TabPlaceholder.jsx",
+      "community": 20,
+      "community_name": "Companies.jsx",
       "norm_label": "rifle()"
     },
     {
@@ -3035,8 +3046,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "src_components_teamgallery",
-      "community": 1,
-      "community_name": "PhotoUploader.jsx",
+      "community": 198,
+      "community_name": "TeamGallery.jsx",
       "norm_label": "teamgallery.jsx"
     },
     {
@@ -3046,8 +3057,8 @@
       "source_location": "L7",
       "_origin": "ast",
       "id": "src_components_teamgallery_p",
-      "community": 1,
-      "community_name": "PhotoUploader.jsx",
+      "community": 198,
+      "community_name": "TeamGallery.jsx",
       "norm_label": "p"
     },
     {
@@ -3057,8 +3068,8 @@
       "source_location": "L19",
       "_origin": "ast",
       "id": "src_components_teamgallery_teamgallery",
-      "community": 1,
-      "community_name": "PhotoUploader.jsx",
+      "community": 198,
+      "community_name": "TeamGallery.jsx",
       "norm_label": "teamgallery()"
     },
     {
@@ -3068,8 +3079,8 @@
       "source_location": "L82",
       "_origin": "ast",
       "id": "src_components_teamgallery_loadingstyle",
-      "community": 1,
-      "community_name": "PhotoUploader.jsx",
+      "community": 198,
+      "community_name": "TeamGallery.jsx",
       "norm_label": "loadingstyle"
     },
     {
@@ -3079,8 +3090,8 @@
       "source_location": "L83",
       "_origin": "ast",
       "id": "src_components_teamgallery_ghostbtn",
-      "community": 1,
-      "community_name": "PhotoUploader.jsx",
+      "community": 198,
+      "community_name": "TeamGallery.jsx",
       "norm_label": "ghostbtn"
     },
     {
@@ -3266,8 +3277,8 @@
       "source_location": "L40",
       "_origin": "ast",
       "id": "src_components_admin_dashboard_dashboard",
-      "community": 41,
-      "community_name": "PhotoUploader.jsx",
+      "community": 43,
+      "community_name": "Rifle.jsx",
       "norm_label": "dashboard()"
     },
     {
@@ -3563,8 +3574,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "src_components_admin_nav_statusbar",
-      "community": 43,
-      "community_name": "Rifle.jsx",
+      "community": 41,
+      "community_name": "PhotoUploader.jsx",
       "norm_label": "statusbar.jsx"
     },
     {
@@ -3882,8 +3893,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "src_components_admin_panels_questionspanel",
-      "community": 41,
-      "community_name": "PhotoUploader.jsx",
+      "community": 83,
+      "community_name": "RaiderPolls.jsx",
       "norm_label": "questionspanel.jsx"
     },
     {
@@ -3893,8 +3904,8 @@
       "source_location": "L13",
       "_origin": "ast",
       "id": "src_components_admin_panels_questionspanel_status_tone",
-      "community": 41,
-      "community_name": "PhotoUploader.jsx",
+      "community": 83,
+      "community_name": "RaiderPolls.jsx",
       "norm_label": "status_tone"
     },
     {
@@ -3904,8 +3915,8 @@
       "source_location": "L15",
       "_origin": "ast",
       "id": "src_components_admin_panels_questionspanel_filters",
-      "community": 41,
-      "community_name": "PhotoUploader.jsx",
+      "community": 83,
+      "community_name": "RaiderPolls.jsx",
       "norm_label": "filters"
     },
     {
@@ -3915,8 +3926,8 @@
       "source_location": "L22",
       "_origin": "ast",
       "id": "src_components_admin_panels_questionspanel_questionspanel",
-      "community": 41,
-      "community_name": "PhotoUploader.jsx",
+      "community": 83,
+      "community_name": "RaiderPolls.jsx",
       "norm_label": "questionspanel()"
     },
     {
@@ -3926,8 +3937,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "src_components_admin_panels_selfaccountpanel",
-      "community": 12,
-      "community_name": "blocks.js",
+      "community": 43,
+      "community_name": "Rifle.jsx",
       "norm_label": "selfaccountpanel.jsx"
     },
     {
@@ -3937,8 +3948,8 @@
       "source_location": "L12",
       "_origin": "ast",
       "id": "src_components_admin_panels_selfaccountpanel_selfaccountpanel",
-      "community": 12,
-      "community_name": "blocks.js",
+      "community": 41,
+      "community_name": "PhotoUploader.jsx",
       "norm_label": "selfaccountpanel()"
     },
     {
@@ -4113,8 +4124,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "src_components_admin_panels_advanced_accountspanel",
-      "community": 12,
-      "community_name": "blocks.js",
+      "community": 43,
+      "community_name": "Rifle.jsx",
       "norm_label": "accountspanel.jsx"
     },
     {
@@ -4124,8 +4135,8 @@
       "source_location": "L19",
       "_origin": "ast",
       "id": "src_components_admin_panels_advanced_accountspanel_slug",
-      "community": 12,
-      "community_name": "blocks.js",
+      "community": 43,
+      "community_name": "Rifle.jsx",
       "norm_label": "slug()"
     },
     {
@@ -4135,8 +4146,8 @@
       "source_location": "L23",
       "_origin": "ast",
       "id": "src_components_admin_panels_advanced_accountspanel_accountspanel",
-      "community": 12,
-      "community_name": "blocks.js",
+      "community": 43,
+      "community_name": "Rifle.jsx",
       "norm_label": "accountspanel()"
     },
     {
@@ -4146,8 +4157,8 @@
       "source_location": "L199",
       "_origin": "ast",
       "id": "src_components_admin_panels_advanced_accountspanel_methoddot",
-      "community": 12,
-      "community_name": "blocks.js",
+      "community": 43,
+      "community_name": "Rifle.jsx",
       "norm_label": "methoddot()"
     },
     {
@@ -4256,8 +4267,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "src_components_admin_panels_advanced_emailhistorypanel",
-      "community": 0,
-      "community_name": "react",
+      "community": 200,
+      "community_name": "EmailHistoryPanel.jsx",
       "norm_label": "emailhistorypanel.jsx"
     },
     {
@@ -4267,8 +4278,8 @@
       "source_location": "L12",
       "_origin": "ast",
       "id": "src_components_admin_panels_advanced_emailhistorypanel_status_color",
-      "community": 0,
-      "community_name": "react",
+      "community": 200,
+      "community_name": "EmailHistoryPanel.jsx",
       "norm_label": "status_color"
     },
     {
@@ -4278,8 +4289,8 @@
       "source_location": "L20",
       "_origin": "ast",
       "id": "src_components_admin_panels_advanced_emailhistorypanel_fmtdate",
-      "community": 0,
-      "community_name": "react",
+      "community": 200,
+      "community_name": "EmailHistoryPanel.jsx",
       "norm_label": "fmtdate()"
     },
     {
@@ -4289,8 +4300,8 @@
       "source_location": "L24",
       "_origin": "ast",
       "id": "src_components_admin_panels_advanced_emailhistorypanel_step",
-      "community": 0,
-      "community_name": "react",
+      "community": 200,
+      "community_name": "EmailHistoryPanel.jsx",
       "norm_label": "step()"
     },
     {
@@ -4300,8 +4311,8 @@
       "source_location": "L39",
       "_origin": "ast",
       "id": "src_components_admin_panels_advanced_emailhistorypanel_emailhistorypanel",
-      "community": 0,
-      "community_name": "react",
+      "community": 200,
+      "community_name": "EmailHistoryPanel.jsx",
       "norm_label": "emailhistorypanel()"
     },
     {
@@ -4377,8 +4388,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "src_components_admin_panels_advanced_quickactionspanel",
-      "community": 12,
-      "community_name": "blocks.js",
+      "community": 0,
+      "community_name": "react",
       "norm_label": "quickactionspanel.jsx"
     },
     {
@@ -4454,8 +4465,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "src_components_admin_panels_advanced_selfcredentialcontrols",
-      "community": 12,
-      "community_name": "blocks.js",
+      "community": 43,
+      "community_name": "Rifle.jsx",
       "norm_label": "selfcredentialcontrols.jsx"
     },
     {
@@ -4465,8 +4476,8 @@
       "source_location": "L15",
       "_origin": "ast",
       "id": "src_components_admin_panels_advanced_selfcredentialcontrols_selfcredentialcontrols",
-      "community": 12,
-      "community_name": "blocks.js",
+      "community": 43,
+      "community_name": "Rifle.jsx",
       "norm_label": "selfcredentialcontrols()"
     },
     {
@@ -4476,8 +4487,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "src_components_admin_panels_advanced_settingspanel",
-      "community": 12,
-      "community_name": "blocks.js",
+      "community": 0,
+      "community_name": "react",
       "norm_label": "settingspanel.jsx"
     },
     {
@@ -4531,8 +4542,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "src_components_admin_panels_email_emailpanel",
-      "community": 41,
-      "community_name": "PhotoUploader.jsx",
+      "community": 10,
+      "community_name": "emailRender.js",
       "norm_label": "emailpanel.jsx"
     },
     {
@@ -4553,8 +4564,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "src_components_admin_panels_email_messages",
-      "community": 11,
-      "community_name": "blocks.js",
+      "community": 10,
+      "community_name": "emailRender.js",
       "norm_label": "messages.jsx"
     },
     {
@@ -4564,8 +4575,8 @@
       "source_location": "L9",
       "_origin": "ast",
       "id": "src_components_admin_panels_email_messages_status_meta",
-      "community": 11,
-      "community_name": "blocks.js",
+      "community": 10,
+      "community_name": "emailRender.js",
       "norm_label": "status_meta"
     },
     {
@@ -4586,8 +4597,8 @@
       "source_location": "L25",
       "_origin": "ast",
       "id": "src_components_admin_panels_email_messages_messages",
-      "community": 41,
-      "community_name": "PhotoUploader.jsx",
+      "community": 10,
+      "community_name": "emailRender.js",
       "norm_label": "messages()"
     },
     {
@@ -4597,8 +4608,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "src_components_admin_panels_email_subscribers",
-      "community": 41,
-      "community_name": "PhotoUploader.jsx",
+      "community": 10,
+      "community_name": "emailRender.js",
       "norm_label": "subscribers.jsx"
     },
     {
@@ -4608,8 +4619,8 @@
       "source_location": "L8",
       "_origin": "ast",
       "id": "src_components_admin_panels_email_subscribers_subscribers",
-      "community": 41,
-      "community_name": "PhotoUploader.jsx",
+      "community": 10,
+      "community_name": "emailRender.js",
       "norm_label": "subscribers()"
     },
     {
@@ -4619,8 +4630,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "src_components_admin_panels_email_builder_blockfields",
-      "community": 43,
-      "community_name": "Rifle.jsx",
+      "community": 10,
+      "community_name": "emailRender.js",
       "norm_label": "blockfields.jsx"
     },
     {
@@ -4630,8 +4641,8 @@
       "source_location": "L7",
       "_origin": "ast",
       "id": "src_components_admin_panels_email_builder_blockfields_blockfields",
-      "community": 43,
-      "community_name": "Rifle.jsx",
+      "community": 10,
+      "community_name": "emailRender.js",
       "norm_label": "blockfields()"
     },
     {
@@ -4641,8 +4652,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "src_components_admin_panels_email_builder_emailbuilder",
-      "community": 43,
-      "community_name": "Rifle.jsx",
+      "community": 10,
+      "community_name": "emailRender.js",
       "norm_label": "emailbuilder.jsx"
     },
     {
@@ -4674,8 +4685,8 @@
       "source_location": "L59",
       "_origin": "ast",
       "id": "src_components_admin_panels_email_builder_emailbuilder_emailbuilder",
-      "community": 11,
-      "community_name": "blocks.js",
+      "community": 10,
+      "community_name": "emailRender.js",
       "norm_label": "emailbuilder()"
     },
     {
@@ -4762,8 +4773,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "src_components_admin_panels_email_emailrender",
-      "community": 11,
-      "community_name": "blocks.js",
+      "community": 197,
+      "community_name": "emailRender.js",
       "norm_label": "emailrender.js"
     },
     {
@@ -4773,8 +4784,8 @@
       "source_location": "L13",
       "_origin": "ast",
       "id": "src_components_admin_panels_email_emailrender_c",
-      "community": 11,
-      "community_name": "blocks.js",
+      "community": 197,
+      "community_name": "emailRender.js",
       "norm_label": "c"
     },
     {
@@ -4784,8 +4795,8 @@
       "source_location": "L23",
       "_origin": "ast",
       "id": "src_components_admin_panels_email_emailrender_escapehtml",
-      "community": 11,
-      "community_name": "blocks.js",
+      "community": 197,
+      "community_name": "emailRender.js",
       "norm_label": "escapehtml()"
     },
     {
@@ -4795,8 +4806,8 @@
       "source_location": "L30",
       "_origin": "ast",
       "id": "src_components_admin_panels_email_emailrender_safeurl",
-      "community": 11,
-      "community_name": "blocks.js",
+      "community": 197,
+      "community_name": "emailRender.js",
       "norm_label": "safeurl()"
     },
     {
@@ -4806,8 +4817,8 @@
       "source_location": "L40",
       "_origin": "ast",
       "id": "src_components_admin_panels_email_emailrender_fmtbytes",
-      "community": 11,
-      "community_name": "blocks.js",
+      "community": 197,
+      "community_name": "emailRender.js",
       "norm_label": "fmtbytes()"
     },
     {
@@ -4817,8 +4828,8 @@
       "source_location": "L48",
       "_origin": "ast",
       "id": "src_components_admin_panels_email_emailrender_blockhtml",
-      "community": 11,
-      "community_name": "blocks.js",
+      "community": 197,
+      "community_name": "emailRender.js",
       "norm_label": "blockhtml()"
     },
     {
@@ -4828,8 +4839,8 @@
       "source_location": "L102",
       "_origin": "ast",
       "id": "src_components_admin_panels_email_emailrender_blockstohtml",
-      "community": 11,
-      "community_name": "blocks.js",
+      "community": 197,
+      "community_name": "emailRender.js",
       "norm_label": "blockstohtml()"
     },
     {
@@ -4839,8 +4850,8 @@
       "source_location": "L149",
       "_origin": "ast",
       "id": "src_components_admin_panels_email_emailrender_blockstotext",
-      "community": 11,
-      "community_name": "blocks.js",
+      "community": 197,
+      "community_name": "emailRender.js",
       "norm_label": "blockstotext()"
     },
     {
@@ -4850,8 +4861,8 @@
       "source_location": "L166",
       "_origin": "ast",
       "id": "src_components_admin_panels_email_emailrender_collectattachments",
-      "community": 11,
-      "community_name": "blocks.js",
+      "community": 197,
+      "community_name": "emailRender.js",
       "norm_label": "collectattachments()"
     },
     {
@@ -5059,8 +5070,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "src_components_admin_panels_photos_adminbulkupload",
-      "community": 43,
-      "community_name": "Rifle.jsx",
+      "community": 83,
+      "community_name": "RaiderPolls.jsx",
       "norm_label": "adminbulkupload.jsx"
     },
     {
@@ -5070,8 +5081,8 @@
       "source_location": "L14",
       "_origin": "ast",
       "id": "src_components_admin_panels_photos_adminbulkupload_adminbulkupload",
-      "community": 73,
-      "community_name": "imageResize.js",
+      "community": 83,
+      "community_name": "RaiderPolls.jsx",
       "norm_label": "adminbulkupload()"
     },
     {
@@ -5257,8 +5268,8 @@
       "source_location": "L22",
       "_origin": "ast",
       "id": "src_components_admin_shared_ui_btn",
-      "community": 41,
-      "community_name": "PhotoUploader.jsx",
+      "community": 83,
+      "community_name": "RaiderPolls.jsx",
       "norm_label": "btn()"
     },
     {
@@ -5279,8 +5290,8 @@
       "source_location": "L72",
       "_origin": "ast",
       "id": "src_components_admin_shared_ui_label",
-      "community": 77,
-      "community_name": "PeoplePanel.jsx",
+      "community": 10,
+      "community_name": "emailRender.js",
       "norm_label": "label()"
     },
     {
@@ -5378,8 +5389,8 @@
       "source_location": "L283",
       "_origin": "ast",
       "id": "src_components_admin_shared_ui_emptystate",
-      "community": 77,
-      "community_name": "PeoplePanel.jsx",
+      "community": 83,
+      "community_name": "RaiderPolls.jsx",
       "norm_label": "emptystate()"
     },
     {
@@ -5389,8 +5400,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "src_components_admin_theme",
-      "community": 43,
-      "community_name": "Rifle.jsx",
+      "community": 10,
+      "community_name": "emailRender.js",
       "norm_label": "theme.js"
     },
     {
@@ -5400,8 +5411,8 @@
       "source_location": "L4",
       "_origin": "ast",
       "id": "src_components_admin_theme_p",
-      "community": 43,
-      "community_name": "Rifle.jsx",
+      "community": 41,
+      "community_name": "PhotoUploader.jsx",
       "norm_label": "p"
     },
     {
@@ -5422,8 +5433,8 @@
       "source_location": "L24",
       "_origin": "ast",
       "id": "src_components_admin_theme_sp",
-      "community": 43,
-      "community_name": "Rifle.jsx",
+      "community": 10,
+      "community_name": "emailRender.js",
       "norm_label": "sp"
     },
     {
@@ -5433,8 +5444,8 @@
       "source_location": "L28",
       "_origin": "ast",
       "id": "src_components_admin_theme_radius",
-      "community": 43,
-      "community_name": "Rifle.jsx",
+      "community": 10,
+      "community_name": "emailRender.js",
       "norm_label": "radius"
     },
     {
@@ -5444,8 +5455,8 @@
       "source_location": "L30",
       "_origin": "ast",
       "id": "src_components_admin_theme_shadow",
-      "community": 43,
-      "community_name": "Rifle.jsx",
+      "community": 77,
+      "community_name": "PeoplePanel.jsx",
       "norm_label": "shadow"
     },
     {
@@ -5609,8 +5620,8 @@
       "source_location": "L31",
       "_origin": "ast",
       "id": "src_components_review_reviewportal_fmtdate",
-      "community": 9,
-      "community_name": "App.jsx",
+      "community": 12,
+      "community_name": "blocks.js",
       "norm_label": "fmtdate()"
     },
     {
@@ -5620,8 +5631,8 @@
       "source_location": "L35",
       "_origin": "ast",
       "id": "src_components_review_reviewportal_reviewportal",
-      "community": 9,
-      "community_name": "App.jsx",
+      "community": 12,
+      "community_name": "blocks.js",
       "norm_label": "reviewportal()"
     },
     {
@@ -5708,8 +5719,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "src_hooks_usepaginatedphotos",
-      "community": 1,
-      "community_name": "PhotoUploader.jsx",
+      "community": 198,
+      "community_name": "TeamGallery.jsx",
       "norm_label": "usepaginatedphotos.js"
     },
     {
@@ -5719,8 +5730,8 @@
       "source_location": "L14",
       "_origin": "ast",
       "id": "src_hooks_usepaginatedphotos_usepaginatedphotos",
-      "community": 1,
-      "community_name": "PhotoUploader.jsx",
+      "community": 198,
+      "community_name": "TeamGallery.jsx",
       "norm_label": "usepaginatedphotos()"
     },
     {
@@ -5730,8 +5741,8 @@
       "source_location": "L64",
       "_origin": "ast",
       "id": "src_hooks_usepaginatedphotos_useinfinitescrollsentinel",
-      "community": 1,
-      "community_name": "PhotoUploader.jsx",
+      "community": 198,
+      "community_name": "TeamGallery.jsx",
       "norm_label": "useinfinitescrollsentinel()"
     },
     {
@@ -5950,8 +5961,8 @@
       "source_location": "L94",
       "_origin": "ast",
       "id": "src_lib_calendar_tocalendaritem",
-      "community": 10,
-      "community_name": "emailRender.js",
+      "community": 4,
+      "community_name": "EventsPanel.jsx",
       "norm_label": "tocalendaritem()"
     },
     {
@@ -6159,8 +6170,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "src_lib_passkey",
-      "community": 12,
-      "community_name": "blocks.js",
+      "community": 43,
+      "community_name": "Rifle.jsx",
       "norm_label": "passkey.js"
     },
     {
@@ -6170,8 +6181,8 @@
       "source_location": "L10",
       "_origin": "ast",
       "id": "src_lib_passkey_registerpasskey",
-      "community": 12,
-      "community_name": "blocks.js",
+      "community": 43,
+      "community_name": "Rifle.jsx",
       "norm_label": "registerpasskey()"
     },
     {
@@ -6258,8 +6269,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "src_lib_supabaseclient",
-      "community": 12,
-      "community_name": "blocks.js",
+      "community": 43,
+      "community_name": "Rifle.jsx",
       "norm_label": "supabaseclient.js"
     },
     {
@@ -6269,8 +6280,8 @@
       "source_location": "L14",
       "_origin": "ast",
       "id": "src_lib_supabaseclient_supabase",
-      "community": 12,
-      "community_name": "blocks.js",
+      "community": 43,
+      "community_name": "Rifle.jsx",
       "norm_label": "supabase"
     },
     {
@@ -7900,6 +7911,17 @@
       "community": 96,
       "community_name": "opticsend.sql",
       "norm_label": "public.email_messages"
+    },
+    {
+      "label": "personnel_assistant_nco_titles.sql",
+      "file_type": "code",
+      "source_file": "supabase/personnel_assistant_nco_titles.sql",
+      "source_location": null,
+      "_origin": "ast",
+      "id": "supabase_personnel_assistant_nco_titles",
+      "community": 201,
+      "community_name": "personnel_assistant_nco_titles.sql",
+      "norm_label": "personnel_assistant_nco_titles.sql"
     },
     {
       "label": "personnel_bios_import.sql",
@@ -20226,7 +20248,18 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "src/components/Rifle.jsx",
-      "source_location": "L73",
+      "source_location": "L39",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "src_components_rifle",
+      "target": "src_components_rifle_activate",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src/components/Rifle.jsx",
+      "source_location": "L83",
       "weight": 1.0,
       "_origin": "ast",
       "source": "src_components_rifle",
@@ -20237,7 +20270,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "src/components/Rifle.jsx",
-      "source_location": "L107",
+      "source_location": "L117",
       "weight": 1.0,
       "_origin": "ast",
       "source": "src_components_rifle",
@@ -20248,7 +20281,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "src/components/Rifle.jsx",
-      "source_location": "L291",
+      "source_location": "L311",
       "weight": 1.0,
       "_origin": "ast",
       "source": "src_components_rifle",
@@ -20259,7 +20292,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "src/components/Rifle.jsx",
-      "source_location": "L5",
+      "source_location": "L6",
       "weight": 1.0,
       "_origin": "ast",
       "source": "src_components_rifle",
@@ -20270,7 +20303,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "src/components/Rifle.jsx",
-      "source_location": "L37",
+      "source_location": "L47",
       "weight": 1.0,
       "_origin": "ast",
       "source": "src_components_rifle",
@@ -20281,7 +20314,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "src/components/Rifle.jsx",
-      "source_location": "L410",
+      "source_location": "L430",
       "weight": 1.0,
       "_origin": "ast",
       "source": "src_components_rifle",
@@ -20292,7 +20325,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "src/components/Rifle.jsx",
-      "source_location": "L20",
+      "source_location": "L21",
       "weight": 1.0,
       "_origin": "ast",
       "source": "src_components_rifle",
@@ -20303,7 +20336,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "src/components/Rifle.jsx",
-      "source_location": "L196",
+      "source_location": "L216",
       "weight": 1.0,
       "_origin": "ast",
       "source": "src_components_rifle",
@@ -20314,7 +20347,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "src/components/Rifle.jsx",
-      "source_location": "L13",
+      "source_location": "L14",
       "weight": 1.0,
       "_origin": "ast",
       "source": "src_components_rifle",
@@ -20325,7 +20358,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "src/components/Rifle.jsx",
-      "source_location": "L174",
+      "source_location": "L194",
       "weight": 1.0,
       "_origin": "ast",
       "source": "src_components_rifle",
@@ -20336,7 +20369,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "src/components/Rifle.jsx",
-      "source_location": "L89",
+      "source_location": "L99",
       "weight": 1.0,
       "_origin": "ast",
       "source": "src_components_rifle",
@@ -20348,7 +20381,7 @@
       "context": "import",
       "confidence": "EXTRACTED",
       "source_file": "src/components/Rifle.jsx",
-      "source_location": "L2",
+      "source_location": "L3",
       "weight": 1.0,
       "_origin": "ast",
       "source": "src_components_rifle",
@@ -20360,7 +20393,7 @@
       "context": "import",
       "confidence": "EXTRACTED",
       "source_file": "src/components/Rifle.jsx",
-      "source_location": "L2",
+      "source_location": "L3",
       "weight": 1.0,
       "_origin": "ast",
       "source": "src_components_rifle",
@@ -20372,7 +20405,7 @@
       "context": "import",
       "confidence": "EXTRACTED",
       "source_file": "src/components/Rifle.jsx",
-      "source_location": "L3",
+      "source_location": "L4",
       "weight": 1.0,
       "_origin": "ast",
       "source": "src_components_rifle",
@@ -20384,7 +20417,7 @@
       "context": "import",
       "confidence": "EXTRACTED",
       "source_file": "src/components/Rifle.jsx",
-      "source_location": "L3",
+      "source_location": "L4",
       "weight": 1.0,
       "_origin": "ast",
       "source": "src_components_rifle",
@@ -20395,9 +20428,21 @@
       "relation": "calls",
       "context": "call",
       "confidence": "EXTRACTED",
+      "source_file": "src/components/Rifle.jsx",
+      "source_location": "L128",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "src_components_rifle_commandercard",
+      "target": "src_components_rifle_activate",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "src/components/Rifle.jsx",
-      "source_location": "L411",
+      "source_location": "L431",
       "weight": 1.0,
       "_origin": "ast",
       "source": "src_components_rifle_rifle",
@@ -40604,5 +40649,5 @@
     }
   ],
   "hyperedges": [],
-  "built_at_commit": "0df5b6c5730023e28743ddfbeb98ca020f1d8771"
+  "built_at_commit": "c3821efc0290fcc73d10bd28393b01b2fa371f3a"
 }
