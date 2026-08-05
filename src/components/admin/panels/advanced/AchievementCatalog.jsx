@@ -23,6 +23,10 @@ export default function AchievementCatalog() {
   const [file, setFile] = useState(null);
   const [saving, setSaving] = useState(false);
   const [replacingId, setReplacingId] = useState(null);
+  const [editingId, setEditingId] = useState(null);
+  const [editName, setEditName] = useState('');
+  const [editDescription, setEditDescription] = useState('');
+  const [renaming, setRenaming] = useState(false);
   const fileRef = useRef();
   const replaceFileRef = useRef();
 
@@ -75,6 +79,32 @@ export default function AchievementCatalog() {
     load();
   }
 
+  function startEditName(a) {
+    setEditingId(a.id);
+    setEditName(a.name);
+    setEditDescription(a.description || '');
+  }
+
+  function cancelEditName() {
+    setEditingId(null);
+    setEditName('');
+    setEditDescription('');
+  }
+
+  async function saveEditName(a) {
+    const trimmedName = editName.trim();
+    const trimmedDesc = editDescription.trim();
+    if (!trimmedName) { cancelEditName(); return; }
+    const nameChanged = trimmedName !== a.name;
+    const descChanged = trimmedDesc !== (a.description || '');
+    if (!nameChanged && !descChanged) { cancelEditName(); return; }
+    setRenaming(true);
+    await SB.from('achievements').update({ name: trimmedName, description: trimmedDesc || null }).eq('id', a.id);
+    setRenaming(false);
+    cancelEditName();
+    load();
+  }
+
   async function create() {
     if (!name.trim() || !file) return;
     setSaving(true);
@@ -91,7 +121,9 @@ export default function AchievementCatalog() {
   }
 
   async function remove(a) {
-    if (!confirm(`Delete "${a.name}"? Removes it from every cadet who has it.`)) return;
+    const count = holderCounts[a.id] || 0;
+    const holderMsg = count > 0 ? `Removes it from ${count} cadet${count === 1 ? '' : 's'} who ${count === 1 ? 'has' : 'have'} it.` : 'No cadets currently hold it.';
+    if (!confirm(`Delete "${a.name}"? ${holderMsg}`)) return;
     await SB.from('achievements').delete().eq('id', a.id);
     load();
   }
@@ -141,8 +173,41 @@ export default function AchievementCatalog() {
             }}>
               <img src={a.icon_url} alt="" style={{ width: 28, height: 28, objectFit: 'contain', flexShrink: 0 }} />
               <div style={{ flex: 1, minWidth: 0 }}>
-                <div style={{ fontFamily: inter, fontSize: fs.sm, color: P.cream }}>{a.name}</div>
-                {a.description && <div style={{ fontFamily: inter, fontSize: fs.xs, color: P.faint, marginTop: 2 }}>{a.description}</div>}
+                {editingId === a.id ? (
+                  <div>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: sp[2] }}>
+                      <Input
+                        value={editName}
+                        onChange={(e) => setEditName(e.target.value)}
+                        onKeyDown={(e) => {
+                          if (e.key === 'Enter') saveEditName(a);
+                          if (e.key === 'Escape') cancelEditName();
+                        }}
+                        autoFocus
+                        style={{ padding: '5px 8px', fontSize: fs.sm }}
+                      />
+                      <Btn variant="gold" size="sm" onClick={() => saveEditName(a)} disabled={renaming}>{renaming ? '…' : '✓'}</Btn>
+                      <Btn variant="ghost" size="sm" onClick={cancelEditName} disabled={renaming}>✕</Btn>
+                    </div>
+                    <Input
+                      value={editDescription}
+                      onChange={(e) => setEditDescription(e.target.value)}
+                      onKeyDown={(e) => {
+                        if (e.key === 'Enter') saveEditName(a);
+                        if (e.key === 'Escape') cancelEditName();
+                      }}
+                      placeholder="Description (optional)"
+                      style={{ padding: '5px 8px', fontSize: fs.xs, marginTop: sp[2] }}
+                    />
+                  </div>
+                ) : (
+                  <div onClick={() => startEditName(a)} title="Click to edit" style={{ cursor: 'pointer', display: 'inline-block' }}>
+                    <div style={{ fontFamily: inter, fontSize: fs.sm, color: P.cream, borderBottom: `1px dashed ${P.hair}`, display: 'inline-block' }}>
+                      {a.name}
+                    </div>
+                    {a.description && <div style={{ fontFamily: inter, fontSize: fs.xs, color: P.faint, marginTop: 2 }}>{a.description}</div>}
+                  </div>
+                )}
               </div>
               <span style={{ fontFamily: mono, fontSize: fs.tiny, color: P.mute, letterSpacing: '0.08em', flexShrink: 0 }}>
                 {holderCounts[a.id] || 0} HOLDER{holderCounts[a.id] === 1 ? '' : 'S'}
