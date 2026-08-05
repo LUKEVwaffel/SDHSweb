@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import TeamGallery from './TeamGallery';
 import useIsMobile from '../hooks/useIsMobile';
 
@@ -26,11 +27,20 @@ function RifleStyles() {
       .rf-target   { animation: rfPulse 3.4s ease-in-out infinite; }
       .rf-ping     { transform-box: fill-box; transform-origin: center; animation: rfRing 3.4s ease-out infinite; }
       .rf-live-dot { animation: rfBlink 1.6s ease-in-out infinite; }
+      .rf-clickable:focus-visible { outline: 2px solid #C9A961; outline-offset: 4px; }
       @media (prefers-reduced-motion: reduce) {
         .rf-target, .rf-ping, .rf-live-dot { animation: none; }
       }
     `}</style>
   );
+}
+
+// Keyboard activation for click-through cards.
+function activate(e, fn) {
+  if (e.key === 'Enter' || e.key === ' ') {
+    e.preventDefault();
+    fn();
+  }
 }
 
 // ── Shared background ─────────────────────────────────────────────────────────
@@ -105,9 +115,19 @@ function SectionLabel({ tag, title, subtitle }) {
 
 // ── Commander Card ────────────────────────────────────────────────────────────
 function CommanderCard() {
+  const navigate = useNavigate();
   const [hovered, setHovered] = useState(false);
+  const view = () => navigate('/profile/rifle-cmd', { state: { from: 'home' } });
   return (
-    <div className="rifle-commander-grid" style={{ display: 'grid', gridTemplateColumns: '320px 1fr', gap: 0, border: `1px solid ${P.hair}`, background: P.deep, position: 'relative' }}>
+    <div
+      className="rifle-commander-grid rf-clickable"
+      role="button"
+      tabIndex={0}
+      aria-label="View profile: Makaio Roos, Rifle Team Commander"
+      onClick={view}
+      onKeyDown={(e) => activate(e, view)}
+      style={{ display: 'grid', gridTemplateColumns: '320px 1fr', gap: 0, border: `1px solid ${P.hair}`, background: P.deep, position: 'relative', cursor: 'pointer' }}
+    >
       <Brackets size={18} opacity={hovered ? 0.7 : 0.3} />
 
       {/* Photo */}
