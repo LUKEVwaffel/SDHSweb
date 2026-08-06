@@ -50,8 +50,8 @@
     "semantic_hash": ""
   },
   "src/components/CommandProfile.jsx": {
-    "mtime": 1785942223.6665807,
-    "ast_hash": "165c2393a0c381cf1e8c9959c2acfe85",
+    "mtime": 1785452833.4511943,
+    "ast_hash": "e7a66a48d9520fedb670345734087223",
     "semantic_hash": ""
   },
   "src/components/Companies.jsx": {
@@ -90,13 +90,13 @@
     "semantic_hash": ""
   },
   "src/components/Rifle.jsx": {
-    "mtime": 1785947218.9712312,
-    "ast_hash": "31d763bf462cb25db5768790ab9ff3a2",
+    "mtime": 1785452987.9592967,
+    "ast_hash": "d98114c87fff47c48ba19a8a198e7cc7",
     "semantic_hash": ""
   },
   "src/components/Staff.jsx": {
-    "mtime": 1785942235.9107678,
-    "ast_hash": "16a148dc54cb0d967759b92754a865af",
+    "mtime": 1785788422.373735,
+    "ast_hash": "e07d07eccb17898618133a16163fe062",
     "semantic_hash": ""
   },
   "src/components/SubmitHub.jsx": {
@@ -130,8 +130,8 @@
     "semantic_hash": ""
   },
   "src/components/admin/Dashboard.jsx": {
-    "mtime": 1786021689.7780867,
-    "ast_hash": "633baa024961c80822bde27f449db7bc",
+    "mtime": 1785771942.0645387,
+    "ast_hash": "ce56c359f94a50c92738acae8184ede4",
     "semantic_hash": ""
   },
   "src/components/admin/LoginScreen.jsx": {
@@ -140,8 +140,8 @@
     "semantic_hash": ""
   },
   "src/components/admin/index.jsx": {
-    "mtime": 1786022099.1232357,
-    "ast_hash": "5bee30389a632ff724d0286e48ac05cc",
+    "mtime": 1785262949.1180038,
+    "ast_hash": "c082488ad651438f44d658bb4e0e14bb",
     "semantic_hash": ""
   },
   "src/components/admin/lib/winnerCard.js": {
@@ -150,8 +150,8 @@
     "semantic_hash": "872097bb6f2a4e8b32dfd0a1ba37dedc"
   },
   "src/components/admin/nav/Sidebar.jsx": {
-    "mtime": 1786021659.70582,
-    "ast_hash": "0f50e023f6651537893e69c501f80ac9",
+    "mtime": 1785262098.469782,
+    "ast_hash": "d23fd78f8a8d441d347d15201f2a1b5e",
     "semantic_hash": ""
   },
   "src/components/admin/nav/StatusBar.jsx": {
@@ -260,8 +260,8 @@
     "semantic_hash": "4dedb03706602a67f8be7d1f02bda71a"
   },
   "src/components/admin/panels/people/ConsentSection.jsx": {
-    "mtime": 1785949456.8133464,
-    "ast_hash": "e1a4254472f54b04878d4360f139bad5",
+    "mtime": 1785845256.2655919,
+    "ast_hash": "495f38dc998862231df6f1f276e6339e",
     "semantic_hash": ""
   },
   "src/components/admin/panels/people/PeoplePanel.jsx": {
@@ -620,8 +620,8 @@
     "semantic_hash": ""
   },
   "src/components/admin/panels/advanced/AchievementCatalog.jsx": {
-    "mtime": 1785939809.758387,
-    "ast_hash": "821b0ba2562ee13e850a6e6cf5338781",
+    "mtime": 1785788569.7504323,
+    "ast_hash": "2b1da37203aca3aeeeea78bddc92ee7b",
     "semantic_hash": ""
   },
   "src/components/admin/panels/people/PersonAchievements.jsx": {
@@ -940,8 +940,8 @@
     "semantic_hash": ""
   },
   "src/lib/posthog.js": {
-    "mtime": 1785949279.6016724,
-    "ast_hash": "2ddd9f9fefef8e7182e7cf20e9f796fd",
+    "mtime": 1785876581.7015116,
+    "ast_hash": "04431d2bae938671b67d647de0e87cdf",
     "semantic_hash": ""
   },
   "supabase/cadet_consent_grade_let.sql": {
@@ -1060,8 +1060,8 @@
     "semantic_hash": ""
   },
   "public/assets/raiders-season-calendar.pdf": {
-    "mtime": 1785941316.4456606,
-    "ast_hash": "1fbe88c474f0bb071597b0c53651bc7f",
+    "mtime": 1785883025.269553,
+    "ast_hash": "3da3e4bbbb7b4594c4c5e66f36ee13bf",
     "semantic_hash": ""
   },
   "vercel.json": {
@@ -1092,51 +1092,6 @@
   "public/favicon-32x32.png": {
     "mtime": 1785883675.8436627,
     "ast_hash": "e766f03dcd20ea84de53c0ee5b3f2fcb",
-    "semantic_hash": ""
-  },
-  "supabase/personnel_assistant_nco_titles.sql": {
-    "mtime": 1785942277.0992162,
-    "ast_hash": "47121bd434eb52497148078b88c6b81d",
-    "semantic_hash": ""
-  },
-  "supabase/dispatch_chat.sql": {
-    "mtime": 1786020462.175588,
-    "ast_hash": "6b4efd3769e8ec28f312a10ff6ae3afc",
-    "semantic_hash": ""
-  },
-  "src/components/admin/panels/messages/Composer.jsx": {
-    "mtime": 1786022393.4873073,
-    "ast_hash": "aae8fca40a6666005de0047f964b022e",
-    "semantic_hash": ""
-  },
-  "src/components/admin/panels/messages/ConversationList.jsx": {
-    "mtime": 1786022169.2030418,
-    "ast_hash": "42f0fa27c5d3e57ce29f9b7cd2054a32",
-    "semantic_hash": ""
-  },
-  "src/components/admin/panels/messages/MessagesPanel.jsx": {
-    "mtime": 1786022619.478296,
-    "ast_hash": "16fbc77f6a61f20d126254dd55e005bf",
-    "semantic_hash": ""
-  },
-  "src/components/admin/panels/messages/NewConversationModal.jsx": {
-    "mtime": 1786021645.6266031,
-    "ast_hash": "3aabe16482d33493fa4283db2bd33a65",
-    "semantic_hash": ""
-  },
-  "src/components/admin/panels/messages/ThreadView.jsx": {
-    "mtime": 1786022603.8111794,
-    "ast_hash": "5b05e01aafff70555c0d1928d9ff05c2",
-    "semantic_hash": ""
-  },
-  "src/hooks/useAdminPresence.js": {
-    "mtime": 1786022061.5230699,
-    "ast_hash": "3147b05634b7f065450dee8ccd4bebe6",
-    "semantic_hash": ""
-  },
-  "supabase/functions/notify-new-message/index.ts": {
-    "mtime": 1786022383.1313462,
-    "ast_hash": "03e41593e0c3f8a9f2295cf23b3ce806",
     "semantic_hash": ""
   }
 }

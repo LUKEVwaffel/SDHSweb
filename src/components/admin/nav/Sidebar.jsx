@@ -15,6 +15,7 @@ export const NAV_GROUPS = [
       { id: 'photos',   icon: '⊞', label: 'Photos' },
       { id: 'questions', icon: '?', label: 'FAQ Questions' },
       { id: 'email',    icon: '✉', label: 'Email List' },
+      { id: 'messages', icon: '◈', label: 'Messages' },
     ],
   },
   {

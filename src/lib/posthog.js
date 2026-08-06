@@ -9,6 +9,7 @@ if (apiKey && typeof window !== 'undefined') {
     ui_host: 'https://us.posthog.com',
     defaults: '2026-05-30',
     enable_console_log_recording: true,
+    capture_exceptions: true,
     person_profiles: 'identified_only',
     capture_pageview: true,
     loaded: (ph) => {

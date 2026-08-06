@@ -13,11 +13,12 @@ import EmailPanel from './panels/email/EmailPanel';
 import MediaPanel from './panels/MediaPanel';
 import AdvancedPanel from './panels/advanced/AdvancedPanel';
 import SelfAccountPanel from './panels/SelfAccountPanel';
+import MessagesPanel from './panels/messages/MessagesPanel';
 
 const SECTION_LABEL = {
   overview: 'OVERVIEW', events: 'EVENTS', aars: 'AAR TRACKER',
   people: 'PEOPLE', photos: 'PHOTOS', questions: 'FAQ QUESTIONS', email: 'EMAIL LIST',
-  media: 'MEDIA', advanced: 'ADVANCED', account: 'MY ACCOUNT',
+  media: 'MEDIA', advanced: 'ADVANCED', account: 'MY ACCOUNT', messages: 'MESSAGES',
 };
 
 // Which sections each role may see. s5 is scoped to the battalion calendar
@@ -26,10 +27,12 @@ const SECTION_LABEL = {
 // tracking is S-5 only (is_s5() on RLS, see supabase/aars.sql) — s6 gets no
 // nav entry and no RLS grant. s5 has no Advanced access, so 'account' gives
 // them a self-only PIN/Touch ID surface without the full roster tool — same
-// self-only enforcement AccountsPanel uses.
+// self-only enforcement AccountsPanel uses. 'messages' is the one section
+// every admin gets regardless of role — DISPATCH chat is internal staff
+// coordination, not tied to the s6/s5 permission split.
 const ROLE_SECTIONS = {
-  s6: ['overview', 'events', 'people', 'photos', 'questions', 'email', 'media', 'advanced'],
-  s5: ['events', 'aars', 'account'],
+  s6: ['overview', 'events', 'people', 'photos', 'questions', 'email', 'media', 'messages', 'advanced'],
+  s5: ['events', 'aars', 'messages', 'account'],
 };
 
 // team values s5 may create/edit/view events for. '' = battalion (team NULL).
@@ -69,6 +72,7 @@ export default function Dashboard({ onLogout, adminId, role = 's6' }) {
           {section === 'media'    && <MediaPanel adminId={adminId} />}
           {section === 'advanced' && <AdvancedPanel adminId={adminId} />}
           {section === 'account'  && <SelfAccountPanel adminId={adminId} />}
+          {section === 'messages' && <MessagesPanel adminId={adminId} />}
         </div>
       </div>
       <StatusBar sectionLabel={SECTION_LABEL[section] || section.toUpperCase()} />

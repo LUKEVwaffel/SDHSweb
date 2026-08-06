@@ -1115,8 +1115,8 @@
     "semantic_hash": ""
   },
   "src/components/admin/panels/messages/MessagesPanel.jsx": {
-    "mtime": 1786022619.478296,
-    "ast_hash": "16fbc77f6a61f20d126254dd55e005bf",
+    "mtime": 1786022127.6476605,
+    "ast_hash": "8a56050abef25c99eede93b2f6433e62",
     "semantic_hash": ""
   },
   "src/components/admin/panels/messages/NewConversationModal.jsx": {
@@ -1125,8 +1125,8 @@
     "semantic_hash": ""
   },
   "src/components/admin/panels/messages/ThreadView.jsx": {
-    "mtime": 1786022603.8111794,
-    "ast_hash": "5b05e01aafff70555c0d1928d9ff05c2",
+    "mtime": 1786022212.2642097,
+    "ast_hash": "c28643e5512d550df9dc32d5be4e3138",
     "semantic_hash": ""
   },
   "src/hooks/useAdminPresence.js": {

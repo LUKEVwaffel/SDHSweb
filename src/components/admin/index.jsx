@@ -4,6 +4,7 @@ import { P, mono, inter } from './theme';
 import LoginScreen from './LoginScreen';
 import Dashboard from './Dashboard';
 import ForcePasswordChange from './login/ForcePasswordChange';
+import useAdminPresence from '../../hooks/useAdminPresence';
 
 // DISPATCH admin root. Real Supabase Auth (email/password) — replaces the old
 // shared passcode. Any user in Supabase Auth → Users can sign in; no per-email
@@ -47,6 +48,13 @@ export default function Admin() {
     })();
     return () => { cancelled = true; };
   }, [session]);
+
+  // Only heartbeat once fully signed in, role-resolved, and past the forced-
+  // password gate — matches "actively in DISPATCH" for the notify-new-message
+  // email gate (Phase 5), not just "has an open tab sitting on the login
+  // screen". Also avoids a doomed upsert for a role===null account, which has
+  // no admin_roles row and would fail admin_presence's FK.
+  useAdminPresence(session && role && !mustChangePassword ? session.user.email : null);
 
   if (loading) {
     return (
