@@ -1,7 +1,7 @@
 import { useState, useEffect, useMemo } from 'react';
 import { supabase as SB } from '../../../lib/supabaseClient';
 import { P, mono, inter, fs, sp } from '../theme';
-import { Btn, Card, Label, Input, PanelHeader, EmptyState } from '../shared/ui';
+import { Btn, Card, Label, Input, Select, Modal, PanelHeader, EmptyState } from '../shared/ui';
 import { EVENT_CATEGORIES, EVENT_TEAMS, UNIFORM_TYPES, DEFAULT_POC, WEEKDAY_SHORT, categoryColor, teamLabel, MONTHS, MON3, toCalendarItem, groupByMonth } from '../../../lib/calendar';
 import { openEventsCalendarPdf } from '../../../lib/eventsPdfPrint';
 
@@ -19,15 +19,29 @@ const emptyForm = () => ({
   uniform_required: false, uniform: '',
   transportation_required: false, transportation: '',
   permission_slip_required: false, permission_slip_url: '',
+  color_guard_required: false,
   recurrence_days: [],
 });
+
+// Default 5-position roster in spec'd order: first 4 required, Alternate
+// optional. Positions added via the modal's "+" button start optional too —
+// only these 4 are ever hard-required.
+const DEFAULT_COLOR_GUARD_POSITIONS = () => [
+  { position_label: 'US Flag', required: true, cadet_consent_id: null, cadet_name: '', ascot_color: null, glove_color: null },
+  { position_label: 'TN Flag', required: true, cadet_consent_id: null, cadet_name: '', ascot_color: null, glove_color: null },
+  { position_label: 'US Rifle', required: true, cadet_consent_id: null, cadet_name: '', ascot_color: null, glove_color: null },
+  { position_label: 'TN Rifle', required: true, cadet_consent_id: null, cadet_name: '', ascot_color: null, glove_color: null },
+  { position_label: 'Alternate', required: false, cadet_consent_id: null, cadet_name: '', ascot_color: null, glove_color: null },
+];
+const ASCOT_COLORS = ['Red', 'White', 'Black'];
+const GLOVE_COLORS = ['Black', 'White'];
 
 // Core fields required before an event can be POSTED to the public calendar —
 // mirrors the DB backstop in events_ironclad.sql (events_posted_requires_fields_check).
 // Uniform Day events don't need a set start time, and Raiders events never
 // require a uniform answer (uniform isn't applicable to that team) — both
 // exemptions mirrored in the DB constraint.
-function missingCore(f) {
+function missingCore(f, positions = []) {
   const gaps = [];
   if (!f.title?.trim()) gaps.push('title');
   if (!f.date) gaps.push('date');
@@ -37,6 +51,10 @@ function missingCore(f) {
   if (f.transportation_required && !f.transportation?.trim()) gaps.push('transportation detail');
   if (f.permission_slip_required && !f.permission_slip_url) gaps.push('permission slip PDF');
   if (f.recurrence_days?.length && !f.end_date) gaps.push('recurring end date');
+  if (f.color_guard_required) {
+    const incomplete = positions.filter((p) => p.required && (!p.cadet_consent_id || !p.ascot_color || !p.glove_color));
+    if (incomplete.length) gaps.push(`color guard (${incomplete.length} position${incomplete.length > 1 ? 's' : ''})`);
+  }
   return gaps;
 }
 
@@ -56,12 +74,15 @@ export default function EventsPanel({ adminId, allowedTeams }) {
   const [secondaryTeams, setSecondaryTeams] = useState([]);
   const [pdfTeam, setPdfTeam] = useState('all');
   const [generatingPdf, setGeneratingPdf] = useState(false);
+  const [positions, setPositions] = useState([]);
+  const [guardOpen, setGuardOpen] = useState(false);
+  const [roster, setRoster] = useState([]);
 
   const scopedTeams = allowedTeams
     ? EVENT_TEAMS.filter((t) => allowedTeams.includes(t.id))
     : EVENT_TEAMS;
 
-  useEffect(() => { load(); loadTopics(); }, []);
+  useEffect(() => { load(); loadTopics(); loadRoster(); }, []);
 
   async function load() {
     const { data } = await SB.from('events').select('*').order('date', { ascending: true });
@@ -83,11 +104,30 @@ export default function EventsPanel({ adminId, allowedTeams }) {
     setSecondaryTeams((data || []).map((r) => r.team));
   }
 
+  // Narrow id/name/company lookup (list_cadet_roster RPC) — bypasses
+  // cadet_consent's S-6-only RLS but only exposes those 3 columns, to any
+  // logged-in admin (s5 or s6). See supabase/events_color_guard.sql.
+  async function loadRoster() {
+    const { data } = await SB.rpc('list_cadet_roster');
+    setRoster(data || []);
+  }
+
+  async function loadColorGuard(eventId) {
+    const { data } = await SB.from('event_color_guard').select('*').eq('event_id', eventId).order('sort_order');
+    setPositions((data || []).map((r) => ({
+      position_label: r.position_label, required: r.required,
+      cadet_consent_id: r.cadet_consent_id,
+      cadet_name: roster.find((c) => c.id === r.cadet_consent_id)?.name || '',
+      ascot_color: r.ascot_color, glove_color: r.glove_color,
+    })));
+  }
+
   function startNew() {
     setEditing('new');
     setForm(emptyForm());
     setTopicIds([]);
     setSecondaryTeams([]);
+    setPositions([]);
     setMsg('');
   }
   function startEdit(r) {
@@ -100,10 +140,12 @@ export default function EventsPanel({ adminId, allowedTeams }) {
       uniform_required: !!r.uniform_required, uniform: r.uniform || '',
       transportation_required: !!r.transportation_required, transportation: r.transportation || '',
       permission_slip_required: !!r.permission_slip_required, permission_slip_url: r.permission_slip_url || '',
+      color_guard_required: !!r.color_guard_required,
       recurrence_days: r.recurrence_days || [],
     });
     loadEventTopics(r.id);
     loadEventSecondaryTeams(r.id);
+    loadColorGuard(r.id);
     setMsg('');
   }
   function cancel() { setEditing(null); setMsg(''); }
@@ -123,6 +165,7 @@ export default function EventsPanel({ adminId, allowedTeams }) {
       transportation: f.transportation_required ? nz(f.transportation) : null,
       permission_slip_required: !!f.permission_slip_required,
       permission_slip_url: f.permission_slip_required ? nz(f.permission_slip_url) : null,
+      color_guard_required: !!f.color_guard_required,
       recurrence_days: recurring ? f.recurrence_days : null,
     };
   }
@@ -142,14 +185,20 @@ export default function EventsPanel({ adminId, allowedTeams }) {
   async function persist(body) {
     setSaving(true);
     let error, row;
-    if (editing && editing !== 'new') {
-      ({ error } = await SB.from('events').update(body).eq('id', editing));
+    const isNew = editing === 'new';
+    // A brand-new event posted directly (no separate draft step) has no
+    // event_color_guard rows yet at INSERT time — the events_color_guard_check
+    // trigger would always reject it. Insert as draft first, sync the roster
+    // below, then promote to posted once the trigger has rows to check against.
+    const twoPhase = isNew && body.color_guard_required && body.status === 'posted';
+    const insertBody = twoPhase ? { ...body, status: 'draft' } : body;
+    if (!isNew) {
+      ({ error } = await SB.from('events').update(insertBody).eq('id', editing));
       row = { id: editing };
     } else {
-      ({ data: row, error } = await SB.from('events').insert(body).select().single());
+      ({ data: row, error } = await SB.from('events').insert(insertBody).select().single());
     }
-    setSaving(false);
-    if (error) { setMsg(error.message); return null; }
+    if (error) { setSaving(false); setMsg(error.message); return null; }
     await SB.from('change_log').insert({
       admin_id: adminId, page: 'events', element: editing === 'new' ? 'new' : editing,
       label: `${body.status === 'posted' ? 'POST' : 'SAVE'} EVENT: ${body.title}`,
@@ -157,6 +206,12 @@ export default function EventsPanel({ adminId, allowedTeams }) {
     });
     await syncEventTopics(row.id);
     await syncEventSecondaryTeams(row.id);
+    await syncColorGuard(row.id);
+    if (twoPhase) {
+      ({ error } = await SB.from('events').update({ status: 'posted' }).eq('id', row.id));
+      if (error) { setSaving(false); setMsg(error.message); return null; }
+    }
+    setSaving(false);
     load();
     return row;
   }
@@ -181,13 +236,28 @@ export default function EventsPanel({ adminId, allowedTeams }) {
     }
   }
 
+  // Color Guard roster — same delete-all-then-reinsert approach as the two
+  // syncs above (small lists, simplest correct approach). Ascot/glove only
+  // persist alongside an actual assignment; clearing a position drops them.
+  async function syncColorGuard(eventId) {
+    await SB.from('event_color_guard').delete().eq('event_id', eventId);
+    if (form.color_guard_required && positions.length) {
+      await SB.from('event_color_guard').insert(positions.map((p, i) => ({
+        event_id: eventId, position_label: p.position_label, sort_order: i, required: p.required,
+        cadet_consent_id: p.cadet_consent_id || null,
+        ascot_color: p.cadet_consent_id ? p.ascot_color : null,
+        glove_color: p.cadet_consent_id ? p.glove_color : null,
+      })));
+    }
+  }
+
   async function saveDraft() {
     if (!form.title.trim()) { setMsg('Title required to save'); return; }
     const row = await persist(payload({ status: form.status === 'posted' ? 'posted' : 'draft' }));
     if (row) { setMsg('Saved ✓'); setEditing(null); }
   }
   async function post() {
-    const gaps = missingCore(form);
+    const gaps = missingCore(form, positions);
     if (gaps.length) { setMsg(`Cannot post, missing: ${gaps.join(', ')}`); return; }
     const row = await persist(payload({ status: 'posted' }));
     if (row) { setMsg('Posted to public calendar ✓'); setEditing(null); }
@@ -224,7 +294,7 @@ export default function EventsPanel({ adminId, allowedTeams }) {
   const rowById = useMemo(() => Object.fromEntries(rows.map((r) => [r.id, r])), [rows]);
 
   const postedCount = rows.filter((r) => r.status === 'posted').length;
-  const coreGaps = missingCore(form);
+  const coreGaps = missingCore(form, positions);
   // S-5's delete grant stays battalion-only even though their edit grant now
   // covers Raiders too (opticsend.sql SECTION 9 leaves events_del_admin
   // unchanged) — hide the button rather than let it fail silently against RLS.
@@ -538,6 +608,30 @@ export default function EventsPanel({ adminId, allowedTeams }) {
             </div>
 
             <div style={{ marginBottom: sp[3] }}>
+              <Label>Color Guard</Label>
+              <div style={{ display: 'flex', gap: sp[2], alignItems: 'center', flexWrap: 'wrap' }}>
+                {[false, true].map((v) => (
+                  <Btn
+                    key={String(v)}
+                    variant={form.color_guard_required === v ? 'gold' : 'ghost'}
+                    size="sm"
+                    onClick={() => {
+                      setForm((f) => ({ ...f, color_guard_required: v }));
+                      if (v && !positions.length) setPositions(DEFAULT_COLOR_GUARD_POSITIONS());
+                    }}
+                  >
+                    {v ? 'YES' : 'NO'}
+                  </Btn>
+                ))}
+                {form.color_guard_required && (
+                  <Btn onClick={() => setGuardOpen(true)} variant="ghost" size="sm">
+                    MANAGE ROSTER ({positions.filter((p) => p.cadet_consent_id).length}/{positions.length})
+                  </Btn>
+                )}
+              </div>
+            </div>
+
+            <div style={{ marginBottom: sp[3] }}>
               <Label>Description / notes</Label>
               <Input value={form.description} onChange={(e) => setForm((f) => ({ ...f, description: e.target.value }))} multiline />
             </div>
@@ -590,6 +684,131 @@ export default function EventsPanel({ adminId, allowedTeams }) {
               {coreGaps.length > 0 && <span style={{ fontFamily: mono, fontSize: 8, color: P.mute }}>need: {coreGaps.join(', ')}</span>}
             </div>
           </Card>
+
+          <Modal open={guardOpen} onClose={() => setGuardOpen(false)} title="COLOR GUARD ROSTER" width={640} footer={
+            <Btn onClick={() => setGuardOpen(false)} variant="gold" size="sm">CLOSE</Btn>
+          }>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: sp[3] }}>
+              {positions.map((p, idx) => {
+                const patch = (fields) => setPositions((ps) => ps.map((row, i) => (i === idx ? { ...row, ...fields } : row)));
+                return (
+                  <div key={idx} style={{ border: `1px solid ${P.hair}`, borderRadius: 5, padding: sp[3] }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: sp[2], marginBottom: sp[2] }}>
+                      <div style={{ flex: 1 }}>
+                        <Label style={{ marginBottom: 4 }}>
+                          POSITION #{idx + 1}{p.required && <span style={{ color: P.red }}> *</span>}
+                        </Label>
+                        {idx < 5 ? (
+                          <div style={{ fontFamily: inter, fontSize: fs.sm, color: P.cream }}>{p.position_label}</div>
+                        ) : (
+                          <Input value={p.position_label} placeholder="Position name" onChange={(e) => patch({ position_label: e.target.value })} />
+                        )}
+                      </div>
+                      {idx >= 5 && (
+                        <button onClick={() => setPositions((ps) => ps.filter((_, i) => i !== idx))} aria-label="Remove position" style={{
+                          all: 'unset', cursor: 'pointer', color: P.faint, fontSize: fs.md, lineHeight: 1, padding: 4,
+                        }}>✕</button>
+                      )}
+                    </div>
+
+                    <CadetPicker
+                      value={p.cadet_consent_id}
+                      name={p.cadet_name}
+                      roster={roster}
+                      onChange={(id, name) => patch({ cadet_consent_id: id, cadet_name: name, ascot_color: id ? p.ascot_color : null, glove_color: id ? p.glove_color : null })}
+                    />
+
+                    {p.cadet_consent_id && (
+                      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: sp[3], marginTop: sp[2] }}>
+                        <div>
+                          <Label style={{ marginBottom: 4 }}>Ascot<span style={{ color: P.red }}> *</span></Label>
+                          <Select
+                            value={p.ascot_color || ''}
+                            onChange={(e) => patch({ ascot_color: e.target.value || null })}
+                            options={[{ value: '', label: 'Select…' }, ...ASCOT_COLORS.map((c) => ({ value: c, label: c }))]}
+                          />
+                        </div>
+                        <div>
+                          <Label style={{ marginBottom: 4 }}>Glove<span style={{ color: P.red }}> *</span></Label>
+                          <Select
+                            value={p.glove_color || ''}
+                            onChange={(e) => patch({ glove_color: e.target.value || null })}
+                            options={[{ value: '', label: 'Select…' }, ...GLOVE_COLORS.map((c) => ({ value: c, label: c }))]}
+                          />
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                );
+              })}
+
+              <Btn
+                onClick={() => setPositions((ps) => [...ps, { position_label: '', required: false, cadet_consent_id: null, cadet_name: '', ascot_color: null, glove_color: null }])}
+                variant="ghost" size="sm"
+              >
+                + ADD POSITION
+              </Btn>
+            </div>
+          </Modal>
+        </div>
+      )}
+    </div>
+  );
+}
+
+// Searchable cadet picker — filters the preloaded `roster` (id/name/company,
+// from list_cadet_roster()) client-side by substring match. No typeahead
+// component existed anywhere in this codebase, so this is a small purpose-built
+// one rather than a new shared primitive (single consumer today).
+function CadetPicker({ value, name, roster, onChange }) {
+  const [query, setQuery] = useState('');
+  const [open, setOpen] = useState(false);
+
+  if (value) {
+    return (
+      <div style={{
+        display: 'inline-flex', alignItems: 'center', gap: 6, fontFamily: inter, fontSize: fs.sm, color: P.cream,
+        background: P.deep, border: `1px solid ${P.hair}`, borderRadius: 5, padding: '8px 10px',
+      }}>
+        {name || 'Assigned cadet'}
+        <button onClick={() => onChange(null, '')} aria-label="Change" style={{
+          all: 'unset', cursor: 'pointer', color: P.faint, fontSize: fs.tiny, marginLeft: 4,
+        }}>✕ change</button>
+      </div>
+    );
+  }
+
+  const matches = query.trim()
+    ? roster.filter((c) => c.name.toLowerCase().includes(query.trim().toLowerCase())).slice(0, 8)
+    : roster.slice(0, 8);
+
+  return (
+    <div style={{ position: 'relative' }}>
+      <Input
+        value={query}
+        placeholder="Search cadet…"
+        onFocus={() => setOpen(true)}
+        onBlur={() => setTimeout(() => setOpen(false), 150)}
+        onChange={(e) => { setQuery(e.target.value); setOpen(true); }}
+      />
+      {open && matches.length > 0 && (
+        <div style={{
+          position: 'absolute', top: '100%', left: 0, right: 0, zIndex: 10, marginTop: 4,
+          background: P.navy, border: `1px solid ${P.hairStrong}`, borderRadius: 5, boxShadow: '0 8px 20px rgba(0,0,0,0.4)',
+          maxHeight: 220, overflowY: 'auto',
+        }}>
+          {matches.map((c) => (
+            <div
+              key={c.id}
+              onMouseDown={() => { onChange(c.id, c.name); setQuery(''); setOpen(false); }}
+              style={{
+                padding: '8px 10px', cursor: 'pointer', fontFamily: inter, fontSize: fs.sm, color: P.cream,
+                borderBottom: `1px solid ${P.hair}`,
+              }}
+            >
+              {c.name} <span style={{ fontFamily: mono, fontSize: fs.micro, color: P.faint }}>· {c.company}</span>
+            </div>
+          ))}
         </div>
       )}
     </div>
