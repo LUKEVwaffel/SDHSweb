@@ -40,8 +40,17 @@ create policy admin_roles_read_self on public.admin_roles
 
 -- Seed the S-6 admin. ⚠ CHANGE this to your real login email if different, and
 -- add extra rows if you log in with more than one address.
+--
+-- CORRECTED 2026-08-06: this line previously read 'nositenoproblem12@gmail.com',
+-- which never matched reality — that address has zero rows in auth.users and
+-- never signed into DISPATCH. The live admin_roles table was already correctly
+-- seeded with lukevetsch77@gmail.com (Luke's actual, actively-used login;
+-- confirmed via auth.users.last_sign_in_at) — this file had just drifted out
+-- of sync with what was actually run against the database. Fixed here so a
+-- fresh environment (or anyone re-running this idempotent seed) reproduces the
+-- real seed instead of a dead placeholder address.
 insert into public.admin_roles (email, role) values
-  ('nositenoproblem12@gmail.com', 's6')
+  ('lukevetsch77@gmail.com', 's6')
 on conflict (email) do update set role = excluded.role;
 
 -- The S-5 account: create the user in Supabase Auth → Users first, then add its

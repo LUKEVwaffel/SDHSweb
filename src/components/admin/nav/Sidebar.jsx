@@ -6,6 +6,15 @@ import { P, mono, oswald, fs, sp, ease } from '../theme';
 // isolated at the bottom under SYSTEM.
 export const NAV_GROUPS = [
   {
+    // Placed first, always — the entire point of Emergency Push is being
+    // found in seconds during an actual same-day cancellation, not sitting
+    // wherever alphabetical/functional grouping would otherwise put it.
+    heading: 'URGENT',
+    items: [
+      { id: 'emergency', icon: '▲', label: 'Emergency Push', danger: true },
+    ],
+  },
+  {
     heading: 'DAILY',
     items: [
       { id: 'overview', icon: '◉', label: 'Overview' },
@@ -22,6 +31,7 @@ export const NAV_GROUPS = [
     heading: 'LIBRARY',
     items: [
       { id: 'media', icon: '⊡', label: 'Media' },
+      { id: 'tvphotos', icon: '▣', label: 'TV Photos' },
     ],
   },
   {

@@ -20,6 +20,7 @@ import CommandProfile from './components/CommandProfile';
 import BattalionCommand from './components/BattalionCommand';
 import Admin from './components/admin';
 import ReviewPortal from './components/review/ReviewPortal';
+import TvKiosk from './components/tv/TvKiosk';
 
 const TABS = [
   { id: 'cadet-manual', label: 'Cadet Manual',  short: 'MANUAL' },
@@ -50,6 +51,7 @@ export default function App() {
   // — bypass TopNav/Footer entirely, same as the old hash early-return.
   if (location.pathname === '/admin' || location.pathname.startsWith('/admin/')) return <Admin />;
   if (location.pathname === '/review' || location.pathname.startsWith('/review/')) return <ReviewPortal />;
+  if (location.pathname === '/tv') return <TvKiosk />;
 
   return (
     <div style={{ minHeight: '100vh', background: '#06101F', fontFamily: 'Inter, sans-serif' }}>

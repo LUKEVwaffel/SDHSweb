@@ -14,11 +14,22 @@ import MediaPanel from './panels/MediaPanel';
 import AdvancedPanel from './panels/advanced/AdvancedPanel';
 import SelfAccountPanel from './panels/SelfAccountPanel';
 import MessagesPanel from './panels/messages/MessagesPanel';
+import TvPhotosPanel from './panels/tvphotos/TvPhotosPanel';
+import EmergencyPushPanel from './panels/tvphotos/EmergencyPushPanel';
+
+// Push-to-TV / TV Photos is intentionally restricted to this one account —
+// a deliberate departure from DISPATCH's usual "no per-email logic"
+// convention (see admin_roles.sql), per explicit product decision. Matches
+// public.is_luke() in supabase/tv_photos.sql; keep both in sync if this ever
+// changes. This is a render-gate ONLY — the real enforcement is server-side
+// RLS/edge functions, same split as every other admin surface here.
+const LUKE_EMAIL = 'lukevetsch77@gmail.com';
 
 const SECTION_LABEL = {
   overview: 'OVERVIEW', events: 'EVENTS', aars: 'AAR TRACKER',
   people: 'PEOPLE', photos: 'PHOTOS', questions: 'FAQ QUESTIONS', email: 'EMAIL LIST',
   media: 'MEDIA', advanced: 'ADVANCED', account: 'MY ACCOUNT', messages: 'MESSAGES',
+  tvphotos: 'TV PHOTOS', emergency: 'EMERGENCY PUSH',
 };
 
 // Which sections each role may see. s5 is scoped to the battalion calendar
@@ -30,9 +41,13 @@ const SECTION_LABEL = {
 // self-only enforcement AccountsPanel uses. 'messages' is the one section
 // every admin gets regardless of role — DISPATCH chat is internal staff
 // coordination, not tied to the s6/s5 permission split.
+// 'emergency' is on every role's list — any signed-in admin can fire it, no
+// gate, per product decision (speed matters more than restriction there).
+// 'tvphotos' is NOT listed here at all — it's added dynamically below, only
+// for LUKE_EMAIL, since it's restricted to one account rather than a role.
 const ROLE_SECTIONS = {
-  s6: ['overview', 'events', 'people', 'photos', 'questions', 'email', 'media', 'messages', 'advanced'],
-  s5: ['events', 'aars', 'messages', 'account'],
+  s6: ['overview', 'events', 'people', 'photos', 'questions', 'email', 'media', 'messages', 'advanced', 'emergency'],
+  s5: ['events', 'aars', 'messages', 'account', 'emergency'],
 };
 
 // team values s5 may create/edit/view events for. '' = battalion (team NULL).
@@ -41,7 +56,9 @@ const ROLE_SECTIONS = {
 const S5_ALLOWED_TEAMS = ['', 'raiders'];
 
 export default function Dashboard({ onLogout, adminId, role = 's6' }) {
-  const allowed = ROLE_SECTIONS[role] || ROLE_SECTIONS.s6;
+  const isLuke = (adminId || '').toLowerCase() === LUKE_EMAIL;
+  const baseAllowed = ROLE_SECTIONS[role] || ROLE_SECTIONS.s6;
+  const allowed = isLuke ? [...baseAllowed, 'tvphotos'] : baseAllowed;
   const allowedTeams = role === 's5' ? S5_ALLOWED_TEAMS : undefined;
   const navigate = useNavigate();
   const location = useLocation();
@@ -73,6 +90,8 @@ export default function Dashboard({ onLogout, adminId, role = 's6' }) {
           {section === 'advanced' && <AdvancedPanel adminId={adminId} />}
           {section === 'account'  && <SelfAccountPanel adminId={adminId} />}
           {section === 'messages' && <MessagesPanel adminId={adminId} />}
+          {section === 'tvphotos' && isLuke && <TvPhotosPanel adminId={adminId} />}
+          {section === 'emergency' && <EmergencyPushPanel />}
         </div>
       </div>
       <StatusBar sectionLabel={SECTION_LABEL[section] || section.toUpperCase()} />

@@ -213,6 +213,14 @@ function formatDateRange(date, end_date) {
 // page when a calendar day/event is selected.
 function EventDetailCard({ event }) {
   const time = formatEventTimeRange(event.event_time, event.end_time);
+  const [colorGuard, setColorGuard] = useState([]);
+
+  useEffect(() => {
+    if (!event.color_guard_required) { setColorGuard([]); return; }
+    SB.rpc('get_event_color_guard', { p_event_id: event.id })
+      .then(({ data }) => setColorGuard(data || []));
+  }, [event.id, event.color_guard_required]);
+
   return (
     <div style={{ border: `1px solid ${P.hairStrong}`, background: P.navy, padding: 22, marginBottom: 20 }}>
       <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 10 }}>
@@ -245,6 +253,19 @@ function EventDetailCard({ event }) {
               </a>
             </div>
           )}
+        </div>
+      )}
+
+      {colorGuard.length > 0 && (
+        <div style={{ paddingTop: 16, marginTop: 16, borderTop: `1px solid ${P.hair}` }}>
+          <div style={{ fontFamily: mono, fontSize: 8, letterSpacing: '0.14em', color: P.mute, marginBottom: 8 }}>COLOR GUARD</div>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
+            {colorGuard.map((p) => (
+              <div key={p.sort_order} style={{ fontFamily: inter, fontSize: 13, color: P.cream }}>
+                <span style={{ color: P.gold }}>{p.position_label}:</span> {p.cadet_name}
+              </div>
+            ))}
+          </div>
         </div>
       )}
 
