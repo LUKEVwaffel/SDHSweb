@@ -22,14 +22,22 @@ function ModeButton({ active, label, hint, onClick }) {
 export default function StepPhotoSource({ featuredTeams, mode, eventId, uploadedUrls, onChange }) {
   const events = useTvEventOptions(featuredTeams);
   const [uploading, setUploading] = useState(false);
+  const [uploadError, setUploadError] = useState('');
   const [deletingUrl, setDeletingUrl] = useState(null);
   const fileInputRef = useRef(null);
 
   const handleFiles = async (files) => {
+    setUploadError('');
     setUploading(true);
     try {
-      const urls = await Promise.all(Array.from(files).map(uploadTvDailyPhoto));
-      onChange({ mode: 'upload', uploadedUrls: [...uploadedUrls, ...urls] });
+      // allSettled, not all — a single RAW/undecodable file throws in the
+      // resize step, and Promise.all would reject the whole batch and drop
+      // every good photo with it.
+      const results = await Promise.allSettled(Array.from(files).map(uploadTvDailyPhoto));
+      const urls = results.filter((r) => r.status === 'fulfilled').map((r) => r.value);
+      if (urls.length) onChange({ mode: 'upload', uploadedUrls: [...uploadedUrls, ...urls] });
+      const firstFail = results.find((r) => r.status === 'rejected');
+      if (firstFail) setUploadError(firstFail.reason?.message || 'Some photos could not be added.');
     } finally {
       setUploading(false);
       if (fileInputRef.current) fileInputRef.current.value = '';
@@ -121,6 +129,12 @@ export default function StepPhotoSource({ featuredTeams, mode, eventId, uploaded
           >
             {uploading ? 'Uploading…' : '+ Add photos'}
           </label>
+
+          {uploadError && (
+            <div style={{ fontFamily: inter, fontSize: 13, color: P.red, marginBottom: sp[3], lineHeight: 1.5 }}>
+              {uploadError}
+            </div>
+          )}
 
           {uploadedUrls.length > 0 && (
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(5, 1fr)', gap: sp[2] }}>
