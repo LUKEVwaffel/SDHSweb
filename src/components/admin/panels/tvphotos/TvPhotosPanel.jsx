@@ -2,6 +2,7 @@ import { useState, useEffect, useRef } from 'react';
 import { supabase as SB } from '../../../../lib/supabaseClient';
 import { TEAMS } from '../../../../lib/teams';
 import { listTvPhotos, uploadTvPhotoFile, insertTvPhoto, deleteTvPhotoFile, deleteTvPhoto } from '../../../../lib/tvPhotosFolders';
+import { isRawFile } from '../../../../lib/imageResize';
 import { resolveTvPhotoCaption } from '../../../../lib/tvPhotoCaption';
 import { useTvDailySettings } from '../../../../hooks/useTvDailySettings';
 import { P, mono, fs, sp, radius } from '../../theme';
@@ -48,8 +49,14 @@ export default function TvPhotosPanel({ adminId }) {
   function flashMsg(msg) { setFlash(msg); setTimeout(() => setFlash(''), 2000); }
 
   function startBatch(fileList) {
-    const files = Array.from(fileList || []).filter((f) => f.type.startsWith('image/'));
-    if (!files.length || batchActive) return;
+    if (batchActive) return;
+    const images = Array.from(fileList || []).filter((f) => f.type.startsWith('image/'));
+    // RAW files can't be decoded by the canvas resize step and would throw —
+    // drop them at pick time (same as AdminBulkUpload) so the batch survives.
+    const files = images.filter((f) => !isRawFile(f));
+    const rawCount = images.length - files.length;
+    if (rawCount) flashMsg(`Skipped ${rawCount} RAW file${rawCount === 1 ? '' : 's'} — export as JPEG first.`);
+    if (!files.length) return;
     setQueueTotal(files.length);
     advance(files);
   }
@@ -63,10 +70,18 @@ export default function TvPhotosPanel({ adminId }) {
     const [file, ...rest] = remaining;
     setQueue(rest);
     setAdvancing(true);
-    const { storagePath, photoUrl, error } = await uploadTvPhotoFile(folder, file);
-    setAdvancing(false);
-    if (error) { flashMsg(`Upload failed: ${file.name}`); advance(rest); return; }
-    setCurrent({ storagePath, photoUrl });
+    try {
+      const { storagePath, photoUrl, error } = await uploadTvPhotoFile(folder, file);
+      if (error) { flashMsg(`Upload failed: ${file.name}`); advance(rest); return; }
+      setCurrent({ storagePath, photoUrl });
+    } catch (err) {
+      // A thrown resize/decode error must not escape as an unhandled rejection —
+      // surface it and keep walking the queue.
+      flashMsg(`Upload failed: ${file.name} — ${err.message}`);
+      advance(rest);
+    } finally {
+      setAdvancing(false);
+    }
   }
 
   async function onSaveAssignment({ folders, title }) {

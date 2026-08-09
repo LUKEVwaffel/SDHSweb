@@ -36,10 +36,13 @@ export default function EmergencyPushPanel() {
     const file = e.target.files[0];
     e.target.value = '';
     if (!file) return;
+    setErr('');
     setUploading(true);
     try {
       const url = await uploadTvDailyPhoto(file);
       setPhotoUrl(url);
+    } catch (uploadErr) {
+      setErr(uploadErr.message || 'Photo upload failed.');
     } finally {
       setUploading(false);
     }
