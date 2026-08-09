@@ -1,11 +1,13 @@
 import { useState, useEffect, useRef } from 'react';
 import { supabase as SB } from '../../../../lib/supabaseClient';
 import { TEAMS } from '../../../../lib/teams';
-import { listTvPhotos, uploadTvPhoto, deleteTvPhoto } from '../../../../lib/tvPhotosFolders';
+import { listTvPhotos, uploadTvPhotoFile, insertTvPhoto, deleteTvPhotoFile, deleteTvPhoto } from '../../../../lib/tvPhotosFolders';
+import { resolveTvPhotoCaption } from '../../../../lib/tvPhotoCaption';
 import { useTvDailySettings } from '../../../../hooks/useTvDailySettings';
 import { P, mono, fs, sp, radius } from '../../theme';
 import { Btn, PanelHeader, EmptyState } from '../../shared/ui';
 import TvSpotlightPushModal from './TvSpotlightPushModal';
+import TvPhotoAssignModal from './TvPhotoAssignModal';
 import TvTerminalManager from './TvTerminalManager';
 
 const FOLDERS = [...TEAMS.map((t) => ({ id: t.id, label: t.label })), { id: 'battalion', label: 'Battalion' }];
@@ -18,11 +20,22 @@ const FOLDERS = [...TEAMS.map((t) => ({ id: t.id, label: t.label })), { id: 'bat
 export default function TvPhotosPanel({ adminId }) {
   const [folder, setFolder] = useState(FOLDERS[0].id);
   const [photos, setPhotos] = useState(null);
-  const [uploading, setUploading] = useState(false);
   const [pushTarget, setPushTarget] = useState(null);
   const [flash, setFlash] = useState('');
   const fileRef = useRef();
   const { settings } = useTvDailySettings();
+
+  // Sequential assignment queue: `queue` holds files not yet started,
+  // `current` is the uploaded-but-not-yet-assigned photo the modal is
+  // showing, `queueTotal` is the batch size (for the "N/M" header). One
+  // popup at a time, never bulk-assign-then-edit.
+  const [queue, setQueue] = useState([]);
+  const [queueTotal, setQueueTotal] = useState(0);
+  const [current, setCurrent] = useState(null);
+  const [advancing, setAdvancing] = useState(false);
+  const [saving, setSaving] = useState(false);
+  const [dragOver, setDragOver] = useState(false);
+  const batchActive = queueTotal > 0;
 
   useEffect(() => { load(); /* eslint-disable-next-line */ }, [folder]);
 
@@ -34,17 +47,43 @@ export default function TvPhotosPanel({ adminId }) {
 
   function flashMsg(msg) { setFlash(msg); setTimeout(() => setFlash(''), 2000); }
 
-  async function onPickFile(e) {
-    const file = e.target.files[0];
-    e.target.value = '';
-    if (!file) return;
-    setUploading(true);
-    try {
-      await uploadTvPhoto(folder, file, adminId);
+  function startBatch(fileList) {
+    const files = Array.from(fileList || []).filter((f) => f.type.startsWith('image/'));
+    if (!files.length || batchActive) return;
+    setQueueTotal(files.length);
+    advance(files);
+  }
+
+  async function advance(remaining) {
+    if (!remaining.length) {
+      setQueue([]); setCurrent(null); setQueueTotal(0);
       load();
-    } finally {
-      setUploading(false);
+      return;
     }
+    const [file, ...rest] = remaining;
+    setQueue(rest);
+    setAdvancing(true);
+    const { storagePath, photoUrl, error } = await uploadTvPhotoFile(folder, file);
+    setAdvancing(false);
+    if (error) { flashMsg(`Upload failed: ${file.name}`); advance(rest); return; }
+    setCurrent({ storagePath, photoUrl });
+  }
+
+  async function onSaveAssignment({ folders, title }) {
+    if (!current) return;
+    setSaving(true);
+    const { error } = await insertTvPhoto({ folders, title, storagePath: current.storagePath, photoUrl: current.photoUrl, uploadedBy: adminId });
+    setSaving(false);
+    if (error) { flashMsg('Save failed — try again.'); return; }
+    advance(queue);
+  }
+
+  async function onCancelAssignment() {
+    if (!current) return;
+    setSaving(true);
+    await deleteTvPhotoFile(current.storagePath);
+    setSaving(false);
+    advance(queue);
   }
 
   async function onDelete(photo) {
@@ -65,9 +104,33 @@ export default function TvPhotosPanel({ adminId }) {
       <PanelHeader
         title="TV PHOTOS"
         sub="Feeds the /tv kiosk carousel — battalion + team folders, live-synced, no reload needed."
-        action={<Btn onClick={() => fileRef.current.click()} variant="gold" size="sm" disabled={uploading}>{uploading ? 'UPLOADING…' : '+ UPLOAD'}</Btn>}
+        action={<Btn onClick={() => fileRef.current.click()} variant="gold" size="sm" disabled={batchActive}>{batchActive ? 'ASSIGNING…' : '+ UPLOAD'}</Btn>}
       />
-      <input ref={fileRef} type="file" accept="image/*" style={{ display: 'none' }} onChange={onPickFile} />
+      <input
+        ref={fileRef} type="file" accept="image/*" multiple style={{ display: 'none' }}
+        onChange={(e) => { startBatch(e.target.files); e.target.value = ''; }}
+      />
+
+      <div
+        onClick={() => !batchActive && fileRef.current.click()}
+        onDragOver={(e) => { e.preventDefault(); if (!batchActive) setDragOver(true); }}
+        onDragLeave={() => setDragOver(false)}
+        onDrop={(e) => { e.preventDefault(); setDragOver(false); startBatch(e.dataTransfer.files); }}
+        style={{
+          cursor: batchActive ? 'not-allowed' : 'pointer', opacity: batchActive ? 0.5 : 1,
+          border: `1px dashed ${dragOver ? P.gold : P.hairStrong}`,
+          background: dragOver ? 'rgba(201,169,97,0.06)' : P.deep,
+          padding: '28px 20px', textAlign: 'center', marginBottom: sp[4], borderRadius: radius.md,
+          transition: 'all 0.15s',
+        }}
+      >
+        <div style={{ fontFamily: mono, fontSize: fs.xs, color: P.gold, letterSpacing: '0.1em' }}>
+          {batchActive ? 'ASSIGNING PHOTOS — FINISH THE CURRENT BATCH FIRST' : 'DROP PHOTOS HERE OR CLICK TO BROWSE'}
+        </div>
+        <div style={{ fontFamily: mono, fontSize: fs.micro, color: P.mute, letterSpacing: '0.1em', marginTop: 6 }}>
+          UPLOADS INTO {FOLDERS.find((f) => f.id === folder)?.label.toUpperCase()} — EACH PHOTO GETS ITS OWN FOLDER/TITLE ASSIGNMENT NEXT
+        </div>
+      </div>
 
       {spotlightActive && (
         <div style={{
@@ -97,6 +160,9 @@ export default function TvPhotosPanel({ adminId }) {
               <div style={{ aspectRatio: '4/3', overflow: 'hidden' }}>
                 <img src={p.photo_url} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }} />
               </div>
+              <div style={{ padding: '6px 8px 0', fontFamily: mono, fontSize: fs.micro, color: P.faint, letterSpacing: '0.06em', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                {resolveTvPhotoCaption(p)}
+              </div>
               <div style={{ padding: '6px 8px', display: 'flex', gap: 4, flexWrap: 'wrap' }}>
                 <button onClick={() => setPushTarget(p)} style={miniBtn(false, P.gold)}>PUSH TO TV</button>
                 <button onClick={() => onDelete(p)} style={miniBtn(false, P.red)}>DEL</button>
@@ -115,6 +181,19 @@ export default function TvPhotosPanel({ adminId }) {
           photo={pushTarget}
           onClose={() => setPushTarget(null)}
           onPushed={() => { setPushTarget(null); flashMsg('Pushed to TV ✓'); }}
+        />
+      )}
+
+      {current && (
+        <TvPhotoAssignModal
+          photo={current}
+          folders={FOLDERS}
+          defaultFolder={folder}
+          queuePosition={queueTotal - queue.length}
+          queueTotal={queueTotal}
+          onSave={onSaveAssignment}
+          onCancel={onCancelAssignment}
+          busy={advancing || saving}
         />
       )}
     </div>

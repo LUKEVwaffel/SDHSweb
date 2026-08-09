@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { supabase as SB } from '../lib/supabaseClient';
 import { TV_PHOTOS } from '../lib/tvPhotos.js';
 import { getTeam } from '../lib/teams.js';
+import { resolveTvPhotoCaption } from '../lib/tvPhotoCaption.js';
 
 /**
  * Resolves today's carousel photo list + display title from the daily
@@ -39,7 +40,7 @@ export function useTvCarouselPhotos(settings) {
 
     if (mode === 'team' && featuredTeams.length) {
       const folders = Array.from(new Set([...featuredTeams, 'battalion']));
-      const load = () => SB.from('tv_photos').select('id,photo_url').in('folder', folders)
+      const load = () => SB.from('tv_photos').select('id,photo_url,title,folders').overlaps('folders', folders)
         .order('created_at', { ascending: false }).limit(30)
         .then(({ data }) => { if (alive) setQueriedPhotos(data || []); });
       load();
@@ -50,8 +51,8 @@ export function useTvCarouselPhotos(settings) {
       // case a kiosk's socket silently drops during an all-day-open session.
       const channel = SB.channel(`tv-photos-live-${folders.join('-')}`)
         .on('postgres_changes', { event: '*', schema: 'public', table: 'tv_photos' }, (payload) => {
-          const row = payload.new?.folder ? payload.new : payload.old;
-          if (row && folders.includes(row.folder)) load();
+          const row = payload.new?.folders ? payload.new : payload.old;
+          if (row?.folders?.some((f) => folders.includes(f))) load();
         })
         .subscribe();
       const pollId = setInterval(load, 60_000);
@@ -73,9 +74,16 @@ export function useTvCarouselPhotos(settings) {
     };
   }
 
-  if ((mode === 'event' || mode === 'team') && queriedPhotos.length) {
+  if (mode === 'event' && queriedPhotos.length) {
     return {
       photos: queriedPhotos.map((p, i) => ({ src: p.photo_url, alt: `Photo ${i + 1}`, title: teamLabel || 'Today' })),
+      teamLabel,
+    };
+  }
+
+  if (mode === 'team' && queriedPhotos.length) {
+    return {
+      photos: queriedPhotos.map((p, i) => ({ src: p.photo_url, alt: `Photo ${i + 1}`, title: resolveTvPhotoCaption(p) })),
       teamLabel,
     };
   }

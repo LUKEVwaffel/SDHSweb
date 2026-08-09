@@ -37,15 +37,53 @@ returns boolean language sql stable security definer set search_path = public as
   select lower(auth.jwt() ->> 'email') = 'lukevetsch77@gmail.com';
 $$;
 
+-- MIGRATION: single-folder → multi-folder (folder text -> folders text[]) +
+-- per-photo title. Table was confirmed empty via a live read before this
+-- shipped, so this truncates rather than backfilling folder -> folders — no
+-- data loss risk. No-ops on a fresh install (the column won't exist yet).
+do $$
+begin
+  if exists (
+    select 1 from information_schema.columns
+    where table_schema = 'public' and table_name = 'tv_photos' and column_name = 'folder'
+  ) then
+    truncate table public.tv_photos;
+    drop index if exists public.tv_photos_folder_time_idx;
+    alter table public.tv_photos drop column folder;
+    alter table public.tv_photos add column folders text[] not null default '{}';
+    alter table public.tv_photos add column title text;
+    alter table public.tv_photos alter column folders drop default;
+    alter table public.tv_photos add constraint tv_photos_folders_check check (
+      cardinality(folders) > 0
+      and folders <@ array['raiders','rifle','academic','drill','battalion']::text[]
+    );
+  end if;
+end $$;
+
 create table if not exists public.tv_photos (
   id            uuid primary key default gen_random_uuid(),
-  folder        text not null check (folder in ('raiders','rifle','academic','drill','battalion')),
+  folders       text[] not null check (
+                  cardinality(folders) > 0
+                  and folders <@ array['raiders','rifle','academic','drill','battalion']::text[]
+                ),
+  title         text,
   storage_path  text not null,
   photo_url     text not null,
   uploaded_by   text,
   created_at    timestamptz not null default now()
 );
-create index if not exists tv_photos_folder_time_idx on public.tv_photos(folder, created_at desc);
+-- Multi-folder assignment (a photo can live in Raiders + Battalion at once —
+-- e.g. a joint event) replaced the original single `folder text` column with
+-- `folders text[]`. Mirrors tv_daily_settings.featured_teams' existing
+-- text[] convention rather than a join table, so useTvCarouselPhotos.js stays
+-- a single-query `.overlaps()` filter instead of a join. Table was empty at
+-- migration time — see TvPhotosPanel.jsx's assignment-popup flow for how rows
+-- get their folders now (deferred insert until the popup submits, see
+-- tvPhotosFolders.js), so no data backfill was needed. `title` is the
+-- per-photo TV caption; NULL falls back to a folder-derived label — see
+-- resolveTvPhotoCaption() in tvPhotoCaption.js.
+create index if not exists tv_photos_folders_gin_idx on public.tv_photos using gin (folders);
+create index if not exists tv_photos_created_idx on public.tv_photos(created_at desc);
 
 alter table public.tv_photos enable row level security;
 
