@@ -1,5 +1,5 @@
 import { useState, useCallback } from 'react';
-import { P, inter, sp, radius, shadow } from '../admin/theme.js';
+import { P, inter, sp } from '../admin/theme.js';
 import { useLocalStorage } from '../../hooks/useLocalStorage.js';
 import { useNowTicker } from '../../hooks/useNowTicker.js';
 import { useTvDailySettings } from '../../hooks/useTvDailySettings.js';
@@ -14,28 +14,30 @@ import TvEmergencyOverlay from './TvEmergencyOverlay.jsx';
 
 const LS_KEY = 'tb_tv_schedule_choice';
 const NY_TZ = 'America/New_York';
+// Below this, the Facts/Quote/Verse widget's kicker + drop-cap treatment
+// stops being readable — the column scrolls rather than compress past it.
+const FACTS_MIN_HEIGHT = 260;
 
 function todayNyDate(now) {
   return new Intl.DateTimeFormat('en-CA', { timeZone: NY_TZ }).format(now); // YYYY-MM-DD
 }
 
-// Each widget gets its own raised card — real depth (shadow + hairline
-// border), not a hairline-divided list. Cards breathe with a gap instead of
-// touching, so the eye reads three separate instruments, not one stacked form.
-// Top edge accent painted with a border + inset shadow (not an absolutely
-// positioned overlay) so it never needs `overflow: hidden` on the card —
-// content that runs slightly long stays visible instead of getting clipped.
-function Card({ children }) {
+// Deliberately NOT three identical boxed cards — that reads as one generic
+// "sidebar of widgets" template no matter how nice the type inside each box
+// is. Instead the right column is one continuous instrument panel (shared
+// background, no per-widget border/shadow/radius) divided by hairline rules,
+// departure-board style. Each widget owns a mono-gold kicker + tick-mark rule
+// as its only visual identity marker (see TvHistoryPanel's "ON THIS DAY" —
+// that pattern is now the shared grammar for all three, not one panel's
+// personal touch). Sizing is asymmetric on purpose: Clock is the hero
+// (glanceable from across a hallway), Weather is a compact secondary strip,
+// Facts gets whatever's left so its drop-cap/ghost-year treatment has room.
+function InstrumentDivider() {
   return (
     <div style={{
-      flex: 1, minHeight: 0, padding: `${sp[4]}px ${sp[5]}px`,
-      display: 'flex', flexDirection: 'column', position: 'relative',
-      background: `linear-gradient(165deg, ${P.navyLift} 0%, ${P.navy} 55%)`,
-      border: `1px solid ${P.hair}`, borderTop: `2px solid ${P.gold}`,
-      borderRadius: radius.lg, boxShadow: shadow.md,
-    }}>
-      {children}
-    </div>
+      height: 1, flexShrink: 0,
+      background: `linear-gradient(90deg, transparent, ${P.hairStrong} 12%, ${P.hairStrong} 88%, transparent)`,
+    }} />
   );
 }
 
@@ -99,17 +101,43 @@ export default function TvKiosk() {
         </div>
 
         <div style={{
-          height: '100%', display: 'flex', flexDirection: 'column', gap: sp[3],
-          borderLeft: `1px solid ${P.hair}`, background: P.deep, padding: sp[4],
+          height: '100%', display: 'flex', flexDirection: 'column',
+          borderLeft: `1px solid ${P.hair}`,
+          background: `linear-gradient(180deg, ${P.deep} 0%, #0D1C33 100%)`,
           overflowY: 'auto',
         }}>
-          <Card><TvWeatherPanel /></Card>
-          <Card><TvClockBellPanel scheduleKey={scheduleKey} /></Card>
+          {/* Clock is the hero — largest, most glanceable instrument. Clock
+              and Weather are both content-sized (not a fixed % of the
+              column) because their content varies day to day — a 3-lunch
+              schedule or a longer forecast string would overflow a fixed
+              box and bleed into the next widget (this bit both, verified via
+              screenshot before landing — see git history). Facts gets a
+              minHeight floor (FACTS_MIN_HEIGHT) rather than a bare flex: 1,
+              so a generous Clock/Weather day can't squeeze it down to an
+              unreadable sliver — the outer column scrolls if that floor
+              can't be met instead of everything silently overlapping. When
+              the Facts widget is hidden (emergency mode), Clock grows to
+              absorb the freed space instead of leaving dead air below it. */}
+          <div style={{ flex: emergencyActive ? '1 1 auto' : '0 0 auto', padding: `${sp[4]}px ${sp[5]}px ${sp[3]}px` }}>
+            <TvClockBellPanel scheduleKey={scheduleKey} />
+          </div>
+
+          <InstrumentDivider />
+
+          <div style={{ flex: '0 0 auto', padding: `${sp[3]}px ${sp[5]}px` }}>
+            <TvWeatherPanel />
+          </div>
+
           {/* Bottom quote/facts widget is the other thing the emergency
-              message replaces — omitted entirely rather than shown empty;
-              the two Cards above flex to fill the freed height (each is
-              flex:1 in this flex-column already). */}
-          {!emergencyActive && <Card><TvBottomWidget settings={settings} now={now} /></Card>}
+              message replaces — omitted entirely rather than shown empty. */}
+          {!emergencyActive && (
+            <>
+              <InstrumentDivider />
+              <div style={{ flex: '1 1 auto', minHeight: FACTS_MIN_HEIGHT, padding: `${sp[4]}px ${sp[5]}px ${sp[6]}px` }}>
+                <TvBottomWidget settings={settings} now={now} />
+              </div>
+            </>
+          )}
         </div>
       </div>
 

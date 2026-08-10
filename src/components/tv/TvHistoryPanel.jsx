@@ -39,7 +39,7 @@ function GhostYear({ year }) {
       style={{
         position: 'absolute', top: '-0.14em', right: '-0.05em',
         fontFamily: fraunces, fontWeight: 900, fontStyle: 'italic',
-        fontSize: 'clamp(64px, 13vh, 168px)', lineHeight: 1, color: P.gold, opacity: 0.05,
+        fontSize: 'clamp(72px, 15vh, 196px)', lineHeight: 1, color: P.gold, opacity: 0.05,
         letterSpacing: '-0.02em', pointerEvents: 'none', userSelect: 'none',
       }}
     >
@@ -82,7 +82,7 @@ export default function TvHistoryPanel() {
   const fact = facts[i % Math.max(facts.length, 1)];
 
   return (
-    <div style={{ height: '100%', display: 'flex', flexDirection: 'column', justifyContent: 'center', position: 'relative', overflow: 'hidden' }}>
+    <div style={{ height: '100%', display: 'flex', flexDirection: 'column', justifyContent: 'flex-start', position: 'relative', overflow: 'hidden' }}>
       <PanelStyles />
 
       {fact && <GhostYear year={fact.year} />}
@@ -105,7 +105,7 @@ export default function TvHistoryPanel() {
             className="tv-fact-year"
             style={{
               fontFamily: fraunces, fontStyle: 'italic', fontWeight: 900,
-              fontSize: 'clamp(30px, 6vh, 92px)', lineHeight: 0.86, letterSpacing: '-0.015em',
+              fontSize: 'clamp(36px, 8vh, 108px)', lineHeight: 0.86, letterSpacing: '-0.015em',
               backgroundImage: `linear-gradient(135deg, ${P.bright}, ${P.gold} 65%)`,
               WebkitBackgroundClip: 'text', backgroundClip: 'text', color: 'transparent',
             }}
@@ -118,7 +118,7 @@ export default function TvHistoryPanel() {
           <div
             className="tv-fact-body"
             style={{
-              fontFamily: inter, fontSize: fs.base, color: P.cream, lineHeight: 1.45,
+              fontFamily: inter, fontSize: fs.md, color: P.cream, lineHeight: 1.5,
               borderLeft: `2px solid ${P.hairStrong}`, paddingLeft: sp[3],
             }}
           >

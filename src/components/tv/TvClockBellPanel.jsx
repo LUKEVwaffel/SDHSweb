@@ -19,13 +19,31 @@ function PanelStyles() {
         0%, 100% { transform: scale(1); opacity: 1; }
         50% { transform: scale(1.6); opacity: 0.35; }
       }
+      @keyframes tvSweep { 0% { left: -35%; } 100% { left: 100%; } }
       .tv-colon { animation: tvColonBlink 2s steps(1) infinite; }
       .tv-ring-urgent { animation: tvUrgentPulse 1.6s ease-in-out infinite; }
       .tv-live-dot { animation: tvDotPulse 1.8s ease-in-out infinite; }
+      .tv-sweep { animation: tvSweep 6s ease-in-out infinite; }
       @media (prefers-reduced-motion: reduce) {
-        .tv-colon, .tv-ring-urgent, .tv-live-dot { animation: none; }
+        .tv-colon, .tv-ring-urgent, .tv-live-dot, .tv-sweep { animation: none; }
       }
     `}</style>
+  );
+}
+
+// The one deliberate motion signature for this widget — a slow gold sweep
+// through the rule between the clock and the bell readout, like a broadcast
+// lower-third or a departure-board scan line. Everything else on this panel
+// is static type; this is the single accent that says "live instrument,"
+// not "printed card."
+function SweepRule() {
+  return (
+    <div style={{ position: 'relative', height: 1, background: P.hair, overflow: 'hidden' }}>
+      <div className="tv-sweep" style={{
+        position: 'absolute', top: 0, bottom: 0, left: '-35%', width: '35%',
+        background: `linear-gradient(90deg, transparent, ${P.gold}, transparent)`,
+      }} />
+    </div>
   );
 }
 
@@ -105,29 +123,37 @@ export default function TvClockBellPanel({ scheduleKey }) {
   const urgent = bell && !bell.done && bell.minutesUntil <= URGENT_MIN;
 
   return (
-    <div style={{ height: '100%', display: 'flex', flexDirection: 'column', justifyContent: 'center', gap: sp[4] }}>
+    <div style={{ height: '100%', display: 'flex', flexDirection: 'column', justifyContent: 'flex-start', gap: sp[2] }}>
       <PanelStyles />
 
+      <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+        <div style={{ width: 14, height: 2, background: P.gold }} />
+        <div style={{ fontFamily: mono, fontSize: fs.micro, color: P.gold, letterSpacing: '0.28em' }}>
+          LOCAL TIME
+        </div>
+        <div style={{ flex: 1, height: 1, background: P.hair }} />
+      </div>
+
       <div>
-        <div style={{ fontFamily: inter, fontSize: fs.sm, color: P.mute, marginBottom: sp[2], letterSpacing: '0.01em' }}>
+        <div style={{ fontFamily: inter, fontSize: fs.sm, color: P.mute, marginBottom: sp[1], letterSpacing: '0.01em' }}>
           {formatDate(now)}
         </div>
         <div style={{ display: 'flex', alignItems: 'baseline', gap: 2 }}>
           <span style={{
-            fontFamily: fraunces, fontWeight: 800, fontSize: 'clamp(32px, 6.5vh, 66px)', color: P.cream,
-            letterSpacing: '-0.02em', lineHeight: 1, fontVariantNumeric: 'tabular-nums',
+            fontFamily: fraunces, fontWeight: 800, fontSize: 'clamp(52px, 9.5vh, 118px)', color: P.cream,
+            letterSpacing: '-0.03em', lineHeight: 0.95, fontVariantNumeric: 'tabular-nums',
           }}>
             {h}
           </span>
-          <span className="tv-colon" style={{ fontFamily: fraunces, fontWeight: 800, fontSize: 'clamp(32px, 6.5vh, 66px)', color: P.gold, lineHeight: 1 }}>:</span>
+          <span className="tv-colon" style={{ fontFamily: fraunces, fontWeight: 800, fontSize: 'clamp(52px, 9.5vh, 118px)', color: P.gold, lineHeight: 0.95 }}>:</span>
           <span style={{
-            fontFamily: fraunces, fontWeight: 800, fontSize: 'clamp(32px, 6.5vh, 66px)', color: P.cream,
-            letterSpacing: '-0.02em', lineHeight: 1, fontVariantNumeric: 'tabular-nums',
+            fontFamily: fraunces, fontWeight: 800, fontSize: 'clamp(52px, 9.5vh, 118px)', color: P.cream,
+            letterSpacing: '-0.03em', lineHeight: 0.95, fontVariantNumeric: 'tabular-nums',
           }}>
             {m}
           </span>
           <span style={{
-            fontFamily: mono, fontSize: fs.sm, color: P.faint, marginLeft: 6,
+            fontFamily: mono, fontSize: fs.sm, color: P.faint, marginLeft: 8,
             fontVariantNumeric: 'tabular-nums', minWidth: '2ch', display: 'inline-block',
           }}>
             :{s}
@@ -138,7 +164,7 @@ export default function TvClockBellPanel({ scheduleKey }) {
         </div>
       </div>
 
-      <div style={{ height: 1, background: P.hair }} />
+      <SweepRule />
 
       {!scheduleKey ? (
         <div style={{ fontFamily: inter, fontSize: fs.base, color: P.mute }}>

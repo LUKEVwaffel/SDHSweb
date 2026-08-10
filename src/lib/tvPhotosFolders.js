@@ -9,7 +9,7 @@ const BUCKET = 'tv-team-photos';
 // table/bucket/RLS this talks to.
 export async function listTvPhotos(folder) {
   const { data, error } = await SB.from('tv_photos')
-    .select('id,folders,title,photo_url,storage_path,created_at')
+    .select('id,folders,title,photo_url,storage_path,focal_x,focal_y,created_at')
     .contains('folders', [folder])
     .order('created_at', { ascending: false });
   return { photos: data || [], error };
@@ -36,7 +36,7 @@ export async function deleteTvPhotoFile(storagePath) {
   return { error };
 }
 
-export async function insertTvPhoto({ folders, title, storagePath, photoUrl, uploadedBy }) {
+export async function insertTvPhoto({ folders, title, storagePath, photoUrl, uploadedBy, focalX = 0.5, focalY = 0.5 }) {
   const { data, error } = await SB.from('tv_photos')
     .insert({
       folders,
@@ -44,10 +44,22 @@ export async function insertTvPhoto({ folders, title, storagePath, photoUrl, upl
       storage_path: storagePath,
       photo_url: photoUrl,
       uploaded_by: uploadedBy || null,
+      focal_x: focalX,
+      focal_y: focalY,
     })
-    .select('id,folders,title,photo_url,storage_path,created_at')
+    .select('id,folders,title,photo_url,storage_path,focal_x,focal_y,created_at')
     .single();
   return { photo: data, error };
+}
+
+// Crop-only edit for an already-assigned photo — uses the update policy from
+// tv_photos_focal_point.sql (the table otherwise has no UPDATE policy; see
+// TvPhotoAssignModal.jsx's comment on why insert/delete stayed the norm).
+export async function updateTvPhotoFocal(id, focalX, focalY) {
+  const { error } = await SB.from('tv_photos')
+    .update({ focal_x: focalX, focal_y: focalY })
+    .eq('id', id);
+  return { error };
 }
 
 export async function deleteTvPhoto(id, storagePath) {

@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { P, mono, fs, sp } from '../../theme';
 import { Btn, Label, Input, Modal } from '../../shared/ui';
 import { resolveTvPhotoCaption } from '../../../../lib/tvPhotoCaption';
+import FocalPointPicker from './FocalPointPicker';
 
 // One popup per dropped/selected photo, shown in sequence by TvPhotosPanel's
 // queue (never bulk-assign-then-edit — each photo gets its own folders +
@@ -13,6 +14,8 @@ import { resolveTvPhotoCaption } from '../../../../lib/tvPhotoCaption';
 export default function TvPhotoAssignModal({ photo, folders: FOLDERS, defaultFolder, queuePosition, queueTotal, onSave, onCancel, busy }) {
   const [selected, setSelected] = useState(() => new Set([defaultFolder]));
   const [title, setTitle] = useState('');
+  const [focalX, setFocalX] = useState(0.5);
+  const [focalY, setFocalY] = useState(0.5);
 
   function toggleFolder(id) {
     setSelected((prev) => {
@@ -35,17 +38,16 @@ export default function TvPhotoAssignModal({ photo, folders: FOLDERS, defaultFol
       footer={
         <>
           <Btn variant="ghost" size="sm" onClick={onCancel} disabled={busy}>DISCARD</Btn>
-          <Btn variant="gold" size="sm" onClick={() => onSave({ folders, title })} disabled={!canSave}>
+          <Btn variant="gold" size="sm" onClick={() => onSave({ folders, title, focalX, focalY })} disabled={!canSave}>
             {busy ? 'SAVING…' : 'SAVE & CONTINUE'}
           </Btn>
         </>
       }
     >
-      <img
-        src={photo.photoUrl}
-        alt=""
-        style={{ width: '100%', aspectRatio: '4/3', objectFit: 'cover', borderRadius: 5, marginBottom: sp[4] }}
-      />
+      <div style={{ marginBottom: sp[4] }}>
+        <Label>CROP <span style={{ color: P.mute, textTransform: 'none', letterSpacing: 0 }}>(shown at the /tv carousel's real aspect ratio)</span></Label>
+        <FocalPointPicker src={photo.photoUrl} focalX={focalX} focalY={focalY} onChange={(x, y) => { setFocalX(x); setFocalY(y); }} disabled={busy} />
+      </div>
 
       <Label>FOLDERS <span style={{ color: P.mute, textTransform: 'none', letterSpacing: 0 }}>(select at least one — a photo can belong to more than one)</span></Label>
       <div style={{ display: 'flex', gap: sp[2], flexWrap: 'wrap', marginBottom: sp[4] }}>

@@ -40,7 +40,7 @@ export function useTvCarouselPhotos(settings) {
 
     if (mode === 'team' && featuredTeams.length) {
       const folders = Array.from(new Set([...featuredTeams, 'battalion']));
-      const load = () => SB.from('tv_photos').select('id,photo_url,title,folders').overlaps('folders', folders)
+      const load = () => SB.from('tv_photos').select('id,photo_url,title,folders,focal_x,focal_y').overlaps('folders', folders)
         .order('created_at', { ascending: false }).limit(30)
         .then(({ data }) => { if (alive) setQueriedPhotos(data || []); });
       load();
@@ -83,7 +83,10 @@ export function useTvCarouselPhotos(settings) {
 
   if (mode === 'team' && queriedPhotos.length) {
     return {
-      photos: queriedPhotos.map((p, i) => ({ src: p.photo_url, alt: `Photo ${i + 1}`, title: resolveTvPhotoCaption(p) })),
+      photos: queriedPhotos.map((p, i) => ({
+        src: p.photo_url, alt: `Photo ${i + 1}`, title: resolveTvPhotoCaption(p),
+        focalX: p.focal_x ?? 0.5, focalY: p.focal_y ?? 0.5,
+      })),
       teamLabel,
     };
   }

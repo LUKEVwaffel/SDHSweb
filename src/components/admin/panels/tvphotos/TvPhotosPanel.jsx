@@ -1,13 +1,14 @@
 import { useState, useEffect, useRef } from 'react';
 import { supabase as SB } from '../../../../lib/supabaseClient';
 import { TEAMS } from '../../../../lib/teams';
-import { listTvPhotos, uploadTvPhotoFile, insertTvPhoto, deleteTvPhotoFile, deleteTvPhoto } from '../../../../lib/tvPhotosFolders';
+import { listTvPhotos, uploadTvPhotoFile, insertTvPhoto, deleteTvPhotoFile, deleteTvPhoto, updateTvPhotoFocal } from '../../../../lib/tvPhotosFolders';
 import { resolveTvPhotoCaption } from '../../../../lib/tvPhotoCaption';
 import { useTvDailySettings } from '../../../../hooks/useTvDailySettings';
 import { P, mono, fs, sp, radius } from '../../theme';
 import { Btn, PanelHeader, EmptyState } from '../../shared/ui';
 import TvSpotlightPushModal from './TvSpotlightPushModal';
 import TvPhotoAssignModal from './TvPhotoAssignModal';
+import TvPhotoEditCropModal from './TvPhotoEditCropModal';
 import TvTerminalManager from './TvTerminalManager';
 
 const FOLDERS = [...TEAMS.map((t) => ({ id: t.id, label: t.label })), { id: 'battalion', label: 'Battalion' }];
@@ -21,6 +22,7 @@ export default function TvPhotosPanel({ adminId }) {
   const [folder, setFolder] = useState(FOLDERS[0].id);
   const [photos, setPhotos] = useState(null);
   const [pushTarget, setPushTarget] = useState(null);
+  const [cropTarget, setCropTarget] = useState(null);
   const [flash, setFlash] = useState('');
   const fileRef = useRef();
   const { settings } = useTvDailySettings();
@@ -69,10 +71,10 @@ export default function TvPhotosPanel({ adminId }) {
     setCurrent({ storagePath, photoUrl });
   }
 
-  async function onSaveAssignment({ folders, title }) {
+  async function onSaveAssignment({ folders, title, focalX, focalY }) {
     if (!current) return;
     setSaving(true);
-    const { error } = await insertTvPhoto({ folders, title, storagePath: current.storagePath, photoUrl: current.photoUrl, uploadedBy: adminId });
+    const { error } = await insertTvPhoto({ folders, title, storagePath: current.storagePath, photoUrl: current.photoUrl, uploadedBy: adminId, focalX, focalY });
     setSaving(false);
     if (error) { flashMsg('Save failed — try again.'); return; }
     advance(queue);
@@ -84,6 +86,15 @@ export default function TvPhotosPanel({ adminId }) {
     await deleteTvPhotoFile(current.storagePath);
     setSaving(false);
     advance(queue);
+  }
+
+  async function onSaveCrop(focalX, focalY) {
+    if (!cropTarget) return;
+    const { error } = await updateTvPhotoFocal(cropTarget.id, focalX, focalY);
+    if (error) { flashMsg('Crop save failed — try again.'); return; }
+    setCropTarget(null);
+    flashMsg('Crop updated ✓');
+    load();
   }
 
   async function onDelete(photo) {
@@ -164,6 +175,7 @@ export default function TvPhotosPanel({ adminId }) {
                 {resolveTvPhotoCaption(p)}
               </div>
               <div style={{ padding: '6px 8px', display: 'flex', gap: 4, flexWrap: 'wrap' }}>
+                <button onClick={() => setCropTarget(p)} style={miniBtn(false, P.gold)}>CROP</button>
                 <button onClick={() => setPushTarget(p)} style={miniBtn(false, P.gold)}>PUSH TO TV</button>
                 <button onClick={() => onDelete(p)} style={miniBtn(false, P.red)}>DEL</button>
               </div>
@@ -181,6 +193,14 @@ export default function TvPhotosPanel({ adminId }) {
           photo={pushTarget}
           onClose={() => setPushTarget(null)}
           onPushed={() => { setPushTarget(null); flashMsg('Pushed to TV ✓'); }}
+        />
+      )}
+
+      {cropTarget && (
+        <TvPhotoEditCropModal
+          photo={cropTarget}
+          onSave={onSaveCrop}
+          onCancel={() => setCropTarget(null)}
         />
       )}
 

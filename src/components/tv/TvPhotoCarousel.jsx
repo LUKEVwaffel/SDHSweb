@@ -39,6 +39,8 @@ function SlideImage({ photo, failed, onError, animate }) {
       </div>
     );
   }
+  const focalX = photo.focalX ?? 0.5;
+  const focalY = photo.focalY ?? 0.5;
   return (
     <img
       key={animate ? photo.src : undefined}
@@ -46,7 +48,7 @@ function SlideImage({ photo, failed, onError, animate }) {
       alt={photo.alt}
       onError={onError}
       className={animate ? 'tv-slide-img' : undefined}
-      style={{ width: '100%', height: '100%', objectFit: 'cover', objectPosition: 'center', display: 'block' }}
+      style={{ width: '100%', height: '100%', objectFit: 'cover', objectPosition: `${focalX * 100}% ${focalY * 100}%`, display: 'block' }}
     />
   );
 }

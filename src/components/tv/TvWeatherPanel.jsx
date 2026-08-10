@@ -141,36 +141,44 @@ export default function TvWeatherPanel() {
   const key = conditionKey(data.current.shortForecast);
 
   return (
-    <div style={{ height: '100%', display: 'flex', flexDirection: 'column', justifyContent: 'center', gap: sp[3] }}>
+    <div style={{ height: '100%', display: 'flex', flexDirection: 'column', justifyContent: 'center', gap: sp[2] }}>
       <IconStyles />
 
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: sp[3] }}>
-          <WeatherIcon condition={key} size={44} />
+      <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+        <div style={{ width: 14, height: 2, background: P.gold }} />
+        <div style={{ fontFamily: mono, fontSize: fs.micro, color: P.gold, letterSpacing: '0.28em' }}>
+          CONDITIONS
+        </div>
+        <div style={{ flex: 1, height: 1, background: P.hair }} />
+      </div>
+
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: sp[3] }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: sp[2] }}>
+          <WeatherIcon condition={key} size={34} />
           <div>
             <div style={{ display: 'flex', alignItems: 'flex-start' }}>
-              <span style={{ fontFamily: fraunces, fontWeight: 800, fontSize: 'clamp(28px, 5.5vh, 50px)', color: P.cream, lineHeight: 0.95, letterSpacing: '-0.02em' }}>
+              <span style={{ fontFamily: fraunces, fontWeight: 800, fontSize: 'clamp(22px, 4.2vh, 38px)', color: P.cream, lineHeight: 0.95, letterSpacing: '-0.02em' }}>
                 {data.current.temperature}
               </span>
-              <span style={{ fontFamily: fraunces, fontWeight: 700, fontSize: 'clamp(14px, 2.5vh, 22px)', color: P.gold, marginTop: 2 }}>°</span>
+              <span style={{ fontFamily: fraunces, fontWeight: 700, fontSize: 'clamp(12px, 2vh, 17px)', color: P.gold, marginTop: 1 }}>°</span>
             </div>
             <div style={{
-              fontFamily: inter, fontSize: fs.sm, color: P.mute, marginTop: 2,
-              whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', maxWidth: 220,
+              fontFamily: inter, fontSize: fs.xs, color: P.mute,
+              whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', maxWidth: 180,
             }}>
               {data.current.shortForecast}
             </div>
           </div>
         </div>
-        <div style={{ display: 'flex', flexDirection: 'column', gap: sp[1], alignItems: 'flex-end' }}>
+        <div style={{ display: 'flex', gap: sp[1], flexShrink: 0 }}>
           <span style={{
-            fontFamily: mono, fontSize: fs.xs, color: P.bright, letterSpacing: '0.04em',
+            fontFamily: mono, fontSize: 10, color: P.bright, letterSpacing: '0.04em',
             padding: `2px ${sp[2]}px`, border: `1px solid ${P.hair}`, borderRadius: radius.pill,
           }}>
             H {data.high ?? '—'}°
           </span>
           <span style={{
-            fontFamily: mono, fontSize: fs.xs, color: P.mute, letterSpacing: '0.04em',
+            fontFamily: mono, fontSize: 10, color: P.mute, letterSpacing: '0.04em',
             padding: `2px ${sp[2]}px`, border: `1px solid ${P.hair}`, borderRadius: radius.pill,
           }}>
             L {data.low ?? '—'}°
@@ -178,21 +186,20 @@ export default function TvWeatherPanel() {
         </div>
       </div>
 
-      <div style={{ display: 'flex', justifyContent: 'space-between', gap: sp[2] }}>
-        {data.hourly.map((h, i) => (
+      <div style={{ display: 'flex', justifyContent: 'space-between', gap: sp[1] }}>
+        {data.hourly.slice(0, 4).map((h, i) => (
           <div key={h.time} style={{
-            display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 4, flex: 1,
-            padding: `${sp[1]}px ${sp[1]}px`, borderRadius: radius.sm,
+            display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 2, flex: 1,
+            padding: `${sp[1]}px 2px`, borderRadius: radius.sm,
             background: i === 0 ? P.goldWash : 'transparent',
             border: `1px solid ${i === 0 ? P.hairStrong : 'transparent'}`,
-            borderTop: `1px dashed ${P.hair}`,
             transition: `background 400ms ${ease}`,
           }}>
-            <span style={{ fontFamily: mono, fontSize: fs.micro, color: i === 0 ? P.gold : P.mute, letterSpacing: '0.04em' }}>
+            <span style={{ fontFamily: mono, fontSize: 9, color: i === 0 ? P.gold : P.mute, letterSpacing: '0.04em' }}>
               {hourLabel(h.time)}
             </span>
-            <WeatherIcon condition={conditionKey(h.shortForecast)} size={16} />
-            <span style={{ fontFamily: fraunces, fontWeight: 700, fontSize: fs.sm, color: P.cream }}>{h.temperature}°</span>
+            <WeatherIcon condition={conditionKey(h.shortForecast)} size={14} />
+            <span style={{ fontFamily: fraunces, fontWeight: 700, fontSize: fs.xs, color: P.cream }}>{h.temperature}°</span>
           </div>
         ))}
       </div>
