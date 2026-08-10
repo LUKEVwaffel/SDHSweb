@@ -22,12 +22,16 @@ function todayNyDate(now) {
 // Each widget gets its own raised card — real depth (shadow + hairline
 // border), not a hairline-divided list. Cards breathe with a gap instead of
 // touching, so the eye reads three separate instruments, not one stacked form.
+// Top edge accent painted with a border + inset shadow (not an absolutely
+// positioned overlay) so it never needs `overflow: hidden` on the card —
+// content that runs slightly long stays visible instead of getting clipped.
 function Card({ children }) {
   return (
     <div style={{
-      flex: 1, minHeight: 0, padding: `${sp[6]}px ${sp[6]}px`,
-      display: 'flex', flexDirection: 'column',
-      background: P.navy, border: `1px solid ${P.hair}`,
+      flex: 1, minHeight: 0, padding: `${sp[4]}px ${sp[5]}px`,
+      display: 'flex', flexDirection: 'column', position: 'relative',
+      background: `linear-gradient(165deg, ${P.navyLift} 0%, ${P.navy} 55%)`,
+      border: `1px solid ${P.hair}`, borderTop: `2px solid ${P.gold}`,
       borderRadius: radius.lg, boxShadow: shadow.md,
     }}>
       {children}
@@ -95,8 +99,9 @@ export default function TvKiosk() {
         </div>
 
         <div style={{
-          height: '100%', display: 'flex', flexDirection: 'column', gap: sp[4],
-          borderLeft: `1px solid ${P.hair}`, background: P.deep, padding: sp[5],
+          height: '100%', display: 'flex', flexDirection: 'column', gap: sp[3],
+          borderLeft: `1px solid ${P.hair}`, background: P.deep, padding: sp[4],
+          overflowY: 'auto',
         }}>
           <Card><TvWeatherPanel /></Card>
           <Card><TvClockBellPanel scheduleKey={scheduleKey} /></Card>

@@ -13,6 +13,10 @@ export const P = {
 export const mono = "'JetBrains Mono', monospace";
 export const oswald = "Oswald, sans-serif";
 export const inter = "Inter, sans-serif";
+// Editorial display face — variable (300–900, roman + italic). Reserved for
+// hero numerals/headline treatments (kiosk widgets); Inter/Oswald stay the
+// workhorse UI faces elsewhere.
+export const fraunces = "'Fraunces', serif";
 
 // Type ramp — bigger, more confident than the old 8–13px cramp.
 export const fs = {
