@@ -18,6 +18,7 @@ export const NAV_GROUPS = [
     heading: 'DAILY',
     items: [
       { id: 'overview', icon: '◉', label: 'Overview' },
+      { id: 'tvremote', icon: '▥', label: 'TV Remote' },
       { id: 'events',   icon: '◷', label: 'Events' },
       { id: 'aars',     icon: '▤', label: 'AAR Tracker' },
       { id: 'people',   icon: '☰', label: 'People' },

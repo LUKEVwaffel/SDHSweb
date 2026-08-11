@@ -16,6 +16,7 @@ import SelfAccountPanel from './panels/SelfAccountPanel';
 import MessagesPanel from './panels/messages/MessagesPanel';
 import TvPhotosPanel from './panels/tvphotos/TvPhotosPanel';
 import EmergencyPushPanel from './panels/tvphotos/EmergencyPushPanel';
+import TvRemotePanel from './panels/tvremote/TvRemotePanel';
 
 // Push-to-TV / TV Photos is intentionally restricted to this one account —
 // a deliberate departure from DISPATCH's usual "no per-email logic"
@@ -29,7 +30,7 @@ const SECTION_LABEL = {
   overview: 'OVERVIEW', events: 'EVENTS', aars: 'AAR TRACKER',
   people: 'PEOPLE', photos: 'PHOTOS', questions: 'FAQ QUESTIONS', email: 'EMAIL LIST',
   media: 'MEDIA', advanced: 'ADVANCED', account: 'MY ACCOUNT', messages: 'MESSAGES',
-  tvphotos: 'TV PHOTOS', emergency: 'EMERGENCY PUSH',
+  tvphotos: 'TV PHOTOS', emergency: 'EMERGENCY PUSH', tvremote: 'TV REMOTE',
 };
 
 // Which sections each role may see. s5 is scoped to the battalion calendar
@@ -41,13 +42,17 @@ const SECTION_LABEL = {
 // self-only enforcement AccountsPanel uses. 'messages' is the one section
 // every admin gets regardless of role — DISPATCH chat is internal staff
 // coordination, not tied to the s6/s5 permission split.
-// 'emergency' is on every role's list — any signed-in admin can fire it, no
-// gate, per product decision (speed matters more than restriction there).
+// 'emergency' and 'tvremote' are on every role's list — any signed-in admin
+// can use them, no gate. For 'tvremote' this isn't just a speed call like
+// emergency: every /tv kiosk is now a pure display with no on-site control
+// at all, so DISPATCH is the ONLY way to change the schedule, featured team,
+// widget, or shoutout — restricting it to one role would mean nobody else
+// could fix a wrong schedule.
 // 'tvphotos' is NOT listed here at all — it's added dynamically below, only
 // for LUKE_EMAIL, since it's restricted to one account rather than a role.
 const ROLE_SECTIONS = {
-  s6: ['overview', 'events', 'people', 'photos', 'questions', 'email', 'media', 'messages', 'advanced', 'emergency'],
-  s5: ['events', 'aars', 'messages', 'account', 'emergency'],
+  s6: ['overview', 'events', 'people', 'photos', 'questions', 'email', 'media', 'messages', 'advanced', 'emergency', 'tvremote'],
+  s5: ['events', 'aars', 'messages', 'account', 'emergency', 'tvremote'],
 };
 
 // team values s5 may create/edit/view events for. '' = battalion (team NULL).
@@ -92,6 +97,7 @@ export default function Dashboard({ onLogout, adminId, role = 's6' }) {
           {section === 'messages' && <MessagesPanel adminId={adminId} />}
           {section === 'tvphotos' && isLuke && <TvPhotosPanel adminId={adminId} />}
           {section === 'emergency' && <EmergencyPushPanel />}
+          {section === 'tvremote' && <TvRemotePanel />}
         </div>
       </div>
       <StatusBar sectionLabel={SECTION_LABEL[section] || section.toUpperCase()} />

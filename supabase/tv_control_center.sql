@@ -3,10 +3,9 @@
 -- SQL editor (idempotent).
 --
 -- Singleton row (id = 'default') — one shared control panel across every
--- physical kiosk TV in the building, not per-device like the bell-schedule
--- localStorage choice (that stays as-is; different TVs can legitimately run
--- different bell schedules, but "which team is featured today" is one
--- battalion-wide decision the 1SGT makes once).
+-- physical kiosk TV in the building. The bell schedule (Normal vs T2) also
+-- lives in this row now — see tv_control_center_bell_schedule.sql — since in
+-- practice every kiosk always runs the same schedule.
 --
 -- SECURITY NOTE: matches the site's existing low-blast-radius public-write
 -- pattern (see team-photos storage policies in photo_hub_v2.sql, and

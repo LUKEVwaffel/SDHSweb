@@ -1,6 +1,4 @@
-import { useState, useCallback } from 'react';
 import { P, inter, sp } from '../admin/theme.js';
-import { useLocalStorage } from '../../hooks/useLocalStorage.js';
 import { useNowTicker } from '../../hooks/useNowTicker.js';
 import { useTvDailySettings } from '../../hooks/useTvDailySettings.js';
 import { useTvCarouselPhotos } from '../../hooks/useTvCarouselPhotos.js';
@@ -8,22 +6,15 @@ import TvPhotoCarousel from './TvPhotoCarousel.jsx';
 import TvWeatherPanel from './TvWeatherPanel.jsx';
 import TvClockBellPanel from './TvClockBellPanel.jsx';
 import TvBottomWidget from './TvBottomWidget.jsx';
-import TvControlCenter from './control-center/TvControlCenter.jsx';
 import TvTopStrip from './TvTopStrip.jsx';
 import TvCountdownBand from './TvCountdownBand.jsx';
 import TvShoutoutsPanel from './TvShoutoutsPanel.jsx';
 import TvEmergencyOverlay from './TvEmergencyOverlay.jsx';
 import InstrumentDivider from './TvInstrumentDivider.jsx';
 
-const LS_KEY = 'tb_tv_schedule_choice';
-const NY_TZ = 'America/New_York';
 // Below this, the Facts/Quote/Verse widget's kicker + drop-cap treatment
 // stops being readable — the column scrolls rather than compress past it.
 const FACTS_MIN_HEIGHT = 260;
-
-function todayNyDate(now) {
-  return new Intl.DateTimeFormat('en-CA', { timeZone: NY_TZ }).format(now); // YYYY-MM-DD
-}
 
 // Deliberately NOT three identical boxed cards — that reads as one generic
 // "sidebar of widgets" template no matter how nice the type inside each box
@@ -41,8 +32,6 @@ function todayNyDate(now) {
 
 export default function TvKiosk() {
   const now = useNowTicker();
-  const [stored, setStored] = useLocalStorage(LS_KEY, null);
-  const [pickerOpen, setPickerOpen] = useState(false);
   const { settings } = useTvDailySettings();
   const { photos: sourcedPhotos } = useTvCarouselPhotos(settings);
 
@@ -62,15 +51,7 @@ export default function TvKiosk() {
     (settings?.featured_teams ?? []).slice().sort().join('+'),
   ].join(':');
 
-  const today = todayNyDate(now);
-  const needsSetup = !stored || stored.date !== today;
-  const scheduleKey = needsSetup ? null : stored.schedule;
-
-  const handleChoose = useCallback((key) => {
-    setStored({ schedule: key, date: todayNyDate(new Date()) });
-  }, [setStored]);
-
-  const overlayOpen = pickerOpen || needsSetup;
+  const scheduleKey = settings?.bell_schedule ?? null;
   const emergencyActive = !!settings?.emergency_active;
 
   return (
@@ -145,16 +126,6 @@ export default function TvKiosk() {
           )}
         </div>
       </div>
-
-      <TvControlCenter
-        open={overlayOpen}
-        needsSetup={needsSetup}
-        scheduleChoice={needsSetup ? null : scheduleKey}
-        onOpen={() => setPickerOpen(true)}
-        onClose={() => setPickerOpen(false)}
-        onChooseSchedule={handleChoose}
-        settings={settings}
-      />
     </div>
   );
 }
