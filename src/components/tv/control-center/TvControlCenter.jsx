@@ -5,12 +5,14 @@ import { updateTvDailySettings } from '../../../hooks/useTvDailySettings.js';
 import StepFeaturedTeams from './StepFeaturedTeams.jsx';
 import StepPhotoSource from './StepPhotoSource.jsx';
 import StepWidgetMode from './StepWidgetMode.jsx';
+import StepShoutout from './StepShoutout.jsx';
 
 const TABS = [
   { id: 'schedule', label: '1. Schedule' },
   { id: 'teams', label: '2. Featured Team' },
   { id: 'photos', label: '3. Photos' },
   { id: 'widget', label: '4. Bottom Widget' },
+  { id: 'shoutout', label: '5. Shoutout' },
 ];
 
 function draftFromSettings(settings) {
@@ -24,6 +26,9 @@ function draftFromSettings(settings) {
     customSignoff: settings?.custom_signoff ?? '',
     selectedQuoteIds: settings?.selected_quote_ids ?? [],
     selectedVerseIds: settings?.selected_verse_ids ?? [],
+    shoutoutName: settings?.shoutout_manual_name ?? '',
+    shoutoutTag: settings?.shoutout_manual_tag ?? '',
+    shoutoutNote: settings?.shoutout_manual_note ?? '',
   };
 }
 
@@ -68,6 +73,9 @@ export default function TvControlCenter({ open, onOpen, onClose, needsSetup, sch
       custom_signoff: draft.customSignoff || null,
       selected_quote_ids: draft.selectedQuoteIds,
       selected_verse_ids: draft.selectedVerseIds,
+      shoutout_manual_name: draft.shoutoutName || null,
+      shoutout_manual_tag: draft.shoutoutTag || null,
+      shoutout_manual_note: draft.shoutoutNote || null,
     });
     setSaving(false);
 
@@ -202,6 +210,19 @@ export default function TvControlCenter({ open, onOpen, onClose, needsSetup, sch
                       ...(customSignoff !== undefined && { customSignoff }),
                       ...(selectedQuoteIds !== undefined && { selectedQuoteIds }),
                       ...(selectedVerseIds !== undefined && { selectedVerseIds }),
+                    })}
+                  />
+                )}
+
+                {activeTab === 'shoutout' && (
+                  <StepShoutout
+                    name={draft.shoutoutName}
+                    tag={draft.shoutoutTag}
+                    note={draft.shoutoutNote}
+                    onChange={({ name, tag, note }) => patch({
+                      ...(name !== undefined && { shoutoutName: name }),
+                      ...(tag !== undefined && { shoutoutTag: tag }),
+                      ...(note !== undefined && { shoutoutNote: note }),
                     })}
                   />
                 )}

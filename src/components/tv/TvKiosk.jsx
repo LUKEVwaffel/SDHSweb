@@ -10,7 +10,10 @@ import TvClockBellPanel from './TvClockBellPanel.jsx';
 import TvBottomWidget from './TvBottomWidget.jsx';
 import TvControlCenter from './control-center/TvControlCenter.jsx';
 import TvTopStrip from './TvTopStrip.jsx';
+import TvCountdownBand from './TvCountdownBand.jsx';
+import TvShoutoutsPanel from './TvShoutoutsPanel.jsx';
 import TvEmergencyOverlay from './TvEmergencyOverlay.jsx';
+import InstrumentDivider from './TvInstrumentDivider.jsx';
 
 const LS_KEY = 'tb_tv_schedule_choice';
 const NY_TZ = 'America/New_York';
@@ -32,14 +35,9 @@ function todayNyDate(now) {
 // personal touch). Sizing is asymmetric on purpose: Clock is the hero
 // (glanceable from across a hallway), Weather is a compact secondary strip,
 // Facts gets whatever's left so its drop-cap/ghost-year treatment has room.
-function InstrumentDivider() {
-  return (
-    <div style={{
-      height: 1, flexShrink: 0,
-      background: `linear-gradient(90deg, transparent, ${P.hairStrong} 12%, ${P.hairStrong} 88%, transparent)`,
-    }} />
-  );
-}
+// (InstrumentDivider itself now lives in TvInstrumentDivider.jsx, shared with
+// TvShoutoutsPanel.jsx, which needs to own its own divider to omit both
+// together when it has nothing to show.)
 
 export default function TvKiosk() {
   const now = useNowTicker();
@@ -81,6 +79,7 @@ export default function TvKiosk() {
       display: 'flex', flexDirection: 'column', fontFamily: inter,
     }}>
       <TvTopStrip scheduleKey={scheduleKey} now={now} />
+      <TvCountdownBand settings={settings} now={now} />
 
       <div style={{ flex: 1, minHeight: 0, display: 'grid', gridTemplateColumns: '68% 32%' }}>
         <div style={{ height: '100%', width: '100%' }}>
@@ -128,10 +127,16 @@ export default function TvKiosk() {
             <TvWeatherPanel />
           </div>
 
-          {/* Bottom quote/facts widget is the other thing the emergency
-              message replaces — omitted entirely rather than shown empty. */}
+          {/* Shoutouts and the bottom quote/facts widget are the other things
+              the emergency message replaces. Shoutouts owns its own
+              divider+padding (see TvShoutoutsPanel.jsx) so it can omit
+              itself, divider included, when neither a birthday nor a manual
+              entry is live today — an empty padded gap between two
+              dividers would read as a layout bug otherwise. */}
           {!emergencyActive && (
             <>
+              <TvShoutoutsPanel settings={settings} />
+
               <InstrumentDivider />
               <div style={{ flex: '1 1 auto', minHeight: FACTS_MIN_HEIGHT, padding: `${sp[4]}px ${sp[5]}px ${sp[6]}px` }}>
                 <TvBottomWidget settings={settings} now={now} />

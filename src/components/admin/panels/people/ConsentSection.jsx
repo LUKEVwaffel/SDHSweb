@@ -137,6 +137,7 @@ export default function ConsentSection({ adminId }) {
       role: form.role || null,
       grade: form.grade || null,
       let_level: form.let_level || null,
+      birthdate: form.birthdate || null,
       school_email: (form.school_email || '').trim() || null,
       parent_email: (form.parent_email || '').trim() || null,
       note: form.note || null,
@@ -399,6 +400,15 @@ export default function ConsentSection({ adminId }) {
                   <Label>LET LEVEL</Label>
                   <Select value={form.let_level || ''} onChange={(e) => setForm((f) => ({ ...f, let_level: e.target.value }))} options={LET_OPTIONS} />
                 </div>
+              </div>
+
+              {/* PII — only reachable by a signed-in s6 admin (cadet_consent is
+                  authenticated-only, see admin_roles.sql); only used server-side
+                  to derive the /tv birthday shoutout, never read by the kiosk
+                  itself (see supabase/tv_shoutouts.sql). */}
+              <div style={{ marginBottom: sp[3] }}>
+                <Label>BIRTHDATE</Label>
+                <Input type="date" value={form.birthdate || ''} onChange={(e) => setForm((f) => ({ ...f, birthdate: e.target.value }))} />
               </div>
 
               {/* consent status */}
