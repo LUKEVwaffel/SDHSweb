@@ -6,7 +6,6 @@ import TvPhotoCarousel from './TvPhotoCarousel.jsx';
 import TvWeatherPanel from './TvWeatherPanel.jsx';
 import TvClockBellPanel from './TvClockBellPanel.jsx';
 import TvBottomWidget from './TvBottomWidget.jsx';
-import TvTopStrip from './TvTopStrip.jsx';
 import TvCountdownBand from './TvCountdownBand.jsx';
 import TvShoutoutsPanel from './TvShoutoutsPanel.jsx';
 import TvEmergencyOverlay from './TvEmergencyOverlay.jsx';
@@ -59,7 +58,6 @@ export default function TvKiosk() {
       position: 'fixed', inset: 0, background: P.ink,
       display: 'flex', flexDirection: 'column', fontFamily: inter,
     }}>
-      <TvTopStrip scheduleKey={scheduleKey} now={now} />
       <TvCountdownBand settings={settings} now={now} />
 
       <div style={{ flex: 1, minHeight: 0, display: 'grid', gridTemplateColumns: '68% 32%' }}>

@@ -49,6 +49,11 @@ export default function ConsentSection({ adminId }) {
   const [counts, setCounts] = useState({});
   const [missing, setMissing] = useState(false);
 
+  // cross-company search — separate from the company-scoped `rows`/tabs above.
+  // Reuses loadCounts' fetch (already pulls every cadet) instead of a second query.
+  const [search, setSearch] = useState('');
+  const [allRows, setAllRows] = useState([]);
+
   // add-cadet popup
   const [addOpen, setAddOpen] = useState(false);
   const [addForm, setAddForm] = useState(BLANK_ADD_FORM);
@@ -82,7 +87,8 @@ export default function ConsentSection({ adminId }) {
   // Per-company counts for the tab row — independent of the active filter so
   // every tab shows a real number, not just the one you're currently on.
   const loadCounts = useCallback(async () => {
-    const { data } = await SB.from('cadet_consent').select('company');
+    const { data } = await SB.from('cadet_consent').select('*').order('name');
+    setAllRows(data || []);
     const c = {};
     for (const r of data || []) c[r.company] = (c[r.company] || 0) + 1;
     setCounts(c);
@@ -222,6 +228,11 @@ export default function ConsentSection({ adminId }) {
   const collected = rows.filter((r) => r.consent_status === 'collected').length;
   const pct = rows.length ? Math.round((collected / rows.length) * 100) : 0;
 
+  const searchTerm = search.trim().toLowerCase();
+  const searchResults = searchTerm
+    ? allRows.filter((r) => (r.name || '').toLowerCase().includes(searchTerm))
+    : null;
+
   if (missing) {
     return (
       <div>
@@ -241,10 +252,21 @@ export default function ConsentSection({ adminId }) {
     <div>
       <PanelHeader title="CADET DATABASE" />
 
+      {/* cross-company name search — searches every company at once, bypassing
+          the tabs below. Clearing it returns to the tab-scoped view. */}
+      <div style={{ marginBottom: sp[3] }}>
+        <Input
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
+          placeholder="Search all cadets by name…"
+        />
+      </div>
+
       {/* company tabs — subordinate to the Staff/Command ↔ Cadet Database
           switch one level up (PeoplePanel), so this reads as "filter within
-          this view" rather than another top-level nav. */}
-      <div style={{ display: 'flex', gap: sp[5], borderBottom: `1px solid ${P.hair}`, marginBottom: sp[4], flexWrap: 'wrap' }}>
+          this view" rather than another top-level nav. Dimmed while a search
+          is active since they don't apply to search results. */}
+      <div style={{ display: 'flex', gap: sp[5], borderBottom: `1px solid ${P.hair}`, marginBottom: sp[4], flexWrap: 'wrap', opacity: searchResults ? 0.4 : 1, pointerEvents: searchResults ? 'none' : 'auto' }}>
         {COMPANIES.map((c) => {
           const active = company === c.id;
           return (
@@ -329,7 +351,7 @@ export default function ConsentSection({ adminId }) {
       <div style={{ display: 'grid', gridTemplateColumns: '1fr 380px', gap: sp[4], alignItems: 'start' }}>
         {/* roster */}
         <div style={{ display: 'flex', flexDirection: 'column', gap: sp[1] }}>
-          {rows.map((r) => {
+          {(searchResults ?? rows).map((r) => {
             const on = selectedId === r.id;
             return (
               <div key={r.id} onClick={() => openCadet(r)} style={{
@@ -346,7 +368,14 @@ export default function ConsentSection({ adminId }) {
                   fontFamily: mono, fontSize: fs.sm, color: P.faint,
                 }}>{(r.name || '?').charAt(0).toUpperCase()}</div>
                 <div style={{ flex: 1, minWidth: 0 }}>
-                  <div style={{ fontFamily: inter, fontSize: fs.sm, color: P.cream, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{r.name}</div>
+                  <div style={{ fontFamily: inter, fontSize: fs.sm, color: P.cream, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                    {r.name}
+                    {searchResults && (
+                      <span style={{ fontFamily: mono, fontSize: fs.micro, color: P.gold, marginLeft: sp[2], letterSpacing: '0.1em' }}>
+                        {(r.company || '').toUpperCase()}
+                      </span>
+                    )}
+                  </div>
                   <div style={{ fontFamily: mono, fontSize: fs.micro, color: P.faint, marginTop: 2 }}>
                     {r.grade ? `${r.grade}TH` : ''}{r.grade && r.let_level ? ' · ' : ''}{r.let_level ? `LET ${r.let_level}` : ''}{(r.grade || r.let_level) ? ' · ' : ''}
                     {r.parent_email ? '✉ parent on file' : 'no parent email'}
@@ -368,7 +397,10 @@ export default function ConsentSection({ adminId }) {
               </div>
             );
           })}
-          {!rows.length && (
+          {searchResults && !searchResults.length && (
+            <EmptyState title="NO MATCHES" hint={`No cadet name contains "${search.trim()}".`} />
+          )}
+          {!searchResults && !rows.length && (
             <EmptyState title={`NO CADETS FOR ${company.toUpperCase()} YET`} hint="Add one above, or import the roster." />
           )}
         </div>
