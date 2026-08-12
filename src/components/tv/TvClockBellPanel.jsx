@@ -1,6 +1,6 @@
 import { P, mono, fraunces, inter, fs, sp, radius, shadow, ease } from '../admin/theme.js';
 import { useNowTicker } from '../../hooks/useNowTicker.js';
-import { nextBell, BELL_SCHEDULES } from '../../lib/bellSchedules.js';
+import { nextBell, BELL_SCHEDULES, formatMinutesUntil, formatHHMM } from '../../lib/bellSchedules.js';
 
 const NY_TZ = 'America/New_York';
 const URGENT_MIN = 5;
@@ -61,23 +61,9 @@ function formatDate(now) {
   }).format(now);
 }
 
-function formatHHMM(hhmm) {
-  const [h, m] = hhmm.split(':').map(Number);
-  const period = h < 12 ? 'AM' : 'PM';
-  const h12 = h % 12 === 0 ? 12 : h % 12;
-  return `${h12}:${String(m).padStart(2, '0')} ${period}`;
-}
-
 function toMinutes(hhmm) {
   const [h, m] = hhmm.split(':').map(Number);
   return h * 60 + m;
-}
-
-function formatCountdown(minutesUntil) {
-  const h = Math.floor(minutesUntil / 60);
-  const m = minutesUntil % 60;
-  if (h <= 0) return `${m}m`;
-  return `${h}h ${m}m`;
 }
 
 // Fraction of the *current* period already elapsed — the ring reads as a dial
@@ -196,7 +182,7 @@ export default function TvClockBellPanel({ scheduleKey }) {
               fontFamily: fraunces, fontWeight: 900, fontStyle: 'italic', fontSize: 'clamp(26px, 5.5vh, 44px)',
               color: urgent ? P.bright : P.cream, lineHeight: 1, fontVariantNumeric: 'tabular-nums',
             }}>
-              {formatCountdown(bell.minutesUntil)}
+              {formatMinutesUntil(bell.minutesUntil)}
             </div>
             <div style={{ fontFamily: inter, fontSize: fs.base, color: P.bright, marginTop: sp[1] }}>
               {bell.current ? `${bell.current.name} in session` : bell.next.name}

@@ -2,36 +2,39 @@ import { useState, useEffect } from 'react';
 import { supabase as SB } from '../lib/supabaseClient';
 import { getDeviceId } from '../lib/fingerprint';
 
-const ROW_ID = 'default';
+const DEFAULT_SCREEN = 'default';
 
 /**
- * Live-synced control-center row. One singleton shared across every physical
- * /tv kiosk — a realtime subscription means a 1SGT change on one screen (or
- * the control-center overlay) reflects on every other kiosk immediately,
- * no reload needed.
+ * Live-synced control-center row, scoped by screen slug (tv_screens.slug —
+ * 'default' is the original Outside kiosk, 'range' is Range, etc). Each
+ * screen gets its own row in tv_daily_settings and its own realtime
+ * subscription — a 1SGT change on one screen (or the control-center overlay)
+ * reflects on every kiosk watching THAT screen immediately, no reload needed,
+ * without leaking into other screens' state.
  */
-export function useTvDailySettings() {
+export function useTvDailySettings(screenSlug = DEFAULT_SCREEN) {
   const [settings, setSettings] = useState(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     let alive = true;
-    SB.from('tv_daily_settings').select('*').eq('id', ROW_ID).maybeSingle().then(({ data }) => {
+    setLoading(true);
+    SB.from('tv_daily_settings').select('*').eq('id', screenSlug).maybeSingle().then(({ data }) => {
       if (!alive) return;
       setSettings(data);
       setLoading(false);
     });
 
-    const channel = SB.channel('tv-daily-settings-live')
+    const channel = SB.channel(`tv-daily-settings-live:${screenSlug}`)
       .on(
         'postgres_changes',
-        { event: 'UPDATE', schema: 'public', table: 'tv_daily_settings', filter: `id=eq.${ROW_ID}` },
+        { event: 'UPDATE', schema: 'public', table: 'tv_daily_settings', filter: `id=eq.${screenSlug}` },
         (payload) => { if (alive) setSettings(payload.new); }
       )
       .subscribe();
 
     return () => { alive = false; SB.removeChannel(channel); };
-  }, []);
+  }, [screenSlug]);
 
   return { settings, loading };
 }
@@ -47,10 +50,10 @@ export function useTvDailySettings() {
  * Returns { error } so callers MUST check it; a failed write here should
  * never look like a successful save to the person using the control center.
  */
-export async function updateTvDailySettings(patch) {
+export async function updateTvDailySettings(patch, screenSlug = DEFAULT_SCREEN) {
   const fingerprint = await getDeviceId();
   const { error } = await SB.from('tv_daily_settings')
     .update({ ...patch, updated_by_fingerprint: fingerprint })
-    .eq('id', ROW_ID);
+    .eq('id', screenSlug);
   return { error };
 }

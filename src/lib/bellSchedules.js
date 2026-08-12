@@ -48,14 +48,22 @@ export const BELL_SCHEDULES = {
 
 const NY_TZ = 'America/New_York';
 
+/** "HH:MM" (24h, schedule wall-clock time) -> "8:25 AM". */
+export function formatHHMM(hhmm) {
+  const [h, m] = hhmm.split(':').map(Number);
+  const period = h < 12 ? 'AM' : 'PM';
+  const h12 = h % 12 === 0 ? 12 : h % 12;
+  return `${h12}:${String(m).padStart(2, '0')} ${period}`;
+}
+
 /** "HH:MM" (schedule wall-clock time) -> minutes since midnight. */
-function toMinutes(hhmm) {
+export function toMinutes(hhmm) {
   const [h, m] = hhmm.split(':').map(Number);
   return h * 60 + m;
 }
 
 /** Current minutes-since-midnight for `now`, read in America/New_York. */
-function nyMinutesOfDay(now) {
+export function nyMinutesOfDay(now) {
   const parts = new Intl.DateTimeFormat('en-US', {
     timeZone: NY_TZ, hour: '2-digit', minute: '2-digit', hour12: false,
   }).formatToParts(now);
@@ -105,6 +113,14 @@ export function nextBell(scheduleKey, now) {
   }
 
   return { done: true };
+}
+
+/** "95" -> "1h 35m", "8" -> "8m". Shared by every countdown display. */
+export function formatMinutesUntil(minutesUntil) {
+  const h = Math.floor(minutesUntil / 60);
+  const m = minutesUntil % 60;
+  if (h <= 0) return `${m}m`;
+  return `${h}h ${m}m`;
 }
 
 /**
