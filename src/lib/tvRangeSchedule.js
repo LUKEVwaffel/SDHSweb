@@ -74,7 +74,7 @@ export function getRangePhase(scheduleKey, now, config) {
       const endMin = toMinutes(lunch1.end);
 
       if (nowMin >= startMin && nowMin < endMin) {
-        return { phase: 'lunch1', bell };
+        return { phase: 'lunch1', bell, minutesUntilLunchEnd: endMin - nowMin };
       }
       // Bravo's welcome is anchored to lunch END, not to 4th period's start —
       // lunch end differs Normal (11:05) vs T2 (11:15), and reading it

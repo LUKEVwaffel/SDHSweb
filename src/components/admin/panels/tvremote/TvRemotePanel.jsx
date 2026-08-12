@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { useTvDailySettings, updateTvDailySettings } from '../../../../hooks/useTvDailySettings.js';
 import { BELL_SCHEDULES } from '../../../../lib/bellSchedules.js';
 import StepFeaturedTeams from '../../../tv/control-center/StepFeaturedTeams.jsx';
@@ -82,6 +82,7 @@ function draftFromSettings(settings) {
 // with a period-based content engine (src/lib/tvRangeSchedule.js) instead of
 // a flat all-day rotation.
 export default function TvRemotePanel() {
+  const rootRef = useRef(null);
   const [selectedScreen, setSelectedScreen] = useState('default');
   const { settings, loading } = useTvDailySettings(selectedScreen);
   const [activeTab, setActiveTab] = useState('schedule');
@@ -104,7 +105,10 @@ export default function TvRemotePanel() {
   }, [settings, selectedScreen, hydratedFor]);
 
   useEffect(() => {
-    const onFsChange = () => setIsFullscreen(!!document.fullscreenElement);
+    // Compares against rootRef, not just truthiness — this panel isn't the
+    // only thing in DISPATCH that could go fullscreen, and we only want our
+    // own button/state reflecting OUR element's fullscreen state.
+    const onFsChange = () => setIsFullscreen(document.fullscreenElement === rootRef.current);
     document.addEventListener('fullscreenchange', onFsChange);
     return () => document.removeEventListener('fullscreenchange', onFsChange);
   }, []);
@@ -119,11 +123,18 @@ export default function TvRemotePanel() {
     setSaveError(null);
   }
 
+  // Fullscreens THIS panel's own element, not document.documentElement — the
+  // browser only ever paints that element's subtree while fullscreen is
+  // active, so DISPATCH's sidebar/nav/branding around it is stripped
+  // automatically rather than just visually hidden. Matters here specifically
+  // because this runs on the same machine driving the physical Range TV,
+  // alongside the /tv kiosk tab — the person managing it needs just the
+  // remote, not the rest of DISPATCH's chrome.
   async function toggleFullscreen() {
     if (document.fullscreenElement) {
       await document.exitFullscreen();
     } else {
-      await document.documentElement.requestFullscreen();
+      await rootRef.current?.requestFullscreen();
     }
   }
 
@@ -176,7 +187,15 @@ export default function TvRemotePanel() {
   }
 
   return (
-    <div style={{ maxWidth: 940 }}>
+    <div
+      ref={rootRef}
+      style={isFullscreen ? {
+        background: P.ink, minHeight: '100vh', width: '100%',
+        display: 'flex', justifyContent: 'center', overflowY: 'auto',
+        padding: sp[10], boxSizing: 'border-box',
+      } : { maxWidth: 940 }}
+    >
+      <div style={{ width: '100%', maxWidth: 940 }}>
       <PanelHeader
         title="TV REMOTE"
         sub="Controls the selected screen's kiosk(s) live, no reload needed. Nothing changes until you press Save."
@@ -327,6 +346,7 @@ export default function TvRemotePanel() {
           {saving ? 'SAVING…' : `SAVE — PUSH TO ${SCREENS.find((s) => s.slug === selectedScreen)?.label.toUpperCase() ?? 'SCREEN'}`}
         </Btn>
         {flash && <div style={{ fontFamily: mono, fontSize: fs.tiny, color: P.green }}>{flash}</div>}
+      </div>
       </div>
     </div>
   );

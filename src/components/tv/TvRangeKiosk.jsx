@@ -36,7 +36,7 @@ export default function TvRangeKiosk() {
     case 'staff-schedule':
       return <TvRangeStaffScheduleScreen scheduleKey={scheduleKey} bell={result.bell} />;
     case 'lunch1':
-      return <TvRangeLunchScreen config={config} />;
+      return <TvRangeLunchScreen config={config} minutesUntilLunchEnd={result.minutesUntilLunchEnd} />;
     case 'company-welcome':
       return <TvRangeCompanyWelcomeScreen config={config} company={result.company} />;
     case 'off-hours':
