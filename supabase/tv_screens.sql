@@ -79,6 +79,21 @@ insert into public.tv_daily_settings (id, range_schedule_config) values (
   )
 ) on conflict (id) do nothing;
 
+-- ── Fix UPDATE policy for multi-screen rows ──────────────────────────────────
+-- tv_control_center.sql's original policy was `using (id = 'default') with
+-- check (id = 'default')`, written back when tv_daily_settings was a hard
+-- singleton. Never updated when this migration unpinned `id` above — so every
+-- write to a non-'default' row (Range, Staff Room 2) has been silently
+-- dropped by RLS since: PostgREST returns 200 with zero rows affected, not an
+-- error, so TV Remote's save flow reports success while nothing actually
+-- changes. Safe to open to `using (true)` because tv_daily_settings_screen_fk
+-- (above) already constrains `id` to a row that exists in tv_screens, and
+-- there is still no INSERT/DELETE policy — this can only ever update one of
+-- the pre-registered screen rows, never create or remove one.
+drop policy if exists tv_daily_settings_update on public.tv_daily_settings;
+create policy tv_daily_settings_update on public.tv_daily_settings
+  for update using (true) with check (true);
+
 -- ============================================================================
 -- VERIFY AFTER RUNNING:
 --   select * from public.tv_screens order by sort_order;
