@@ -3,6 +3,7 @@ import { useTvNotices } from '../../../hooks/useTvNotices.js';
 import { useTvUpcomingEvents } from '../../../hooks/useTvUpcomingEvents.js';
 import { getTeam } from '../../../lib/teams.js';
 import TvCountdownBand from '../TvCountdownBand.jsx';
+import TvRangeRaiderPracticeWidget from './TvRangeRaiderPracticeWidget.jsx';
 
 function eventDateLabel(event) {
   const d = new Date(`${event.date}T${event.event_time || '00:00:00'}`);
@@ -71,12 +72,13 @@ function EventCard({ event }) {
 // used by TvKiosk.jsx) is untouched. Same continuous-instrument-panel grammar
 // as the Weather/Clock/Facts column: shared background, hairline dividers,
 // mono-gold kickers, no per-panel card chrome.
-export default function TvRangeRotationLayout({ settings, now }) {
+export default function TvRangeRotationLayout({ settings, now, config }) {
   const { notices } = useTvNotices('range');
   const events = useTvUpcomingEvents(6);
 
   const announcements = notices.filter((n) => n.category === 'announcement');
   const staffNotes = notices.filter((n) => n.category === 'staff_note');
+  const showRaiderPractice = !!config?.show_raider_practice;
 
   return (
     <div style={{
@@ -86,7 +88,8 @@ export default function TvRangeRotationLayout({ settings, now }) {
       <TvCountdownBand settings={settings} now={now} />
 
       <div style={{
-        flex: 1, minHeight: 0, display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)',
+        flex: 1, minHeight: 0, display: 'grid',
+        gridTemplateColumns: showRaiderPractice ? 'repeat(4, 1fr)' : 'repeat(3, 1fr)',
         background: `linear-gradient(180deg, ${P.deep} 0%, #0D1C33 100%)`,
       }}>
         <div style={{ padding: `${sp[6]}px ${sp[6]}px`, overflowY: 'auto', borderRight: `1px solid ${P.hair}` }}>
@@ -103,12 +106,21 @@ export default function TvRangeRotationLayout({ settings, now }) {
           )}
         </div>
 
-        <div style={{ padding: `${sp[6]}px ${sp[6]}px`, overflowY: 'auto' }}>
+        <div style={{
+          padding: `${sp[6]}px ${sp[6]}px`, overflowY: 'auto',
+          borderRight: showRaiderPractice ? `1px solid ${P.hair}` : 'none',
+        }}>
           <PanelHeading>NOTES FROM STAFF</PanelHeading>
           {staffNotes.length ? staffNotes.map((n) => <NoticeCard key={n.id} notice={n} />) : (
             <EmptyState>No notes from staff.</EmptyState>
           )}
         </div>
+
+        {showRaiderPractice && (
+          <div style={{ padding: `${sp[6]}px ${sp[6]}px`, overflowY: 'auto' }}>
+            <TvRangeRaiderPracticeWidget groupmeUrl={config?.groupme_url} />
+          </div>
+        )}
       </div>
     </div>
   );

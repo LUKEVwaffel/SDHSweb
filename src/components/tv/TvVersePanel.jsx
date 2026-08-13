@@ -35,17 +35,17 @@ export default function TvVersePanel({ selectedIds = [] }) {
   return (
     <div style={{ height: '100%', display: 'flex', flexDirection: 'column', justifyContent: 'center', gap: sp[2] }}>
       <FadeInStyles />
-      <div style={{ fontFamily: mono, fontSize: fs.micro, color: P.gold, letterSpacing: '0.24em' }}>
+      <div style={{ fontFamily: mono, fontSize: fs.xs, color: P.gold, letterSpacing: '0.24em' }}>
         VERSE OF THE DAY
       </div>
       {!verse ? (
-        <div style={{ fontFamily: inter, fontSize: fs.base, color: P.mute }}>No verse on file.</div>
+        <div style={{ fontFamily: inter, fontSize: fs.md, color: P.mute }}>No verse on file.</div>
       ) : (
-        <div key={i} className="tv-verse" style={{ display: 'flex', flexDirection: 'column', gap: sp[1] }}>
-          <div style={{ fontFamily: inter, fontSize: fs.base, color: P.cream, lineHeight: 1.5 }}>
+        <div key={i} className="tv-verse" style={{ display: 'flex', flexDirection: 'column', gap: sp[2] }}>
+          <div style={{ fontFamily: inter, fontSize: fs.lg, color: P.cream, lineHeight: 1.5 }}>
             {verse.text}
           </div>
-          <div style={{ fontFamily: oswald, fontSize: fs.sm, color: P.gold, marginTop: sp[1] }}>
+          <div style={{ fontFamily: oswald, fontSize: fs.md, color: P.gold, marginTop: sp[1] }}>
             — {verse.reference}
           </div>
         </div>

@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
-import { P, mono, inter, fs, sp, radius, ease } from '../admin/theme.js';
+import { P, mono, fraunces, inter, fs, sp, radius, ease } from '../admin/theme.js';
 import { useNowTicker } from '../../hooks/useNowTicker.js';
 import InstrumentDivider from './TvInstrumentDivider.jsx';
 
@@ -93,23 +93,28 @@ export default function TvShoutoutsPanel({ settings }) {
         <PanelStyles />
         <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: sp[3] }}>
           <div style={{ width: 14, height: 2, background: P.gold }} />
-          <div style={{ fontFamily: mono, fontSize: fs.micro, color: P.gold, letterSpacing: '0.28em' }}>
+          <div style={{ fontFamily: mono, fontSize: fs.xs, color: P.gold, letterSpacing: '0.28em' }}>
             SHOUTOUTS
           </div>
           <div style={{ flex: 1, height: 1, background: P.hair }} />
         </div>
 
-        <div key={entry.key + i} className="tv-shout-body" style={{ display: 'flex', alignItems: 'center', gap: sp[3] }}>
+        <div key={entry.key + i} className="tv-shout-body" style={{ display: 'flex', alignItems: 'center', gap: sp[4] }}>
           <span style={{
-            fontFamily: mono, fontSize: fs.micro, color: P.ink, background: P.gold,
-            padding: '3px 8px', borderRadius: radius.pill, letterSpacing: '0.1em', flexShrink: 0,
+            fontFamily: mono, fontSize: fs.tiny, color: P.ink, background: P.gold,
+            padding: '4px 10px', borderRadius: radius.pill, letterSpacing: '0.1em', flexShrink: 0,
           }}>
             {entry.tag}
           </span>
           <div style={{ minWidth: 0 }}>
-            <div style={{ fontFamily: inter, fontSize: fs.base, color: P.cream, fontWeight: 600 }}>{entry.name}</div>
+            <div style={{
+              fontFamily: fraunces, fontWeight: 800, fontStyle: 'italic', fontSize: fs.xl, color: P.cream,
+              textShadow: '0 2px 24px rgba(201,169,97,0.18)',
+            }}>
+              {entry.name}
+            </div>
             {entry.note && (
-              <div style={{ fontFamily: inter, fontSize: fs.xs, color: P.mute }}>{entry.note}</div>
+              <div style={{ fontFamily: inter, fontSize: fs.md, color: P.mute, marginTop: 2 }}>{entry.note}</div>
             )}
           </div>
         </div>

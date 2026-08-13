@@ -5,6 +5,7 @@ import RaiderCarousel from './RaiderCarousel';
 import RaiderFAQ from './RaiderFAQ';
 import useIsMobile from '../hooks/useIsMobile';
 import { categoryColor, eventOccursOnDate, formatRecurrenceDays, formatEventTime, formatEventTimeRange, teamLabel, DEFAULT_POC } from '../lib/calendar';
+import { RAIDER_PRACTICE_TILES } from '../lib/raiderPracticeInfo';
 
 // Palette mirrors Rifle.jsx for a consistent specialty-team look. Green is the
 // raider live/event accent; gold stays the structural/command accent.
@@ -638,11 +639,7 @@ export default function Raiders() {
             subtitle="Raiders fields three teams: Male, Coed, and JV. Tryouts are open to every cadet in the battalion."
           />
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: 16, marginBottom: 24 }}>
-            {[
-              { label: 'PRACTICES', value: 'MON – THU', sub: '2:30 PM – 4:30 PM' },
-              { label: 'REPORT TO', value: 'THE RANGE' },
-              { label: 'BRING', value: 'WATER + PT CLOTHES' },
-            ].map((t) => (
+            {RAIDER_PRACTICE_TILES.map((t) => (
               <div key={t.label} style={{ border: `1px solid ${P.hair}`, background: P.deep, padding: '24px 22px', position: 'relative' }}>
                 <Brackets size={14} opacity={0.3} />
                 <div style={{ fontFamily: oswald, fontWeight: 700, fontSize: 26, color: P.gold, letterSpacing: '0.02em', lineHeight: 1.15 }}>

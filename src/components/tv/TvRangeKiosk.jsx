@@ -9,6 +9,8 @@ import TvRangeStaffScheduleScreen from './range/TvRangeStaffScheduleScreen.jsx';
 import TvRangeOffHoursScreen from './range/TvRangeOffHoursScreen.jsx';
 import TvRangePeriodEndingScreen from './range/TvRangePeriodEndingScreen.jsx';
 import TvRangeRotationLayout from './range/TvRangeRotationLayout.jsx';
+import TvPreviewBadge from './TvPreviewBadge.jsx';
+import TvRangeClock from './TvRangeClock.jsx';
 
 /**
  * Range — /tv/range. Unlike Outside (TvKiosk.jsx, a single fixed layout),
@@ -28,23 +30,39 @@ export default function TvRangeKiosk() {
   const config = settings?.range_schedule_config ?? null;
   const result = getRangePhase(scheduleKey, now, config);
 
+  let phaseContent;
   switch (result.phase) {
     case 'planning':
-      return <TvRangePlanningScreen config={config} bell={result.bell} now={now} />;
+      phaseContent = <TvRangePlanningScreen config={config} bell={result.bell} now={now} />;
+      break;
     case 't2':
-      return <TvRangeT2Screen config={config} bell={result.bell} now={now} />;
+      phaseContent = <TvRangeT2Screen config={config} bell={result.bell} now={now} />;
+      break;
     case 'staff-schedule':
-      return <TvRangeStaffScheduleScreen scheduleKey={scheduleKey} bell={result.bell} now={now} />;
+      phaseContent = <TvRangeStaffScheduleScreen scheduleKey={scheduleKey} bell={result.bell} now={now} />;
+      break;
     case 'lunch1':
-      return <TvRangeLunchScreen config={config} lunchEndTime={result.lunchEndTime} now={now} />;
+      phaseContent = <TvRangeLunchScreen config={config} lunchEndTime={result.lunchEndTime} now={now} />;
+      break;
     case 'company-welcome':
-      return <TvRangeCompanyWelcomeScreen config={config} company={result.company} />;
+      phaseContent = <TvRangeCompanyWelcomeScreen config={config} company={result.company} />;
+      break;
     case 'period-ending':
-      return <TvRangePeriodEndingScreen config={config} company={result.company} periodName={result.periodName} bell={result.bell} now={now} />;
+      phaseContent = <TvRangePeriodEndingScreen config={config} company={result.company} periodName={result.periodName} bell={result.bell} now={now} />;
+      break;
     case 'off-hours':
-      return <TvRangeOffHoursScreen stage={result.stage} bell={result.bell} now={now} />;
+      phaseContent = <TvRangeOffHoursScreen stage={result.stage} bell={result.bell} now={now} />;
+      break;
     case 'rotation':
     default:
-      return <TvRangeRotationLayout settings={settings} now={now} />;
+      phaseContent = <TvRangeRotationLayout settings={settings} now={now} config={config} />;
   }
+
+  return (
+    <>
+      {phaseContent}
+      <TvRangeClock now={now} />
+      <TvPreviewBadge />
+    </>
+  );
 }

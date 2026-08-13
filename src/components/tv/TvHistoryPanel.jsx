@@ -89,14 +89,14 @@ export default function TvHistoryPanel() {
 
       <div style={{ display: 'flex', alignItems: 'center', gap: 8, position: 'relative' }}>
         <div style={{ width: 14, height: 2, background: P.gold }} />
-        <div style={{ fontFamily: mono, fontSize: fs.micro, color: P.gold, letterSpacing: '0.28em' }}>
+        <div style={{ fontFamily: mono, fontSize: fs.xs, color: P.gold, letterSpacing: '0.28em' }}>
           ON THIS DAY
         </div>
         <div style={{ flex: 1, height: 1, background: P.hair }} />
       </div>
 
       {!fact ? (
-        <div style={{ fontFamily: inter, fontSize: fs.base, color: P.mute, marginTop: sp[4] }}>
+        <div style={{ fontFamily: inter, fontSize: fs.md, color: P.mute, marginTop: sp[4] }}>
           No facts on file for today.
         </div>
       ) : (
@@ -118,8 +118,8 @@ export default function TvHistoryPanel() {
           <div
             className="tv-fact-body"
             style={{
-              fontFamily: inter, fontSize: fs.md, color: P.cream, lineHeight: 1.5,
-              borderLeft: `2px solid ${P.hairStrong}`, paddingLeft: sp[3],
+              fontFamily: inter, fontSize: fs.lg, color: P.cream, lineHeight: 1.5,
+              borderLeft: `2px solid ${P.hairStrong}`, paddingLeft: sp[4],
             }}
           >
             <span className="tv-fact-dropcap">{fact.text.charAt(0)}</span>

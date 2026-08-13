@@ -119,6 +119,32 @@ export default function StepRangeSchedule({ config, onChange }) {
           onChange={(v) => onChange({ attendanceReminderTemplate: v })} />
       </div>
 
+      {/* Raiders isn't a period_company entry — it's not tied to a class
+          period — so it gets its own toggle rather than a slot in the
+          PERIOD → COMPANY grid above. Shown as a 4th column on the rotation
+          screen (TvRangeRotationLayout.jsx) when enabled. */}
+      <div style={{ padding: sp[5], borderRadius: radius.lg, border: `1px solid ${P.hairStrong}`, marginTop: sp[5] }}>
+        <div style={{ fontFamily: mono, fontSize: fs.micro, color: P.gold, letterSpacing: '0.2em', marginBottom: sp[3] }}>
+          RAIDERS PRACTICE WIDGET
+        </div>
+        <div style={{ fontFamily: inter, fontSize: 13, color: P.mute, marginBottom: sp[4], lineHeight: 1.5 }}>
+          Adds a Raiders practice-info panel (days/times, report-to, what to bring) to the rotation screen, with an optional GroupMe QR code.
+        </div>
+
+        <label style={{ display: 'flex', alignItems: 'center', gap: sp[3], marginBottom: sp[4], cursor: 'pointer' }}>
+          <input
+            type="checkbox"
+            checked={!!config.showRaiderPractice}
+            onChange={(e) => onChange({ showRaiderPractice: e.target.checked })}
+            style={{ width: 18, height: 18, accentColor: P.gold }}
+          />
+          <span style={{ fontFamily: inter, fontSize: 14, color: P.cream }}>Show on Range rotation screen</span>
+        </label>
+
+        <Field label="RAIDERS GROUPME LINK (OPTIONAL — SHOWS AS A QR CODE)" value={config.groupmeUrl ?? ''}
+          onChange={(v) => onChange({ groupmeUrl: v })} placeholder="https://groupme.com/join_group/…" />
+      </div>
+
       {/* Item 5: flexible content structure for the welcome screens — an
           ordered array of free-text blocks (each just {id, text}), so a new
           line of content is an add-block click, never a code change. Renders

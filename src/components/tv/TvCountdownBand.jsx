@@ -60,14 +60,24 @@ export default function TvCountdownBand({ settings, now }) {
     <div style={{
       position: 'relative', zIndex: 1, flexShrink: 0,
       display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: sp[6],
-      padding: `0 ${sp[8]}px`, height: 96,
+      padding: `0 ${sp[8]}px`, height: 96, overflow: 'hidden',
       background: `linear-gradient(90deg, ${P.deep} 0%, ${P.navy} 100%)`,
       borderBottom: `1px solid ${P.hairStrong}`,
     }}>
-      <div style={{ display: 'flex', flexDirection: 'column', gap: 6, minWidth: 0 }}>
+      {/* Same grid+glow texture as the Range welcome screen, scaled down for
+          the band's 96px height — decorative only, content stays legible. */}
+      <div style={{
+        position: 'absolute', inset: 0, pointerEvents: 'none', opacity: 0.5,
+        backgroundImage: `linear-gradient(${P.hair} 1px, transparent 1px), linear-gradient(90deg, ${P.hair} 1px, transparent 1px)`,
+        backgroundSize: '32px 32px',
+        maskImage: 'radial-gradient(ellipse 60% 100% at 50% 50%, black 0%, transparent 85%)',
+        WebkitMaskImage: 'radial-gradient(ellipse 60% 100% at 50% 50%, black 0%, transparent 85%)',
+      }} />
+
+      <div style={{ position: 'relative', display: 'flex', flexDirection: 'column', gap: 6, minWidth: 0 }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: sp[2] }}>
           <div style={{ width: 14, height: 2, background: P.gold }} />
-          <span style={{ fontFamily: mono, fontSize: fs.micro, color: P.gold, letterSpacing: '0.28em' }}>
+          <span style={{ fontFamily: mono, fontSize: fs.xs, color: P.gold, letterSpacing: '0.28em' }}>
             NEXT UP
           </span>
         </div>
@@ -79,7 +89,7 @@ export default function TvCountdownBand({ settings, now }) {
         </div>
       </div>
 
-      <div style={{ display: 'flex', alignItems: 'baseline', gap: sp[4], flexShrink: 0 }}>
+      <div style={{ position: 'relative', display: 'flex', alignItems: 'baseline', gap: sp[4], flexShrink: 0 }}>
         <Segment value={days} label="DAYS" />
         <Colon />
         <Segment value={String(hours).padStart(2, '0')} label="HRS" />

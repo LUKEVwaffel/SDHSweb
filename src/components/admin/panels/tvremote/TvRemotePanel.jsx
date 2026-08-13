@@ -14,8 +14,8 @@ import { Btn, PanelHeader } from '../../shared/ui.jsx';
 // the registry (see supabase/tv_screens.sql) but no working kiosk yet, so it
 // deliberately doesn't appear here until it's actually built out.
 const SCREENS = [
-  { slug: 'default', label: 'Outside' },
-  { slug: 'range', label: 'Range' },
+  { slug: 'default', label: 'Outside', path: '/tv' },
+  { slug: 'range', label: 'Range', path: '/tv/range' },
 ];
 
 const BASE_TABS = [
@@ -44,6 +44,8 @@ const DEFAULT_RANGE_CONFIG = {
   companyWelcomeTemplate: 'Welcome {company} Company',
   attendanceReminderTemplate: '1SGT: Take attendance now',
   customBlocks: [],
+  showRaiderPractice: false,
+  groupmeUrl: '',
 };
 
 function rangeConfigFromRow(raw) {
@@ -57,6 +59,8 @@ function rangeConfigFromRow(raw) {
     companyWelcomeTemplate: raw?.company_welcome_template ?? DEFAULT_RANGE_CONFIG.companyWelcomeTemplate,
     attendanceReminderTemplate: raw?.attendance_reminder_template ?? DEFAULT_RANGE_CONFIG.attendanceReminderTemplate,
     customBlocks: raw?.custom_blocks ?? DEFAULT_RANGE_CONFIG.customBlocks,
+    showRaiderPractice: raw?.show_raider_practice ?? DEFAULT_RANGE_CONFIG.showRaiderPractice,
+    groupmeUrl: raw?.groupme_url ?? DEFAULT_RANGE_CONFIG.groupmeUrl,
   };
 }
 
@@ -99,6 +103,7 @@ export default function TvRemotePanel() {
   const [saveError, setSaveError] = useState(null);
   const [flash, setFlash] = useState('');
   const [isFullscreen, setIsFullscreen] = useState(false);
+  const [previewDatetime, setPreviewDatetime] = useState('');
 
   // Hydrate once per screen, from that screen's first settings load — not on
   // every realtime tick, so someone editing here doesn't get their
@@ -145,6 +150,20 @@ export default function TvRemotePanel() {
     }
   }
 
+  // Opens the selected screen in a new tab with ?previewAt=<ISO> — read by
+  // useNowTicker.js in that tab only, so time-driven phases (bell schedule,
+  // welcome windows, lunch states, period-ending warnings) render as they
+  // would at that instant without waiting for the real clock. Purely
+  // client-side: no write to tv_daily_settings, so it never touches what the
+  // real wall-mounted kiosk is showing.
+  function openPreview() {
+    if (!previewDatetime) return;
+    const iso = new Date(previewDatetime).toISOString();
+    const path = SCREENS.find((s) => s.slug === selectedScreen)?.path ?? '/tv';
+    const url = `${window.location.origin}${path}?previewAt=${encodeURIComponent(iso)}`;
+    window.open(url, '_blank', 'noopener,noreferrer');
+  }
+
   async function save() {
     setSaving(true);
     setSaveError(null);
@@ -174,6 +193,8 @@ export default function TvRemotePanel() {
         company_welcome_template: draft.rangeConfig.companyWelcomeTemplate || null,
         attendance_reminder_template: draft.rangeConfig.attendanceReminderTemplate || null,
         custom_blocks: draft.rangeConfig.customBlocks,
+        show_raider_practice: draft.rangeConfig.showRaiderPractice,
+        groupme_url: draft.rangeConfig.groupmeUrl || null,
       },
     } : {};
 
@@ -231,6 +252,38 @@ export default function TvRemotePanel() {
             {s.label.toUpperCase()}
           </button>
         ))}
+      </div>
+
+      {/* Preview/test mode — punch in any date/time and see exactly what the
+          selected screen would show at that moment, without waiting for the
+          real clock to reach it. See openPreview()/useNowTicker.js for how
+          the override works and why it's safe (browser-local, opt-in query
+          param, real kiosks never load it). */}
+      <div style={{
+        display: 'flex', alignItems: 'flex-end', gap: sp[4], marginBottom: sp[6],
+        padding: sp[4], borderRadius: radius.md, border: `1px solid ${P.hair}`,
+        background: 'rgba(201,169,97,0.03)',
+      }}>
+        <div style={{ flex: 1, minWidth: 0 }}>
+          <div style={{ fontFamily: mono, fontSize: fs.micro, color: P.gold, letterSpacing: '0.2em', marginBottom: sp[2] }}>
+            PREVIEW MODE — {SCREENS.find((s) => s.slug === selectedScreen)?.label.toUpperCase()}
+          </div>
+          <div style={{ fontFamily: inter, fontSize: 13, color: P.mute, marginBottom: sp[3], lineHeight: 1.5 }}>
+            Opens this screen in a new tab as of the date/time below — ticks forward in real time from there. Doesn't touch the live kiosk.
+          </div>
+          <input
+            type="datetime-local"
+            value={previewDatetime}
+            onChange={(e) => setPreviewDatetime(e.target.value)}
+            style={{
+              padding: sp[3], borderRadius: radius.sm, border: `1px solid ${P.hair}`,
+              background: P.deep, color: P.cream, fontFamily: inter, fontSize: 14,
+            }}
+          />
+        </div>
+        <Btn onClick={openPreview} variant="ghost" size="sm" disabled={!previewDatetime}>
+          OPEN PREVIEW ↗
+        </Btn>
       </div>
 
       <div style={{ display: 'flex', gap: sp[6] }}>

@@ -79,11 +79,29 @@ export default function TvStandardLayout({ settings, now }) {
         </div>
 
         <div style={{
-          height: '100%', display: 'flex', flexDirection: 'column',
+          height: '100%', display: 'flex', flexDirection: 'column', position: 'relative',
           borderLeft: `1px solid ${P.hair}`,
           background: `linear-gradient(180deg, ${P.deep} 0%, #0D1C33 100%)`,
           overflowY: 'auto',
         }}>
+          {/* Same grid+glow decorative language as the Range welcome screen
+              (TvRangeCompanyWelcomeScreen.jsx) — applied once to the whole
+              column rather than per-widget, so the 64px grid stays aligned
+              across the hairline dividers instead of seaming at each panel. */}
+          <div style={{
+            position: 'absolute', inset: 0, pointerEvents: 'none',
+            background: `radial-gradient(ellipse 60% 50% at 30% 20%, ${P.goldWash} 0%, transparent 60%),
+                         radial-gradient(ellipse 50% 40% at 80% 85%, rgba(201,169,97,0.06) 0%, transparent 65%)`,
+          }} />
+          <div style={{
+            position: 'absolute', inset: 0, pointerEvents: 'none', opacity: 0.5,
+            backgroundImage: `linear-gradient(${P.hair} 1px, transparent 1px), linear-gradient(90deg, ${P.hair} 1px, transparent 1px)`,
+            backgroundSize: '64px 64px',
+            maskImage: 'radial-gradient(ellipse 70% 60% at 50% 50%, black 0%, transparent 75%)',
+            WebkitMaskImage: 'radial-gradient(ellipse 70% 60% at 50% 50%, black 0%, transparent 75%)',
+          }} />
+
+          <div style={{ position: 'relative', display: 'flex', flexDirection: 'column' }}>
           {/* Clock is the hero — largest, most glanceable instrument. Clock
               and Weather are both content-sized (not a fixed % of the
               column) because their content varies day to day — a 3-lunch
@@ -122,6 +140,7 @@ export default function TvStandardLayout({ settings, now }) {
               </div>
             </>
           )}
+          </div>
         </div>
       </div>
     </div>
