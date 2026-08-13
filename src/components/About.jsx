@@ -457,6 +457,10 @@ export default function About() {
               <p style={{ fontFamily: inter, fontSize: 13.5, color: P.mute2, lineHeight: 1.7, margin: '8px 0 0', fontStyle: 'italic' }}>
                 {content['battalion.creed'] || '"I will seek the mantle of leadership and stand prepared to uphold the Constitution and the American way of life."'}
               </p>
+              <button onClick={() => navigate('/creed')} style={{
+                background: 'transparent', border: 'none', cursor: 'pointer', padding: 0,
+                marginTop: 10, fontFamily: mono, fontSize: 9, letterSpacing: '0.2em', color: P.gold,
+              }}>PRACTICE IT →</button>
             </div>
           </Reveal>
           <div className="about-mission-divider" style={{ width: 1, background: `linear-gradient(180deg, transparent, ${P.hairStrong} 15%, ${P.hairStrong} 85%, transparent)`, position: 'relative' }}>

@@ -9,6 +9,7 @@ import HomeNewsletterBand from './components/HomeNewsletterBand';
 import Footer from './components/Footer';
 import TabPlaceholder from './components/TabPlaceholder';
 import CadetManual from './components/CadetManual';
+import CreedHub from './components/creed/CreedHub';
 import Raiders from './components/Raiders';
 import Rifle from './components/Rifle';
 import Staff from './components/Staff';
@@ -71,6 +72,7 @@ export default function App() {
           </>
         )} />
         <Route path="/cadet-manual" element={<CadetManual />} />
+        <Route path="/creed" element={<CreedHub />} />
         <Route path="/raiders" element={<Raiders />} />
         <Route path="/rifle" element={<Rifle />} />
         <Route path="/staff" element={<Staff />} />

@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 
 const P = {
   ink: '#06101F',
@@ -92,6 +93,7 @@ const UNITS = [
 const ALL_CHAPTERS = UNITS.flatMap(u => u.chapters.map(c => ({ ...c, unit: u.label, unitCode: u.code })));
 
 export default function CadetManual() {
+  const navigate = useNavigate();
   const [selected, setSelected] = useState(null); // null = list view, chapter = pdf view
   const [search, setSearch] = useState('');
   const [openUnits, setOpenUnits] = useState({ u0: true, u1: false, u2: false, u3: false, u4: false, u6: false });
@@ -269,7 +271,7 @@ export default function CadetManual() {
             ) : (
               <div style={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
                 {filtered.map(c => (
-                  <ChapterCard key={c.id} chapter={c} showUnit onClick={() => openChapter(c)} />
+                  <ChapterCard key={c.id} chapter={c} showUnit onClick={() => openChapter(c)} onPractice={() => navigate('/creed')} />
                 ))}
               </div>
             )}
@@ -322,6 +324,7 @@ export default function CadetManual() {
                         chapter={{ ...c, unit: unit.label, unitCode: unit.code }}
                         divider={i < unit.chapters.length - 1}
                         onClick={() => openChapter({ ...c, unit: unit.label, unitCode: unit.code })}
+                        onPractice={c.id === 'creed' ? () => navigate('/creed') : undefined}
                       />
                     ))}
                   </div>
@@ -354,11 +357,14 @@ export default function CadetManual() {
   );
 }
 
-function ChapterCard({ chapter, onClick, showUnit, divider }) {
+function ChapterCard({ chapter, onClick, showUnit, divider, onPractice }) {
   const [hovered, setHovered] = useState(false);
   return (
-    <button
+    <div
+      role="button"
+      tabIndex={0}
       onClick={onClick}
+      onKeyDown={e => { if (e.key === 'Enter' || e.key === ' ') onClick(); }}
       onMouseEnter={() => setHovered(true)}
       onMouseLeave={() => setHovered(false)}
       style={{
@@ -391,10 +397,21 @@ function ChapterCard({ chapter, onClick, showUnit, divider }) {
         }}>{chapter.label}</div>
       </div>
 
+      {onPractice && (
+        <button
+          onClick={e => { e.stopPropagation(); onPractice(); }}
+          style={{
+            background: 'transparent', border: `1px solid rgba(201,169,97,0.4)`,
+            color: P.gold, cursor: 'pointer', flexShrink: 0,
+            fontFamily: "'JetBrains Mono', monospace", fontSize: 9,
+            letterSpacing: '0.16em', padding: '6px 12px',
+          }}>PRACTICE IT →</button>
+      )}
+
       <div style={{
         color: P.gold, fontSize: 16, opacity: hovered ? 0.9 : 0.3,
         transition: 'opacity 0.15s', flexShrink: 0,
       }}>›</div>
-    </button>
+    </div>
   );
 }
