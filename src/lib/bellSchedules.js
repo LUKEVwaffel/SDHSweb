@@ -124,6 +124,34 @@ export function formatMinutesUntil(minutesUntil) {
 }
 
 /**
+ * Millisecond-precise "now" within the NY wall-clock day — nyMinutesOfDay()
+ * truncates to whole minutes (Intl only exposes hour/minute), so the
+ * sub-minute part is read straight off `now` itself. Safe regardless of the
+ * browser's local timezone: America/New_York's UTC offset is always a whole
+ * number of hours, so seconds/ms never shift between UTC and NY wall-clock
+ * time — only the hour/minute component needs the Intl round-trip.
+ */
+export function nyMillisOfDay(now) {
+  return nyMinutesOfDay(now) * 60000 + now.getUTCSeconds() * 1000 + now.getUTCMilliseconds();
+}
+
+/** Precise ms remaining until "HH:MM" (today, NY wall clock), from `now`. */
+export function msUntilHHMM(hhmm, now) {
+  return toMinutes(hhmm) * 60000 - nyMillisOfDay(now);
+}
+
+/** ms -> "7:42" (< 1hr) or "1:07:42" (>= 1hr) — countdown clock, seconds always shown. */
+export function formatCountdownClock(ms) {
+  const totalSeconds = Math.max(0, Math.round(ms / 1000));
+  const h = Math.floor(totalSeconds / 3600);
+  const m = Math.floor((totalSeconds % 3600) / 60);
+  const s = totalSeconds % 60;
+  const ss = String(s).padStart(2, '0');
+  if (h > 0) return `${h}:${String(m).padStart(2, '0')}:${ss}`;
+  return `${m}:${ss}`;
+}
+
+/**
  * Whole-instructional-day progress, first period's start to last period's end.
  * Deliberately does NOT reset per-period — it's meant to read as one continuous
  * bar with tick marks at period boundaries, not a countdown that restarts.

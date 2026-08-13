@@ -39,8 +39,21 @@ function Field({ label, value, onChange, placeholder, multiline }) {
  * is the only screen with a schedule engine; Outside just runs the same
  * carousel/widget rotation all day).
  */
+function addCustomBlock(blocks) {
+  return [...blocks, { id: crypto.randomUUID(), text: '' }];
+}
+
+function updateCustomBlock(blocks, id, text) {
+  return blocks.map((b) => (b.id === id ? { ...b, text } : b));
+}
+
+function removeCustomBlock(blocks, id) {
+  return blocks.filter((b) => b.id !== id);
+}
+
 export default function StepRangeSchedule({ config, onChange }) {
   const periodCompany = config.periodCompany ?? {};
+  const customBlocks = config.customBlocks ?? [];
 
   return (
     <div>
@@ -104,6 +117,61 @@ export default function StepRangeSchedule({ config, onChange }) {
 
         <Field label="1SGT ATTENDANCE REMINDER" value={config.attendanceReminderTemplate ?? ''}
           onChange={(v) => onChange({ attendanceReminderTemplate: v })} />
+      </div>
+
+      {/* Item 5: flexible content structure for the welcome screens — an
+          ordered array of free-text blocks (each just {id, text}), so a new
+          line of content is an add-block click, never a code change. Renders
+          under the attendance reminder on TvRangeCompanyWelcomeScreen.jsx,
+          same order top to bottom. */}
+      <div style={{ padding: sp[5], borderRadius: radius.lg, border: `1px solid ${P.hairStrong}`, marginTop: sp[5] }}>
+        <div style={{ fontFamily: mono, fontSize: fs.micro, color: P.gold, letterSpacing: '0.2em', marginBottom: sp[3] }}>
+          WELCOME SCREEN — EXTRA CONTENT
+        </div>
+        <div style={{ fontFamily: inter, fontSize: 13, color: P.mute, marginBottom: sp[4], lineHeight: 1.5 }}>
+          Optional lines shown under the attendance reminder on every company welcome screen. Add as many as needed —
+          nothing here requires a code change.
+        </div>
+
+        {customBlocks.map((block, i) => (
+          <div key={block.id} style={{ display: 'flex', gap: sp[2], marginBottom: sp[3], alignItems: 'flex-start' }}>
+            <div style={{
+              flexShrink: 0, width: 24, height: 24, marginTop: sp[3] - 12, borderRadius: '50%',
+              border: `1px solid ${P.hair}`, display: 'flex', alignItems: 'center', justifyContent: 'center',
+              fontFamily: mono, fontSize: fs.micro, color: P.mute,
+            }}>
+              {i + 1}
+            </div>
+            <textarea
+              value={block.text}
+              onChange={(e) => onChange({ customBlocks: updateCustomBlock(customBlocks, block.id, e.target.value) })}
+              placeholder="Extra line for the welcome screen…"
+              rows={2}
+              style={{ ...fieldStyle, resize: 'vertical', flex: 1 }}
+            />
+            <button
+              onClick={() => onChange({ customBlocks: removeCustomBlock(customBlocks, block.id) })}
+              style={{
+                flexShrink: 0, padding: `${sp[2]}px ${sp[3]}px`, borderRadius: radius.sm,
+                border: `1px solid ${P.hair}`, background: 'transparent', color: P.mute,
+                fontFamily: mono, fontSize: fs.micro, letterSpacing: '0.1em', cursor: 'pointer',
+              }}
+            >
+              REMOVE
+            </button>
+          </div>
+        ))}
+
+        <button
+          onClick={() => onChange({ customBlocks: addCustomBlock(customBlocks) })}
+          style={{
+            padding: `${sp[2]}px ${sp[4]}px`, borderRadius: radius.sm,
+            border: `1px dashed ${P.hairStrong}`, background: 'transparent', color: P.gold,
+            fontFamily: mono, fontSize: fs.micro, letterSpacing: '0.1em', cursor: 'pointer',
+          }}
+        >
+          + ADD LINE
+        </button>
       </div>
     </div>
   );

@@ -1,10 +1,14 @@
 import { P, mono, fraunces, inter, fs, sp, radius } from '../../admin/theme.js';
-import { BELL_SCHEDULES, formatHHMM, formatMinutesUntil } from '../../../lib/bellSchedules.js';
+import { BELL_SCHEDULES, formatHHMM } from '../../../lib/bellSchedules.js';
+import TvRangePeriodProgressBar from './TvRangePeriodProgressBar.jsx';
 
 // Fullscreen glanceable "rest of today's bells" for the whole 3rd period —
 // no company/welcome pattern here per spec, just the schedule itself. Built
-// straight from BELL_SCHEDULES, no new data source.
-export default function TvRangeStaffScheduleScreen({ scheduleKey, bell }) {
+// straight from BELL_SCHEDULES, no new data source. Item 4: the old bare
+// "next bell in X" line is now a progress bar scoped to 3rd period itself
+// (bell.current), not the whole day — dayProgress() exists in
+// bellSchedules.js for a whole-day bar but that's not what was asked for here.
+export default function TvRangeStaffScheduleScreen({ scheduleKey, bell, now }) {
   const schedule = BELL_SCHEDULES[scheduleKey];
   const periods = schedule?.periods ?? [];
 
@@ -22,9 +26,9 @@ export default function TvRangeStaffScheduleScreen({ scheduleKey, bell }) {
         <div style={{ width: 28, height: 2, background: P.gold }} />
       </div>
 
-      {bell && !bell.done && (
-        <div style={{ fontFamily: inter, fontSize: fs.md, color: P.mute, marginBottom: sp[8] }}>
-          Next bell in <span style={{ color: P.bright }}>{formatMinutesUntil(bell.minutesUntil)}</span>
+      {bell?.current && (
+        <div style={{ marginBottom: sp[8] }}>
+          <TvRangePeriodProgressBar period={bell.current} now={now} label="3RD PERIOD" />
         </div>
       )}
 

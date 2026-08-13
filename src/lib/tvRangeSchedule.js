@@ -33,6 +33,14 @@ function minutesSince(hhmm, now) {
 
 const DEFAULT_WELCOME_WINDOW = 20;
 
+// Last-5-minutes warning window (item 1). Excludes Planning (1st) and Staff
+// (3rd) per product decision — those two keep their own countdown/progress-bar
+// screens uninterrupted through the bell. Everything else (2nd/4th/5th/6th,
+// T2 Block) gets overridden by the warning, checked before any other
+// in-period branch so it wins regardless of what would otherwise be showing.
+const PERIOD_ENDING_WINDOW = 5;
+const NO_ENDING_WARNING_PERIODS = new Set([1, 3]);
+
 /**
  * @param {'normal'|'t2'} scheduleKey
  * @param {Date} now
@@ -62,6 +70,11 @@ export function getRangePhase(scheduleKey, now, config) {
   const periodNum = periodNumber(period.name);
   const welcomeWindow = config?.welcome_window_minutes ?? DEFAULT_WELCOME_WINDOW;
 
+  if (!NO_ENDING_WARNING_PERIODS.has(periodNum) && bell.minutesUntil <= PERIOD_ENDING_WINDOW) {
+    const company = periodNum != null ? config?.period_company?.[String(periodNum)] : null;
+    return { phase: 'period-ending', company, periodName: period.name, bell };
+  }
+
   if (periodNum === 1) return { phase: 'planning', bell };
   if (period.name === 'T2 Block') return { phase: 't2', bell };
   if (periodNum === 3) return { phase: 'staff-schedule', bell };
@@ -74,7 +87,7 @@ export function getRangePhase(scheduleKey, now, config) {
       const endMin = toMinutes(lunch1.end);
 
       if (nowMin >= startMin && nowMin < endMin) {
-        return { phase: 'lunch1', bell, minutesUntilLunchEnd: endMin - nowMin };
+        return { phase: 'lunch1', bell, lunchEndTime: lunch1.end };
       }
       // Bravo's welcome is anchored to lunch END, not to 4th period's start —
       // lunch end differs Normal (11:05) vs T2 (11:15), and reading it

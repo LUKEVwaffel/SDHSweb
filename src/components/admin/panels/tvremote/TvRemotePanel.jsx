@@ -6,6 +6,7 @@ import StepPhotoSource from '../../../tv/control-center/StepPhotoSource.jsx';
 import StepWidgetMode from '../../../tv/control-center/StepWidgetMode.jsx';
 import StepShoutout from '../../../tv/control-center/StepShoutout.jsx';
 import StepRangeSchedule from '../../../tv/control-center/StepRangeSchedule.jsx';
+import StepRangeNotices from '../../../tv/control-center/StepRangeNotices.jsx';
 import { P, mono, oswald, inter, fs, sp, radius, ease } from '../../theme.js';
 import { Btn, PanelHeader } from '../../shared/ui.jsx';
 
@@ -25,6 +26,10 @@ const BASE_TABS = [
   { id: 'shoutout', label: 'Shoutout' },
 ];
 const RANGE_TAB = { id: 'rangeSchedule', label: 'Schedule Editor' };
+const RANGE_NOTICE_TABS = [
+  { id: 'announcements', label: 'Announcements' },
+  { id: 'staffNotes', label: 'Staff Notes' },
+];
 
 // Matches the seed values in supabase/tv_screens.sql — used as a fallback so
 // the Schedule Editor still has sane defaults before that migration has run,
@@ -38,6 +43,7 @@ const DEFAULT_RANGE_CONFIG = {
   lunch1ReminderText: "This is a privilege to sit in here and eat lunch, don't abuse it. All cadets wanting to eat lunch should come within the first 10 minutes of the lunch and cannot leave after that before the ending of the lunch.",
   companyWelcomeTemplate: 'Welcome {company} Company',
   attendanceReminderTemplate: '1SGT: Take attendance now',
+  customBlocks: [],
 };
 
 function rangeConfigFromRow(raw) {
@@ -50,6 +56,7 @@ function rangeConfigFromRow(raw) {
     lunch1ReminderText: raw?.lunch1_reminder_text ?? DEFAULT_RANGE_CONFIG.lunch1ReminderText,
     companyWelcomeTemplate: raw?.company_welcome_template ?? DEFAULT_RANGE_CONFIG.companyWelcomeTemplate,
     attendanceReminderTemplate: raw?.attendance_reminder_template ?? DEFAULT_RANGE_CONFIG.attendanceReminderTemplate,
+    customBlocks: raw?.custom_blocks ?? DEFAULT_RANGE_CONFIG.customBlocks,
   };
 }
 
@@ -166,6 +173,7 @@ export default function TvRemotePanel() {
         lunch1_reminder_text: draft.rangeConfig.lunch1ReminderText || null,
         company_welcome_template: draft.rangeConfig.companyWelcomeTemplate || null,
         attendance_reminder_template: draft.rangeConfig.attendanceReminderTemplate || null,
+        custom_blocks: draft.rangeConfig.customBlocks,
       },
     } : {};
 
@@ -180,7 +188,7 @@ export default function TvRemotePanel() {
     setTimeout(() => setFlash(''), 2500);
   }
 
-  const tabs = selectedScreen === 'range' ? [...BASE_TABS, RANGE_TAB] : BASE_TABS;
+  const tabs = selectedScreen === 'range' ? [...BASE_TABS, RANGE_TAB, ...RANGE_NOTICE_TABS] : BASE_TABS;
 
   if (loading && hydratedFor !== selectedScreen) {
     return <div style={{ fontFamily: mono, fontSize: fs.xs, color: P.mute }}>LOADING…</div>;
@@ -327,6 +335,24 @@ export default function TvRemotePanel() {
 
           {activeTab === 'rangeSchedule' && selectedScreen === 'range' && (
             <StepRangeSchedule config={draft.rangeConfig} onChange={patchRange} />
+          )}
+
+          {activeTab === 'announcements' && selectedScreen === 'range' && (
+            <StepRangeNotices
+              screenSlug="range"
+              category="announcement"
+              heading="ANNOUNCEMENTS"
+              blurb="Shown in the Announcements panel of Range's rotation screen. Persists until deleted — nothing here expires on its own."
+            />
+          )}
+
+          {activeTab === 'staffNotes' && selectedScreen === 'range' && (
+            <StepRangeNotices
+              screenSlug="range"
+              category="staff_note"
+              heading="NOTES FROM STAFF"
+              blurb="Shown in the Notes from Staff panel of Range's rotation screen. Persists until deleted — nothing here expires on its own."
+            />
           )}
         </div>
       </div>

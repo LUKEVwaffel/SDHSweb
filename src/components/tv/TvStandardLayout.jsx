@@ -27,10 +27,10 @@ const FACTS_MIN_HEIGHT = 260;
 // TvShoutoutsPanel.jsx, which needs to own its own divider to omit both
 // together when it has nothing to show.)
 //
-// Extracted out of TvKiosk.jsx (originally Outside-only) so the "normal
-// rotation" content is one shared implementation across every kiosk screen
-// instead of a second hand-copy per screen — Range's rotation phase renders
-// this exact component, fed by its own tv_daily_settings row, same as Outside.
+// Outside's (TvKiosk.jsx) carousel + instrument-column layout. Range used to
+// reuse this for its own 'rotation' phase too, but that's now
+// TvRangeRotationLayout.jsx's 3-panel Announcements/Events/Staff Notes
+// display instead — this component is Outside-only again.
 export default function TvStandardLayout({ settings, now }) {
   const { photos: sourcedPhotos } = useTvCarouselPhotos(settings);
 
