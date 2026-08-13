@@ -3,6 +3,7 @@ import { CREED_WORD_COUNT, CREED_LINES_WITH_GLOBAL, CREED_FLAT_WORDS } from '../
 import { recordResult } from '../../lib/creedProgress';
 import { P, MONO, BODY } from './creedShared';
 import { GameHeader, GoldButton, ResultPanel } from './CreedUi';
+import { PerfectScorePanel } from './CreedLeaderboardPanel';
 
 function cleanMatch(typed, expectedClean) {
   return typed.replace(/[.,]/g, '').toLowerCase() === expectedClean.toLowerCase();
@@ -27,6 +28,20 @@ export default function SpeedGame({ onExit }) {
   }, [typedWords]);
 
   const accuracy = Math.round((correctCount / CREED_WORD_COUNT) * 100);
+
+  const wrongWords = useMemo(() => {
+    if (phase !== 'DONE') return [];
+    const items = [];
+    for (let i = 0; i < typedWords.length && i < CREED_WORD_COUNT; i++) {
+      if (!cleanMatch(typedWords[i], CREED_FLAT_WORDS[i].clean)) {
+        items.push(`"${CREED_FLAT_WORDS[i].raw}" — you wrote "${typedWords[i]}"`);
+      }
+    }
+    if (typedWords.length < CREED_WORD_COUNT) {
+      items.push(`Ran out of words: never typed the last ${CREED_WORD_COUNT - typedWords.length}`);
+    }
+    return items;
+  }, [phase, typedWords]);
 
   const elapsedMs = useMemo(() => {
     if (!startedAt) return 0;
@@ -103,9 +118,13 @@ export default function SpeedGame({ onExit }) {
             { label: 'TIME', value: `${(elapsedMs / 1000).toFixed(1)}s` },
             { label: 'CORRECT', value: `${correctCount}/${CREED_WORD_COUNT}` },
           ]}
+          wrongItems={wrongWords}
           onRetry={begin}
           onBack={onExit}
         />
+        {accuracy === 100 && (
+          <PerfectScorePanel gameKey="speed" gameLabel="Speed Challenge" metricLabel="WPM" metricValue={`${wpm}`} />
+        )}
       </div>
     );
   }

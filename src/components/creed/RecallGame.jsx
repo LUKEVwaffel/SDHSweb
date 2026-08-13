@@ -3,6 +3,7 @@ import { CREED_WORD_COUNT, CREED_LINES_WITH_GLOBAL, CREED_FLAT_WORDS } from '../
 import { recordResult } from '../../lib/creedProgress';
 import { P, MONO, DISPLAY, BODY } from './creedShared';
 import { GameHeader, GoldButton, GhostButton, ResultPanel } from './CreedUi';
+import { PerfectScorePanel } from './CreedLeaderboardPanel';
 
 const MASTERY_THRESHOLD = 95;
 
@@ -32,6 +33,20 @@ export default function RecallGame({ onExit }) {
   }, [typedWords]);
 
   const accuracy = Math.round((correctCount / CREED_WORD_COUNT) * 100);
+
+  const wrongWords = useMemo(() => {
+    if (!done) return [];
+    const items = [];
+    for (let i = 0; i < typedWords.length && i < CREED_FLAT_WORDS.length; i++) {
+      if (!cleanMatch(typedWords[i], CREED_FLAT_WORDS[i].clean)) {
+        items.push(`"${CREED_FLAT_WORDS[i].raw}" — you wrote "${typedWords[i]}"`);
+      }
+    }
+    if (typedWords.length < CREED_FLAT_WORDS.length) {
+      items.push(`Ran out of words: never typed the last ${CREED_FLAT_WORDS.length - typedWords.length}`);
+    }
+    return items;
+  }, [done, typedWords]);
 
   const start = useCallback((m) => {
     setMode(m);
@@ -101,9 +116,13 @@ export default function RecallGame({ onExit }) {
             { label: 'CORRECT', value: `${correctCount}/${CREED_WORD_COUNT}` },
             { label: 'MODE', value: mode === 'HINTS' ? 'HINTS' : 'BLANK' },
           ]}
+          wrongItems={wrongWords}
           onRetry={() => start(mode)}
           onBack={onExit}
         />
+        {accuracy === 100 && (
+          <PerfectScorePanel gameKey="recall" gameLabel="Type It From Memory" metricLabel="ACCURACY" metricValue={`${accuracy}%`} />
+        )}
       </div>
     );
   }

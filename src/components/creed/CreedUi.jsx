@@ -1,4 +1,4 @@
-import { P, MONO, DISPLAY } from './creedShared';
+import { P, MONO, DISPLAY, BODY } from './creedShared';
 
 // Header bar every game screen shares: back-to-hub + game title + optional
 // right-side slot (timer, score, hint toggle — whatever that game needs).
@@ -63,7 +63,10 @@ export function StatChip({ label, value }) {
 }
 
 // Full-screen "you finished" panel shared by every game's end state.
-export function ResultPanel({ heading, stats, onRetry, onBack }) {
+// `wrongItems` (optional) is a plain string list of what the cadet missed —
+// each game builds its own phrasing since "wrong" means something different
+// per drill (a blank, a line, a typed word…).
+export function ResultPanel({ heading, stats, wrongItems, onRetry, onBack }) {
   return (
     <div style={{
       maxWidth: 520, margin: '48px auto', padding: '0 24px',
@@ -76,6 +79,18 @@ export function ResultPanel({ heading, stats, onRetry, onBack }) {
       {stats && (
         <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap', justifyContent: 'center' }}>
           {stats.map(s => <StatChip key={s.label} {...s} />)}
+        </div>
+      )}
+      {wrongItems && wrongItems.length > 0 && (
+        <div style={{ width: '100%', border: `1px solid ${P.hairline}`, background: P.navyDeep, padding: '16px 18px', textAlign: 'left' }}>
+          <div style={{ fontFamily: MONO, fontSize: 9, letterSpacing: '0.24em', color: P.red, marginBottom: 10 }}>
+            WHAT YOU GOT WRONG
+          </div>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+            {wrongItems.map((line, i) => (
+              <div key={i} style={{ fontFamily: BODY, fontSize: 13, color: P.mute, lineHeight: 1.5 }}>{line}</div>
+            ))}
+          </div>
         </div>
       )}
       <div style={{ display: 'flex', gap: 12, marginTop: 8 }}>

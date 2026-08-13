@@ -7,6 +7,7 @@ import ScrambleGame from './ScrambleGame';
 import SequencingGame from './SequencingGame';
 import RecallGame from './RecallGame';
 import SpeedGame from './SpeedGame';
+import CreedLeaderboardBoard from './CreedLeaderboardPanel';
 
 const GAMES = [
   {
@@ -55,6 +56,7 @@ export default function CreedHub() {
   if (activeGame === 'scramble') return <ScrambleGame onExit={closeGame} />;
   if (activeGame === 'recall') return <RecallGame onExit={closeGame} />;
   if (activeGame === 'speed') return <SpeedGame onExit={closeGame} />;
+  if (activeGame === 'leaderboard') return <CreedLeaderboardBoard onBack={closeGame} />;
 
   const masteredCount = GAMES.filter(g => masteryLevel(g.key, progress) === 'MASTERED').length;
 
@@ -79,9 +81,15 @@ export default function CreedHub() {
           }}>
             Five drills, five different ways to lock it in. Progress is saved on this device — no login needed.
           </div>
-          <div style={{
-            fontFamily: MONO, fontSize: 9, letterSpacing: '0.2em', color: P.gold,
-          }}>{masteredCount} / {GAMES.length} MASTERED</div>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 16, flexWrap: 'wrap' }}>
+            <div style={{
+              fontFamily: MONO, fontSize: 9, letterSpacing: '0.2em', color: P.gold,
+            }}>{masteredCount} / {GAMES.length} MASTERED</div>
+            <button onClick={() => openGame('leaderboard')} style={{
+              background: 'transparent', border: `1px solid ${P.hairlineStrong}`, cursor: 'pointer',
+              color: P.gold, fontFamily: MONO, fontSize: 9, letterSpacing: '0.2em', padding: '5px 10px',
+            }}>🏆 LEADERBOARD</button>
+          </div>
         </div>
       </div>
 

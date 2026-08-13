@@ -3,6 +3,7 @@ import { CREED_TOKENIZED } from '../../data/creed';
 import { recordResult } from '../../lib/creedProgress';
 import { P, MONO, DISPLAY, BODY } from './creedShared';
 import { GameHeader, GoldButton, ResultPanel } from './CreedUi';
+import { PerfectScorePanel } from './CreedLeaderboardPanel';
 
 const DIFFICULTY = {
   EASY: { label: 'Easy', fraction: 1 / 8, minLen: 4 },   // ~1 blank/line, longer words only
@@ -59,6 +60,22 @@ export default function FillBlankGame({ onExit }) {
   }, [round, submitted, answers]);
 
   const score = totalBlanks ? Math.round((correctCount / totalBlanks) * 100) : 0;
+
+  const wrongBlanks = useMemo(() => {
+    if (!round || !submitted) return [];
+    const items = [];
+    for (const line of round) {
+      for (const idx of line.blankIdxs) {
+        const key = `${line.id}-${idx}`;
+        const expected = line.words[idx].clean;
+        const given = (answers[key] || '').trim();
+        if (given.toLowerCase() !== expected.toLowerCase()) {
+          items.push(`"${expected}" — you wrote "${given || '(blank)'}"`);
+        }
+      }
+    }
+    return items;
+  }, [round, submitted, answers]);
 
   const startDifficulty = useCallback((d) => {
     setDifficulty(d);
@@ -123,9 +140,13 @@ export default function FillBlankGame({ onExit }) {
             { label: 'CORRECT', value: `${correctCount}/${totalBlanks}` },
             { label: 'DIFFICULTY', value: DIFFICULTY[difficulty].label.toUpperCase() },
           ]}
+          wrongItems={wrongBlanks}
           onRetry={retry}
           onBack={onExit}
         />
+        {score === 100 && (
+          <PerfectScorePanel gameKey="fillBlank" gameLabel="Fill in the Blank" metricLabel="SCORE" metricValue={`${score}%`} />
+        )}
       </div>
     );
   }

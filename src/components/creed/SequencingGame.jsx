@@ -11,6 +11,7 @@ import { CREED_LINES } from '../../data/creed';
 import { recordResult } from '../../lib/creedProgress';
 import { P, MONO, BODY } from './creedShared';
 import { GameHeader, GoldButton, GhostButton, ResultPanel } from './CreedUi';
+import { PerfectScorePanel } from './CreedLeaderboardPanel';
 
 function seededShuffle(items, seed) {
   const shuffled = items
@@ -58,6 +59,7 @@ export default function SequencingGame({ onExit }) {
   const [checked, setChecked] = useState(false);
   const [startedAt] = useState(() => Date.now());
   const [elapsedMs, setElapsedMs] = useState(null);
+  const [missedLineIds, setMissedLineIds] = useState(new Set());
 
   const sensors = useSensors(
     useSensor(PointerSensor, { activationConstraint: { distance: 4 } }),
@@ -84,7 +86,14 @@ export default function SequencingGame({ onExit }) {
     const ms = Date.now() - startedAt;
     setElapsedMs(ms);
     setChecked(true);
-  }, [startedAt]);
+    if (!allCorrect) {
+      setMissedLineIds(prev => {
+        const next = new Set(prev);
+        order.forEach((line, i) => { if (line.id !== i) next.add(line.id); });
+        return next;
+      });
+    }
+  }, [startedAt, order, allCorrect]);
 
   useEffect(() => {
     if (!checked || !allCorrect) return;
@@ -98,18 +107,24 @@ export default function SequencingGame({ onExit }) {
     setOrder(seededShuffle(CREED_LINES, seed + 1));
     setChecked(false);
     setElapsedMs(null);
+    setMissedLineIds(new Set());
   }, [seed]);
 
   if (checked && allCorrect) {
+    const wrongLineTexts = CREED_LINES.filter(l => missedLineIds.has(l.id)).map(l => `Misordered earlier: "${l.text}"`);
     return (
       <div style={{ background: P.ink, minHeight: '100vh' }}>
         <GameHeader title="Line Sequencing" onBack={onExit} />
         <ResultPanel
           heading="ALL 8 LINES CORRECT"
           stats={[{ label: 'TIME', value: `${(elapsedMs / 1000).toFixed(1)}s` }]}
+          wrongItems={wrongLineTexts}
           onRetry={retry}
           onBack={onExit}
         />
+        {missedLineIds.size === 0 && (
+          <PerfectScorePanel gameKey="sequencing" gameLabel="Line Sequencing" metricLabel="TIME" metricValue={`${(elapsedMs / 1000).toFixed(1)}s`} />
+        )}
       </div>
     );
   }

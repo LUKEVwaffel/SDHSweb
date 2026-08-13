@@ -3,6 +3,7 @@ import { CREED_TOKENIZED } from '../../data/creed';
 import { recordResult } from '../../lib/creedProgress';
 import { P, MONO, BODY } from './creedShared';
 import { GameHeader, GoldButton, GhostButton, ResultPanel } from './CreedUi';
+import { PerfectScorePanel } from './CreedLeaderboardPanel';
 
 function seededShuffle(items, seed) {
   return items
@@ -30,6 +31,7 @@ export default function ScrambleGame({ onExit }) {
   const [resets, setResets] = useState(0);
   const [lineScores, setLineScores] = useState([]);
   const [done, setDone] = useState(false);
+  const [missedLines, setMissedLines] = useState([]);
 
   const line = CREED_TOKENIZED[lineIdx];
   const pool = useMemo(() => {
@@ -49,7 +51,8 @@ export default function ScrambleGame({ onExit }) {
   const resetLine = useCallback(() => {
     setPlaced([]);
     setResets(r => r + 1);
-  }, []);
+    setMissedLines(m => (m.includes(line.text) ? m : [...m, line.text]));
+  }, [line]);
 
   const nextLine = useCallback(() => {
     const score = Math.max(0, 100 - resets * 25);
@@ -82,6 +85,7 @@ export default function ScrambleGame({ onExit }) {
     setResets(0);
     setLineScores([]);
     setDone(false);
+    setMissedLines([]);
   }, []);
 
   if (done) {
@@ -91,9 +95,13 @@ export default function ScrambleGame({ onExit }) {
         <ResultPanel
           heading={`${overallScore}% CLEAN`}
           stats={[{ label: 'LINES', value: CREED_TOKENIZED.length }, { label: 'AVG SCORE', value: `${overallScore}%` }]}
+          wrongItems={missedLines.map(t => `Needed a reset: "${t}"`)}
           onRetry={retryAll}
           onBack={onExit}
         />
+        {overallScore === 100 && (
+          <PerfectScorePanel gameKey="scramble" gameLabel="Word Scramble" metricLabel="SCORE" metricValue={`${overallScore}%`} />
+        )}
       </div>
     );
   }
