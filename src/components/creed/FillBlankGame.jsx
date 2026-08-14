@@ -37,6 +37,9 @@ export default function FillBlankGame({ onExit }) {
   const [seed, setSeed] = useState(0);
   const [answers, setAnswers] = useState({});
   const [submitted, setSubmitted] = useState(false);
+  const [startedAt, setStartedAt] = useState(null);
+  const [finishedAt, setFinishedAt] = useState(null);
+  const [nowTick, setNowTick] = useState(Date.now());
 
   const round = useMemo(() => (difficulty ? buildRound(difficulty, seed) : null), [difficulty, seed]);
 
@@ -61,6 +64,17 @@ export default function FillBlankGame({ onExit }) {
 
   const score = totalBlanks ? Math.round((correctCount / totalBlanks) * 100) : 0;
 
+  const elapsedMs = useMemo(() => {
+    if (!startedAt) return 0;
+    return (finishedAt || nowTick) - startedAt;
+  }, [startedAt, finishedAt, nowTick]);
+
+  useEffect(() => {
+    if (!difficulty || submitted) return;
+    const id = setInterval(() => setNowTick(Date.now()), 200);
+    return () => clearInterval(id);
+  }, [difficulty, submitted]);
+
   const wrongBlanks = useMemo(() => {
     if (!round || !submitted) return [];
     const items = [];
@@ -81,15 +95,20 @@ export default function FillBlankGame({ onExit }) {
     setDifficulty(d);
     setAnswers({});
     setSubmitted(false);
+    setStartedAt(Date.now());
+    setFinishedAt(null);
   }, []);
 
   const retry = useCallback(() => {
     setSeed(s => s + 1);
     setAnswers({});
     setSubmitted(false);
+    setStartedAt(Date.now());
+    setFinishedAt(null);
   }, []);
 
   const submit = useCallback(() => {
+    setFinishedAt(Date.now());
     setSubmitted(true);
   }, []);
 
@@ -138,6 +157,7 @@ export default function FillBlankGame({ onExit }) {
           heading={`${score}% CORRECT`}
           stats={[
             { label: 'CORRECT', value: `${correctCount}/${totalBlanks}` },
+            { label: 'TIME', value: `${(elapsedMs / 1000).toFixed(1)}s` },
             { label: 'DIFFICULTY', value: DIFFICULTY[difficulty].label.toUpperCase() },
           ]}
           wrongItems={wrongBlanks}
@@ -145,7 +165,7 @@ export default function FillBlankGame({ onExit }) {
           onBack={onExit}
         />
         {score === 100 && (
-          <PerfectScorePanel gameKey="fillBlank" gameLabel="Fill in the Blank" metricLabel="SCORE" metricValue={`${score}%`} />
+          <PerfectScorePanel gameKey="fillBlank" gameLabel="Fill in the Blank" metricLabel="TIME" metricValue={`${(elapsedMs / 1000).toFixed(1)}s`} />
         )}
       </div>
     );
@@ -156,7 +176,7 @@ export default function FillBlankGame({ onExit }) {
       <GameHeader
         title="Fill in the Blank"
         onBack={onExit}
-        right={<span style={{ fontFamily: MONO, fontSize: 9, letterSpacing: '0.16em', color: P.mute }}>{DIFFICULTY[difficulty].label.toUpperCase()}</span>}
+        right={<span style={{ fontFamily: MONO, fontSize: 11, letterSpacing: '0.1em', color: P.goldBright }}>{(elapsedMs / 1000).toFixed(1)}s · {DIFFICULTY[difficulty].label.toUpperCase()}</span>}
       />
       <div style={{ maxWidth: 720, margin: '0 auto', padding: '32px 24px 64px' }}>
         {round.map(line => (

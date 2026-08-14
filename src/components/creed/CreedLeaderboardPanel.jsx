@@ -4,6 +4,24 @@ import { GoldButton } from './CreedUi';
 import ConfettiBurst from './ConfettiBurst';
 import { COMPANIES, submitLeaderboardEntry, fetchLeaderboard } from '../../lib/creedLeaderboard';
 
+// Honor-system age gate — there's no auth on /creed to actually verify LET
+// level, so this asks for a birthdate and rejects ages that are implausible
+// for a LET-1 cadet. Same trust tier as the LET-level constant in
+// creedLeaderboard.js: it discourages casual gaming, not a hard guarantee.
+// The birthdate itself is never sent to the server (see submit below).
+const MIN_AGE = 10;
+const MAX_AGE = 20;
+
+function ageFromBirthdate(isoDate) {
+  const dob = new Date(isoDate);
+  if (Number.isNaN(dob.getTime())) return null;
+  const today = new Date();
+  let age = today.getFullYear() - dob.getFullYear();
+  const monthDiff = today.getMonth() - dob.getMonth();
+  if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < dob.getDate())) age--;
+  return age;
+}
+
 // Shown inside a game's ResultPanel when the run was a 100% clear — fires
 // confetti once and offers a name+company leaderboard entry. LET level is a
 // fixed constant sent by the client (see supabase/creed_leaderboard.sql for
@@ -11,11 +29,19 @@ import { COMPANIES, submitLeaderboardEntry, fetchLeaderboard } from '../../lib/c
 export function PerfectScorePanel({ gameKey, gameLabel, metricLabel, metricValue }) {
   const [name, setName] = useState('');
   const [company, setCompany] = useState('');
+  const [birthdate, setBirthdate] = useState('');
   const [status, setStatus] = useState('idle'); // idle | saving | done | error
+  const [ageError, setAgeError] = useState(false);
 
   const submit = useCallback(async (e) => {
     e.preventDefault();
-    if (!name.trim() || !company) return;
+    if (!name.trim() || !company || !birthdate) return;
+    const age = ageFromBirthdate(birthdate);
+    if (age === null || age < MIN_AGE || age > MAX_AGE) {
+      setAgeError(true);
+      return;
+    }
+    setAgeError(false);
     setStatus('saving');
     try {
       await submitLeaderboardEntry({ cadetName: name, company, gameKey, gameLabel, metricLabel, metricValue });
@@ -23,7 +49,7 @@ export function PerfectScorePanel({ gameKey, gameLabel, metricLabel, metricValue
     } catch {
       setStatus('error');
     }
-  }, [name, company, gameKey, gameLabel, metricLabel, metricValue]);
+  }, [name, company, birthdate, gameKey, gameLabel, metricLabel, metricValue]);
 
   return (
     <div style={{
@@ -72,9 +98,28 @@ export function PerfectScorePanel({ gameKey, gameLabel, metricLabel, metricValue
             <option value="">Company…</option>
             {COMPANIES.map(c => <option key={c} value={c}>{c}</option>)}
           </select>
-          <GoldButton disabled={!name.trim() || !company || status === 'saving'}>
+          <div style={{ textAlign: 'left' }}>
+            <label style={{ display: 'block', fontFamily: MONO, fontSize: 8, letterSpacing: '0.14em', color: P.mute, marginBottom: 4 }}>
+              VERIFY YOUR BIRTHDATE
+            </label>
+            <input
+              type="date"
+              value={birthdate}
+              onChange={e => { setBirthdate(e.target.value); setAgeError(false); }}
+              style={{
+                width: '100%', background: 'rgba(0,0,0,0.3)', border: `1px solid ${P.hairlineStrong}`,
+                color: P.cream, fontFamily: BODY, fontSize: 14, padding: '10px 12px', outline: 'none',
+              }}
+            />
+          </div>
+          <GoldButton disabled={!name.trim() || !company || !birthdate || status === 'saving'}>
             {status === 'saving' ? 'SAVING…' : 'ADD ME'}
           </GoldButton>
+          {ageError && (
+            <div style={{ fontFamily: MONO, fontSize: 10, color: P.red }}>
+              That birthdate doesn't look like a LET 1 cadet — double check it.
+            </div>
+          )}
           {status === 'error' && (
             <div style={{ fontFamily: MONO, fontSize: 10, color: P.red }}>Couldn't save — try again.</div>
           )}

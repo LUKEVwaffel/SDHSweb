@@ -20,6 +20,9 @@ export default function RecallGame({ onExit }) {
   const [mode, setMode] = useState(null); // null | 'HINTS' | 'BLANK'
   const [text, setText] = useState('');
   const [done, setDone] = useState(false);
+  const [startedAt, setStartedAt] = useState(null);
+  const [finishedAt, setFinishedAt] = useState(null);
+  const [nowTick, setNowTick] = useState(Date.now());
   const textareaRef = useRef(null);
 
   const typedWords = useMemo(() => text.trim().split(/\s+/).filter(Boolean), [text]);
@@ -48,17 +51,42 @@ export default function RecallGame({ onExit }) {
     return items;
   }, [done, typedWords]);
 
+  const elapsedMs = useMemo(() => {
+    if (!startedAt) return 0;
+    return (finishedAt || nowTick) - startedAt;
+  }, [startedAt, finishedAt, nowTick]);
+
+  useEffect(() => {
+    if (!mode || done) return;
+    const id = setInterval(() => setNowTick(Date.now()), 200);
+    return () => clearInterval(id);
+  }, [mode, done]);
+
   const start = useCallback((m) => {
     setMode(m);
     setText('');
     setDone(false);
+    setStartedAt(null);
+    setFinishedAt(null);
     setTimeout(() => textareaRef.current?.focus(), 0);
   }, []);
 
-  const finish = useCallback(() => setDone(true), []);
+  const finishNow = useCallback(() => {
+    setFinishedAt(Date.now());
+    setDone(true);
+  }, []);
+
+  const onChangeText = useCallback((e) => {
+    const value = e.target.value;
+    if (!startedAt && value.trim().length > 0) setStartedAt(Date.now());
+    setText(value);
+  }, [startedAt]);
 
   useEffect(() => {
-    if (typedWords.length >= CREED_FLAT_WORDS.length && !done) setDone(true);
+    if (typedWords.length >= CREED_FLAT_WORDS.length && !done) {
+      setFinishedAt(Date.now());
+      setDone(true);
+    }
   }, [typedWords.length, done]);
 
   useEffect(() => {
@@ -114,6 +142,7 @@ export default function RecallGame({ onExit }) {
           heading={`${accuracy}% ACCURATE`}
           stats={[
             { label: 'CORRECT', value: `${correctCount}/${CREED_WORD_COUNT}` },
+            { label: 'TIME', value: `${(elapsedMs / 1000).toFixed(1)}s` },
             { label: 'MODE', value: mode === 'HINTS' ? 'HINTS' : 'BLANK' },
           ]}
           wrongItems={wrongWords}
@@ -121,7 +150,7 @@ export default function RecallGame({ onExit }) {
           onBack={onExit}
         />
         {accuracy === 100 && (
-          <PerfectScorePanel gameKey="recall" gameLabel="Type It From Memory" metricLabel="ACCURACY" metricValue={`${accuracy}%`} />
+          <PerfectScorePanel gameKey="recall" gameLabel="Type It From Memory" metricLabel="TIME" metricValue={`${(elapsedMs / 1000).toFixed(1)}s`} />
         )}
       </div>
     );
@@ -132,7 +161,7 @@ export default function RecallGame({ onExit }) {
       <GameHeader
         title="Type It From Memory"
         onBack={onExit}
-        right={<span style={{ fontFamily: MONO, fontSize: 9, letterSpacing: '0.16em', color: P.mute }}>{mode} · {typedWords.length}/{CREED_WORD_COUNT} WORDS</span>}
+        right={<span style={{ fontFamily: MONO, fontSize: 11, letterSpacing: '0.1em', color: P.goldBright }}>{(elapsedMs / 1000).toFixed(1)}s · {mode} · {typedWords.length}/{CREED_WORD_COUNT} WORDS</span>}
       />
       <div style={{ maxWidth: 720, margin: '0 auto', padding: '32px 24px 64px' }}>
         {/* live diff render */}
@@ -163,7 +192,7 @@ export default function RecallGame({ onExit }) {
         <textarea
           ref={textareaRef}
           value={text}
-          onChange={e => setText(e.target.value)}
+          onChange={onChangeText}
           onPaste={e => e.preventDefault()}
           placeholder="Start typing the creed from memory…"
           rows={4}
@@ -176,7 +205,7 @@ export default function RecallGame({ onExit }) {
         />
 
         <div style={{ marginTop: 20, display: 'flex', gap: 12 }}>
-          <GoldButton onClick={finish} disabled={typedWords.length === 0}>FINISH NOW</GoldButton>
+          <GoldButton onClick={finishNow} disabled={typedWords.length === 0}>FINISH NOW</GoldButton>
           <GhostButton onClick={() => start(mode)}>RESTART</GhostButton>
         </div>
       </div>

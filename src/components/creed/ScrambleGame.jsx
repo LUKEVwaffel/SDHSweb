@@ -32,6 +32,9 @@ export default function ScrambleGame({ onExit }) {
   const [lineScores, setLineScores] = useState([]);
   const [done, setDone] = useState(false);
   const [missedLines, setMissedLines] = useState([]);
+  const [startedAt, setStartedAt] = useState(() => Date.now());
+  const [finishedAt, setFinishedAt] = useState(null);
+  const [nowTick, setNowTick] = useState(Date.now());
 
   const line = CREED_TOKENIZED[lineIdx];
   const pool = useMemo(() => {
@@ -62,6 +65,7 @@ export default function ScrambleGame({ onExit }) {
     if (lineIdx + 1 < CREED_TOKENIZED.length) {
       setLineIdx(i => i + 1);
     } else {
+      setFinishedAt(Date.now());
       setDone(true);
     }
   }, [resets, lineIdx]);
@@ -70,6 +74,17 @@ export default function ScrambleGame({ onExit }) {
     if (!lineScores.length) return 0;
     return Math.round(lineScores.reduce((a, b) => a + b, 0) / lineScores.length);
   }, [lineScores]);
+
+  const elapsedMs = useMemo(() => {
+    if (!startedAt) return 0;
+    return (finishedAt || nowTick) - startedAt;
+  }, [startedAt, finishedAt, nowTick]);
+
+  useEffect(() => {
+    if (done) return;
+    const id = setInterval(() => setNowTick(Date.now()), 200);
+    return () => clearInterval(id);
+  }, [done]);
 
   useEffect(() => {
     if (!done) return;
@@ -86,6 +101,8 @@ export default function ScrambleGame({ onExit }) {
     setLineScores([]);
     setDone(false);
     setMissedLines([]);
+    setStartedAt(Date.now());
+    setFinishedAt(null);
   }, []);
 
   if (done) {
@@ -94,13 +111,17 @@ export default function ScrambleGame({ onExit }) {
         <GameHeader title="Word Scramble" onBack={onExit} />
         <ResultPanel
           heading={`${overallScore}% CLEAN`}
-          stats={[{ label: 'LINES', value: CREED_TOKENIZED.length }, { label: 'AVG SCORE', value: `${overallScore}%` }]}
+          stats={[
+            { label: 'LINES', value: CREED_TOKENIZED.length },
+            { label: 'AVG SCORE', value: `${overallScore}%` },
+            { label: 'TIME', value: `${(elapsedMs / 1000).toFixed(1)}s` },
+          ]}
           wrongItems={missedLines.map(t => `Needed a reset: "${t}"`)}
           onRetry={retryAll}
           onBack={onExit}
         />
         {overallScore === 100 && (
-          <PerfectScorePanel gameKey="scramble" gameLabel="Word Scramble" metricLabel="SCORE" metricValue={`${overallScore}%`} />
+          <PerfectScorePanel gameKey="scramble" gameLabel="Word Scramble" metricLabel="TIME" metricValue={`${(elapsedMs / 1000).toFixed(1)}s`} />
         )}
       </div>
     );
@@ -111,7 +132,7 @@ export default function ScrambleGame({ onExit }) {
       <GameHeader
         title="Word Scramble"
         onBack={onExit}
-        right={<span style={{ fontFamily: MONO, fontSize: 9, letterSpacing: '0.16em', color: P.mute }}>LINE {lineIdx + 1}/{CREED_TOKENIZED.length}</span>}
+        right={<span style={{ fontFamily: MONO, fontSize: 11, letterSpacing: '0.1em', color: P.goldBright }}>{(elapsedMs / 1000).toFixed(1)}s · LINE {lineIdx + 1}/{CREED_TOKENIZED.length}</span>}
       />
       <div style={{ maxWidth: 640, margin: '0 auto', padding: '40px 24px 64px' }}>
         {/* answer row */}
