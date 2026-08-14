@@ -214,12 +214,19 @@ function formatDateRange(date, end_date) {
 function EventDetailCard({ event }) {
   const time = formatEventTimeRange(event.event_time, event.end_time);
   const [colorGuard, setColorGuard] = useState([]);
+  const [honorGuard, setHonorGuard] = useState([]);
 
   useEffect(() => {
     if (!event.color_guard_required) { setColorGuard([]); return; }
     SB.rpc('get_event_color_guard', { p_event_id: event.id })
       .then(({ data }) => setColorGuard(data || []));
   }, [event.id, event.color_guard_required]);
+
+  useEffect(() => {
+    if (!event.honor_guard_required) { setHonorGuard([]); return; }
+    SB.rpc('get_event_honor_guard', { p_event_id: event.id })
+      .then(({ data }) => setHonorGuard(data || []));
+  }, [event.id, event.honor_guard_required]);
 
   return (
     <div style={{ border: `1px solid ${P.hairStrong}`, background: P.navy, padding: 22, marginBottom: 20 }}>
@@ -261,6 +268,19 @@ function EventDetailCard({ event }) {
           <div style={{ fontFamily: mono, fontSize: 8, letterSpacing: '0.14em', color: P.mute, marginBottom: 8 }}>COLOR GUARD</div>
           <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
             {colorGuard.map((p) => (
+              <div key={p.sort_order} style={{ fontFamily: inter, fontSize: 13, color: P.cream }}>
+                <span style={{ color: P.gold }}>{p.position_label}:</span> {p.cadet_name}
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {honorGuard.length > 0 && (
+        <div style={{ paddingTop: 16, marginTop: 16, borderTop: `1px solid ${P.hair}` }}>
+          <div style={{ fontFamily: mono, fontSize: 8, letterSpacing: '0.14em', color: P.mute, marginBottom: 8 }}>HONOR GUARD</div>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
+            {honorGuard.map((p) => (
               <div key={p.sort_order} style={{ fontFamily: inter, fontSize: 13, color: P.cream }}>
                 <span style={{ color: P.gold }}>{p.position_label}:</span> {p.cadet_name}
               </div>

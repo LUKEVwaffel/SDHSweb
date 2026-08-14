@@ -20,6 +20,7 @@ const emptyForm = () => ({
   transportation_required: false, transportation: '',
   permission_slip_required: false, permission_slip_url: '',
   color_guard_required: false,
+  honor_guard_required: false,
   recurrence_days: [],
 });
 
@@ -36,12 +37,20 @@ const DEFAULT_COLOR_GUARD_POSITIONS = () => [
 const ASCOT_COLORS = ['Red', 'White', 'Black'];
 const GLOVE_COLORS = ['Black', 'White'];
 
+// Fixed 11-position roster — Commander + 10 sabre-bearers. Every slot is
+// required (no optional/alternate, no add/remove — unlike Color Guard this
+// count never changes).
+const DEFAULT_HONOR_GUARD_POSITIONS = () => [
+  { position_label: 'Commander', cadet_consent_id: null, cadet_name: '' },
+  ...Array.from({ length: 10 }, (_, i) => ({ position_label: `Sabre ${i + 1}`, cadet_consent_id: null, cadet_name: '' })),
+];
+
 // Core fields required before an event can be POSTED to the public calendar —
 // mirrors the DB backstop in events_ironclad.sql (events_posted_requires_fields_check).
 // Uniform Day events don't need a set start time, and Raiders events never
 // require a uniform answer (uniform isn't applicable to that team) — both
 // exemptions mirrored in the DB constraint.
-function missingCore(f, positions = []) {
+function missingCore(f, positions = [], honorPositions = []) {
   const gaps = [];
   if (!f.title?.trim()) gaps.push('title');
   if (!f.date) gaps.push('date');
@@ -54,6 +63,10 @@ function missingCore(f, positions = []) {
   if (f.color_guard_required) {
     const incomplete = positions.filter((p) => p.required && (!p.cadet_consent_id || !p.ascot_color || !p.glove_color));
     if (incomplete.length) gaps.push(`color guard (${incomplete.length} position${incomplete.length > 1 ? 's' : ''})`);
+  }
+  if (f.honor_guard_required) {
+    const incomplete = honorPositions.filter((p) => !p.cadet_consent_id);
+    if (incomplete.length) gaps.push(`honor guard (${incomplete.length} position${incomplete.length > 1 ? 's' : ''})`);
   }
   return gaps;
 }
@@ -76,6 +89,8 @@ export default function EventsPanel({ adminId, allowedTeams }) {
   const [generatingPdf, setGeneratingPdf] = useState(false);
   const [positions, setPositions] = useState([]);
   const [guardOpen, setGuardOpen] = useState(false);
+  const [honorPositions, setHonorPositions] = useState([]);
+  const [honorGuardOpen, setHonorGuardOpen] = useState(false);
   const [roster, setRoster] = useState([]);
 
   const scopedTeams = allowedTeams
@@ -122,12 +137,22 @@ export default function EventsPanel({ adminId, allowedTeams }) {
     })));
   }
 
+  async function loadHonorGuard(eventId) {
+    const { data } = await SB.from('event_honor_guard').select('*').eq('event_id', eventId).order('sort_order');
+    setHonorPositions((data || []).map((r) => ({
+      position_label: r.position_label,
+      cadet_consent_id: r.cadet_consent_id,
+      cadet_name: roster.find((c) => c.id === r.cadet_consent_id)?.name || '',
+    })));
+  }
+
   function startNew() {
     setEditing('new');
     setForm(emptyForm());
     setTopicIds([]);
     setSecondaryTeams([]);
     setPositions([]);
+    setHonorPositions([]);
     setMsg('');
   }
   function startEdit(r) {
@@ -141,11 +166,13 @@ export default function EventsPanel({ adminId, allowedTeams }) {
       transportation_required: !!r.transportation_required, transportation: r.transportation || '',
       permission_slip_required: !!r.permission_slip_required, permission_slip_url: r.permission_slip_url || '',
       color_guard_required: !!r.color_guard_required,
+      honor_guard_required: !!r.honor_guard_required,
       recurrence_days: r.recurrence_days || [],
     });
     loadEventTopics(r.id);
     loadEventSecondaryTeams(r.id);
     loadColorGuard(r.id);
+    loadHonorGuard(r.id);
     setMsg('');
   }
   function cancel() { setEditing(null); setMsg(''); }
@@ -166,6 +193,7 @@ export default function EventsPanel({ adminId, allowedTeams }) {
       permission_slip_required: !!f.permission_slip_required,
       permission_slip_url: f.permission_slip_required ? nz(f.permission_slip_url) : null,
       color_guard_required: !!f.color_guard_required,
+      honor_guard_required: !!f.honor_guard_required,
       recurrence_days: recurring ? f.recurrence_days : null,
     };
   }
@@ -187,10 +215,11 @@ export default function EventsPanel({ adminId, allowedTeams }) {
     let error, row;
     const isNew = editing === 'new';
     // A brand-new event posted directly (no separate draft step) has no
-    // event_color_guard rows yet at INSERT time — the events_color_guard_check
-    // trigger would always reject it. Insert as draft first, sync the roster
-    // below, then promote to posted once the trigger has rows to check against.
-    const twoPhase = isNew && body.color_guard_required && body.status === 'posted';
+    // event_color_guard / event_honor_guard rows yet at INSERT time — the
+    // events_color_guard_check / events_honor_guard_check triggers would
+    // always reject it. Insert as draft first, sync the rosters below, then
+    // promote to posted once the triggers have rows to check against.
+    const twoPhase = isNew && (body.color_guard_required || body.honor_guard_required) && body.status === 'posted';
     const insertBody = twoPhase ? { ...body, status: 'draft' } : body;
     if (!isNew) {
       ({ error } = await SB.from('events').update(insertBody).eq('id', editing));
@@ -207,6 +236,7 @@ export default function EventsPanel({ adminId, allowedTeams }) {
     await syncEventTopics(row.id);
     await syncEventSecondaryTeams(row.id);
     await syncColorGuard(row.id);
+    await syncHonorGuard(row.id);
     if (twoPhase) {
       ({ error } = await SB.from('events').update({ status: 'posted' }).eq('id', row.id));
       if (error) { setSaving(false); setMsg(error.message); return null; }
@@ -251,13 +281,25 @@ export default function EventsPanel({ adminId, allowedTeams }) {
     }
   }
 
+  // Honor Guard roster — same delete-all-then-reinsert approach. Always the
+  // fixed 11 positions (Commander + Sabre 1-10) when the toggle is on.
+  async function syncHonorGuard(eventId) {
+    await SB.from('event_honor_guard').delete().eq('event_id', eventId);
+    if (form.honor_guard_required && honorPositions.length) {
+      await SB.from('event_honor_guard').insert(honorPositions.map((p, i) => ({
+        event_id: eventId, position_label: p.position_label, sort_order: i,
+        cadet_consent_id: p.cadet_consent_id || null,
+      })));
+    }
+  }
+
   async function saveDraft() {
     if (!form.title.trim()) { setMsg('Title required to save'); return; }
     const row = await persist(payload({ status: form.status === 'posted' ? 'posted' : 'draft' }));
     if (row) { setMsg('Saved ✓'); setEditing(null); }
   }
   async function post() {
-    const gaps = missingCore(form, positions);
+    const gaps = missingCore(form, positions, honorPositions);
     if (gaps.length) { setMsg(`Cannot post, missing: ${gaps.join(', ')}`); return; }
     const row = await persist(payload({ status: 'posted' }));
     if (row) { setMsg('Posted to public calendar ✓'); setEditing(null); }
@@ -294,7 +336,7 @@ export default function EventsPanel({ adminId, allowedTeams }) {
   const rowById = useMemo(() => Object.fromEntries(rows.map((r) => [r.id, r])), [rows]);
 
   const postedCount = rows.filter((r) => r.status === 'posted').length;
-  const coreGaps = missingCore(form, positions);
+  const coreGaps = missingCore(form, positions, honorPositions);
   // S-5's delete grant stays battalion-only even though their edit grant now
   // covers Raiders too (opticsend.sql SECTION 9 leaves events_del_admin
   // unchanged) — hide the button rather than let it fail silently against RLS.
@@ -632,6 +674,33 @@ export default function EventsPanel({ adminId, allowedTeams }) {
             </div>
 
             <div style={{ marginBottom: sp[3] }}>
+              <Label>Honor Guard</Label>
+              <div style={{ display: 'flex', gap: sp[2], alignItems: 'center', flexWrap: 'wrap' }}>
+                {[false, true].map((v) => (
+                  <Btn
+                    key={String(v)}
+                    variant={form.honor_guard_required === v ? 'gold' : 'ghost'}
+                    size="sm"
+                    onClick={() => {
+                      setForm((f) => ({ ...f, honor_guard_required: v }));
+                      if (v && !honorPositions.length) setHonorPositions(DEFAULT_HONOR_GUARD_POSITIONS());
+                    }}
+                  >
+                    {v ? 'YES' : 'NO'}
+                  </Btn>
+                ))}
+                {form.honor_guard_required && (
+                  <Btn onClick={() => setHonorGuardOpen(true)} variant="ghost" size="sm">
+                    MANAGE ROSTER ({honorPositions.filter((p) => p.cadet_consent_id).length}/{honorPositions.length})
+                  </Btn>
+                )}
+              </div>
+              <div style={{ fontFamily: mono, fontSize: 8, color: P.mute, letterSpacing: '0.06em', marginTop: sp[1] }}>
+                Commander + 10 sabre-bearers. All 11 positions required to post.
+              </div>
+            </div>
+
+            <div style={{ marginBottom: sp[3] }}>
               <Label>Description / notes</Label>
               <Input value={form.description} onChange={(e) => setForm((f) => ({ ...f, description: e.target.value }))} multiline />
             </div>
@@ -748,6 +817,31 @@ export default function EventsPanel({ adminId, allowedTeams }) {
               >
                 + ADD POSITION
               </Btn>
+            </div>
+          </Modal>
+
+          <Modal open={honorGuardOpen} onClose={() => setHonorGuardOpen(false)} title="HONOR GUARD ROSTER" width={640} footer={
+            <Btn onClick={() => setHonorGuardOpen(false)} variant="gold" size="sm">CLOSE</Btn>
+          }>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: sp[3] }}>
+              {honorPositions.map((p, idx) => {
+                const patch = (fields) => setHonorPositions((ps) => ps.map((row, i) => (i === idx ? { ...row, ...fields } : row)));
+                return (
+                  <div key={idx} style={{ border: `1px solid ${P.hair}`, borderRadius: 5, padding: sp[3] }}>
+                    <div style={{ marginBottom: sp[2] }}>
+                      <Label style={{ marginBottom: 4 }}>
+                        {p.position_label}<span style={{ color: P.red }}> *</span>
+                      </Label>
+                    </div>
+                    <CadetPicker
+                      value={p.cadet_consent_id}
+                      name={p.cadet_name}
+                      roster={roster}
+                      onChange={(id, name) => patch({ cadet_consent_id: id, cadet_name: name })}
+                    />
+                  </div>
+                );
+              })}
             </div>
           </Modal>
         </div>
