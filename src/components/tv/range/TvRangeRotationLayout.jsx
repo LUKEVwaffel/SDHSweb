@@ -1,7 +1,6 @@
 import { P, inter, sp } from '../../admin/theme.js';
 import { useTvNotices } from '../../../hooks/useTvNotices.js';
 import { useTvUpcomingEvents } from '../../../hooks/useTvUpcomingEvents.js';
-import TvCountdownBand from '../TvCountdownBand.jsx';
 import RangeGridBoard from './rangeGrid/RangeGridBoard.jsx';
 import { resolveRotationGrid } from './rangeGrid/gridDefaults.js';
 
@@ -10,7 +9,10 @@ import { resolveRotationGrid } from './rangeGrid/gridDefaults.js';
 // in settings.range_schedule_config.rotation_grid, edited from the "Grid
 // Layout" tab in TV Remote (StepRangeLayout.jsx) via RangeGridBoard, the same
 // component that renders it here read-only. Outside-only content
-// (TvStandardLayout, still used by TvKiosk.jsx) is untouched.
+// (TvStandardLayout, still used by TvKiosk.jsx) is untouched — that includes
+// TvCountdownBand, which used to be force-mounted here too; Range's "until
+// next event" content is now the addable/movable `countdown` grid widget
+// instead (RangeGridCountdown.jsx), not a fixed band.
 export default function TvRangeRotationLayout({ settings, now, config }) {
   const { notices } = useTvNotices('range');
   const events = useTvUpcomingEvents(6);
@@ -29,8 +31,6 @@ export default function TvRangeRotationLayout({ settings, now, config }) {
       position: 'fixed', inset: 0, background: P.ink,
       display: 'flex', flexDirection: 'column', fontFamily: inter,
     }}>
-      <TvCountdownBand settings={settings} now={now} />
-
       {/* Bottom padding clears TvRangeClock (fixed bottom-right, ~50px tall,
           rendered by TvRangeKiosk.jsx above every phase screen) — without it
           a tile whose freeform placement runs to the bottom edge visually

@@ -14,7 +14,7 @@ function PanelHeading({ children }) {
   );
 }
 
-function PracticeTile({ tile }) {
+function PracticeTile({ tile, style }) {
   return (
     <div style={{ borderBottom: `1px solid ${P.hair}`, paddingBottom: sp[3], marginBottom: sp[3] }}>
       <div style={{ fontFamily: fraunces, fontWeight: 800, fontStyle: 'italic', fontSize: fs.xl, color: P.bright }}>
@@ -23,7 +23,14 @@ function PracticeTile({ tile }) {
       <div style={{ fontFamily: mono, fontSize: fs.tiny, color: P.cream, letterSpacing: '0.16em', marginTop: 4 }}>
         {tile.label}
       </div>
-      {tile.sub && <div style={{ fontFamily: inter, fontSize: fs.sm, color: P.mute, marginTop: 2 }}>{tile.sub}</div>}
+      {tile.sub && (
+        <div style={{
+          fontFamily: style?.fontFamily ?? inter, fontSize: style?.fontSize ?? fs.sm,
+          fontWeight: style?.bold ? 700 : 400, color: P.mute, marginTop: 2,
+        }}>
+          {tile.sub}
+        </div>
+      )}
     </div>
   );
 }
@@ -38,7 +45,7 @@ function PracticeTile({ tile }) {
 // thematically tied to the practice info, no new schedule-engine phase
 // needed. qrcode is dynamically imported (same pattern as
 // lib/eventsPdfPrint.js) so it only loads once a URL is actually set.
-export default function TvRangeRaiderPracticeWidget({ groupmeUrl }) {
+export default function TvRangeRaiderPracticeWidget({ groupmeUrl, style }) {
   const [qrSrc, setQrSrc] = useState(null);
 
   useEffect(() => {
@@ -61,7 +68,7 @@ export default function TvRangeRaiderPracticeWidget({ groupmeUrl }) {
       <PanelHeading>RAIDERS PRACTICE</PanelHeading>
 
       <div style={{ flex: 1, minHeight: 0 }}>
-        {RAIDER_PRACTICE_TILES.map((t) => <PracticeTile key={t.label} tile={t} />)}
+        {RAIDER_PRACTICE_TILES.map((t) => <PracticeTile key={t.label} tile={t} style={style} />)}
       </div>
 
       {qrSrc && (
