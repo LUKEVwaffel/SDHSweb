@@ -13,6 +13,13 @@ const SWATCHES = [
   { label: 'Blue', value: P.blue },
 ];
 
+const SIZES = [
+  { label: 'S', px: 12 },
+  { label: 'M', px: 16 },
+  { label: 'L', px: 24 },
+  { label: 'XL', px: 36 },
+];
+
 // Builds the field's initial DOM straight from the run model via DOM APIs
 // (createElement/appendChild) — never an HTML string, so there's no
 // dangerouslySetInnerHTML and nothing to sanitize.
@@ -24,7 +31,13 @@ function buildDom(container, runs) {
     if (r.bold) { const b = document.createElement('b'); b.appendChild(node); node = b; }
     if (r.italic) { const i = document.createElement('i'); i.appendChild(node); node = i; }
     if (r.underline) { const u = document.createElement('u'); u.appendChild(node); node = u; }
-    if (r.color) { const span = document.createElement('span'); span.style.color = r.color; span.appendChild(node); node = span; }
+    if (r.color || r.fontSize) {
+      const span = document.createElement('span');
+      if (r.color) span.style.color = r.color;
+      if (r.fontSize) span.style.fontSize = `${r.fontSize}px`;
+      span.appendChild(node);
+      node = span;
+    }
     container.appendChild(node);
   });
 }
@@ -108,6 +121,23 @@ export default function RichTextField({ value, onChange, placeholder, multiline 
     updateToolbarFromSelection();
   }
 
+  // execCommand has no arbitrary-px font-size command — only the legacy 1-7
+  // scale, applied as <font size="N">. Use size 7 as a throwaway marker, then
+  // swap every <font size="7"> it produced for a <span style="font-size:Npx">
+  // — the standard workaround for real px sizing via execCommand.
+  function execFontSize(px) {
+    ref.current?.focus();
+    document.execCommand('fontSize', false, '7');
+    ref.current?.querySelectorAll('font[size="7"]').forEach((font) => {
+      const span = document.createElement('span');
+      span.style.fontSize = `${px}px`;
+      while (font.firstChild) span.appendChild(font.firstChild);
+      font.replaceWith(span);
+    });
+    commit();
+    updateToolbarFromSelection();
+  }
+
   function handleKeyDown(e) {
     if (!multiline && e.key === 'Enter') { e.preventDefault(); ref.current?.blur(); }
   }
@@ -146,6 +176,21 @@ export default function RichTextField({ value, onChange, placeholder, multiline 
           <ToolbarBtn onClick={() => exec('bold')} label="B" />
           <ToolbarBtn onClick={() => exec('italic')} label="I" />
           <ToolbarBtn onClick={() => exec('underline')} label="U" />
+          <div style={{ width: 1, alignSelf: 'stretch', background: P.hairStrong, margin: '0 2px' }} />
+          {SIZES.map((s) => (
+            <button
+              key={s.label}
+              onMouseDown={(e) => e.preventDefault()}
+              onClick={() => execFontSize(s.px)}
+              title={`${s.px}px`}
+              style={{
+                minWidth: 20, height: 22, padding: '0 4px', borderRadius: 4, border: `1px solid ${P.hairStrong}`,
+                background: P.deep, color: P.cream, fontFamily: mono, fontSize: 10, fontWeight: 700, cursor: 'pointer',
+              }}
+            >
+              {s.label}
+            </button>
+          ))}
           <div style={{ width: 1, alignSelf: 'stretch', background: P.hairStrong, margin: '0 2px' }} />
           {SWATCHES.map((s) => (
             <button

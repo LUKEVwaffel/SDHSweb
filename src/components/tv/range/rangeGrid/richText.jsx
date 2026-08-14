@@ -3,7 +3,7 @@
 // override in gridDefaults.js/RangeGridBoard.jsx, which still applies
 // uniformly to externally-sourced content (announcements/events/etc).
 //
-// A run is `{ text, bold?, italic?, underline?, color? }`. Rendered as plain
+// A run is `{ text, bold?, italic?, underline?, color?, fontSize? }`. Rendered as plain
 // React <span> elements (RenderRuns) — never dangerouslySetInnerHTML, so
 // there's no HTML-injection surface to sanitize against.
 
@@ -55,7 +55,8 @@ export function storageStringToRuns(value) {
 }
 
 function sameFormat(a, b) {
-  return a.bold === b.bold && a.italic === b.italic && a.underline === b.underline && a.color === b.color;
+  return a.bold === b.bold && a.italic === b.italic && a.underline === b.underline
+    && a.color === b.color && a.fontSize === b.fontSize;
 }
 
 function mergeRuns(runs) {
@@ -87,6 +88,7 @@ function walk(node, ctx, runs) {
   if (tag === 'i' || tag === 'em') next.italic = true;
   if (tag === 'u') next.underline = true;
   if (node.style?.color) next.color = node.style.color;
+  if (node.style?.fontSize) next.fontSize = parseInt(node.style.fontSize, 10) || undefined;
   node.childNodes.forEach((child) => walk(child, next, runs));
 }
 
@@ -111,6 +113,7 @@ export function RenderRuns({ runs }) {
           fontStyle: r.italic ? 'italic' : undefined,
           textDecoration: r.underline ? 'underline' : undefined,
           color: r.color || undefined,
+          fontSize: r.fontSize ? `${r.fontSize}px` : undefined,
         }}
       >
         {r.text}
