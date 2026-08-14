@@ -2,13 +2,10 @@ import { useState, useEffect, useCallback } from 'react';
 import { P, MONO, DISPLAY, BODY } from './creedShared';
 import { GoldButton } from './CreedUi';
 import ConfettiBurst from './ConfettiBurst';
-import { COMPANIES, submitLeaderboardEntry, fetchLeaderboard } from '../../lib/creedLeaderboard';
+import { COMPANIES, submitLeaderboardEntry, fetchLeaderboard, verifyCreedEligibility } from '../../lib/creedLeaderboard';
 
-// Honor-system age gate — there's no auth on /creed to actually verify LET
-// level, so this asks for a birthdate and rejects ages that are implausible
-// for a LET-1 cadet. Same trust tier as the LET-level constant in
-// creedLeaderboard.js: it discourages casual gaming, not a hard guarantee.
-// The birthdate itself is never sent to the server (see submit below).
+// Plausibility pre-filter, checked client-side before the real check below.
+// Catches obviously-wrong birthdates without a round trip.
 const MIN_AGE = 10;
 const MAX_AGE = 20;
 
@@ -30,7 +27,7 @@ export function PerfectScorePanel({ gameKey, gameLabel, metricLabel, metricValue
   const [name, setName] = useState('');
   const [company, setCompany] = useState('');
   const [birthdate, setBirthdate] = useState('');
-  const [status, setStatus] = useState('idle'); // idle | saving | done | error
+  const [status, setStatus] = useState('idle'); // idle | verifying | saving | done | error | blocked
   const [ageError, setAgeError] = useState(false);
 
   const submit = useCallback(async (e) => {
@@ -42,6 +39,17 @@ export function PerfectScorePanel({ gameKey, gameLabel, metricLabel, metricValue
       return;
     }
     setAgeError(false);
+    setStatus('verifying');
+    try {
+      const eligible = await verifyCreedEligibility({ name, company, birthdate });
+      if (!eligible) {
+        setStatus('blocked');
+        return;
+      }
+    } catch {
+      setStatus('error');
+      return;
+    }
     setStatus('saving');
     try {
       await submitLeaderboardEntry({ cadetName: name, company, gameKey, gameLabel, metricLabel, metricValue });
@@ -112,12 +120,17 @@ export function PerfectScorePanel({ gameKey, gameLabel, metricLabel, metricValue
               }}
             />
           </div>
-          <GoldButton disabled={!name.trim() || !company || !birthdate || status === 'saving'}>
-            {status === 'saving' ? 'SAVING…' : 'ADD ME'}
+          <GoldButton disabled={!name.trim() || !company || !birthdate || status === 'verifying' || status === 'saving'}>
+            {status === 'verifying' ? 'VERIFYING…' : status === 'saving' ? 'SAVING…' : 'ADD ME'}
           </GoldButton>
           {ageError && (
             <div style={{ fontFamily: MONO, fontSize: 10, color: P.red }}>
               That birthdate doesn't look like a LET 1 cadet — double check it.
+            </div>
+          )}
+          {status === 'blocked' && (
+            <div style={{ fontFamily: MONO, fontSize: 10, color: P.red }}>
+              Dispatch records show you're LET 2-4 — this board is for LET 1 cadets only.
             </div>
           )}
           {status === 'error' && (

@@ -8,6 +8,27 @@ const LET_LEVEL = '1';
 export const COMPANIES = ['ALPHA', 'BRAVO', 'CHARLIE', 'DELTA'];
 
 /**
+ * Checks the submitter's name/company/birthdate against the dispatch roster
+ * (public.cadet_consent, via the verify_creed_eligibility RPC — that table
+ * is s6-locked, so this is the only way an anon client can check it). Returns
+ * false only when dispatch data confirms the person is LET 2/3/4; true
+ * otherwise (including "not found in dispatch yet").
+ * @param {{ name: string, company: string, birthdate: string }} identity
+ * @returns {Promise<boolean>}
+ */
+export async function verifyCreedEligibility({ name, company, birthdate }) {
+  const fp = await getDeviceId().catch(() => null);
+  const { data, error } = await supabase.rpc('verify_creed_eligibility', {
+    p_name: name.trim(),
+    p_company: company,
+    p_birthdate: birthdate,
+    p_fp: fp,
+  });
+  if (error) throw error;
+  return data === true;
+}
+
+/**
  * @param {{ cadetName: string, company: string, gameKey: string, gameLabel: string, metricLabel: string, metricValue: string }} entry
  */
 export async function submitLeaderboardEntry({ cadetName, company, gameKey, gameLabel, metricLabel, metricValue }) {
