@@ -1605,8 +1605,8 @@
     "semantic_hash": ""
   },
   "src/components/creed/CreedLeaderboardPanel.jsx": {
-    "mtime": 1786717087.7615192,
-    "ast_hash": "c3789fc77e8008083a80c16870fa3df1",
+    "mtime": 1786724810.8303638,
+    "ast_hash": "10eccdf940a123dfda98bb7dab1f139d",
     "semantic_hash": ""
   },
   "src/components/tv/control-center/StepRangeLayout.jsx": {
@@ -1655,8 +1655,8 @@
     "semantic_hash": ""
   },
   "src/lib/creedLeaderboard.js": {
-    "mtime": 1786717066.156987,
-    "ast_hash": "b9373fd38f1e0ab95c9b9cfeaa2b48b8",
+    "mtime": 1786724798.603383,
+    "ast_hash": "8d8c6e89ade0f428970f6094c314d50d",
     "semantic_hash": ""
   },
   "supabase/creed_leaderboard.sql": {
@@ -1665,8 +1665,8 @@
     "semantic_hash": ""
   },
   "supabase/creed_leaderboard_dispatch_verify.sql": {
-    "mtime": 1786717050.1393785,
-    "ast_hash": "0cae53904b4f73bfaec40f5cb92ded07",
+    "mtime": 1786724793.6487813,
+    "ast_hash": "a7003d3914bf1eea197b393bb6eb28d8",
     "semantic_hash": ""
   },
   "supabase/creed_leaderboard_wipe.sql": {

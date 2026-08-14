@@ -11,8 +11,8 @@ export const COMPANIES = ['ALPHA', 'BRAVO', 'CHARLIE', 'DELTA'];
  * Checks the submitter's name/company/birthdate against the dispatch roster
  * (public.cadet_consent, via the verify_creed_eligibility RPC — that table
  * is s6-locked, so this is the only way an anon client can check it). Returns
- * false only when dispatch data confirms the person is LET 2/3/4; true
- * otherwise (including "not found in dispatch yet").
+ * true only when that exact identity matches a LET 1 record in dispatch;
+ * false for LET 2/3/4 matches AND for no match at all.
  * @param {{ name: string, company: string, birthdate: string }} identity
  * @returns {Promise<boolean>}
  */

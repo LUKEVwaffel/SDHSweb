@@ -130,7 +130,7 @@ export function PerfectScorePanel({ gameKey, gameLabel, metricLabel, metricValue
           )}
           {status === 'blocked' && (
             <div style={{ fontFamily: MONO, fontSize: 10, color: P.red }}>
-              Dispatch records show you're LET 2-4 — this board is for LET 1 cadets only.
+              Couldn't verify you as a LET 1 cadet in dispatch — double-check your name, company, and birthdate.
             </div>
           )}
           {status === 'error' && (

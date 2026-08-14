@@ -1180,8 +1180,8 @@
     "semantic_hash": ""
   },
   "src/components/admin/panels/tvremote/TvRemotePanel.jsx": {
-    "mtime": 1786697627.4113932,
-    "ast_hash": "be59c98a334c4205b260928d6d359fcf",
+    "mtime": 1786715839.1174414,
+    "ast_hash": "0d5c9595f5c2d29b3464e5d55ed229f6",
     "semantic_hash": ""
   },
   "src/components/creed/CreedHub.jsx": {
@@ -1445,8 +1445,8 @@
     "semantic_hash": ""
   },
   "src/hooks/useTvDailySettings.js": {
-    "mtime": 1786545490.342632,
-    "ast_hash": "68b09017d40af09ffee4e15e55693110",
+    "mtime": 1786715826.1747556,
+    "ast_hash": "5713c2f3e9dcc2418b220625af7e4673",
     "semantic_hash": ""
   },
   "src/hooks/useTvEventOptions.js": {
@@ -1605,8 +1605,8 @@
     "semantic_hash": ""
   },
   "src/components/creed/CreedLeaderboardPanel.jsx": {
-    "mtime": 1786707537.633036,
-    "ast_hash": "bfa5d456926c25a5aebfd34b0eacb153",
+    "mtime": 1786717087.7615192,
+    "ast_hash": "c3789fc77e8008083a80c16870fa3df1",
     "semantic_hash": ""
   },
   "src/components/tv/control-center/StepRangeLayout.jsx": {
@@ -1655,13 +1655,23 @@
     "semantic_hash": ""
   },
   "src/lib/creedLeaderboard.js": {
-    "mtime": 1786661485.314693,
-    "ast_hash": "2068d8246b03761f8b925a01febfefcb",
+    "mtime": 1786717066.156987,
+    "ast_hash": "b9373fd38f1e0ab95c9b9cfeaa2b48b8",
     "semantic_hash": ""
   },
   "supabase/creed_leaderboard.sql": {
     "mtime": 1786661474.8291411,
     "ast_hash": "ecad173466ff9c682c47fbebe658ff87",
+    "semantic_hash": ""
+  },
+  "supabase/creed_leaderboard_dispatch_verify.sql": {
+    "mtime": 1786717050.1393785,
+    "ast_hash": "0cae53904b4f73bfaec40f5cb92ded07",
+    "semantic_hash": ""
+  },
+  "supabase/creed_leaderboard_wipe.sql": {
+    "mtime": 1786717059.7462218,
+    "ast_hash": "ef17171aaaaf7e0b521d942dcc81ed47",
     "semantic_hash": ""
   }
 }

@@ -10963,7 +10963,7 @@
       "label": "public.creed_verify_attempts",
       "file_type": "code",
       "source_file": "supabase/creed_leaderboard_dispatch_verify.sql",
-      "source_location": "L25",
+      "source_location": "L24",
       "_origin": "ast",
       "id": "supabase_creed_leaderboard_dispatch_verify_public_creed_verify_attempts",
       "community": 203,
@@ -10974,7 +10974,7 @@
       "label": "public.verify_creed_eligibility()",
       "file_type": "code",
       "source_file": "supabase/creed_leaderboard_dispatch_verify.sql",
-      "source_location": "L40",
+      "source_location": "L39",
       "_origin": "ast",
       "id": "supabase_creed_leaderboard_dispatch_verify_public_verify_creed_eligibility",
       "community": 203,
@@ -51309,7 +51309,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "supabase/creed_leaderboard_dispatch_verify.sql",
-      "source_location": "L25",
+      "source_location": "L24",
       "weight": 1.0,
       "_origin": "ast",
       "source": "supabase_creed_leaderboard_dispatch_verify",
@@ -51320,7 +51320,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "supabase/creed_leaderboard_dispatch_verify.sql",
-      "source_location": "L40",
+      "source_location": "L39",
       "weight": 1.0,
       "_origin": "ast",
       "source": "supabase_creed_leaderboard_dispatch_verify",
@@ -51331,7 +51331,7 @@
       "relation": "reads_from",
       "confidence": "EXTRACTED",
       "source_file": "supabase/creed_leaderboard_dispatch_verify.sql",
-      "source_location": "L49",
+      "source_location": "L48",
       "weight": 1.0,
       "_origin": "ast",
       "source": "supabase_creed_leaderboard_dispatch_verify_public_verify_creed_eligibility",
@@ -61359,5 +61359,5 @@
     }
   ],
   "hyperedges": [],
-  "built_at_commit": "656cc7dd55933775c44cd4a2bef9577378a753cc"
+  "built_at_commit": "08a8fc856d9c0252ba2418f24b0b08452ba5c2d3"
 }

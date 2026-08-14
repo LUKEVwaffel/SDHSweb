@@ -13,13 +13,12 @@
 -- never the underlying row.
 --
 -- MATCH RULE: exact match on trimmed/case-insensitive name + company +
--- birthdate. If a match exists and its let_level is 2/3/4, block. If no
--- match is found (not yet in dispatch, mismatched entry), allow — this stays
--- an honor-system fallback for legitimate LET 1 cadets who aren't in the
--- roster yet; it only hard-blocks identities the dispatch data actually
--- confirms as LET 2-4. Company/name are effectively public (team rosters),
--- so birthdate is the only real secret here — rate-limited below so this
--- can't be used to brute-force a cadet's birthdate.
+-- birthdate required. Eligible ONLY if that match exists AND its let_level
+-- is '1' — no match (not in dispatch, made-up identity, typo) blocks same as
+-- a confirmed LET 2/3/4 match. This is a real identity check, not an honor-
+-- system fallback. Company/name are effectively public (team rosters), so
+-- birthdate is the only real secret here — rate-limited below so this can't
+-- be used to brute-force a cadet's birthdate.
 -- ============================================================================
 
 create table if not exists public.creed_verify_attempts (
@@ -61,10 +60,7 @@ begin
      and birthdate = p_birthdate
    limit 1;
 
-  if v_let_level in ('2', '3', '4') then
-    return false;
-  end if;
-  return true;
+  return v_let_level = '1';
 end $$;
 
 revoke all on function public.verify_creed_eligibility(text, text, date, text) from public;
