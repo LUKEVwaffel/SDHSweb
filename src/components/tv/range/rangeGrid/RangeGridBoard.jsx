@@ -97,10 +97,17 @@ export default function RangeGridBoard({ grid, editable, fullBleed = false, onCh
     onChange(grid.map((x) => (x.id === id ? { ...x, visible: false } : x)));
   }
 
+  // fullBleed (the live kiosk) sits in a real height:100vh ancestor chain, so
+  // height:100% resolves fine there. The editor's canvas does not — it's
+  // embedded in an auto-height admin panel, where a percentage height has no
+  // basis and collapses (renders as a thin strip). aspect-ratio sizes the
+  // canvas from its own resolved width instead, independent of the parent's
+  // height, and doubles as an accurate 16:9 TV preview while editing.
   const canvasStyle = {
     position: 'relative',
-    width: fullBleed ? '100%' : 'min(1400px, 100%)',
-    height: fullBleed ? '100%' : 'max(560px, 100%)',
+    width: fullBleed ? '100%' : 'min(1800px, 100%)',
+    height: fullBleed ? '100%' : undefined,
+    aspectRatio: fullBleed ? undefined : '16 / 9',
     flexShrink: 0,
     backgroundColor: P.deep,
     backgroundImage: editable

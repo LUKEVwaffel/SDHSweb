@@ -397,7 +397,15 @@ export default function TvRemotePanel() {
           )}
 
           {activeTab === 'rangeLayout' && selectedScreen === 'range' && (
-            <StepRangeLayout config={draft.rangeConfig} settings={settings} onChange={patchRange} />
+            <StepRangeLayout
+              config={draft.rangeConfig}
+              settings={settings}
+              onChange={patchRange}
+              onSave={save}
+              saving={saving}
+              flash={flash}
+              saveError={saveError}
+            />
           )}
 
           {activeTab === 'announcements' && selectedScreen === 'range' && (
