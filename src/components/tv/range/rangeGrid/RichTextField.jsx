@@ -1,4 +1,5 @@
 import { useRef, useEffect, useState, useCallback } from 'react';
+import { createPortal } from 'react-dom';
 import { P, mono, radius } from '../../../admin/theme.js';
 import { domToRuns, stringToRuns, runsToPlainText, truncateRuns } from './richText.jsx';
 
@@ -57,6 +58,14 @@ function PlaceholderStyle() {
  * on every keystroke is the classic way to break the caret position.
  * Serializes to the run model (richText.js) on blur and after every
  * formatting command, not per keystroke.
+ *
+ * The toolbar is portaled to document.body — `position: fixed` only escapes
+ * to the true viewport when no ancestor sets a transform/contain/filter;
+ * container-query wrappers (containerType, used by RangeGridClock's tile and
+ * the `text` widget) count as "contain" for this purpose, so without the
+ * portal the toolbar would anchor to whichever tile happens to be its
+ * nearest such ancestor instead of the screen — invisible or off-position
+ * anywhere that isn't inside one of those tiles (e.g. StepRangeNotices.jsx).
  */
 export default function RichTextField({ value, onChange, placeholder, multiline = false, maxLength, baseStyle }) {
   const ref = useRef(null);
@@ -124,14 +133,14 @@ export default function RichTextField({ value, onChange, placeholder, multiline 
           ...baseStyle,
         }}
       />
-      {toolbar && (
+      {toolbar && createPortal(
         <div
           onPointerDown={(e) => e.stopPropagation()}
           style={{
             position: 'fixed', top: toolbar.top - 38, left: toolbar.left, transform: 'translateX(-50%)',
             display: 'flex', alignItems: 'center', gap: 4, padding: '4px 6px', borderRadius: radius.sm,
             background: P.ink, border: `1px solid ${P.hairStrong}`, boxShadow: '0 8px 20px rgba(0,0,0,0.5)',
-            zIndex: 1000,
+            zIndex: 10000,
           }}
         >
           <ToolbarBtn onClick={() => exec('bold')} label="B" />
@@ -150,7 +159,8 @@ export default function RichTextField({ value, onChange, placeholder, multiline 
               }}
             />
           ))}
-        </div>
+        </div>,
+        document.body,
       )}
     </div>
   );
