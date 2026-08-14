@@ -25,7 +25,7 @@
     "semantic_hash": "c1ee9ce6a4fe04105dbf8e619390df5e"
   },
   "src/App.jsx": {
-    "mtime": 1786701940.8835175,
+    "mtime": 1786615158.7119336,
     "ast_hash": "564a2e5246191e41d27509269eee99d9",
     "semantic_hash": ""
   },
@@ -1180,43 +1180,43 @@
     "semantic_hash": ""
   },
   "src/components/admin/panels/tvremote/TvRemotePanel.jsx": {
-    "mtime": 1786697627.4113932,
-    "ast_hash": "be59c98a334c4205b260928d6d359fcf",
+    "mtime": 1786632653.5687811,
+    "ast_hash": "21ba978daed4348081216fcb90977dd3",
     "semantic_hash": ""
   },
   "src/components/creed/CreedHub.jsx": {
-    "mtime": 1786661644.907099,
-    "ast_hash": "ddd9c01a41f47cbf1d341b72a6e196a2",
+    "mtime": 1786615133.0725138,
+    "ast_hash": "5337b76b7f56e3d55eef121d7edbeee8",
     "semantic_hash": ""
   },
   "src/components/creed/CreedUi.jsx": {
-    "mtime": 1786661545.3625026,
-    "ast_hash": "98c178ddc79ed8745a7701cec2213e88",
+    "mtime": 1786615099.6468005,
+    "ast_hash": "8a0808659c76de8311a9d76db00049a6",
     "semantic_hash": ""
   },
   "src/components/creed/FillBlankGame.jsx": {
-    "mtime": 1786707462.1491697,
-    "ast_hash": "f7a1c34ead605434e86b47b073391b78",
+    "mtime": 1786615563.3987513,
+    "ast_hash": "123aeb425c41e612ff399add213ad7d5",
     "semantic_hash": ""
   },
   "src/components/creed/RecallGame.jsx": {
-    "mtime": 1786707486.8272107,
-    "ast_hash": "c900dbcb4889f97f4f31fb187e00ee8d",
+    "mtime": 1786616243.4410384,
+    "ast_hash": "9802a5bcce52547fec20df3870040183",
     "semantic_hash": ""
   },
   "src/components/creed/ScrambleGame.jsx": {
-    "mtime": 1786707516.3413677,
-    "ast_hash": "131c59d4bbe49db4f5e4c8c22fa71af9",
+    "mtime": 1786615566.731385,
+    "ast_hash": "fd7188d2e502c419d57d22a0b14a2a13",
     "semantic_hash": ""
   },
   "src/components/creed/SequencingGame.jsx": {
-    "mtime": 1786661609.3123038,
-    "ast_hash": "934650fdbe55d83c466c36853fb3f9f6",
+    "mtime": 1786615542.4447517,
+    "ast_hash": "306cc58c5d0750e9f2178c5eaf850c25",
     "semantic_hash": ""
   },
   "src/components/creed/SpeedGame.jsx": {
-    "mtime": 1786661634.2164767,
-    "ast_hash": "470636c8c39a0674266d9285c63865a9",
+    "mtime": 1786616230.994366,
+    "ast_hash": "9ef8c27fa5d564096631a5ee9bd9b05f",
     "semantic_hash": ""
   },
   "src/components/creed/creedShared.js": {
@@ -1330,8 +1330,8 @@
     "semantic_hash": ""
   },
   "src/components/tv/control-center/StepRangeNotices.jsx": {
-    "mtime": 1786700788.54161,
-    "ast_hash": "f52d6c9c6d194c449232e1321198ab38",
+    "mtime": 1786612793.7262018,
+    "ast_hash": "21e3945d69f57f92628217527984443d",
     "semantic_hash": ""
   },
   "src/components/tv/control-center/StepRangeSchedule.jsx": {
@@ -1385,13 +1385,13 @@
     "semantic_hash": ""
   },
   "src/components/tv/range/TvRangeRaiderPracticeWidget.jsx": {
-    "mtime": 1786698630.9045632,
-    "ast_hash": "97f22fa57ddea2b032d3a0c2ca37c7bf",
+    "mtime": 1786632611.1002634,
+    "ast_hash": "2762c3e00de59b9fbcf22aff9a4d1bcf",
     "semantic_hash": ""
   },
   "src/components/tv/range/TvRangeRotationLayout.jsx": {
-    "mtime": 1786698650.4558597,
-    "ast_hash": "95b02fbc90868e3acaa1b01720cb94d5",
+    "mtime": 1786658510.5895188,
+    "ast_hash": "6aff5903ff5e16ea35e8018778fb1c3a",
     "semantic_hash": ""
   },
   "src/components/tv/range/TvRangeScreenBase.jsx": {
@@ -1597,71 +1597,6 @@
   "supabase/tv_shoutouts.sql": {
     "mtime": 1786442924.5149817,
     "ast_hash": "b69db7067f4e272ffdc03f7c9d6cb06c",
-    "semantic_hash": ""
-  },
-  "src/components/creed/ConfettiBurst.jsx": {
-    "mtime": 1786661496.8490806,
-    "ast_hash": "9c8a5af73c21aeb4bec0caa19fca7504",
-    "semantic_hash": ""
-  },
-  "src/components/creed/CreedLeaderboardPanel.jsx": {
-    "mtime": 1786707537.633036,
-    "ast_hash": "bfa5d456926c25a5aebfd34b0eacb153",
-    "semantic_hash": ""
-  },
-  "src/components/tv/control-center/StepRangeLayout.jsx": {
-    "mtime": 1786697622.5172696,
-    "ast_hash": "cdb04e6370515d1e142063ddcec60584",
-    "semantic_hash": ""
-  },
-  "src/components/tv/range/rangeGrid/RangeGridBoard.jsx": {
-    "mtime": 1786702550.2182906,
-    "ast_hash": "4221c9ab8134fda328ad76c218a77322",
-    "semantic_hash": ""
-  },
-  "src/components/tv/range/rangeGrid/RangeGridClock.jsx": {
-    "mtime": 1786698508.9657934,
-    "ast_hash": "afc9b5117fe95ce4b470ea793bbe2d42",
-    "semantic_hash": ""
-  },
-  "src/components/tv/range/rangeGrid/RangeGridCountdown.jsx": {
-    "mtime": 1786699838.683487,
-    "ast_hash": "ba5087fbb8cf74021c0d7c86051d806e",
-    "semantic_hash": ""
-  },
-  "src/components/tv/range/rangeGrid/RangeGridPhotoSingle.jsx": {
-    "mtime": 1786699876.8960893,
-    "ast_hash": "54b287e9e85eff897f4dfab61a25119a",
-    "semantic_hash": ""
-  },
-  "src/components/tv/range/rangeGrid/RangeGridWidgetContent.jsx": {
-    "mtime": 1786700830.538543,
-    "ast_hash": "0f20aea16e7414b236809977ab896036",
-    "semantic_hash": ""
-  },
-  "src/components/tv/range/rangeGrid/RichTextField.jsx": {
-    "mtime": 1786701897.2696514,
-    "ast_hash": "ec2c39e64f150c13d45dabec1144f424",
-    "semantic_hash": ""
-  },
-  "src/components/tv/range/rangeGrid/gridDefaults.js": {
-    "mtime": 1786699780.4015958,
-    "ast_hash": "492b44b9b366e76d20f129a4949d2279",
-    "semantic_hash": ""
-  },
-  "src/components/tv/range/rangeGrid/richText.jsx": {
-    "mtime": 1786701861.2119794,
-    "ast_hash": "a827076a9b93583c62c4e86943b70a75",
-    "semantic_hash": ""
-  },
-  "src/lib/creedLeaderboard.js": {
-    "mtime": 1786661485.314693,
-    "ast_hash": "2068d8246b03761f8b925a01febfefcb",
-    "semantic_hash": ""
-  },
-  "supabase/creed_leaderboard.sql": {
-    "mtime": 1786661474.8291411,
-    "ast_hash": "ecad173466ff9c682c47fbebe658ff87",
     "semantic_hash": ""
   }
 }
