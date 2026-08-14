@@ -7,6 +7,8 @@ import StepWidgetMode from '../../../tv/control-center/StepWidgetMode.jsx';
 import StepShoutout from '../../../tv/control-center/StepShoutout.jsx';
 import StepRangeSchedule from '../../../tv/control-center/StepRangeSchedule.jsx';
 import StepRangeNotices from '../../../tv/control-center/StepRangeNotices.jsx';
+import StepRangeLayout from '../../../tv/control-center/StepRangeLayout.jsx';
+import { DEFAULT_ROTATION_GRID } from '../../../tv/range/rangeGrid/gridDefaults.js';
 import { P, mono, oswald, inter, fs, sp, radius, ease } from '../../theme.js';
 import { Btn, PanelHeader } from '../../shared/ui.jsx';
 
@@ -26,6 +28,7 @@ const BASE_TABS = [
   { id: 'shoutout', label: 'Shoutout' },
 ];
 const RANGE_TAB = { id: 'rangeSchedule', label: 'Schedule Editor' };
+const RANGE_LAYOUT_TAB = { id: 'rangeLayout', label: 'Grid Layout' };
 const RANGE_NOTICE_TABS = [
   { id: 'announcements', label: 'Announcements' },
   { id: 'staffNotes', label: 'Staff Notes' },
@@ -46,6 +49,7 @@ const DEFAULT_RANGE_CONFIG = {
   customBlocks: [],
   showRaiderPractice: false,
   groupmeUrl: '',
+  rotationGrid: DEFAULT_ROTATION_GRID,
 };
 
 function rangeConfigFromRow(raw) {
@@ -61,6 +65,7 @@ function rangeConfigFromRow(raw) {
     customBlocks: raw?.custom_blocks ?? DEFAULT_RANGE_CONFIG.customBlocks,
     showRaiderPractice: raw?.show_raider_practice ?? DEFAULT_RANGE_CONFIG.showRaiderPractice,
     groupmeUrl: raw?.groupme_url ?? DEFAULT_RANGE_CONFIG.groupmeUrl,
+    rotationGrid: raw?.rotation_grid?.length ? raw.rotation_grid : DEFAULT_RANGE_CONFIG.rotationGrid,
   };
 }
 
@@ -195,6 +200,7 @@ export default function TvRemotePanel() {
         custom_blocks: draft.rangeConfig.customBlocks,
         show_raider_practice: draft.rangeConfig.showRaiderPractice,
         groupme_url: draft.rangeConfig.groupmeUrl || null,
+        rotation_grid: draft.rangeConfig.rotationGrid,
       },
     } : {};
 
@@ -209,7 +215,7 @@ export default function TvRemotePanel() {
     setTimeout(() => setFlash(''), 2500);
   }
 
-  const tabs = selectedScreen === 'range' ? [...BASE_TABS, RANGE_TAB, ...RANGE_NOTICE_TABS] : BASE_TABS;
+  const tabs = selectedScreen === 'range' ? [...BASE_TABS, RANGE_TAB, RANGE_LAYOUT_TAB, ...RANGE_NOTICE_TABS] : BASE_TABS;
 
   if (loading && hydratedFor !== selectedScreen) {
     return <div style={{ fontFamily: mono, fontSize: fs.xs, color: P.mute }}>LOADING…</div>;
@@ -388,6 +394,10 @@ export default function TvRemotePanel() {
 
           {activeTab === 'rangeSchedule' && selectedScreen === 'range' && (
             <StepRangeSchedule config={draft.rangeConfig} onChange={patchRange} />
+          )}
+
+          {activeTab === 'rangeLayout' && selectedScreen === 'range' && (
+            <StepRangeLayout config={draft.rangeConfig} settings={settings} onChange={patchRange} />
           )}
 
           {activeTab === 'announcements' && selectedScreen === 'range' && (
