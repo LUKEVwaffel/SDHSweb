@@ -20,6 +20,7 @@ export const GRID_WIDGET_LABELS = {
   shoutouts: 'SHOUTOUTS',
   countdown: 'NEXT EVENT COUNTDOWN',
   photoSingle: 'PHOTO + TITLE',
+  text: 'CUSTOM TEXT',
 };
 
 // Kinds whose *content* text (not structural chrome — kickers, date stamps,
@@ -49,6 +50,7 @@ export const DEFAULT_ROTATION_GRID = [
   { id: 'shoutouts', kind: 'shoutouts', x: 0.35, y: 0.78, w: 0.3, h: 0.2, visible: false },
   { id: 'countdown', kind: 'countdown', x: 0.02, y: 0.02, w: 0.28, h: 0.18, visible: false },
   { id: 'photoSingle', kind: 'photoSingle', x: 0.68, y: 0.78, w: 0.3, h: 0.2, visible: false },
+  { id: 'text', kind: 'text', x: 0.35, y: 0.4, w: 0.3, h: 0.2, visible: false },
 ];
 
 // `raider` is only ever offered when Range's showRaiderPractice checkbox

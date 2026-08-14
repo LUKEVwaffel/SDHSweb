@@ -1,6 +1,8 @@
 import { P, mono, fraunces, inter, fs, sp } from '../../../admin/theme.js';
 import { useTvUpcomingEvents } from '../../../../hooks/useTvUpcomingEvents.js';
 import { getTeam } from '../../../../lib/teams.js';
+import RichTextField from './RichTextField.jsx';
+import { RenderRuns } from './richText.jsx';
 
 function targetDate(event) {
   return new Date(`${event.date}T${event.event_time || '00:00:00'}`);
@@ -40,14 +42,15 @@ const titleInputStyle = {
  * Range-only "until next event" tile — same days/hrs/min math TvCountdownBand
  * (Outside's fixed top band, untouched) uses, rebuilt as a normal addable
  * grid widget so it's movable/removable/resizable instead of forced on.
- * Title is per-tile data (not the shared style-inspector concern); the title
- * and event-title text respect `style` (font/size/bold) like other
+ * Title is per-tile data, rich-text-editable per substring (richText.js) —
+ * not the shared whole-tile style-inspector concern. `style` (font/size)
+ * still sets the event-title line's base look, same as other
  * style-capable kinds — the day/hr/min numerals stay instrument-styled.
  */
 export default function RangeGridCountdown({ settings, style, data, editable, onUpdateTile }) {
   const featuredTeams = settings?.featured_teams ?? [];
   const [event] = useTvUpcomingEvents(1, featuredTeams);
-  const title = data?.title || 'NEXT EVENT';
+  const titleRuns = data?.runs ?? data?.title;
 
   const textFont = style?.fontFamily ?? mono;
   const titleStyle = { fontFamily: textFont, fontSize: fs.micro, letterSpacing: '0.24em', color: P.gold };
@@ -64,15 +67,14 @@ export default function RangeGridCountdown({ settings, style, data, editable, on
       display: 'flex', flexDirection: 'column', justifyContent: 'center', gap: sp[2],
     }}>
       {editable ? (
-        <input
-          value={title}
-          onChange={(e) => onUpdateTile?.({ data: { ...data, title: e.target.value } })}
-          onPointerDown={(e) => e.stopPropagation()}
+        <RichTextField
+          value={titleRuns}
+          onChange={(runs) => onUpdateTile?.({ data: { ...data, runs, title: undefined } })}
           placeholder="NEXT EVENT"
-          style={{ ...titleInputStyle, fontFamily: textFont }}
+          baseStyle={{ ...titleInputStyle, fontFamily: textFont }}
         />
       ) : (
-        <div style={titleStyle}>{title}</div>
+        <div style={titleStyle}><RenderRuns runs={titleRuns || 'NEXT EVENT'} /></div>
       )}
 
       {!event ? (

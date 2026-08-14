@@ -1,6 +1,8 @@
 import { useState, useId } from 'react';
 import { P, mono, oswald, fs, sp, radius } from '../../../admin/theme.js';
 import { uploadTvDailyPhoto, deleteTvDailyPhoto } from '../../../../lib/tvDailyPhotos.js';
+import RichTextField from './RichTextField.jsx';
+import { RenderRuns, runsToPlainText } from './richText.jsx';
 
 function Placeholder({ children }) {
   return (
@@ -30,7 +32,8 @@ export default function RangeGridPhotoSingle({ style, data, editable, onUpdateTi
   const [uploading, setUploading] = useState(false);
   const inputId = useId();
   const photoUrl = data?.photoUrl ?? null;
-  const title = data?.photoTitle ?? '';
+  const titleRuns = data?.titleRuns ?? data?.photoTitle;
+  const titlePlain = runsToPlainText(titleRuns);
 
   async function handleFile(file) {
     if (!file) return;
@@ -72,15 +75,14 @@ export default function RangeGridPhotoSingle({ style, data, editable, onUpdateTi
           justifyContent: 'flex-end', gap: sp[2], padding: sp[3],
           background: 'linear-gradient(to top, rgba(6,16,31,0.88) 0%, rgba(6,16,31,0.35) 55%, transparent 80%)',
         }}>
-          <input
-            value={title}
-            onChange={(e) => onUpdateTile?.({ data: { ...data, photoTitle: e.target.value } })}
-            onPointerDown={(e) => e.stopPropagation()}
+          <RichTextField
+            value={titleRuns}
+            onChange={(runs) => onUpdateTile?.({ data: { ...data, titleRuns: runs, photoTitle: undefined } })}
             placeholder="Widget title…"
-            style={{
+            baseStyle={{
               width: '100%', background: 'rgba(6,16,31,0.6)', border: `1px solid ${P.hairStrong}`,
               borderRadius: radius.sm, color: P.cream, fontFamily: oswald, fontSize: 13,
-              padding: '6px 8px', outline: 'none',
+              padding: '6px 8px',
             }}
           />
           <div style={{ display: 'flex', gap: sp[2] }}>
@@ -120,20 +122,20 @@ export default function RangeGridPhotoSingle({ style, data, editable, onUpdateTi
   }
 
   if (!photoUrl) {
-    return <Placeholder>{title && <span style={titleStyle}>{title}</span>}</Placeholder>;
+    return <Placeholder>{titlePlain && <span style={titleStyle}><RenderRuns runs={titleRuns} /></span>}</Placeholder>;
   }
 
   return (
     <div style={{ position: 'relative', width: '100%', height: '100%' }}>
-      <img src={photoUrl} alt={title || ''} style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }} />
-      {title && (
+      <img src={photoUrl} alt={titlePlain} style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }} />
+      {titlePlain && (
         <>
           <div style={{
             position: 'absolute', inset: 0, pointerEvents: 'none',
             background: 'linear-gradient(to top, rgba(6,16,31,0.85) 0%, rgba(6,16,31,0.15) 35%, transparent 55%)',
           }} />
           <div style={{ position: 'absolute', bottom: sp[3], left: sp[3], right: sp[3] }}>
-            <span style={titleStyle}>{title}</span>
+            <span style={titleStyle}><RenderRuns runs={titleRuns} /></span>
           </div>
         </>
       )}

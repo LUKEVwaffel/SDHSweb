@@ -9,6 +9,8 @@ import TvRangeRaiderPracticeWidget from '../TvRangeRaiderPracticeWidget.jsx';
 import RangeGridClock from './RangeGridClock.jsx';
 import RangeGridCountdown from './RangeGridCountdown.jsx';
 import RangeGridPhotoSingle from './RangeGridPhotoSingle.jsx';
+import RichTextField from './RichTextField.jsx';
+import { RenderRuns } from './richText.jsx';
 
 function eventDateLabel(event) {
   const d = new Date(`${event.date}T${event.event_time || '00:00:00'}`);
@@ -102,6 +104,33 @@ function PhotoTile({ settings }) {
   return <TvPhotoCarousel photos={photos} />;
 }
 
+// Freeform "Custom Text" box — the general answer to "edit any text": a
+// tile the admin types anything into and formats per-substring (bold,
+// italic, underline, color) via RichTextField's floating toolbar, unlike
+// STYLE_CAPABLE_KINDS' whole-tile font/size/bold override. Font size scales
+// with the tile's own box (container query), like a real text box.
+function CustomTextTile({ data, editable, onUpdateTile }) {
+  return (
+    <div style={{
+      height: '100%', width: '100%', containerType: 'inline-size',
+      display: 'flex', alignItems: 'center', justifyContent: 'center', textAlign: 'center',
+      fontFamily: inter, fontSize: 'clamp(12px, 6cqw, 64px)', color: P.cream, lineHeight: 1.3,
+    }}>
+      {editable ? (
+        <RichTextField
+          multiline
+          value={data?.runs}
+          onChange={(runs) => onUpdateTile?.({ data: { ...data, runs } })}
+          placeholder="Type anything…"
+          baseStyle={{ width: '100%', textAlign: 'center' }}
+        />
+      ) : (
+        <div><RenderRuns runs={data?.runs} /></div>
+      )}
+    </div>
+  );
+}
+
 // Single place every rotation-grid widget kind resolves to real content —
 // shared by the live kiosk (TvRangeRotationLayout.jsx) and the admin editor
 // (StepRangeLayout.jsx) so the two can never drift apart on what a kind
@@ -137,6 +166,8 @@ export default function RangeGridWidgetContent({
       return <TvBottomWidget settings={settings} now={now} />;
     case 'shoutouts':
       return <TvShoutoutsPanel settings={settings} />;
+    case 'text':
+      return <CustomTextTile data={data} editable={editable} onUpdateTile={onUpdateTile} />;
     default:
       return null;
   }
