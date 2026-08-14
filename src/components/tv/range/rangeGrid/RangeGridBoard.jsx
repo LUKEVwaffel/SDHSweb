@@ -198,6 +198,12 @@ export default function RangeGridBoard({ grid, editable, fullBleed = false, onCh
           >
             Reset style
           </button>
+
+          {(selectedTile.kind === 'announcements' || selectedTile.kind === 'staffnotes') && (
+            <span style={{ fontFamily: inter, fontSize: 11, color: P.faint, fontStyle: 'italic', whiteSpace: 'nowrap' }}>
+              This bolds the whole tile. To bold/color just one word, edit the text in the {selectedTile.kind === 'announcements' ? 'Announcements' : 'Staff Notes'} tab instead.
+            </span>
+          )}
         </div>
       )}
 
