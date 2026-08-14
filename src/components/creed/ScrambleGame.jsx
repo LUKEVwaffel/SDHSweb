@@ -43,13 +43,17 @@ export default function ScrambleGame({ onExit }) {
   }, [line, seed, placed]);
 
   const isFull = placed.length === line.words.length;
-  const isCorrect = isFull && placed.every((w, i) => w.idx === i);
+  const isCorrect = isFull && placed.every((w, i) => w.raw === line.words[i].raw);
   const isWrong = isFull && !isCorrect;
 
   const place = useCallback((word) => {
     if (isFull) return;
     setPlaced(p => [...p, word]);
   }, [isFull]);
+
+  const removeAt = useCallback((i) => {
+    setPlaced(p => p.filter((_, idx) => idx !== i));
+  }, []);
 
   const resetLine = useCallback(() => {
     setPlaced([]);
@@ -145,12 +149,16 @@ export default function ScrambleGame({ onExit }) {
           {placed.length === 0 && (
             <span style={{ fontFamily: BODY, fontSize: 13, color: P.mute, opacity: 0.5 }}>Tap words below in order…</span>
           )}
-          {placed.map((w, i) => (
-            <span key={i} style={{
-              fontFamily: BODY, fontSize: 15, color: P.cream,
-              background: 'rgba(201,169,97,0.1)', border: `1px solid ${P.hairline}`, padding: '4px 10px',
-            }}>{w.raw}</span>
-          ))}
+          {placed.map((w, i) => {
+            const wrongSlot = w.raw !== line.words[i].raw;
+            return (
+              <button key={i} onClick={() => removeAt(i)} title="Tap to remove" style={{
+                fontFamily: BODY, fontSize: 15, color: P.cream, cursor: 'pointer',
+                background: wrongSlot ? P.wrongBg : 'rgba(201,169,97,0.1)',
+                border: `1px solid ${wrongSlot ? P.red : P.hairline}`, padding: '4px 10px',
+              }}>{w.raw}</button>
+            );
+          })}
         </div>
 
         {isCorrect && (
@@ -160,7 +168,7 @@ export default function ScrambleGame({ onExit }) {
         )}
         {isWrong && (
           <div style={{ fontFamily: MONO, fontSize: 11, letterSpacing: '0.14em', color: P.red, marginBottom: 16 }}>
-            ✕ NOT QUITE — RESET AND TRY AGAIN
+            ✕ NOT QUITE — WORDS IN RED ARE OUT OF PLACE, TAP TO REMOVE
           </div>
         )}
 
