@@ -19,6 +19,11 @@ export function useTvDailySettings(screenSlug = DEFAULT_SCREEN) {
   useEffect(() => {
     let alive = true;
     setLoading(true);
+    // Clear the previous screen's row immediately, not just after the new
+    // fetch resolves — otherwise a consumer that hydrates local state off
+    // `settings` truthiness (TvRemotePanel's draft) can fire mid-switch and
+    // hydrate from the OLD screen's data while this one is in flight.
+    setSettings(null);
     SB.from('tv_daily_settings').select('*').eq('id', screenSlug).maybeSingle().then(({ data }) => {
       if (!alive) return;
       setSettings(data);

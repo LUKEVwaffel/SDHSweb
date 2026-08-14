@@ -97,9 +97,16 @@ function draftFromSettings(settings) {
 // Range additionally gets a Schedule Editor tab since it's the one screen
 // with a period-based content engine (src/lib/tvRangeSchedule.js) instead of
 // a flat all-day rotation.
+const LAST_SCREEN_KEY = 'tvRemote.lastScreen';
+
 export default function TvRemotePanel() {
   const rootRef = useRef(null);
-  const [selectedScreen, setSelectedScreen] = useState('default');
+  // Remembers the last screen tab across remounts (switching admin sections
+  // and coming back to TV Remote) so a mid-edit visit to another panel
+  // doesn't dump the admin back on Outside/Bell Schedule.
+  const [selectedScreen, setSelectedScreen] = useState(
+    () => (SCREENS.some((s) => s.slug === sessionStorage.getItem(LAST_SCREEN_KEY)) && sessionStorage.getItem(LAST_SCREEN_KEY)) || 'default'
+  );
   const { settings, loading } = useTvDailySettings(selectedScreen);
   const [activeTab, setActiveTab] = useState('schedule');
   const [draft, setDraft] = useState(() => draftFromSettings(null));
@@ -136,6 +143,7 @@ export default function TvRemotePanel() {
   function selectScreen(slug) {
     if (slug === selectedScreen) return;
     setSelectedScreen(slug);
+    sessionStorage.setItem(LAST_SCREEN_KEY, slug);
     setActiveTab('schedule');
     setSaveError(null);
   }
