@@ -17,6 +17,43 @@ export function runsToPlainText(runs) {
   return stringToRuns(runs).map((r) => r.text).join('');
 }
 
+// Trims a run list to a total plain-text length, cutting the run that
+// crosses the boundary rather than dropping it whole.
+export function truncateRuns(runs, maxLength) {
+  const out = [];
+  let used = 0;
+  for (const r of stringToRuns(runs)) {
+    if (used >= maxLength) break;
+    const remaining = maxLength - used;
+    const text = r.text.length > remaining ? r.text.slice(0, remaining) : r.text;
+    out.push({ ...r, text });
+    used += text.length;
+  }
+  return out;
+}
+
+// tv_notices.title/message are plain `text` columns (supabase/tv_notices.sql)
+// — no schema change needed to carry rich formatting, since a `text` column
+// happily holds a JSON-encoded string. storageStringToRuns falls back to
+// treating the value as plain text whenever it isn't valid run JSON, so
+// every notice written before this feature shipped keeps rendering exactly
+// as it did.
+const RUNS_MARKER = 'rgruns:';
+
+export function runsToStorageString(runs) {
+  return RUNS_MARKER + JSON.stringify(stringToRuns(runs));
+}
+
+export function storageStringToRuns(value) {
+  if (typeof value !== 'string' || !value.startsWith(RUNS_MARKER)) return stringToRuns(value);
+  try {
+    const parsed = JSON.parse(value.slice(RUNS_MARKER.length));
+    return Array.isArray(parsed) ? parsed : stringToRuns(value);
+  } catch {
+    return stringToRuns(value);
+  }
+}
+
 function sameFormat(a, b) {
   return a.bold === b.bold && a.italic === b.italic && a.underline === b.underline && a.color === b.color;
 }
@@ -64,17 +101,20 @@ export function domToRuns(el) {
 export function RenderRuns({ runs }) {
   const list = stringToRuns(runs);
   if (!list.length) return null;
-  return list.map((r, i) => (
-    <span
-      key={i}
-      style={{
-        fontWeight: r.bold ? 700 : undefined,
-        fontStyle: r.italic ? 'italic' : undefined,
-        textDecoration: r.underline ? 'underline' : undefined,
-        color: r.color || undefined,
-      }}
-    >
-      {r.text}
-    </span>
-  ));
+  return list.map((r, i) => {
+    if (r.text === '\n') return <br key={i} />;
+    return (
+      <span
+        key={i}
+        style={{
+          fontWeight: r.bold ? 700 : undefined,
+          fontStyle: r.italic ? 'italic' : undefined,
+          textDecoration: r.underline ? 'underline' : undefined,
+          color: r.color || undefined,
+        }}
+      >
+        {r.text}
+      </span>
+    );
+  });
 }

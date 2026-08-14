@@ -1,6 +1,6 @@
 import { useRef, useEffect, useState, useCallback } from 'react';
 import { P, mono, radius } from '../../../admin/theme.js';
-import { domToRuns, stringToRuns } from './richText.jsx';
+import { domToRuns, stringToRuns, runsToPlainText, truncateRuns } from './richText.jsx';
 
 const SWATCHES = [
   { label: 'Cream', value: P.cream },
@@ -58,7 +58,7 @@ function PlaceholderStyle() {
  * Serializes to the run model (richText.js) on blur and after every
  * formatting command, not per keystroke.
  */
-export default function RichTextField({ value, onChange, placeholder, multiline = false, baseStyle }) {
+export default function RichTextField({ value, onChange, placeholder, multiline = false, maxLength, baseStyle }) {
   const ref = useRef(null);
   const mountedRunsRef = useRef(null);
   const [toolbar, setToolbar] = useState(null);
@@ -73,10 +73,14 @@ export default function RichTextField({ value, onChange, placeholder, multiline 
 
   const commit = useCallback(() => {
     if (!ref.current) return;
-    const runs = domToRuns(ref.current);
+    let runs = domToRuns(ref.current);
+    if (maxLength && runsToPlainText(runs).length > maxLength) {
+      runs = truncateRuns(runs, maxLength);
+      buildDom(ref.current, runs); // clip the visible DOM too, not just what's saved
+    }
     mountedRunsRef.current = runs;
     onChange(runs);
-  }, [onChange]);
+  }, [onChange, maxLength]);
 
   function updateToolbarFromSelection() {
     const sel = window.getSelection();

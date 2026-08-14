@@ -2,26 +2,32 @@ import { useState } from 'react';
 import { P, mono, inter, fs, sp, radius, shadow, ease } from '../../admin/theme.js';
 import { useTvNotices } from '../../../hooks/useTvNotices.js';
 import { createTvNotice, updateTvNotice, deleteTvNotice } from '../../../lib/tvNotices.js';
+import RichTextField from '../range/rangeGrid/RichTextField.jsx';
+import { RenderRuns, runsToPlainText, runsToStorageString, storageStringToRuns } from '../range/rangeGrid/richText.jsx';
 
 const TITLE_MAX = 80;
 const MESSAGE_MAX = 280;
 
-const fieldStyle = {
+const fieldBaseStyle = {
   width: '100%', padding: sp[3], borderRadius: radius.sm,
   border: `1px solid ${P.hair}`, background: P.deep, color: P.cream,
   fontFamily: inter, fontSize: 14, boxSizing: 'border-box',
 };
 
 function NewEntryForm({ onSubmit, saving }) {
-  const [title, setTitle] = useState('');
-  const [message, setMessage] = useState('');
+  const [title, setTitle] = useState([]);
+  const [message, setMessage] = useState([]);
 
   async function submit() {
-    if (!title.trim() || !message.trim()) return;
-    await onSubmit({ title: title.trim(), message: message.trim() });
-    setTitle('');
-    setMessage('');
+    const titlePlain = runsToPlainText(title).trim();
+    const messagePlain = runsToPlainText(message).trim();
+    if (!titlePlain || !messagePlain) return;
+    await onSubmit({ title: runsToStorageString(title), message: runsToStorageString(message) });
+    setTitle([]);
+    setMessage([]);
   }
+
+  const canSubmit = !!runsToPlainText(title).trim() && !!runsToPlainText(message).trim();
 
   return (
     <div style={{
@@ -32,32 +38,34 @@ function NewEntryForm({ onSubmit, saving }) {
       <label style={{ display: 'block', fontFamily: mono, fontSize: fs.micro, color: P.gold, letterSpacing: '0.2em', marginBottom: sp[2] }}>
         TITLE
       </label>
-      <input
+      <RichTextField
         value={title}
-        onChange={(e) => setTitle(e.target.value.slice(0, TITLE_MAX))}
+        onChange={setTitle}
+        maxLength={TITLE_MAX}
         placeholder="Uniform inspection Friday"
-        style={{ ...fieldStyle, marginBottom: sp[4] }}
+        baseStyle={{ ...fieldBaseStyle, marginBottom: sp[4] }}
       />
 
       <label style={{ display: 'block', fontFamily: mono, fontSize: fs.micro, color: P.gold, letterSpacing: '0.2em', marginBottom: sp[2] }}>
         MESSAGE
       </label>
-      <textarea
+      <RichTextField
+        multiline
         value={message}
-        onChange={(e) => setMessage(e.target.value.slice(0, MESSAGE_MAX))}
+        onChange={setMessage}
+        maxLength={MESSAGE_MAX}
         placeholder="Full Class B uniform inspection this Friday during 6th period."
-        rows={3}
-        style={{ ...fieldStyle, resize: 'vertical', marginBottom: sp[4] }}
+        baseStyle={{ ...fieldBaseStyle, minHeight: '4.2em', marginBottom: sp[4] }}
       />
 
       <button
         onClick={submit}
-        disabled={saving || !title.trim() || !message.trim()}
+        disabled={saving || !canSubmit}
         style={{
           padding: `${sp[3]}px ${sp[5]}px`, borderRadius: radius.sm, border: 'none',
           background: P.gold, color: P.ink, fontFamily: mono, fontSize: fs.xs,
           letterSpacing: '0.1em', cursor: saving ? 'default' : 'pointer',
-          opacity: saving || !title.trim() || !message.trim() ? 0.5 : 1,
+          opacity: saving || !canSubmit ? 0.5 : 1,
           transition: `opacity 150ms ${ease}`,
         }}
       >
@@ -69,13 +77,22 @@ function NewEntryForm({ onSubmit, saving }) {
 
 function ExistingEntry({ entry, onSave, onDelete }) {
   const [editing, setEditing] = useState(false);
-  const [title, setTitle] = useState(entry.title);
-  const [message, setMessage] = useState(entry.message);
+  const [title, setTitle] = useState(() => storageStringToRuns(entry.title));
+  const [message, setMessage] = useState(() => storageStringToRuns(entry.message));
   const [busy, setBusy] = useState(false);
 
+  function startEditing() {
+    setTitle(storageStringToRuns(entry.title));
+    setMessage(storageStringToRuns(entry.message));
+    setEditing(true);
+  }
+
   async function save() {
+    const titlePlain = runsToPlainText(title).trim();
+    const messagePlain = runsToPlainText(message).trim();
+    if (!titlePlain || !messagePlain) return;
     setBusy(true);
-    await onSave(entry.id, { title: title.trim(), message: message.trim() });
+    await onSave(entry.id, { title: runsToStorageString(title), message: runsToStorageString(message) });
     setBusy(false);
     setEditing(false);
   }
@@ -89,10 +106,10 @@ function ExistingEntry({ entry, onSave, onDelete }) {
   if (editing) {
     return (
       <div style={{ padding: sp[4], borderRadius: radius.md, border: `1px solid ${P.hairStrong}`, marginBottom: sp[3] }}>
-        <input value={title} onChange={(e) => setTitle(e.target.value.slice(0, TITLE_MAX))} style={{ ...fieldStyle, marginBottom: sp[3] }} />
-        <textarea value={message} onChange={(e) => setMessage(e.target.value.slice(0, MESSAGE_MAX))} rows={3} style={{ ...fieldStyle, resize: 'vertical', marginBottom: sp[3] }} />
+        <RichTextField value={title} onChange={setTitle} maxLength={TITLE_MAX} baseStyle={{ ...fieldBaseStyle, marginBottom: sp[3] }} />
+        <RichTextField multiline value={message} onChange={setMessage} maxLength={MESSAGE_MAX} baseStyle={{ ...fieldBaseStyle, minHeight: '4.2em', marginBottom: sp[3] }} />
         <div style={{ display: 'flex', gap: sp[2] }}>
-          <button onClick={save} disabled={busy || !title.trim() || !message.trim()} style={{
+          <button onClick={save} disabled={busy || !runsToPlainText(title).trim() || !runsToPlainText(message).trim()} style={{
             padding: `${sp[2]}px ${sp[4]}px`, borderRadius: radius.sm, border: 'none',
             background: P.gold, color: P.ink, fontFamily: mono, fontSize: fs.micro, letterSpacing: '0.1em', cursor: 'pointer',
           }}>
@@ -115,11 +132,15 @@ function ExistingEntry({ entry, onSave, onDelete }) {
       padding: sp[4], borderRadius: radius.md, border: `1px solid ${P.hair}`, marginBottom: sp[3],
     }}>
       <div style={{ minWidth: 0 }}>
-        <div style={{ fontFamily: inter, fontSize: fs.base, fontWeight: 700, color: P.cream, marginBottom: 2 }}>{entry.title}</div>
-        <div style={{ fontFamily: inter, fontSize: fs.sm, color: P.mute, lineHeight: 1.5 }}>{entry.message}</div>
+        <div style={{ fontFamily: inter, fontSize: fs.base, fontWeight: 700, color: P.cream, marginBottom: 2 }}>
+          <RenderRuns runs={storageStringToRuns(entry.title)} />
+        </div>
+        <div style={{ fontFamily: inter, fontSize: fs.sm, color: P.mute, lineHeight: 1.5 }}>
+          <RenderRuns runs={storageStringToRuns(entry.message)} />
+        </div>
       </div>
       <div style={{ display: 'flex', gap: sp[2], flexShrink: 0 }}>
-        <button onClick={() => setEditing(true)} disabled={busy} style={{
+        <button onClick={startEditing} disabled={busy} style={{
           padding: `${sp[2]}px ${sp[3]}px`, borderRadius: radius.sm, border: `1px solid ${P.hair}`,
           background: 'transparent', color: P.mute, fontFamily: mono, fontSize: fs.micro, letterSpacing: '0.1em', cursor: 'pointer',
         }}>
@@ -143,6 +164,11 @@ function ExistingEntry({ entry, onSave, onDelete }) {
  * immediately on each action (not batched into TV Remote's Save button) since
  * this is a list with its own per-row lifecycle, not a scalar settings patch —
  * useTvNotices' realtime subscription reflects every change straight back.
+ *
+ * title/message are stored as rich-text run JSON (richText.js) inside the
+ * existing `text` columns — no schema change, since a text column happily
+ * holds a JSON string. storageStringToRuns falls back to plain text for any
+ * notice written before this shipped, so nothing existing breaks.
  */
 export default function StepRangeNotices({ screenSlug, category, heading, blurb }) {
   const { notices, loading } = useTvNotices(screenSlug);
@@ -175,7 +201,7 @@ export default function StepRangeNotices({ screenSlug, category, heading, blurb 
         {heading}
       </div>
       <div style={{ fontFamily: inter, fontSize: 13, color: P.mute, marginBottom: sp[5], lineHeight: 1.5 }}>
-        {blurb}
+        {blurb} Select any text below to bold, italicize, underline, or color it.
       </div>
 
       <NewEntryForm onSubmit={handleCreate} saving={adding} />

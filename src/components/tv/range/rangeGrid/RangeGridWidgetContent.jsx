@@ -10,7 +10,7 @@ import RangeGridClock from './RangeGridClock.jsx';
 import RangeGridCountdown from './RangeGridCountdown.jsx';
 import RangeGridPhotoSingle from './RangeGridPhotoSingle.jsx';
 import RichTextField from './RichTextField.jsx';
-import { RenderRuns } from './richText.jsx';
+import { RenderRuns, storageStringToRuns } from './richText.jsx';
 
 function eventDateLabel(event) {
   const d = new Date(`${event.date}T${event.event_time || '00:00:00'}`);
@@ -42,15 +42,18 @@ function EmptyState({ children }) {
 // title stays bold regardless of the `bold` toggle (matches the body text's
 // un-toggled weight so the two only ever differ when `bold` is on); `bold`
 // itself governs the body line — the toggle's actual effect.
+// notice.title/message are rich-text run JSON stored in tv_notices' existing
+// text columns (StepRangeNotices.jsx, richText.js) — falls back to plain
+// text automatically for any notice written before that shipped.
 function NoticeCard({ notice, style }) {
   const fontFamily = style?.fontFamily ?? inter;
   return (
     <div style={{ paddingBottom: sp[4], marginBottom: sp[4], borderBottom: `1px solid ${P.hair}` }}>
       <div style={{ fontFamily, fontSize: style?.fontSize ?? fs.base, fontWeight: 700, color: P.cream, marginBottom: sp[1] }}>
-        {notice.title}
+        <RenderRuns runs={storageStringToRuns(notice.title)} />
       </div>
       <div style={{ fontFamily, fontSize: style?.fontSize ?? fs.sm, fontWeight: style?.bold ? 700 : 400, color: P.mute, lineHeight: 1.5 }}>
-        {notice.message}
+        <RenderRuns runs={storageStringToRuns(notice.message)} />
       </div>
     </div>
   );
