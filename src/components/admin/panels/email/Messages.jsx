@@ -5,6 +5,7 @@ import { Btn, Card, Label, Input, PanelHeader, EmptyState } from '../../shared/u
 import { blocksToHtml, blocksToText } from './emailRender';
 import EmailBuilder from './builder/EmailBuilder';
 import { starterBlocks } from './builder/blocks';
+import { AUDIENCE_GROUPS, resolveAudienceEmails } from '../../../../lib/emailAudience';
 
 const STATUS_META = {
   draft:              { label: 'DRAFT',              color: P.mute },
@@ -27,7 +28,7 @@ export default function Messages({ adminId }) {
   const [missing, setMissing] = useState(false);
   const [sel, setSel] = useState(null);
   const [isNew, setIsNew] = useState(false);
-  const [form, setForm] = useState({ subject: '', blocks: [] });
+  const [form, setForm] = useState({ subject: '', blocks: [], testRecipient: '', audienceGroup: 'broadcast' });
   const [busy, setBusy] = useState('');
   const [sendState, setSendState] = useState('idle'); // idle | sending | sent | error
   const [sendMsg, setSendMsg] = useState('');
@@ -79,7 +80,7 @@ export default function Messages({ adminId }) {
   function newDraft() {
     setSel(null);
     setIsNew(true);
-    setForm({ subject: '', blocks: starterBlocks() });
+    setForm({ subject: '', blocks: starterBlocks(), testRecipient: '', audienceGroup: 'broadcast' });
     setBusy('');
     setDeletedNotice(false);
     resetSend();
@@ -87,7 +88,16 @@ export default function Messages({ adminId }) {
   function selectMsg(r) {
     setSel(r);
     setIsNew(false);
-    setForm({ subject: r.subject, blocks: rowToBlocks(r) });
+    // A stored recipient_group means the last save was a resolved audience —
+    // reopening keeps that selection so re-saving re-resolves fresh names
+    // instead of silently reverting to broadcast. A plain recipient_emails
+    // with no group (the old single-test-address path) surfaces as the
+    // manual override field instead.
+    setForm({
+      subject: r.subject, blocks: rowToBlocks(r),
+      testRecipient: !r.recipient_group ? (r.recipient_emails?.[0] || '') : '',
+      audienceGroup: r.recipient_group || 'broadcast',
+    });
     setBusy('');
     setDeletedNotice(false);
     resetSend();
@@ -124,9 +134,36 @@ export default function Messages({ adminId }) {
     const subject = form.subject.trim();
     if (!subject) { flash('Subject required'); return; }
     if (!form.blocks.length) { flash('Add at least one element'); return; }
+    const testRecipient = form.testRecipient.trim();
+    if (testRecipient && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(testRecipient)) {
+      flash('Test recipient is not a valid email'); return;
+    }
     const body_html = blocksToHtml(form.blocks, { subject });
     const body = blocksToText(form.blocks) || subject;
-    const payload = { subject, body, body_html, content_json: form.blocks };
+    // recipient_emails is otherwise server-only (set by generate_opticsend_drafts());
+    // leave opticsend-sourced rows' targeting untouched here. For a hand-built
+    // draft: the manual test address wins if set (deliverability testing,
+    // no group label), else a picked audience group resolves to a fresh
+    // email list at save time, else it's a plain full broadcast.
+    const isOpticsend = sel?.source === 'opticsend';
+    let targeting = {};
+    if (isS6 && !isOpticsend) {
+      if (testRecipient) {
+        targeting = { recipient_emails: [testRecipient], recipient_group: null };
+      } else if (form.audienceGroup !== 'broadcast') {
+        let emails;
+        try {
+          emails = await resolveAudienceEmails(SB, form.audienceGroup);
+        } catch (e) {
+          flash(`Could not resolve audience: ${e.message}`); return;
+        }
+        if (!emails.length) { flash('That audience has no emails on file'); return; }
+        targeting = { recipient_emails: emails, recipient_group: form.audienceGroup };
+      } else {
+        targeting = { recipient_emails: null, recipient_group: null };
+      }
+    }
+    const payload = { subject, body, body_html, content_json: form.blocks, ...targeting };
     if (sel) {
       await SB.from('email_messages').update(payload).eq('id', sel.id);
     } else {
@@ -159,7 +196,10 @@ export default function Messages({ adminId }) {
   }
   async function send(r) {
     if (r.status !== 'approved' || sendState === 'sending') return;
-    if (!confirm('Send this message to all active subscribers now?')) return;
+    const target = r.recipient_emails?.length
+      ? `to ${r.recipient_emails.join(', ')}`
+      : 'to all active subscribers';
+    if (!confirm(`Send this message ${target} now?`)) return;
     setSendState('sending');
     setSendMsg('Contacting mail server…');
     const { data, error } = await SB.functions.invoke('send-email', { body: { message_id: r.id } });
@@ -254,12 +294,44 @@ export default function Messages({ adminId }) {
         {busy && <div style={{ fontFamily: mono, fontSize: fs.tiny, color: busy.includes('failed') || busy.includes('required') || busy.includes('Add') ? P.red : P.green, marginTop: sp[2] }}>{busy}</div>}
         {sel?.recipient_emails?.length > 0 && (
           <div style={{ fontFamily: mono, fontSize: fs.tiny, color: P.green, marginTop: sp[2] }}>
-            🎯 TARGETED SEND: {sel.recipient_emails.length} recipient{sel.recipient_emails.length === 1 ? '' : 's'} (not the full subscriber list)
+            🎯 {sel.recipient_group ? `TARGETING: ${AUDIENCE_GROUPS.find((g) => g.id === sel.recipient_group)?.label || sel.recipient_group}` : 'TARGETED SEND'} · {sel.recipient_emails.length} recipient{sel.recipient_emails.length === 1 ? '' : 's'} (not the full subscriber list)
           </div>
         )}
         {sel?.source === 'opticsend' && !sel?.recipient_emails?.length && (
           <div style={{ fontFamily: mono, fontSize: fs.tiny, color: P.red, marginTop: sp[2] }}>
             ⚠ NO RECIPIENTS ON FILE. Add Raiders cadets' emails in People → Cadet Database before sending.
+          </div>
+        )}
+        {isS6 && editable && sel?.source !== 'opticsend' && (
+          <div style={{ marginTop: sp[3] }}>
+            <Label>Audience</Label>
+            <div style={{ display: 'flex', gap: sp[2], flexWrap: 'wrap' }}>
+              {AUDIENCE_GROUPS.map((g) => (
+                <Btn
+                  key={g.id}
+                  variant={form.audienceGroup === g.id ? 'gold' : 'ghost'}
+                  size="sm"
+                  onClick={() => setForm((f) => ({ ...f, audienceGroup: g.id }))}
+                >
+                  {g.label}
+                </Btn>
+              ))}
+            </div>
+            <div style={{ fontFamily: mono, fontSize: fs.tiny, color: P.mute, marginTop: sp[1] }}>
+              Cadets only, never parents. Resolved fresh from the roster each time this draft is saved.
+            </div>
+
+            <div style={{ marginTop: sp[3] }}>
+              <Label>Test recipient override (optional, s6-only)</Label>
+              <Input
+                value={form.testRecipient}
+                onChange={(e) => setForm((f) => ({ ...f, testRecipient: e.target.value }))}
+                placeholder="Leave blank to use the audience picked above"
+              />
+              <div style={{ fontFamily: mono, fontSize: fs.tiny, color: P.mute, marginTop: sp[1] }}>
+                Set to send ONLY to this address on approval — for deliverability testing. Overrides the audience above; clear it to restore that selection.
+              </div>
+            </div>
           </div>
         )}
       </Card>

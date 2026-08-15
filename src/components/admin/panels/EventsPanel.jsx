@@ -21,6 +21,8 @@ const emptyForm = () => ({
   permission_slip_required: false, permission_slip_url: '',
   color_guard_required: false,
   honor_guard_required: false,
+  color_guard_notes: '', honor_guard_notes: '',
+  uniform_reminder_exempt: false,
   recurrence_days: [],
 });
 
@@ -92,6 +94,8 @@ export default function EventsPanel({ adminId, allowedTeams }) {
   const [honorPositions, setHonorPositions] = useState([]);
   const [honorGuardOpen, setHonorGuardOpen] = useState(false);
   const [roster, setRoster] = useState([]);
+  const [guardAlertLog, setGuardAlertLog] = useState({ color: null, honor: null });
+  const [alertBusy, setAlertBusy] = useState('');
 
   const scopedTeams = allowedTeams
     ? EVENT_TEAMS.filter((t) => allowedTeams.includes(t.id))
@@ -146,6 +150,33 @@ export default function EventsPanel({ adminId, allowedTeams }) {
     })));
   }
 
+  // Latest alert per guard type — powers the "Last alerted…" line and the
+  // audit trail Luke asked for. guard_alert_log is admin-read-only; writes
+  // only ever happen inside send-guard-alert (service role).
+  async function loadGuardAlertLog(eventId) {
+    const [{ data: color }, { data: honor }] = await Promise.all([
+      SB.from('guard_alert_log').select('*').eq('event_id', eventId).eq('guard_type', 'color').order('sent_at', { ascending: false }).limit(1).maybeSingle(),
+      SB.from('guard_alert_log').select('*').eq('event_id', eventId).eq('guard_type', 'honor').order('sent_at', { ascending: false }).limit(1).maybeSingle(),
+    ]);
+    setGuardAlertLog({ color: color || null, honor: honor || null });
+  }
+
+  // Re-sendable anytime — every click re-notifies the current roster (even
+  // unchanged names, admin's discretion) and separately tells anyone who
+  // dropped off the roster since the last click. No review gate: see
+  // supabase/functions/send-guard-alert.
+  async function sendGuardAlert(eventId, guardType) {
+    setAlertBusy(guardType);
+    const { data, error } = await SB.functions.invoke('send-guard-alert', { body: { event_id: eventId, guard_type: guardType } });
+    setAlertBusy('');
+    if (error || data?.error) {
+      setMsg(`Alert failed: ${data?.error || error.message}`);
+      return;
+    }
+    setMsg(`${guardType === 'color' ? 'Color' : 'Honor'} Guard alerted ✓ (${data.notified} notified${data.removed ? `, ${data.removed} removed-notice` : ''})`);
+    loadGuardAlertLog(eventId);
+  }
+
   function startNew() {
     setEditing('new');
     setForm(emptyForm());
@@ -153,6 +184,7 @@ export default function EventsPanel({ adminId, allowedTeams }) {
     setSecondaryTeams([]);
     setPositions([]);
     setHonorPositions([]);
+    setGuardAlertLog({ color: null, honor: null });
     setMsg('');
   }
   function startEdit(r) {
@@ -167,12 +199,15 @@ export default function EventsPanel({ adminId, allowedTeams }) {
       permission_slip_required: !!r.permission_slip_required, permission_slip_url: r.permission_slip_url || '',
       color_guard_required: !!r.color_guard_required,
       honor_guard_required: !!r.honor_guard_required,
+      color_guard_notes: r.color_guard_notes || '', honor_guard_notes: r.honor_guard_notes || '',
+      uniform_reminder_exempt: !!r.uniform_reminder_exempt,
       recurrence_days: r.recurrence_days || [],
     });
     loadEventTopics(r.id);
     loadEventSecondaryTeams(r.id);
     loadColorGuard(r.id);
     loadHonorGuard(r.id);
+    loadGuardAlertLog(r.id);
     setMsg('');
   }
   function cancel() { setEditing(null); setMsg(''); }
@@ -194,6 +229,8 @@ export default function EventsPanel({ adminId, allowedTeams }) {
       permission_slip_url: f.permission_slip_required ? nz(f.permission_slip_url) : null,
       color_guard_required: !!f.color_guard_required,
       honor_guard_required: !!f.honor_guard_required,
+      color_guard_notes: nz(f.color_guard_notes), honor_guard_notes: nz(f.honor_guard_notes),
+      uniform_reminder_exempt: !!f.uniform_reminder_exempt,
       recurrence_days: recurring ? f.recurrence_days : null,
     };
   }
@@ -594,6 +631,27 @@ export default function EventsPanel({ adminId, allowedTeams }) {
               )}
             </div>
 
+            {form.category === 'UNIFORM_DAY' && (
+              <div style={{ marginBottom: sp[3] }}>
+                <Label>Exempt from auto-reminders</Label>
+                <div style={{ display: 'flex', gap: sp[2] }}>
+                  {[false, true].map((v) => (
+                    <Btn
+                      key={String(v)}
+                      variant={form.uniform_reminder_exempt === v ? 'gold' : 'ghost'}
+                      size="sm"
+                      onClick={() => setForm((f) => ({ ...f, uniform_reminder_exempt: v }))}
+                    >
+                      {v ? 'YES' : 'NO'}
+                    </Btn>
+                  ))}
+                </div>
+                <div style={{ fontFamily: mono, fontSize: 8, color: P.mute, letterSpacing: '0.06em', marginTop: sp[1] }}>
+                  YES skips the automatic Monday/Wednesday cadet email for this Thursday (canceled/modified uniform day).
+                </div>
+              </div>
+            )}
+
             <div style={{ marginBottom: sp[3] }}>
               <Label>POC</Label>
               <Input value={form.poc} onChange={(e) => setForm((f) => ({ ...f, poc: e.target.value }))} placeholder="name / role" />
@@ -671,6 +729,26 @@ export default function EventsPanel({ adminId, allowedTeams }) {
                   </Btn>
                 )}
               </div>
+              {form.color_guard_required && editing !== 'new' && (
+                <div style={{ marginTop: sp[2] }}>
+                  <Input
+                    value={form.color_guard_notes}
+                    onChange={(e) => setForm((f) => ({ ...f, color_guard_notes: e.target.value }))}
+                    placeholder="Directions / specifics for this roster (optional, included in the alert email)"
+                    multiline
+                  />
+                  <div style={{ display: 'flex', alignItems: 'center', gap: sp[2], marginTop: sp[2], flexWrap: 'wrap' }}>
+                    <Btn onClick={() => sendGuardAlert(editing, 'color')} variant="gold" size="sm" disabled={alertBusy === 'color'}>
+                      {alertBusy === 'color' ? 'ALERTING…' : 'ALERT COLOR GUARD'}
+                    </Btn>
+                    {guardAlertLog.color && (
+                      <span style={{ fontFamily: mono, fontSize: 8, color: P.mute, letterSpacing: '0.06em' }}>
+                        Last alerted {new Date(guardAlertLog.color.sent_at).toLocaleString()} · notified {guardAlertLog.color.recipient_count}{guardAlertLog.color.removed_count ? ` · removed ${guardAlertLog.color.removed_count}` : ''}
+                      </span>
+                    )}
+                  </div>
+                </div>
+              )}
             </div>
 
             <div style={{ marginBottom: sp[3] }}>
@@ -698,6 +776,26 @@ export default function EventsPanel({ adminId, allowedTeams }) {
               <div style={{ fontFamily: mono, fontSize: 8, color: P.mute, letterSpacing: '0.06em', marginTop: sp[1] }}>
                 Commander + 10 sabre-bearers. All 11 positions required to post.
               </div>
+              {form.honor_guard_required && editing !== 'new' && (
+                <div style={{ marginTop: sp[2] }}>
+                  <Input
+                    value={form.honor_guard_notes}
+                    onChange={(e) => setForm((f) => ({ ...f, honor_guard_notes: e.target.value }))}
+                    placeholder="Directions / specifics for this roster (optional, included in the alert email)"
+                    multiline
+                  />
+                  <div style={{ display: 'flex', alignItems: 'center', gap: sp[2], marginTop: sp[2], flexWrap: 'wrap' }}>
+                    <Btn onClick={() => sendGuardAlert(editing, 'honor')} variant="gold" size="sm" disabled={alertBusy === 'honor'}>
+                      {alertBusy === 'honor' ? 'ALERTING…' : 'ALERT HONOR GUARD'}
+                    </Btn>
+                    {guardAlertLog.honor && (
+                      <span style={{ fontFamily: mono, fontSize: 8, color: P.mute, letterSpacing: '0.06em' }}>
+                        Last alerted {new Date(guardAlertLog.honor.sent_at).toLocaleString()} · notified {guardAlertLog.honor.recipient_count}{guardAlertLog.honor.removed_count ? ` · removed ${guardAlertLog.honor.removed_count}` : ''}
+                      </span>
+                    )}
+                  </div>
+                </div>
+              )}
             </div>
 
             <div style={{ marginBottom: sp[3] }}>
