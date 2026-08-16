@@ -260,13 +260,13 @@
     "semantic_hash": "4dedb03706602a67f8be7d1f02bda71a"
   },
   "src/components/admin/panels/people/ConsentSection.jsx": {
-    "mtime": 1786458416.0846574,
-    "ast_hash": "bbc27ab620fd1a31ef73f3af55067e2a",
+    "mtime": 1786811896.6626642,
+    "ast_hash": "15f006f75b656e2b23b9bb2f62eab260",
     "semantic_hash": ""
   },
   "src/components/admin/panels/people/PeoplePanel.jsx": {
-    "mtime": 1785845268.634396,
-    "ast_hash": "235eae39c38e63bd3f45d52d95ec7f06",
+    "mtime": 1786811928.5523143,
+    "ast_hash": "21948c0b3f1342decbe3ffe102b94b64",
     "semantic_hash": ""
   },
   "src/components/admin/panels/photos/PhotoSubmissions.jsx": {
@@ -1712,6 +1712,16 @@
   "supabase/uniform_reminders.sql": {
     "mtime": 1786802606.7149646,
     "ast_hash": "9102064d2b99266a45e98bf02afdb967",
+    "semantic_hash": ""
+  },
+  "supabase/cadet_consent_dd_forms.sql": {
+    "mtime": 1786811682.9342492,
+    "ast_hash": "2ace33f4c3b8a979a4945897993289e4",
+    "semantic_hash": ""
+  },
+  "supabase/cadet_consent_parent2.sql": {
+    "mtime": 1786811862.6130998,
+    "ast_hash": "6bf38dca4a801b2cc41cd2caf0b19562",
     "semantic_hash": ""
   }
 }

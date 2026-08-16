@@ -3,6 +3,7 @@ import { supabase as SB } from '../../../../lib/supabaseClient';
 import { P, mono, oswald, inter, fs, sp, radius, shadow, ease } from '../../theme';
 import { Btn, Card, Label, Input, Select, SuffixEmailInput, StatusPills, Toast, Modal, PanelHeader, EmptyState } from '../../shared/ui';
 import { TEAMS } from '../../../../lib/teams';
+import { openConsentStatusPdf } from '../../../../lib/consentPdfPrint';
 
 const COMPANIES = [
   { id: 'alpha',   label: 'ALPHA' },
@@ -16,6 +17,15 @@ const STATUSES = [
   { id: 'collected', label: 'COLLECTED', color: P.green },
   { id: 'pending',   label: 'PENDING',   color: P.mute },
   { id: 'declined',  label: 'DECLINED',  color: P.red },
+];
+
+// Every form tracked per cadet/staff row, each with its own
+// {status,collected_at,collected_by} triplet on `cadet_consent`
+// (see supabase/cadet_consent.sql + cadet_consent_dd_forms.sql).
+const FORMS = [
+  { key: 'consent',   statusCol: 'consent_status',   atCol: 'collected_at',           byCol: 'collected_by',           label: 'DISPATCH SEND PARENT CONSENT' },
+  { key: 'dd3203',    statusCol: 'dd3203_status',    atCol: 'dd3203_collected_at',    byCol: 'dd3203_collected_by',    label: 'DD FORM 3203 (JAN 2024)', due: 'DUE AUG 31' },
+  { key: 'datasheet', statusCol: 'datasheet_status', atCol: 'datasheet_collected_at', byCol: 'datasheet_collected_by', label: 'JROTC CADET PERSONAL DATASHEET', due: 'DUE AUG 31' },
 ];
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -36,7 +46,7 @@ const LET_OPTIONS = [
   { value: '4', label: 'LET 4' },
 ];
 
-const BLANK_ADD_FORM = { name: '', grade: '', let_level: '', school_email: '', parent_email: '' };
+const BLANK_ADD_FORM = { name: '', grade: '', let_level: '', school_email: '', parent_email: '', parent_email2: '' };
 
 // Cadet database, organized by company. Each row is both a photo-consent record
 // AND the cadet's contact record — same `cadet_consent` table (run
@@ -123,11 +133,12 @@ export default function ConsentSection({ adminId }) {
     loadCadetTeams(cadetConsentId);
   }
 
-  async function setStatus(row, status) {
+  async function setStatus(row, status, formKey = 'consent') {
+    const f = FORMS.find((x) => x.key === formKey);
     const patch = {
-      consent_status: status,
-      collected_at: status === 'collected' ? new Date().toISOString() : null,
-      collected_by: status === 'collected' ? adminId : null,
+      [f.statusCol]: status,
+      [f.atCol]: status === 'collected' ? new Date().toISOString() : null,
+      [f.byCol]: status === 'collected' ? adminId : null,
       updated_at: new Date().toISOString(),
     };
     await SB.from('cadet_consent').update(patch).eq('id', row.id);
@@ -146,6 +157,7 @@ export default function ConsentSection({ adminId }) {
       birthdate: form.birthdate || null,
       school_email: (form.school_email || '').trim() || null,
       parent_email: (form.parent_email || '').trim() || null,
+      parent_email2: (form.parent_email2 || '').trim() || null,
       note: form.note || null,
       updated_at: new Date().toISOString(),
     };
@@ -170,10 +182,10 @@ export default function ConsentSection({ adminId }) {
     await SB.from('email_subscribers').insert({ email: clean, source: 'manual', company: companyTag });
   }
 
-  // Promote the cadet's parent email into email_subscribers. Explicit action,
-  // deduped by email — no DB trigger.
-  async function addParentToList() {
-    const email = (form.parent_email || '').trim().toLowerCase();
+  // Promote a parent email into email_subscribers. Explicit action, deduped
+  // by email — no DB trigger. `field` picks parent_email or parent_email2.
+  async function addParentToList(field = 'parent_email') {
+    const email = (form[field] || '').trim().toLowerCase();
     if (!EMAIL_RE.test(email)) { setListErr(true); setListMsg('Enter a valid parent email first'); return; }
     const { data: existing } = await SB.from('email_subscribers').select('id').eq('email', email).maybeSingle();
     if (existing) { setListErr(true); setListMsg('Already on the mailing list'); return; }
@@ -203,6 +215,7 @@ export default function ConsentSection({ adminId }) {
       let_level: addForm.let_level || null,
       school_email: addForm.school_email.trim() || null,
       parent_email: addForm.parent_email.trim() || null,
+      parent_email2: addForm.parent_email2.trim() || null,
       sort_order: maxOrder + 1,
     };
     const { error } = await SB.from('cadet_consent').insert(payload);
@@ -225,8 +238,10 @@ export default function ConsentSection({ adminId }) {
     loadCounts();
   }
 
-  const collected = rows.filter((r) => r.consent_status === 'collected').length;
-  const pct = rows.length ? Math.round((collected / rows.length) * 100) : 0;
+  const formProgress = FORMS.map((f) => {
+    const collected = rows.filter((r) => r[f.statusCol] === 'collected').length;
+    return { ...f, collected, pct: rows.length ? Math.round((collected / rows.length) * 100) : 0 };
+  });
 
   const searchTerm = search.trim().toLowerCase();
   const searchResults = searchTerm
@@ -240,7 +255,7 @@ export default function ConsentSection({ adminId }) {
         <Card>
           <div style={{ fontFamily: mono, fontSize: fs.tiny, color: P.mute, lineHeight: 1.9 }}>
             <div style={{ color: P.gold }}>CADET TABLE NOT FOUND</div>
-            <div>Run <span style={{ color: P.cream }}>supabase/cadet_consent.sql</span> then <span style={{ color: P.cream }}>supabase/cadet_consent_contact.sql</span> in the Supabase SQL editor.</div>
+            <div>Run <span style={{ color: P.cream }}>supabase/cadet_consent.sql</span>, <span style={{ color: P.cream }}>supabase/cadet_consent_contact.sql</span>, then <span style={{ color: P.cream }}>supabase/cadet_consent_dd_forms.sql</span> in the Supabase SQL editor.</div>
             <div>Then import the roster (sectioned by company) and it appears here.</div>
           </div>
         </Card>
@@ -282,17 +297,30 @@ export default function ConsentSection({ adminId }) {
         })}
       </div>
 
-      {/* progress */}
+      {/* progress — one bar per tracked form, all scoped to the active company tab */}
       <Card style={{ marginBottom: sp[4] }}>
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', marginBottom: sp[2] }}>
-          <Label style={{ marginBottom: 0 }}>CONSENT COLLECTED</Label>
-          <div style={{ fontFamily: oswald, fontSize: fs.lg, color: P.cream }}>
-            {collected} / {rows.length} <span style={{ fontSize: fs.sm, color: P.gold }}>· {pct}%</span>
+        <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: sp[3] }}>
+          <Btn
+            onClick={() => openConsentStatusPdf(rows, FORMS, COMPANIES.find((c) => c.id === company)?.label || company.toUpperCase())}
+            variant="ghost"
+            size="sm"
+          >
+            PRINT FORM STATUS
+          </Btn>
+        </div>
+        {formProgress.map((f, i) => (
+          <div key={f.key} style={{ marginBottom: i < formProgress.length - 1 ? sp[3] : 0 }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', marginBottom: sp[2] }}>
+              <Label style={{ marginBottom: 0 }}>{f.label} COLLECTED{f.due ? ` · ${f.due}` : ''}</Label>
+              <div style={{ fontFamily: oswald, fontSize: fs.lg, color: P.cream }}>
+                {f.collected} / {rows.length} <span style={{ fontSize: fs.sm, color: P.gold }}>· {f.pct}%</span>
+              </div>
+            </div>
+            <div style={{ height: 7, background: P.deep, border: `1px solid ${P.hair}`, borderRadius: radius.sm, overflow: 'hidden' }}>
+              <div style={{ height: '100%', width: `${f.pct}%`, background: `linear-gradient(90deg, ${P.gold}, ${P.bright})`, transition: `width 0.3s ${ease}` }} />
+            </div>
           </div>
-        </div>
-        <div style={{ height: 7, background: P.deep, border: `1px solid ${P.hair}`, borderRadius: radius.sm, overflow: 'hidden' }}>
-          <div style={{ height: '100%', width: `${pct}%`, background: `linear-gradient(90deg, ${P.gold}, ${P.bright})`, transition: `width 0.3s ${ease}` }} />
-        </div>
+        ))}
       </Card>
 
       {/* add */}
@@ -336,9 +364,14 @@ export default function ConsentSection({ adminId }) {
           <SuffixEmailInput value={addForm.school_email} onChange={(v) => setAddForm((f) => ({ ...f, school_email: v }))} />
         </div>
 
-        <div style={{ marginBottom: sp[1] }}>
+        <div style={{ marginBottom: sp[3] }}>
           <Label>PARENT EMAIL</Label>
           <Input value={addForm.parent_email} onChange={(e) => setAddForm((f) => ({ ...f, parent_email: e.target.value }))} placeholder="feeds the mailing list" />
+        </div>
+
+        <div style={{ marginBottom: sp[1] }}>
+          <Label>PARENT EMAIL 2</Label>
+          <Input value={addForm.parent_email2} onChange={(e) => setAddForm((f) => ({ ...f, parent_email2: e.target.value }))} placeholder="second parent/guardian, optional" />
         </div>
 
         {/* lives inside the modal (not just the page-level toast below) so an
@@ -378,9 +411,16 @@ export default function ConsentSection({ adminId }) {
                   </div>
                   <div style={{ fontFamily: mono, fontSize: fs.micro, color: P.faint, marginTop: 2 }}>
                     {r.grade ? `${r.grade}TH` : ''}{r.grade && r.let_level ? ' · ' : ''}{r.let_level ? `LET ${r.let_level}` : ''}{(r.grade || r.let_level) ? ' · ' : ''}
-                    {r.parent_email ? '✉ parent on file' : 'no parent email'}
+                    {r.parent_email || r.parent_email2 ? '✉ parent on file' : 'no parent email'}
                     {r.consent_status === 'collected' && r.collected_at ? ` · signed ${new Date(r.collected_at).toLocaleDateString()}` : ''}
                   </div>
+                  {(r.dd3203_status !== 'collected' || r.datasheet_status !== 'collected') && (
+                    <div style={{ fontFamily: mono, fontSize: fs.micro, color: P.gold, marginTop: 2 }}>
+                      {r.dd3203_status !== 'collected' ? 'DD 3203 pending' : ''}
+                      {r.dd3203_status !== 'collected' && r.datasheet_status !== 'collected' ? ' · ' : ''}
+                      {r.datasheet_status !== 'collected' ? 'Datasheet pending' : ''}
+                    </div>
+                  )}
                 </div>
                 <div style={{ display: 'flex', alignItems: 'center', gap: sp[2] }} onClick={(e) => e.stopPropagation()}>
                   <StatusPills items={STATUSES} value={r.consent_status} onChange={(id) => setStatus(r, id)} size="compact" />
@@ -443,10 +483,20 @@ export default function ConsentSection({ adminId }) {
                 <Input type="date" value={form.birthdate || ''} onChange={(e) => setForm((f) => ({ ...f, birthdate: e.target.value }))} />
               </div>
 
-              {/* consent status */}
+              {/* consent status + the two required-back-by-8/31 forms — all
+                  three are independent {status,collected_at,collected_by}
+                  triplets on this same row (FORMS above). */}
               <div style={{ marginBottom: sp[4] }}>
-                <Label>PHOTO CONSENT</Label>
+                <Label>DISPATCH SEND PARENT CONSENT</Label>
                 <StatusPills items={STATUSES} value={form.consent_status} onChange={(id) => setStatus(form, id)} size="regular" style={{ width: '100%' }} />
+              </div>
+              <div style={{ marginBottom: sp[4] }}>
+                <Label>DD FORM 3203 (JAN 2024) · DUE AUG 31</Label>
+                <StatusPills items={STATUSES} value={form.dd3203_status} onChange={(id) => setStatus(form, id, 'dd3203')} size="regular" style={{ width: '100%' }} />
+              </div>
+              <div style={{ marginBottom: sp[4] }}>
+                <Label>JROTC CADET PERSONAL DATASHEET · DUE AUG 31</Label>
+                <StatusPills items={STATUSES} value={form.datasheet_status} onChange={(id) => setStatus(form, id, 'datasheet')} size="regular" style={{ width: '100%' }} />
               </div>
 
               <div style={{ marginBottom: sp[3] }}>
@@ -457,9 +507,20 @@ export default function ConsentSection({ adminId }) {
                 <Label>PARENT EMAIL</Label>
                 <Input value={form.parent_email || ''} onChange={(e) => setForm((f) => ({ ...f, parent_email: e.target.value }))} placeholder="feeds the mailing list" />
                 <div style={{ display: 'flex', gap: sp[3], alignItems: 'center', marginTop: sp[2], flexWrap: 'wrap' }}>
-                  <Btn onClick={addParentToList} variant="green" size="sm">+ ADD PARENT TO MAILING LIST</Btn>
-                  <Toast tone={listErr ? 'error' : 'success'}>{listMsg}</Toast>
+                  <Btn onClick={() => addParentToList('parent_email')} variant="green" size="sm">+ ADD PARENT TO MAILING LIST</Btn>
                 </div>
+              </div>
+
+              <div style={{ marginBottom: sp[3] }}>
+                <Label>PARENT EMAIL 2</Label>
+                <Input value={form.parent_email2 || ''} onChange={(e) => setForm((f) => ({ ...f, parent_email2: e.target.value }))} placeholder="second parent/guardian, optional" />
+                <div style={{ display: 'flex', gap: sp[3], alignItems: 'center', marginTop: sp[2], flexWrap: 'wrap' }}>
+                  <Btn onClick={() => addParentToList('parent_email2')} variant="green" size="sm">+ ADD PARENT 2 TO MAILING LIST</Btn>
+                </div>
+              </div>
+
+              <div style={{ marginBottom: sp[3], minHeight: fs.tiny }}>
+                <Toast tone={listErr ? 'error' : 'success'}>{listMsg}</Toast>
               </div>
 
               <div style={{ marginBottom: sp[3] }}>

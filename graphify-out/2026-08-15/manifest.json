@@ -165,8 +165,8 @@
     "semantic_hash": "77a430c16bda8921d643793b172afe2f"
   },
   "src/components/admin/panels/EventsPanel.jsx": {
-    "mtime": 1786026728.481338,
-    "ast_hash": "b444de3feed0ed3e139feb07f1396a14",
+    "mtime": 1786802752.7307346,
+    "ast_hash": "9b1436cff2baf730e3f73e5658dd118d",
     "semantic_hash": ""
   },
   "src/components/admin/panels/MediaPanel.jsx": {
@@ -230,8 +230,8 @@
     "semantic_hash": "2fb87b9ddc035aa17907879b1bd5e130"
   },
   "src/components/admin/panels/email/Messages.jsx": {
-    "mtime": 1785882858.3661566,
-    "ast_hash": "c2cb007be9ab9b974cfe8fe3e72a561d",
+    "mtime": 1786802826.5432107,
+    "ast_hash": "52fe9ea19cf637cccf791515db29ec10",
     "semantic_hash": ""
   },
   "src/components/admin/panels/email/Subscribers.jsx": {
@@ -260,8 +260,8 @@
     "semantic_hash": "4dedb03706602a67f8be7d1f02bda71a"
   },
   "src/components/admin/panels/people/ConsentSection.jsx": {
-    "mtime": 1786458416.0846574,
-    "ast_hash": "bbc27ab620fd1a31ef73f3af55067e2a",
+    "mtime": 1786811717.8913832,
+    "ast_hash": "5183a957cd3105805e2cf2f83c8c2057",
     "semantic_hash": ""
   },
   "src/components/admin/panels/people/PeoplePanel.jsx": {
@@ -790,8 +790,8 @@
     "semantic_hash": ""
   },
   "src/components/EventsPage.jsx": {
-    "mtime": 1786038281.6033306,
-    "ast_hash": "671daab9a465e08ce27cf2f92af7dc40",
+    "mtime": 1786726855.142356,
+    "ast_hash": "ef688a9d91ef2928e228977a3fb71598",
     "semantic_hash": ""
   },
   "src/components/PhotoLightbox.jsx": {
@@ -1205,8 +1205,8 @@
     "semantic_hash": ""
   },
   "src/components/creed/ScrambleGame.jsx": {
-    "mtime": 1786707516.3413677,
-    "ast_hash": "131c59d4bbe49db4f5e4c8c22fa71af9",
+    "mtime": 1786729915.778332,
+    "ast_hash": "8e77880d589aae409efc521e2f497bec",
     "semantic_hash": ""
   },
   "src/components/creed/SequencingGame.jsx": {
@@ -1672,6 +1672,51 @@
   "supabase/creed_leaderboard_wipe.sql": {
     "mtime": 1786717059.7462218,
     "ast_hash": "ef17171aaaaf7e0b521d942dcc81ed47",
+    "semantic_hash": ""
+  },
+  "src/lib/emailAudience.js": {
+    "mtime": 1786802777.1399784,
+    "ast_hash": "5f84280c25a836572ada81106bf3c1ab",
+    "semantic_hash": ""
+  },
+  "supabase/email_audience_groups.sql": {
+    "mtime": 1786802614.823989,
+    "ast_hash": "3862f864187061a8c1bdf148e7ca5d17",
+    "semantic_hash": ""
+  },
+  "supabase/event_honor_guard_public.sql": {
+    "mtime": 1786726752.3887277,
+    "ast_hash": "f239cfd33c34d6aa0a0ea21c9b39d4a9",
+    "semantic_hash": ""
+  },
+  "supabase/events_honor_guard.sql": {
+    "mtime": 1786726746.5444741,
+    "ast_hash": "1efd662280ad2f26e68354ca70b62bd2",
+    "semantic_hash": ""
+  },
+  "supabase/functions/send-guard-alert/index.ts": {
+    "mtime": 1786802651.021248,
+    "ast_hash": "eb6c5c4948488587cf9b3d0de19ef832",
+    "semantic_hash": ""
+  },
+  "supabase/functions/send-uniform-reminders/index.ts": {
+    "mtime": 1786802682.7723799,
+    "ast_hash": "9d5c81763d2809c021d40f5fa7ef552d",
+    "semantic_hash": ""
+  },
+  "supabase/guard_alerts.sql": {
+    "mtime": 1786802583.3841674,
+    "ast_hash": "f5d260ae7afcd4d42e2fcb010b065fb7",
+    "semantic_hash": ""
+  },
+  "supabase/uniform_reminders.sql": {
+    "mtime": 1786802606.7149646,
+    "ast_hash": "9102064d2b99266a45e98bf02afdb967",
+    "semantic_hash": ""
+  },
+  "supabase/cadet_consent_dd_forms.sql": {
+    "mtime": 1786811682.9342492,
+    "ast_hash": "2ace33f4c3b8a979a4945897993289e4",
     "semantic_hash": ""
   }
 }

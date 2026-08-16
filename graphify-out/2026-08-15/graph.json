@@ -43,8 +43,8 @@
       "source_location": "L3",
       "_origin": "ast",
       "id": "ref_react",
-      "community": 0,
-      "community_name": "react",
+      "community": 206,
+      "community_name": "index.jsx",
       "norm_label": "react"
     },
     {
@@ -1484,8 +1484,8 @@
       "source_location": "L537",
       "_origin": "ast",
       "id": "src_components_battalioncommand_battalioncommand",
-      "community": 9,
-      "community_name": "App.jsx",
+      "community": 20,
+      "community_name": "Companies.jsx",
       "norm_label": "battalioncommand()"
     },
     {
@@ -1561,7 +1561,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "src_components_cadetmanual",
-      "community": 18,
+      "community": 230,
       "community_name": "CadetManual.jsx",
       "norm_label": "cadetmanual.jsx"
     },
@@ -1572,7 +1572,7 @@
       "source_location": "L4",
       "_origin": "ast",
       "id": "src_components_cadetmanual_p",
-      "community": 18,
+      "community": 230,
       "community_name": "CadetManual.jsx",
       "norm_label": "p"
     },
@@ -1583,7 +1583,7 @@
       "source_location": "L16",
       "_origin": "ast",
       "id": "src_components_cadetmanual_units",
-      "community": 18,
+      "community": 230,
       "community_name": "CadetManual.jsx",
       "norm_label": "units"
     },
@@ -1594,7 +1594,7 @@
       "source_location": "L93",
       "_origin": "ast",
       "id": "src_components_cadetmanual_all_chapters",
-      "community": 18,
+      "community": 230,
       "community_name": "CadetManual.jsx",
       "norm_label": "all_chapters"
     },
@@ -1605,7 +1605,7 @@
       "source_location": "L95",
       "_origin": "ast",
       "id": "src_components_cadetmanual_cadetmanual",
-      "community": 18,
+      "community": 230,
       "community_name": "CadetManual.jsx",
       "norm_label": "cadetmanual()"
     },
@@ -1616,7 +1616,7 @@
       "source_location": "L360",
       "_origin": "ast",
       "id": "src_components_cadetmanual_chaptercard",
-      "community": 18,
+      "community": 230,
       "community_name": "CadetManual.jsx",
       "norm_label": "chaptercard()"
     },
@@ -1682,7 +1682,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "src_components_companies",
-      "community": 222,
+      "community": 231,
       "community_name": "Companies.jsx",
       "norm_label": "companies.jsx"
     },
@@ -1693,7 +1693,7 @@
       "source_location": "L6",
       "_origin": "ast",
       "id": "src_components_companies_p",
-      "community": 222,
+      "community": 231,
       "community_name": "Companies.jsx",
       "norm_label": "p"
     },
@@ -1704,7 +1704,7 @@
       "source_location": "L79",
       "_origin": "ast",
       "id": "src_components_companies_companies",
-      "community": 222,
+      "community": 231,
       "community_name": "Companies.jsx",
       "norm_label": "companies"
     },
@@ -1715,7 +1715,7 @@
       "source_location": "L19",
       "_origin": "ast",
       "id": "src_components_companies_role_order",
-      "community": 222,
+      "community": 231,
       "community_name": "Companies.jsx",
       "norm_label": "role_order"
     },
@@ -1726,7 +1726,7 @@
       "source_location": "L22",
       "_origin": "ast",
       "id": "src_components_companies_activate",
-      "community": 222,
+      "community": 231,
       "community_name": "Companies.jsx",
       "norm_label": "activate()"
     },
@@ -1737,7 +1737,7 @@
       "source_location": "L29",
       "_origin": "ast",
       "id": "src_components_companies_cadetcard",
-      "community": 222,
+      "community": 231,
       "community_name": "Companies.jsx",
       "norm_label": "cadetcard()"
     },
@@ -1748,8 +1748,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "src_components_eventspage",
-      "community": 87,
-      "community_name": "EventsPage.jsx",
+      "community": 1,
+      "community_name": "PhotoUploader.jsx",
       "norm_label": "eventspage.jsx"
     },
     {
@@ -1759,8 +1759,8 @@
       "source_location": "L10",
       "_origin": "ast",
       "id": "src_components_eventspage_p",
-      "community": 87,
-      "community_name": "EventsPage.jsx",
+      "community": 1,
+      "community_name": "PhotoUploader.jsx",
       "norm_label": "p"
     },
     {
@@ -1781,8 +1781,8 @@
       "source_location": "L145",
       "_origin": "ast",
       "id": "src_components_eventspage_photogrid",
-      "community": 1,
-      "community_name": "PhotoUploader.jsx",
+      "community": 18,
+      "community_name": "CadetManual.jsx",
       "norm_label": "photogrid()"
     },
     {
@@ -1792,8 +1792,8 @@
       "source_location": "L202",
       "_origin": "ast",
       "id": "src_components_eventspage_formatdaterange",
-      "community": 87,
-      "community_name": "EventsPage.jsx",
+      "community": 44,
+      "community_name": "imageResize.js",
       "norm_label": "formatdaterange()"
     },
     {
@@ -1803,85 +1803,85 @@
       "source_location": "L214",
       "_origin": "ast",
       "id": "src_components_eventspage_eventdetailcard",
-      "community": 87,
-      "community_name": "EventsPage.jsx",
+      "community": 44,
+      "community_name": "imageResize.js",
       "norm_label": "eventdetailcard()"
     },
     {
       "label": "UpcomingEventsList()",
       "file_type": "code",
       "source_file": "src/components/EventsPage.jsx",
-      "source_location": "L284",
+      "source_location": "L304",
       "_origin": "ast",
       "id": "src_components_eventspage_upcomingeventslist",
-      "community": 87,
-      "community_name": "EventsPage.jsx",
+      "community": 44,
+      "community_name": "imageResize.js",
       "norm_label": "upcomingeventslist()"
     },
     {
       "label": "DetailField()",
       "file_type": "code",
       "source_file": "src/components/EventsPage.jsx",
-      "source_location": "L311",
+      "source_location": "L331",
       "_origin": "ast",
       "id": "src_components_eventspage_detailfield",
-      "community": 87,
-      "community_name": "EventsPage.jsx",
+      "community": 1,
+      "community_name": "PhotoUploader.jsx",
       "norm_label": "detailfield()"
     },
     {
       "label": "backBtn",
       "file_type": "code",
       "source_file": "src/components/EventsPage.jsx",
-      "source_location": "L320",
+      "source_location": "L340",
       "_origin": "ast",
       "id": "src_components_eventspage_backbtn",
-      "community": 87,
-      "community_name": "EventsPage.jsx",
+      "community": 1,
+      "community_name": "PhotoUploader.jsx",
       "norm_label": "backbtn"
     },
     {
       "label": "ghostBtn",
       "file_type": "code",
       "source_file": "src/components/EventsPage.jsx",
-      "source_location": "L321",
+      "source_location": "L341",
       "_origin": "ast",
       "id": "src_components_eventspage_ghostbtn",
-      "community": 87,
-      "community_name": "EventsPage.jsx",
+      "community": 1,
+      "community_name": "PhotoUploader.jsx",
       "norm_label": "ghostbtn"
     },
     {
       "label": "loadingStyle",
       "file_type": "code",
       "source_file": "src/components/EventsPage.jsx",
-      "source_location": "L322",
+      "source_location": "L342",
       "_origin": "ast",
       "id": "src_components_eventspage_loadingstyle",
-      "community": 87,
-      "community_name": "EventsPage.jsx",
+      "community": 1,
+      "community_name": "PhotoUploader.jsx",
       "norm_label": "loadingstyle"
     },
     {
       "label": "modeTab",
       "file_type": "code",
       "source_file": "src/components/EventsPage.jsx",
-      "source_location": "L323",
+      "source_location": "L343",
       "_origin": "ast",
       "id": "src_components_eventspage_modetab",
-      "community": 87,
-      "community_name": "EventsPage.jsx",
+      "community": 1,
+      "community_name": "PhotoUploader.jsx",
       "norm_label": "modetab"
     },
     {
       "label": "modeTabActive",
       "file_type": "code",
       "source_file": "src/components/EventsPage.jsx",
-      "source_location": "L324",
+      "source_location": "L344",
       "_origin": "ast",
       "id": "src_components_eventspage_modetabactive",
-      "community": 87,
-      "community_name": "EventsPage.jsx",
+      "community": 1,
+      "community_name": "PhotoUploader.jsx",
       "norm_label": "modetabactive"
     },
     {
@@ -1891,7 +1891,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "src_components_faqsection",
-      "community": 24,
+      "community": 228,
       "community_name": "FaqSection.jsx",
       "norm_label": "faqsection.jsx"
     },
@@ -1902,7 +1902,7 @@
       "source_location": "L8",
       "_origin": "ast",
       "id": "src_components_faqsection_p",
-      "community": 24,
+      "community": 228,
       "community_name": "FaqSection.jsx",
       "norm_label": "p"
     },
@@ -1913,7 +1913,7 @@
       "source_location": "L21",
       "_origin": "ast",
       "id": "src_components_faqsection_faqitem",
-      "community": 24,
+      "community": 228,
       "community_name": "FaqSection.jsx",
       "norm_label": "faqitem()"
     },
@@ -1924,7 +1924,7 @@
       "source_location": "L75",
       "_origin": "ast",
       "id": "src_components_faqsection_faqcategory",
-      "community": 24,
+      "community": 228,
       "community_name": "FaqSection.jsx",
       "norm_label": "faqcategory()"
     },
@@ -1935,7 +1935,7 @@
       "source_location": "L101",
       "_origin": "ast",
       "id": "src_components_faqsection_focusfield",
-      "community": 24,
+      "community": 228,
       "community_name": "FaqSection.jsx",
       "norm_label": "focusfield()"
     },
@@ -1946,7 +1946,7 @@
       "source_location": "L120",
       "_origin": "ast",
       "id": "src_components_faqsection_submitquestion",
-      "community": 24,
+      "community": 228,
       "community_name": "FaqSection.jsx",
       "norm_label": "submitquestion()"
     },
@@ -1957,7 +1957,7 @@
       "source_location": "L223",
       "_origin": "ast",
       "id": "src_components_faqsection_faqsection",
-      "community": 24,
+      "community": 228,
       "community_name": "FaqSection.jsx",
       "norm_label": "faqsection()"
     },
@@ -2364,8 +2364,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "src_components_raidercarousel",
-      "community": 72,
-      "community_name": "ui.jsx",
+      "community": 232,
+      "community_name": "RaiderCarousel.jsx",
       "norm_label": "raidercarousel.jsx"
     },
     {
@@ -2375,8 +2375,8 @@
       "source_location": "L3",
       "_origin": "ast",
       "id": "src_components_raidercarousel_p",
-      "community": 72,
-      "community_name": "ui.jsx",
+      "community": 232,
+      "community_name": "RaiderCarousel.jsx",
       "norm_label": "p"
     },
     {
@@ -2386,8 +2386,8 @@
       "source_location": "L14",
       "_origin": "ast",
       "id": "src_components_raidercarousel_slides",
-      "community": 72,
-      "community_name": "ui.jsx",
+      "community": 232,
+      "community_name": "RaiderCarousel.jsx",
       "norm_label": "slides"
     },
     {
@@ -2397,8 +2397,8 @@
       "source_location": "L19",
       "_origin": "ast",
       "id": "src_components_raidercarousel_carouselstyles",
-      "community": 72,
-      "community_name": "ui.jsx",
+      "community": 232,
+      "community_name": "RaiderCarousel.jsx",
       "norm_label": "carouselstyles()"
     },
     {
@@ -2408,8 +2408,8 @@
       "source_location": "L31",
       "_origin": "ast",
       "id": "src_components_raidercarousel_slide",
-      "community": 72,
-      "community_name": "ui.jsx",
+      "community": 232,
+      "community_name": "RaiderCarousel.jsx",
       "norm_label": "slide()"
     },
     {
@@ -2419,8 +2419,8 @@
       "source_location": "L58",
       "_origin": "ast",
       "id": "src_components_raidercarousel_raidercarousel",
-      "community": 72,
-      "community_name": "ui.jsx",
+      "community": 232,
+      "community_name": "RaiderCarousel.jsx",
       "norm_label": "raidercarousel()"
     },
     {
@@ -2430,7 +2430,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "src_components_raiderfaq",
-      "community": 199,
+      "community": 235,
       "community_name": "RaiderFAQ.jsx",
       "norm_label": "raiderfaq.jsx"
     },
@@ -2441,7 +2441,7 @@
       "source_location": "L3",
       "_origin": "ast",
       "id": "src_components_raiderfaq_p",
-      "community": 199,
+      "community": 235,
       "community_name": "RaiderFAQ.jsx",
       "norm_label": "p"
     },
@@ -2452,7 +2452,7 @@
       "source_location": "L12",
       "_origin": "ast",
       "id": "src_components_raiderfaq_faqs",
-      "community": 199,
+      "community": 235,
       "community_name": "RaiderFAQ.jsx",
       "norm_label": "faqs"
     },
@@ -2463,7 +2463,7 @@
       "source_location": "L21",
       "_origin": "ast",
       "id": "src_components_raiderfaq_chevronicon",
-      "community": 199,
+      "community": 235,
       "community_name": "RaiderFAQ.jsx",
       "norm_label": "chevronicon()"
     },
@@ -2474,7 +2474,7 @@
       "source_location": "L31",
       "_origin": "ast",
       "id": "src_components_raiderfaq_raiderfaq",
-      "community": 199,
+      "community": 235,
       "community_name": "RaiderFAQ.jsx",
       "norm_label": "raiderfaq()"
     },
@@ -2485,8 +2485,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "src_components_raidervoting",
-      "community": 24,
-      "community_name": "FaqSection.jsx",
+      "community": 198,
+      "community_name": "RaiderCarousel.jsx",
       "norm_label": "raidervoting.jsx"
     },
     {
@@ -2496,8 +2496,8 @@
       "source_location": "L7",
       "_origin": "ast",
       "id": "src_components_raidervoting_p",
-      "community": 24,
-      "community_name": "FaqSection.jsx",
+      "community": 198,
+      "community_name": "RaiderCarousel.jsx",
       "norm_label": "p"
     },
     {
@@ -2507,8 +2507,8 @@
       "source_location": "L18",
       "_origin": "ast",
       "id": "src_components_raidervoting_cats",
-      "community": 24,
-      "community_name": "FaqSection.jsx",
+      "community": 198,
+      "community_name": "RaiderCarousel.jsx",
       "norm_label": "cats"
     },
     {
@@ -2518,8 +2518,8 @@
       "source_location": "L24",
       "_origin": "ast",
       "id": "src_components_raidervoting_fmtcountdown",
-      "community": 24,
-      "community_name": "FaqSection.jsx",
+      "community": 198,
+      "community_name": "RaiderCarousel.jsx",
       "norm_label": "fmtcountdown()"
     },
     {
@@ -2529,8 +2529,8 @@
       "source_location": "L37",
       "_origin": "ast",
       "id": "src_components_raidervoting_raidervoting",
-      "community": 24,
-      "community_name": "FaqSection.jsx",
+      "community": 198,
+      "community_name": "RaiderCarousel.jsx",
       "norm_label": "raidervoting()"
     },
     {
@@ -2540,8 +2540,8 @@
       "source_location": "L277",
       "_origin": "ast",
       "id": "src_components_raidervoting_loadingstyle",
-      "community": 24,
-      "community_name": "FaqSection.jsx",
+      "community": 198,
+      "community_name": "RaiderCarousel.jsx",
       "norm_label": "loadingstyle"
     },
     {
@@ -2551,8 +2551,8 @@
       "source_location": "L278",
       "_origin": "ast",
       "id": "src_components_raidervoting_statlabel",
-      "community": 24,
-      "community_name": "FaqSection.jsx",
+      "community": 198,
+      "community_name": "RaiderCarousel.jsx",
       "norm_label": "statlabel"
     },
     {
@@ -2562,8 +2562,8 @@
       "source_location": "L279",
       "_origin": "ast",
       "id": "src_components_raidervoting_centered",
-      "community": 24,
-      "community_name": "FaqSection.jsx",
+      "community": 198,
+      "community_name": "RaiderCarousel.jsx",
       "norm_label": "centered"
     },
     {
@@ -2573,8 +2573,8 @@
       "source_location": "L280",
       "_origin": "ast",
       "id": "src_components_raidervoting_ghostbtn",
-      "community": 24,
-      "community_name": "FaqSection.jsx",
+      "community": 198,
+      "community_name": "RaiderCarousel.jsx",
       "norm_label": "ghostbtn"
     },
     {
@@ -2760,8 +2760,8 @@
       "source_location": "L527",
       "_origin": "ast",
       "id": "src_components_raiders_raiders",
-      "community": 72,
-      "community_name": "ui.jsx",
+      "community": 20,
+      "community_name": "Companies.jsx",
       "norm_label": "raiders()"
     },
     {
@@ -2903,8 +2903,8 @@
       "source_location": "L430",
       "_origin": "ast",
       "id": "src_components_rifle_rifle",
-      "community": 27,
-      "community_name": "TabPlaceholder.jsx",
+      "community": 20,
+      "community_name": "Companies.jsx",
       "norm_label": "rifle()"
     },
     {
@@ -2914,8 +2914,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "src_components_staff",
-      "community": 20,
-      "community_name": "Companies.jsx",
+      "community": 24,
+      "community_name": "FaqSection.jsx",
       "norm_label": "staff.jsx"
     },
     {
@@ -2925,8 +2925,8 @@
       "source_location": "L6",
       "_origin": "ast",
       "id": "src_components_staff_p",
-      "community": 20,
-      "community_name": "Companies.jsx",
+      "community": 24,
+      "community_name": "FaqSection.jsx",
       "norm_label": "p"
     },
     {
@@ -2936,8 +2936,8 @@
       "source_location": "L12",
       "_origin": "ast",
       "id": "src_components_staff_s_sections",
-      "community": 20,
-      "community_name": "Companies.jsx",
+      "community": 24,
+      "community_name": "FaqSection.jsx",
       "norm_label": "s_sections"
     },
     {
@@ -2947,8 +2947,8 @@
       "source_location": "L23",
       "_origin": "ast",
       "id": "src_components_staff_activate",
-      "community": 20,
-      "community_name": "Companies.jsx",
+      "community": 24,
+      "community_name": "FaqSection.jsx",
       "norm_label": "activate()"
     },
     {
@@ -2958,8 +2958,8 @@
       "source_location": "L31",
       "_origin": "ast",
       "id": "src_components_staff_cardstyles",
-      "community": 20,
-      "community_name": "Companies.jsx",
+      "community": 24,
+      "community_name": "FaqSection.jsx",
       "norm_label": "cardstyles()"
     },
     {
@@ -2969,8 +2969,8 @@
       "source_location": "L40",
       "_origin": "ast",
       "id": "src_components_staff_pagebackground",
-      "community": 20,
-      "community_name": "Companies.jsx",
+      "community": 24,
+      "community_name": "FaqSection.jsx",
       "norm_label": "pagebackground()"
     },
     {
@@ -2980,8 +2980,8 @@
       "source_location": "L83",
       "_origin": "ast",
       "id": "src_components_staff_brackets",
-      "community": 20,
-      "community_name": "Companies.jsx",
+      "community": 24,
+      "community_name": "FaqSection.jsx",
       "norm_label": "brackets()"
     },
     {
@@ -2991,8 +2991,8 @@
       "source_location": "L101",
       "_origin": "ast",
       "id": "src_components_staff_photopending",
-      "community": 20,
-      "community_name": "Companies.jsx",
+      "community": 24,
+      "community_name": "FaqSection.jsx",
       "norm_label": "photopending()"
     },
     {
@@ -3002,8 +3002,8 @@
       "source_location": "L124",
       "_origin": "ast",
       "id": "src_components_staff_staffcard",
-      "community": 20,
-      "community_name": "Companies.jsx",
+      "community": 24,
+      "community_name": "FaqSection.jsx",
       "norm_label": "staffcard()"
     },
     {
@@ -3013,8 +3013,8 @@
       "source_location": "L204",
       "_origin": "ast",
       "id": "src_components_staff_sectionheader",
-      "community": 20,
-      "community_name": "Companies.jsx",
+      "community": 24,
+      "community_name": "FaqSection.jsx",
       "norm_label": "sectionheader()"
     },
     {
@@ -3024,8 +3024,8 @@
       "source_location": "L234",
       "_origin": "ast",
       "id": "src_components_staff_staff",
-      "community": 20,
-      "community_name": "Companies.jsx",
+      "community": 24,
+      "community_name": "FaqSection.jsx",
       "norm_label": "staff()"
     },
     {
@@ -3035,8 +3035,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "src_components_submithub",
-      "community": 1,
-      "community_name": "PhotoUploader.jsx",
+      "community": 18,
+      "community_name": "CadetManual.jsx",
       "norm_label": "submithub.jsx"
     },
     {
@@ -3046,8 +3046,8 @@
       "source_location": "L8",
       "_origin": "ast",
       "id": "src_components_submithub_p",
-      "community": 1,
-      "community_name": "PhotoUploader.jsx",
+      "community": 18,
+      "community_name": "CadetManual.jsx",
       "norm_label": "p"
     },
     {
@@ -3057,8 +3057,8 @@
       "source_location": "L17",
       "_origin": "ast",
       "id": "src_components_submithub_submithub",
-      "community": 1,
-      "community_name": "PhotoUploader.jsx",
+      "community": 18,
+      "community_name": "CadetManual.jsx",
       "norm_label": "submithub()"
     },
     {
@@ -3068,8 +3068,8 @@
       "source_location": "L92",
       "_origin": "ast",
       "id": "src_components_submithub_backbtn",
-      "community": 1,
-      "community_name": "PhotoUploader.jsx",
+      "community": 18,
+      "community_name": "CadetManual.jsx",
       "norm_label": "backbtn"
     },
     {
@@ -3134,8 +3134,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "src_components_tabplaceholder",
-      "community": 1,
-      "community_name": "PhotoUploader.jsx",
+      "community": 18,
+      "community_name": "CadetManual.jsx",
       "norm_label": "tabplaceholder.jsx"
     },
     {
@@ -3145,8 +3145,8 @@
       "source_location": "L6",
       "_origin": "ast",
       "id": "src_components_tabplaceholder_p",
-      "community": 1,
-      "community_name": "PhotoUploader.jsx",
+      "community": 18,
+      "community_name": "CadetManual.jsx",
       "norm_label": "p"
     },
     {
@@ -3156,8 +3156,8 @@
       "source_location": "L15",
       "_origin": "ast",
       "id": "src_components_tabplaceholder_tabplaceholder",
-      "community": 1,
-      "community_name": "PhotoUploader.jsx",
+      "community": 18,
+      "community_name": "CadetManual.jsx",
       "norm_label": "tabplaceholder()"
     },
     {
@@ -3508,8 +3508,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "src_components_admin_login_accountgrid",
-      "community": 206,
-      "community_name": "index.jsx",
+      "community": 43,
+      "community_name": "Rifle.jsx",
       "norm_label": "accountgrid.jsx"
     },
     {
@@ -3519,8 +3519,8 @@
       "source_location": "L9",
       "_origin": "ast",
       "id": "src_components_admin_login_accountgrid_accountgrid",
-      "community": 206,
-      "community_name": "index.jsx",
+      "community": 43,
+      "community_name": "Rifle.jsx",
       "norm_label": "accountgrid()"
     },
     {
@@ -3530,8 +3530,8 @@
       "source_location": "L36",
       "_origin": "ast",
       "id": "src_components_admin_login_accountgrid_accountcard",
-      "community": 206,
-      "community_name": "index.jsx",
+      "community": 43,
+      "community_name": "Rifle.jsx",
       "norm_label": "accountcard()"
     },
     {
@@ -3541,8 +3541,8 @@
       "source_location": "L100",
       "_origin": "ast",
       "id": "src_components_admin_login_accountgrid_glyph",
-      "community": 206,
-      "community_name": "index.jsx",
+      "community": 43,
+      "community_name": "Rifle.jsx",
       "norm_label": "glyph()"
     },
     {
@@ -3552,8 +3552,8 @@
       "source_location": "L104",
       "_origin": "ast",
       "id": "src_components_admin_login_accountgrid_pip",
-      "community": 206,
-      "community_name": "index.jsx",
+      "community": 43,
+      "community_name": "Rifle.jsx",
       "norm_label": "pip()"
     },
     {
@@ -3651,8 +3651,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "src_components_admin_nav_sidebar",
-      "community": 43,
-      "community_name": "Rifle.jsx",
+      "community": 41,
+      "community_name": "PhotoUploader.jsx",
       "norm_label": "sidebar.jsx"
     },
     {
@@ -3662,8 +3662,8 @@
       "source_location": "L7",
       "_origin": "ast",
       "id": "src_components_admin_nav_sidebar_nav_groups",
-      "community": 43,
-      "community_name": "Rifle.jsx",
+      "community": 41,
+      "community_name": "PhotoUploader.jsx",
       "norm_label": "nav_groups"
     },
     {
@@ -3673,8 +3673,8 @@
       "source_location": "L52",
       "_origin": "ast",
       "id": "src_components_admin_nav_sidebar_navitem",
-      "community": 43,
-      "community_name": "Rifle.jsx",
+      "community": 41,
+      "community_name": "PhotoUploader.jsx",
       "norm_label": "navitem()"
     },
     {
@@ -3684,8 +3684,8 @@
       "source_location": "L77",
       "_origin": "ast",
       "id": "src_components_admin_nav_sidebar_sidebar",
-      "community": 43,
-      "community_name": "Rifle.jsx",
+      "community": 41,
+      "community_name": "PhotoUploader.jsx",
       "norm_label": "sidebar()"
     },
     {
@@ -3769,7 +3769,7 @@
       "label": "DEFAULT_COLOR_GUARD_POSITIONS()",
       "file_type": "code",
       "source_file": "src/components/admin/panels/EventsPanel.jsx",
-      "source_location": "L29",
+      "source_location": "L32",
       "_origin": "ast",
       "id": "src_components_admin_panels_eventspanel_default_color_guard_positions",
       "community": 4,
@@ -3780,7 +3780,7 @@
       "label": "ASCOT_COLORS",
       "file_type": "code",
       "source_file": "src/components/admin/panels/EventsPanel.jsx",
-      "source_location": "L36",
+      "source_location": "L39",
       "_origin": "ast",
       "id": "src_components_admin_panels_eventspanel_ascot_colors",
       "community": 4,
@@ -3791,7 +3791,7 @@
       "label": "GLOVE_COLORS",
       "file_type": "code",
       "source_file": "src/components/admin/panels/EventsPanel.jsx",
-      "source_location": "L37",
+      "source_location": "L40",
       "_origin": "ast",
       "id": "src_components_admin_panels_eventspanel_glove_colors",
       "community": 4,
@@ -3799,10 +3799,21 @@
       "norm_label": "glove_colors"
     },
     {
+      "label": "DEFAULT_HONOR_GUARD_POSITIONS()",
+      "file_type": "code",
+      "source_file": "src/components/admin/panels/EventsPanel.jsx",
+      "source_location": "L45",
+      "_origin": "ast",
+      "id": "src_components_admin_panels_eventspanel_default_honor_guard_positions",
+      "community": 4,
+      "community_name": "EventsPanel.jsx",
+      "norm_label": "default_honor_guard_positions()"
+    },
+    {
       "label": "missingCore()",
       "file_type": "code",
       "source_file": "src/components/admin/panels/EventsPanel.jsx",
-      "source_location": "L44",
+      "source_location": "L55",
       "_origin": "ast",
       "id": "src_components_admin_panels_eventspanel_missingcore",
       "community": 4,
@@ -3813,7 +3824,7 @@
       "label": "EventsPanel()",
       "file_type": "code",
       "source_file": "src/components/admin/panels/EventsPanel.jsx",
-      "source_location": "L64",
+      "source_location": "L79",
       "_origin": "ast",
       "id": "src_components_admin_panels_eventspanel_eventspanel",
       "community": 4,
@@ -3824,7 +3835,7 @@
       "label": "CadetPicker()",
       "file_type": "code",
       "source_file": "src/components/admin/panels/EventsPanel.jsx",
-      "source_location": "L763",
+      "source_location": "L955",
       "_origin": "ast",
       "id": "src_components_admin_panels_eventspanel_cadetpicker",
       "community": 4,
@@ -3835,7 +3846,7 @@
       "label": "selectStyle",
       "file_type": "code",
       "source_file": "src/components/admin/panels/EventsPanel.jsx",
-      "source_location": "L818",
+      "source_location": "L1010",
       "_origin": "ast",
       "id": "src_components_admin_panels_eventspanel_selectstyle",
       "community": 4,
@@ -4113,8 +4124,8 @@
       "source_location": "L12",
       "_origin": "ast",
       "id": "src_components_admin_panels_selfaccountpanel_selfaccountpanel",
-      "community": 206,
-      "community_name": "index.jsx",
+      "community": 41,
+      "community_name": "PhotoUploader.jsx",
       "norm_label": "selfaccountpanel()"
     },
     {
@@ -4432,8 +4443,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "src_components_admin_panels_advanced_emailhistorypanel",
-      "community": 0,
-      "community_name": "react",
+      "community": 234,
+      "community_name": "EmailHistoryPanel.jsx",
       "norm_label": "emailhistorypanel.jsx"
     },
     {
@@ -4443,8 +4454,8 @@
       "source_location": "L12",
       "_origin": "ast",
       "id": "src_components_admin_panels_advanced_emailhistorypanel_status_color",
-      "community": 0,
-      "community_name": "react",
+      "community": 234,
+      "community_name": "EmailHistoryPanel.jsx",
       "norm_label": "status_color"
     },
     {
@@ -4454,8 +4465,8 @@
       "source_location": "L20",
       "_origin": "ast",
       "id": "src_components_admin_panels_advanced_emailhistorypanel_fmtdate",
-      "community": 0,
-      "community_name": "react",
+      "community": 234,
+      "community_name": "EmailHistoryPanel.jsx",
       "norm_label": "fmtdate()"
     },
     {
@@ -4465,8 +4476,8 @@
       "source_location": "L24",
       "_origin": "ast",
       "id": "src_components_admin_panels_advanced_emailhistorypanel_step",
-      "community": 0,
-      "community_name": "react",
+      "community": 234,
+      "community_name": "EmailHistoryPanel.jsx",
       "norm_label": "step()"
     },
     {
@@ -4476,8 +4487,8 @@
       "source_location": "L39",
       "_origin": "ast",
       "id": "src_components_admin_panels_advanced_emailhistorypanel_emailhistorypanel",
-      "community": 0,
-      "community_name": "react",
+      "community": 234,
+      "community_name": "EmailHistoryPanel.jsx",
       "norm_label": "emailhistorypanel()"
     },
     {
@@ -4707,8 +4718,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "src_components_admin_panels_email_emailpanel",
-      "community": 11,
-      "community_name": "blocks.js",
+      "community": 0,
+      "community_name": "react",
       "norm_label": "emailpanel.jsx"
     },
     {
@@ -4729,26 +4740,26 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "src_components_admin_panels_email_messages",
-      "community": 11,
-      "community_name": "blocks.js",
+      "community": 0,
+      "community_name": "react",
       "norm_label": "messages.jsx"
     },
     {
       "label": "STATUS_META",
       "file_type": "code",
       "source_file": "src/components/admin/panels/email/Messages.jsx",
-      "source_location": "L9",
+      "source_location": "L10",
       "_origin": "ast",
       "id": "src_components_admin_panels_email_messages_status_meta",
-      "community": 11,
-      "community_name": "blocks.js",
+      "community": 0,
+      "community_name": "react",
       "norm_label": "status_meta"
     },
     {
       "label": "rowToBlocks()",
       "file_type": "code",
       "source_file": "src/components/admin/panels/email/Messages.jsx",
-      "source_location": "L19",
+      "source_location": "L20",
       "_origin": "ast",
       "id": "src_components_admin_panels_email_messages_rowtoblocks",
       "community": 11,
@@ -4759,11 +4770,11 @@
       "label": "Messages()",
       "file_type": "code",
       "source_file": "src/components/admin/panels/email/Messages.jsx",
-      "source_location": "L25",
+      "source_location": "L26",
       "_origin": "ast",
       "id": "src_components_admin_panels_email_messages_messages",
-      "community": 11,
-      "community_name": "blocks.js",
+      "community": 0,
+      "community_name": "react",
       "norm_label": "messages()"
     },
     {
@@ -4773,8 +4784,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "src_components_admin_panels_email_subscribers",
-      "community": 11,
-      "community_name": "blocks.js",
+      "community": 0,
+      "community_name": "react",
       "norm_label": "subscribers.jsx"
     },
     {
@@ -4784,8 +4795,8 @@
       "source_location": "L8",
       "_origin": "ast",
       "id": "src_components_admin_panels_email_subscribers_subscribers",
-      "community": 11,
-      "community_name": "blocks.js",
+      "community": 0,
+      "community_name": "react",
       "norm_label": "subscribers()"
     },
     {
@@ -4795,8 +4806,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "src_components_admin_panels_email_builder_blockfields",
-      "community": 11,
-      "community_name": "blocks.js",
+      "community": 43,
+      "community_name": "Rifle.jsx",
       "norm_label": "blockfields.jsx"
     },
     {
@@ -4806,8 +4817,8 @@
       "source_location": "L7",
       "_origin": "ast",
       "id": "src_components_admin_panels_email_builder_blockfields_blockfields",
-      "community": 11,
-      "community_name": "blocks.js",
+      "community": 43,
+      "community_name": "Rifle.jsx",
       "norm_label": "blockfields()"
     },
     {
@@ -4817,8 +4828,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "src_components_admin_panels_email_builder_emailbuilder",
-      "community": 11,
-      "community_name": "blocks.js",
+      "community": 43,
+      "community_name": "Rifle.jsx",
       "norm_label": "emailbuilder.jsx"
     },
     {
@@ -4850,8 +4861,8 @@
       "source_location": "L59",
       "_origin": "ast",
       "id": "src_components_admin_panels_email_builder_emailbuilder_emailbuilder",
-      "community": 11,
-      "community_name": "blocks.js",
+      "community": 0,
+      "community_name": "react",
       "norm_label": "emailbuilder()"
     },
     {
@@ -5158,8 +5169,8 @@
       "source_location": "L24",
       "_origin": "ast",
       "id": "src_components_admin_panels_messages_messagespanel_messagespanel",
-      "community": 20,
-      "community_name": "Companies.jsx",
+      "community": 6,
+      "community_name": "Raiders.jsx",
       "norm_label": "messagespanel()"
     },
     {
@@ -5273,10 +5284,21 @@
       "norm_label": "statuses"
     },
     {
+      "label": "FORMS",
+      "file_type": "code",
+      "source_file": "src/components/admin/panels/people/ConsentSection.jsx",
+      "source_location": "L24",
+      "_origin": "ast",
+      "id": "src_components_admin_panels_people_consentsection_forms",
+      "community": 77,
+      "community_name": "PeoplePanel.jsx",
+      "norm_label": "forms"
+    },
+    {
       "label": "GRADE_OPTIONS",
       "file_type": "code",
       "source_file": "src/components/admin/panels/people/ConsentSection.jsx",
-      "source_location": "L23",
+      "source_location": "L32",
       "_origin": "ast",
       "id": "src_components_admin_panels_people_consentsection_grade_options",
       "community": 77,
@@ -5287,7 +5309,7 @@
       "label": "LET_OPTIONS",
       "file_type": "code",
       "source_file": "src/components/admin/panels/people/ConsentSection.jsx",
-      "source_location": "L31",
+      "source_location": "L40",
       "_origin": "ast",
       "id": "src_components_admin_panels_people_consentsection_let_options",
       "community": 77,
@@ -5298,7 +5320,7 @@
       "label": "BLANK_ADD_FORM",
       "file_type": "code",
       "source_file": "src/components/admin/panels/people/ConsentSection.jsx",
-      "source_location": "L39",
+      "source_location": "L48",
       "_origin": "ast",
       "id": "src_components_admin_panels_people_consentsection_blank_add_form",
       "community": 77,
@@ -5309,7 +5331,7 @@
       "label": "ConsentSection()",
       "file_type": "code",
       "source_file": "src/components/admin/panels/people/ConsentSection.jsx",
-      "source_location": "L46",
+      "source_location": "L55",
       "_origin": "ast",
       "id": "src_components_admin_panels_people_consentsection_consentsection",
       "community": 77,
@@ -5609,8 +5631,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "src_components_admin_panels_tvphotos_emergencypushpanel",
-      "community": 11,
-      "community_name": "blocks.js",
+      "community": 43,
+      "community_name": "Rifle.jsx",
       "norm_label": "emergencypushpanel.jsx"
     },
     {
@@ -5620,8 +5642,8 @@
       "source_location": "L7",
       "_origin": "ast",
       "id": "src_components_admin_panels_tvphotos_emergencypushpanel_text_sizes",
-      "community": 11,
-      "community_name": "blocks.js",
+      "community": 43,
+      "community_name": "Rifle.jsx",
       "norm_label": "text_sizes"
     },
     {
@@ -5653,8 +5675,8 @@
       "source_location": "L10",
       "_origin": "ast",
       "id": "src_components_admin_panels_tvphotos_focalpointpicker_focalpointpicker",
-      "community": 99,
-      "community_name": "imageResize.js",
+      "community": 43,
+      "community_name": "Rifle.jsx",
       "norm_label": "focalpointpicker()"
     },
     {
@@ -5664,8 +5686,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "src_components_admin_panels_tvphotos_tvphotoassignmodal",
-      "community": 99,
-      "community_name": "imageResize.js",
+      "community": 43,
+      "community_name": "Rifle.jsx",
       "norm_label": "tvphotoassignmodal.jsx"
     },
     {
@@ -5675,8 +5697,8 @@
       "source_location": "L14",
       "_origin": "ast",
       "id": "src_components_admin_panels_tvphotos_tvphotoassignmodal_tvphotoassignmodal",
-      "community": 99,
-      "community_name": "imageResize.js",
+      "community": 209,
+      "community_name": "TabGrid.jsx",
       "norm_label": "tvphotoassignmodal()"
     },
     {
@@ -5686,8 +5708,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "src_components_admin_panels_tvphotos_tvphotoeditcropmodal",
-      "community": 99,
-      "community_name": "imageResize.js",
+      "community": 43,
+      "community_name": "Rifle.jsx",
       "norm_label": "tvphotoeditcropmodal.jsx"
     },
     {
@@ -5697,8 +5719,8 @@
       "source_location": "L10",
       "_origin": "ast",
       "id": "src_components_admin_panels_tvphotos_tvphotoeditcropmodal_tvphotoeditcropmodal",
-      "community": 99,
-      "community_name": "imageResize.js",
+      "community": 209,
+      "community_name": "TabGrid.jsx",
       "norm_label": "tvphotoeditcropmodal()"
     },
     {
@@ -5708,8 +5730,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "src_components_admin_panels_tvphotos_tvphotospanel",
-      "community": 99,
-      "community_name": "imageResize.js",
+      "community": 209,
+      "community_name": "TabGrid.jsx",
       "norm_label": "tvphotospanel.jsx"
     },
     {
@@ -5719,8 +5741,8 @@
       "source_location": "L14",
       "_origin": "ast",
       "id": "src_components_admin_panels_tvphotos_tvphotospanel_folders",
-      "community": 99,
-      "community_name": "imageResize.js",
+      "community": 209,
+      "community_name": "TabGrid.jsx",
       "norm_label": "folders"
     },
     {
@@ -5730,8 +5752,8 @@
       "source_location": "L21",
       "_origin": "ast",
       "id": "src_components_admin_panels_tvphotos_tvphotospanel_tvphotospanel",
-      "community": 99,
-      "community_name": "imageResize.js",
+      "community": 209,
+      "community_name": "TabGrid.jsx",
       "norm_label": "tvphotospanel()"
     },
     {
@@ -5741,8 +5763,8 @@
       "source_location": "L223",
       "_origin": "ast",
       "id": "src_components_admin_panels_tvphotos_tvphotospanel_minibtn",
-      "community": 99,
-      "community_name": "imageResize.js",
+      "community": 209,
+      "community_name": "TabGrid.jsx",
       "norm_label": "minibtn()"
     },
     {
@@ -5752,8 +5774,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "src_components_admin_panels_tvphotos_tvspotlightpushmodal",
-      "community": 99,
-      "community_name": "imageResize.js",
+      "community": 43,
+      "community_name": "Rifle.jsx",
       "norm_label": "tvspotlightpushmodal.jsx"
     },
     {
@@ -5763,8 +5785,8 @@
       "source_location": "L15",
       "_origin": "ast",
       "id": "src_components_admin_panels_tvphotos_tvspotlightpushmodal_tvspotlightpushmodal",
-      "community": 99,
-      "community_name": "imageResize.js",
+      "community": 209,
+      "community_name": "TabGrid.jsx",
       "norm_label": "tvspotlightpushmodal()"
     },
     {
@@ -5774,8 +5796,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "src_components_admin_panels_tvphotos_tvterminalmanager",
-      "community": 99,
-      "community_name": "imageResize.js",
+      "community": 206,
+      "community_name": "index.jsx",
       "norm_label": "tvterminalmanager.jsx"
     },
     {
@@ -5785,8 +5807,8 @@
       "source_location": "L15",
       "_origin": "ast",
       "id": "src_components_admin_panels_tvphotos_tvterminalmanager_tvterminalmanager",
-      "community": 99,
-      "community_name": "imageResize.js",
+      "community": 209,
+      "community_name": "TabGrid.jsx",
       "norm_label": "tvterminalmanager()"
     },
     {
@@ -5906,8 +5928,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "src_components_admin_shared_ui",
-      "community": 77,
-      "community_name": "PeoplePanel.jsx",
+      "community": 0,
+      "community_name": "react",
       "norm_label": "ui.jsx"
     },
     {
@@ -5917,8 +5939,8 @@
       "source_location": "L8",
       "_origin": "ast",
       "id": "src_components_admin_shared_ui_btn_sizes",
-      "community": 77,
-      "community_name": "PeoplePanel.jsx",
+      "community": 0,
+      "community_name": "react",
       "norm_label": "btn_sizes"
     },
     {
@@ -5928,8 +5950,8 @@
       "source_location": "L14",
       "_origin": "ast",
       "id": "src_components_admin_shared_ui_btn_variants",
-      "community": 77,
-      "community_name": "PeoplePanel.jsx",
+      "community": 0,
+      "community_name": "react",
       "norm_label": "btn_variants"
     },
     {
@@ -5939,8 +5961,8 @@
       "source_location": "L22",
       "_origin": "ast",
       "id": "src_components_admin_shared_ui_btn",
-      "community": 11,
-      "community_name": "blocks.js",
+      "community": 0,
+      "community_name": "react",
       "norm_label": "btn()"
     },
     {
@@ -5961,8 +5983,8 @@
       "source_location": "L72",
       "_origin": "ast",
       "id": "src_components_admin_shared_ui_label",
-      "community": 11,
-      "community_name": "blocks.js",
+      "community": 0,
+      "community_name": "react",
       "norm_label": "label()"
     },
     {
@@ -5972,8 +5994,8 @@
       "source_location": "L85",
       "_origin": "ast",
       "id": "src_components_admin_shared_ui_input",
-      "community": 99,
-      "community_name": "imageResize.js",
+      "community": 0,
+      "community_name": "react",
       "norm_label": "input()"
     },
     {
@@ -6005,8 +6027,8 @@
       "source_location": "L172",
       "_origin": "ast",
       "id": "src_components_admin_shared_ui_status_pill_sizes",
-      "community": 77,
-      "community_name": "PeoplePanel.jsx",
+      "community": 0,
+      "community_name": "react",
       "norm_label": "status_pill_sizes"
     },
     {
@@ -6038,8 +6060,8 @@
       "source_location": "L225",
       "_origin": "ast",
       "id": "src_components_admin_shared_ui_modal",
-      "community": 99,
-      "community_name": "imageResize.js",
+      "community": 43,
+      "community_name": "Rifle.jsx",
       "norm_label": "modal()"
     },
     {
@@ -6060,8 +6082,8 @@
       "source_location": "L283",
       "_origin": "ast",
       "id": "src_components_admin_shared_ui_emptystate",
-      "community": 11,
-      "community_name": "blocks.js",
+      "community": 41,
+      "community_name": "PhotoUploader.jsx",
       "norm_label": "emptystate()"
     },
     {
@@ -6115,8 +6137,8 @@
       "source_location": "L32",
       "_origin": "ast",
       "id": "src_components_admin_theme_radius",
-      "community": 11,
-      "community_name": "blocks.js",
+      "community": 43,
+      "community_name": "Rifle.jsx",
       "norm_label": "radius"
     },
     {
@@ -6720,8 +6742,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "src_components_review_forcepasswordchange",
-      "community": 90,
-      "community_name": "MediaPanel.jsx",
+      "community": 227,
+      "community_name": "ReviewPortal.jsx",
       "norm_label": "review/forcepasswordchange.jsx"
     },
     {
@@ -6731,8 +6753,8 @@
       "source_location": "L16",
       "_origin": "ast",
       "id": "src_components_review_forcepasswordchange_forcepasswordchange",
-      "community": 90,
-      "community_name": "MediaPanel.jsx",
+      "community": 227,
+      "community_name": "ReviewPortal.jsx",
       "norm_label": "forcepasswordchange()"
     },
     {
@@ -6742,8 +6764,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "src_components_review_reviewlogin",
-      "community": 90,
-      "community_name": "MediaPanel.jsx",
+      "community": 227,
+      "community_name": "ReviewPortal.jsx",
       "norm_label": "reviewlogin.jsx"
     },
     {
@@ -6753,8 +6775,8 @@
       "source_location": "L10",
       "_origin": "ast",
       "id": "src_components_review_reviewlogin_reviewlogin",
-      "community": 90,
-      "community_name": "MediaPanel.jsx",
+      "community": 227,
+      "community_name": "ReviewPortal.jsx",
       "norm_label": "reviewlogin()"
     },
     {
@@ -6764,8 +6786,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "src_components_review_reviewportal",
-      "community": 90,
-      "community_name": "MediaPanel.jsx",
+      "community": 227,
+      "community_name": "ReviewPortal.jsx",
       "norm_label": "reviewportal.jsx"
     },
     {
@@ -6775,8 +6797,8 @@
       "source_location": "L31",
       "_origin": "ast",
       "id": "src_components_review_reviewportal_fmtdate",
-      "community": 90,
-      "community_name": "MediaPanel.jsx",
+      "community": 227,
+      "community_name": "ReviewPortal.jsx",
       "norm_label": "fmtdate()"
     },
     {
@@ -6786,8 +6808,8 @@
       "source_location": "L35",
       "_origin": "ast",
       "id": "src_components_review_reviewportal_reviewportal",
-      "community": 90,
-      "community_name": "MediaPanel.jsx",
+      "community": 227,
+      "community_name": "ReviewPortal.jsx",
       "norm_label": "reviewportal()"
     },
     {
@@ -6797,8 +6819,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "src_components_review_reviewerpincontrol",
-      "community": 90,
-      "community_name": "MediaPanel.jsx",
+      "community": 227,
+      "community_name": "ReviewPortal.jsx",
       "norm_label": "reviewerpincontrol.jsx"
     },
     {
@@ -6808,8 +6830,8 @@
       "source_location": "L12",
       "_origin": "ast",
       "id": "src_components_review_reviewerpincontrol_reviewerpincontrol",
-      "community": 90,
-      "community_name": "MediaPanel.jsx",
+      "community": 227,
+      "community_name": "ReviewPortal.jsx",
       "norm_label": "reviewerpincontrol()"
     },
     {
@@ -6819,8 +6841,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "src_components_team_teampagemobile",
-      "community": 1,
-      "community_name": "PhotoUploader.jsx",
+      "community": 18,
+      "community_name": "CadetManual.jsx",
       "norm_label": "teampagemobile.jsx"
     },
     {
@@ -6830,8 +6852,8 @@
       "source_location": "L5",
       "_origin": "ast",
       "id": "src_components_team_teampagemobile_p",
-      "community": 1,
-      "community_name": "PhotoUploader.jsx",
+      "community": 18,
+      "community_name": "CadetManual.jsx",
       "norm_label": "p"
     },
     {
@@ -6841,8 +6863,8 @@
       "source_location": "L18",
       "_origin": "ast",
       "id": "src_components_team_teampagemobile_teampagemobile",
-      "community": 1,
-      "community_name": "PhotoUploader.jsx",
+      "community": 18,
+      "community_name": "CadetManual.jsx",
       "norm_label": "teampagemobile()"
     },
     {
@@ -6852,8 +6874,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "src_components_tv_tvbottomwidget",
-      "community": 73,
-      "community_name": "imageResize.js",
+      "community": 12,
+      "community_name": "blocks.js",
       "norm_label": "tvbottomwidget.jsx"
     },
     {
@@ -6863,8 +6885,8 @@
       "source_location": "L13",
       "_origin": "ast",
       "id": "src_components_tv_tvbottomwidget_isstale",
-      "community": 73,
-      "community_name": "imageResize.js",
+      "community": 12,
+      "community_name": "blocks.js",
       "norm_label": "isstale()"
     },
     {
@@ -6874,8 +6896,8 @@
       "source_location": "L18",
       "_origin": "ast",
       "id": "src_components_tv_tvbottomwidget_tvbottomwidget",
-      "community": 73,
-      "community_name": "imageResize.js",
+      "community": 12,
+      "community_name": "blocks.js",
       "norm_label": "tvbottomwidget()"
     },
     {
@@ -6885,8 +6907,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "src_components_tv_tvclockbellpanel",
-      "community": 93,
-      "community_name": "ConversationList.jsx",
+      "community": 43,
+      "community_name": "Rifle.jsx",
       "norm_label": "tvclockbellpanel.jsx"
     },
     {
@@ -6896,8 +6918,8 @@
       "source_location": "L10",
       "_origin": "ast",
       "id": "src_components_tv_tvclockbellpanel_panelstyles",
-      "community": 93,
-      "community_name": "ConversationList.jsx",
+      "community": 43,
+      "community_name": "Rifle.jsx",
       "norm_label": "panelstyles()"
     },
     {
@@ -6907,8 +6929,8 @@
       "source_location": "L39",
       "_origin": "ast",
       "id": "src_components_tv_tvclockbellpanel_sweeprule",
-      "community": 93,
-      "community_name": "ConversationList.jsx",
+      "community": 43,
+      "community_name": "Rifle.jsx",
       "norm_label": "sweeprule()"
     },
     {
@@ -6962,8 +6984,8 @@
       "source_location": "L81",
       "_origin": "ast",
       "id": "src_components_tv_tvclockbellpanel_bellring",
-      "community": 93,
-      "community_name": "ConversationList.jsx",
+      "community": 43,
+      "community_name": "Rifle.jsx",
       "norm_label": "bellring()"
     },
     {
@@ -7050,8 +7072,8 @@
       "source_location": "L3",
       "_origin": "ast",
       "id": "src_components_tv_tvcustommessagepanel_tvcustommessagepanel",
-      "community": 73,
-      "community_name": "imageResize.js",
+      "community": 12,
+      "community_name": "blocks.js",
       "norm_label": "tvcustommessagepanel()"
     },
     {
@@ -7061,8 +7083,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "src_components_tv_tvemergencyoverlay",
-      "community": 43,
-      "community_name": "Rifle.jsx",
+      "community": 73,
+      "community_name": "imageResize.js",
       "norm_label": "tvemergencyoverlay.jsx"
     },
     {
@@ -7072,8 +7094,8 @@
       "source_location": "L3",
       "_origin": "ast",
       "id": "src_components_tv_tvemergencyoverlay_text_size",
-      "community": 43,
-      "community_name": "Rifle.jsx",
+      "community": 73,
+      "community_name": "imageResize.js",
       "norm_label": "text_size"
     },
     {
@@ -7193,8 +7215,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "src_components_tv_tvphotocarousel",
-      "community": 73,
-      "community_name": "imageResize.js",
+      "community": 10,
+      "community_name": "emailRender.js",
       "norm_label": "tvphotocarousel.jsx"
     },
     {
@@ -7204,8 +7226,8 @@
       "source_location": "L9",
       "_origin": "ast",
       "id": "src_components_tv_tvphotocarousel_carouselstyles",
-      "community": 73,
-      "community_name": "imageResize.js",
+      "community": 10,
+      "community_name": "emailRender.js",
       "norm_label": "carouselstyles()"
     },
     {
@@ -7215,8 +7237,8 @@
       "source_location": "L23",
       "_origin": "ast",
       "id": "src_components_tv_tvphotocarousel_slideimage",
-      "community": 73,
-      "community_name": "imageResize.js",
+      "community": 10,
+      "community_name": "emailRender.js",
       "norm_label": "slideimage()"
     },
     {
@@ -7226,8 +7248,8 @@
       "source_location": "L68",
       "_origin": "ast",
       "id": "src_components_tv_tvphotocarousel_tvphotocarousel",
-      "community": 73,
-      "community_name": "imageResize.js",
+      "community": 10,
+      "community_name": "emailRender.js",
       "norm_label": "tvphotocarousel()"
     },
     {
@@ -7281,8 +7303,8 @@
       "source_location": "L21",
       "_origin": "ast",
       "id": "src_components_tv_tvquotepanel_tvquotepanel",
-      "community": 73,
-      "community_name": "imageResize.js",
+      "community": 12,
+      "community_name": "blocks.js",
       "norm_label": "tvquotepanel()"
     },
     {
@@ -7402,8 +7424,8 @@
       "source_location": "L34",
       "_origin": "ast",
       "id": "src_components_tv_tvstandardlayout_tvstandardlayout",
-      "community": 73,
-      "community_name": "imageResize.js",
+      "community": 10,
+      "community_name": "emailRender.js",
       "norm_label": "tvstandardlayout()"
     },
     {
@@ -7479,8 +7501,8 @@
       "source_location": "L17",
       "_origin": "ast",
       "id": "src_components_tv_tvversepanel_tvversepanel",
-      "community": 73,
-      "community_name": "imageResize.js",
+      "community": 12,
+      "community_name": "blocks.js",
       "norm_label": "tvversepanel()"
     },
     {
@@ -7490,8 +7512,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "src_components_tv_tvweatherpanel",
-      "community": 73,
-      "community_name": "imageResize.js",
+      "community": 90,
+      "community_name": "MediaPanel.jsx",
       "norm_label": "tvweatherpanel.jsx"
     },
     {
@@ -7501,8 +7523,8 @@
       "source_location": "L4",
       "_origin": "ast",
       "id": "src_components_tv_tvweatherpanel_hourlabel",
-      "community": 73,
-      "community_name": "imageResize.js",
+      "community": 90,
+      "community_name": "MediaPanel.jsx",
       "norm_label": "hourlabel()"
     },
     {
@@ -7512,8 +7534,8 @@
       "source_location": "L13",
       "_origin": "ast",
       "id": "src_components_tv_tvweatherpanel_conditionkey",
-      "community": 73,
-      "community_name": "imageResize.js",
+      "community": 90,
+      "community_name": "MediaPanel.jsx",
       "norm_label": "conditionkey()"
     },
     {
@@ -7523,8 +7545,8 @@
       "source_location": "L24",
       "_origin": "ast",
       "id": "src_components_tv_tvweatherpanel_minutesago",
-      "community": 73,
-      "community_name": "imageResize.js",
+      "community": 90,
+      "community_name": "MediaPanel.jsx",
       "norm_label": "minutesago()"
     },
     {
@@ -7534,8 +7556,8 @@
       "source_location": "L29",
       "_origin": "ast",
       "id": "src_components_tv_tvweatherpanel_iconstyles",
-      "community": 73,
-      "community_name": "imageResize.js",
+      "community": 90,
+      "community_name": "MediaPanel.jsx",
       "norm_label": "iconstyles()"
     },
     {
@@ -7545,8 +7567,8 @@
       "source_location": "L49",
       "_origin": "ast",
       "id": "src_components_tv_tvweatherpanel_weathericon",
-      "community": 73,
-      "community_name": "imageResize.js",
+      "community": 90,
+      "community_name": "MediaPanel.jsx",
       "norm_label": "weathericon()"
     },
     {
@@ -7556,8 +7578,8 @@
       "source_location": "L129",
       "_origin": "ast",
       "id": "src_components_tv_tvweatherpanel_tvweatherpanel",
-      "community": 73,
-      "community_name": "imageResize.js",
+      "community": 90,
+      "community_name": "MediaPanel.jsx",
       "norm_label": "tvweatherpanel()"
     },
     {
@@ -7600,8 +7622,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "src_components_tv_control_center_stepfeaturedteams",
-      "community": 43,
-      "community_name": "Rifle.jsx",
+      "community": 202,
+      "community_name": "TvRemotePanel.jsx",
       "norm_label": "stepfeaturedteams.jsx"
     },
     {
@@ -7622,8 +7644,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "src_components_tv_control_center_stepphotosource",
-      "community": 12,
-      "community_name": "blocks.js",
+      "community": 43,
+      "community_name": "Rifle.jsx",
       "norm_label": "stepphotosource.jsx"
     },
     {
@@ -7633,8 +7655,8 @@
       "source_location": "L6",
       "_origin": "ast",
       "id": "src_components_tv_control_center_stepphotosource_modebutton",
-      "community": 12,
-      "community_name": "blocks.js",
+      "community": 43,
+      "community_name": "Rifle.jsx",
       "norm_label": "modebutton()"
     },
     {
@@ -7644,8 +7666,8 @@
       "source_location": "L22",
       "_origin": "ast",
       "id": "src_components_tv_control_center_stepphotosource_stepphotosource",
-      "community": 12,
-      "community_name": "blocks.js",
+      "community": 43,
+      "community_name": "Rifle.jsx",
       "norm_label": "stepphotosource()"
     },
     {
@@ -7710,8 +7732,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "src_components_tv_control_center_steprangenotices",
-      "community": 10,
-      "community_name": "emailRender.js",
+      "community": 87,
+      "community_name": "EventsPage.jsx",
       "norm_label": "steprangenotices.jsx"
     },
     {
@@ -7721,8 +7743,8 @@
       "source_location": "L11",
       "_origin": "ast",
       "id": "src_components_tv_control_center_steprangenotices_fieldbasestyle",
-      "community": 10,
-      "community_name": "emailRender.js",
+      "community": 87,
+      "community_name": "EventsPage.jsx",
       "norm_label": "fieldbasestyle"
     },
     {
@@ -7732,8 +7754,8 @@
       "source_location": "L17",
       "_origin": "ast",
       "id": "src_components_tv_control_center_steprangenotices_newentryform",
-      "community": 10,
-      "community_name": "emailRender.js",
+      "community": 87,
+      "community_name": "EventsPage.jsx",
       "norm_label": "newentryform()"
     },
     {
@@ -7743,8 +7765,8 @@
       "source_location": "L78",
       "_origin": "ast",
       "id": "src_components_tv_control_center_steprangenotices_existingentry",
-      "community": 10,
-      "community_name": "emailRender.js",
+      "community": 87,
+      "community_name": "EventsPage.jsx",
       "norm_label": "existingentry()"
     },
     {
@@ -7930,8 +7952,8 @@
       "source_location": "L54",
       "_origin": "ast",
       "id": "src_components_tv_control_center_stepwidgetmode_stepwidgetmode",
-      "community": 43,
-      "community_name": "Rifle.jsx",
+      "community": 202,
+      "community_name": "TvRemotePanel.jsx",
       "norm_label": "stepwidgetmode()"
     },
     {
@@ -7996,8 +8018,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "src_components_tv_range_tvrangelunchscreen",
-      "community": 93,
-      "community_name": "ConversationList.jsx",
+      "community": 43,
+      "community_name": "Rifle.jsx",
       "norm_label": "tvrangelunchscreen.jsx"
     },
     {
@@ -8106,8 +8128,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "src_components_tv_range_tvrangeraiderpracticewidget",
-      "community": 73,
-      "community_name": "imageResize.js",
+      "community": 233,
+      "community_name": "TvRangeRaiderPracticeWidget.jsx",
       "norm_label": "tvrangeraiderpracticewidget.jsx"
     },
     {
@@ -8117,8 +8139,8 @@
       "source_location": "L5",
       "_origin": "ast",
       "id": "src_components_tv_range_tvrangeraiderpracticewidget_panelheading",
-      "community": 73,
-      "community_name": "imageResize.js",
+      "community": 233,
+      "community_name": "TvRangeRaiderPracticeWidget.jsx",
       "norm_label": "panelheading()"
     },
     {
@@ -8128,8 +8150,8 @@
       "source_location": "L17",
       "_origin": "ast",
       "id": "src_components_tv_range_tvrangeraiderpracticewidget_practicetile",
-      "community": 73,
-      "community_name": "imageResize.js",
+      "community": 233,
+      "community_name": "TvRangeRaiderPracticeWidget.jsx",
       "norm_label": "practicetile()"
     },
     {
@@ -8139,8 +8161,8 @@
       "source_location": "L48",
       "_origin": "ast",
       "id": "src_components_tv_range_tvrangeraiderpracticewidget_tvrangeraiderpracticewidget",
-      "community": 73,
-      "community_name": "imageResize.js",
+      "community": 233,
+      "community_name": "TvRangeRaiderPracticeWidget.jsx",
       "norm_label": "tvrangeraiderpracticewidget()"
     },
     {
@@ -8172,8 +8194,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "src_components_tv_range_tvrangescreenbase",
-      "community": 93,
-      "community_name": "ConversationList.jsx",
+      "community": 43,
+      "community_name": "Rifle.jsx",
       "norm_label": "tvrangescreenbase.jsx"
     },
     {
@@ -8414,8 +8436,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "src_components_tv_range_rangegrid_rangegridcountdown",
-      "community": 205,
-      "community_name": "StepRangeNotices.jsx",
+      "community": 229,
+      "community_name": "RangeGridCountdown.jsx",
       "norm_label": "rangegridcountdown.jsx"
     },
     {
@@ -8425,8 +8447,8 @@
       "source_location": "L7",
       "_origin": "ast",
       "id": "src_components_tv_range_rangegrid_rangegridcountdown_targetdate",
-      "community": 205,
-      "community_name": "StepRangeNotices.jsx",
+      "community": 229,
+      "community_name": "RangeGridCountdown.jsx",
       "norm_label": "targetdate()"
     },
     {
@@ -8436,8 +8458,8 @@
       "source_location": "L11",
       "_origin": "ast",
       "id": "src_components_tv_range_rangegrid_rangegridcountdown_segment",
-      "community": 205,
-      "community_name": "StepRangeNotices.jsx",
+      "community": 229,
+      "community_name": "RangeGridCountdown.jsx",
       "norm_label": "segment()"
     },
     {
@@ -8447,8 +8469,8 @@
       "source_location": "L27",
       "_origin": "ast",
       "id": "src_components_tv_range_rangegrid_rangegridcountdown_colon",
-      "community": 205,
-      "community_name": "StepRangeNotices.jsx",
+      "community": 229,
+      "community_name": "RangeGridCountdown.jsx",
       "norm_label": "colon()"
     },
     {
@@ -8458,8 +8480,8 @@
       "source_location": "L35",
       "_origin": "ast",
       "id": "src_components_tv_range_rangegrid_rangegridcountdown_titleinputstyle",
-      "community": 205,
-      "community_name": "StepRangeNotices.jsx",
+      "community": 229,
+      "community_name": "RangeGridCountdown.jsx",
       "norm_label": "titleinputstyle"
     },
     {
@@ -8469,8 +8491,8 @@
       "source_location": "L50",
       "_origin": "ast",
       "id": "src_components_tv_range_rangegrid_rangegridcountdown_rangegridcountdown",
-      "community": 205,
-      "community_name": "StepRangeNotices.jsx",
+      "community": 229,
+      "community_name": "RangeGridCountdown.jsx",
       "norm_label": "rangegridcountdown()"
     },
     {
@@ -8480,8 +8502,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "src_components_tv_range_rangegrid_rangegridphotosingle",
-      "community": 205,
-      "community_name": "StepRangeNotices.jsx",
+      "community": 43,
+      "community_name": "Rifle.jsx",
       "norm_label": "rangegridphotosingle.jsx"
     },
     {
@@ -8491,8 +8513,8 @@
       "source_location": "L7",
       "_origin": "ast",
       "id": "src_components_tv_range_rangegrid_rangegridphotosingle_placeholder",
-      "community": 205,
-      "community_name": "StepRangeNotices.jsx",
+      "community": 43,
+      "community_name": "Rifle.jsx",
       "norm_label": "placeholder()"
     },
     {
@@ -8502,8 +8524,8 @@
       "source_location": "L31",
       "_origin": "ast",
       "id": "src_components_tv_range_rangegrid_rangegridphotosingle_rangegridphotosingle",
-      "community": 205,
-      "community_name": "StepRangeNotices.jsx",
+      "community": 10,
+      "community_name": "emailRender.js",
       "norm_label": "rangegridphotosingle()"
     },
     {
@@ -8513,8 +8535,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "src_components_tv_range_rangegrid_rangegridwidgetcontent",
-      "community": 73,
-      "community_name": "imageResize.js",
+      "community": 10,
+      "community_name": "emailRender.js",
       "norm_label": "rangegridwidgetcontent.jsx"
     },
     {
@@ -8524,8 +8546,8 @@
       "source_location": "L15",
       "_origin": "ast",
       "id": "src_components_tv_range_rangegrid_rangegridwidgetcontent_eventdatelabel",
-      "community": 73,
-      "community_name": "imageResize.js",
+      "community": 10,
+      "community_name": "emailRender.js",
       "norm_label": "eventdatelabel()"
     },
     {
@@ -8535,8 +8557,8 @@
       "source_location": "L22",
       "_origin": "ast",
       "id": "src_components_tv_range_rangegrid_rangegridwidgetcontent_panelheading",
-      "community": 73,
-      "community_name": "imageResize.js",
+      "community": 10,
+      "community_name": "emailRender.js",
       "norm_label": "panelheading()"
     },
     {
@@ -8546,8 +8568,8 @@
       "source_location": "L34",
       "_origin": "ast",
       "id": "src_components_tv_range_rangegrid_rangegridwidgetcontent_emptystate",
-      "community": 73,
-      "community_name": "imageResize.js",
+      "community": 10,
+      "community_name": "emailRender.js",
       "norm_label": "emptystate()"
     },
     {
@@ -8557,8 +8579,8 @@
       "source_location": "L48",
       "_origin": "ast",
       "id": "src_components_tv_range_rangegrid_rangegridwidgetcontent_noticecard",
-      "community": 73,
-      "community_name": "imageResize.js",
+      "community": 87,
+      "community_name": "EventsPage.jsx",
       "norm_label": "noticecard()"
     },
     {
@@ -8568,8 +8590,8 @@
       "source_location": "L62",
       "_origin": "ast",
       "id": "src_components_tv_range_rangegrid_rangegridwidgetcontent_eventcard",
-      "community": 73,
-      "community_name": "imageResize.js",
+      "community": 10,
+      "community_name": "emailRender.js",
       "norm_label": "eventcard()"
     },
     {
@@ -8579,8 +8601,8 @@
       "source_location": "L83",
       "_origin": "ast",
       "id": "src_components_tv_range_rangegrid_rangegridwidgetcontent_noticecolumn",
-      "community": 73,
-      "community_name": "imageResize.js",
+      "community": 10,
+      "community_name": "emailRender.js",
       "norm_label": "noticecolumn()"
     },
     {
@@ -8590,8 +8612,8 @@
       "source_location": "L94",
       "_origin": "ast",
       "id": "src_components_tv_range_rangegrid_rangegridwidgetcontent_eventcolumn",
-      "community": 73,
-      "community_name": "imageResize.js",
+      "community": 10,
+      "community_name": "emailRender.js",
       "norm_label": "eventcolumn()"
     },
     {
@@ -8601,8 +8623,8 @@
       "source_location": "L105",
       "_origin": "ast",
       "id": "src_components_tv_range_rangegrid_rangegridwidgetcontent_phototile",
-      "community": 73,
-      "community_name": "imageResize.js",
+      "community": 10,
+      "community_name": "emailRender.js",
       "norm_label": "phototile()"
     },
     {
@@ -8612,8 +8634,8 @@
       "source_location": "L115",
       "_origin": "ast",
       "id": "src_components_tv_range_rangegrid_rangegridwidgetcontent_customtexttile",
-      "community": 73,
-      "community_name": "imageResize.js",
+      "community": 10,
+      "community_name": "emailRender.js",
       "norm_label": "customtexttile()"
     },
     {
@@ -8832,8 +8854,8 @@
       "source_location": "L43",
       "_origin": "ast",
       "id": "src_components_tv_range_rangegrid_richtext_runstostoragestring",
-      "community": 10,
-      "community_name": "emailRender.js",
+      "community": 87,
+      "community_name": "EventsPage.jsx",
       "norm_label": "runstostoragestring()"
     },
     {
@@ -8843,8 +8865,8 @@
       "source_location": "L47",
       "_origin": "ast",
       "id": "src_components_tv_range_rangegrid_richtext_storagestringtoruns",
-      "community": 10,
-      "community_name": "emailRender.js",
+      "community": 87,
+      "community_name": "EventsPage.jsx",
       "norm_label": "storagestringtoruns()"
     },
     {
@@ -8898,8 +8920,8 @@
       "source_location": "L103",
       "_origin": "ast",
       "id": "src_components_tv_range_rangegrid_richtext_renderruns",
-      "community": 205,
-      "community_name": "StepRangeNotices.jsx",
+      "community": 229,
+      "community_name": "RangeGridCountdown.jsx",
       "norm_label": "renderruns()"
     },
     {
@@ -9140,8 +9162,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "src_hooks_usetvcarouselphotos",
-      "community": 73,
-      "community_name": "imageResize.js",
+      "community": 10,
+      "community_name": "emailRender.js",
       "norm_label": "usetvcarouselphotos.js"
     },
     {
@@ -9151,8 +9173,8 @@
       "source_location": "L24",
       "_origin": "ast",
       "id": "src_hooks_usetvcarouselphotos_usetvcarouselphotos",
-      "community": 73,
-      "community_name": "imageResize.js",
+      "community": 10,
+      "community_name": "emailRender.js",
       "norm_label": "usetvcarouselphotos()"
     },
     {
@@ -9162,8 +9184,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "src_hooks_usetvdailysettings",
-      "community": 24,
-      "community_name": "FaqSection.jsx",
+      "community": 198,
+      "community_name": "RaiderCarousel.jsx",
       "norm_label": "usetvdailysettings.js"
     },
     {
@@ -9184,8 +9206,8 @@
       "source_location": "L58",
       "_origin": "ast",
       "id": "src_hooks_usetvdailysettings_updatetvdailysettings",
-      "community": 24,
-      "community_name": "FaqSection.jsx",
+      "community": 198,
+      "community_name": "RaiderCarousel.jsx",
       "norm_label": "updatetvdailysettings()"
     },
     {
@@ -9195,8 +9217,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "src_hooks_usetveventoptions",
-      "community": 12,
-      "community_name": "blocks.js",
+      "community": 206,
+      "community_name": "index.jsx",
       "norm_label": "usetveventoptions.js"
     },
     {
@@ -9206,8 +9228,8 @@
       "source_location": "L6",
       "_origin": "ast",
       "id": "src_hooks_usetveventoptions_todayny",
-      "community": 12,
-      "community_name": "blocks.js",
+      "community": 206,
+      "community_name": "index.jsx",
       "norm_label": "todayny()"
     },
     {
@@ -9217,8 +9239,8 @@
       "source_location": "L11",
       "_origin": "ast",
       "id": "src_hooks_usetveventoptions_usetveventoptions",
-      "community": 12,
-      "community_name": "blocks.js",
+      "community": 206,
+      "community_name": "index.jsx",
       "norm_label": "usetveventoptions()"
     },
     {
@@ -9283,8 +9305,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "src_hooks_useweather",
-      "community": 73,
-      "community_name": "imageResize.js",
+      "community": 90,
+      "community_name": "MediaPanel.jsx",
       "norm_label": "useweather.js"
     },
     {
@@ -9294,8 +9316,8 @@
       "source_location": "L11",
       "_origin": "ast",
       "id": "src_hooks_useweather_nws_headers",
-      "community": 73,
-      "community_name": "imageResize.js",
+      "community": 90,
+      "community_name": "MediaPanel.jsx",
       "norm_label": "nws_headers"
     },
     {
@@ -9305,8 +9327,8 @@
       "source_location": "L13",
       "_origin": "ast",
       "id": "src_hooks_useweather_fetchjson",
-      "community": 73,
-      "community_name": "imageResize.js",
+      "community": 90,
+      "community_name": "MediaPanel.jsx",
       "norm_label": "fetchjson()"
     },
     {
@@ -9316,8 +9338,8 @@
       "source_location": "L25",
       "_origin": "ast",
       "id": "src_hooks_useweather_useweather",
-      "community": 73,
-      "community_name": "imageResize.js",
+      "community": 90,
+      "community_name": "MediaPanel.jsx",
       "norm_label": "useweather()"
     },
     {
@@ -9503,8 +9525,8 @@
       "source_location": "L5",
       "_origin": "ast",
       "id": "src_lib_calendar_event_categories",
-      "community": 87,
-      "community_name": "EventsPage.jsx",
+      "community": 4,
+      "community_name": "EventsPanel.jsx",
       "norm_label": "event_categories"
     },
     {
@@ -9569,8 +9591,8 @@
       "source_location": "L44",
       "_origin": "ast",
       "id": "src_lib_calendar_formateventtimerange",
-      "community": 87,
-      "community_name": "EventsPage.jsx",
+      "community": 72,
+      "community_name": "ui.jsx",
       "norm_label": "formateventtimerange()"
     },
     {
@@ -9602,8 +9624,8 @@
       "source_location": "L62",
       "_origin": "ast",
       "id": "src_lib_calendar_months",
-      "community": 4,
-      "community_name": "EventsPanel.jsx",
+      "community": 92,
+      "community_name": "MonthGridCalendar.jsx",
       "norm_label": "months"
     },
     {
@@ -9816,6 +9838,61 @@
       "norm_label": "masterylevel()"
     },
     {
+      "label": "emailAudience.js",
+      "file_type": "code",
+      "source_file": "src/lib/emailAudience.js",
+      "source_location": "L1",
+      "_origin": "ast",
+      "id": "src_lib_emailaudience",
+      "community": 99,
+      "community_name": "imageResize.js",
+      "norm_label": "emailaudience.js"
+    },
+    {
+      "label": "AUDIENCE_GROUPS",
+      "file_type": "code",
+      "source_file": "src/lib/emailAudience.js",
+      "source_location": "L12",
+      "_origin": "ast",
+      "id": "src_lib_emailaudience_audience_groups",
+      "community": 0,
+      "community_name": "react",
+      "norm_label": "audience_groups"
+    },
+    {
+      "label": "COMPANIES",
+      "file_type": "code",
+      "source_file": "src/lib/emailAudience.js",
+      "source_location": "L23",
+      "_origin": "ast",
+      "id": "src_lib_emailaudience_companies",
+      "community": 99,
+      "community_name": "imageResize.js",
+      "norm_label": "companies"
+    },
+    {
+      "label": "clean()",
+      "file_type": "code",
+      "source_file": "src/lib/emailAudience.js",
+      "source_location": "L25",
+      "_origin": "ast",
+      "id": "src_lib_emailaudience_clean",
+      "community": 99,
+      "community_name": "imageResize.js",
+      "norm_label": "clean()"
+    },
+    {
+      "label": "resolveAudienceEmails()",
+      "file_type": "code",
+      "source_file": "src/lib/emailAudience.js",
+      "source_location": "L36",
+      "_origin": "ast",
+      "id": "src_lib_emailaudience_resolveaudienceemails",
+      "community": 99,
+      "community_name": "imageResize.js",
+      "norm_label": "resolveaudienceemails()"
+    },
+    {
       "label": "eventsPdfPrint.js",
       "file_type": "code",
       "source_file": "src/lib/eventsPdfPrint.js",
@@ -9899,8 +9976,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "src_lib_fingerprint",
-      "community": 24,
-      "community_name": "FaqSection.jsx",
+      "community": 198,
+      "community_name": "RaiderCarousel.jsx",
       "norm_label": "fingerprint.js"
     },
     {
@@ -9910,8 +9987,8 @@
       "source_location": "L14",
       "_origin": "ast",
       "id": "src_lib_fingerprint_localnonce",
-      "community": 24,
-      "community_name": "FaqSection.jsx",
+      "community": 198,
+      "community_name": "RaiderCarousel.jsx",
       "norm_label": "localnonce()"
     },
     {
@@ -9921,8 +9998,8 @@
       "source_location": "L24",
       "_origin": "ast",
       "id": "src_lib_fingerprint_getdeviceid",
-      "community": 24,
-      "community_name": "FaqSection.jsx",
+      "community": 198,
+      "community_name": "RaiderCarousel.jsx",
       "norm_label": "getdeviceid()"
     },
     {
@@ -10108,8 +10185,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "src_lib_raiderpracticeinfo",
-      "community": 73,
-      "community_name": "imageResize.js",
+      "community": 233,
+      "community_name": "TvRangeRaiderPracticeWidget.jsx",
       "norm_label": "raiderpracticeinfo.js"
     },
     {
@@ -10119,8 +10196,8 @@
       "source_location": "L6",
       "_origin": "ast",
       "id": "src_lib_raiderpracticeinfo_raider_practice_tiles",
-      "community": 73,
-      "community_name": "imageResize.js",
+      "community": 233,
+      "community_name": "TvRangeRaiderPracticeWidget.jsx",
       "norm_label": "raider_practice_tiles"
     },
     {
@@ -10185,8 +10262,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "src_lib_teams",
-      "community": 99,
-      "community_name": "imageResize.js",
+      "community": 18,
+      "community_name": "CadetManual.jsx",
       "norm_label": "teams.js"
     },
     {
@@ -10196,8 +10273,8 @@
       "source_location": "L4",
       "_origin": "ast",
       "id": "src_lib_teams_teams",
-      "community": 99,
-      "community_name": "imageResize.js",
+      "community": 18,
+      "community_name": "CadetManual.jsx",
       "norm_label": "teams"
     },
     {
@@ -10207,8 +10284,8 @@
       "source_location": "L11",
       "_origin": "ast",
       "id": "src_lib_teams_team_ids",
-      "community": 99,
-      "community_name": "imageResize.js",
+      "community": 18,
+      "community_name": "CadetManual.jsx",
       "norm_label": "team_ids"
     },
     {
@@ -10218,8 +10295,8 @@
       "source_location": "L12",
       "_origin": "ast",
       "id": "src_lib_teams_getteam",
-      "community": 1,
-      "community_name": "PhotoUploader.jsx",
+      "community": 18,
+      "community_name": "CadetManual.jsx",
       "norm_label": "getteam()"
     },
     {
@@ -10229,8 +10306,8 @@
       "source_location": "L13",
       "_origin": "ast",
       "id": "src_lib_teams_isvotingteam",
-      "community": 1,
-      "community_name": "PhotoUploader.jsx",
+      "community": 18,
+      "community_name": "CadetManual.jsx",
       "norm_label": "isvotingteam()"
     },
     {
@@ -10251,8 +10328,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "src_lib_tvdailyphotos",
-      "community": 12,
-      "community_name": "blocks.js",
+      "community": 43,
+      "community_name": "Rifle.jsx",
       "norm_label": "tvdailyphotos.js"
     },
     {
@@ -10262,8 +10339,8 @@
       "source_location": "L8",
       "_origin": "ast",
       "id": "src_lib_tvdailyphotos_uploadtvdailyphoto",
-      "community": 12,
-      "community_name": "blocks.js",
+      "community": 43,
+      "community_name": "Rifle.jsx",
       "norm_label": "uploadtvdailyphoto()"
     },
     {
@@ -10273,8 +10350,8 @@
       "source_location": "L19",
       "_origin": "ast",
       "id": "src_lib_tvdailyphotos_deletetvdailyphoto",
-      "community": 12,
-      "community_name": "blocks.js",
+      "community": 43,
+      "community_name": "Rifle.jsx",
       "norm_label": "deletetvdailyphoto()"
     },
     {
@@ -10284,8 +10361,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "src_lib_tvnotices",
-      "community": 10,
-      "community_name": "emailRender.js",
+      "community": 87,
+      "community_name": "EventsPage.jsx",
       "norm_label": "tvnotices.js"
     },
     {
@@ -10295,8 +10372,8 @@
       "source_location": "L12",
       "_origin": "ast",
       "id": "src_lib_tvnotices_createtvnotice",
-      "community": 10,
-      "community_name": "emailRender.js",
+      "community": 87,
+      "community_name": "EventsPage.jsx",
       "norm_label": "createtvnotice()"
     },
     {
@@ -10306,8 +10383,8 @@
       "source_location": "L24",
       "_origin": "ast",
       "id": "src_lib_tvnotices_updatetvnotice",
-      "community": 10,
-      "community_name": "emailRender.js",
+      "community": 87,
+      "community_name": "EventsPage.jsx",
       "norm_label": "updatetvnotice()"
     },
     {
@@ -10317,8 +10394,8 @@
       "source_location": "L29",
       "_origin": "ast",
       "id": "src_lib_tvnotices_deletetvnotice",
-      "community": 10,
-      "community_name": "emailRender.js",
+      "community": 87,
+      "community_name": "EventsPage.jsx",
       "norm_label": "deletetvnotice()"
     },
     {
@@ -10328,8 +10405,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "src_lib_tvphotocaption",
-      "community": 99,
-      "community_name": "imageResize.js",
+      "community": 209,
+      "community_name": "TabGrid.jsx",
       "norm_label": "tvphotocaption.js"
     },
     {
@@ -10339,8 +10416,8 @@
       "source_location": "L6",
       "_origin": "ast",
       "id": "src_lib_tvphotocaption_folder_labels",
-      "community": 99,
-      "community_name": "imageResize.js",
+      "community": 209,
+      "community_name": "TabGrid.jsx",
       "norm_label": "folder_labels"
     },
     {
@@ -10350,8 +10427,8 @@
       "source_location": "L10",
       "_origin": "ast",
       "id": "src_lib_tvphotocaption_folder_order",
-      "community": 99,
-      "community_name": "imageResize.js",
+      "community": 209,
+      "community_name": "TabGrid.jsx",
       "norm_label": "folder_order"
     },
     {
@@ -10361,8 +10438,8 @@
       "source_location": "L15",
       "_origin": "ast",
       "id": "src_lib_tvphotocaption_resolvetvphotocaption",
-      "community": 99,
-      "community_name": "imageResize.js",
+      "community": 209,
+      "community_name": "TabGrid.jsx",
       "norm_label": "resolvetvphotocaption()"
     },
     {
@@ -10372,8 +10449,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "src_lib_tvphotos",
-      "community": 73,
-      "community_name": "imageResize.js",
+      "community": 10,
+      "community_name": "emailRender.js",
       "norm_label": "tvphotos.js"
     },
     {
@@ -10383,8 +10460,8 @@
       "source_location": "L4",
       "_origin": "ast",
       "id": "src_lib_tvphotos_tv_photos",
-      "community": 73,
-      "community_name": "imageResize.js",
+      "community": 10,
+      "community_name": "emailRender.js",
       "norm_label": "tv_photos"
     },
     {
@@ -10894,6 +10971,28 @@
       "norm_label": "public.cadet_consent"
     },
     {
+      "label": "cadet_consent_dd_forms.sql",
+      "file_type": "code",
+      "source_file": "supabase/cadet_consent_dd_forms.sql",
+      "source_location": null,
+      "_origin": "ast",
+      "id": "supabase_cadet_consent_dd_forms",
+      "community": 236,
+      "community_name": "cadet_consent_dd_forms.sql",
+      "norm_label": "cadet_consent_dd_forms.sql"
+    },
+    {
+      "label": "public.cadet_consent",
+      "file_type": "code",
+      "source_file": "supabase/cadet_consent_dd_forms.sql",
+      "source_location": "L13",
+      "_origin": "ast",
+      "id": "supabase_cadet_consent_dd_forms_public_cadet_consent",
+      "community": 236,
+      "community_name": "cadet_consent_dd_forms.sql",
+      "norm_label": "public.cadet_consent"
+    },
+    {
       "label": "cadet_consent_grade_let.sql",
       "file_type": "code",
       "source_file": "supabase/cadet_consent_grade_let.sql",
@@ -11079,6 +11178,28 @@
       "community": 55,
       "community_name": "documents.sql",
       "norm_label": "documents.sql"
+    },
+    {
+      "label": "email_audience_groups.sql",
+      "file_type": "code",
+      "source_file": "supabase/email_audience_groups.sql",
+      "source_location": null,
+      "_origin": "ast",
+      "id": "supabase_email_audience_groups",
+      "community": 225,
+      "community_name": "email_audience_groups.sql",
+      "norm_label": "email_audience_groups.sql"
+    },
+    {
+      "label": "public.email_messages",
+      "file_type": "code",
+      "source_file": "supabase/email_audience_groups.sql",
+      "source_location": "L15",
+      "_origin": "ast",
+      "id": "supabase_email_audience_groups_public_email_messages",
+      "community": 225,
+      "community_name": "email_audience_groups.sql",
+      "norm_label": "public.email_messages"
     },
     {
       "label": "email_builder.sql",
@@ -11356,6 +11477,28 @@
       "norm_label": "public.get_event_color_guard()"
     },
     {
+      "label": "event_honor_guard_public.sql",
+      "file_type": "code",
+      "source_file": "supabase/event_honor_guard_public.sql",
+      "source_location": null,
+      "_origin": "ast",
+      "id": "supabase_event_honor_guard_public",
+      "community": 226,
+      "community_name": "event_honor_guard_public.sql",
+      "norm_label": "event_honor_guard_public.sql"
+    },
+    {
+      "label": "public.get_event_honor_guard()",
+      "file_type": "code",
+      "source_file": "supabase/event_honor_guard_public.sql",
+      "source_location": "L9",
+      "_origin": "ast",
+      "id": "supabase_event_honor_guard_public_public_get_event_honor_guard",
+      "community": 226,
+      "community_name": "event_honor_guard_public.sql",
+      "norm_label": "public.get_event_honor_guard()"
+    },
+    {
       "label": "events_backfill_incomplete_to_draft.sql",
       "file_type": "code",
       "source_file": "supabase/events_backfill_incomplete_to_draft.sql",
@@ -11486,6 +11629,50 @@
       "community": 191,
       "community_name": "events_end_time.sql",
       "norm_label": "public.events"
+    },
+    {
+      "label": "events_honor_guard.sql",
+      "file_type": "code",
+      "source_file": "supabase/events_honor_guard.sql",
+      "source_location": null,
+      "_origin": "ast",
+      "id": "supabase_events_honor_guard",
+      "community": 199,
+      "community_name": "RaiderFAQ.jsx",
+      "norm_label": "events_honor_guard.sql"
+    },
+    {
+      "label": "public.events",
+      "file_type": "code",
+      "source_file": "supabase/events_honor_guard.sql",
+      "source_location": "L10",
+      "_origin": "ast",
+      "id": "supabase_events_honor_guard_public_events",
+      "community": 199,
+      "community_name": "RaiderFAQ.jsx",
+      "norm_label": "public.events"
+    },
+    {
+      "label": "public.event_honor_guard",
+      "file_type": "code",
+      "source_file": "supabase/events_honor_guard.sql",
+      "source_location": "L12",
+      "_origin": "ast",
+      "id": "supabase_events_honor_guard_public_event_honor_guard",
+      "community": 199,
+      "community_name": "RaiderFAQ.jsx",
+      "norm_label": "public.event_honor_guard"
+    },
+    {
+      "label": "public.honor_guard_requires_fields()",
+      "file_type": "code",
+      "source_file": "supabase/events_honor_guard.sql",
+      "source_location": "L27",
+      "_origin": "ast",
+      "id": "supabase_events_honor_guard_public_honor_guard_requires_fields",
+      "community": 199,
+      "community_name": "RaiderFAQ.jsx",
+      "norm_label": "public.honor_guard_requires_fields()"
     },
     {
       "label": "events_ironclad.sql",
@@ -12280,6 +12467,61 @@
       "norm_label": "block"
     },
     {
+      "label": "send-guard-alert/index.ts",
+      "file_type": "code",
+      "source_file": "supabase/functions/send-guard-alert/index.ts",
+      "source_location": "L1",
+      "_origin": "ast",
+      "id": "supabase_functions_send_guard_alert_index",
+      "community": 14,
+      "community_name": "PeoplePanel.jsx",
+      "norm_label": "send-guard-alert/index.ts"
+    },
+    {
+      "label": "Position",
+      "file_type": "code",
+      "source_file": "supabase/functions/send-guard-alert/index.ts",
+      "source_location": "L17",
+      "_origin": "ast",
+      "id": "supabase_functions_send_guard_alert_index_position",
+      "community": 14,
+      "community_name": "PeoplePanel.jsx",
+      "norm_label": "position"
+    },
+    {
+      "label": "sendBatch()",
+      "file_type": "code",
+      "source_file": "supabase/functions/send-guard-alert/index.ts",
+      "source_location": "L100",
+      "_origin": "ast",
+      "id": "supabase_functions_send_guard_alert_index_sendbatch",
+      "community": 14,
+      "community_name": "PeoplePanel.jsx",
+      "norm_label": "sendbatch()"
+    },
+    {
+      "label": "send-uniform-reminders/index.ts",
+      "file_type": "code",
+      "source_file": "supabase/functions/send-uniform-reminders/index.ts",
+      "source_location": "L1",
+      "_origin": "ast",
+      "id": "supabase_functions_send_uniform_reminders_index",
+      "community": 14,
+      "community_name": "PeoplePanel.jsx",
+      "norm_label": "send-uniform-reminders/index.ts"
+    },
+    {
+      "label": "chunk()",
+      "file_type": "code",
+      "source_file": "supabase/functions/send-uniform-reminders/index.ts",
+      "source_location": "L64",
+      "_origin": "ast",
+      "id": "supabase_functions_send_uniform_reminders_index_chunk",
+      "community": 14,
+      "community_name": "PeoplePanel.jsx",
+      "norm_label": "chunk()"
+    },
+    {
       "label": "set-pin/index.ts",
       "file_type": "code",
       "source_file": "supabase/functions/set-pin/index.ts",
@@ -12344,6 +12586,39 @@
       "community": 196,
       "community_name": "gallery_removal.sql",
       "norm_label": "gallery_removal.sql"
+    },
+    {
+      "label": "guard_alerts.sql",
+      "file_type": "code",
+      "source_file": "supabase/guard_alerts.sql",
+      "source_location": null,
+      "_origin": "ast",
+      "id": "supabase_guard_alerts",
+      "community": 223,
+      "community_name": "guard_alerts.sql",
+      "norm_label": "guard_alerts.sql"
+    },
+    {
+      "label": "public.events",
+      "file_type": "code",
+      "source_file": "supabase/guard_alerts.sql",
+      "source_location": "L21",
+      "_origin": "ast",
+      "id": "supabase_guard_alerts_public_events",
+      "community": 223,
+      "community_name": "guard_alerts.sql",
+      "norm_label": "public.events"
+    },
+    {
+      "label": "public.guard_alert_log",
+      "file_type": "code",
+      "source_file": "supabase/guard_alerts.sql",
+      "source_location": "L25",
+      "_origin": "ast",
+      "id": "supabase_guard_alerts_public_guard_alert_log",
+      "community": 223,
+      "community_name": "guard_alerts.sql",
+      "norm_label": "public.guard_alert_log"
     },
     {
       "label": "opticsend.sql",
@@ -13367,6 +13642,50 @@
       "community": 207,
       "community_name": "tv_shoutouts.sql",
       "norm_label": "trg_tv_daily_settings_guard"
+    },
+    {
+      "label": "uniform_reminders.sql",
+      "file_type": "code",
+      "source_file": "supabase/uniform_reminders.sql",
+      "source_location": null,
+      "_origin": "ast",
+      "id": "supabase_uniform_reminders",
+      "community": 222,
+      "community_name": "Companies.jsx",
+      "norm_label": "uniform_reminders.sql"
+    },
+    {
+      "label": "public.events",
+      "file_type": "code",
+      "source_file": "supabase/uniform_reminders.sql",
+      "source_location": "L39",
+      "_origin": "ast",
+      "id": "supabase_uniform_reminders_public_events",
+      "community": 222,
+      "community_name": "Companies.jsx",
+      "norm_label": "public.events"
+    },
+    {
+      "label": "public.uniform_reminder_log",
+      "file_type": "code",
+      "source_file": "supabase/uniform_reminders.sql",
+      "source_location": "L42",
+      "_origin": "ast",
+      "id": "supabase_uniform_reminders_public_uniform_reminder_log",
+      "community": 222,
+      "community_name": "Companies.jsx",
+      "norm_label": "public.uniform_reminder_log"
+    },
+    {
+      "label": "public.generate_uniform_reminders()",
+      "file_type": "code",
+      "source_file": "supabase/uniform_reminders.sql",
+      "source_location": "L50",
+      "_origin": "ast",
+      "id": "supabase_uniform_reminders_public_generate_uniform_reminders",
+      "community": 222,
+      "community_name": "Companies.jsx",
+      "norm_label": "public.generate_uniform_reminders()"
     },
     {
       "label": "webauthn_challenges.sql",
@@ -23856,7 +24175,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "src/components/EventsPage.jsx",
-      "source_location": "L320",
+      "source_location": "L340",
       "weight": 1.0,
       "_origin": "ast",
       "source": "src_components_eventspage",
@@ -23867,7 +24186,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "src/components/EventsPage.jsx",
-      "source_location": "L311",
+      "source_location": "L331",
       "weight": 1.0,
       "_origin": "ast",
       "source": "src_components_eventspage",
@@ -23911,7 +24230,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "src/components/EventsPage.jsx",
-      "source_location": "L321",
+      "source_location": "L341",
       "weight": 1.0,
       "_origin": "ast",
       "source": "src_components_eventspage",
@@ -23922,7 +24241,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "src/components/EventsPage.jsx",
-      "source_location": "L322",
+      "source_location": "L342",
       "weight": 1.0,
       "_origin": "ast",
       "source": "src_components_eventspage",
@@ -23933,7 +24252,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "src/components/EventsPage.jsx",
-      "source_location": "L323",
+      "source_location": "L343",
       "weight": 1.0,
       "_origin": "ast",
       "source": "src_components_eventspage",
@@ -23944,7 +24263,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "src/components/EventsPage.jsx",
-      "source_location": "L324",
+      "source_location": "L344",
       "weight": 1.0,
       "_origin": "ast",
       "source": "src_components_eventspage",
@@ -23977,7 +24296,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "src/components/EventsPage.jsx",
-      "source_location": "L284",
+      "source_location": "L304",
       "weight": 1.0,
       "_origin": "ast",
       "source": "src_components_eventspage",
@@ -24205,7 +24524,7 @@
       "context": "call",
       "confidence": "EXTRACTED",
       "source_file": "src/components/EventsPage.jsx",
-      "source_location": "L233",
+      "source_location": "L240",
       "weight": 1.0,
       "_origin": "ast",
       "source": "src_components_eventspage_eventdetailcard",
@@ -24217,7 +24536,7 @@
       "context": "call",
       "confidence": "EXTRACTED",
       "source_file": "src/components/EventsPage.jsx",
-      "source_location": "L300",
+      "source_location": "L320",
       "weight": 1.0,
       "_origin": "ast",
       "source": "src_components_eventspage_upcomingeventslist",
@@ -24229,7 +24548,7 @@
       "context": "call",
       "confidence": "EXTRACTED",
       "source_file": "src/components/EventsPage.jsx",
-      "source_location": "L227",
+      "source_location": "L234",
       "weight": 1.0,
       "_origin": "ast",
       "source": "src_components_eventspage_eventdetailcard",
@@ -24253,7 +24572,7 @@
       "context": "call",
       "confidence": "EXTRACTED",
       "source_file": "src/components/EventsPage.jsx",
-      "source_location": "L235",
+      "source_location": "L242",
       "weight": 1.0,
       "_origin": "ast",
       "source": "src_components_eventspage_eventdetailcard",
@@ -24265,7 +24584,7 @@
       "context": "call",
       "confidence": "EXTRACTED",
       "source_file": "src/components/EventsPage.jsx",
-      "source_location": "L298",
+      "source_location": "L318",
       "weight": 1.0,
       "_origin": "ast",
       "source": "src_components_eventspage_upcomingeventslist",
@@ -28699,7 +29018,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "src/components/admin/panels/EventsPanel.jsx",
-      "source_location": "L36",
+      "source_location": "L39",
       "weight": 1.0,
       "_origin": "ast",
       "source": "src_components_admin_panels_eventspanel",
@@ -28710,7 +29029,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "src/components/admin/panels/EventsPanel.jsx",
-      "source_location": "L763",
+      "source_location": "L955",
       "weight": 1.0,
       "_origin": "ast",
       "source": "src_components_admin_panels_eventspanel",
@@ -28732,11 +29051,22 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "src/components/admin/panels/EventsPanel.jsx",
-      "source_location": "L29",
+      "source_location": "L32",
       "weight": 1.0,
       "_origin": "ast",
       "source": "src_components_admin_panels_eventspanel",
       "target": "src_components_admin_panels_eventspanel_default_color_guard_positions",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src/components/admin/panels/EventsPanel.jsx",
+      "source_location": "L45",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "src_components_admin_panels_eventspanel",
+      "target": "src_components_admin_panels_eventspanel_default_honor_guard_positions",
       "confidence_score": 1.0
     },
     {
@@ -28754,7 +29084,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "src/components/admin/panels/EventsPanel.jsx",
-      "source_location": "L64",
+      "source_location": "L79",
       "weight": 1.0,
       "_origin": "ast",
       "source": "src_components_admin_panels_eventspanel",
@@ -28765,7 +29095,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "src/components/admin/panels/EventsPanel.jsx",
-      "source_location": "L37",
+      "source_location": "L40",
       "weight": 1.0,
       "_origin": "ast",
       "source": "src_components_admin_panels_eventspanel",
@@ -28776,7 +29106,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "src/components/admin/panels/EventsPanel.jsx",
-      "source_location": "L44",
+      "source_location": "L55",
       "weight": 1.0,
       "_origin": "ast",
       "source": "src_components_admin_panels_eventspanel",
@@ -28787,7 +29117,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "src/components/admin/panels/EventsPanel.jsx",
-      "source_location": "L818",
+      "source_location": "L1010",
       "weight": 1.0,
       "_origin": "ast",
       "source": "src_components_admin_panels_eventspanel",
@@ -29147,7 +29477,7 @@
       "context": "call",
       "confidence": "EXTRACTED",
       "source_file": "src/components/admin/panels/EventsPanel.jsx",
-      "source_location": "L67",
+      "source_location": "L82",
       "weight": 1.0,
       "_origin": "ast",
       "source": "src_components_admin_panels_eventspanel_eventspanel",
@@ -29159,7 +29489,7 @@
       "context": "call",
       "confidence": "EXTRACTED",
       "source_file": "src/components/admin/panels/EventsPanel.jsx",
-      "source_location": "L620",
+      "source_location": "L720",
       "weight": 1.0,
       "_origin": "ast",
       "source": "src_components_admin_panels_eventspanel_eventspanel",
@@ -29171,7 +29501,19 @@
       "context": "call",
       "confidence": "EXTRACTED",
       "source_file": "src/components/admin/panels/EventsPanel.jsx",
-      "source_location": "L297",
+      "source_location": "L764",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "src_components_admin_panels_eventspanel_eventspanel",
+      "target": "src_components_admin_panels_eventspanel_default_honor_guard_positions",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "src/components/admin/panels/EventsPanel.jsx",
+      "source_location": "L376",
       "weight": 1.0,
       "_origin": "ast",
       "source": "src_components_admin_panels_eventspanel_eventspanel",
@@ -29184,7 +29526,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "src/components/admin/panels/EventsPanel.jsx",
-      "source_location": "L355",
+      "source_location": "L434",
       "weight": 1.0,
       "_origin": "ast",
       "source": "src_components_admin_panels_eventspanel_eventspanel",
@@ -29196,7 +29538,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "src/components/admin/panels/EventsPanel.jsx",
-      "source_location": "L293",
+      "source_location": "L372",
       "weight": 1.0,
       "_origin": "ast",
       "source": "src_components_admin_panels_eventspanel_eventspanel",
@@ -29208,7 +29550,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "src/components/admin/panels/EventsPanel.jsx",
-      "source_location": "L359",
+      "source_location": "L438",
       "weight": 1.0,
       "_origin": "ast",
       "source": "src_components_admin_panels_eventspanel_eventspanel",
@@ -29220,7 +29562,7 @@
       "confidence": "INFERRED",
       "confidence_score": 0.8,
       "source_file": "src/components/admin/panels/EventsPanel.jsx",
-      "source_location": "L293",
+      "source_location": "L372",
       "weight": 1.0,
       "_origin": "ast",
       "source": "src_components_admin_panels_eventspanel_eventspanel",
@@ -32684,7 +33026,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "src/components/admin/panels/email/Messages.jsx",
-      "source_location": "L25",
+      "source_location": "L26",
       "weight": 1.0,
       "_origin": "ast",
       "source": "src_components_admin_panels_email_messages",
@@ -32695,7 +33037,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "src/components/admin/panels/email/Messages.jsx",
-      "source_location": "L19",
+      "source_location": "L20",
       "weight": 1.0,
       "_origin": "ast",
       "source": "src_components_admin_panels_email_messages",
@@ -32706,7 +33048,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "src/components/admin/panels/email/Messages.jsx",
-      "source_location": "L9",
+      "source_location": "L10",
       "weight": 1.0,
       "_origin": "ast",
       "source": "src_components_admin_panels_email_messages",
@@ -32850,6 +33192,42 @@
       "context": "import",
       "confidence": "EXTRACTED",
       "source_file": "src/components/admin/panels/email/Messages.jsx",
+      "source_location": "L8",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "src_components_admin_panels_email_messages",
+      "target": "src_lib_emailaudience",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "src/components/admin/panels/email/Messages.jsx",
+      "source_location": "L8",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "src_components_admin_panels_email_messages",
+      "target": "src_lib_emailaudience_audience_groups",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "src/components/admin/panels/email/Messages.jsx",
+      "source_location": "L8",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "src_components_admin_panels_email_messages",
+      "target": "src_lib_emailaudience_resolveaudienceemails",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "src/components/admin/panels/email/Messages.jsx",
       "source_location": "L2",
       "weight": 1.0,
       "_origin": "ast",
@@ -32874,12 +33252,24 @@
       "context": "call",
       "confidence": "EXTRACTED",
       "source_file": "src/components/admin/panels/email/Messages.jsx",
-      "source_location": "L22",
+      "source_location": "L23",
       "weight": 1.0,
       "_origin": "ast",
       "source": "src_components_admin_panels_email_messages_rowtoblocks",
       "target": "src_components_admin_panels_email_builder_blocks_starterblocks",
       "confidence_score": 1.0
+    },
+    {
+      "relation": "references",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "src/components/admin/panels/email/Messages.jsx",
+      "source_location": "L297",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "src_components_admin_panels_email_messages_messages",
+      "target": "src_lib_emailaudience_audience_groups"
     },
     {
       "relation": "contains",
@@ -34724,7 +35114,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "src/components/admin/panels/people/ConsentSection.jsx",
-      "source_location": "L39",
+      "source_location": "L48",
       "weight": 1.0,
       "_origin": "ast",
       "source": "src_components_admin_panels_people_consentsection",
@@ -34746,7 +35136,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "src/components/admin/panels/people/ConsentSection.jsx",
-      "source_location": "L46",
+      "source_location": "L55",
       "weight": 1.0,
       "_origin": "ast",
       "source": "src_components_admin_panels_people_consentsection",
@@ -34757,7 +35147,18 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "src/components/admin/panels/people/ConsentSection.jsx",
-      "source_location": "L23",
+      "source_location": "L24",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "src_components_admin_panels_people_consentsection",
+      "target": "src_components_admin_panels_people_consentsection_forms",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src/components/admin/panels/people/ConsentSection.jsx",
+      "source_location": "L32",
       "weight": 1.0,
       "_origin": "ast",
       "source": "src_components_admin_panels_people_consentsection",
@@ -34768,7 +35169,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "src/components/admin/panels/people/ConsentSection.jsx",
-      "source_location": "L31",
+      "source_location": "L40",
       "weight": 1.0,
       "_origin": "ast",
       "source": "src_components_admin_panels_people_consentsection",
@@ -42237,7 +42638,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "src/components/creed/ScrambleGame.jsx",
-      "source_location": "L91",
+      "source_location": "L95",
       "weight": 1.0,
       "_origin": "ast",
       "source": "src_components_creed_scramblegame_scramblegame",
@@ -50004,6 +50405,62 @@
     {
       "relation": "contains",
       "confidence": "EXTRACTED",
+      "source_file": "src/lib/emailAudience.js",
+      "source_location": "L12",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "src_lib_emailaudience",
+      "target": "src_lib_emailaudience_audience_groups",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src/lib/emailAudience.js",
+      "source_location": "L25",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "src_lib_emailaudience",
+      "target": "src_lib_emailaudience_clean",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src/lib/emailAudience.js",
+      "source_location": "L23",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "src_lib_emailaudience",
+      "target": "src_lib_emailaudience_companies",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src/lib/emailAudience.js",
+      "source_location": "L36",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "src_lib_emailaudience",
+      "target": "src_lib_emailaudience_resolveaudienceemails",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "src/lib/emailAudience.js",
+      "source_location": "L44",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "src_lib_emailaudience_resolveaudienceemails",
+      "target": "src_lib_emailaudience_clean",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
       "source_file": "src/lib/eventsPdfPrint.js",
       "source_location": "L100",
       "weight": 1.0,
@@ -51275,6 +51732,17 @@
     {
       "relation": "contains",
       "confidence": "EXTRACTED",
+      "source_file": "supabase/cadet_consent_dd_forms.sql",
+      "source_location": "L13",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "supabase_cadet_consent_dd_forms",
+      "target": "supabase_cadet_consent_dd_forms_public_cadet_consent",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
       "source_file": "supabase/cadet_consent_grade_let.sql",
       "source_location": "L13",
       "weight": 1.0,
@@ -51435,6 +51903,17 @@
       "_origin": "ast",
       "source": "supabase_dispatch_chat_public_is_conversation_participant",
       "target": "supabase_dispatch_chat_public_conversation_participants",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "supabase/email_audience_groups.sql",
+      "source_location": "L15",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "supabase_email_audience_groups",
+      "target": "supabase_email_audience_groups_public_email_messages",
       "confidence_score": 1.0
     },
     {
@@ -51616,6 +52095,17 @@
     {
       "relation": "contains",
       "confidence": "EXTRACTED",
+      "source_file": "supabase/event_honor_guard_public.sql",
+      "source_location": "L9",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "supabase_event_honor_guard_public",
+      "target": "supabase_event_honor_guard_public_public_get_event_honor_guard",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
       "source_file": "supabase/events_calendar.sql",
       "source_location": "L18",
       "weight": 1.0,
@@ -51699,6 +52189,50 @@
       "_origin": "ast",
       "source": "supabase_events_end_time",
       "target": "supabase_events_end_time_public_events",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "supabase/events_honor_guard.sql",
+      "source_location": "L12",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "supabase_events_honor_guard",
+      "target": "supabase_events_honor_guard_public_event_honor_guard",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "supabase/events_honor_guard.sql",
+      "source_location": "L10",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "supabase_events_honor_guard",
+      "target": "supabase_events_honor_guard_public_events",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "supabase/events_honor_guard.sql",
+      "source_location": "L27",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "supabase_events_honor_guard",
+      "target": "supabase_events_honor_guard_public_honor_guard_requires_fields",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "source_file": "supabase/events_honor_guard.sql",
+      "source_location": "L12",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "supabase_events_honor_guard_public_event_honor_guard",
+      "target": "supabase_events_honor_guard_public_events",
       "confidence_score": 1.0
     },
     {
@@ -52050,6 +52584,30 @@
       "relation": "imports_from",
       "context": "import",
       "confidence": "EXTRACTED",
+      "source_file": "supabase/functions/send-guard-alert/index.ts",
+      "source_location": "L14",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "supabase_functions_send_guard_alert_index",
+      "target": "supabase_functions_shared_http",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "supabase/functions/send-uniform-reminders/index.ts",
+      "source_location": "L15",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "supabase_functions_send_uniform_reminders_index",
+      "target": "supabase_functions_shared_http",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
       "source_file": "supabase/functions/set-pin/index.ts",
       "source_location": "L7",
       "weight": 1.0,
@@ -52345,6 +52903,30 @@
       "relation": "imports",
       "context": "import",
       "confidence": "EXTRACTED",
+      "source_file": "supabase/functions/send-guard-alert/index.ts",
+      "source_location": "L14",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "supabase_functions_send_guard_alert_index",
+      "target": "supabase_functions_shared_http_json",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "supabase/functions/send-uniform-reminders/index.ts",
+      "source_location": "L15",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "supabase_functions_send_uniform_reminders_index",
+      "target": "supabase_functions_shared_http_json",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
       "source_file": "supabase/functions/set-pin/index.ts",
       "source_location": "L7",
       "weight": 1.0,
@@ -52573,6 +53155,30 @@
       "relation": "imports",
       "context": "import",
       "confidence": "EXTRACTED",
+      "source_file": "supabase/functions/send-guard-alert/index.ts",
+      "source_location": "L14",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "supabase_functions_send_guard_alert_index",
+      "target": "supabase_functions_shared_http_preflight",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "supabase/functions/send-uniform-reminders/index.ts",
+      "source_location": "L15",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "supabase_functions_send_uniform_reminders_index",
+      "target": "supabase_functions_shared_http_preflight",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
       "source_file": "supabase/functions/set-pin/index.ts",
       "source_location": "L7",
       "weight": 1.0,
@@ -52686,6 +53292,30 @@
       "weight": 1.0,
       "_origin": "ast",
       "source": "supabase_functions_notify_question_submitted_index",
+      "target": "supabase_functions_shared_http_escapehtml",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "supabase/functions/send-guard-alert/index.ts",
+      "source_location": "L14",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "supabase_functions_send_guard_alert_index",
+      "target": "supabase_functions_shared_http_escapehtml",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "supabase/functions/send-uniform-reminders/index.ts",
+      "source_location": "L15",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "supabase_functions_send_uniform_reminders_index",
       "target": "supabase_functions_shared_http_escapehtml",
       "confidence_score": 1.0
     },
@@ -53286,6 +53916,30 @@
       "relation": "imports_from",
       "context": "import",
       "confidence": "EXTRACTED",
+      "source_file": "supabase/functions/send-guard-alert/index.ts",
+      "source_location": "L15",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "supabase_functions_send_guard_alert_index",
+      "target": "supabase_functions_shared_supabase",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "supabase/functions/send-uniform-reminders/index.ts",
+      "source_location": "L16",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "supabase_functions_send_uniform_reminders_index",
+      "target": "supabase_functions_shared_supabase",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
       "source_file": "supabase/functions/set-pin/index.ts",
       "source_location": "L8",
       "weight": 1.0,
@@ -53581,6 +54235,30 @@
       "relation": "imports",
       "context": "import",
       "confidence": "EXTRACTED",
+      "source_file": "supabase/functions/send-guard-alert/index.ts",
+      "source_location": "L15",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "supabase_functions_send_guard_alert_index",
+      "target": "supabase_functions_shared_supabase_serviceclient",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "supabase/functions/send-uniform-reminders/index.ts",
+      "source_location": "L16",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "supabase_functions_send_uniform_reminders_index",
+      "target": "supabase_functions_shared_supabase_serviceclient",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
       "source_file": "supabase/functions/set-pin/index.ts",
       "source_location": "L8",
       "weight": 1.0,
@@ -53778,6 +54456,18 @@
       "weight": 1.0,
       "_origin": "ast",
       "source": "supabase_functions_revoke_passkeys_index",
+      "target": "supabase_functions_shared_supabase_getcaller",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "supabase/functions/send-guard-alert/index.ts",
+      "source_location": "L15",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "supabase_functions_send_guard_alert_index",
       "target": "supabase_functions_shared_supabase_getcaller",
       "confidence_score": 1.0
     },
@@ -54166,12 +54856,78 @@
     {
       "relation": "contains",
       "confidence": "EXTRACTED",
+      "source_file": "supabase/functions/send-guard-alert/index.ts",
+      "source_location": "L17",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "supabase_functions_send_guard_alert_index",
+      "target": "supabase_functions_send_guard_alert_index_position",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "supabase/functions/send-guard-alert/index.ts",
+      "source_location": "L100",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "supabase_functions_send_guard_alert_index",
+      "target": "supabase_functions_send_guard_alert_index_sendbatch",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "supabase/functions/send-uniform-reminders/index.ts",
+      "source_location": "L64",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "supabase_functions_send_uniform_reminders_index",
+      "target": "supabase_functions_send_uniform_reminders_index_chunk",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
       "source_file": "supabase/functions/submit-for-review/index.ts",
       "source_location": "L22",
       "weight": 1.0,
       "_origin": "ast",
       "source": "supabase_functions_submit_for_review_index",
       "target": "supabase_functions_submit_for_review_index_submittable_statuses",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "supabase/guard_alerts.sql",
+      "source_location": "L21",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "supabase_guard_alerts",
+      "target": "supabase_guard_alerts_public_events",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "supabase/guard_alerts.sql",
+      "source_location": "L25",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "supabase_guard_alerts",
+      "target": "supabase_guard_alerts_public_guard_alert_log",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "source_file": "supabase/guard_alerts.sql",
+      "source_location": "L25",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "supabase_guard_alerts_public_guard_alert_log",
+      "target": "supabase_guard_alerts_public_events",
       "confidence_score": 1.0
     },
     {
@@ -55239,6 +55995,72 @@
       "_origin": "ast",
       "source": "supabase_tv_shoutouts_trg_tv_daily_settings_guard",
       "target": "supabase_tv_shoutouts_public_tv_daily_settings_guard",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "supabase/uniform_reminders.sql",
+      "source_location": "L39",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "supabase_uniform_reminders",
+      "target": "supabase_uniform_reminders_public_events",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "supabase/uniform_reminders.sql",
+      "source_location": "L50",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "supabase_uniform_reminders",
+      "target": "supabase_uniform_reminders_public_generate_uniform_reminders",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "supabase/uniform_reminders.sql",
+      "source_location": "L42",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "supabase_uniform_reminders",
+      "target": "supabase_uniform_reminders_public_uniform_reminder_log",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "reads_from",
+      "confidence": "EXTRACTED",
+      "source_file": "supabase/uniform_reminders.sql",
+      "source_location": "L76",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "supabase_uniform_reminders_public_generate_uniform_reminders",
+      "target": "supabase_uniform_reminders_public_events",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "source_file": "supabase/uniform_reminders.sql",
+      "source_location": "L42",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "supabase_uniform_reminders_public_uniform_reminder_log",
+      "target": "supabase_uniform_reminders_public_events",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "reads_from",
+      "confidence": "EXTRACTED",
+      "source_file": "supabase/uniform_reminders.sql",
+      "source_location": "L79",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "supabase_uniform_reminders_public_generate_uniform_reminders",
+      "target": "supabase_uniform_reminders_public_uniform_reminder_log",
       "confidence_score": 1.0
     },
     {
@@ -61359,5 +62181,5 @@
     }
   ],
   "hyperedges": [],
-  "built_at_commit": "08a8fc856d9c0252ba2418f24b0b08452ba5c2d3"
+  "built_at_commit": "f99b3f0827f569ddb59755fb88f5b2253f2b720f"
 }

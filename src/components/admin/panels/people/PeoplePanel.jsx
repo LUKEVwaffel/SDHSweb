@@ -96,7 +96,7 @@ export default function PeoplePanel({ adminId }) {
   async function load() {
     const [{ data: people }, { data: consent }, { data: ach }] = await Promise.all([
       SB.from('personnel').select('*').order('sort_order'),
-      SB.from('cadet_consent').select('id, name, company, consent_status, collected_at, school_email, parent_email'),
+      SB.from('cadet_consent').select('id, name, company, consent_status, collected_at, school_email, parent_email, parent_email2'),
       SB.from('achievements').select('*').order('sort_order').order('name'),
     ]);
     setRecords(people || []);
@@ -114,7 +114,7 @@ export default function PeoplePanel({ adminId }) {
     setEditing(r.id);
     setForm({ ...r });
     const c = consentFor(r);
-    setCForm(c ? { ...c } : { name: r.name, company: companyForSection(r.section), school_email: '', parent_email: '' });
+    setCForm(c ? { ...c } : { name: r.name, company: companyForSection(r.section), school_email: '', parent_email: '', parent_email2: '' });
     setContactMsg(''); setContactErr(false); setListMsg('');
     loadPersonTeams(r.id);
   }
@@ -156,7 +156,7 @@ export default function PeoplePanel({ adminId }) {
     if (cForm.id) {
       ({ error } = await SB.from('cadet_consent').update(patch).eq('id', cForm.id));
     } else {
-      const insertPatch = { name: form.name || cForm.name, company: companyForSection(form.section), school_email: cForm.school_email || null, parent_email: cForm.parent_email || null, ...patch };
+      const insertPatch = { name: form.name || cForm.name, company: companyForSection(form.section), school_email: cForm.school_email || null, parent_email: cForm.parent_email || null, parent_email2: cForm.parent_email2 || null, ...patch };
       const { data, error: insertError } = await SB.from('cadet_consent').insert(insertPatch).select().single();
       error = insertError;
       if (data) setCForm((f) => ({ ...f, id: data.id }));
@@ -181,6 +181,7 @@ export default function PeoplePanel({ adminId }) {
       company: companyForSection(form.section),
       school_email: (cForm.school_email || '').trim() || null,
       parent_email: (cForm.parent_email || '').trim() || null,
+      parent_email2: (cForm.parent_email2 || '').trim() || null,
       updated_at: new Date().toISOString(),
     };
     let error;
@@ -198,10 +199,11 @@ export default function PeoplePanel({ adminId }) {
     load();
   }
 
-  // Promote the parent email into email_subscribers. Explicit action, deduped
+  // Promote a parent email into email_subscribers. Explicit action, deduped
   // by email — mirrors ConsentSection's cadet-side "add to mailing list".
-  async function addParentToList() {
-    const email = (cForm.parent_email || '').trim().toLowerCase();
+  // `field` picks parent_email or parent_email2.
+  async function addParentToList(field = 'parent_email') {
+    const email = (cForm[field] || '').trim().toLowerCase();
     if (!EMAIL_RE.test(email)) { setListErr(true); setListMsg('Enter a valid parent email first'); return; }
     const { data: existing } = await SB.from('email_subscribers').select('id').eq('email', email).maybeSingle();
     if (existing) { setListErr(true); setListMsg('Already on the mailing list'); return; }
@@ -352,6 +354,7 @@ export default function PeoplePanel({ adminId }) {
                 {cForm.collected_at && <div>Signed {new Date(cForm.collected_at).toLocaleDateString()}</div>}
                 {cForm.school_email && <div>School: <span style={{ color: P.cream }}>{cForm.school_email}</span></div>}
                 {cForm.parent_email && <div>Parent: <span style={{ color: P.cream }}>{cForm.parent_email}</span></div>}
+                {cForm.parent_email2 && <div>Parent 2: <span style={{ color: P.cream }}>{cForm.parent_email2}</span></div>}
                 {!cForm.id && <div style={{ color: P.faint }}>No matching cadet_consent row yet. Marking a status here creates one.</div>}
               </div>
             </div>
@@ -367,10 +370,15 @@ export default function PeoplePanel({ adminId }) {
                   <Label>PARENT EMAIL</Label>
                   <Input value={cForm.parent_email || ''} onChange={(e) => setCForm((f) => ({ ...f, parent_email: e.target.value }))} placeholder="feeds the mailing list" />
                 </div>
+                <div>
+                  <Label>PARENT EMAIL 2</Label>
+                  <Input value={cForm.parent_email2 || ''} onChange={(e) => setCForm((f) => ({ ...f, parent_email2: e.target.value }))} placeholder="second parent/guardian, optional" />
+                </div>
               </div>
               <div style={{ display: 'flex', gap: sp[2], alignItems: 'center', flexWrap: 'wrap' }}>
                 <Btn onClick={saveContact} variant="ghost" size="sm" disabled={savingContact}>{savingContact ? 'SAVING…' : 'SAVE CONTACT INFO'}</Btn>
-                <Btn onClick={addParentToList} variant="green" size="sm">+ ADD PARENT TO MAILING LIST</Btn>
+                <Btn onClick={() => addParentToList('parent_email')} variant="green" size="sm">+ ADD PARENT TO MAILING LIST</Btn>
+                <Btn onClick={() => addParentToList('parent_email2')} variant="green" size="sm">+ ADD PARENT 2 TO MAILING LIST</Btn>
                 {contactMsg && <Toast tone={contactErr ? 'error' : 'success'}>{contactMsg}</Toast>}
                 {listMsg && <Toast tone={listErr ? 'error' : 'success'}>{listMsg}</Toast>}
               </div>
