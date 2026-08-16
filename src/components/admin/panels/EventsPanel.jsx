@@ -384,7 +384,7 @@ export default function EventsPanel({ adminId, allowedTeams }) {
   const secondaryTeamOptions = scopedTeams.filter((t) => t.id && t.id !== form.team);
 
   return (
-    <div style={{ display: 'grid', gridTemplateColumns: editing ? '1fr 1fr' : '1fr', gap: sp[4], maxWidth: editing ? 'none' : 900 }}>
+    <div style={{ display: 'grid', gridTemplateColumns: '1fr', gap: sp[4], maxWidth: 900 }}>
       <div>
         <PanelHeader
           title={allowedTeams ? 'CALENDAR · BATTALION + RAIDERS' : 'CALENDAR'}
@@ -450,15 +450,29 @@ export default function EventsPanel({ adminId, allowedTeams }) {
         )}
       </div>
 
-      {editing && (
-        <div>
-          <PanelHeader title={editing === 'new' ? 'NEW EVENT' : 'EDIT EVENT'} action={
-            <div style={{ display: 'flex', gap: sp[2] }}>
-              <Btn onClick={cancel} variant="ghost" size="sm">CANCEL</Btn>
+      <Modal
+        open={!!editing}
+        onClose={cancel}
+        title={editing === 'new' ? 'NEW EVENT' : 'EDIT EVENT'}
+        width={760}
+        footer={
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', width: '100%', flexWrap: 'wrap', gap: sp[2] }}>
+            <div style={{ display: 'flex', gap: sp[2], alignItems: 'center', flexWrap: 'wrap' }}>
               {editing !== 'new' && canDelete && <Btn onClick={() => del(rowById[editing])} variant="danger" size="sm">DELETE</Btn>}
+              {coreGaps.length > 0 && <span style={{ fontFamily: mono, fontSize: 8, color: P.mute }}>need: {coreGaps.join(', ')}</span>}
+              {msg && <span style={{ fontFamily: mono, fontSize: fs.tiny, color: msg.includes('✓') ? P.green : P.red }}>{msg}</span>}
             </div>
-          } />
-          <Card>
+            <div style={{ display: 'flex', gap: sp[2], flexWrap: 'wrap' }}>
+              <Btn onClick={cancel} variant="ghost" size="sm">CANCEL</Btn>
+              <Btn onClick={saveDraft} variant="ghost" size="sm" disabled={saving}>{saving ? '…' : 'SAVE DRAFT'}</Btn>
+              <Btn onClick={post} variant="gold" size="sm" disabled={saving || coreGaps.length > 0}>POST TO CALENDAR</Btn>
+              {form.status === 'posted' && editing !== 'new' && <Btn onClick={() => unpost(rowById[editing])} variant="ghost" size="sm">UNPOST</Btn>}
+            </div>
+          </div>
+        }
+      >
+        {editing && (
+          <>
             <div style={{ marginBottom: sp[3] }}>
               <Label>Title <span style={{ color: P.red }}>*</span></Label>
               <Input value={form.title} onChange={(e) => setForm((f) => ({ ...f, title: e.target.value }))} />
@@ -841,18 +855,11 @@ export default function EventsPanel({ adminId, allowedTeams }) {
                 )}
               </div>
             )}
+          </>
+        )}
+      </Modal>
 
-            {msg && <div style={{ fontFamily: mono, fontSize: fs.tiny, color: msg.includes('✓') ? P.green : P.red, marginBottom: sp[3] }}>{msg}</div>}
-
-            <div style={{ display: 'flex', gap: sp[2], flexWrap: 'wrap', alignItems: 'center' }}>
-              <Btn onClick={saveDraft} variant="ghost" size="sm" disabled={saving}>{saving ? '…' : 'SAVE DRAFT'}</Btn>
-              <Btn onClick={post} variant="gold" size="sm" disabled={saving || coreGaps.length > 0}>POST TO CALENDAR</Btn>
-              {form.status === 'posted' && editing !== 'new' && <Btn onClick={() => unpost(rowById[editing])} variant="ghost" size="sm">UNPOST</Btn>}
-              {coreGaps.length > 0 && <span style={{ fontFamily: mono, fontSize: 8, color: P.mute }}>need: {coreGaps.join(', ')}</span>}
-            </div>
-          </Card>
-
-          <Modal open={guardOpen} onClose={() => setGuardOpen(false)} title="COLOR GUARD ROSTER" width={640} footer={
+      <Modal open={guardOpen} onClose={() => setGuardOpen(false)} title="COLOR GUARD ROSTER" width={640} footer={
             <Btn onClick={() => setGuardOpen(false)} variant="gold" size="sm">CLOSE</Btn>
           }>
             <div style={{ display: 'flex', flexDirection: 'column', gap: sp[3] }}>
@@ -942,8 +949,6 @@ export default function EventsPanel({ adminId, allowedTeams }) {
               })}
             </div>
           </Modal>
-        </div>
-      )}
     </div>
   );
 }

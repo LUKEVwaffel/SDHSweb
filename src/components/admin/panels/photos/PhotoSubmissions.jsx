@@ -2,11 +2,17 @@ import { useState, useEffect, useCallback } from 'react';
 import { supabase as SB } from '../../../../lib/supabaseClient';
 import { P, mono, inter, fs, sp } from '../../theme';
 import { Btn, PanelHeader, EmptyState } from '../../shared/ui';
+import TvPhotosPanel from '../tvphotos/TvPhotosPanel';
+import TvTerminalManager from '../tvphotos/TvTerminalManager';
 
 // Every public photo submission (PhotoUploader → photos table, bucket
 // team-photos) lands here — battalion AND all 4 specialty teams. This is the
 // panel that was missing: DISPATCH previously only read `gallery` (curated) and
 // raider event photos, so plain team/battalion submissions were invisible.
+// When a specific category filter is selected (not ALL) and showTvPhotos is
+// set (Luke only), that category's curated TV Photos section (tv_photos
+// table — a separate table by design, see TvPhotosPanel.jsx) renders above
+// the submissions grid, so both photo pools live in one place per category.
 const BUCKET = 'team-photos';
 
 const FILTERS = [
@@ -27,7 +33,7 @@ function thumbPath(storagePath) {
   return storagePath ? storagePath.replace(/\.jpg$/i, '_t.jpg') : null;
 }
 
-export default function PhotoSubmissions({ adminId }) {
+export default function PhotoSubmissions({ adminId, showTvPhotos = false }) {
   const [rows, setRows] = useState([]);
   const [events, setEvents] = useState({});
   const [filter, setFilter] = useState('all');
@@ -87,6 +93,16 @@ export default function PhotoSubmissions({ adminId }) {
         ))}
       </div>
 
+      {showTvPhotos && filter !== 'all' && (
+        <TvPhotosPanel adminId={adminId} folder={filter} />
+      )}
+
+      {(showTvPhotos && filter !== 'all') && (
+        <div style={{ fontFamily: mono, fontSize: fs.xs, color: P.faint, letterSpacing: '0.14em', marginBottom: sp[3] }}>
+          SUBMISSIONS
+        </div>
+      )}
+
       {loading ? (
         <div style={{ fontFamily: mono, fontSize: fs.xs, color: P.mute, textAlign: 'center', marginTop: sp[8] }}>LOADING…</div>
       ) : filtered.length === 0 ? (
@@ -129,6 +145,8 @@ export default function PhotoSubmissions({ adminId }) {
           })}
         </div>
       )}
+
+      {showTvPhotos && <TvTerminalManager />}
     </div>
   );
 }

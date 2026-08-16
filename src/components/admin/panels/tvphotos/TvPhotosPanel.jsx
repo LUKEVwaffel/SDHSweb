@@ -5,23 +5,23 @@ import { listTvPhotos, uploadTvPhotoFile, insertTvPhoto, deleteTvPhotoFile, dele
 import { resolveTvPhotoCaption } from '../../../../lib/tvPhotoCaption';
 import { useTvDailySettings } from '../../../../hooks/useTvDailySettings';
 import { P, mono, fs, sp, radius } from '../../theme';
-import { Btn, PanelHeader, EmptyState } from '../../shared/ui';
+import { Btn, EmptyState } from '../../shared/ui';
 import TvSpotlightPushModal from './TvSpotlightPushModal';
 import TvPhotoAssignModal from './TvPhotoAssignModal';
 import TvPhotoEditCropModal from './TvPhotoEditCropModal';
-import TvTerminalManager from './TvTerminalManager';
 
 const FOLDERS = [...TEAMS.map((t) => ({ id: t.id, label: t.label })), { id: 'battalion', label: 'Battalion' }];
 
-// Upload/organize surface for the 5 TV Photos folders that feed the /tv
-// carousel's "Team Photos" mode (see useTvCarouselPhotos.js), plus
-// Push-to-TV single-photo spotlight. Rendered as a tab inside PhotosPanel.
-// Luke-only — gated via the showTvPhotos prop threaded down from
-// Dashboard.jsx (nav visibility) AND server-side (tv_photos.sql RLS,
-// is_luke()); this component assumes it's only ever rendered for that
-// account.
-export default function TvPhotosPanel({ adminId }) {
-  const [folder, setFolder] = useState(FOLDERS[0].id);
+// Curated TV-Photos section for ONE folder (team or battalion) — feeds the
+// /tv kiosk carousel's "Team Photos" mode (see useTvCarouselPhotos.js), plus
+// Push-to-TV single-photo spotlight. Embedded inside PhotoSubmissions.jsx so
+// each category shows its TV-curated photos alongside that team's public
+// submissions instead of living in a separate tab; `folder` is controlled by
+// PhotoSubmissions' category filter, not owned here. Luke-only — gated via
+// the showTvPhotos prop threaded down from Dashboard.jsx (nav visibility)
+// AND server-side (tv_photos.sql RLS, is_luke()); this component assumes
+// it's only ever rendered for that account.
+export default function TvPhotosPanel({ adminId, folder }) {
   const [photos, setPhotos] = useState(null);
   const [pushTarget, setPushTarget] = useState(null);
   const [cropTarget, setCropTarget] = useState(null);
@@ -111,14 +111,16 @@ export default function TvPhotosPanel({ adminId }) {
   }
 
   const spotlightActive = !!settings?.spotlight_active && !!settings?.spotlight_photo_url;
+  const folderLabel = (FOLDERS.find((f) => f.id === folder)?.label || folder).toUpperCase();
 
   return (
-    <div style={{ maxWidth: 1040 }}>
-      <PanelHeader
-        title="TV PHOTOS"
-        sub="Feeds the /tv kiosk carousel — battalion + team folders, live-synced, no reload needed."
-        action={<Btn onClick={() => fileRef.current.click()} variant="gold" size="sm" disabled={batchActive}>{batchActive ? 'ASSIGNING…' : '+ UPLOAD'}</Btn>}
-      />
+    <div style={{ marginBottom: sp[6] }}>
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: sp[3], marginBottom: sp[3] }}>
+        <div style={{ fontFamily: mono, fontSize: fs.xs, color: P.gold, letterSpacing: '0.14em' }}>
+          ON TV — {folderLabel}
+        </div>
+        <Btn onClick={() => fileRef.current.click()} variant="gold" size="sm" disabled={batchActive}>{batchActive ? 'ASSIGNING…' : '+ UPLOAD'}</Btn>
+      </div>
       <input
         ref={fileRef} type="file" accept="image/*" multiple style={{ display: 'none' }}
         onChange={(e) => { startBatch(e.target.files); e.target.value = ''; }}
@@ -133,7 +135,7 @@ export default function TvPhotosPanel({ adminId }) {
           cursor: batchActive ? 'not-allowed' : 'pointer', opacity: batchActive ? 0.5 : 1,
           border: `1px dashed ${dragOver ? P.gold : P.hairStrong}`,
           background: dragOver ? 'rgba(201,169,97,0.06)' : P.deep,
-          padding: '28px 20px', textAlign: 'center', marginBottom: sp[4], borderRadius: radius.md,
+          padding: '20px', textAlign: 'center', marginBottom: sp[3], borderRadius: radius.md,
           transition: 'all 0.15s',
         }}
       >
@@ -141,13 +143,13 @@ export default function TvPhotosPanel({ adminId }) {
           {batchActive ? 'ASSIGNING PHOTOS — FINISH THE CURRENT BATCH FIRST' : 'DROP PHOTOS HERE OR CLICK TO BROWSE'}
         </div>
         <div style={{ fontFamily: mono, fontSize: fs.micro, color: P.mute, letterSpacing: '0.1em', marginTop: 6 }}>
-          UPLOADS INTO {FOLDERS.find((f) => f.id === folder)?.label.toUpperCase()} — EACH PHOTO GETS ITS OWN FOLDER/TITLE ASSIGNMENT NEXT
+          UPLOADS INTO {folderLabel} — EACH PHOTO GETS ITS OWN FOLDER/TITLE ASSIGNMENT NEXT
         </div>
       </div>
 
       {spotlightActive && (
         <div style={{
-          display: 'flex', alignItems: 'center', gap: sp[3], marginBottom: sp[4],
+          display: 'flex', alignItems: 'center', gap: sp[3], marginBottom: sp[3],
           padding: sp[3], background: 'rgba(201,169,97,0.1)', border: `1px solid ${P.gold}`, borderRadius: radius.md,
         }}>
           <img src={settings.spotlight_photo_url} alt="" style={{ width: 56, height: 40, objectFit: 'cover', borderRadius: 4 }} />
@@ -156,39 +158,43 @@ export default function TvPhotosPanel({ adminId }) {
         </div>
       )}
 
-      <div style={{ display: 'flex', gap: sp[2], marginBottom: sp[4], flexWrap: 'wrap' }}>
-        {FOLDERS.map((f) => (
-          <Btn key={f.id} variant={folder === f.id ? 'gold' : 'ghost'} size="sm" onClick={() => setFolder(f.id)}>{f.label.toUpperCase()}</Btn>
-        ))}
-      </div>
-
       {photos === null ? (
-        <div style={{ fontFamily: mono, fontSize: fs.xs, color: P.mute, textAlign: 'center', marginTop: sp[6] }}>LOADING…</div>
+        <div style={{ fontFamily: mono, fontSize: fs.xs, color: P.mute, textAlign: 'center', marginTop: sp[4] }}>LOADING…</div>
       ) : photos.length === 0 ? (
-        <EmptyState icon="⊡" title="NO PHOTOS IN THIS FOLDER" hint="Upload photos for this folder — they'll appear on the kiosk carousel automatically when this team is featured." />
+        <EmptyState icon="⊡" title="NO TV PHOTOS IN THIS FOLDER" hint="Upload photos for this folder — they'll appear on the kiosk carousel automatically when this team is featured." />
       ) : (
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(150px, 1fr))', gap: sp[2] }}>
-          {photos.map((p) => (
-            <div key={p.id} style={{ background: P.deep, border: `1px solid ${P.hair}`, display: 'flex', flexDirection: 'column' }}>
-              <div style={{ aspectRatio: '4/3', overflow: 'hidden' }}>
-                <img src={p.photo_url} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }} />
+          {photos.map((p) => {
+            const isActiveOnTv = spotlightActive && p.photo_url === settings.spotlight_photo_url;
+            return (
+              <div key={p.id} style={{ background: P.deep, border: `1px solid ${isActiveOnTv ? P.gold : P.hair}`, display: 'flex', flexDirection: 'column' }}>
+                <div style={{ aspectRatio: '4/3', overflow: 'hidden', position: 'relative' }}>
+                  <img src={p.photo_url} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }} />
+                  {isActiveOnTv && (
+                    <div style={{
+                      position: 'absolute', top: 4, left: 4, display: 'flex', alignItems: 'center', gap: 4,
+                      background: P.gold, color: P.ink, fontFamily: mono, fontSize: 7, letterSpacing: '0.08em',
+                      padding: '3px 6px', borderRadius: 3,
+                    }}>
+                      ● ACTIVE ON TV
+                    </div>
+                  )}
+                </div>
+                <div style={{ padding: '6px 8px 0', fontFamily: mono, fontSize: fs.micro, color: P.faint, letterSpacing: '0.06em', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                  {resolveTvPhotoCaption(p)}
+                </div>
+                <div style={{ padding: '6px 8px', display: 'flex', gap: 4, flexWrap: 'wrap' }}>
+                  <button onClick={() => setCropTarget(p)} style={miniBtn(false, P.gold)}>CROP</button>
+                  <button onClick={() => setPushTarget(p)} style={miniBtn(false, P.gold)}>PUSH TO TV</button>
+                  <button onClick={() => onDelete(p)} style={miniBtn(false, P.red)}>DEL</button>
+                </div>
               </div>
-              <div style={{ padding: '6px 8px 0', fontFamily: mono, fontSize: fs.micro, color: P.faint, letterSpacing: '0.06em', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-                {resolveTvPhotoCaption(p)}
-              </div>
-              <div style={{ padding: '6px 8px', display: 'flex', gap: 4, flexWrap: 'wrap' }}>
-                <button onClick={() => setCropTarget(p)} style={miniBtn(false, P.gold)}>CROP</button>
-                <button onClick={() => setPushTarget(p)} style={miniBtn(false, P.gold)}>PUSH TO TV</button>
-                <button onClick={() => onDelete(p)} style={miniBtn(false, P.red)}>DEL</button>
-              </div>
-            </div>
-          ))}
+            );
+          })}
         </div>
       )}
 
       {flash && <div style={{ fontFamily: mono, fontSize: fs.tiny, color: P.green, marginTop: sp[3] }}>{flash}</div>}
-
-      <TvTerminalManager />
 
       {pushTarget && (
         <TvSpotlightPushModal

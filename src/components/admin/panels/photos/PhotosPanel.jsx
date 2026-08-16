@@ -5,14 +5,13 @@ import { Btn } from '../../shared/ui';
 import RaiderPolls from './RaiderPolls';
 import PhotoSubmissions from './PhotoSubmissions';
 import AdminBulkUpload from './AdminBulkUpload';
-import TvPhotosPanel from '../tvphotos/TvPhotosPanel';
 
 // Single home for all team photos. SUBMISSIONS is the default — that's where
-// every public upload (battalion + specialty teams) lives. Polls are
+// every public upload (battalion + specialty teams) lives, AND (Luke-only,
+// via showTvPhotos) where each category's TV-curated photos show up inline
+// alongside that team's submissions — see PhotoSubmissions.jsx. Polls are
 // voting-teams-only (Raiders today). Bulk upload lets staff post a whole
-// batch on behalf of the team, tied to one posted event. TV PHOTOS (Luke-only,
-// gated by showTvPhotos from Dashboard.jsx) curates the folders that feed the
-// /tv kiosk carousel — kept as one photo library, not a separate top-level tab.
+// batch on behalf of the team, tied to one posted event.
 const VOTING_TEAMS = TEAMS.filter((t) => t.voting);
 
 export default function PhotosPanel({ adminId, showTvPhotos = false }) {
@@ -21,7 +20,6 @@ export default function PhotosPanel({ adminId, showTvPhotos = false }) {
   const tabs = [
     { id: 'submissions', label: 'SUBMISSIONS · ALL PHOTOS' },
     { id: 'bulk', label: 'BULK UPLOAD' },
-    ...(showTvPhotos ? [{ id: 'tvphotos', label: 'TV PHOTOS' }] : []),
     ...VOTING_TEAMS.map((t) => ({ id: `polls-${t.id}`, label: `${t.label.toUpperCase()} POLLS` })),
   ];
 
@@ -32,9 +30,8 @@ export default function PhotosPanel({ adminId, showTvPhotos = false }) {
           <Btn key={t.id} variant={tab === t.id ? 'gold' : 'ghost'} size="sm" onClick={() => setTab(t.id)}>{t.label}</Btn>
         ))}
       </div>
-      {tab === 'submissions' && <PhotoSubmissions adminId={adminId} />}
+      {tab === 'submissions' && <PhotoSubmissions adminId={adminId} showTvPhotos={showTvPhotos} />}
       {tab === 'bulk' && <AdminBulkUpload adminId={adminId} />}
-      {tab === 'tvphotos' && showTvPhotos && <TvPhotosPanel adminId={adminId} />}
       {tab === 'polls-raiders' && <RaiderPolls adminId={adminId} />}
       {tab.startsWith('polls-') && tab !== 'polls-raiders' && (
         <div style={{ fontFamily: mono, fontSize: fs.xs, color: P.mute, textAlign: 'center', marginTop: sp[10] }}>
