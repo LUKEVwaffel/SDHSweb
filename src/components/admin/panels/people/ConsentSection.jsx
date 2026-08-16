@@ -504,6 +504,28 @@ export default function ConsentSection({ adminId }) {
         <div style={{ marginBottom: sp[4] }}>
           <Label>DISPATCH SEND PARENT CONSENT</Label>
           <StatusPills items={STATUSES} value={form.consent_status} onChange={(id) => setStatus(form, id)} size="regular" style={{ width: '100%' }} />
+
+          {/* only relevant once consent is actually collected — nested here
+              instead of a standalone block so it can't be filled in ahead of
+              (or independent of) the consent status itself. */}
+          {form.consent_status === 'collected' && (
+            <div style={{ marginTop: sp[3], paddingTop: sp[3], borderTop: `1px solid ${P.hair}` }}>
+              <div style={{ marginBottom: sp[3] }}>
+                <Label>PARENT EMAIL</Label>
+                <Input value={form.parent_email || ''} onChange={(e) => setForm((f) => ({ ...f, parent_email: e.target.value }))} placeholder="feeds the mailing list" />
+                <div style={{ display: 'flex', gap: sp[3], alignItems: 'center', marginTop: sp[2], flexWrap: 'wrap' }}>
+                  <Btn onClick={() => addParentToList('parent_email')} variant="green" size="sm">+ ADD PARENT TO MAILING LIST</Btn>
+                </div>
+              </div>
+              <div>
+                <Label>PARENT EMAIL 2</Label>
+                <Input value={form.parent_email2 || ''} onChange={(e) => setForm((f) => ({ ...f, parent_email2: e.target.value }))} placeholder="second parent/guardian, optional" />
+                <div style={{ display: 'flex', gap: sp[3], alignItems: 'center', marginTop: sp[2], flexWrap: 'wrap' }}>
+                  <Btn onClick={() => addParentToList('parent_email2')} variant="green" size="sm">+ ADD PARENT 2 TO MAILING LIST</Btn>
+                </div>
+              </div>
+            </div>
+          )}
         </div>
         <div style={{ marginBottom: sp[4] }}>
           <Label>DD FORM 3203 (JAN 2024) · DUE AUG 31</Label>
@@ -517,21 +539,6 @@ export default function ConsentSection({ adminId }) {
         <div style={{ marginBottom: sp[3] }}>
           <Label>SCHOOL EMAIL</Label>
           <SuffixEmailInput value={form.school_email || ''} onChange={(v) => setForm((f) => ({ ...f, school_email: v }))} />
-        </div>
-        <div style={{ marginBottom: sp[3] }}>
-          <Label>PARENT EMAIL</Label>
-          <Input value={form.parent_email || ''} onChange={(e) => setForm((f) => ({ ...f, parent_email: e.target.value }))} placeholder="feeds the mailing list" />
-          <div style={{ display: 'flex', gap: sp[3], alignItems: 'center', marginTop: sp[2], flexWrap: 'wrap' }}>
-            <Btn onClick={() => addParentToList('parent_email')} variant="green" size="sm">+ ADD PARENT TO MAILING LIST</Btn>
-          </div>
-        </div>
-
-        <div style={{ marginBottom: sp[3] }}>
-          <Label>PARENT EMAIL 2</Label>
-          <Input value={form.parent_email2 || ''} onChange={(e) => setForm((f) => ({ ...f, parent_email2: e.target.value }))} placeholder="second parent/guardian, optional" />
-          <div style={{ display: 'flex', gap: sp[3], alignItems: 'center', marginTop: sp[2], flexWrap: 'wrap' }}>
-            <Btn onClick={() => addParentToList('parent_email2')} variant="green" size="sm">+ ADD PARENT 2 TO MAILING LIST</Btn>
-          </div>
         </div>
 
         <div style={{ marginBottom: sp[3], minHeight: fs.tiny }}>

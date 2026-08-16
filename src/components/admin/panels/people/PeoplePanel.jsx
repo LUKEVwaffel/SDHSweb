@@ -246,6 +246,10 @@ export default function PeoplePanel({ adminId }) {
   const letLevels = [...new Set(records.map((r) => String(r.let_level)).filter((v) => v && v !== 'undefined'))].sort();
 
   const selMeta = CONSENT_META[cForm.consent_status || 'none'] || CONSENT_META.none;
+  // SAI/AI/1SGT (section='leadership') don't need any of the cadet forms —
+  // hide every trace of consent/contact UI on their profiles so a stray edit
+  // can't re-seed a cadet_consent row and re-taint OverviewPanel's percentage.
+  const isLeadership = form.section === 'leadership';
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', height: '100%', gap: 12 }}>
@@ -322,7 +326,9 @@ export default function PeoplePanel({ adminId }) {
                       <div style={{ fontFamily: inter, fontSize: fs.sm, color: P.cream, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{r.name}</div>
                       <div style={{ fontFamily: mono, fontSize: fs.tiny, color: P.mute, marginTop: 2 }}>{r.role_short}</div>
                     </div>
-                    <span title={cm.label} style={{ width: 8, height: 8, borderRadius: '50%', background: cm.color, flexShrink: 0 }} />
+                    {r.section !== 'leadership' && (
+                      <span title={cm.label} style={{ width: 8, height: 8, borderRadius: '50%', background: cm.color, flexShrink: 0 }} />
+                    )}
                   </div>
                   );
                 })}
@@ -344,7 +350,9 @@ export default function PeoplePanel({ adminId }) {
               </div>
             }/>
 
-            {/* admin-relevant summary: consent status + emails, always visible */}
+            {/* admin-relevant summary: consent status + emails — hidden for
+                leadership (see isLeadership above), no forms tracked for them */}
+            {!isLeadership && (
             <div style={{ background: P.deep, border: `1px solid ${P.hair}`, borderLeft: `3px solid ${selMeta.color}`, padding: '10px 12px', marginBottom: sp[3] }}>
               <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: sp[2], flexWrap: 'wrap' }}>
                 <div style={{ fontFamily: mono, fontSize: fs.tiny, color: selMeta.color, letterSpacing: '0.12em' }}>{selMeta.label}</div>
@@ -358,7 +366,9 @@ export default function PeoplePanel({ adminId }) {
                 {!cForm.id && <div style={{ color: P.faint }}>No matching cadet_consent row yet. Marking a status here creates one.</div>}
               </div>
             </div>
+            )}
 
+            {!isLeadership && (
             <div style={{ marginBottom: sp[4] }}>
               <PanelHeader title="STAFF CONTACT" sub={`cadet_consent · company = ${companyForSection(form.section)}`} />
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0 16px', marginBottom: 8 }}>
@@ -383,6 +393,7 @@ export default function PeoplePanel({ adminId }) {
                 {listMsg && <Toast tone={listErr ? 'error' : 'success'}>{listMsg}</Toast>}
               </div>
             </div>
+            )}
 
             <div style={{ marginBottom: sp[4] }}>
               <PersonAchievements personnelId={form.id} achievements={achievements} />
