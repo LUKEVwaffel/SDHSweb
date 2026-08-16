@@ -141,6 +141,98 @@ export function SuffixEmailInput({ value, onChange, suffix = SCHOOL_EMAIL_SUFFIX
   );
 }
 
+const COMMON_EMAIL_DOMAINS = [
+  'gmail.com', 'yahoo.com', 'outlook.com', 'hotmail.com', 'icloud.com',
+  'aol.com', 'live.com', 'msn.com', 'comcast.net', 'att.net',
+];
+
+// Free-text email input that suggests common providers once the user types
+// "@" — parents span every domain under the sun (unlike school_email, which
+// is always the same suffix; see SuffixEmailInput). Typing "@g" narrows to
+// gmail.com etc.; arrow keys + Enter pick, Escape/blur dismiss.
+export function EmailAutocompleteInput({ value, onChange, domains = COMMON_EMAIL_DOMAINS, style = {}, onFocus, onBlur, ...rest }) {
+  const [focused, setFocused] = useState(false);
+  const [open, setOpen] = useState(false);
+  const [highlight, setHighlight] = useState(0);
+
+  const raw = value || '';
+  const atIdx = raw.indexOf('@');
+  const local = atIdx === -1 ? raw : raw.slice(0, atIdx);
+  const domainTyped = atIdx === -1 ? '' : raw.slice(atIdx + 1).toLowerCase();
+
+  const suggestions = atIdx === -1 || !local
+    ? []
+    : domains.filter((d) => d.startsWith(domainTyped) && d !== domainTyped);
+  const showList = open && suggestions.length > 0;
+
+  function pick(domain) {
+    onChange(`${local}@${domain}`);
+    setOpen(false);
+  }
+
+  function handleChange(e) {
+    onChange(e.target.value);
+    setOpen(true);
+    setHighlight(0);
+  }
+
+  function handleKeyDown(e) {
+    if (!showList) return;
+    if (e.key === 'ArrowDown') { e.preventDefault(); setHighlight((h) => Math.min(h + 1, suggestions.length - 1)); }
+    else if (e.key === 'ArrowUp') { e.preventDefault(); setHighlight((h) => Math.max(h - 1, 0)); }
+    else if (e.key === 'Enter' && suggestions[highlight]) { e.preventDefault(); pick(suggestions[highlight]); }
+    else if (e.key === 'Escape') { setOpen(false); }
+  }
+
+  return (
+    <div style={{ position: 'relative', width: '100%' }}>
+      <input
+        value={raw}
+        onChange={handleChange}
+        onFocus={(e) => { setFocused(true); setOpen(true); onFocus?.(e); }}
+        onBlur={(e) => { setFocused(false); setTimeout(() => setOpen(false), 120); onBlur?.(e); }}
+        onKeyDown={handleKeyDown}
+        role="combobox"
+        aria-expanded={showList}
+        aria-autocomplete="list"
+        style={{
+          width: '100%', background: P.deep, border: `1px solid ${focused ? P.gold : P.hair}`,
+          color: P.cream, fontFamily: inter, fontSize: fs.sm, padding: '11px 13px',
+          outline: 'none', boxSizing: 'border-box', borderRadius: radius.sm,
+          boxShadow: focused ? focusRing : 'none',
+          transition: `border-color 0.15s ${ease}, box-shadow 0.15s ${ease}`,
+          ...style,
+        }}
+        {...rest}
+      />
+      {showList && (
+        <div role="listbox" style={{
+          position: 'absolute', top: '100%', left: 0, right: 0, marginTop: 4, zIndex: 20,
+          background: P.navy, border: `1px solid ${P.hairStrong}`, borderRadius: radius.sm,
+          boxShadow: shadow.md, overflow: 'hidden',
+        }}>
+          {suggestions.map((d, i) => (
+            <div
+              key={d}
+              role="option"
+              aria-selected={i === highlight}
+              onMouseDown={(e) => { e.preventDefault(); pick(d); }}
+              onMouseEnter={() => setHighlight(i)}
+              style={{
+                padding: '9px 13px', fontFamily: inter, fontSize: fs.sm, cursor: 'pointer',
+                color: i === highlight ? P.ink : P.cream,
+                background: i === highlight ? P.gold : 'transparent',
+              }}
+            >
+              {local}@{d}
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
+
 // Select — same border/radius/focus treatment as Input, gold chevron instead
 // of the OS default arrow, so dropdowns stop looking bolted onto the form.
 export function Select({ value, onChange, options, style = {}, ...rest }) {

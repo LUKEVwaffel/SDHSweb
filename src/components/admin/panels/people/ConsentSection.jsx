@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { supabase as SB } from '../../../../lib/supabaseClient';
 import { P, mono, oswald, inter, fs, sp, radius, shadow, ease } from '../../theme';
-import { Btn, Card, Label, Input, Select, SuffixEmailInput, StatusPills, Toast, Modal, PanelHeader, EmptyState } from '../../shared/ui';
+import { Btn, Card, Label, Input, Select, SuffixEmailInput, EmailAutocompleteInput, StatusPills, Toast, Modal, PanelHeader, EmptyState } from '../../shared/ui';
 import { TEAMS } from '../../../../lib/teams';
 import { openConsentStatusPdf } from '../../../../lib/consentPdfPrint';
 
@@ -374,12 +374,12 @@ export default function ConsentSection({ adminId }) {
 
         <div style={{ marginBottom: sp[3] }}>
           <Label>PARENT EMAIL</Label>
-          <Input value={addForm.parent_email} onChange={(e) => setAddForm((f) => ({ ...f, parent_email: e.target.value }))} placeholder="feeds the mailing list" />
+          <EmailAutocompleteInput value={addForm.parent_email} onChange={(v) => setAddForm((f) => ({ ...f, parent_email: v }))} placeholder="feeds the mailing list" />
         </div>
 
         <div style={{ marginBottom: sp[1] }}>
           <Label>PARENT EMAIL 2</Label>
-          <Input value={addForm.parent_email2} onChange={(e) => setAddForm((f) => ({ ...f, parent_email2: e.target.value }))} placeholder="second parent/guardian, optional" />
+          <EmailAutocompleteInput value={addForm.parent_email2} onChange={(v) => setAddForm((f) => ({ ...f, parent_email2: v }))} placeholder="second parent/guardian, optional" />
         </div>
 
         {/* lives inside the modal (not just the page-level toast below) so an
@@ -512,14 +512,14 @@ export default function ConsentSection({ adminId }) {
             <div style={{ marginTop: sp[3], paddingTop: sp[3], borderTop: `1px solid ${P.hair}` }}>
               <div style={{ marginBottom: sp[3] }}>
                 <Label>PARENT EMAIL</Label>
-                <Input value={form.parent_email || ''} onChange={(e) => setForm((f) => ({ ...f, parent_email: e.target.value }))} placeholder="feeds the mailing list" />
+                <EmailAutocompleteInput value={form.parent_email || ''} onChange={(v) => setForm((f) => ({ ...f, parent_email: v }))} placeholder="feeds the mailing list" />
                 <div style={{ display: 'flex', gap: sp[3], alignItems: 'center', marginTop: sp[2], flexWrap: 'wrap' }}>
                   <Btn onClick={() => addParentToList('parent_email')} variant="green" size="sm">+ ADD PARENT TO MAILING LIST</Btn>
                 </div>
               </div>
               <div>
                 <Label>PARENT EMAIL 2</Label>
-                <Input value={form.parent_email2 || ''} onChange={(e) => setForm((f) => ({ ...f, parent_email2: e.target.value }))} placeholder="second parent/guardian, optional" />
+                <EmailAutocompleteInput value={form.parent_email2 || ''} onChange={(v) => setForm((f) => ({ ...f, parent_email2: v }))} placeholder="second parent/guardian, optional" />
                 <div style={{ display: 'flex', gap: sp[3], alignItems: 'center', marginTop: sp[2], flexWrap: 'wrap' }}>
                   <Btn onClick={() => addParentToList('parent_email2')} variant="green" size="sm">+ ADD PARENT 2 TO MAILING LIST</Btn>
                 </div>
