@@ -8,6 +8,7 @@ import StepShoutout from '../../../tv/control-center/StepShoutout.jsx';
 import StepRangeSchedule from '../../../tv/control-center/StepRangeSchedule.jsx';
 import StepRangeNotices from '../../../tv/control-center/StepRangeNotices.jsx';
 import StepRangeLayout from '../../../tv/control-center/StepRangeLayout.jsx';
+import EmergencyPushPanel from '../tvphotos/EmergencyPushPanel.jsx';
 import { DEFAULT_ROTATION_GRID } from '../../../tv/range/rangeGrid/gridDefaults.js';
 import { P, mono, oswald, inter, fs, sp, radius, ease } from '../../theme.js';
 import { Btn, PanelHeader } from '../../shared/ui.jsx';
@@ -21,6 +22,7 @@ const SCREENS = [
 ];
 
 const BASE_TABS = [
+  { id: 'emergency', label: 'Emergency Push', danger: true },
   { id: 'schedule', label: 'Bell Schedule' },
   { id: 'teams', label: 'Featured Team' },
   { id: 'photos', label: 'Photo Source' },
@@ -308,8 +310,8 @@ export default function TvRemotePanel() {
               onClick={() => setActiveTab(t.id)}
               style={{
                 textAlign: 'left', padding: `${sp[4]}px ${sp[3]}px`, borderRadius: radius.sm,
-                border: 'none', background: activeTab === t.id ? P.goldWash : 'transparent',
-                color: activeTab === t.id ? P.bright : P.mute,
+                border: 'none', background: activeTab === t.id ? (t.danger ? 'rgba(192,57,43,0.14)' : P.goldWash) : 'transparent',
+                color: activeTab === t.id ? (t.danger ? P.red : P.bright) : (t.danger ? P.red : P.mute),
                 fontFamily: inter, fontSize: 15, fontWeight: activeTab === t.id ? 700 : 400,
                 cursor: 'pointer', transition: `all 150ms ${ease}`,
               }}
@@ -320,6 +322,10 @@ export default function TvRemotePanel() {
         </div>
 
         <div style={{ flex: 1, minWidth: 0 }}>
+          {activeTab === 'emergency' && (
+            <EmergencyPushPanel screenSlug={selectedScreen} />
+          )}
+
           {activeTab === 'schedule' && (
             <div>
               <div style={{ fontFamily: mono, fontSize: 10, color: P.gold, letterSpacing: '0.24em', marginBottom: sp[2] }}>

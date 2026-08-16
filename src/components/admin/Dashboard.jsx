@@ -14,8 +14,6 @@ import MediaPanel from './panels/MediaPanel';
 import AdvancedPanel from './panels/advanced/AdvancedPanel';
 import SelfAccountPanel from './panels/SelfAccountPanel';
 import MessagesPanel from './panels/messages/MessagesPanel';
-import TvPhotosPanel from './panels/tvphotos/TvPhotosPanel';
-import EmergencyPushPanel from './panels/tvphotos/EmergencyPushPanel';
 import TvRemotePanel from './panels/tvremote/TvRemotePanel';
 
 // Push-to-TV / TV Photos is intentionally restricted to this one account —
@@ -30,7 +28,7 @@ const SECTION_LABEL = {
   overview: 'OVERVIEW', events: 'EVENTS', aars: 'AAR TRACKER',
   people: 'PEOPLE', photos: 'PHOTOS', questions: 'FAQ QUESTIONS', email: 'EMAIL LIST',
   media: 'MEDIA', advanced: 'ADVANCED', account: 'MY ACCOUNT', messages: 'MESSAGES',
-  tvphotos: 'TV PHOTOS', emergency: 'EMERGENCY PUSH', tvremote: 'TV REMOTE',
+  tvremote: 'TV REMOTE',
 };
 
 // Which sections each role may see. s5 is scoped to the battalion calendar
@@ -42,17 +40,18 @@ const SECTION_LABEL = {
 // self-only enforcement AccountsPanel uses. 'messages' is the one section
 // every admin gets regardless of role — DISPATCH chat is internal staff
 // coordination, not tied to the s6/s5 permission split.
-// 'emergency' and 'tvremote' are on every role's list — any signed-in admin
-// can use them, no gate. For 'tvremote' this isn't just a speed call like
-// emergency: every /tv kiosk is now a pure display with no on-site control
-// at all, so DISPATCH is the ONLY way to change the schedule, featured team,
-// widget, or shoutout — restricting it to one role would mean nobody else
-// could fix a wrong schedule.
-// 'tvphotos' is NOT listed here at all — it's added dynamically below, only
-// for LUKE_EMAIL, since it's restricted to one account rather than a role.
+// 'tvremote' is on every role's list — any signed-in admin can use it, no
+// gate. Every /tv kiosk is now a pure display with no on-site control at
+// all, so DISPATCH is the ONLY way to change the schedule, featured team,
+// widget, shoutout, or push an Emergency message — restricting it to one
+// role would mean nobody else could fix a wrong schedule or push a same-day
+// cancellation.
+// TV Photos is not a section of its own — it's a Luke-only tab inside the
+// 'photos' section (see showTvPhotos below), since it's restricted to one
+// account rather than a role.
 const ROLE_SECTIONS = {
-  s6: ['overview', 'events', 'people', 'photos', 'questions', 'email', 'media', 'messages', 'advanced', 'emergency', 'tvremote'],
-  s5: ['events', 'aars', 'messages', 'account', 'emergency', 'tvremote'],
+  s6: ['overview', 'events', 'people', 'photos', 'questions', 'email', 'media', 'messages', 'advanced', 'tvremote'],
+  s5: ['events', 'aars', 'messages', 'account', 'tvremote'],
 };
 
 // team values s5 may create/edit/view events for. '' = battalion (team NULL).
@@ -62,8 +61,7 @@ const S5_ALLOWED_TEAMS = ['', 'raiders'];
 
 export default function Dashboard({ onLogout, adminId, role = 's6' }) {
   const isLuke = (adminId || '').toLowerCase() === LUKE_EMAIL;
-  const baseAllowed = ROLE_SECTIONS[role] || ROLE_SECTIONS.s6;
-  const allowed = isLuke ? [...baseAllowed, 'tvphotos'] : baseAllowed;
+  const allowed = ROLE_SECTIONS[role] || ROLE_SECTIONS.s6;
   const allowedTeams = role === 's5' ? S5_ALLOWED_TEAMS : undefined;
   const navigate = useNavigate();
   const location = useLocation();
@@ -88,15 +86,13 @@ export default function Dashboard({ onLogout, adminId, role = 's6' }) {
           {section === 'events'   && <EventsPanel adminId={adminId} allowedTeams={allowedTeams} />}
           {section === 'aars'     && <AarsPanel adminId={adminId} />}
           {section === 'people'   && <PeoplePanel adminId={adminId} />}
-          {section === 'photos'   && <PhotosPanel adminId={adminId} />}
+          {section === 'photos'   && <PhotosPanel adminId={adminId} showTvPhotos={isLuke} />}
           {section === 'questions' && <QuestionsPanel />}
           {section === 'email'    && <EmailPanel adminId={adminId} />}
           {section === 'media'    && <MediaPanel adminId={adminId} />}
           {section === 'advanced' && <AdvancedPanel adminId={adminId} />}
           {section === 'account'  && <SelfAccountPanel adminId={adminId} />}
           {section === 'messages' && <MessagesPanel adminId={adminId} />}
-          {section === 'tvphotos' && isLuke && <TvPhotosPanel adminId={adminId} />}
-          {section === 'emergency' && <EmergencyPushPanel />}
           {section === 'tvremote' && <TvRemotePanel />}
         </div>
       </div>

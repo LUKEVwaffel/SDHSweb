@@ -15,9 +15,11 @@ const FOLDERS = [...TEAMS.map((t) => ({ id: t.id, label: t.label })), { id: 'bat
 
 // Upload/organize surface for the 5 TV Photos folders that feed the /tv
 // carousel's "Team Photos" mode (see useTvCarouselPhotos.js), plus
-// Push-to-TV single-photo spotlight. Luke-only — gated in Dashboard.jsx
-// (nav visibility) AND server-side (tv_photos.sql RLS, is_luke()); this
-// component assumes it's only ever rendered for that account.
+// Push-to-TV single-photo spotlight. Rendered as a tab inside PhotosPanel.
+// Luke-only — gated via the showTvPhotos prop threaded down from
+// Dashboard.jsx (nav visibility) AND server-side (tv_photos.sql RLS,
+// is_luke()); this component assumes it's only ever rendered for that
+// account.
 export default function TvPhotosPanel({ adminId }) {
   const [folder, setFolder] = useState(FOLDERS[0].id);
   const [photos, setPhotos] = useState(null);

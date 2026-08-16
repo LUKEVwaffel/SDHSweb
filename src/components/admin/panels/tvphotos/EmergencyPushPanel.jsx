@@ -13,14 +13,16 @@ const TEXT_SIZES = [
 // Broadcast feature: push text/photo/both to the live TV instantly, no
 // reload, replacing the carousel + everything else with a full-takeover
 // urgent treatment (see TvEmergencyOverlay). Open to ANY signed-in DISPATCH
-// admin, no PIN/device gate — deliberately separate from the Luke-only TV
-// Photos tab (product decision: speed matters more than restriction here —
-// whoever's on-site when practice gets cancelled needs to act immediately).
-// Enforced server-side by the tv_daily_settings_guard trigger (is_admin()),
-// not just this component being reachable — same split as the rest of
-// DISPATCH's admin surfaces.
-export default function EmergencyPushPanel() {
-  const { settings } = useTvDailySettings();
+// admin, no PIN/device gate (product decision: speed matters more than
+// restriction here — whoever's on-site when practice gets cancelled needs
+// to act immediately). Enforced server-side by the tv_daily_settings_guard
+// trigger (is_admin()), not just this component being reachable — same
+// split as the rest of DISPATCH's admin surfaces.
+// Lives as a tab inside TvRemotePanel, so screenSlug tracks whichever
+// screen is selected there (Outside/Range) instead of always targeting the
+// default screen.
+export default function EmergencyPushPanel({ screenSlug = 'default' }) {
+  const { settings } = useTvDailySettings(screenSlug);
   const [header, setHeader] = useState('');
   const [text, setText] = useState('');
   const [textSize, setTextSize] = useState('huge');
@@ -61,7 +63,7 @@ export default function EmergencyPushPanel() {
         emergency_header: header.trim() || null,
         emergency_photo_url: photoUrl,
         emergency_text_size: textSize,
-      });
+      }, screenSlug);
       if (error) setErr(error.message || 'Push failed.');
     } finally {
       setBusy(false);
@@ -71,7 +73,7 @@ export default function EmergencyPushPanel() {
   async function clear() {
     setBusy(true);
     try {
-      const { error } = await updateTvDailySettings({ emergency_active: false });
+      const { error } = await updateTvDailySettings({ emergency_active: false }, screenSlug);
       if (error) setErr(error.message || 'Clear failed.');
       else { setHeader(''); setText(''); setPhotoUrl(null); setTextSize('huge'); }
     } finally {
