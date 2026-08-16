@@ -33,6 +33,11 @@ const FORM_INITIAL = { consent: 'C', dd3203: 'D', datasheet: 'S' };
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
+// Normalize a name for cross-table matching (cadet_consent ↔ personnel).
+function normName(s) {
+  return String(s || '').toLowerCase().replace(/\s+/g, ' ').trim();
+}
+
 const GRADE_OPTIONS = [
   { value: '', label: '—' },
   { value: '9',  label: '9TH' },
@@ -90,6 +95,23 @@ export default function ConsentSection({ adminId }) {
   // supabase/opticsend.sql SECTION 3.
   const [cadetTeams, setCadetTeams] = useState([]);
 
+  // personnel match (by name) for the cosmetic directory-tag TEAM(S), moved
+  // here from PeoplePanel so every form/tag edit lives in one place —
+  // this Cadet Database view — including for staff/command rows (company
+  // 'staff'). personnel_teams is unrelated to cadet_teams above: it's a
+  // directory-only tag, doesn't feed OpticSend.
+  const [personnelByName, setPersonnelByName] = useState({});
+  const [personTeams, setPersonTeams] = useState([]);
+
+  useEffect(() => {
+    (async () => {
+      const { data } = await SB.from('personnel').select('id, name');
+      const map = {};
+      for (const p of data || []) map[normName(p.name)] = p.id;
+      setPersonnelByName(map);
+    })();
+  }, []);
+
   const load = useCallback(async () => {
     const { data, error } = await SB.from('cadet_consent').select('*').eq('company', company).order('sort_order').order('name');
     if (error) { setMissing(true); setRows([]); return; }
@@ -120,6 +142,8 @@ export default function ConsentSection({ adminId }) {
     setDetailMsg('');
     setListMsg('');
     loadCadetTeams(row.id);
+    const personnelId = personnelByName[normName(row.name)];
+    if (personnelId) loadPersonTeams(personnelId); else setPersonTeams([]);
   }
 
   function closeCadet() {
@@ -139,6 +163,20 @@ export default function ConsentSection({ adminId }) {
       await SB.from('cadet_teams').insert({ cadet_consent_id: cadetConsentId, team });
     }
     loadCadetTeams(cadetConsentId);
+  }
+
+  async function loadPersonTeams(personnelId) {
+    const { data } = await SB.from('personnel_teams').select('team').eq('personnel_id', personnelId);
+    setPersonTeams((data || []).map((r) => r.team));
+  }
+
+  async function togglePersonTeam(personnelId, team, on) {
+    if (on) {
+      await SB.from('personnel_teams').delete().eq('personnel_id', personnelId).eq('team', team);
+    } else {
+      await SB.from('personnel_teams').insert({ personnel_id: personnelId, team });
+    }
+    loadPersonTeams(personnelId);
   }
 
   async function setStatus(row, status, formKey = 'consent') {
@@ -567,6 +605,26 @@ export default function ConsentSection({ adminId }) {
             </div>
           )}
         </div>
+
+        {/* cosmetic directory tag (personnel_teams) — separate from the
+            functional TEAM(S) above; only shown when this row has a
+            matching personnel record (staff/command) to tag. Moved here
+            from Staff/Command, which is bios-only now. */}
+        {personnelByName[normName(form.name)] && (
+          <div style={{ marginBottom: sp[3] }}>
+            <Label>TEAM(S), directory tag only</Label>
+            <div style={{ display: 'flex', flexWrap: 'wrap', gap: sp[2] }}>
+              {TEAMS.map((t) => {
+                const on = personTeams.includes(t.id);
+                return (
+                  <Btn key={t.id} variant={on ? 'gold' : 'ghost'} size="sm" onClick={() => togglePersonTeam(personnelByName[normName(form.name)], t.id, on)}>
+                    {t.label}
+                  </Btn>
+                );
+              })}
+            </div>
+          </div>
+        )}
 
         <div style={{ marginBottom: sp[1] }}>
           <Label>NOTE</Label>

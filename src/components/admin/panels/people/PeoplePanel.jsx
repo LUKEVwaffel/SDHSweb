@@ -2,7 +2,6 @@ import { useState, useEffect, useMemo } from 'react';
 import { supabase as SB } from '../../../../lib/supabaseClient';
 import { P, mono, inter, fs, sp, radius, shadow, ease } from '../../theme';
 import { Btn, Card, Label, Input, Select, PanelHeader } from '../../shared/ui';
-import { TEAMS } from '../../../../lib/teams';
 import ConsentSection from './ConsentSection';
 import PersonAchievements from './PersonAchievements';
 
@@ -53,11 +52,6 @@ export default function PeoplePanel({ adminId }) {
   const [saving, setSaving] = useState(false);
   const [view, setView] = useState('directory');
 
-  // directory-only team tag (personnel_teams) — cosmetic, does not feed
-  // OpticSend (that reads cadet_teams on cadet_consent instead; see
-  // supabase/opticsend.sql SECTION 2 vs 3).
-  const [personTeams, setPersonTeams] = useState([]);
-
   // filters
   const [search, setSearch] = useState('');
   const [fSection, setFSection] = useState('');
@@ -86,21 +80,6 @@ export default function PeoplePanel({ adminId }) {
   function startEdit(r) {
     setEditing(r.id);
     setForm({ ...r });
-    loadPersonTeams(r.id);
-  }
-
-  async function loadPersonTeams(personnelId) {
-    const { data } = await SB.from('personnel_teams').select('team').eq('personnel_id', personnelId);
-    setPersonTeams((data || []).map((r) => r.team));
-  }
-
-  async function togglePersonTeam(personnelId, team, on) {
-    if (on) {
-      await SB.from('personnel_teams').delete().eq('personnel_id', personnelId).eq('team', team);
-    } else {
-      await SB.from('personnel_teams').insert({ personnel_id: personnelId, team });
-    }
-    loadPersonTeams(personnelId);
   }
 
   async function save() {
@@ -254,20 +233,6 @@ export default function PeoplePanel({ adminId }) {
 
             <div style={{ marginBottom: sp[4] }}>
               <PersonAchievements personnelId={form.id} achievements={achievements} />
-            </div>
-
-            <div style={{ marginBottom: sp[4] }}>
-              <Label>TEAM(S), directory tag only</Label>
-              <div style={{ display: 'flex', flexWrap: 'wrap', gap: sp[2] }}>
-                {TEAMS.map((t) => {
-                  const on = personTeams.includes(t.id);
-                  return (
-                    <Btn key={t.id} variant={on ? 'gold' : 'ghost'} size="sm" onClick={() => togglePersonTeam(form.id, t.id, on)}>
-                      {t.label}
-                    </Btn>
-                  );
-                })}
-              </div>
             </div>
 
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0 16px' }}>
