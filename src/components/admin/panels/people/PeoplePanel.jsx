@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect, useMemo, useRef } from 'react';
 import { supabase as SB } from '../../../../lib/supabaseClient';
 import { P, mono, inter, fs, sp, radius, shadow, ease } from '../../theme';
 import { Btn, Card, Label, Input, Select, PanelHeader } from '../../shared/ui';
@@ -50,6 +50,7 @@ export default function PeoplePanel({ adminId }) {
   const [editing, setEditing] = useState(null);
   const [form, setForm] = useState({});
   const [saving, setSaving] = useState(false);
+  const [autosaveStatus, setAutosaveStatus] = useState(null); // null | 'pending' | 'saved'
   const [view, setView] = useState('directory');
 
   // filters
@@ -58,7 +59,44 @@ export default function PeoplePanel({ adminId }) {
   const [fLet, setFLet] = useState('');
   const [fConsent, setFConsent] = useState('');
 
+  // Autosave: refs mirror the latest form/editing state so the debounce
+  // timer (and unmount/switch-record flushes) always persist the newest
+  // edits, not a stale value captured when the timer was scheduled.
+  const formRef = useRef(form);
+  useEffect(() => { formRef.current = form; }, [form]);
+  const editingRef = useRef(editing);
+  useEffect(() => { editingRef.current = editing; }, [editing]);
+  const dirtyRef = useRef(false);
+  const autosaveTimer = useRef(null);
+  const AUTOSAVE_DELAY_MS = 1500;
+
   useEffect(() => { load(); }, []);
+
+  // Flush any pending autosave on unmount (leaving the panel / logging out)
+  // so a forgotten Save button never loses an in-progress edit.
+  useEffect(() => () => { flushAutosave(); }, []); // eslint-disable-line react-hooks/exhaustive-deps
+
+  async function persist(record) {
+    await SB.from('personnel').upsert({ ...record, updated_at: new Date().toISOString() });
+    await SB.from('change_log').insert({ admin_id: adminId, page: 'personnel', element: record.id, label: record.name, value_before: {}, value_after: record });
+  }
+
+  async function flushAutosave() {
+    if (autosaveTimer.current) { clearTimeout(autosaveTimer.current); autosaveTimer.current = null; }
+    if (!dirtyRef.current || !editingRef.current) return;
+    dirtyRef.current = false;
+    setAutosaveStatus('pending');
+    await persist(formRef.current);
+    setAutosaveStatus('saved');
+    load();
+  }
+
+  function scheduleAutosave() {
+    dirtyRef.current = true;
+    setAutosaveStatus(null);
+    if (autosaveTimer.current) clearTimeout(autosaveTimer.current);
+    autosaveTimer.current = setTimeout(flushAutosave, AUTOSAVE_DELAY_MS);
+  }
 
   async function load() {
     const [{ data: people }, { data: consent }, { data: ach }] = await Promise.all([
@@ -78,25 +116,33 @@ export default function PeoplePanel({ adminId }) {
   }
 
   function startEdit(r) {
+    // Switching records mid-edit shouldn't drop whatever was already typed.
+    if (editingRef.current && editingRef.current !== r.id) flushAutosave();
     setEditing(r.id);
     setForm({ ...r });
+    dirtyRef.current = false;
+    setAutosaveStatus(null);
   }
 
   async function save() {
+    if (autosaveTimer.current) { clearTimeout(autosaveTimer.current); autosaveTimer.current = null; }
+    dirtyRef.current = false;
     setSaving(true);
-    await SB.from('personnel').upsert({ ...form, updated_at: new Date().toISOString() });
-    await SB.from('change_log').insert({ admin_id: adminId, page: 'personnel', element: form.id, label: form.name, value_before: {}, value_after: form });
+    await persist(form);
     setEditing(null);
     setSaving(false);
+    setAutosaveStatus(null);
     load();
   }
 
   // Text-input field helper (visibility toggle intentionally removed — every
   // staff/command record stays public; no add/delete here to protect the data).
+  // Every edit also schedules a debounced autosave so a forgotten SAVE click
+  // never loses what was typed.
   const f = (k, l, opts = {}) => (
     <div style={{ marginBottom: 8 }}>
       <Label>{l}</Label>
-      <Input value={form[k] || ''} onChange={(e) => setForm((f) => ({ ...f, [k]: e.target.value }))} multiline={opts.multiline} />
+      <Input value={form[k] || ''} onChange={(e) => { setForm((f) => ({ ...f, [k]: e.target.value })); scheduleAutosave(); }} multiline={opts.multiline} />
     </div>
   );
 
@@ -135,7 +181,7 @@ export default function PeoplePanel({ adminId }) {
         ].map((v) => {
           const active = view === v.id;
           return (
-            <button key={v.id} onClick={() => setView(v.id)} style={{
+            <button key={v.id} onClick={() => { flushAutosave(); setView(v.id); }} style={{
               fontFamily: mono, fontSize: fs.tiny, letterSpacing: '0.12em', fontWeight: 600,
               padding: '10px 20px', borderRadius: 6, border: 'none', cursor: 'pointer',
               background: active ? P.gold : 'transparent', color: active ? P.ink : P.mute,
@@ -216,9 +262,16 @@ export default function PeoplePanel({ adminId }) {
         {editing ? (
           <Card>
             <PanelHeader title={`EDITING · ${form.name || 'RECORD'}`} action={
-              <div style={{ display: 'flex', gap: sp[2] }}>
-                <Btn onClick={() => setEditing(null)} variant="ghost" size="sm">CANCEL</Btn>
-                <Btn onClick={save} variant="gold" size="sm" disabled={saving}>{saving ? 'SAVING…' : 'SAVE'}</Btn>
+              <div style={{ display: 'flex', alignItems: 'center', gap: sp[3] }}>
+                {autosaveStatus && (
+                  <span style={{ fontFamily: mono, fontSize: fs.tiny, letterSpacing: '0.1em', color: autosaveStatus === 'saved' ? P.green : P.mute }}>
+                    {autosaveStatus === 'saved' ? 'AUTOSAVED' : 'AUTOSAVING…'}
+                  </span>
+                )}
+                <div style={{ display: 'flex', gap: sp[2] }}>
+                  <Btn onClick={() => { if (autosaveTimer.current) clearTimeout(autosaveTimer.current); setEditing(null); setAutosaveStatus(null); }} variant="ghost" size="sm">CANCEL</Btn>
+                  <Btn onClick={save} variant="gold" size="sm" disabled={saving}>{saving ? 'SAVING…' : 'SAVE'}</Btn>
+                </div>
               </div>
             }/>
 
@@ -245,7 +298,7 @@ export default function PeoplePanel({ adminId }) {
             {f('bio_long', 'FULL BIO', { multiline: true })}
             {f('photo_url', 'PHOTO URL')}
             {form.photo_url && <img src={form.photo_url} alt="" style={{ width: 96, height: 96, objectFit: 'cover', borderRadius: 6, marginBottom: sp[2] }} />}
-            <div style={{ fontFamily: mono, fontSize: 9, color: P.faint, letterSpacing: '0.08em' }}>Edits save straight to the personnel table the public site reads. Changes go live on save.</div>
+            <div style={{ fontFamily: mono, fontSize: 9, color: P.faint, letterSpacing: '0.08em' }}>Edits save straight to the personnel table the public site reads. Changes go live on save, and also autosave a few seconds after you stop typing — a forgotten SAVE click won't lose them.</div>
           </Card>
         ) : (
           <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', height: '100%', gap: sp[3], color: P.faint }}>
