@@ -170,17 +170,32 @@ export function Select({ value, onChange, options, style = {}, ...rest }) {
 }
 
 const STATUS_PILL_SIZES = {
-  compact: { padding: '7px 10px', fontSize: fs.micro },
-  regular: { padding: '10px 8px', fontSize: fs.tiny, flex: 1 },
+  compact: { padding: '6px 10px', fontSize: fs.micro },
+  regular: { padding: '9px 8px', fontSize: fs.tiny, flex: 1 },
 };
 
-// Shared 3-state consent toggle (`items` = [{id,label,color}]). One component
-// at two sizes instead of the 3 hand-rolled copies that used to drift apart
-// (cadet roster row, cadet detail panel, staff consent banner).
+// Shared 3-state consent toggle (`items` = [{id,label,color}]), rendered as a
+// single segmented control — one bordered track, active segment filled and
+// sliding between positions — instead of 3 separate free-floating buttons.
+// One component at two sizes instead of the 3 hand-rolled copies that used to
+// drift apart (cadet roster row, cadet detail panel, staff consent banner).
 export function StatusPills({ items, value, onChange, size = 'regular', style = {} }) {
   const s = STATUS_PILL_SIZES[size] || STATUS_PILL_SIZES.regular;
+  const activeIndex = Math.max(0, items.findIndex((it) => it.id === value));
+  const activeItem = items[activeIndex];
   return (
-    <div style={{ display: 'flex', gap: 3, ...style }}>
+    <div style={{
+      position: 'relative', display: 'flex', padding: 3, gap: 2,
+      background: P.deep, border: `1px solid ${P.hair}`, borderRadius: radius.sm,
+      ...style,
+    }}>
+      <div style={{
+        position: 'absolute', top: 3, bottom: 3, left: 3,
+        width: `calc(${100 / items.length}% - 2.5px)`,
+        transform: `translateX(calc(${activeIndex * 100}% + ${activeIndex * 2}px))`,
+        background: activeItem?.color, borderRadius: Math.max(radius.sm - 2, 3),
+        transition: `transform 0.2s ${ease}, background 0.2s ${ease}`,
+      }} />
       {items.map((it) => {
         const active = value === it.id;
         return (
@@ -189,12 +204,11 @@ export function StatusPills({ items, value, onChange, size = 'regular', style = 
             type="button"
             onClick={() => onChange(it.id)}
             style={{
+              position: 'relative', zIndex: 1, flex: 1,
               fontFamily: mono, fontWeight: 600, letterSpacing: '0.1em', cursor: 'pointer',
-              borderRadius: radius.sm,
-              border: `1px solid ${active ? it.color : P.hair}`,
-              background: active ? it.color : 'transparent',
+              border: 'none', background: 'transparent',
               color: active ? (it.id === 'pending' ? P.ink : '#fff') : P.faint,
-              transition: `all 0.15s ${ease}`,
+              transition: `color 0.2s ${ease}`,
               ...s,
             }}
           >

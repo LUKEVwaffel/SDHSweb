@@ -28,6 +28,9 @@ const FORMS = [
   { key: 'datasheet', statusCol: 'datasheet_status', atCol: 'datasheet_collected_at', byCol: 'datasheet_collected_by', label: 'JROTC CADET PERSONAL DATASHEET', due: 'DUE AUG 31' },
 ];
 
+// One-letter chip label per FORMS entry, for the roster row's at-a-glance indicator.
+const FORM_INITIAL = { consent: 'C', dd3203: 'D', datasheet: 'S' };
+
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
 const GRADE_OPTIONS = [
@@ -117,6 +120,11 @@ export default function ConsentSection({ adminId }) {
     setDetailMsg('');
     setListMsg('');
     loadCadetTeams(row.id);
+  }
+
+  function closeCadet() {
+    setSelectedId(null);
+    setForm({});
   }
 
   async function loadCadetTeams(cadetConsentId) {
@@ -380,9 +388,8 @@ export default function ConsentSection({ adminId }) {
         <Toast tone={addErr ? 'error' : 'success'} style={{ marginTop: sp[2] }}>{addMsg}</Toast>
       </Modal>
 
-      {/* roster (left) + detail (right) */}
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 380px', gap: sp[4], alignItems: 'start' }}>
-        {/* roster */}
+      {/* roster — full width; click a cadet to open the detail popup below */}
+      <div>
         <div style={{ display: 'flex', flexDirection: 'column', gap: sp[1] }}>
           {(searchResults ?? rows).map((r) => {
             const on = selectedId === r.id;
@@ -414,16 +421,28 @@ export default function ConsentSection({ adminId }) {
                     {r.parent_email || r.parent_email2 ? '✉ parent on file' : 'no parent email'}
                     {r.consent_status === 'collected' && r.collected_at ? ` · signed ${new Date(r.collected_at).toLocaleDateString()}` : ''}
                   </div>
-                  {(r.dd3203_status !== 'collected' || r.datasheet_status !== 'collected') && (
-                    <div style={{ fontFamily: mono, fontSize: fs.micro, color: P.gold, marginTop: 2 }}>
-                      {r.dd3203_status !== 'collected' ? 'DD 3203 pending' : ''}
-                      {r.dd3203_status !== 'collected' && r.datasheet_status !== 'collected' ? ' · ' : ''}
-                      {r.datasheet_status !== 'collected' ? 'Datasheet pending' : ''}
-                    </div>
-                  )}
                 </div>
+                {/* per-form status at a glance — one chip per tracked form (FORMS),
+                    read-only here so it can never be mistaken for a single overall
+                    toggle; open the cadet to actually change a status. */}
                 <div style={{ display: 'flex', alignItems: 'center', gap: sp[2] }} onClick={(e) => e.stopPropagation()}>
-                  <StatusPills items={STATUSES} value={r.consent_status} onChange={(id) => setStatus(r, id)} size="compact" />
+                  <div style={{ display: 'flex', gap: 3 }}>
+                    {FORMS.map((f) => {
+                      const st = r[f.statusCol] || 'pending';
+                      const meta = STATUSES.find((s) => s.id === st) || STATUSES[1];
+                      const filled = st !== 'pending';
+                      return (
+                        <span key={f.key} title={`${f.label}: ${st.toUpperCase()}`} style={{
+                          width: 20, height: 20, borderRadius: radius.sm,
+                          display: 'flex', alignItems: 'center', justifyContent: 'center',
+                          fontFamily: mono, fontSize: 9, fontWeight: 700,
+                          background: filled ? meta.color : 'transparent',
+                          border: `1px solid ${filled ? meta.color : P.hair}`,
+                          color: filled ? (st === 'declined' ? '#fff' : P.ink) : P.faint,
+                        }}>{FORM_INITIAL[f.key]}</span>
+                      );
+                    })}
+                  </div>
                   <button onClick={() => del(r)} title="Remove cadet" style={{
                     width: 30, height: 30, borderRadius: radius.sm, border: '1px solid transparent',
                     background: 'transparent', color: P.faint, cursor: 'pointer', fontSize: fs.base,
@@ -444,125 +463,111 @@ export default function ConsentSection({ adminId }) {
             <EmptyState title={`NO CADETS FOR ${company.toUpperCase()} YET`} hint="Add one above, or import the roster." />
           )}
         </div>
+      </div>
 
-        {/* detail */}
-        <div style={{ position: 'sticky', top: 0 }}>
-          {form.id ? (
-            <Card>
-              <PanelHeader title={`CADET · ${(form.name || '').toUpperCase() || 'UNNAMED'}`} action={
-                <Btn onClick={saveDetail} variant="gold" size="sm" disabled={saving}>
-                  {saving ? 'SAVING…' : 'SAVE'}
+      {/* detail — full-record popup, opened by clicking a cadet in the roster */}
+      <Modal open={!!form.id} onClose={closeCadet} title={`CADET · ${(form.name || '').toUpperCase() || 'UNNAMED'}`} width={560} footer={<>
+        <Btn onClick={closeCadet} variant="ghost" size="sm">CLOSE</Btn>
+        <Btn onClick={saveDetail} variant="gold" size="sm" disabled={saving}>{saving ? 'SAVING…' : 'SAVE'}</Btn>
+      </>}>
+        <div style={{ marginBottom: sp[3] }}>
+          <Label>NAME</Label>
+          <Input value={form.name || ''} onChange={(e) => setForm((f) => ({ ...f, name: e.target.value }))} />
+        </div>
+        <div style={{ marginBottom: sp[3] }}>
+          <Label>ROLE / RANK</Label>
+          <Input value={form.role || ''} onChange={(e) => setForm((f) => ({ ...f, role: e.target.value }))} placeholder="cadet, staff, rank…" />
+        </div>
+        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: `0 ${sp[3]}px`, marginBottom: sp[3] }}>
+          <div>
+            <Label>GRADE</Label>
+            <Select value={form.grade || ''} onChange={(e) => setForm((f) => ({ ...f, grade: e.target.value }))} options={GRADE_OPTIONS} />
+          </div>
+          <div>
+            <Label>LET LEVEL</Label>
+            <Select value={form.let_level || ''} onChange={(e) => setForm((f) => ({ ...f, let_level: e.target.value }))} options={LET_OPTIONS} />
+          </div>
+        </div>
+
+        {/* PII — only reachable by a signed-in s6 admin (cadet_consent is
+            authenticated-only, see admin_roles.sql); only used server-side
+            to derive the /tv birthday shoutout, never read by the kiosk
+            itself (see supabase/tv_shoutouts.sql). */}
+        <div style={{ marginBottom: sp[3] }}>
+          <Label>BIRTHDATE</Label>
+          <Input type="date" value={form.birthdate || ''} onChange={(e) => setForm((f) => ({ ...f, birthdate: e.target.value }))} />
+        </div>
+
+        {/* consent status + the two required-back-by-8/31 forms — all
+            three are independent {status,collected_at,collected_by}
+            triplets on this same row (FORMS above). */}
+        <div style={{ marginBottom: sp[4] }}>
+          <Label>DISPATCH SEND PARENT CONSENT</Label>
+          <StatusPills items={STATUSES} value={form.consent_status} onChange={(id) => setStatus(form, id)} size="regular" style={{ width: '100%' }} />
+        </div>
+        <div style={{ marginBottom: sp[4] }}>
+          <Label>DD FORM 3203 (JAN 2024) · DUE AUG 31</Label>
+          <StatusPills items={STATUSES} value={form.dd3203_status} onChange={(id) => setStatus(form, id, 'dd3203')} size="regular" style={{ width: '100%' }} />
+        </div>
+        <div style={{ marginBottom: sp[4] }}>
+          <Label>JROTC CADET PERSONAL DATASHEET · DUE AUG 31</Label>
+          <StatusPills items={STATUSES} value={form.datasheet_status} onChange={(id) => setStatus(form, id, 'datasheet')} size="regular" style={{ width: '100%' }} />
+        </div>
+
+        <div style={{ marginBottom: sp[3] }}>
+          <Label>SCHOOL EMAIL</Label>
+          <SuffixEmailInput value={form.school_email || ''} onChange={(v) => setForm((f) => ({ ...f, school_email: v }))} />
+        </div>
+        <div style={{ marginBottom: sp[3] }}>
+          <Label>PARENT EMAIL</Label>
+          <Input value={form.parent_email || ''} onChange={(e) => setForm((f) => ({ ...f, parent_email: e.target.value }))} placeholder="feeds the mailing list" />
+          <div style={{ display: 'flex', gap: sp[3], alignItems: 'center', marginTop: sp[2], flexWrap: 'wrap' }}>
+            <Btn onClick={() => addParentToList('parent_email')} variant="green" size="sm">+ ADD PARENT TO MAILING LIST</Btn>
+          </div>
+        </div>
+
+        <div style={{ marginBottom: sp[3] }}>
+          <Label>PARENT EMAIL 2</Label>
+          <Input value={form.parent_email2 || ''} onChange={(e) => setForm((f) => ({ ...f, parent_email2: e.target.value }))} placeholder="second parent/guardian, optional" />
+          <div style={{ display: 'flex', gap: sp[3], alignItems: 'center', marginTop: sp[2], flexWrap: 'wrap' }}>
+            <Btn onClick={() => addParentToList('parent_email2')} variant="green" size="sm">+ ADD PARENT 2 TO MAILING LIST</Btn>
+          </div>
+        </div>
+
+        <div style={{ marginBottom: sp[3], minHeight: fs.tiny }}>
+          <Toast tone={listErr ? 'error' : 'success'}>{listMsg}</Toast>
+        </div>
+
+        <div style={{ marginBottom: sp[3] }}>
+          <Label>TEAM(S)</Label>
+          <div style={{ display: 'flex', flexWrap: 'wrap', gap: sp[2] }}>
+            {TEAMS.map((t) => {
+              const on = cadetTeams.includes(t.id);
+              return (
+                <Btn key={t.id} variant={on ? 'gold' : 'ghost'} size="sm" onClick={() => toggleCadetTeam(selectedId, t.id, on)}>
+                  {t.label}
                 </Btn>
-              } />
-
-              <div style={{ marginBottom: sp[3] }}>
-                <Label>NAME</Label>
-                <Input value={form.name || ''} onChange={(e) => setForm((f) => ({ ...f, name: e.target.value }))} />
-              </div>
-              <div style={{ marginBottom: sp[3] }}>
-                <Label>ROLE / RANK</Label>
-                <Input value={form.role || ''} onChange={(e) => setForm((f) => ({ ...f, role: e.target.value }))} placeholder="cadet, staff, rank…" />
-              </div>
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: `0 ${sp[3]}px`, marginBottom: sp[3] }}>
-                <div>
-                  <Label>GRADE</Label>
-                  <Select value={form.grade || ''} onChange={(e) => setForm((f) => ({ ...f, grade: e.target.value }))} options={GRADE_OPTIONS} />
-                </div>
-                <div>
-                  <Label>LET LEVEL</Label>
-                  <Select value={form.let_level || ''} onChange={(e) => setForm((f) => ({ ...f, let_level: e.target.value }))} options={LET_OPTIONS} />
-                </div>
-              </div>
-
-              {/* PII — only reachable by a signed-in s6 admin (cadet_consent is
-                  authenticated-only, see admin_roles.sql); only used server-side
-                  to derive the /tv birthday shoutout, never read by the kiosk
-                  itself (see supabase/tv_shoutouts.sql). */}
-              <div style={{ marginBottom: sp[3] }}>
-                <Label>BIRTHDATE</Label>
-                <Input type="date" value={form.birthdate || ''} onChange={(e) => setForm((f) => ({ ...f, birthdate: e.target.value }))} />
-              </div>
-
-              {/* consent status + the two required-back-by-8/31 forms — all
-                  three are independent {status,collected_at,collected_by}
-                  triplets on this same row (FORMS above). */}
-              <div style={{ marginBottom: sp[4] }}>
-                <Label>DISPATCH SEND PARENT CONSENT</Label>
-                <StatusPills items={STATUSES} value={form.consent_status} onChange={(id) => setStatus(form, id)} size="regular" style={{ width: '100%' }} />
-              </div>
-              <div style={{ marginBottom: sp[4] }}>
-                <Label>DD FORM 3203 (JAN 2024) · DUE AUG 31</Label>
-                <StatusPills items={STATUSES} value={form.dd3203_status} onChange={(id) => setStatus(form, id, 'dd3203')} size="regular" style={{ width: '100%' }} />
-              </div>
-              <div style={{ marginBottom: sp[4] }}>
-                <Label>JROTC CADET PERSONAL DATASHEET · DUE AUG 31</Label>
-                <StatusPills items={STATUSES} value={form.datasheet_status} onChange={(id) => setStatus(form, id, 'datasheet')} size="regular" style={{ width: '100%' }} />
-              </div>
-
-              <div style={{ marginBottom: sp[3] }}>
-                <Label>SCHOOL EMAIL</Label>
-                <SuffixEmailInput value={form.school_email || ''} onChange={(v) => setForm((f) => ({ ...f, school_email: v }))} />
-              </div>
-              <div style={{ marginBottom: sp[3] }}>
-                <Label>PARENT EMAIL</Label>
-                <Input value={form.parent_email || ''} onChange={(e) => setForm((f) => ({ ...f, parent_email: e.target.value }))} placeholder="feeds the mailing list" />
-                <div style={{ display: 'flex', gap: sp[3], alignItems: 'center', marginTop: sp[2], flexWrap: 'wrap' }}>
-                  <Btn onClick={() => addParentToList('parent_email')} variant="green" size="sm">+ ADD PARENT TO MAILING LIST</Btn>
-                </div>
-              </div>
-
-              <div style={{ marginBottom: sp[3] }}>
-                <Label>PARENT EMAIL 2</Label>
-                <Input value={form.parent_email2 || ''} onChange={(e) => setForm((f) => ({ ...f, parent_email2: e.target.value }))} placeholder="second parent/guardian, optional" />
-                <div style={{ display: 'flex', gap: sp[3], alignItems: 'center', marginTop: sp[2], flexWrap: 'wrap' }}>
-                  <Btn onClick={() => addParentToList('parent_email2')} variant="green" size="sm">+ ADD PARENT 2 TO MAILING LIST</Btn>
-                </div>
-              </div>
-
-              <div style={{ marginBottom: sp[3], minHeight: fs.tiny }}>
-                <Toast tone={listErr ? 'error' : 'success'}>{listMsg}</Toast>
-              </div>
-
-              <div style={{ marginBottom: sp[3] }}>
-                <Label>TEAM(S)</Label>
-                <div style={{ display: 'flex', flexWrap: 'wrap', gap: sp[2] }}>
-                  {TEAMS.map((t) => {
-                    const on = cadetTeams.includes(t.id);
-                    return (
-                      <Btn key={t.id} variant={on ? 'gold' : 'ghost'} size="sm" onClick={() => toggleCadetTeam(selectedId, t.id, on)}>
-                        {t.label}
-                      </Btn>
-                    );
-                  })}
-                </div>
-                {cadetTeams.includes('raiders') && (!form.school_email && !form.parent_email) && (
-                  <div style={{
-                    fontFamily: mono, fontSize: fs.micro, color: P.bright, marginTop: sp[2], lineHeight: 1.6,
-                    background: 'rgba(232,199,122,0.08)', border: '1px solid rgba(232,199,122,0.25)',
-                    borderRadius: radius.sm, padding: `${sp[2]}px ${sp[2]}px`,
-                  }}>
-                    ⚠ No email on file. OpticSend won't be able to reach this cadet yet.
-                  </div>
-                )}
-              </div>
-
-              <div style={{ marginBottom: sp[3] }}>
-                <Label>NOTE</Label>
-                <Input value={form.note || ''} onChange={(e) => setForm((f) => ({ ...f, note: e.target.value }))} multiline />
-              </div>
-
-              <Toast tone={detailErr ? 'error' : 'success'}>{detailMsg}</Toast>
-            </Card>
-          ) : (
+              );
+            })}
+          </div>
+          {cadetTeams.includes('raiders') && (!form.school_email && !form.parent_email) && (
             <div style={{
-              fontFamily: mono, fontSize: fs.tiny, color: P.mute, textAlign: 'center', lineHeight: 1.8,
-              padding: `${sp[10]}px ${sp[4]}px`, border: `1px dashed ${P.hair}`, borderRadius: radius.md,
+              fontFamily: mono, fontSize: fs.micro, color: P.bright, marginTop: sp[2], lineHeight: 1.6,
+              background: 'rgba(232,199,122,0.08)', border: '1px solid rgba(232,199,122,0.25)',
+              borderRadius: radius.sm, padding: `${sp[2]}px ${sp[2]}px`,
             }}>
-              SELECT A CADET →<br />to edit contact info &amp; consent
+              ⚠ No email on file. OpticSend won't be able to reach this cadet yet.
             </div>
           )}
         </div>
-      </div>
+
+        <div style={{ marginBottom: sp[1] }}>
+          <Label>NOTE</Label>
+          <Input value={form.note || ''} onChange={(e) => setForm((f) => ({ ...f, note: e.target.value }))} multiline />
+        </div>
+
+        <Toast tone={detailErr ? 'error' : 'success'}>{detailMsg}</Toast>
+      </Modal>
     </div>
   );
 }
