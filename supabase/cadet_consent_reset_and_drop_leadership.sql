@@ -17,6 +17,19 @@
 -- ============================================================================
 BEGIN;
 
+-- self-heal in case cadet_consent_dd_forms.sql was never run — the UPDATE
+-- below needs these columns to exist.
+alter table public.cadet_consent
+  add column if not exists dd3203_status text not null default 'pending'
+    check (dd3203_status in ('pending','collected','declined')),
+  add column if not exists dd3203_collected_at timestamptz,
+  add column if not exists dd3203_collected_by text,
+
+  add column if not exists datasheet_status text not null default 'pending'
+    check (datasheet_status in ('pending','collected','declined')),
+  add column if not exists datasheet_collected_at timestamptz,
+  add column if not exists datasheet_collected_by text;
+
 UPDATE public.cadet_consent SET
   consent_status = 'pending',   collected_at = NULL,           collected_by = NULL,
   dd3203_status = 'pending',    dd3203_collected_at = NULL,    dd3203_collected_by = NULL,

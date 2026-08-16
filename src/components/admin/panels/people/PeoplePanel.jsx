@@ -1,12 +1,10 @@
 import { useState, useEffect, useMemo } from 'react';
 import { supabase as SB } from '../../../../lib/supabaseClient';
 import { P, mono, inter, fs, sp, radius, shadow, ease } from '../../theme';
-import { Btn, Card, Label, Input, Select, SuffixEmailInput, StatusPills, Toast, PanelHeader } from '../../shared/ui';
+import { Btn, Card, Label, Input, Select, PanelHeader } from '../../shared/ui';
 import { TEAMS } from '../../../../lib/teams';
 import ConsentSection from './ConsentSection';
 import PersonAchievements from './PersonAchievements';
-
-const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
 // Section display order + friendly names. Personnel `section` values seen in the
 // app: staff / command / s-1..s-6 / company-alpha..delta. Unknown sections fall
@@ -30,26 +28,9 @@ const CONSENT_META = {
   none:      { label: 'NO CONSENT RECORD', color: P.mute },
 };
 
-// Same 3 states as the banner's status line, shaped for the shared StatusPills.
-const BANNER_STATUSES = [
-  { id: 'collected', label: 'COLLECTED', color: CONSENT_META.collected.color },
-  { id: 'pending',   label: 'PENDING',   color: CONSENT_META.pending.color },
-  { id: 'declined',  label: 'DECLINED',  color: CONSENT_META.declined.color },
-];
-
 // Normalize a name for cross-table matching (personnel ↔ cadet_consent).
 function normName(s) {
   return String(s || '').toLowerCase().replace(/\s+/g, ' ').trim();
-}
-
-// Personnel section → the cadet_consent company bucket their contact/consent
-// record should live in. Company commanders (section = company-alpha etc)
-// get filed under their real company so they show up in that company's
-// Cadet Database tab too, not just lumped into the generic 'staff' bucket
-// with battalion HQ (command/staff/s-1..s-6).
-function companyForSection(section) {
-  const m = /^company-(alpha|bravo|charlie|delta)$/.exec(section || '');
-  return m ? m[1] : 'staff';
 }
 
 function groupBySection(records) {
@@ -71,14 +52,6 @@ export default function PeoplePanel({ adminId }) {
   const [form, setForm] = useState({});
   const [saving, setSaving] = useState(false);
   const [view, setView] = useState('directory');
-
-  // contact record (cadet_consent row, company = companyForSection(section)) for the person being edited
-  const [cForm, setCForm] = useState({});
-  const [savingContact, setSavingContact] = useState(false);
-  const [contactMsg, setContactMsg] = useState('');
-  const [contactErr, setContactErr] = useState(false);
-  const [listMsg, setListMsg] = useState('');
-  const [listErr, setListErr] = useState(false);
 
   // directory-only team tag (personnel_teams) — cosmetic, does not feed
   // OpticSend (that reads cadet_teams on cadet_consent instead; see
@@ -113,9 +86,6 @@ export default function PeoplePanel({ adminId }) {
   function startEdit(r) {
     setEditing(r.id);
     setForm({ ...r });
-    const c = consentFor(r);
-    setCForm(c ? { ...c } : { name: r.name, company: companyForSection(r.section), school_email: '', parent_email: '', parent_email2: '' });
-    setContactMsg(''); setContactErr(false); setListMsg('');
     loadPersonTeams(r.id);
   }
 
@@ -140,77 +110,6 @@ export default function PeoplePanel({ adminId }) {
     setEditing(null);
     setSaving(false);
     load();
-  }
-
-  // Mark the consent form collected/pending/declined straight from the banner.
-  // Creates the cadet_consent row (filed under the person's real company —
-  // see companyForSection) if this person has none yet.
-  async function setConsentStatus(status) {
-    const patch = {
-      consent_status: status,
-      collected_at: status === 'collected' ? new Date().toISOString() : null,
-      collected_by: status === 'collected' ? adminId : null,
-      updated_at: new Date().toISOString(),
-    };
-    let error;
-    if (cForm.id) {
-      ({ error } = await SB.from('cadet_consent').update(patch).eq('id', cForm.id));
-    } else {
-      const insertPatch = { name: form.name || cForm.name, company: companyForSection(form.section), school_email: cForm.school_email || null, parent_email: cForm.parent_email || null, parent_email2: cForm.parent_email2 || null, ...patch };
-      const { data, error: insertError } = await SB.from('cadet_consent').insert(insertPatch).select().single();
-      error = insertError;
-      if (data) setCForm((f) => ({ ...f, id: data.id }));
-    }
-    setContactErr(!!error);
-    setContactMsg(error ? error.message : '');
-    if (error) { setTimeout(() => setContactMsg(''), 4000); return; }
-    setCForm((f) => ({ ...f, ...patch }));
-    load();
-  }
-
-  // Staff/command contact info lives in cadet_consent (company = the person's
-  // real company via companyForSection, 'staff' for true HQ), same mechanism
-  // as the cadet database — matched by name, not a duplicate column on
-  // personnel. Creates the row on first save if this person has none yet.
-  // `patch` is reused for both insert and update, so company gets recomputed
-  // every save — an already-correct row never gets silently reset to 'staff'.
-  async function saveContact() {
-    setSavingContact(true);
-    const patch = {
-      name: form.name || cForm.name,
-      company: companyForSection(form.section),
-      school_email: (cForm.school_email || '').trim() || null,
-      parent_email: (cForm.parent_email || '').trim() || null,
-      parent_email2: (cForm.parent_email2 || '').trim() || null,
-      updated_at: new Date().toISOString(),
-    };
-    let error;
-    if (cForm.id) {
-      ({ error } = await SB.from('cadet_consent').update(patch).eq('id', cForm.id));
-    } else {
-      const { data, error: insertError } = await SB.from('cadet_consent').insert(patch).select().single();
-      error = insertError;
-      if (data) setCForm((f) => ({ ...f, id: data.id }));
-    }
-    setSavingContact(false);
-    setContactErr(!!error);
-    setContactMsg(error ? error.message : 'Saved');
-    setTimeout(() => setContactMsg(''), error ? 4000 : 2500);
-    load();
-  }
-
-  // Promote a parent email into email_subscribers. Explicit action, deduped
-  // by email — mirrors ConsentSection's cadet-side "add to mailing list".
-  // `field` picks parent_email or parent_email2.
-  async function addParentToList(field = 'parent_email') {
-    const email = (cForm[field] || '').trim().toLowerCase();
-    if (!EMAIL_RE.test(email)) { setListErr(true); setListMsg('Enter a valid parent email first'); return; }
-    const { data: existing } = await SB.from('email_subscribers').select('id').eq('email', email).maybeSingle();
-    if (existing) { setListErr(true); setListMsg('Already on the mailing list'); return; }
-    const { error } = await SB.from('email_subscribers').insert({ email, source: 'manual', company: companyForSection(form.section) });
-    setListErr(!!error);
-    setListMsg(error ? (error.code === '23505' ? 'Already on the mailing list' : error.message) : 'Added to mailing list');
-    setTimeout(() => setListMsg(''), 3000);
   }
 
   // Text-input field helper (visibility toggle intentionally removed — every
@@ -244,12 +143,6 @@ export default function PeoplePanel({ adminId }) {
   const groups = groupBySection(filtered);
   const sectionsPresent = SECTION_ORDER.filter((s) => records.some((r) => (r.section || 'other') === s));
   const letLevels = [...new Set(records.map((r) => String(r.let_level)).filter((v) => v && v !== 'undefined'))].sort();
-
-  const selMeta = CONSENT_META[cForm.consent_status || 'none'] || CONSENT_META.none;
-  // SAI/AI/1SGT (section='leadership') don't need any of the cadet forms —
-  // hide every trace of consent/contact UI on their profiles so a stray edit
-  // can't re-seed a cadet_consent row and re-taint OverviewPanel's percentage.
-  const isLeadership = form.section === 'leadership';
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', height: '100%', gap: 12 }}>
@@ -350,48 +243,12 @@ export default function PeoplePanel({ adminId }) {
               </div>
             }/>
 
-            {/* admin-relevant summary: consent status + emails — hidden for
-                leadership (see isLeadership above), no forms tracked for them */}
-            {!isLeadership && (
-            <div style={{ background: P.deep, border: `1px solid ${P.hair}`, borderLeft: `3px solid ${selMeta.color}`, padding: '10px 12px', marginBottom: sp[3] }}>
-              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: sp[2], flexWrap: 'wrap' }}>
-                <div style={{ fontFamily: mono, fontSize: fs.tiny, color: selMeta.color, letterSpacing: '0.12em' }}>{selMeta.label}</div>
-                <StatusPills items={BANNER_STATUSES} value={cForm.consent_status} onChange={setConsentStatus} size="compact" />
-              </div>
-              <div style={{ fontFamily: mono, fontSize: fs.micro, color: P.mute, marginTop: sp[2], lineHeight: 1.8 }}>
-                {cForm.collected_at && <div>Signed {new Date(cForm.collected_at).toLocaleDateString()}</div>}
-                {cForm.school_email && <div>School: <span style={{ color: P.cream }}>{cForm.school_email}</span></div>}
-                {cForm.parent_email && <div>Parent: <span style={{ color: P.cream }}>{cForm.parent_email}</span></div>}
-                {cForm.parent_email2 && <div>Parent 2: <span style={{ color: P.cream }}>{cForm.parent_email2}</span></div>}
-                {!cForm.id && <div style={{ color: P.faint }}>No matching cadet_consent row yet. Marking a status here creates one.</div>}
-              </div>
-            </div>
-            )}
-
-            {!isLeadership && (
-            <div style={{ marginBottom: sp[4] }}>
-              <PanelHeader title="STAFF CONTACT" sub={`cadet_consent · company = ${companyForSection(form.section)}`} />
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0 16px', marginBottom: 8 }}>
-                <div>
-                  <Label>SCHOOL EMAIL</Label>
-                  <SuffixEmailInput value={cForm.school_email || ''} onChange={(v) => setCForm((f) => ({ ...f, school_email: v }))} />
-                </div>
-                <div>
-                  <Label>PARENT EMAIL</Label>
-                  <Input value={cForm.parent_email || ''} onChange={(e) => setCForm((f) => ({ ...f, parent_email: e.target.value }))} placeholder="feeds the mailing list" />
-                </div>
-                <div>
-                  <Label>PARENT EMAIL 2</Label>
-                  <Input value={cForm.parent_email2 || ''} onChange={(e) => setCForm((f) => ({ ...f, parent_email2: e.target.value }))} placeholder="second parent/guardian, optional" />
-                </div>
-              </div>
-              <div style={{ display: 'flex', gap: sp[2], alignItems: 'center', flexWrap: 'wrap' }}>
-                <Btn onClick={saveContact} variant="ghost" size="sm" disabled={savingContact}>{savingContact ? 'SAVING…' : 'SAVE CONTACT INFO'}</Btn>
-                <Btn onClick={() => addParentToList('parent_email')} variant="green" size="sm">+ ADD PARENT TO MAILING LIST</Btn>
-                <Btn onClick={() => addParentToList('parent_email2')} variant="green" size="sm">+ ADD PARENT 2 TO MAILING LIST</Btn>
-                {contactMsg && <Toast tone={contactErr ? 'error' : 'success'}>{contactMsg}</Toast>}
-                {listMsg && <Toast tone={listErr ? 'error' : 'success'}>{listMsg}</Toast>}
-              </div>
+            {/* form status + school/parent email are edited in Cadet Database
+                → STAFF tab now, same as any other cadet — this tab is bios only. */}
+            {form.section !== 'leadership' && (
+            <div style={{ background: P.deep, border: `1px solid ${P.hair}`, padding: '10px 12px', marginBottom: sp[3], display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: sp[2], flexWrap: 'wrap' }}>
+              <div style={{ fontFamily: mono, fontSize: fs.micro, color: P.mute, lineHeight: 1.6 }}>Consent status + school/parent email now live in Cadet Database → STAFF tab.</div>
+              <Btn onClick={() => setView('consent')} variant="ghost" size="sm">GO TO CADET DATABASE →</Btn>
             </div>
             )}
 
@@ -429,7 +286,7 @@ export default function PeoplePanel({ adminId }) {
           <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', height: '100%', gap: sp[3], color: P.faint }}>
             <div style={{ fontFamily: mono, fontSize: fs.xxl, color: P.hairStrong }}>☰</div>
             <div style={{ fontFamily: mono, fontSize: fs.xs, color: P.mute, letterSpacing: '0.14em' }}>SELECT A RECORD TO VIEW / EDIT</div>
-            <div style={{ fontFamily: inter, fontSize: fs.sm, color: P.faint }}>consent status, email & bio show here</div>
+            <div style={{ fontFamily: inter, fontSize: fs.sm, color: P.faint }}>bio & directory info show here</div>
           </div>
         )}
       </div>
