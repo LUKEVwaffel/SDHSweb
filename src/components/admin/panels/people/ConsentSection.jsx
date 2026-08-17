@@ -190,16 +190,27 @@ export default function ConsentSection({ adminId }) {
     await SB.from('email_subscribers').insert({ email: clean, source: 'manual', company: companyTag });
   }
 
-  // Promote a parent email into email_subscribers. Explicit action, deduped
-  // by email — no DB trigger. `field` picks parent_email or parent_email2.
+  // Promote a parent email into email_subscribers. `field` picks parent_email
+  // or parent_email2. Also persists the email onto the cadet's own row first —
+  // otherwise it only ever lived in local `form` state (the main SAVE button
+  // is a separate action), so the roster's "parent on file" indicator and
+  // the field itself would silently revert on reload even after this
+  // "succeeded". Deduped by email in email_subscribers — no DB trigger.
   async function addParentToList(field = 'parent_email') {
     const email = (form[field] || '').trim().toLowerCase();
     if (!EMAIL_RE.test(email)) { setListErr(true); setListMsg('Enter a valid parent email first'); return; }
+
+    const { error: saveErr } = await SB.from('cadet_consent')
+      .update({ [field]: email, updated_at: new Date().toISOString() })
+      .eq('id', selectedId);
+    if (saveErr) { setListErr(true); setListMsg(saveErr.message); return; }
+    load();
+
     const { data: existing } = await SB.from('email_subscribers').select('id').eq('email', email).maybeSingle();
-    if (existing) { setListErr(true); setListMsg('Already on the mailing list'); return; }
+    if (existing) { setListErr(true); setListMsg('Saved to cadet — already on the mailing list'); return; }
     const { error } = await SB.from('email_subscribers').insert({ email, source: 'manual', company });
     setListErr(!!error);
-    setListMsg(error ? (error.code === '23505' ? 'Already on the mailing list' : error.message) : 'Added to mailing list');
+    setListMsg(error ? (error.code === '23505' ? 'Saved to cadet — already on the mailing list' : error.message) : 'Saved + added to mailing list');
     setTimeout(() => setListMsg(''), 3000);
   }
 
