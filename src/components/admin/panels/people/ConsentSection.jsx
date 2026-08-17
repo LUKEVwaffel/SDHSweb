@@ -177,7 +177,13 @@ export default function ConsentSection({ adminId }) {
     }
     setRows((rs) => rs.map((r) => (r.id === row.id ? { ...r, ...data } : r)));
     setAllRows((rs) => rs.map((r) => (r.id === row.id ? { ...r, ...data } : r)));
-    if (selectedId === row.id) setForm((f) => ({ ...f, ...data }));
+    // Only merge the status fields this call actually wrote — NOT the full
+    // `data` row. `data` is a fresh read of the whole row from Postgres, and
+    // spreading all of it into `form` clobbered any grade/LET/birthdate/
+    // parent-email/etc. the admin had already typed into the open form but
+    // not hit SAVE on yet, wiping visible unsaved input the instant a status
+    // pill was clicked.
+    if (selectedId === row.id) setForm((f) => ({ ...f, ...patch }));
   }
 
   async function saveDetail() {
