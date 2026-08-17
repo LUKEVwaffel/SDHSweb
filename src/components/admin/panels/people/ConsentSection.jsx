@@ -169,11 +169,22 @@ export default function ConsentSection({ adminId }) {
       note: form.note || null,
       updated_at: new Date().toISOString(),
     };
-    const { error } = await SB.from('cadet_consent').update(patch).eq('id', selectedId);
+    // .select() round-trips the row postgrest actually wrote (post-RLS,
+    // post-trigger) instead of trusting the request succeeded — grade/
+    // let_level/birthdate have a history of silently not sticking (RLS
+    // filtering the row with no error, or a DB trigger reverting the value
+    // right after) and a bare "Saved" toast was hiding that completely.
+    const { data, error } = await SB.from('cadet_consent').update(patch).eq('id', selectedId).select().maybeSingle();
     setSaving(false);
-    setDetailErr(!!error);
-    setDetailMsg(error ? error.message : 'Saved');
-    setTimeout(() => setDetailMsg(''), 2500);
+    const reverted = data && (data.grade !== patch.grade || data.let_level !== patch.let_level || data.birthdate !== patch.birthdate);
+    setDetailErr(!!error || !data || reverted);
+    setDetailMsg(
+      error ? error.message
+      : !data ? 'Update blocked — 0 rows changed (permissions issue, check RLS/role)'
+      : reverted ? 'Saved, but grade/LET level/birthdate reverted right after (a trigger or constraint is overwriting it — not a client bug)'
+      : 'Saved'
+    );
+    setTimeout(() => setDetailMsg(''), 6000);
     if (!error && patch.school_email) enrollSchoolEmail(patch.school_email, company);
     load();
   }
