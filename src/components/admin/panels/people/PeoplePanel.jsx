@@ -21,11 +21,22 @@ const SECTION_LABEL = {
 };
 
 const CONSENT_META = {
-  collected: { label: 'CONSENT COLLECTED', color: P.green },
-  pending:   { label: 'CONSENT PENDING',   color: P.bright },
-  declined:  { label: 'CONSENT DECLINED',  color: P.red },
-  none:      { label: 'NO CONSENT RECORD', color: P.mute },
+  collected: { label: 'ALL FORMS COLLECTED', color: P.green },
+  pending:   { label: 'FORMS PENDING',       color: P.bright },
+  declined:  { label: 'CONSENT DECLINED',    color: P.red },
+  none:      { label: 'NO RECORD',           color: P.mute },
 };
+
+// Cadet-level "collected" requires all 3 tracked forms (parent consent,
+// DD 3203, datasheet) — see cadet_consent.dd3203_status / .datasheet_status.
+const FORM_STATUS_COLS = ['consent_status', 'dd3203_status', 'datasheet_status'];
+function overallStatus(c) {
+  if (!c) return 'none';
+  const statuses = FORM_STATUS_COLS.map((col) => c[col] || 'pending');
+  if (statuses.includes('declined')) return 'declined';
+  if (statuses.every((s) => s === 'collected')) return 'collected';
+  return 'pending';
+}
 
 // Normalize a name for cross-table matching (personnel ↔ cadet_consent).
 function normName(s) {
@@ -101,7 +112,7 @@ export default function PeoplePanel({ adminId }) {
   async function load() {
     const [{ data: people }, { data: consent }, { data: ach }] = await Promise.all([
       SB.from('personnel').select('*').order('sort_order'),
-      SB.from('cadet_consent').select('id, name, company, consent_status, collected_at, school_email, parent_email, parent_email2'),
+      SB.from('cadet_consent').select('id, name, company, consent_status, dd3203_status, datasheet_status, collected_at, school_email, parent_email, parent_email2'),
       SB.from('achievements').select('*').order('sort_order').order('name'),
     ]);
     setRecords(people || []);
@@ -153,7 +164,7 @@ export default function PeoplePanel({ adminId }) {
       if (fSection && (r.section || 'other') !== fSection) return false;
       if (fLet && String(r.let_level) !== fLet) return false;
       if (fConsent) {
-        const status = consentFor(r)?.consent_status || 'none';
+        const status = overallStatus(consentFor(r));
         if (status !== fConsent) return false;
       }
       if (q) {
@@ -229,7 +240,7 @@ export default function PeoplePanel({ adminId }) {
               <div style={{ display: 'flex', flexDirection: 'column', gap: sp[1] }}>
                 {items.map((r) => {
                   const c = consentFor(r);
-                  const cm = CONSENT_META[c?.consent_status || 'none'] || CONSENT_META.none;
+                  const cm = CONSENT_META[overallStatus(c)] || CONSENT_META.none;
                   return (
                   <div key={r.id} style={{
                     display: 'flex', alignItems: 'center', gap: sp[3],

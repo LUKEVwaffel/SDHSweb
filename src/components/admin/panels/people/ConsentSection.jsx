@@ -215,6 +215,23 @@ export default function ConsentSection({ adminId }) {
     if (!name) { setAddNameErr(true); return; }
     setAddNameErr(false);
     setAdding(true);
+
+    // Pre-check for an existing cadet with this exact name in this company —
+    // catches accidental double-entry during bulk roster typing with a clear
+    // message, instead of letting it hit the DB unique constraint (name,
+    // company) and surface a raw Postgres error.
+    const { data: existing } = await SB.from('cadet_consent')
+      .select('id')
+      .eq('company', addCompany)
+      .ilike('name', name)
+      .maybeSingle();
+    if (existing) {
+      setAdding(false);
+      setAddErr(true);
+      setAddMsg(`${name} is already in ${addCompany.toUpperCase()} — search instead of re-adding.`);
+      return;
+    }
+
     const maxOrder = Math.max(0, ...rows.map((r) => r.sort_order || 0));
     const payload = {
       name,
@@ -229,7 +246,12 @@ export default function ConsentSection({ adminId }) {
     const { error } = await SB.from('cadet_consent').insert(payload);
     setAdding(false);
     setAddErr(!!error);
-    setAddMsg(error ? error.message : `Added ${name} to ${addCompany.toUpperCase()}`);
+    // 23505 = unique_violation — the pre-check above should already catch this,
+    // but a race (two admins adding the same cadet at once) can still hit the
+    // DB constraint directly, so give it the same friendly message as a backstop.
+    setAddMsg(error
+      ? (error.code === '23505' ? `${name} is already in ${addCompany.toUpperCase()}.` : error.message)
+      : `Added ${name} to ${addCompany.toUpperCase()}`);
     if (error) return; // leave the popup open + message visible so they can fix and retry
     if (payload.school_email) enrollSchoolEmail(payload.school_email, addCompany);
     setAddOpen(false);
