@@ -4,6 +4,7 @@ import { P, mono, oswald, inter, fs, sp, radius, shadow, ease } from '../../them
 import { Btn, Card, Label, Input, Select, SuffixEmailInput, EmailAutocompleteInput, StatusPills, Toast, Modal, PanelHeader, EmptyState } from '../../shared/ui';
 import { TEAMS } from '../../../../lib/teams';
 import { openConsentStatusPdf } from '../../../../lib/consentPdfPrint';
+import { byLastName } from '../../../../lib/nameSort';
 
 const COMPANIES = [
   { id: 'alpha',   label: 'ALPHA' },
@@ -101,14 +102,16 @@ export default function ConsentSection({ adminId }) {
     const { data, error } = await SB.from('cadet_consent').select('*').eq('company', company).order('sort_order').order('name');
     if (error) { setMissing(true); setRows([]); return; }
     setMissing(false);
-    setRows(data || []);
+    // Last-name-first display order — `name` is a single "First Last" field
+    // (no separate surname column), so re-sort client-side after the fetch.
+    setRows((data || []).slice().sort((a, b) => byLastName(a.name, b.name)));
   }, [company]);
 
   // Per-company counts for the tab row — independent of the active filter so
   // every tab shows a real number, not just the one you're currently on.
   const loadCounts = useCallback(async () => {
     const { data } = await SB.from('cadet_consent').select('*').order('name');
-    setAllRows(data || []);
+    setAllRows((data || []).slice().sort((a, b) => byLastName(a.name, b.name)));
     const c = {};
     for (const r of data || []) c[r.company] = (c[r.company] || 0) + 1;
     setCounts(c);

@@ -4,6 +4,7 @@ import { P, mono, inter, fs, sp, radius, shadow, ease } from '../../theme';
 import { Btn, Card, Label, Input, Select, PanelHeader } from '../../shared/ui';
 import ConsentSection from './ConsentSection';
 import PersonAchievements from './PersonAchievements';
+import { byLastName } from '../../../../lib/nameSort';
 
 // Section display order + friendly names. Personnel `section` values seen in the
 // app: staff / command / s-1..s-6 / company-alpha..delta. Unknown sections fall
@@ -115,7 +116,10 @@ export default function PeoplePanel({ adminId }) {
       SB.from('cadet_consent').select('id, name, company, consent_status, dd3203_status, datasheet_status, collected_at, school_email, parent_email, parent_email2'),
       SB.from('achievements').select('*').order('sort_order').order('name'),
     ]);
-    setRecords(people || []);
+    // Last-name-first order within each section — `name` is a single
+    // "First Last" field, sorted client-side (groupBySection preserves this
+    // relative order within each section bucket).
+    setRecords((people || []).slice().sort((a, b) => byLastName(a.name, b.name)));
     const map = {};
     for (const c of consent || []) map[normName(c.name)] = c;
     setConsentByName(map);
