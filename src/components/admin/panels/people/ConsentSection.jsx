@@ -225,7 +225,17 @@ export default function ConsentSection({ adminId }) {
     // reflect what postgrest actually has, not what was optimistically typed —
     // if a field reverted, the field itself now visibly shows the real value
     // instead of only a toast the admin might miss.
-    if (data) setForm((f) => ({ ...f, ...data }));
+    if (data) {
+      setForm((f) => ({ ...f, ...data }));
+      // Same race setStatus() had: this only relied on the trailing load()
+      // below (fire-and-forget) to refresh `rows`/`allRows`. Closing the
+      // cadet and reopening it before that fetch resolved re-seeded `form`
+      // from the still-stale roster array — looked exactly like the save
+      // "didn't take" even though the toast said Saved and the DB had it.
+      // Patch both arrays immediately with what postgrest actually wrote.
+      setRows((rs) => rs.map((r) => (r.id === selectedId ? { ...r, ...data } : r)));
+      setAllRows((rs) => rs.map((r) => (r.id === selectedId ? { ...r, ...data } : r)));
+    }
     if (!error && patch.school_email) enrollSchoolEmail(patch.school_email, company);
     load();
   }
