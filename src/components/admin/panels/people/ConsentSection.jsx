@@ -170,21 +170,30 @@ export default function ConsentSection({ adminId }) {
       updated_at: new Date().toISOString(),
     };
     // .select() round-trips the row postgrest actually wrote (post-RLS,
-    // post-trigger) instead of trusting the request succeeded — grade/
-    // let_level/birthdate have a history of silently not sticking (RLS
-    // filtering the row with no error, or a DB trigger reverting the value
-    // right after) and a bare "Saved" toast was hiding that completely.
+    // post-trigger) instead of trusting the request succeeded — several
+    // fields have a history of silently not sticking (RLS filtering the
+    // row with no error, or a DB trigger reverting a value right after)
+    // and a bare "Saved" toast was hiding that completely. Diff EVERY
+    // field in the patch (previously only grade/let_level/birthdate were
+    // checked, so a revert on parent_email/parent_email2/school_email/
+    // role/note silently reported "Saved").
     const { data, error } = await SB.from('cadet_consent').update(patch).eq('id', selectedId).select().maybeSingle();
     setSaving(false);
-    const reverted = data && (data.grade !== patch.grade || data.let_level !== patch.let_level || data.birthdate !== patch.birthdate);
-    setDetailErr(!!error || !data || reverted);
+    const revertedFields = data
+      ? Object.keys(patch).filter((k) => k !== 'updated_at' && data[k] !== patch[k])
+      : [];
+    setDetailErr(!!error || !data || revertedFields.length > 0);
     setDetailMsg(
       error ? error.message
       : !data ? 'Update blocked — 0 rows changed (permissions issue, check RLS/role)'
-      : reverted ? 'Saved, but grade/LET level/birthdate reverted right after (a trigger or constraint is overwriting it — not a client bug)'
+      : revertedFields.length ? `Saved, but ${revertedFields.join(', ')} reverted right after (a trigger or constraint is overwriting it — not a client bug)`
       : 'Saved'
     );
-    setTimeout(() => setDetailMsg(''), 6000);
+    setTimeout(() => setDetailMsg(''), 8000);
+    // reflect what postgrest actually has, not what was optimistically typed —
+    // if a field reverted, the field itself now visibly shows the real value
+    // instead of only a toast the admin might miss.
+    if (data) setForm((f) => ({ ...f, ...data }));
     if (!error && patch.school_email) enrollSchoolEmail(patch.school_email, company);
     load();
   }
