@@ -49,7 +49,7 @@ const LET_OPTIONS = [
   { value: '4', label: 'LET 4' },
 ];
 
-const BLANK_ADD_FORM = { name: '', grade: '', let_level: '', school_email: '', parent_email: '', parent_email2: '' };
+const BLANK_ADD_FORM = { name: '', let_level: '' };
 
 // Cadet database, organized by company. Each row is both a photo-consent record
 // AND the cadet's contact record — same `cadet_consent` table (run
@@ -236,11 +236,7 @@ export default function ConsentSection({ adminId }) {
     const payload = {
       name,
       company: addCompany,
-      grade: addForm.grade || null,
       let_level: addForm.let_level || null,
-      school_email: addForm.school_email.trim() || null,
-      parent_email: addForm.parent_email.trim() || null,
-      parent_email2: addForm.parent_email2.trim() || null,
       sort_order: maxOrder + 1,
     };
     const { error } = await SB.from('cadet_consent').insert(payload);
@@ -253,7 +249,6 @@ export default function ConsentSection({ adminId }) {
       ? (error.code === '23505' ? `${name} is already in ${addCompany.toUpperCase()}.` : error.message)
       : `Added ${name} to ${addCompany.toUpperCase()}`);
     if (error) return; // leave the popup open + message visible so they can fix and retry
-    if (payload.school_email) enrollSchoolEmail(payload.school_email, addCompany);
     setAddOpen(false);
     setTimeout(() => setAddMsg(''), 3000);
     loadCounts();
@@ -378,31 +373,14 @@ export default function ConsentSection({ adminId }) {
             options={COMPANIES.map((c) => ({ value: c.id, label: c.label }))} />
         </div>
 
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: `0 ${sp[3]}px`, marginBottom: sp[3] }}>
-          <div>
-            <Label>GRADE</Label>
-            <Select value={addForm.grade} onChange={(e) => setAddForm((f) => ({ ...f, grade: e.target.value }))} options={GRADE_OPTIONS} />
-          </div>
-          <div>
-            <Label>LET LEVEL</Label>
-            <Select value={addForm.let_level} onChange={(e) => setAddForm((f) => ({ ...f, let_level: e.target.value }))} options={LET_OPTIONS} />
-          </div>
-        </div>
-
-        <div style={{ marginBottom: sp[3] }}>
-          <Label>SCHOOL EMAIL</Label>
-          <SuffixEmailInput value={addForm.school_email} onChange={(v) => setAddForm((f) => ({ ...f, school_email: v }))} />
-        </div>
-
-        <div style={{ marginBottom: sp[3] }}>
-          <Label>PARENT EMAIL</Label>
-          <EmailAutocompleteInput value={addForm.parent_email} onChange={(v) => setAddForm((f) => ({ ...f, parent_email: v }))} placeholder="feeds the mailing list" />
-        </div>
-
         <div style={{ marginBottom: sp[1] }}>
-          <Label>PARENT EMAIL 2</Label>
-          <EmailAutocompleteInput value={addForm.parent_email2} onChange={(v) => setAddForm((f) => ({ ...f, parent_email2: v }))} placeholder="second parent/guardian, optional" />
+          <Label>LET LEVEL</Label>
+          <Select value={addForm.let_level} onChange={(e) => setAddForm((f) => ({ ...f, let_level: e.target.value }))} options={LET_OPTIONS} />
         </div>
+
+        {/* Everything else (grade, emails, birthdate, teams, note) is filled in
+            from the cadet detail view after adding — keeping this modal to the
+            3 fields needed to get a row on the roster fast during bulk entry. */}
 
         {/* lives inside the modal (not just the page-level toast below) so an
             insert error is actually visible — the modal overlay would hide the
