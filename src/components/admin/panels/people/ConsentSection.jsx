@@ -163,9 +163,21 @@ export default function ConsentSection({ adminId }) {
       [f.byCol]: status === 'collected' ? adminId : null,
       updated_at: new Date().toISOString(),
     };
-    await SB.from('cadet_consent').update(patch).eq('id', row.id);
-    if (selectedId === row.id) setForm((f) => ({ ...f, ...patch }));
-    load();
+    // Patch `rows`/`allRows` directly instead of only firing a background
+    // load() — the roster chips and progress bars (both derived from `rows`)
+    // used to only catch up once that refetch resolved, so closing and
+    // reopening the cadet before it landed showed the pre-click status back
+    // (looked like the click "didn't save" until a manual page reload).
+    const { data, error } = await SB.from('cadet_consent').update(patch).eq('id', row.id).select().maybeSingle();
+    if (error || !data) {
+      setDetailErr(true);
+      setDetailMsg(error ? error.message : 'Status update blocked — 0 rows changed (permissions issue, check RLS/role)');
+      setTimeout(() => setDetailMsg(''), 8000);
+      return;
+    }
+    setRows((rs) => rs.map((r) => (r.id === row.id ? { ...r, ...data } : r)));
+    setAllRows((rs) => rs.map((r) => (r.id === row.id ? { ...r, ...data } : r)));
+    if (selectedId === row.id) setForm((f) => ({ ...f, ...data }));
   }
 
   async function saveDetail() {
