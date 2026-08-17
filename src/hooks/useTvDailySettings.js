@@ -4,6 +4,10 @@ import { getDeviceId } from '../lib/fingerprint';
 
 const DEFAULT_SCREEN = 'default';
 
+// Counter that makes each channel topic unique per subscription. The channel
+// setup below explains why a fixed topic is unsafe.
+let channelSeq = 0;
+
 /**
  * Live-synced control-center row, scoped by screen slug (tv_screens.slug —
  * 'default' is the original Outside kiosk, 'range' is Range, etc). Each
@@ -30,7 +34,14 @@ export function useTvDailySettings(screenSlug = DEFAULT_SCREEN) {
       setLoading(false);
     });
 
-    const channel = SB.channel(`tv-daily-settings-live:${screenSlug}`)
+    // Use a unique topic for each subscription. supabase-js returns the
+    // existing channel when a live one already holds the same topic, and it
+    // throws when you add a `postgres_changes` callback to a channel that is
+    // already subscribed. removeChannel() in the cleanup below runs
+    // asynchronously. So on a fast remount, the old channel can still be joined
+    // when the next effect runs. A per-instance topic gives each effect a fresh
+    // channel and prevents the collision.
+    const channel = SB.channel(`tv-daily-settings-live:${screenSlug}:${++channelSeq}`)
       .on(
         'postgres_changes',
         { event: 'UPDATE', schema: 'public', table: 'tv_daily_settings', filter: `id=eq.${screenSlug}` },
