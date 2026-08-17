@@ -90,6 +90,13 @@ export default function ConsentSection({ adminId }) {
   // supabase/opticsend.sql SECTION 3.
   const [cadetTeams, setCadetTeams] = useState([]);
 
+  // whether the open cadet is linked to a Staff/Command personnel row
+  // (personnel.cadet_consent_id → this row, see personnel_cadet_consent_sync.sql).
+  // Only linked cadets actually have a rank (pushed one-way from personnel.rank
+  // into cadet_consent.role by that sync trigger) — everyone else's `role`
+  // column is meaningless, so RANK shouldn't render for them.
+  const [isStaffLinked, setIsStaffLinked] = useState(false);
+
   const load = useCallback(async () => {
     const { data, error } = await SB.from('cadet_consent').select('*').eq('company', company).order('sort_order').order('name');
     if (error) { setMissing(true); setRows([]); return; }
@@ -120,11 +127,18 @@ export default function ConsentSection({ adminId }) {
     setDetailMsg('');
     setListMsg('');
     loadCadetTeams(row.id);
+    loadStaffLink(row.id);
   }
 
   function closeCadet() {
     setSelectedId(null);
     setForm({});
+    setIsStaffLinked(false);
+  }
+
+  async function loadStaffLink(cadetConsentId) {
+    const { data } = await SB.from('personnel').select('id').eq('cadet_consent_id', cadetConsentId).maybeSingle();
+    setIsStaffLinked(!!data);
   }
 
   async function loadCadetTeams(cadetConsentId) {
@@ -505,10 +519,15 @@ export default function ConsentSection({ adminId }) {
           <Label>NAME</Label>
           <Input value={form.name || ''} onChange={(e) => setForm((f) => ({ ...f, name: e.target.value }))} />
         </div>
-        <div style={{ marginBottom: sp[3] }}>
-          <Label>ROLE / RANK</Label>
-          <Input value={form.role || ''} onChange={(e) => setForm((f) => ({ ...f, role: e.target.value }))} placeholder="cadet, staff, rank…" />
-        </div>
+        {/* RANK only applies to Staff/Command — it's pushed one-way from
+            personnel.rank by the sync trigger, so a plain cadet with no
+            linked personnel row has nothing real to show here. */}
+        {isStaffLinked && (
+          <div style={{ marginBottom: sp[3] }}>
+            <Label>RANK</Label>
+            <Input value={form.role || ''} onChange={(e) => setForm((f) => ({ ...f, role: e.target.value }))} placeholder="rank…" />
+          </div>
+        )}
         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: `0 ${sp[3]}px`, marginBottom: sp[3] }}>
           <div>
             <Label>GRADE</Label>
