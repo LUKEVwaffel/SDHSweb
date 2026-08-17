@@ -7,7 +7,7 @@ import StepWidgetMode from '../../../tv/control-center/StepWidgetMode.jsx';
 import StepShoutout from '../../../tv/control-center/StepShoutout.jsx';
 import StepRangeSchedule from '../../../tv/control-center/StepRangeSchedule.jsx';
 import StepRangeNotices from '../../../tv/control-center/StepRangeNotices.jsx';
-import StepRangeLayout from '../../../tv/control-center/StepRangeLayout.jsx';
+import StepRotationScreen from '../../../tv/control-center/StepRotationScreen.jsx';
 import EmergencyPushPanel from '../tvphotos/EmergencyPushPanel.jsx';
 import { DEFAULT_ROTATION_GRID } from '../../../tv/range/rangeGrid/gridDefaults.js';
 import { P, mono, oswald, inter, fs, sp, radius, ease } from '../../theme.js';
@@ -30,7 +30,7 @@ const BASE_TABS = [
   { id: 'shoutout', label: 'Shoutout' },
 ];
 const RANGE_TAB = { id: 'rangeSchedule', label: 'Schedule Editor' };
-const RANGE_LAYOUT_TAB = { id: 'rangeLayout', label: 'Grid Layout' };
+const RANGE_LAYOUT_TAB = { id: 'rangeLayout', label: 'Rotation Screen' };
 const RANGE_NOTICE_TABS = [
   { id: 'announcements', label: 'Announcements' },
   { id: 'staffNotes', label: 'Staff Notes' },
@@ -52,6 +52,8 @@ const DEFAULT_RANGE_CONFIG = {
   showRaiderPractice: false,
   groupmeUrl: '',
   rotationGrid: DEFAULT_ROTATION_GRID,
+  rotationMode: 'grid',
+  slideshowSlides: [],
 };
 
 function rangeConfigFromRow(raw) {
@@ -68,6 +70,8 @@ function rangeConfigFromRow(raw) {
     showRaiderPractice: raw?.show_raider_practice ?? DEFAULT_RANGE_CONFIG.showRaiderPractice,
     groupmeUrl: raw?.groupme_url ?? DEFAULT_RANGE_CONFIG.groupmeUrl,
     rotationGrid: raw?.rotation_grid?.length ? raw.rotation_grid : DEFAULT_RANGE_CONFIG.rotationGrid,
+    rotationMode: raw?.rotation_mode ?? DEFAULT_RANGE_CONFIG.rotationMode,
+    slideshowSlides: raw?.slideshow_slides ?? DEFAULT_RANGE_CONFIG.slideshowSlides,
   };
 }
 
@@ -211,6 +215,8 @@ export default function TvRemotePanel() {
         show_raider_practice: draft.rangeConfig.showRaiderPractice,
         groupme_url: draft.rangeConfig.groupmeUrl || null,
         rotation_grid: draft.rangeConfig.rotationGrid,
+        rotation_mode: draft.rangeConfig.rotationMode,
+        slideshow_slides: draft.rangeConfig.slideshowSlides,
       },
     } : {};
 
@@ -411,7 +417,7 @@ export default function TvRemotePanel() {
           )}
 
           {activeTab === 'rangeLayout' && selectedScreen === 'range' && (
-            <StepRangeLayout
+            <StepRotationScreen
               config={draft.rangeConfig}
               settings={settings}
               onChange={patchRange}

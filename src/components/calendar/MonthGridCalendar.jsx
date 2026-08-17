@@ -176,11 +176,13 @@ export default function MonthGridCalendar({ events, selectedEventId, onSelectEve
         </button>
       )}
       <style>{`
+        .mgc-cell { transition: background 0.12s, border-color 0.12s; }
+        .mgc-cell:not(:disabled):hover { background: rgba(201,169,97,0.16) !important; border-color: ${P.gold} !important; }
         @media (max-width: 767px) {
-          .mgc-header-label { font-size: 19px !important; }
-          .mgc-weekday { font-size: 7.5px !important; padding: 2px 0 !important; }
-          .mgc-cell { min-height: 40px !important; padding: 2px !important; }
-          .mgc-daynum { font-size: 10px !important; }
+          .mgc-header-label { font-size: 20px !important; }
+          .mgc-weekday { font-size: 8.5px !important; padding: 2px 0 !important; }
+          .mgc-cell { min-height: 44px !important; padding: 2px !important; }
+          .mgc-daynum { font-size: 11px !important; }
         }
       `}</style>
     </div>

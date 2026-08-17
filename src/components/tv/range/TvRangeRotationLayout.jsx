@@ -3,12 +3,22 @@ import { useTvNotices } from '../../../hooks/useTvNotices.js';
 import { useTvUpcomingEvents } from '../../../hooks/useTvUpcomingEvents.js';
 import RangeGridBoard from './rangeGrid/RangeGridBoard.jsx';
 import { resolveRotationGrid } from './rangeGrid/gridDefaults.js';
+import TvRangeSlideshowScreen from './TvRangeSlideshowScreen.jsx';
 
-// Range's rotation phase (the TBD photo/widget content) is a freeform,
-// staff-arranged widget board — position/size/visibility of every tile lives
-// in settings.range_schedule_config.rotation_grid, edited from the "Grid
-// Layout" tab in TV Remote (StepRangeLayout.jsx) via RangeGridBoard, the same
-// component that renders it here read-only. Outside-only content
+// Range's rotation phase (the TBD photo/widget content) has two modes,
+// chosen per-screen from the "Rotation Screen" tab in TV Remote
+// (StepRotationScreen.jsx) and stored as `rotation_mode`:
+//   - 'grid' (default, backward-compatible with every screen predating this
+//     toggle): the freeform, staff-arranged widget board below — position/
+//     size/visibility of every tile lives in
+//     settings.range_schedule_config.rotation_grid, edited via
+//     RangeGridBoard, the same component that renders it here read-only.
+//   - 'slideshow': cycles full-screen single-purpose slides
+//     (`slideshow_slides`, edited in StepRangeSlideshow.jsx) one at a time —
+//     for when the grid's "everything at once" density is more than cadets
+//     can read from across the room during a period.
+// Falls back to the grid whenever slideshow mode has zero slides, so a
+// half-configured screen never just goes blank. Outside-only content
 // (TvStandardLayout, still used by TvKiosk.jsx) is untouched — that includes
 // TvCountdownBand, which used to be force-mounted here too; Range's "until
 // next event" content is now the addable/movable `countdown` grid widget
@@ -16,6 +26,9 @@ import { resolveRotationGrid } from './rangeGrid/gridDefaults.js';
 export default function TvRangeRotationLayout({ settings, now, config }) {
   const { notices } = useTvNotices('range');
   const events = useTvUpcomingEvents(6);
+
+  const slides = config?.slideshow_slides ?? [];
+  const useSlideshow = config?.rotation_mode === 'slideshow' && slides.length > 0;
 
   const grid = resolveRotationGrid(config?.rotation_grid, !!config?.show_raider_practice);
 
@@ -25,6 +38,10 @@ export default function TvRangeRotationLayout({ settings, now, config }) {
     staffNotes: notices.filter((n) => n.category === 'staff_note'),
     events,
   };
+
+  if (useSlideshow) {
+    return <TvRangeSlideshowScreen slides={slides} announcements={contentProps.announcements} />;
+  }
 
   return (
     <div style={{

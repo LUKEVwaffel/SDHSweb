@@ -174,7 +174,7 @@ function NavItem({ item, active, setActive }) {
       onMouseLeave={handleMouseLeave}
     >
       <button
-        onClick={() => { if (!item.dropdown) setActive(item.id); else setOpen(o => !o); }}
+        onClick={() => { if (!item.dropdown) setActive(item.id); else setOpen(true); }}
         style={{
           background: isActive ? 'rgba(201,169,97,0.1)' : 'transparent',
           border: 'none', cursor: 'pointer',

@@ -4,6 +4,7 @@ import { supabase as SB } from '../lib/supabaseClient';
 import { usePaginatedPhotos, useInfiniteScrollSentinel } from '../hooks/usePaginatedPhotos';
 import { EVENT_CATEGORIES, DEFAULT_POC, categoryColor, teamLabel, formatEventTimeRange } from '../lib/calendar';
 import { getTeam } from '../lib/teams';
+import useIsMobile from '../hooks/useIsMobile';
 import MonthGridCalendar from './calendar/MonthGridCalendar';
 import PhotoLightbox from './PhotoLightbox';
 
@@ -47,33 +48,50 @@ export default function EventsPage() {
         .events-layout { display: grid; grid-template-columns: 380px 1fr; gap: 40px; align-items: start; }
         .events-photo-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 8px; }
         .events-photo-grid.all-photos { grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); }
+        .events-mode-tabs { position: sticky; top: 0; z-index: 5; background: ${P.ink}; padding: 12px 0; margin: -12px 0 24px; }
+        .mode-tab, .ghost-btn { transition: background 0.15s, border-color 0.15s, color 0.15s; }
+        .mode-tab:hover, .ghost-btn:hover {
+          border-color: ${P.gold} !important; color: ${P.bright} !important; background: rgba(201,169,97,0.08) !important;
+        }
+        .mode-tab:disabled:hover, .ghost-btn:disabled:hover {
+          border-color: ${P.hairStrong} !important; color: ${P.gold} !important; background: transparent !important;
+        }
         @media (max-width: 900px) { .events-layout { grid-template-columns: 1fr; } }
         @media (max-width: 767px) {
-          .events-header { padding: 24px 20px 28px !important; }
-          .events-title { font-size: 42px !important; }
-          .events-body { padding: 24px 20px 60px !important; }
+          .events-header { padding: 20px 16px 22px !important; }
+          .events-back-btn { font-size: 9px !important; margin-bottom: 14px !important; min-height: 32px; }
+          .events-eyebrow { font-size: 9px !important; letter-spacing: 0.2em !important; }
+          .events-title { font-size: 30px !important; }
+          .events-subtitle { font-size: 13px !important; line-height: 1.55 !important; margin-top: 12px !important; }
+          .events-body { padding: 16px 16px 60px !important; }
+          .mode-tab { font-size: 11px !important; padding: 12px 16px !important; min-height: 44px; }
+          .ghost-btn { font-size: 11px !important; padding: 12px 16px !important; min-height: 44px; }
+          .detail-label, .guard-label, .legend-label { font-size: 10px !important; }
+          .detail-value, .guard-name { font-size: 14px !important; }
+          .photo-uploader { font-size: 11px !important; }
+          .photo-badge { font-size: 9px !important; }
         }
         @media (max-width: 480px) { .events-photo-grid { grid-template-columns: repeat(2, 1fr); gap: 6px; } }
       `}</style>
 
       {/* Header */}
       <div className="events-header" style={{ borderBottom: `1px solid ${P.hair}`, padding: '60px 40px 40px', maxWidth: 1400, margin: '0 auto' }}>
-        <button onClick={() => navigate('/')} style={backBtn}>← BACK</button>
-        <div style={{ fontFamily: mono, fontSize: 10, color: P.gold, letterSpacing: '0.32em', marginBottom: 12 }}>
+        <button onClick={() => navigate('/')} className="events-back-btn" style={backBtn}>← BACK</button>
+        <div className="events-eyebrow" style={{ fontFamily: mono, fontSize: 10, color: P.gold, letterSpacing: '0.32em', marginBottom: 12 }}>
           // BATTALION CALENDAR &amp; OPTIC PHOTOS
         </div>
         <h1 className="events-title" style={{ fontFamily: oswald, fontWeight: 700, fontSize: 72, color: P.cream, letterSpacing: '0.02em', margin: 0, lineHeight: 0.9 }}>
           EVENTS
         </h1>
-        <p style={{ color: P.mute, fontSize: 15, lineHeight: 1.7, marginTop: 20, maxWidth: 620, margin: '20px 0 0' }}>
+        <p className="events-subtitle" style={{ color: P.mute, fontSize: 15, lineHeight: 1.7, marginTop: 20, maxWidth: 620, margin: '20px 0 0' }}>
           Full battalion schedule and recent photos from every team. Pick a day to see photos from that event, or browse everything below.
         </p>
       </div>
 
       <div className="events-body" style={{ maxWidth: 1400, margin: '0 auto', padding: '36px 40px 90px' }}>
-        <div style={{ display: 'flex', gap: 8, marginBottom: 28 }}>
-          <button onClick={() => setMode('calendar')} style={mode === 'calendar' ? modeTabActive : modeTab}>CALENDAR</button>
-          <button onClick={() => setMode('all')} style={mode === 'all' ? modeTabActive : modeTab}>ALL PHOTOS</button>
+        <div className="events-mode-tabs" style={{ display: 'flex', gap: 8 }}>
+          <button onClick={() => setMode('calendar')} className="mode-tab" style={mode === 'calendar' ? modeTabActive : modeTab}>CALENDAR</button>
+          <button onClick={() => setMode('all')} className="mode-tab" style={mode === 'all' ? modeTabActive : modeTab}>ALL PHOTOS</button>
         </div>
 
         {mode === 'calendar' ? (
@@ -89,7 +107,7 @@ export default function EventsPage() {
                     {EVENT_CATEGORIES.filter((c) => c.id !== 'EVENT').map((c) => (
                       <div key={c.id} style={{ display: 'flex', alignItems: 'center', gap: 5 }}>
                         <span style={{ width: 7, height: 7, background: c.color }} />
-                        <span style={{ fontFamily: mono, fontSize: 8, letterSpacing: '0.12em', color: P.mute }}>{c.id.replace('_', ' ')}</span>
+                        <span className="legend-label" style={{ fontFamily: mono, fontSize: 8, letterSpacing: '0.12em', color: P.mute }}>{c.id.replace('_', ' ')}</span>
                       </div>
                     ))}
                   </div>
@@ -105,7 +123,7 @@ export default function EventsPage() {
                 <div style={{ fontFamily: mono, fontSize: 9, color: P.mute, letterSpacing: '0.2em' }}>
                   {selectedEvent ? `PHOTOS · ${selectedEvent.title.toUpperCase()}` : 'OPTIC · RECENT PHOTOS · ALL TEAMS'}
                 </div>
-                <button onClick={() => navigate('/submit')} style={ghostBtn}>+ SUBMIT A PHOTO</button>
+                <button onClick={() => navigate('/submit')} className="ghost-btn" style={ghostBtn}>+ SUBMIT A PHOTO</button>
               </div>
 
               <PhotoGrid
@@ -164,7 +182,7 @@ function PhotoGrid({ photos, loading, loadingMore, hasMore, loadMore, sentinelRe
                 onMouseLeave={(e) => (e.currentTarget.style.transform = 'scale(1)')}
               />
               {showTeamBadge && (
-                <span style={{
+                <span className="photo-badge" style={{
                   position: 'absolute', top: 6, left: 6, background: 'rgba(6,16,31,0.82)',
                   border: `1px solid ${P.hairStrong}`, padding: '3px 7px',
                   fontFamily: mono, fontSize: 8, letterSpacing: '0.1em', color: team?.accent || P.gold,
@@ -178,7 +196,7 @@ function PhotoGrid({ photos, loading, loadingMore, hasMore, loadMore, sentinelRe
                   background: 'linear-gradient(to top, rgba(6,16,31,0.92) 0%, transparent 100%)',
                   padding: '20px 10px 8px',
                 }}>
-                  <span style={{ fontFamily: mono, fontSize: 9, color: P.gold }}>📷 {photo.uploader_name}</span>
+                  <span className="photo-uploader" style={{ fontFamily: mono, fontSize: 9, color: P.gold }}>📷 {photo.uploader_name}</span>
                 </div>
               )}
             </div>
@@ -189,7 +207,7 @@ function PhotoGrid({ photos, loading, loadingMore, hasMore, loadMore, sentinelRe
         <>
           <div ref={sentinelRef} style={{ height: 1 }} />
           <div style={{ textAlign: 'center', marginTop: 24 }}>
-            <button onClick={loadMore} disabled={loadingMore} style={ghostBtn}>
+            <button onClick={loadMore} disabled={loadingMore} className="ghost-btn" style={ghostBtn}>
               {loadingMore ? 'LOADING…' : 'LOAD MORE'}
             </button>
           </div>
@@ -212,6 +230,7 @@ function formatDateRange(date, end_date) {
 // downloadable/printable permission slip PDF. Rendered on the public /events
 // page when a calendar day/event is selected.
 function EventDetailCard({ event }) {
+  const isMobile = useIsMobile();
   const time = formatEventTimeRange(event.event_time, event.end_time);
   const [colorGuard, setColorGuard] = useState([]);
   const [honorGuard, setHonorGuard] = useState([]);
@@ -228,6 +247,9 @@ function EventDetailCard({ event }) {
       .then(({ data }) => setHonorGuard(data || []));
   }, [event.id, event.honor_guard_required]);
 
+  const hasLogistics = event.uniform_required || event.transportation_required || event.permission_slip_required;
+  const hasMoreDetails = hasLogistics || colorGuard.length > 0 || honorGuard.length > 0 || event.description;
+
   return (
     <div style={{ border: `1px solid ${P.hairStrong}`, background: P.navy, padding: 22, marginBottom: 20 }}>
       <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 10 }}>
@@ -236,7 +258,7 @@ function EventDetailCard({ event }) {
       </div>
       <div style={{ fontFamily: oswald, fontWeight: 700, fontSize: 24, color: P.cream, marginBottom: 12 }}>{event.title}</div>
 
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))', gap: 14, marginBottom: event.uniform_required || event.transportation_required || event.permission_slip_required ? 16 : 0 }}>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))', gap: 14 }}>
         <DetailField label="Date">{formatDateRange(event.date, event.end_date)}</DetailField>
         {time && <DetailField label="Time">{time}</DetailField>}
         <DetailField label="Calendar">{teamLabel(event.team)}</DetailField>
@@ -248,51 +270,66 @@ function EventDetailCard({ event }) {
         </DetailField>
       </div>
 
-      {(event.uniform_required || event.transportation_required || event.permission_slip_required) && (
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))', gap: 14, paddingTop: 16, borderTop: `1px solid ${P.hair}` }}>
-          {event.uniform_required && <DetailField label="Uniform">{event.uniform}</DetailField>}
-          {event.transportation_required && <DetailField label="Transportation">{event.transportation}</DetailField>}
-          {event.permission_slip_required && event.permission_slip_url && (
-            <div>
-              <div style={{ fontFamily: mono, fontSize: 8, letterSpacing: '0.14em', color: P.mute, marginBottom: 6 }}>PERMISSION SLIP</div>
-              <a href={event.permission_slip_url} target="_blank" rel="noopener noreferrer" download style={{ ...ghostBtn, textDecoration: 'none', display: 'inline-block' }}>
-                ↓ DOWNLOAD PDF
-              </a>
+      {hasMoreDetails && (
+        // Native <details> — no JS state needed. Collapsed by default on
+        // mobile so the dense logistics/guard/description block doesn't
+        // force a long scroll before the photo grid; open by default on
+        // desktop where the extra height already fits.
+        <details open={!isMobile} style={{ marginTop: 16 }}>
+          <summary style={{
+            fontFamily: mono, fontSize: 9, letterSpacing: '0.16em', color: P.gold,
+            cursor: 'pointer', padding: '12px 0', borderTop: `1px solid ${P.hair}`,
+          }}>
+            MORE DETAILS
+          </summary>
+
+          {hasLogistics && (
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))', gap: 14, paddingTop: 4 }}>
+              {event.uniform_required && <DetailField label="Uniform">{event.uniform}</DetailField>}
+              {event.transportation_required && <DetailField label="Transportation">{event.transportation}</DetailField>}
+              {event.permission_slip_required && event.permission_slip_url && (
+                <div>
+                  <div className="detail-label" style={{ fontFamily: mono, fontSize: 8, letterSpacing: '0.14em', color: P.mute, marginBottom: 6 }}>PERMISSION SLIP</div>
+                  <a href={event.permission_slip_url} target="_blank" rel="noopener noreferrer" download className="ghost-btn" style={{ ...ghostBtn, textDecoration: 'none', display: 'inline-block' }}>
+                    ↓ DOWNLOAD PDF
+                  </a>
+                </div>
+              )}
             </div>
           )}
-        </div>
-      )}
 
-      {colorGuard.length > 0 && (
-        <div style={{ paddingTop: 16, marginTop: 16, borderTop: `1px solid ${P.hair}` }}>
-          <div style={{ fontFamily: mono, fontSize: 8, letterSpacing: '0.14em', color: P.mute, marginBottom: 8 }}>COLOR GUARD</div>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
-            {colorGuard.map((p) => (
-              <div key={p.sort_order} style={{ fontFamily: inter, fontSize: 13, color: P.cream }}>
-                <span style={{ color: P.gold }}>{p.position_label}:</span> {p.cadet_name}
+          {colorGuard.length > 0 && (
+            <div style={{ paddingTop: 16, marginTop: 16, borderTop: `1px solid ${P.hair}` }}>
+              <div className="guard-label" style={{ fontFamily: mono, fontSize: 8, letterSpacing: '0.14em', color: P.mute, marginBottom: 8 }}>COLOR GUARD</div>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
+                {colorGuard.map((p) => (
+                  <div key={p.sort_order} className="guard-name" style={{ fontFamily: inter, fontSize: 13, color: P.cream }}>
+                    <span style={{ color: P.gold }}>{p.position_label}:</span> {p.cadet_name}
+                  </div>
+                ))}
               </div>
-            ))}
-          </div>
-        </div>
-      )}
+            </div>
+          )}
 
-      {honorGuard.length > 0 && (
-        <div style={{ paddingTop: 16, marginTop: 16, borderTop: `1px solid ${P.hair}` }}>
-          <div style={{ fontFamily: mono, fontSize: 8, letterSpacing: '0.14em', color: P.mute, marginBottom: 8 }}>HONOR GUARD</div>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
-            {honorGuard.map((p) => (
-              <div key={p.sort_order} style={{ fontFamily: inter, fontSize: 13, color: P.cream }}>
-                <span style={{ color: P.gold }}>{p.position_label}:</span> {p.cadet_name}
+          {honorGuard.length > 0 && (
+            <div style={{ paddingTop: 16, marginTop: 16, borderTop: `1px solid ${P.hair}` }}>
+              <div className="guard-label" style={{ fontFamily: mono, fontSize: 8, letterSpacing: '0.14em', color: P.mute, marginBottom: 8 }}>HONOR GUARD</div>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
+                {honorGuard.map((p) => (
+                  <div key={p.sort_order} className="guard-name" style={{ fontFamily: inter, fontSize: 13, color: P.cream }}>
+                    <span style={{ color: P.gold }}>{p.position_label}:</span> {p.cadet_name}
+                  </div>
+                ))}
               </div>
-            ))}
-          </div>
-        </div>
-      )}
+            </div>
+          )}
 
-      {event.description && (
-        <div style={{ fontFamily: inter, fontSize: 13, color: P.mute, lineHeight: 1.6, marginTop: 16, paddingTop: 16, borderTop: `1px solid ${P.hair}` }}>
-          {event.description}
-        </div>
+          {event.description && (
+            <div style={{ fontFamily: inter, fontSize: 13, color: P.mute, lineHeight: 1.6, marginTop: 16, paddingTop: 16, borderTop: `1px solid ${P.hair}` }}>
+              {event.description}
+            </div>
+          )}
+        </details>
       )}
     </div>
   );
@@ -331,8 +368,8 @@ function UpcomingEventsList({ events, onSelect }) {
 function DetailField({ label, children }) {
   return (
     <div>
-      <div style={{ fontFamily: mono, fontSize: 8, letterSpacing: '0.14em', color: P.mute, marginBottom: 4 }}>{label.toUpperCase()}</div>
-      <div style={{ fontFamily: inter, fontSize: 13, color: P.cream }}>{children}</div>
+      <div className="detail-label" style={{ fontFamily: mono, fontSize: 8, letterSpacing: '0.14em', color: P.mute, marginBottom: 4 }}>{label.toUpperCase()}</div>
+      <div className="detail-value" style={{ fontFamily: inter, fontSize: 13, color: P.cream }}>{children}</div>
     </div>
   );
 }
