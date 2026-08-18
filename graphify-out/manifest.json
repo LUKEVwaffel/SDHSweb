@@ -25,8 +25,8 @@
     "semantic_hash": "c1ee9ce6a4fe04105dbf8e619390df5e"
   },
   "src/App.jsx": {
-    "mtime": 1787045618.3411238,
-    "ast_hash": "564a2e5246191e41d27509269eee99d9",
+    "mtime": 1787097101.2262902,
+    "ast_hash": "364f99a16d2ed9e09201ac9e25a5852f",
     "semantic_hash": ""
   },
   "src/components/About.jsx": {
@@ -130,8 +130,8 @@
     "semantic_hash": ""
   },
   "src/components/admin/Dashboard.jsx": {
-    "mtime": 1787063750.21255,
-    "ast_hash": "c64445424e1baac6c74611d1cdf517fa",
+    "mtime": 1787097095.720237,
+    "ast_hash": "6c62dc56a7c451fb36827b7511d1ddc6",
     "semantic_hash": ""
   },
   "src/components/admin/LoginScreen.jsx": {
@@ -150,8 +150,8 @@
     "semantic_hash": "872097bb6f2a4e8b32dfd0a1ba37dedc"
   },
   "src/components/admin/nav/Sidebar.jsx": {
-    "mtime": 1786892119.8981433,
-    "ast_hash": "c8088c9103ae5f46b45782bf81e73cbd",
+    "mtime": 1787097083.214991,
+    "ast_hash": "20dc8248e169cfe9cac82ef0f9acf39e",
     "semantic_hash": ""
   },
   "src/components/admin/nav/StatusBar.jsx": {
@@ -1735,8 +1735,8 @@
     "semantic_hash": ""
   },
   "src/components/tv/range/TvRangeSlideshowScreen.jsx": {
-    "mtime": 1786957869.5926597,
-    "ast_hash": "fb26298c1d66d67403bbba1a80058c62",
+    "mtime": 1787097080.0959594,
+    "ast_hash": "d406482ef5d69977efe655bb39eb036c",
     "semantic_hash": ""
   },
   "src/components/tv/range/slides/SlideAnnouncementSingle.jsx": {
@@ -1755,8 +1755,8 @@
     "semantic_hash": ""
   },
   "src/components/tv/range/slides/slideRegistry.js": {
-    "mtime": 1786958107.9192579,
-    "ast_hash": "e2cc4a4b332f3ed83b579067b99788fb",
+    "mtime": 1787097074.2691917,
+    "ast_hash": "41f852bd339003d64ba2414e1dbba0d1",
     "semantic_hash": ""
   },
   "src/hooks/useTvNextUniformDay.js": {
@@ -1842,6 +1842,26 @@
   "posthog-source-maps-report.md": {
     "mtime": 1787045638.6714773,
     "ast_hash": "cb15127154ab7ebe13766311ee45ffbc",
+    "semantic_hash": ""
+  },
+  "src/components/EventSpotlightBand.jsx": {
+    "mtime": 1787097055.4868212,
+    "ast_hash": "ad89fb3d1b1b1ff17ba6d4eacfc2d46a",
+    "semantic_hash": ""
+  },
+  "src/components/admin/panels/beta/BetaFeaturesPanel.jsx": {
+    "mtime": 1787097126.3053696,
+    "ast_hash": "222b50b560497dc96bd7752888c265ba",
+    "semantic_hash": ""
+  },
+  "src/components/tv/range/slides/SlideEventSpotlight.jsx": {
+    "mtime": 1787097067.931605,
+    "ast_hash": "3f1b6bc85f8362efd1f28b4dd50bdb20",
+    "semantic_hash": ""
+  },
+  "supabase/beta_event_spotlight.sql": {
+    "mtime": 1787097010.4908054,
+    "ast_hash": "e0e4be080713bbe38e7c9608bd20db5d",
     "semantic_hash": ""
   }
 }

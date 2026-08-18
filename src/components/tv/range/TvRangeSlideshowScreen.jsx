@@ -2,11 +2,13 @@ import { useState, useEffect } from 'react';
 import SlideAnnouncements from './slides/SlideAnnouncements.jsx';
 import SlideAnnouncementSingle from './slides/SlideAnnouncementSingle.jsx';
 import SlideUniformCountdown from './slides/SlideUniformCountdown.jsx';
+import SlideEventSpotlight from './slides/SlideEventSpotlight.jsx';
 
 const SLIDE_COMPONENTS = {
   announcements: SlideAnnouncements,
   announcementSingle: SlideAnnouncementSingle,
   uniformCountdown: SlideUniformCountdown,
+  eventSpotlight: SlideEventSpotlight,
 };
 
 // Fades through black between slides rather than a hard cut — opacity only

@@ -5,6 +5,7 @@ import Hero from './components/Hero';
 import TabGrid from './components/TabGrid';
 import Bulletin from './components/Bulletin';
 import OpticPromoBand from './components/OpticPromoBand';
+import EventSpotlightBand from './components/EventSpotlightBand';
 import HomeNewsletterBand from './components/HomeNewsletterBand';
 import Footer from './components/Footer';
 import TabPlaceholder from './components/TabPlaceholder';
@@ -64,6 +65,7 @@ export default function App() {
         <Route path="/" element={(
           <>
             <Hero />
+            <EventSpotlightBand />
             <BattalionCommand />
             <TabGrid />
             <Bulletin />

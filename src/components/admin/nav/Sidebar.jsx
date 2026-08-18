@@ -27,6 +27,12 @@ export const NAV_GROUPS = [
     ],
   },
   {
+    heading: 'BETA',
+    items: [
+      { id: 'beta', icon: '✦', label: 'Beta Features' },
+    ],
+  },
+  {
     heading: 'SYSTEM',
     items: [
       { id: 'advanced', icon: '⚙', label: 'Advanced', danger: true },

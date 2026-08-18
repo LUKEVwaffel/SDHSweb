@@ -247,5 +247,10 @@
   "245": "cadet_consent_block_kaiden_write.sql",
   "246": "cadet_consent_let1_correction.sql",
   "247": "cadet_consent_reset_and_drop_leadership.sql",
-  "248": "events_s5_full_access.sql"
+  "248": "events_s5_full_access.sql",
+  "249": "MediaPanel.jsx",
+  "250": "FaqSection.jsx",
+  "251": "CadetManual.jsx",
+  "252": "Companies.jsx",
+  "253": "beta_event_spotlight.sql"
 }

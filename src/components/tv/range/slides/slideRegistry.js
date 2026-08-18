@@ -22,6 +22,12 @@ export const SLIDE_TYPES = {
     defaultDurationSec: 12,
     defaultConfig: { title: '', message: '' },
   },
+  eventSpotlight: {
+    label: 'Event Spotlight',
+    blurb: 'Beta test event photos + write-up — content is set in DISPATCH → Beta Features, not here.',
+    defaultDurationSec: 20,
+    defaultConfig: {},
+  },
 };
 
 export function makeSlide(type) {

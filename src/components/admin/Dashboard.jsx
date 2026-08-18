@@ -15,6 +15,7 @@ import AdvancedPanel from './panels/advanced/AdvancedPanel';
 import SelfAccountPanel from './panels/SelfAccountPanel';
 import MessagesPanel from './panels/messages/MessagesPanel';
 import TvRemotePanel from './panels/tvremote/TvRemotePanel';
+import BetaFeaturesPanel from './panels/beta/BetaFeaturesPanel';
 
 // Push-to-TV / TV Photos is intentionally restricted to this one account —
 // a deliberate departure from DISPATCH's usual "no per-email logic"
@@ -28,7 +29,7 @@ const SECTION_LABEL = {
   overview: 'OVERVIEW', events: 'EVENTS', aars: 'AAR TRACKER',
   people: 'PEOPLE', photos: 'PHOTOS', questions: 'FAQ QUESTIONS', email: 'EMAIL LIST',
   media: 'MEDIA', advanced: 'ADVANCED', account: 'MY ACCOUNT', messages: 'MESSAGES',
-  tvremote: 'TV REMOTE',
+  tvremote: 'TV REMOTE', beta: 'BETA FEATURES',
 };
 
 // Which sections each role may see. s5 is scoped to the battalion calendar
@@ -50,7 +51,7 @@ const SECTION_LABEL = {
 // 'photos' section (see showTvPhotos below), since it's restricted to one
 // account rather than a role.
 const ROLE_SECTIONS = {
-  s6: ['overview', 'events', 'people', 'photos', 'questions', 'email', 'media', 'messages', 'advanced', 'tvremote'],
+  s6: ['overview', 'events', 'people', 'photos', 'questions', 'email', 'media', 'messages', 'advanced', 'tvremote', 'beta'],
   s5: ['events', 'aars', 'messages', 'account', 'tvremote'],
 };
 
@@ -91,6 +92,7 @@ export default function Dashboard({ onLogout, adminId, role = 's6' }) {
           {section === 'account'  && <SelfAccountPanel adminId={adminId} />}
           {section === 'messages' && <MessagesPanel adminId={adminId} />}
           {section === 'tvremote' && <TvRemotePanel />}
+          {section === 'beta'     && <BetaFeaturesPanel adminId={adminId} />}
         </div>
       </div>
       <StatusBar sectionLabel={SECTION_LABEL[section] || section.toUpperCase()} />

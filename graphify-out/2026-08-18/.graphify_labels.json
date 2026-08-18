@@ -235,5 +235,17 @@
   "233": "TvRangeRaiderPracticeWidget.jsx",
   "234": "EmailHistoryPanel.jsx",
   "235": "RaiderFAQ.jsx",
-  "236": "cadet_consent_dd_forms.sql"
+  "236": "cadet_consent_dd_forms.sql",
+  "237": "@dnd-kit/utilities",
+  "238": "expo",
+  "239": "expo-application",
+  "240": "posthog-react-native",
+  "241": "react-dom",
+  "242": "@supabase/supabase-js",
+  "243": "events_uniform_day_time_exempt_fix.sql",
+  "244": "cadet_consent_backfill_school_email_subscribers.sql",
+  "245": "cadet_consent_block_kaiden_write.sql",
+  "246": "cadet_consent_let1_correction.sql",
+  "247": "cadet_consent_reset_and_drop_leadership.sql",
+  "248": "events_s5_full_access.sql"
 }
