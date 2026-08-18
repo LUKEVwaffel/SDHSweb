@@ -27,6 +27,10 @@ export async function updateTvNotice(id, { title, message }) {
 }
 
 export async function deleteTvNotice(id) {
-  const { error } = await SB.from('tv_notices').delete().eq('id', id);
-  return { error };
+  const { data, error } = await SB.from('tv_notices').delete().eq('id', id).select('id');
+  if (error) return { error };
+  if (!data || data.length === 0) {
+    return { error: { message: "Didn't delete — you may not have permission, or it's already gone. Try signing out and back in." } };
+  }
+  return { error: null };
 }
