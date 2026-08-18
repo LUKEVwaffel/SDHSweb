@@ -54,15 +54,12 @@ const ROLE_SECTIONS = {
   s5: ['events', 'aars', 'messages', 'account', 'tvremote'],
 };
 
-// team values s5 may create/edit/view events for. '' = battalion (team NULL).
-// Matches the RLS grant in opticsend.sql SECTION 9 exactly — expand both
-// together if s5's scope ever grows.
-const S5_ALLOWED_TEAMS = ['', 'raiders'];
-
 export default function Dashboard({ onLogout, adminId, role = 's6' }) {
   const isLuke = (adminId || '').toLowerCase() === LUKE_EMAIL;
   const allowed = ROLE_SECTIONS[role] || ROLE_SECTIONS.s6;
-  const allowedTeams = role === 's5' ? S5_ALLOWED_TEAMS : undefined;
+  // S-5 has full events parity with S-6 (every team) — see
+  // supabase/events_s5_full_access.sql for the matching RLS grant.
+  const allowedTeams = undefined;
   const navigate = useNavigate();
   const location = useLocation();
 
