@@ -58,7 +58,22 @@ export default function CommandProfile() {
       // Try direct id match first, then slug, then role_short — strict priority
       // so an id that happens to equal another row's shared role_short (e.g.
       // 'xo') can't lose to that row. See: Mya Sneidman routing bug.
-      const list = await SB.from('personnel').select('*').eq('visible', true).limit(200).then(r => r.data || []);
+      // Filtered server-side (id/slug/role_short OR) instead of pulling all
+      // visible personnel and matching in JS — that used to block the
+      // profile photo (this page's LCP element) behind a ~200-row fetch.
+      // personId is interpolated into a raw PostgREST .or() filter string,
+      // so it's restricted to the slug charset first — a stray comma or
+      // period there would otherwise let a crafted URL inject extra filter
+      // clauses (e.g. `,role_short.eq.CDR`).
+      // Note: personnel has no `slug` column (the JS fallback below that
+      // compares `p.slug` is dead code left from before this table existed) —
+      // matching on it server-side 400s, so only id/role_short are filtered.
+      const safeId = /^[a-zA-Z0-9_-]+$/.test(personId || '') ? personId : null;
+      const list = safeId
+        ? await SB.from('personnel').select('*').eq('visible', true)
+            .or(`id.eq.${safeId},role_short.ilike.${safeId}`)
+            .then(r => r.data || [])
+        : [];
       const match =
         list.find(p => String(p.id) === String(personId)) ||
         list.find(p => p.slug === personId) ||
@@ -148,6 +163,8 @@ export default function CommandProfile() {
                 <img
                   src={person.photo_url}
                   alt={person.name}
+                  loading="eager"
+                  fetchPriority="high"
                   style={{ width: '100%', height: '100%', objectFit: 'cover', objectPosition: 'top', display: 'block' }}
                 />
               ) : (
