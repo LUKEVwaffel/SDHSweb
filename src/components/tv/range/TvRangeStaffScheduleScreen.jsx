@@ -23,7 +23,7 @@ export default function TvRangeStaffScheduleScreen({ scheduleKey, bell, now }) {
       </div>
 
       {bell?.current && (
-        <TvRangePeriodProgressBar period={bell.current} now={now} label="3RD PERIOD" />
+        <TvRangePeriodProgressBar period={bell.current} now={now} label="3RD PERIOD" size="lg" />
       )}
     </div>
   );
