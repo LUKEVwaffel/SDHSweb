@@ -18,7 +18,7 @@ const TEAMS = [
     accent: P.gold,
     members: [
       'Weston Noblit', 'Quincy Tyler', 'William Baker (Senior)', "Aiden O'Brien",
-      'Luke Vetch', 'Makio Roos', 'Griffen Bloom', 'Aiden Clifton', 'Zane Youngblood',
+      'Luke Vetch', 'Makio Roos', 'Griffen Blume', 'Aiden Clifton', 'Zane Youngblood',
       'Blayne Frazier', 'Alex Johnson', "Logan O'Brien", 'Hayden Ogle', 'Riley Tyles',
       'Luke Mattison',
     ],
@@ -42,7 +42,7 @@ const TEAMS = [
       'Hayden Ogle', 'Avery Fosdick', 'Grayson Mercier', 'Mason Myers', 'Jordan Elsea',
       'Jayden Walker', 'Veronica Coyer', 'Elizabeth Morris', 'Annabelle Settles',
       'Hayden Lee', 'James Shelby', 'Miles Holloway', 'Bryson Dodd', 'Luke Chambers',
-      'Landon McClure',
+      'Landon McClure', 'Ian Thompson',
     ],
   },
 ];
