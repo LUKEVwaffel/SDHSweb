@@ -11,6 +11,16 @@ const P = {
 const CAROUSEL_INTERVAL_MS = 4500;
 const FADE_MS = 500;
 
+// Postgres `date` columns come back as a bare "YYYY-MM-DD" string — parsing
+// that directly with `new Date()` reads it as UTC midnight, which rolls
+// back a day in any negative-UTC timezone. Building the Date from parts
+// keeps it local and avoids that off-by-one.
+function formatEventDate(dateStr) {
+  if (!dateStr) return '';
+  const [y, m, d] = dateStr.split('-').map(Number);
+  return new Date(y, m - 1, d).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' });
+}
+
 function PhotoCarousel({ photos }) {
   const [index, setIndex] = useState(0);
 
@@ -90,8 +100,15 @@ export default function EventSpotlightBand() {
             <h2 style={{
               color: P.cream, fontFamily: 'Oswald, sans-serif', fontWeight: 700,
               fontSize: 'clamp(28px, 4.4vw, 44px)', letterSpacing: '0.02em',
-              lineHeight: 1.05, margin: '0 0 18px',
+              lineHeight: 1.05, margin: '0 0 10px',
             }}>{row.title}</h2>
+          )}
+
+          {row.event_date && (
+            <div style={{
+              color: P.faint, fontFamily: "'JetBrains Mono', monospace", fontSize: 11,
+              letterSpacing: '0.14em', textTransform: 'uppercase', margin: '0 0 18px',
+            }}>{formatEventDate(row.event_date)}</div>
           )}
 
           {row.description && (

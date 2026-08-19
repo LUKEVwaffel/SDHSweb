@@ -18,6 +18,7 @@ export default function BetaFeaturesPanel({ adminId }) {
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
   const [people, setPeople] = useState('');
+  const [eventDate, setEventDate] = useState('');
   const [active, setActive] = useState(true);
   const [saving, setSaving] = useState(false);
   const [saveMsg, setSaveMsg] = useState('');
@@ -33,6 +34,7 @@ export default function BetaFeaturesPanel({ adminId }) {
         setTitle(data?.title || '');
         setDescription(data?.description || '');
         setPeople(data?.people || '');
+        setEventDate(data?.event_date || '');
         setActive(data?.active ?? true);
       });
   }, []);
@@ -57,7 +59,7 @@ export default function BetaFeaturesPanel({ adminId }) {
     setSaving(true);
     setSaveMsg('');
     try {
-      await persist({ title: title.trim(), description: description.trim(), people: people.trim(), active });
+      await persist({ title: title.trim(), description: description.trim(), people: people.trim(), event_date: eventDate || null, active });
       setSaveMsg('Saved.');
     } catch (err) {
       setSaveMsg(`Save failed: ${err.message || err}`);
@@ -124,6 +126,9 @@ export default function BetaFeaturesPanel({ adminId }) {
 
         <Label>PEOPLE INVOLVED</Label>
         <Input value={people} onChange={(e) => setPeople(e.target.value)} placeholder="e.g. S-5 Aaron Johnson, Deputy S-3 Brock Beeler" style={{ marginBottom: sp[3] }} />
+
+        <Label>DATE</Label>
+        <Input type="date" value={eventDate} onChange={(e) => setEventDate(e.target.value)} style={{ marginBottom: sp[3], maxWidth: 200 }} />
 
         <label style={{ display: 'flex', alignItems: 'center', gap: sp[2], cursor: 'pointer', marginBottom: sp[4] }}>
           <input type="checkbox" checked={active} onChange={(e) => setActive(e.target.checked)} />

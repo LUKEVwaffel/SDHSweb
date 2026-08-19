@@ -5,6 +5,15 @@ import TvRangeScreenBase from '../TvRangeScreenBase.jsx';
 
 const PHOTO_ROTATE_MS = 4000;
 
+// See EventSpotlightBand.jsx's identical helper for why this doesn't just
+// call `new Date(dateStr)` — a bare "YYYY-MM-DD" parses as UTC midnight and
+// rolls back a day in negative-UTC timezones.
+function formatEventDate(dateStr) {
+  if (!dateStr) return '';
+  const [y, m, d] = dateStr.split('-').map(Number);
+  return new Date(y, m - 1, d).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' });
+}
+
 // Full-screen slide for the one-off "beta test" event spotlight. Reads the
 // same singleton row BetaFeaturesPanel.jsx writes and EventSpotlightBand.jsx
 // reads on the homepage — no per-slide config (SLIDE_TYPES.eventSpotlight's
@@ -59,6 +68,11 @@ export default function SlideEventSpotlight() {
         {row.title && (
           <div style={{ fontFamily: inter, fontWeight: 800, color: P.cream, fontSize: 'clamp(28px, 4.6vh, 56px)', lineHeight: 1.1 }}>
             {row.title}
+          </div>
+        )}
+        {row.event_date && (
+          <div style={{ fontFamily: mono, fontSize: fs.sm, color: P.faint, letterSpacing: '0.14em', textTransform: 'uppercase' }}>
+            {formatEventDate(row.event_date)}
           </div>
         )}
         {row.description && (

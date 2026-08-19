@@ -17,12 +17,18 @@ create table if not exists public.beta_event_spotlight (
   title        text not null default '',
   description  text not null default '',
   people       text not null default '',
+  event_date   date,
   photos       jsonb not null default '[]'::jsonb check (jsonb_array_length(photos) <= 10),
   active       boolean not null default true,
   updated_by   text,
   updated_at   timestamptz not null default now(),
   created_at   timestamptz not null default now()
 );
+
+-- Added after the table's initial ship — plain ALTER instead of the
+-- create-table default so this stays idempotent whether this file runs
+-- once (fresh install, column already there) or twice (already-live table).
+alter table public.beta_event_spotlight add column if not exists event_date date;
 
 alter table public.beta_event_spotlight enable row level security;
 
