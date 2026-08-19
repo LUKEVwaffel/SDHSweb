@@ -12,6 +12,7 @@ import TabPlaceholder from './components/TabPlaceholder';
 import CadetManual from './components/CadetManual';
 import CreedHub from './components/creed/CreedHub';
 import Raiders from './components/Raiders';
+import RaiderTeam from './components/RaiderTeam';
 import Rifle from './components/Rifle';
 import Staff from './components/Staff';
 import EventsPage from './components/EventsPage';
@@ -76,6 +77,7 @@ export default function App() {
         <Route path="/cadet-manual" element={<CadetManual />} />
         <Route path="/creed" element={<CreedHub />} />
         <Route path="/raiders" element={<Raiders />} />
+        <Route path="/raiderteam" element={<RaiderTeam />} />
         <Route path="/rifle" element={<Rifle />} />
         <Route path="/staff" element={<Staff />} />
         <Route path="/events" element={<EventsPage />} />
