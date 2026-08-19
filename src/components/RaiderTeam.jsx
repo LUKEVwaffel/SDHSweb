@@ -29,7 +29,7 @@ const TEAMS = [
     accent: P.bright,
     members: [
       'Zoe McCollum', 'Amber Davidson', 'Kylie Gray', 'Mya Sniedeman', 'Maddie Basset',
-      'Bella Basset', 'Lilac Powers', 'Tyler King', 'Chase Otto', 'Levi Fosdick',
+      'Bella Basset', 'Lilac Powers', 'Taylor King', 'Chase Otto', 'Levi Fosdick',
       'Bryson Frazier', 'Cooper Higgenbothem', 'William Baker (Freshman)', 'Shawn Layson',
       'James Bunch',
     ],
