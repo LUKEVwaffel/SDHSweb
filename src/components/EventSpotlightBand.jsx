@@ -8,6 +8,50 @@ const P = {
   hairline: 'rgba(201,169,97,0.25)',
 };
 
+const CAROUSEL_INTERVAL_MS = 4500;
+const FADE_MS = 500;
+
+function PhotoCarousel({ photos }) {
+  const [index, setIndex] = useState(0);
+
+  useEffect(() => {
+    if (photos.length <= 1) return undefined;
+    const id = setInterval(() => setIndex((i) => (i + 1) % photos.length), CAROUSEL_INTERVAL_MS);
+    return () => clearInterval(id);
+  }, [photos.length]);
+
+  return (
+    <div style={{
+      position: 'relative', width: '100%', aspectRatio: '4/3',
+      border: `1px solid ${P.hairline}`, overflow: 'hidden', background: P.deep,
+    }}>
+      {photos.map((photo, i) => (
+        <img
+          key={photo.path}
+          src={photo.url} alt=""
+          width={800} height={600}
+          loading={i === 0 ? 'eager' : 'lazy'}
+          style={{
+            position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover',
+            opacity: i === index ? 1 : 0, transition: `opacity ${FADE_MS}ms ease`,
+          }}
+        />
+      ))}
+      {photos.length > 1 && (
+        <div style={{ position: 'absolute', bottom: 12, left: 0, right: 0, display: 'flex', justifyContent: 'center', gap: 6 }}>
+          {photos.map((photo, i) => (
+            <div key={photo.path} style={{
+              width: 6, height: 6, borderRadius: '50%',
+              background: i === index ? P.gold : 'rgba(244,236,216,0.35)',
+              transition: 'background 200ms ease',
+            }} />
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
+
 // Homepage beta test — one-off, not-on-the-calendar event write-up + up to
 // 10 photos. Renders nothing unless an admin has turned it on in
 // DISPATCH → Beta Features (supabase/beta_event_spotlight.sql, singleton
@@ -31,55 +75,45 @@ export default function EventSpotlightBand() {
       padding: '72px 32px', borderBottom: `1px solid ${P.hairline}`,
       position: 'relative', overflow: 'hidden',
     }}>
-      <div style={{ maxWidth: 1200, margin: '0 auto', position: 'relative' }}>
-        <div style={{
-          color: P.gold, opacity: 0.75, fontFamily: "'JetBrains Mono', monospace",
-          fontSize: 10, letterSpacing: '0.32em', marginBottom: 14,
-        }}>// SPECIAL RECOGNITION</div>
+      <div className="spotlight-grid" style={{
+        maxWidth: 1200, margin: '0 auto', position: 'relative',
+        display: 'grid', gridTemplateColumns: 'minmax(0,1.1fr) minmax(0,0.9fr)',
+        gap: 56, alignItems: 'center',
+      }}>
+        <div>
+          <div style={{
+            color: P.gold, opacity: 0.75, fontFamily: "'JetBrains Mono', monospace",
+            fontSize: 10, letterSpacing: '0.32em', marginBottom: 14,
+          }}>// SPECIAL RECOGNITION</div>
 
-        {row.title && (
-          <h2 style={{
-            color: P.cream, fontFamily: 'Oswald, sans-serif', fontWeight: 700,
-            fontSize: 'clamp(28px, 4.4vw, 44px)', letterSpacing: '0.02em',
-            lineHeight: 1.05, margin: '0 0 18px',
-          }}>{row.title}</h2>
-        )}
+          {row.title && (
+            <h2 style={{
+              color: P.cream, fontFamily: 'Oswald, sans-serif', fontWeight: 700,
+              fontSize: 'clamp(28px, 4.4vw, 44px)', letterSpacing: '0.02em',
+              lineHeight: 1.05, margin: '0 0 18px',
+            }}>{row.title}</h2>
+          )}
 
-        {row.description && (
-          <p style={{
-            color: P.mute, fontFamily: 'Inter, sans-serif', fontSize: 16,
-            lineHeight: 1.7, maxWidth: 760, margin: '0 0 12px',
-          }}>{row.description}</p>
-        )}
+          {row.description && (
+            <p style={{
+              color: P.mute, fontFamily: 'Inter, sans-serif', fontSize: 16,
+              lineHeight: 1.7, margin: '0 0 12px',
+            }}>{row.description}</p>
+          )}
 
-        {row.people && (
-          <p style={{
-            color: P.gold, fontFamily: "'JetBrains Mono', monospace", fontSize: 12,
-            letterSpacing: '0.08em', margin: '0 0 32px',
-          }}>{row.people}</p>
-        )}
+          {row.people && (
+            <p style={{
+              color: P.gold, fontFamily: "'JetBrains Mono', monospace", fontSize: 12,
+              letterSpacing: '0.08em', margin: 0,
+            }}>{row.people}</p>
+          )}
+        </div>
 
-        {photos.length > 0 && (
-          <div className="spotlight-grid" style={{
-            display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(180px, 1fr))', gap: 12,
-          }}>
-            {photos.map((photo, i) => (
-              <a key={photo.path} href={photo.url} target="_blank" rel="noopener noreferrer">
-                <img
-                  src={photo.url} alt="" width={400} height={300}
-                  loading={i < 2 ? 'eager' : 'lazy'}
-                  style={{
-                    width: '100%', aspectRatio: '4/3', objectFit: 'cover',
-                    border: `1px solid ${P.hairline}`, display: 'block',
-                  }}
-                />
-              </a>
-            ))}
-          </div>
-        )}
+        {photos.length > 0 && <PhotoCarousel photos={photos} />}
       </div>
 
       <style>{`
+        @media (max-width: 760px) { .spotlight-grid { grid-template-columns: 1fr !important; gap: 36px !important; } }
         @media (max-width: 767px) { .spotlight-section { padding: 32px 20px !important; } }
       `}</style>
     </section>
