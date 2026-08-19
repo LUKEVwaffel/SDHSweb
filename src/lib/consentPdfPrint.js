@@ -23,6 +23,13 @@ const DOC_STYLE = `
   .head .org { font-family: Arial, Helvetica, sans-serif; font-size: 10px; letter-spacing: 3px; text-transform: uppercase; opacity: 0.85; }
   .head .title { font-family: Georgia, 'Times New Roman', serif; font-weight: 700; font-size: 21px; letter-spacing: 0.02em; margin-top: 4px; }
   .meta-row { display: flex; justify-content: space-between; font-family: 'Courier New', monospace; font-size: 9.5px; color: #666; padding: 9px 24px; border-bottom: 1px solid #ddd; }
+  .progress { padding: 14px 24px 2px; }
+  .progress-row { margin-bottom: 10px; }
+  .progress-row:last-child { margin-bottom: 0; }
+  .progress-label { display: flex; justify-content: space-between; font-family: 'Courier New', monospace; font-size: 8.5px; letter-spacing: 0.06em; color: #555; margin-bottom: 3px; }
+  .progress-label b { color: ${NAVY}; font-size: 10px; }
+  .progress-bar { height: 6px; background: #eee; border: 1px solid #ddd; }
+  .progress-fill { height: 100%; background: ${GOLD}; }
   .notice { font-family: Inter, Arial, sans-serif; font-size: 9.5px; line-height: 1.5; color: #555; background: #f7f5ef; border-left: 3px solid ${GOLD}; padding: 10px 14px; margin: 14px 24px 0; }
   table { width: 100%; border-collapse: collapse; margin-top: 4px; }
   thead th { text-align: left; font-family: 'Courier New', monospace; font-size: 8.5px; letter-spacing: 0.08em; color: #666; border-bottom: 1.5px solid ${NAVY}; padding: 8px 6px; }
@@ -47,7 +54,15 @@ function rowHtml(r, forms) {
   return `<tr><td>${escapeHtml(r.name)}</td><td class="grade">${escapeHtml(gradeBits)}</td>${cells}</tr>`;
 }
 
-function documentHtml({ companyLabel, generatedOn, missingCount, totalCount, tableRows, forms }) {
+function progressHtml(progress) {
+  return `<div class="progress">${progress.map((p) => `
+    <div class="progress-row">
+      <div class="progress-label"><span>${escapeHtml(p.label)}</span><b>${p.pct}%</b></div>
+      <div class="progress-bar"><div class="progress-fill" style="width:${p.pct}%"></div></div>
+    </div>`).join('')}</div>`;
+}
+
+function documentHtml({ companyLabel, generatedOn, missingCount, totalCount, tableRows, forms, progress }) {
   return `<!doctype html><html><head><meta charset="utf-8">
 <title>Form Status For ${escapeHtml(companyLabel)}</title>
 <style>${DOC_STYLE}</style>
@@ -59,6 +74,7 @@ function documentHtml({ companyLabel, generatedOn, missingCount, totalCount, tab
       <div class="title">Form Status For ${escapeHtml(companyLabel)}</div>
     </div>
     <div class="meta-row"><span>Generated ${escapeHtml(generatedOn)}</span><span>${missingCount} of ${totalCount} cadets missing a form</span></div>
+    ${progressHtml(progress)}
     <div class="notice">This list is for your company to see its own progress only — it is not a checklist to submit or turn in, and this sheet can be thrown away. A fresh copy is posted weekly until August 31st. Anything marked on this printout is NOT recorded in DISPATCH; forms are only tracked when collected by staff.</div>
     ${tableRows ? `<table>
       <thead><tr><th>NAME</th><th>GRADE</th>${forms.map((f) => `<th class="chk">${escapeHtml(f.label)}</th>`).join('')}</tr></thead>
@@ -77,6 +93,10 @@ export function openConsentStatusPdf(rows, forms, companyLabel) {
 
   const missingCount = rows.filter((r) => forms.some((f) => r[f.statusCol] !== 'collected')).length;
   const tableRows = rows.map((r) => rowHtml(r, forms)).join('');
+  const progress = forms.map((f) => {
+    const collected = rows.filter((r) => r[f.statusCol] === 'collected').length;
+    return { label: f.label, pct: rows.length ? Math.round((collected / rows.length) * 100) : 0 };
+  });
 
   const html = documentHtml({
     companyLabel,
@@ -85,6 +105,7 @@ export function openConsentStatusPdf(rows, forms, companyLabel) {
     totalCount: rows.length,
     tableRows,
     forms,
+    progress,
   });
 
   win.document.write(html);
