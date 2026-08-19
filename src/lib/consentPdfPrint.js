@@ -1,8 +1,9 @@
 // Printable "Form Status" checklist for a company — same window.open +
 // document.write + print() pattern as eventsPdfPrint.js. Lists every cadet in
-// the company still missing at least one of the 3 tracked forms (photo
-// consent, DD 3203, JROTC datasheet — one packet), with a checkbox per form
-// so staff can physically mark them off while chasing down paperwork.
+// the company with a checkbox per tracked form (photo consent, DD 3203,
+// JROTC datasheet — one packet) so the company can see its own progress at a
+// glance. Informational only — not collected back, nothing marked on it
+// changes DISPATCH.
 const NAVY = '#142847';
 const GOLD = '#C9A961';
 
@@ -22,6 +23,7 @@ const DOC_STYLE = `
   .head .org { font-family: Arial, Helvetica, sans-serif; font-size: 10px; letter-spacing: 3px; text-transform: uppercase; opacity: 0.85; }
   .head .title { font-family: Georgia, 'Times New Roman', serif; font-weight: 700; font-size: 21px; letter-spacing: 0.02em; margin-top: 4px; }
   .meta-row { display: flex; justify-content: space-between; font-family: 'Courier New', monospace; font-size: 9.5px; color: #666; padding: 9px 24px; border-bottom: 1px solid #ddd; }
+  .notice { font-family: Inter, Arial, sans-serif; font-size: 9.5px; line-height: 1.5; color: #555; background: #f7f5ef; border-left: 3px solid ${GOLD}; padding: 10px 14px; margin: 14px 24px 0; }
   table { width: 100%; border-collapse: collapse; margin-top: 4px; }
   thead th { text-align: left; font-family: 'Courier New', monospace; font-size: 8.5px; letter-spacing: 0.08em; color: #666; border-bottom: 1.5px solid ${NAVY}; padding: 8px 6px; }
   thead th.chk { text-align: center; width: 78px; }
@@ -57,10 +59,11 @@ function documentHtml({ companyLabel, generatedOn, missingCount, totalCount, tab
       <div class="title">Form Status For ${escapeHtml(companyLabel)}</div>
     </div>
     <div class="meta-row"><span>Generated ${escapeHtml(generatedOn)}</span><span>${missingCount} of ${totalCount} cadets missing a form</span></div>
+    <div class="notice">This list is for your company to see its own progress only — it is not a checklist to submit or turn in, and this sheet can be thrown away. A fresh copy is posted weekly until August 31st. Anything marked on this printout is NOT recorded in DISPATCH; forms are only tracked when collected by staff.</div>
     ${tableRows ? `<table>
       <thead><tr><th>NAME</th><th>GRADE</th>${forms.map((f) => `<th class="chk">${escapeHtml(f.label)}</th>`).join('')}</tr></thead>
       <tbody>${tableRows}</tbody>
-    </table>` : `<div class="empty">EVERY CADET IN ${escapeHtml(companyLabel.toUpperCase())} HAS ALL FORMS ON FILE</div>`}
+    </table>` : `<div class="empty">NO CADETS FOUND FOR ${escapeHtml(companyLabel.toUpperCase())}</div>`}
     <div class="foot">Checked box = form collected. Empty box = still needed. All 3 forms are one packet per cadet.</div>
   </div>
 </body></html>`;
@@ -72,13 +75,13 @@ export function openConsentStatusPdf(rows, forms, companyLabel) {
   const win = window.open('', '_blank');
   if (!win) { alert('Popup blocked, allow popups to export the PDF.'); return; }
 
-  const missing = rows.filter((r) => forms.some((f) => r[f.statusCol] !== 'collected'));
-  const tableRows = missing.map((r) => rowHtml(r, forms)).join('');
+  const missingCount = rows.filter((r) => forms.some((f) => r[f.statusCol] !== 'collected')).length;
+  const tableRows = rows.map((r) => rowHtml(r, forms)).join('');
 
   const html = documentHtml({
     companyLabel,
     generatedOn: new Date().toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' }),
-    missingCount: missing.length,
+    missingCount,
     totalCount: rows.length,
     tableRows,
     forms,
