@@ -2,6 +2,7 @@ import { useNowTicker } from '../../hooks/useNowTicker.js';
 import { useTvDailySettings } from '../../hooks/useTvDailySettings.js';
 import TvStandardLayout from './TvStandardLayout.jsx';
 import TvPreviewBadge from './TvPreviewBadge.jsx';
+import TvRefreshNotice from './TvRefreshNotice.jsx';
 
 /**
  * Outside — the original public kiosk, mounted at /tv. Thin per-screen
@@ -18,6 +19,7 @@ export default function TvKiosk() {
     <>
       <TvStandardLayout settings={settings} now={now} />
       <TvPreviewBadge />
+      <TvRefreshNotice />
     </>
   );
 }

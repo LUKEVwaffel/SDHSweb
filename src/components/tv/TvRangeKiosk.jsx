@@ -10,6 +10,7 @@ import TvRangeOffHoursScreen from './range/TvRangeOffHoursScreen.jsx';
 import TvRangePeriodEndingScreen from './range/TvRangePeriodEndingScreen.jsx';
 import TvRangeRotationLayout from './range/TvRangeRotationLayout.jsx';
 import TvPreviewBadge from './TvPreviewBadge.jsx';
+import TvRefreshNotice from './TvRefreshNotice.jsx';
 import TvRangeClock from './TvRangeClock.jsx';
 
 /**
@@ -63,6 +64,7 @@ export default function TvRangeKiosk() {
       {phaseContent}
       <TvRangeClock now={now} />
       <TvPreviewBadge />
+      <TvRefreshNotice />
     </>
   );
 }

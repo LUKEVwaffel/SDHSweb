@@ -16,9 +16,9 @@ export const BELL_SCHEDULES = {
       {
         name: '4th Period', start: '10:35', end: '12:05',
         lunches: [
-          { name: '1st Lunch', start: '10:35', end: '11:05' },
-          { name: '2nd Lunch', start: '11:05', end: '11:35' },
-          { name: '3rd Lunch', start: '11:35', end: '12:05' },
+          { name: '1st Lunch', start: '10:40', end: '11:05' },
+          { name: '2nd Lunch', start: '11:10', end: '11:35' },
+          { name: '3rd Lunch', start: '11:40', end: '12:05' },
         ],
       },
       { name: '5th Period', start: '12:10', end: '13:10' },
@@ -35,9 +35,9 @@ export const BELL_SCHEDULES = {
       {
         name: '4th Period', start: '10:45', end: '12:15',
         lunches: [
-          { name: '1st Lunch', start: '10:45', end: '11:15' },
-          { name: '2nd Lunch', start: '11:15', end: '11:45' },
-          { name: '3rd Lunch', start: '11:45', end: '12:15' },
+          { name: '1st Lunch', start: '10:50', end: '11:15' },
+          { name: '2nd Lunch', start: '11:20', end: '11:45' },
+          { name: '3rd Lunch', start: '11:50', end: '12:15' },
         ],
       },
       { name: '5th Period', start: '12:20', end: '13:15' },
