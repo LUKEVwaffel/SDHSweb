@@ -34,7 +34,7 @@ export default function TvRangeKiosk() {
   let phaseContent;
   switch (result.phase) {
     case 'planning':
-      phaseContent = <TvRangePlanningScreen config={config} bell={result.bell} now={now} />;
+      phaseContent = <TvRangePlanningScreen config={config} bell={result.bell} now={now} scheduleKey={scheduleKey} />;
       break;
     case 't2':
       phaseContent = <TvRangeT2Screen config={config} bell={result.bell} now={now} />;
@@ -46,7 +46,7 @@ export default function TvRangeKiosk() {
       phaseContent = <TvRangeLunchScreen config={config} lunchEndTime={result.lunchEndTime} now={now} />;
       break;
     case 'company-welcome':
-      phaseContent = <TvRangeCompanyWelcomeScreen config={config} company={result.company} />;
+      phaseContent = <TvRangeCompanyWelcomeScreen config={config} company={result.company} now={now} scheduleKey={scheduleKey} />;
       break;
     case 'period-ending':
       phaseContent = <TvRangePeriodEndingScreen config={config} company={result.company} periodName={result.periodName} bell={result.bell} now={now} />;
