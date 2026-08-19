@@ -19,7 +19,7 @@ const TEAMS = [
     members: [
       'Weston Noblit', 'Quincy Tyler', 'William Baker (Senior)', "Aiden O'Brien",
       'Luke Vetch', 'Makio Roos', 'Griffen Blume', 'Aiden Clifton', 'Zane Youngblood',
-      'Blayne Frazier', 'Alex Johnson', "Logan O'Brien", 'Hayden Ogle', 'Riley Tyles',
+      'Blayne Frazier', 'Alex Johnson', "Logan O'Brien", 'Hayden Ogle', 'Riley Lyles',
       'Luke Mattison',
     ],
   },
