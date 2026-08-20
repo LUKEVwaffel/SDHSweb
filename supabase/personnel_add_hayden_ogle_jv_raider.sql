@@ -1,8 +1,10 @@
 -- Add Hayden Ogle as JV Raider Team Commander — new personnel row.
 -- Run in the Supabase SQL editor. Idempotent via ON CONFLICT (id) DO NOTHING —
 -- safe to re-run, will never duplicate or clobber a later edit made from the
--- Dispatch PeoplePanel (bio/photo are expected to be filled in there after
--- this row exists — PeoplePanel has no add-new-row UI, only edit-existing).
+-- Dispatch PeoplePanel (bio_long/photo are expected to be filled in there
+-- after this row exists — PeoplePanel has no add-new-row UI, only
+-- edit-existing). `bio` (short bio) is NOT NULL on this table, unlike
+-- bio_long/photo_url — empty string, not NULL, so the insert doesn't 23502.
 --
 -- Existing raider commander rows use id 'raider-male' / 'raider-female'
 -- (see personnel_bios_import.sql) — 'raider-jv' follows that convention.
@@ -17,7 +19,7 @@ VALUES (
   'JV CMDR',
   'JV Raider Team Commander',
   'raider',
-  NULL,
+  '',
   NULL,
   NULL,
   true,
