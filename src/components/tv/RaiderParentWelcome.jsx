@@ -67,16 +67,19 @@ function QrCard({ src, alt, label }) {
   );
 }
 
-function CommanderCard({ person }) {
+// TEMP — Zoe called out large for tonight's meeting only; revert to equal
+// flex:1 cards (see git history) after.
+function CommanderCard({ person, featured }) {
   const [imgOk, setImgOk] = useState(true);
   const hasPhoto = person.photo_url && imgOk;
   return (
-    <div style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: sp[2] }}>
+    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: featured ? sp[3] : sp[1] }}>
       <div style={{
-        width: '100%', aspectRatio: '3 / 4', borderRadius: 10, overflow: 'hidden', position: 'relative',
+        height: featured ? '54vh' : '15vh', aspectRatio: '3 / 4', width: 'auto',
+        borderRadius: featured ? 14 : 8, overflow: 'hidden', position: 'relative',
         border: `1px solid ${P.hair}`, background: `linear-gradient(160deg, rgba(20,40,71,0.9), rgba(6,16,31,0.95))`,
         display: 'flex', alignItems: 'center', justifyContent: 'center',
-        boxShadow: '0 12px 30px rgba(0,0,0,0.35)',
+        boxShadow: featured ? '0 20px 50px rgba(0,0,0,0.45)' : '0 12px 30px rgba(0,0,0,0.35)',
       }}>
         {hasPhoto ? (
           <img
@@ -84,16 +87,16 @@ function CommanderCard({ person }) {
             style={{ width: '100%', height: '100%', objectFit: 'cover', objectPosition: 'top', display: 'block' }}
           />
         ) : (
-          <div style={{ fontFamily: oswald, fontWeight: 700, fontSize: 40, color: P.gold, opacity: 0.35 }}>
+          <div style={{ fontFamily: oswald, fontWeight: 700, fontSize: featured ? 64 : 24, color: P.gold, opacity: 0.35 }}>
             {initials(person.name)}
           </div>
         )}
         <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to bottom, transparent 60%, rgba(6,16,31,0.85))' }} />
       </div>
-      <div style={{ fontFamily: oswald, fontWeight: 700, fontSize: fs.lg, color: P.cream, textAlign: 'center' }}>
+      <div style={{ fontFamily: oswald, fontWeight: 700, fontSize: featured ? fs.xxl : fs.tiny, color: P.cream, textAlign: 'center' }}>
         {person.name}
       </div>
-      <div style={{ fontFamily: mono, fontSize: fs.tiny, letterSpacing: '0.16em', color: P.gold, opacity: 0.7, textAlign: 'center' }}>
+      <div style={{ fontFamily: mono, fontSize: featured ? fs.sm : 8, letterSpacing: '0.16em', color: P.gold, opacity: 0.7, textAlign: 'center' }}>
         {(person.role_long || person.role_short || 'RAIDER COMMANDER').toUpperCase()}
       </div>
     </div>
@@ -161,17 +164,17 @@ export default function RaiderParentWelcome() {
 
       {/* body: commanders left, QR codes right */}
       <div style={{ position: 'relative', flex: 1, display: 'flex', minHeight: 0, padding: '3vh 5vw 5vh', gap: '4vw' }}>
-        <div style={{ flex: 1.15, display: 'flex', flexDirection: 'column', justifyContent: 'center', gap: sp[6], minWidth: 0 }}>
+        <div style={{ flex: 1.6, display: 'flex', flexDirection: 'column', justifyContent: 'center', gap: sp[6], minWidth: 0 }}>
           <div style={{ fontFamily: mono, fontSize: fs.sm, letterSpacing: '0.2em', color: P.mute, textTransform: 'uppercase' }}>
             Meet Your Commanders
           </div>
-          <div style={{ display: 'flex', gap: sp[6] }}>
-            {commanders.map((c) => <CommanderCard key={c.id} person={c} />)}
+          <div style={{ display: 'flex', alignItems: 'flex-end', gap: sp[4] }}>
+            {commanders.map((c) => <CommanderCard key={c.id} person={c} featured={c.name === 'Zoe McCollum'} />)}
           </div>
         </div>
 
         <div style={{
-          flex: 1.15, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
+          flex: 0.85, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
           gap: '2vh', borderLeft: `1px solid ${P.hair}`, paddingLeft: '3vw',
         }}>
           <QrCard src={groupmeQr} alt="QR code to join the parent GroupMe" label="Join Parent GroupMe" />
