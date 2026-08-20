@@ -30,7 +30,7 @@ export const RAIDER_TEAMS = [
     accent: '#7EC87E',
     members: [
       'Hayden Ogle', 'Avery Fosdick', 'Grayson Mercier', 'Mason Myers', 'Jordan Elsea',
-      'Jayden Walker', 'Veronica Coyer', 'Elizabeth Morris', 'Annabelle Settles',
+      'Jayde Walker', 'Veronica Coyer', 'Elizabeth Morris', 'Annabelle Settle',
       'Hayden Lee', 'James Shelby', 'Miles Holloway', 'Bryson Dodd', 'Luke Chambers',
       'Landon McClure', 'Ian Thompson',
     ],
