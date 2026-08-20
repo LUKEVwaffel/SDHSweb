@@ -36,7 +36,8 @@ export function useRaiderCongrats() {
 const STAFF_SECTIONS = new Set(['command', 'staff', 'leadership', 's1', 's2', 's3', 's4', 's5', 's6']);
 
 export function matchesForCompany(matches, companyId) {
-  return matches.filter((m) => m.section === `company-${companyId}`);
+  const section = `company-${(companyId || '').toLowerCase()}`;
+  return matches.filter((m) => m.section === section);
 }
 
 export function matchesForStaff(matches) {
