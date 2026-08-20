@@ -1,3 +1,13 @@
+// Companies eligible for a Raider Congrats slide (SLIDE_TYPES.raiderCongrats
+// below) — staff isn't a company cadets belong to on this roster, so it's
+// deliberately left out of this list rather than filtered later.
+export const RAIDER_CONGRATS_COMPANIES = [
+  { id: 'alpha', label: 'Alpha' },
+  { id: 'bravo', label: 'Bravo' },
+  { id: 'charlie', label: 'Charlie' },
+  { id: 'delta', label: 'Delta' },
+];
+
 // Catalog of full-screen slide templates for Range's rotation screen
 // (StepRangeSlideshow.jsx builds the "+ Add Slide" gallery from this; the
 // live kiosk (TvRangeSlideshowScreen.jsx) resolves `type` to a component
@@ -53,28 +63,29 @@ export const SLIDE_TYPES = {
   },
   raiderCongrats: {
     label: 'Raider Team Congrats',
-    blurb: 'Everyone who made a Raider team this year, grouped by squad — battalion-wide, not company-scoped.',
+    blurb: 'Cadets from one company who made a Raider team this year — add one per company below.',
     defaultDurationSec: 15,
-    defaultConfig: {},
+    defaultConfig: { company: RAIDER_CONGRATS_COMPANIES[0].id },
   },
 };
 
-export function makeSlide(type) {
+export function makeSlide(type, configOverride) {
   const def = SLIDE_TYPES[type];
   return {
     id: crypto.randomUUID(),
     type,
     durationSec: def.defaultDurationSec,
-    config: { ...def.defaultConfig },
+    config: { ...def.defaultConfig, ...configOverride },
   };
 }
 
 // Seeded the first time an admin switches a screen into Slideshow mode, so
 // the TV never goes blank mid-switch waiting on someone to build a playlist
-// from scratch.
+// from scratch. One raiderCongrats slide per company (not one battalion-wide
+// slide) so every company sees only their own teammates on rotation.
 export const DEFAULT_SLIDESHOW = [
   makeSlide('announcements'),
   makeSlide('uniformCountdown'),
   makeSlide('announcementSingle'),
-  makeSlide('raiderCongrats'),
+  ...RAIDER_CONGRATS_COMPANIES.map((c) => makeSlide('raiderCongrats', { company: c.id })),
 ];
