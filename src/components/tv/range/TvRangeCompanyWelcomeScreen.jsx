@@ -1,7 +1,5 @@
 import { P, mono, fraunces, inter, fs, sp } from '../../admin/theme.js';
 import { renderTemplate } from '../../../lib/tvRangeSchedule.js';
-import { isNewScheduleAnnouncementActive, NEW_SCHEDULE_MESSAGE } from '../../../lib/scheduleAnnouncement.js';
-import TvScheduleTable from './TvScheduleTable.jsx';
 import RaiderCongratsBanner from './RaiderCongratsBanner.jsx';
 import { useRaiderCongrats, matchesForCompany } from '../../../hooks/useRaiderCongrats.js';
 
@@ -24,11 +22,10 @@ function WelcomeStyles() {
   );
 }
 
-export default function TvRangeCompanyWelcomeScreen({ config, company, now, scheduleKey }) {
+export default function TvRangeCompanyWelcomeScreen({ config, company }) {
   const welcome = renderTemplate(config?.company_welcome_template || 'Welcome {company} Company', { company });
   const reminder = config?.attendance_reminder_template || '1SGT: Take attendance now';
   const customBlocks = config?.custom_blocks ?? [];
-  const showNewScheduleNotice = isNewScheduleAnnouncementActive(now);
   const { matches } = useRaiderCongrats();
   const companyCongrats = matchesForCompany(matches, company);
 
@@ -57,19 +54,6 @@ export default function TvRangeCompanyWelcomeScreen({ config, company, now, sche
       }} />
 
       <div style={{ position: 'relative', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: sp[6] }}>
-        {showNewScheduleNotice && (
-          <div
-            className="tv-welcome-pill"
-            style={{
-              padding: `${sp[2]}px ${sp[5]}px`, border: `1px solid ${P.hairStrong}`,
-              borderRadius: 999, background: `linear-gradient(160deg, ${P.goldWash}, transparent)`,
-              fontFamily: mono, fontSize: fs.xs, color: P.gold, letterSpacing: '0.2em',
-            }}
-          >
-            {NEW_SCHEDULE_MESSAGE.toUpperCase()}
-          </div>
-        )}
-
         <div
           className="tv-welcome-title"
           style={{
@@ -110,8 +94,6 @@ export default function TvRangeCompanyWelcomeScreen({ config, company, now, sche
             ))}
           </div>
         )}
-
-        {showNewScheduleNotice && <TvScheduleTable scheduleKey={scheduleKey} />}
       </div>
     </div>
   );
