@@ -25,6 +25,7 @@ import Admin from './components/admin';
 import ReviewPortal from './components/review/ReviewPortal';
 import TvKiosk from './components/tv/TvKiosk';
 import TvRangeKiosk from './components/tv/TvRangeKiosk';
+import RaiderParentWelcome from './components/tv/RaiderParentWelcome';
 
 const TABS = [
   { id: 'cadet-manual', label: 'Cadet Manual',  short: 'MANUAL' },
@@ -57,6 +58,7 @@ export default function App() {
   if (location.pathname === '/review' || location.pathname.startsWith('/review/')) return <ReviewPortal />;
   if (location.pathname === '/tv') return <TvKiosk />;
   if (location.pathname === '/tv/range') return <TvRangeKiosk />;
+  if (location.pathname === '/raiderparent') return <RaiderParentWelcome />;
 
   return (
     <div style={{ minHeight: '100vh', background: '#06101F', fontFamily: 'Inter, sans-serif' }}>
