@@ -3,7 +3,7 @@ import { P, mono, inter, fs, sp, radius, shadow, ease } from '../../admin/theme.
 import { useTvUpcomingEvents } from '../../../hooks/useTvUpcomingEvents.js';
 import { useTvNotices } from '../../../hooks/useTvNotices.js';
 import { SLIDE_TYPES, makeSlide } from '../range/slides/slideRegistry.js';
-import { FONT_FAMILY_OPTIONS } from '../range/rangeGrid/gridDefaults.js';
+import { FONT_FAMILY_OPTIONS } from '../range/rangeGrid/fontOptions.js';
 import TvRangeSlideshowScreen from '../range/TvRangeSlideshowScreen.jsx';
 import RichTextField from '../range/rangeGrid/RichTextField.jsx';
 import { storageStringToRuns, runsToStorageString } from '../range/rangeGrid/richText.jsx';
@@ -33,10 +33,14 @@ function updateSlideConfig(slides, id, patch) {
 }
 
 const cardBase = {
-  flex: 1, textAlign: 'left', padding: sp[4], borderRadius: radius.md,
+  flex: '1 1 220px', textAlign: 'left', padding: sp[4], borderRadius: radius.md,
   border: `1px solid ${P.hair}`, background: 'transparent', cursor: 'pointer',
   transition: `all 150ms ${ease}`,
 };
+
+// Slide types whose body is a styleable list (font family/size override) —
+// same STYLE_CAPABLE idea the old Grid Layout board used per-kind.
+const FONT_STYLEABLE_TYPES = new Set(['announcements', 'staffNotes', 'upcomingEvents', 'raiderPractice']);
 
 const rowFieldStyle = {
   padding: '6px 10px', borderRadius: radius.sm, border: `1px solid ${P.hairStrong}`,
@@ -55,7 +59,7 @@ function AddSlideGallery({ onAdd }) {
       <div style={{ fontFamily: mono, fontSize: fs.micro, color: P.faint, letterSpacing: '0.2em', marginBottom: sp[3] }}>
         ADD A SLIDE
       </div>
-      <div style={{ display: 'flex', gap: sp[3] }}>
+      <div style={{ display: 'flex', flexWrap: 'wrap', gap: sp[3] }}>
         {Object.entries(SLIDE_TYPES).map(([type, def]) => (
           <button key={type} onClick={() => onAdd(type)} style={cardBase}>
             <div style={{ fontFamily: inter, fontSize: 15, fontWeight: 700, color: P.cream, marginBottom: 4 }}>
@@ -70,7 +74,7 @@ function AddSlideGallery({ onAdd }) {
 }
 
 function SlideExtraControls({ slide, onPatchConfig, upcomingEvents }) {
-  if (slide.type === 'announcements') {
+  if (FONT_STYLEABLE_TYPES.has(slide.type)) {
     return (
       <>
         <select
@@ -208,17 +212,16 @@ function SlideRow({ slide, index, count, onMove, onRemove, onUpdate, onPatchConf
 }
 
 /**
- * Slideshow editor for Range's Rotation Screen — sibling of StepRangeLayout
- * (Grid mode), swapped in by StepRotationScreen.jsx when `rotationMode` is
- * 'slideshow'. Slides are built from the template catalog in slideRegistry.js
- * and reordered top-to-bottom (↑/↓, not drag — same numbered-list pattern
+ * Slideshow editor for Range's Rotation Screen — this is the whole tab now
+ * (the old Grid Layout mode toggle is gone; slideshow is the only rotation
+ * mode). Slides are built from the template catalog in slideRegistry.js and
+ * reordered top-to-bottom (↑/↓, not drag — same numbered-list pattern
  * StepRangeSchedule.jsx's Welcome Screen blocks already use, and more
  * reliable than drag-and-drop for a short list). TV Preview runs the exact
  * same TvRangeSlideshowScreen component the live kiosk renders, timers and
- * all, so what's previewed here is exactly what airs — same principle
- * StepRangeLayout's preview mode already follows.
+ * all, so what's previewed here is exactly what airs.
  */
-export default function StepRangeSlideshow({ config, onChange, onSave, saving, flash, saveError }) {
+export default function StepRangeSlideshow({ config, settings, onChange, onSave, saving, flash, saveError }) {
   const [mode, setMode] = useState('edit');
   const [isFullscreen, setIsFullscreen] = useState(false);
   const wrapRef = useRef(null);
@@ -233,6 +236,7 @@ export default function StepRangeSlideshow({ config, onChange, onSave, saving, f
   const upcomingEvents = useTvUpcomingEvents(30);
   const { notices } = useTvNotices('range');
   const announcements = notices.filter((n) => n.category === 'announcement');
+  const staffNotes = notices.filter((n) => n.category === 'staff_note');
 
   useEffect(() => {
     const onFsChange = () => setIsFullscreen(document.fullscreenElement === wrapRef.current);
@@ -327,7 +331,14 @@ export default function StepRangeSlideshow({ config, onChange, onSave, saving, f
           }}>
             {slides.length ? (
               <div style={{ position: 'absolute', inset: 0 }}>
-                <TvRangeSlideshowScreen slides={slides} announcements={announcements} />
+                <TvRangeSlideshowScreen
+                  slides={slides}
+                  announcements={announcements}
+                  staffNotes={staffNotes}
+                  events={upcomingEvents}
+                  settings={settings}
+                  rangeConfig={config}
+                />
               </div>
             ) : (
               <div style={{ position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: inter, fontSize: fs.sm, color: P.faint, fontStyle: 'italic' }}>

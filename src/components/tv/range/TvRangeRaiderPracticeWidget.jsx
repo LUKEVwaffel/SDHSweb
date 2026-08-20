@@ -35,10 +35,10 @@ function PracticeTile({ tile, style }) {
   );
 }
 
-// Dedicated Raiders info panel in Range's rotation phase, gated behind
-// config.showRaiderPractice — period_company (the period→company map driving
-// the welcome screens) has no slot for extracurricular teams, so this lives
-// as a 4th always-visible column in TvRangeRotationLayout.jsx instead.
+// Dedicated Raiders info panel, addable as a "Raider Practice" slide on
+// Range's rotation screen (SlideRaiderPractice.jsx) — period_company (the
+// period→company map driving the welcome screens) has no slot for
+// extracurricular teams, so it's a slide rather than a welcome-screen block.
 // Content mirrors Raiders.jsx's own "JOIN THE TEAM" tiles via the shared
 // raiderPracticeInfo.js constant, so the two surfaces can't drift apart.
 // GroupMe QR is a small element here rather than its own phase screen —

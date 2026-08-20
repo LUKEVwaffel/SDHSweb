@@ -1,8 +1,7 @@
-// Catalog of full-screen slide templates for Range's Slideshow rotation mode
+// Catalog of full-screen slide templates for Range's rotation screen
 // (StepRangeSlideshow.jsx builds the "+ Add Slide" gallery from this; the
 // live kiosk (TvRangeSlideshowScreen.jsx) resolves `type` to a component
-// from the same map) — same "one source, admin + kiosk both read it" shape
-// gridDefaults.js already uses for the Grid Layout mode.
+// from the same map) — one source, admin + kiosk both read it.
 export const SLIDE_TYPES = {
   announcements: {
     label: 'Announcements',
@@ -26,6 +25,30 @@ export const SLIDE_TYPES = {
     label: 'Event Spotlight',
     blurb: 'Beta test event photos + write-up — content is set in DISPATCH → Beta Features, not here.',
     defaultDurationSec: 20,
+    defaultConfig: {},
+  },
+  staffNotes: {
+    label: 'Notes From Staff',
+    blurb: 'Every posted staff note, listed full-screen — same content as the Staff Notes tab.',
+    defaultDurationSec: 15,
+    defaultConfig: {},
+  },
+  upcomingEvents: {
+    label: 'Upcoming Events',
+    blurb: 'What’s next on the calendar, soonest first.',
+    defaultDurationSec: 15,
+    defaultConfig: {},
+  },
+  photoOfDay: {
+    label: 'Photo Carousel',
+    blurb: 'Rotating photos from this screen’s Photo Source setting.',
+    defaultDurationSec: 20,
+    defaultConfig: {},
+  },
+  raiderPractice: {
+    label: 'Raider Practice',
+    blurb: 'Practice days/times, report-to, what to bring — plus a GroupMe QR if one’s set below.',
+    defaultDurationSec: 15,
     defaultConfig: {},
   },
 };

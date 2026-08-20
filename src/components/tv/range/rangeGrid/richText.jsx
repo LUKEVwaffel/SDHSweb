@@ -1,7 +1,8 @@
-// Per-substring rich text for tile-owned strings (countdown/photoSingle
-// titles, the `text` custom widget) — NOT the whole-tile font/size/bold
-// override in gridDefaults.js/RangeGridBoard.jsx, which still applies
-// uniformly to externally-sourced content (announcements/events/etc).
+// Per-substring rich text for slide-owned strings (announcementSingle's
+// title/message) — NOT the whole-slide font/size/bold override
+// (fontOptions.js, applied via each slide's `style` prop), which still
+// applies uniformly to externally-sourced content (announcements/staff
+// notes/etc).
 //
 // A run is `{ text, bold?, italic?, underline?, color?, fontSize? }`. Rendered as plain
 // React <span> elements (RenderRuns) — never dangerouslySetInnerHTML, so

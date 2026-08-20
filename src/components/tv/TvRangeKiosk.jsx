@@ -56,7 +56,7 @@ export default function TvRangeKiosk() {
       break;
     case 'rotation':
     default:
-      phaseContent = <TvRangeRotationLayout settings={settings} now={now} config={config} />;
+      phaseContent = <TvRangeRotationLayout settings={settings} config={config} />;
   }
 
   return (

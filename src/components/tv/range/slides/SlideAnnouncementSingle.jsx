@@ -1,3 +1,4 @@
+import { useEffect } from 'react';
 import { P, mono, inter, fs, sp } from '../../../admin/theme.js';
 import TvRangeScreenBase from '../TvRangeScreenBase.jsx';
 import { RenderRuns, storageStringToRuns } from '../rangeGrid/richText.jsx';
@@ -7,11 +8,16 @@ import { RenderRuns, storageStringToRuns } from '../rangeGrid/richText.jsx';
 // not pulled from the shared Announcements tab. Deliberately separate data:
 // this slide is for the one thing staff wants featured on its own screen,
 // not a mirror of whatever's newest in tv_notices.
-export default function SlideAnnouncementSingle({ config }) {
+export default function SlideAnnouncementSingle({ config, onEmpty }) {
   const titleRuns = storageStringToRuns(config?.title);
   const messageRuns = storageStringToRuns(config?.message);
+  const isEmpty = !config?.title && !config?.message;
 
-  if (!config?.title && !config?.message) {
+  useEffect(() => {
+    if (isEmpty) onEmpty?.();
+  }, [isEmpty, onEmpty]);
+
+  if (isEmpty) {
     return (
       <TvRangeScreenBase kicker="ANNOUNCEMENT" title="Nothing written yet." sub="Add a title and message in the Rotation Screen tab." />
     );

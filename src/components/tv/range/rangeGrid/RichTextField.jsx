@@ -73,12 +73,9 @@ function PlaceholderStyle() {
  * formatting command, not per keystroke.
  *
  * The toolbar is portaled to document.body — `position: fixed` only escapes
- * to the true viewport when no ancestor sets a transform/contain/filter;
- * container-query wrappers (containerType, used by RangeGridClock's tile and
- * the `text` widget) count as "contain" for this purpose, so without the
- * portal the toolbar would anchor to whichever tile happens to be its
- * nearest such ancestor instead of the screen — invisible or off-position
- * anywhere that isn't inside one of those tiles (e.g. StepRangeNotices.jsx).
+ * to the true viewport when no ancestor sets a transform/contain/filter,
+ * so without the portal it could anchor to whichever ancestor happens to
+ * set one instead of the screen (e.g. StepRangeNotices.jsx).
  */
 export default function RichTextField({ value, onChange, placeholder, multiline = false, maxLength, baseStyle }) {
   const ref = useRef(null);

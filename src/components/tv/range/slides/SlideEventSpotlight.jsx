@@ -20,7 +20,7 @@ function formatEventDate(dateStr) {
 // defaultConfig is `{}`), so the write-up only ever needs to be entered once.
 // Internally cycles through the photo set on its own timer, independent of
 // this slide's overall durationSec in the rotation.
-export default function SlideEventSpotlight() {
+export default function SlideEventSpotlight({ onEmpty }) {
   const [row, setRow] = useState(null);
   const [photoIndex, setPhotoIndex] = useState(0);
 
@@ -30,6 +30,11 @@ export default function SlideEventSpotlight() {
   }, []);
 
   const photos = row?.photos || [];
+  const isEmpty = row !== null && (!row.active || (!row.title && !row.description && !photos.length));
+
+  useEffect(() => {
+    if (isEmpty) onEmpty?.();
+  }, [isEmpty, onEmpty]);
 
   useEffect(() => {
     if (photos.length <= 1) return undefined;
@@ -38,7 +43,7 @@ export default function SlideEventSpotlight() {
   }, [photos.length]);
 
   if (row === null) return null; // still loading — avoid a flash of the empty state
-  if (!row.active || (!row.title && !row.description && !photos.length)) {
+  if (isEmpty) {
     return (
       <TvRangeScreenBase kicker="SPOTLIGHT" title="Nothing set." sub="Turn on an event in DISPATCH → Beta Features." />
     );

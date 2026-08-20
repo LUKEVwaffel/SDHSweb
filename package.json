@@ -5,7 +5,7 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "vite build",
+    "build": "vite build && posthog-cli --dotenv-file .env sourcemap process --directory ./dist",
     "lint": "oxlint",
     "preview": "vite preview"
   },
@@ -31,6 +31,7 @@
   },
   "devDependencies": {
     "@expo/cli": "^57.0.12",
+    "@posthog/cli": "^0.11.3",
     "@tailwindcss/postcss": "^4.3.2",
     "@types/react": "^19.2.17",
     "@types/react-dom": "^19.2.3",
