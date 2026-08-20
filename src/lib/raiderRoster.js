@@ -8,7 +8,7 @@ export const RAIDER_TEAMS = [
     accent: '#C9A961',
     members: [
       'Weston Noblit', 'Quincy Tyler', 'William Baker (Senior)', "Aidan O'Brien",
-      'Luke Vetsch', 'Makaio Roos', 'Griffen Blume', 'Aiden Clifton', 'Zane Youngblood',
+      'Luke Vetsch', 'Makaio Roos', 'Griffin Blumeyer', 'Aiden Clifton', 'Zane Youngblood',
       'Blayne Frazier', 'Alex Johnson', "Logan O'Brien", 'Hayden Ogle', 'Riley Lyles',
       'Luke Mattison',
     ],
@@ -19,7 +19,7 @@ export const RAIDER_TEAMS = [
     accent: '#E8C77A',
     members: [
       'Zoe McCollum', 'Amber Davidson', 'Kylie Gray', 'Mya Sneideman', 'Maddie Bassett',
-      'Bella Bassett', 'Lilac Powers', 'Taylor King', 'Chase Otto', 'Levi Fosdick',
+      'Bella Bassett', 'Raven Powers', 'Taylor King', 'Chase Otto', 'Levi Fosdick',
       'Bryson Frazier', 'Cooper Higginbotham', 'William Baker (Freshman)', 'Sean Layson',
       'James Bunch',
     ],
