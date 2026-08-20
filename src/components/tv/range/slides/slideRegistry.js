@@ -51,6 +51,12 @@ export const SLIDE_TYPES = {
     defaultDurationSec: 15,
     defaultConfig: {},
   },
+  raiderCongrats: {
+    label: 'Raider Team Congrats',
+    blurb: 'Everyone who made a Raider team this year, grouped by squad — battalion-wide, not company-scoped.',
+    defaultDurationSec: 15,
+    defaultConfig: {},
+  },
 };
 
 export function makeSlide(type) {
@@ -70,4 +76,5 @@ export const DEFAULT_SLIDESHOW = [
   makeSlide('announcements'),
   makeSlide('uniformCountdown'),
   makeSlide('announcementSingle'),
+  makeSlide('raiderCongrats'),
 ];

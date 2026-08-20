@@ -7,6 +7,7 @@ import SlideStaffNotes from './slides/SlideStaffNotes.jsx';
 import SlideUpcomingEvents from './slides/SlideUpcomingEvents.jsx';
 import SlidePhotoOfDay from './slides/SlidePhotoOfDay.jsx';
 import SlideRaiderPractice from './slides/SlideRaiderPractice.jsx';
+import SlideRaiderCongrats from './slides/SlideRaiderCongrats.jsx';
 
 const SLIDE_COMPONENTS = {
   announcements: SlideAnnouncements,
@@ -17,6 +18,7 @@ const SLIDE_COMPONENTS = {
   upcomingEvents: SlideUpcomingEvents,
   photoOfDay: SlidePhotoOfDay,
   raiderPractice: SlideRaiderPractice,
+  raiderCongrats: SlideRaiderCongrats,
 };
 
 // Fades through black between slides rather than a hard cut — opacity only
