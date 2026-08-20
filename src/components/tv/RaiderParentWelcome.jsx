@@ -46,7 +46,7 @@ function initials(name) {
 
 function QrCard({ src, alt, label }) {
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: sp[3], width: 'min(24vh, 22vw)', maxWidth: 280 }}>
+    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: sp[2], width: 'min(30vh, 26vw)', maxWidth: 340 }}>
       <div style={{
         width: '100%', aspectRatio: '1 / 1', background: P.cream, borderRadius: 14,
         display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: 'hidden',
@@ -132,8 +132,8 @@ export default function RaiderParentWelcome() {
       }} />
 
       {/* header: eyebrow + title on the left, live clock top-right */}
-      <div style={{ position: 'relative', display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', padding: '5vh 5vw 0' }}>
-        <div style={{ display: 'flex', flexDirection: 'column', gap: sp[4] }}>
+      <div style={{ position: 'relative', display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', padding: '4vh 5vw 0' }}>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: sp[3] }}>
           <div style={{
             fontFamily: mono, fontSize: fs.md, letterSpacing: '0.22em', color: P.gold, textTransform: 'uppercase',
             padding: `${sp[2]}px ${sp[5]}px`, border: `1px solid ${P.hairStrong}`, borderRadius: 999,
@@ -143,7 +143,7 @@ export default function RaiderParentWelcome() {
           </div>
           <h1 style={{
             fontFamily: fraunces, fontWeight: 800, fontStyle: 'italic', color: P.cream, margin: 0,
-            fontSize: 'clamp(72px, 15vh, 200px)', lineHeight: 0.95,
+            fontSize: 'clamp(64px, 11vh, 170px)', lineHeight: 0.95,
             textShadow: '0 4px 40px rgba(201,169,97,0.18)',
           }}>
             Welcome
@@ -161,7 +161,7 @@ export default function RaiderParentWelcome() {
 
       {/* body: commanders left, QR codes right */}
       <div style={{ position: 'relative', flex: 1, display: 'flex', minHeight: 0, padding: '3vh 5vw 5vh', gap: '4vw' }}>
-        <div style={{ flex: 1.5, display: 'flex', flexDirection: 'column', justifyContent: 'center', gap: sp[6], minWidth: 0 }}>
+        <div style={{ flex: 1.15, display: 'flex', flexDirection: 'column', justifyContent: 'center', gap: sp[6], minWidth: 0 }}>
           <div style={{ fontFamily: mono, fontSize: fs.sm, letterSpacing: '0.2em', color: P.mute, textTransform: 'uppercase' }}>
             Meet Your Commanders
           </div>
@@ -171,8 +171,8 @@ export default function RaiderParentWelcome() {
         </div>
 
         <div style={{
-          flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
-          gap: '4vh', borderLeft: `1px solid ${P.hair}`, paddingLeft: '3vw',
+          flex: 1.15, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
+          gap: '2vh', borderLeft: `1px solid ${P.hair}`, paddingLeft: '3vw',
         }}>
           <QrCard src={groupmeQr} alt="QR code to join the parent GroupMe" label="Join Parent GroupMe" />
           <QrCard src={websiteQr} alt="QR code for sdhsjrotc.com/raiders" label="sdhsjrotc.com/raiders" />
