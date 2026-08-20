@@ -25,8 +25,8 @@
     "semantic_hash": "c1ee9ce6a4fe04105dbf8e619390df5e"
   },
   "src/App.jsx": {
-    "mtime": 1787225639.035403,
-    "ast_hash": "6ba3f7e0d1b23f557968c6ca02dbbc29",
+    "mtime": 1787097101.2262902,
+    "ast_hash": "364f99a16d2ed9e09201ac9e25a5852f",
     "semantic_hash": ""
   },
   "src/components/About.jsx": {
@@ -50,8 +50,8 @@
     "semantic_hash": ""
   },
   "src/components/CommandProfile.jsx": {
-    "mtime": 1787141758.2785769,
-    "ast_hash": "ab5fd31f10ce56965ddf18aa5dd49ce4",
+    "mtime": 1785942223.6665807,
+    "ast_hash": "165c2393a0c381cf1e8c9959c2acfe85",
     "semantic_hash": ""
   },
   "src/components/Companies.jsx": {
@@ -510,8 +510,8 @@
     "semantic_hash": ""
   },
   "index.html": {
-    "mtime": 1787141509.4292042,
-    "ast_hash": "fb7395d5d44b375937f1677b639422f9",
+    "mtime": 1785883680.912585,
+    "ast_hash": "e5ef466f7795d0d1ae537a2407bc06f1",
     "semantic_hash": ""
   },
   "public/assets/cadet-manual.pdf": {
@@ -1180,8 +1180,8 @@
     "semantic_hash": ""
   },
   "src/components/admin/panels/tvremote/TvRemotePanel.jsx": {
-    "mtime": 1787151133.9229026,
-    "ast_hash": "29cbac3e1f1350094b89ab17c19ced39",
+    "mtime": 1786956943.751473,
+    "ast_hash": "4d232826feaaa833cf1ca9f46a771771",
     "semantic_hash": ""
   },
   "src/components/creed/CreedHub.jsx": {
@@ -1260,8 +1260,8 @@
     "semantic_hash": ""
   },
   "src/components/tv/TvKiosk.jsx": {
-    "mtime": 1787133456.4925947,
-    "ast_hash": "66c78da7ba28e99bb857eac7fa88ce33",
+    "mtime": 1786632502.3418922,
+    "ast_hash": "51a8849e5503a892e969d015ca82ca46",
     "semantic_hash": ""
   },
   "src/components/tv/TvPhotoCarousel.jsx": {
@@ -1285,8 +1285,8 @@
     "semantic_hash": ""
   },
   "src/components/tv/TvRangeKiosk.jsx": {
-    "mtime": 1787151051.6808603,
-    "ast_hash": "151706eeb917aa59640cf091faad2b14",
+    "mtime": 1786632512.5396988,
+    "ast_hash": "040ce91446be1602449c501731a9a0cf",
     "semantic_hash": ""
   },
   "src/components/tv/TvShoutoutsPanel.jsx": {
@@ -1335,8 +1335,8 @@
     "semantic_hash": ""
   },
   "src/components/tv/control-center/StepRangeSchedule.jsx": {
-    "mtime": 1787151149.5499704,
-    "ast_hash": "06c01eba181df5f65e1c2d08edb1fa40",
+    "mtime": 1786632640.8203964,
+    "ast_hash": "08c9ff4f1eed2b6cff4211aa43c533e9",
     "semantic_hash": ""
   },
   "src/components/tv/control-center/StepShoutout.jsx": {
@@ -1350,8 +1350,8 @@
     "semantic_hash": ""
   },
   "src/components/tv/range/TvRangeCompanyWelcomeScreen.jsx": {
-    "mtime": 1787227319.513284,
-    "ast_hash": "dec24d2ac169e86fa0ad7e088e1c8d46",
+    "mtime": 1786612620.5011032,
+    "ast_hash": "432f5b1085acd246b2452d774a728428",
     "semantic_hash": ""
   },
   "src/components/tv/range/TvRangeCountdown.jsx": {
@@ -1375,23 +1375,23 @@
     "semantic_hash": ""
   },
   "src/components/tv/range/TvRangePeriodProgressBar.jsx": {
-    "mtime": 1787149051.913406,
-    "ast_hash": "abea7f00c08c51b98cb70baead822afe",
+    "mtime": 1786614108.711446,
+    "ast_hash": "4b80be553572c499bdf7e7bf36cedaa5",
     "semantic_hash": ""
   },
   "src/components/tv/range/TvRangePlanningScreen.jsx": {
-    "mtime": 1787224854.040079,
-    "ast_hash": "b503c32b5584f2378c94b03898ebba83",
+    "mtime": 1786612585.4915855,
+    "ast_hash": "11759cf63463a9f1d0e12d08a548e4f0",
     "semantic_hash": ""
   },
   "src/components/tv/range/TvRangeRaiderPracticeWidget.jsx": {
-    "mtime": 1787151190.6185539,
-    "ast_hash": "c91249f8ee49486fd7452b5edf05c630",
+    "mtime": 1786698630.9045632,
+    "ast_hash": "97f22fa57ddea2b032d3a0c2ca37c7bf",
     "semantic_hash": ""
   },
   "src/components/tv/range/TvRangeRotationLayout.jsx": {
-    "mtime": 1787151045.696392,
-    "ast_hash": "c1092f18da493312e67a0e349dfed69f",
+    "mtime": 1786957873.229451,
+    "ast_hash": "1c06119b9f2548ff164315c78ab0b3ad",
     "semantic_hash": ""
   },
   "src/components/tv/range/TvRangeScreenBase.jsx": {
@@ -1400,8 +1400,8 @@
     "semantic_hash": ""
   },
   "src/components/tv/range/TvRangeStaffScheduleScreen.jsx": {
-    "mtime": 1787225558.0726063,
-    "ast_hash": "14833603bc2ce8d1b6da7998438c209c",
+    "mtime": 1786612595.5789921,
+    "ast_hash": "e25e1b2993224d36695fd9989d2001a4",
     "semantic_hash": ""
   },
   "src/components/tv/range/TvRangeT2Screen.jsx": {
@@ -1470,8 +1470,8 @@
     "semantic_hash": ""
   },
   "src/lib/bellSchedules.js": {
-    "mtime": 1787133159.471526,
-    "ast_hash": "ae50d71a392db3bba52963c75ee99225",
+    "mtime": 1786614049.9631343,
+    "ast_hash": "8ba6e061621d5b6cd36e451dc552ba5a",
     "semantic_hash": ""
   },
   "src/lib/creedProgress.js": {
@@ -1609,14 +1609,49 @@
     "ast_hash": "10eccdf940a123dfda98bb7dab1f139d",
     "semantic_hash": ""
   },
+  "src/components/tv/control-center/StepRangeLayout.jsx": {
+    "mtime": 1786697622.5172696,
+    "ast_hash": "cdb04e6370515d1e142063ddcec60584",
+    "semantic_hash": ""
+  },
+  "src/components/tv/range/rangeGrid/RangeGridBoard.jsx": {
+    "mtime": 1786702550.2182906,
+    "ast_hash": "4221c9ab8134fda328ad76c218a77322",
+    "semantic_hash": ""
+  },
+  "src/components/tv/range/rangeGrid/RangeGridClock.jsx": {
+    "mtime": 1786698508.9657934,
+    "ast_hash": "afc9b5117fe95ce4b470ea793bbe2d42",
+    "semantic_hash": ""
+  },
+  "src/components/tv/range/rangeGrid/RangeGridCountdown.jsx": {
+    "mtime": 1786699838.683487,
+    "ast_hash": "ba5087fbb8cf74021c0d7c86051d806e",
+    "semantic_hash": ""
+  },
+  "src/components/tv/range/rangeGrid/RangeGridPhotoSingle.jsx": {
+    "mtime": 1786699876.8960893,
+    "ast_hash": "54b287e9e85eff897f4dfab61a25119a",
+    "semantic_hash": ""
+  },
+  "src/components/tv/range/rangeGrid/RangeGridWidgetContent.jsx": {
+    "mtime": 1786700830.538543,
+    "ast_hash": "0f20aea16e7414b236809977ab896036",
+    "semantic_hash": ""
+  },
   "src/components/tv/range/rangeGrid/RichTextField.jsx": {
-    "mtime": 1787151176.0855248,
-    "ast_hash": "41cd22ebae075aecb846c39b2a26968d",
+    "mtime": 1786701897.2696514,
+    "ast_hash": "ec2c39e64f150c13d45dabec1144f424",
+    "semantic_hash": ""
+  },
+  "src/components/tv/range/rangeGrid/gridDefaults.js": {
+    "mtime": 1786699780.4015958,
+    "ast_hash": "492b44b9b366e76d20f129a4949d2279",
     "semantic_hash": ""
   },
   "src/components/tv/range/rangeGrid/richText.jsx": {
-    "mtime": 1787151166.4328997,
-    "ast_hash": "e580d03022151fc336ac8e30bcf749fb",
+    "mtime": 1786701861.2119794,
+    "ast_hash": "a827076a9b93583c62c4e86943b70a75",
     "semantic_hash": ""
   },
   "src/lib/creedLeaderboard.js": {
@@ -1690,23 +1725,28 @@
     "semantic_hash": ""
   },
   "src/components/tv/control-center/StepRangeSlideshow.jsx": {
-    "mtime": 1787232313.7446616,
-    "ast_hash": "fad9cbdcca253f77eda747529b3c736a",
+    "mtime": 1786958177.0156329,
+    "ast_hash": "83df2e66879355e6f43a5a4c7c4c4c48",
+    "semantic_hash": ""
+  },
+  "src/components/tv/control-center/StepRotationScreen.jsx": {
+    "mtime": 1786956920.9222798,
+    "ast_hash": "89b865e597d4a0e3b958f7434f2fae7d",
     "semantic_hash": ""
   },
   "src/components/tv/range/TvRangeSlideshowScreen.jsx": {
-    "mtime": 1787229656.9425542,
-    "ast_hash": "9dfde1c6d831aae698f1bc6a233fa5ef",
+    "mtime": 1787097080.0959594,
+    "ast_hash": "d406482ef5d69977efe655bb39eb036c",
     "semantic_hash": ""
   },
   "src/components/tv/range/slides/SlideAnnouncementSingle.jsx": {
-    "mtime": 1787150998.3004196,
-    "ast_hash": "fd876133e5c868bd1d67ee255a1b8557",
+    "mtime": 1786958125.2978876,
+    "ast_hash": "21899c039f373ff236532c466cf314ec",
     "semantic_hash": ""
   },
   "src/components/tv/range/slides/SlideAnnouncements.jsx": {
-    "mtime": 1787150946.5784073,
-    "ast_hash": "0cdeb80a59f3fccaae698af100dcce52",
+    "mtime": 1786956764.776748,
+    "ast_hash": "dcad7f582d665b2a36adf478f198df58",
     "semantic_hash": ""
   },
   "src/components/tv/range/slides/SlideUniformCountdown.jsx": {
@@ -1715,8 +1755,8 @@
     "semantic_hash": ""
   },
   "src/components/tv/range/slides/slideRegistry.js": {
-    "mtime": 1787232331.6786427,
-    "ast_hash": "69e9cde14ae4b689e01fa86f304305a0",
+    "mtime": 1787097074.2691917,
+    "ast_hash": "41f852bd339003d64ba2414e1dbba0d1",
     "semantic_hash": ""
   },
   "src/hooks/useTvNextUniformDay.js": {
@@ -1725,8 +1765,8 @@
     "semantic_hash": ""
   },
   "src/lib/consentPdfPrint.js": {
-    "mtime": 1787148439.6783535,
-    "ast_hash": "c8c076cd684b4e477ee3925fb845d701",
+    "mtime": 1786840330.2598479,
+    "ast_hash": "30e6ee454ca1f784ec2406b9ade83bf4",
     "semantic_hash": ""
   },
   "src/lib/nameSort.js": {
@@ -1805,103 +1845,23 @@
     "semantic_hash": ""
   },
   "src/components/EventSpotlightBand.jsx": {
-    "mtime": 1787141474.5898848,
-    "ast_hash": "041b64a1be2f6d5569ce2f214c430869",
+    "mtime": 1787097055.4868212,
+    "ast_hash": "ad89fb3d1b1b1ff17ba6d4eacfc2d46a",
     "semantic_hash": ""
   },
   "src/components/admin/panels/beta/BetaFeaturesPanel.jsx": {
-    "mtime": 1787098428.7678728,
-    "ast_hash": "376c3db266e5f426f10e733c9a082d67",
+    "mtime": 1787097126.3053696,
+    "ast_hash": "222b50b560497dc96bd7752888c265ba",
     "semantic_hash": ""
   },
   "src/components/tv/range/slides/SlideEventSpotlight.jsx": {
-    "mtime": 1787151008.3956027,
-    "ast_hash": "77f1f53d72e0c7e382b7b5f245546fa6",
+    "mtime": 1787097067.931605,
+    "ast_hash": "3f1b6bc85f8362efd1f28b4dd50bdb20",
     "semantic_hash": ""
   },
   "supabase/beta_event_spotlight.sql": {
-    "mtime": 1787098404.443855,
-    "ast_hash": "115bb9f68dbe3f62d775da05325f5716",
-    "semantic_hash": ""
-  },
-  "src/components/RaiderTeam.jsx": {
-    "mtime": 1787225499.5034335,
-    "ast_hash": "cdba54bb461d25dbc36736b36109e045",
-    "semantic_hash": ""
-  },
-  "src/components/tv/TvRefreshNotice.jsx": {
-    "mtime": 1787133450.5641055,
-    "ast_hash": "907d94fa85fd4c9857b77f6b83ed86bb",
-    "semantic_hash": ""
-  },
-  "src/components/tv/range/RaiderCongratsBanner.jsx": {
-    "mtime": 1787227735.3481867,
-    "ast_hash": "d73df3c07896ebc9fa549bd30e9608b9",
-    "semantic_hash": ""
-  },
-  "src/components/tv/range/rangeGrid/fontOptions.js": {
-    "mtime": 1787151066.2820928,
-    "ast_hash": "eec445aa2d156eb039096cf1d047f96d",
-    "semantic_hash": ""
-  },
-  "src/components/tv/range/slides/SlideNoticeList.jsx": {
-    "mtime": 1787151791.6130755,
-    "ast_hash": "9709c34daac18e74f7c2c7751a607c4f",
-    "semantic_hash": ""
-  },
-  "src/components/tv/range/slides/SlidePhotoOfDay.jsx": {
-    "mtime": 1787150969.5949597,
-    "ast_hash": "02081a7a9e1725e20c87c17e616c4d67",
-    "semantic_hash": ""
-  },
-  "src/components/tv/range/slides/SlideRaiderCongrats.jsx": {
-    "mtime": 1787232300.982928,
-    "ast_hash": "b95045b6a68f48242bde9cc3b1a74eb8",
-    "semantic_hash": ""
-  },
-  "src/components/tv/range/slides/SlideRaiderPractice.jsx": {
-    "mtime": 1787150987.6543074,
-    "ast_hash": "76628c85553a79a8cf9c48bf20da0f89",
-    "semantic_hash": ""
-  },
-  "src/components/tv/range/slides/SlideStaffNotes.jsx": {
-    "mtime": 1787150952.3712797,
-    "ast_hash": "286d98b481c79151cf50b2a85efc1793",
-    "semantic_hash": ""
-  },
-  "src/components/tv/range/slides/SlideUpcomingEvents.jsx": {
-    "mtime": 1787151807.1243572,
-    "ast_hash": "b04179ac997e0390032b471ae8882574",
-    "semantic_hash": ""
-  },
-  "src/hooks/useRaiderCongrats.js": {
-    "mtime": 1787228789.3085945,
-    "ast_hash": "5ca997c6996bb9ae36737d34514e3f1e",
-    "semantic_hash": ""
-  },
-  "src/hooks/useTvRefreshNotice.js": {
-    "mtime": 1787133615.4857957,
-    "ast_hash": "b7ccd4196d718daee7c66e31239eb454",
-    "semantic_hash": ""
-  },
-  "src/lib/raiderRoster.js": {
-    "mtime": 1787229463.593384,
-    "ast_hash": "192fcd23010b12d33785af0abe070943",
-    "semantic_hash": ""
-  },
-  "supabase/cadet_company_roster_view.sql": {
-    "mtime": 1787228545.3725426,
-    "ast_hash": "a5b329a20622e58ee8188cbae5e48337",
-    "semantic_hash": ""
-  },
-  "supabase/cadet_consent_commander_company_fix.sql": {
-    "mtime": 1787147429.246604,
-    "ast_hash": "2db7214b1260a8c523de8a096f28eb5c",
-    "semantic_hash": ""
-  },
-  "supabase/personnel_add_hayden_ogle_jv_raider.sql": {
-    "mtime": 1787236090.4712982,
-    "ast_hash": "a0b326b68994ae0186c8c1706dbc97e8",
+    "mtime": 1787097010.4908054,
+    "ast_hash": "e0e4be080713bbe38e7c9608bd20db5d",
     "semantic_hash": ""
   }
 }
