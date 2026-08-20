@@ -18,9 +18,9 @@ export const RAIDER_TEAMS = [
     label: 'CO-ED VARSITY',
     accent: '#E8C77A',
     members: [
-      'Zoe McCollum', 'Amber Davidson', 'Kylie Gray', 'Mya Sneideman', 'Maddie Basset',
-      'Bella Basset', 'Lilac Powers', 'Taylor King', 'Chase Otto', 'Levi Fosdick',
-      'Bryson Frazier', 'Cooper Higginbotham', 'William Baker (Freshman)', 'Shawn Layson',
+      'Zoe McCollum', 'Amber Davidson', 'Kylie Gray', 'Mya Sneideman', 'Maddie Bassett',
+      'Bella Bassett', 'Lilac Powers', 'Taylor King', 'Chase Otto', 'Levi Fosdick',
+      'Bryson Frazier', 'Cooper Higginbotham', 'William Baker (Freshman)', 'Sean Layson',
       'James Bunch',
     ],
   },
@@ -37,6 +37,16 @@ export const RAIDER_TEAMS = [
   },
 ];
 
+// Cadets who go by a name other than their cadet_consent legal first name —
+// normalizeName can't infer this from spelling alone, so map the roster's
+// normalized key straight to the DB's normalized (first+last) key.
+const NAME_ALIASES = {
+  'zane youngblood': 'jason youngblood', // legal "Jason Zane Youngblood", goes by middle name
+  'alex johnson': 'alexander johnson',   // legal "Alexander Lee Johnson"
+  'maddie bassett': 'madalynn bassett',  // legal "Madalynn Alexa Bassett"
+  'bella bassett': 'isabella bassett',   // legal "Isabella Bridget Bassett"
+};
+
 // Flat lookups keyed by normalized name: teams a cadet made (a cadet can
 // appear on more than one roster, e.g. Hayden Ogle on both Male and JV), and
 // the roster's own short display form — cadet_consent stores full legal
@@ -47,10 +57,12 @@ const NAME_TO_DISPLAY = new Map();
 for (const team of RAIDER_TEAMS) {
   for (const rawName of team.members) {
     const key = normalizeName(rawName);
-    const list = NAME_TO_TEAMS.get(key) || [];
-    list.push(team);
-    NAME_TO_TEAMS.set(key, list);
-    if (!NAME_TO_DISPLAY.has(key)) NAME_TO_DISPLAY.set(key, rawName);
+    for (const k of [key, NAME_ALIASES[key]].filter(Boolean)) {
+      const list = NAME_TO_TEAMS.get(k) || [];
+      list.push(team);
+      NAME_TO_TEAMS.set(k, list);
+      if (!NAME_TO_DISPLAY.has(k)) NAME_TO_DISPLAY.set(k, rawName);
+    }
   }
 }
 
