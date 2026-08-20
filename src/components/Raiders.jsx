@@ -602,29 +602,31 @@ export default function Raiders() {
           <RaiderCarousel />
         </div>
 
-        {/* ── Meet your commanders + about, side by side (stacks on narrow viewports) ── */}
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(380px, 1fr))', gap: 28, alignItems: 'start' }}>
-          <div>
-            <SectionLabel tag="// ABOUT THE TEAM" title="WHAT IS RAIDERS" />
-            <p style={{ fontFamily: 'Inter, sans-serif', fontSize: 14, color: P.mute, lineHeight: 1.75, margin: '0 0 14px' }}>
-              Raiders is the battalion's physical fitness and tactical skills competition team. Cadets train in rope bridge construction,
-              obstacle courses, land navigation, and team relays, then compete against other JROTC battalions at regional meets.
-            </p>
-            <p style={{ fontFamily: 'Inter, sans-serif', fontSize: 14, color: P.mute, lineHeight: 1.75, margin: 0 }}>
-              No prior fitness level or JROTC experience is required to join. Training builds up over the season, and every cadet
-              is welcome at practice regardless of where they're starting from.
-            </p>
-          </div>
-          <div>
-            <SectionLabel tag="// LEADERSHIP" title="MEET YOUR COMMANDERS" subtitle="Tap a commander for their full profile." />
-            {commanders.length > 0 ? (
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: 20 }}>
-                {commanders.map((c) => <CommanderCard key={c.id} person={c} onOpen={openProfile} />)}
-              </div>
-            ) : (
-              <div style={{ fontFamily: mono, fontSize: 10, color: P.mute, letterSpacing: '0.2em' }}>LOADING…</div>
-            )}
-          </div>
+        {/* ── Meet your commanders — its own full-width row ── */}
+        <div>
+          <SectionLabel tag="// LEADERSHIP" title="MEET YOUR COMMANDERS" subtitle="Tap a commander for their full profile." />
+          {commanders.length > 0 ? (
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))', gap: 22 }}>
+              {commanders.map((c) => <CommanderCard key={c.id} person={c} onOpen={openProfile} />)}
+            </div>
+          ) : (
+            <div style={{ fontFamily: mono, fontSize: 10, color: P.mute, letterSpacing: '0.2em' }}>LOADING…</div>
+          )}
+        </div>
+
+        <Divider tight />
+
+        {/* ── What Raiders is, below the commanders row ── */}
+        <div>
+          <SectionLabel tag="// ABOUT THE TEAM" title="WHAT IS RAIDERS" />
+          <p style={{ fontFamily: 'Inter, sans-serif', fontSize: 14, color: P.mute, lineHeight: 1.75, margin: '0 0 14px', maxWidth: 760 }}>
+            Raiders is the battalion's physical fitness and tactical skills competition team. Cadets train in rope bridge construction,
+            obstacle courses, land navigation, and team relays, then compete against other JROTC battalions at regional meets.
+          </p>
+          <p style={{ fontFamily: 'Inter, sans-serif', fontSize: 14, color: P.mute, lineHeight: 1.75, margin: 0, maxWidth: 760 }}>
+            No prior fitness level or JROTC experience is required to join. Training builds up over the season, and every cadet
+            is welcome at practice regardless of where they're starting from.
+          </p>
         </div>
 
         <Divider tight />
