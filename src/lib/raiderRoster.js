@@ -37,28 +37,44 @@ export const RAIDER_TEAMS = [
   },
 ];
 
-// Flat lookup: normalized name -> array of teams that name made (a cadet can
-// appear on more than one roster, e.g. Hayden Ogle on both Male and JV).
+// Flat lookups keyed by normalized name: teams a cadet made (a cadet can
+// appear on more than one roster, e.g. Hayden Ogle on both Male and JV), and
+// the roster's own short display form — cadet_consent stores full legal
+// names (middle names included), so showing the roster's "Hayden Ogle"
+// instead of the DB's "Hayden Michael Ogle" keeps every card consistent.
 const NAME_TO_TEAMS = new Map();
+const NAME_TO_DISPLAY = new Map();
 for (const team of RAIDER_TEAMS) {
   for (const rawName of team.members) {
     const key = normalizeName(rawName);
     const list = NAME_TO_TEAMS.get(key) || [];
     list.push(team);
     NAME_TO_TEAMS.set(key, list);
+    if (!NAME_TO_DISPLAY.has(key)) NAME_TO_DISPLAY.set(key, rawName);
   }
 }
 
-// Roster names carry parenthetical disambiguators ("(Senior)") personnel
-// records won't have — strip those, plus case/whitespace, for matching.
+// Roster names carry parenthetical disambiguators ("(Senior)") the cadet
+// roster won't have — strip those, plus case/whitespace. cadet_consent also
+// stores full legal names (middle names included) where the roster only has
+// first + last, so once cleaned, collapse to just the first and last token —
+// checked against the full ~154-cadet roster and no two distinct cadets
+// share a first+last, so this doesn't risk cross-matching different people.
 export function normalizeName(name) {
-  return (name || '')
+  const cleaned = (name || '')
     .replace(/\s*\([^)]*\)\s*/g, ' ')
     .trim()
     .toLowerCase()
     .replace(/\s+/g, ' ');
+  const parts = cleaned.split(' ').filter(Boolean);
+  if (parts.length <= 2) return cleaned;
+  return `${parts[0]} ${parts[parts.length - 1]}`;
 }
 
 export function teamsForName(name) {
   return NAME_TO_TEAMS.get(normalizeName(name)) || [];
+}
+
+export function displayNameForName(name) {
+  return NAME_TO_DISPLAY.get(normalizeName(name)) || name;
 }

@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { supabase as SB } from '../lib/supabaseClient';
-import { teamsForName } from '../lib/raiderRoster.js';
+import { teamsForName, displayNameForName } from '../lib/raiderRoster.js';
 
 /**
  * Cross-references the official Raider roster (src/lib/raiderRoster.js)
@@ -25,7 +25,7 @@ export function useRaiderCongrats() {
       .then(({ data }) => {
         if (!alive) return;
         const found = (data || [])
-          .map((c) => ({ name: c.name, company: (c.company || '').toLowerCase(), teams: teamsForName(c.name) }))
+          .map((c) => ({ name: displayNameForName(c.name), company: (c.company || '').toLowerCase(), teams: teamsForName(c.name) }))
           .filter((c) => c.teams.length > 0);
         setMatches(found);
         setLoading(false);
