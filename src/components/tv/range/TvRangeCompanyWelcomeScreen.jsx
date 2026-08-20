@@ -2,6 +2,8 @@ import { P, mono, fraunces, inter, fs, sp } from '../../admin/theme.js';
 import { renderTemplate } from '../../../lib/tvRangeSchedule.js';
 import { isNewScheduleAnnouncementActive, NEW_SCHEDULE_MESSAGE } from '../../../lib/scheduleAnnouncement.js';
 import TvScheduleTable from './TvScheduleTable.jsx';
+import RaiderCongratsBanner from './RaiderCongratsBanner.jsx';
+import { useRaiderCongrats, matchesForCompany } from '../../../hooks/useRaiderCongrats.js';
 
 // Item 3 (visual redesign) + item 5 (editable custom_blocks). Still the
 // sparsest screen in the set per spec — no carousel, no widgets — but "sparse"
@@ -27,6 +29,8 @@ export default function TvRangeCompanyWelcomeScreen({ config, company, now, sche
   const reminder = config?.attendance_reminder_template || '1SGT: Take attendance now';
   const customBlocks = config?.custom_blocks ?? [];
   const showNewScheduleNotice = isNewScheduleAnnouncementActive(now);
+  const { matches } = useRaiderCongrats();
+  const companyCongrats = matchesForCompany(matches, company);
 
   return (
     <div style={{
@@ -87,6 +91,8 @@ export default function TvRangeCompanyWelcomeScreen({ config, company, now, sche
         >
           {reminder}
         </div>
+
+        <RaiderCongratsBanner matches={companyCongrats} />
 
         {customBlocks.length > 0 && (
           <div style={{ display: 'flex', flexDirection: 'column', gap: sp[3], maxWidth: '70vw' }}>

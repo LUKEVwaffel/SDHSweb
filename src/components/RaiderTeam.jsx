@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { RAIDER_TEAMS } from '../lib/raiderRoster.js';
 
 // Palette mirrors Raiders.jsx — green is the raider accent, gold stays command.
 const P = {
@@ -11,41 +12,8 @@ const mono = "'JetBrains Mono', monospace";
 const oswald = 'Oswald, sans-serif';
 
 // Official 2026 Raider Roster. First name in each list is the team commander.
-const TEAMS = [
-  {
-    key: 'male',
-    label: 'MALE VARSITY',
-    accent: P.gold,
-    members: [
-      'Weston Noblit', 'Quincy Tyler', 'William Baker (Senior)', "Aiden O'Brien",
-      'Luke Vetch', 'Makio Roos', 'Griffen Blume', 'Aiden Clifton', 'Zane Youngblood',
-      'Blayne Frazier', 'Alex Johnson', "Logan O'Brien", 'Hayden Ogle', 'Riley Lyles',
-      'Luke Mattison',
-    ],
-  },
-  {
-    key: 'coed',
-    label: 'CO-ED VARSITY',
-    accent: P.bright,
-    members: [
-      'Zoe McCollum', 'Amber Davidson', 'Kylie Gray', 'Mya Sniedeman', 'Maddie Basset',
-      'Bella Basset', 'Lilac Powers', 'Taylor King', 'Chase Otto', 'Levi Fosdick',
-      'Bryson Frazier', 'Cooper Higgenbothem', 'William Baker (Freshman)', 'Shawn Layson',
-      'James Bunch',
-    ],
-  },
-  {
-    key: 'jv',
-    label: 'JUNIOR VARSITY',
-    accent: P.green,
-    members: [
-      'Hayden Ogle', 'Avery Fosdick', 'Grayson Mercier', 'Mason Myers', 'Jordan Elsea',
-      'Jayden Walker', 'Veronica Coyer', 'Elizabeth Morris', 'Annabelle Settles',
-      'Hayden Lee', 'James Shelby', 'Miles Holloway', 'Bryson Dodd', 'Luke Chambers',
-      'Landon McClure', 'Ian Thompson',
-    ],
-  },
-];
+// Shared with the Range TV congrats feature — see src/lib/raiderRoster.js.
+const TEAMS = RAIDER_TEAMS;
 
 function RosterStyles() {
   return (
