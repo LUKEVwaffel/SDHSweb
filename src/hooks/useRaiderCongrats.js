@@ -4,9 +4,16 @@ import { teamsForName } from '../lib/raiderRoster.js';
 
 /**
  * Cross-references the official Raider roster (src/lib/raiderRoster.js)
- * against DISPATCH's `personnel` table by name, so Range TV can congratulate
+ * against the full cadet roster by name, so Range TV can congratulate
  * whichever cadets made the team on their own company's (or staff's) screen
  * without hand-maintaining a second roster-to-company mapping.
+ *
+ * Reads `cadet_company_roster`, not `personnel` — personnel is only the
+ * ~33-person leadership directory. The real ~154-cadet roster with company
+ * assignments lives in `cadet_consent`, which is admin-locked (consent
+ * status, emails, birthdates); cadet_company_roster is a narrow public view
+ * over it exposing just name + company. See
+ * supabase/cadet_company_roster_view.sql.
  */
 export function useRaiderCongrats() {
   const [matches, setMatches] = useState([]);
@@ -14,12 +21,12 @@ export function useRaiderCongrats() {
 
   useEffect(() => {
     let alive = true;
-    SB.from('personnel').select('name, section').eq('visible', true)
+    SB.from('cadet_company_roster').select('name, company')
       .then(({ data }) => {
         if (!alive) return;
         const found = (data || [])
-          .map((p) => ({ name: p.name, section: p.section, teams: teamsForName(p.name) }))
-          .filter((p) => p.teams.length > 0);
+          .map((c) => ({ name: c.name, company: (c.company || '').toLowerCase(), teams: teamsForName(c.name) }))
+          .filter((c) => c.teams.length > 0);
         setMatches(found);
         setLoading(false);
       });
@@ -29,17 +36,11 @@ export function useRaiderCongrats() {
   return { matches, loading };
 }
 
-// Non-company sections DISPATCH uses for battalion staff/command. Matches the
-// actual `section` values seen in the personnel table (no hyphen in s1..s6,
-// unlike PeoplePanel.jsx's SECTION_ORDER labels) — anyone here shows on the
-// Staff screen instead of a company-welcome screen.
-const STAFF_SECTIONS = new Set(['command', 'staff', 'leadership', 's1', 's2', 's3', 's4', 's5', 's6']);
-
 export function matchesForCompany(matches, companyId) {
-  const section = `company-${(companyId || '').toLowerCase()}`;
-  return matches.filter((m) => m.section === section);
+  const company = (companyId || '').toLowerCase();
+  return matches.filter((m) => m.company === company);
 }
 
 export function matchesForStaff(matches) {
-  return matches.filter((m) => STAFF_SECTIONS.has(m.section));
+  return matches.filter((m) => m.company === 'staff');
 }
