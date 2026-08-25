@@ -18,6 +18,7 @@ export const NAV_GROUPS = [
       { id: 'questions', icon: '?', label: 'FAQ Questions' },
       { id: 'email',    icon: '✉', label: 'Email List' },
       { id: 'messages', icon: '◈', label: 'Messages' },
+      { id: 'checkin', icon: '◔', label: 'Site Check-In' },
     ],
   },
   {

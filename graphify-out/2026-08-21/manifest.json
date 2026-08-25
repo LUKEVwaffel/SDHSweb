@@ -25,8 +25,8 @@
     "semantic_hash": "c1ee9ce6a4fe04105dbf8e619390df5e"
   },
   "src/App.jsx": {
-    "mtime": 1787657927.1841156,
-    "ast_hash": "4a83b85c74a17355bd9d0fbc98da97a3",
+    "mtime": 1787225639.035403,
+    "ast_hash": "6ba3f7e0d1b23f557968c6ca02dbbc29",
     "semantic_hash": ""
   },
   "src/components/About.jsx": {
@@ -85,8 +85,8 @@
     "semantic_hash": ""
   },
   "src/components/Raiders.jsx": {
-    "mtime": 1787237679.0615895,
-    "ast_hash": "95449bd13b4bc550e700f7e9709be4c1",
+    "mtime": 1786632580.5612898,
+    "ast_hash": "25ea6b5e78c87d482a6c963f781873ad",
     "semantic_hash": ""
   },
   "src/components/Rifle.jsx": {
@@ -130,8 +130,8 @@
     "semantic_hash": ""
   },
   "src/components/admin/Dashboard.jsx": {
-    "mtime": 1787657968.80384,
-    "ast_hash": "ae3ebb87d0d3b6e4247adde02be6b579",
+    "mtime": 1787097095.720237,
+    "ast_hash": "6c62dc56a7c451fb36827b7511d1ddc6",
     "semantic_hash": ""
   },
   "src/components/admin/LoginScreen.jsx": {
@@ -150,8 +150,8 @@
     "semantic_hash": "872097bb6f2a4e8b32dfd0a1ba37dedc"
   },
   "src/components/admin/nav/Sidebar.jsx": {
-    "mtime": 1787657951.5584927,
-    "ast_hash": "fc0f4b311545dd3c477c5c883b744755",
+    "mtime": 1787097083.214991,
+    "ast_hash": "20dc8248e169cfe9cac82ef0f9acf39e",
     "semantic_hash": ""
   },
   "src/components/admin/nav/StatusBar.jsx": {
@@ -170,8 +170,8 @@
     "semantic_hash": ""
   },
   "src/components/admin/panels/MediaPanel.jsx": {
-    "mtime": 1787316815.1663022,
-    "ast_hash": "c2e50b204db2b49b3c2451b4c33d4117",
+    "mtime": 1785788679.6550438,
+    "ast_hash": "459323d0c5e95845126dcef43821c8a2",
     "semantic_hash": ""
   },
   "src/components/admin/panels/OverviewPanel.jsx": {
@@ -805,8 +805,8 @@
     "semantic_hash": ""
   },
   "src/components/admin/panels/aars/AarsPanel.jsx": {
-    "mtime": 1787316824.7871776,
-    "ast_hash": "d8af8418eb63399186aeca004568cb6b",
+    "mtime": 1785870146.419886,
+    "ast_hash": "5820e27b8cc2925819afeb827d3be6d8",
     "semantic_hash": ""
   },
   "src/components/calendar/MonthGridCalendar.jsx": {
@@ -1145,8 +1145,8 @@
     "semantic_hash": ""
   },
   "src/components/admin/panels/tvphotos/EmergencyPushPanel.jsx": {
-    "mtime": 1787316684.5682645,
-    "ast_hash": "d72909b2aa9915e79db4fde04761a3ee",
+    "mtime": 1786892088.3031023,
+    "ast_hash": "4eee834284e39e81b5f670d3ff9a9fd1",
     "semantic_hash": ""
   },
   "src/components/admin/panels/tvphotos/FocalPointPicker.jsx": {
@@ -1180,8 +1180,8 @@
     "semantic_hash": ""
   },
   "src/components/admin/panels/tvremote/TvRemotePanel.jsx": {
-    "mtime": 1787316687.2116086,
-    "ast_hash": "2f9763ad349d533a4c8552128c4c1fe0",
+    "mtime": 1787151133.9229026,
+    "ast_hash": "29cbac3e1f1350094b89ab17c19ced39",
     "semantic_hash": ""
   },
   "src/components/creed/CreedHub.jsx": {
@@ -1445,8 +1445,8 @@
     "semantic_hash": ""
   },
   "src/hooks/useTvDailySettings.js": {
-    "mtime": 1787316750.1952717,
-    "ast_hash": "df54811fc14d28e3bcff5c9b94d891c2",
+    "mtime": 1786715826.1747556,
+    "ast_hash": "5713c2f3e9dcc2418b220625af7e4673",
     "semantic_hash": ""
   },
   "src/hooks/useTvEventOptions.js": {
@@ -1455,8 +1455,8 @@
     "semantic_hash": ""
   },
   "src/hooks/useTvNotices.js": {
-    "mtime": 1787316745.4316866,
-    "ast_hash": "a62e63ff31567d82ada6ad0b0f0d9f25",
+    "mtime": 1786612709.251265,
+    "ast_hash": "c32a50a30db200cc185395289cde3ffe",
     "semantic_hash": ""
   },
   "src/hooks/useTvUpcomingEvents.js": {
@@ -1900,43 +1900,8 @@
     "semantic_hash": ""
   },
   "supabase/personnel_add_hayden_ogle_jv_raider.sql": {
-    "mtime": 1787236669.1872113,
-    "ast_hash": "afb2ce55ad7bf10d01688f076488f587",
-    "semantic_hash": ""
-  },
-  "src/components/tv/RaiderParentWelcome.jsx": {
-    "mtime": 1787251143.4362512,
-    "ast_hash": "17e2114c7de2f918d32dca1f8086fb20",
-    "semantic_hash": ""
-  },
-  "scripts/mark-raiders-team.mjs": {
-    "mtime": 1787596590.1562788,
-    "ast_hash": "72f475ada1676d1cfeafc7dc17ef3caf",
-    "semantic_hash": ""
-  },
-  "src/components/CheckinSurvey.jsx": {
-    "mtime": 1787658576.0909376,
-    "ast_hash": "0893bf5658fdbfb0fb1b34cd41cfa093",
-    "semantic_hash": ""
-  },
-  "src/components/admin/panels/CheckinPanel.jsx": {
-    "mtime": 1787658608.6044571,
-    "ast_hash": "e3ec2761b6fea1fa452dd1042071ea23",
-    "semantic_hash": ""
-  },
-  "src/lib/checkinQuestions.js": {
-    "mtime": 1787658489.1746805,
-    "ast_hash": "9ed41be252c01467bc7a8b7ce6666be9",
-    "semantic_hash": ""
-  },
-  "src/lib/checkinSeen.js": {
-    "mtime": 1787657884.8446255,
-    "ast_hash": "f269b0881aa105b3d2f6710fed45f2fc",
-    "semantic_hash": ""
-  },
-  "supabase/site_checkin.sql": {
-    "mtime": 1787658505.8296695,
-    "ast_hash": "86d1fa8919fd4b393c08991688e190da",
+    "mtime": 1787236090.4712982,
+    "ast_hash": "a0b326b68994ae0186c8c1706dbc97e8",
     "semantic_hash": ""
   }
 }

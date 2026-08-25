@@ -1,16 +1,16 @@
-# Graph Report - Trojan Battalion Folder  (2026-08-25)
+# Graph Report - Trojan Battalion Folder  (2026-08-20)
 
 ## Corpus Check
-- 360 files · ~650,230 words
+- 353 files · ~645,039 words
 - Verdict: corpus is large enough that graph structure adds value.
 
 ## Summary
-- 1994 nodes · 3982 edges · 268 communities (156 shown, 112 thin omitted)
+- 1958 nodes · 3851 edges · 261 communities (149 shown, 112 thin omitted)
 - Extraction: 100% EXTRACTED · 0% INFERRED · 0% AMBIGUOUS · INFERRED: 8 edges (avg confidence: 0.72)
 - Token cost: 0 input · 0 output
 
 ## Graph Freshness
-- Built from commit: `60fb8756`
+- Built from commit: `31a72c3a`
 - Run `git rev-parse HEAD` and compare to check if the graph is stale.
 - Run `graphify update .` after code changes (no API cost).
 
@@ -241,51 +241,44 @@
 - CadetManual.jsx
 - Companies.jsx
 - beta_event_spotlight.sql
-- tvPhotoCaption.js
-- EventSpotlightBand.jsx
-- site_checkin.sql
-- emailRender.js
-- cadet_company_roster_view.sql
-- ReviewPortal.jsx
 - StepRangeSchedule.jsx
-- TvRangeRaiderPracticeWidget.jsx
-- RaiderPolls.jsx
-- RaiderParentWelcome.jsx
+- EventSpotlightBand.jsx
+- TEAMS
 - TvRefreshNotice
-- posthog-js
+- cadet_company_roster_view.sql
 
 ## God Nodes (most connected - your core abstractions)
 1. `PostHog` - 210 edges
-2. `react` - 127 edges
-3. `P` - 95 edges
-4. `sp` - 88 edges
-5. `fs` - 78 edges
-6. `supabase` - 75 edges
-7. `sb` - 53 edges
-8. `radius` - 44 edges
-9. `Btn()` - 40 edges
-10. `serviceClient()` - 29 edges
+2. `react` - 124 edges
+3. `P` - 93 edges
+4. `sp` - 86 edges
+5. `fs` - 76 edges
+6. `supabase` - 72 edges
+7. `radius` - 44 edges
+8. `Btn()` - 39 edges
+9. `serviceClient()` - 29 edges
+10. `Label()` - 27 edges
 
 ## Surprising Connections (you probably didn't know these)
-- `Admin()` --references--> `sb`  [EXTRACTED]
-  src/components/admin/index.jsx → scripts/mark-raiders-team.mjs
-- `LoginScreen()` --references--> `sb`  [EXTRACTED]
-  src/components/admin/LoginScreen.jsx → scripts/mark-raiders-team.mjs
-- `AccountsPanel()` --references--> `sb`  [EXTRACTED]
-  src/components/admin/panels/advanced/AccountsPanel.jsx → scripts/mark-raiders-team.mjs
-- `EmailHistoryPanel()` --references--> `sb`  [EXTRACTED]
-  src/components/admin/panels/advanced/EmailHistoryPanel.jsx → scripts/mark-raiders-team.mjs
-- `QuickActionsPanel()` --references--> `sb`  [EXTRACTED]
-  src/components/admin/panels/advanced/QuickActionsPanel.jsx → scripts/mark-raiders-team.mjs
+- `TeaserRow()` --calls--> `categoryColor()`  [EXTRACTED]
+  src/components/Bulletin.jsx → src/lib/calendar.js
+- `SubmitQuestion()` --calls--> `getDeviceId()`  [EXTRACTED]
+  src/components/FaqSection.jsx → src/lib/fingerprint.js
+- `EventsPanel()` --indirect_call--> `toCalendarItem()`  [INFERRED]
+  src/components/admin/panels/EventsPanel.jsx → src/lib/calendar.js
+- `AdminBulkUpload()` --indirect_call--> `isRawFile()`  [INFERRED]
+  src/components/admin/panels/photos/AdminBulkUpload.jsx → src/lib/imageResize.js
+- `useTvCarouselPhotos()` --indirect_call--> `load()`  [INFERRED]
+  src/hooks/useTvCarouselPhotos.js → src/lib/creedProgress.js
 
 ## Import Cycles
 - None detected.
 
-## Communities (268 total, 112 thin omitted)
+## Communities (261 total, 112 thin omitted)
 
 ### Community 0 - "react"
 Cohesion: 0.10
-Nodes (30): react, AccountsPanel(), AchievementCatalog(), ICON_MIME, SUBTABS, DesignTokensPanel(), EmailHistoryPanel(), fmtDate() (+22 more)
+Nodes (33): AccountsPanel(), AchievementCatalog(), ICON_MIME, SUBTABS, DesignTokensPanel(), EmailHistoryPanel(), fmtDate(), STATUS_COLOR (+25 more)
 
 ### Community 1 - "PhotoUploader.jsx"
 Cohesion: 0.07
@@ -296,20 +289,20 @@ Cohesion: 0.09
 Nodes (23): autoprefixer, @expo/cli, oxlint, devDependencies, autoprefixer, @expo/cli, oxlint, postcss (+15 more)
 
 ### Community 3 - "PhotoUploader.jsx"
-Cohesion: 0.14
-Nodes (19): StepRangeNotices(), addSlide(), cardBase, chromeBtnBase, FONT_STYLEABLE_TYPES, moveSlide(), removeSlide(), rowFieldStyle (+11 more)
+Cohesion: 0.13
+Nodes (20): StepRangeNotices(), addSlide(), cardBase, chromeBtnBase, FONT_STYLEABLE_TYPES, moveSlide(), removeSlide(), rowFieldStyle (+12 more)
 
 ### Community 4 - "EventsPanel.jsx"
-Cohesion: 0.24
-Nodes (10): ASCOT_COLORS, CATEGORY_OPTIONS, DEFAULT_COLOR_GUARD_POSITIONS(), DEFAULT_HONOR_GUARD_POSITIONS(), emptyForm(), EventsPanel(), GLOVE_COLORS, missingCore() (+2 more)
+Cohesion: 0.17
+Nodes (16): ASCOT_COLORS, CATEGORY_OPTIONS, DEFAULT_COLOR_GUARD_POSITIONS(), DEFAULT_HONOR_GUARD_POSITIONS(), emptyForm(), EventsPanel(), GLOVE_COLORS, missingCore() (+8 more)
 
 ### Community 5 - "BattalionCommand.jsx"
 Cohesion: 0.10
 Nodes (8): activate(), BOARD_MATH, boardColor(), CommandCard(), MathScatter(), P, ROLE_INFO, TacticalMap()
 
 ### Community 6 - "Raiders.jsx"
-Cohesion: 0.15
-Nodes (14): Dashboard(), Admin(), EyeIcon(), ForcePasswordChange(), inputStyle(), LoginScreen(), HealthPanel(), STORAGE_CHECKS (+6 more)
+Cohesion: 0.19
+Nodes (13): ALLOWED_MIME, Composer(), conversationAvatar(), ConversationList(), conversationName(), isOtherOnline(), previewText(), timeLabel() (+5 more)
 
 ### Community 7 - "photo_hub_v2.sql"
 Cohesion: 0.28
@@ -328,16 +321,16 @@ Cohesion: 0.20
 Nodes (8): isStale(), TvBottomWidget(), TvCustomMessagePanel(), TvHistoryPanel(), TvQuotePanel(), TvVersePanel(), todayKey(), todaysFacts()
 
 ### Community 11 - "blocks.js"
-Cohesion: 0.24
-Nodes (9): BLOCK_TYPES, blockLabel(), BY_TYPE, makeBlock(), newId(), starterBlocks(), arrowStyle(), SortableBlock() (+1 more)
+Cohesion: 0.17
+Nodes (16): BlockFields(), BLOCK_TYPES, blockLabel(), BY_TYPE, makeBlock(), newId(), starterBlocks(), arrowStyle() (+8 more)
 
 ### Community 12 - "blocks.js"
-Cohesion: 0.14
-Nodes (18): EmergencyPushPanel(), TEXT_SIZES, BASE_TABS, DEFAULT_RANGE_CONFIG, draftFromSettings(), RANGE_LAYOUT_TAB, RANGE_NOTICE_TABS, RANGE_TAB (+10 more)
+Cohesion: 0.19
+Nodes (12): BASE_TABS, DEFAULT_RANGE_CONFIG, draftFromSettings(), RANGE_LAYOUT_TAB, RANGE_NOTICE_TABS, RANGE_TAB, rangeConfigFromRow(), SCREENS (+4 more)
 
 ### Community 13 - "About.jsx"
-Cohesion: 0.11
-Nodes (10): CORE_VALUES, FAQ_CATEGORIES, P, Reveal(), teamAccent(), TeamCard(), TEAMS, useReducedMotion() (+2 more)
+Cohesion: 0.10
+Nodes (11): About(), CORE_VALUES, FAQ_CATEGORIES, P, Reveal(), teamAccent(), TeamCard(), TEAMS (+3 more)
 
 ### Community 14 - "PeoplePanel.jsx"
 Cohesion: 0.13
@@ -364,28 +357,28 @@ Cohesion: 0.12
 Nodes (14): CommandProfile(), P, ROLE_LABELS, COLS, Footer(), FooterLink(), NAV_MAP, P (+6 more)
 
 ### Community 20 - "Companies.jsx"
-Cohesion: 0.14
-Nodes (16): MessagesPanel(), BattalionCommand(), activate(), CadetCard(), Companies, P, ROLE_ORDER, Hero() (+8 more)
+Cohesion: 0.16
+Nodes (14): MessagesPanel(), BattalionCommand(), activate(), CadetCard(), Companies, P, ROLE_ORDER, Hero() (+6 more)
 
 ### Community 24 - "FaqSection.jsx"
 Cohesion: 0.20
 Nodes (5): activate(), P, S_SECTIONS, Staff(), StaffCard()
 
 ### Community 27 - "TabPlaceholder.jsx"
-Cohesion: 0.18
-Nodes (4): activate(), CommanderCard(), P, SEASON
+Cohesion: 0.17
+Nodes (5): activate(), CommanderCard(), P, Rifle(), SEASON
 
 ### Community 41 - "PhotoUploader.jsx"
-Cohesion: 0.08
-Nodes (24): ROLE_SECTIONS, SECTION_LABEL, NAV_GROUPS, Sidebar(), StatusBar(), TopBar(), AdvancedPanel(), BetaFeaturesPanel() (+16 more)
+Cohesion: 0.11
+Nodes (18): ROLE_SECTIONS, SECTION_LABEL, NAV_GROUPS, Sidebar(), StatusBar(), TopBar(), AdvancedPanel(), BetaFeaturesPanel() (+10 more)
 
 ### Community 42 - "RaiderVoting.jsx"
 Cohesion: 0.60
 Nodes (3): public.reviewer_credentials, public.reviewer_has_pin(), public.reviewer_reserve_pin_attempt()
 
 ### Community 43 - "Rifle.jsx"
-Cohesion: 0.14
-Nodes (15): AccountAuth(), AccountGrid(), PasswordForm(), BlockFields(), ALLOWED_MIME, fs, P, radius (+7 more)
+Cohesion: 0.12
+Nodes (16): AccountAuth(), AccountGrid(), EyeIcon(), PasswordForm(), LoginScreen(), TEXT_SIZES, fs, P (+8 more)
 
 ### Community 44 - "imageResize.js"
 Cohesion: 0.29
@@ -412,12 +405,12 @@ Cohesion: 0.53
 Nodes (5): on_admin_password_changed, public.admin_password_changed(), public.admin_role(), public.admin_roles, public.login_accounts
 
 ### Community 72 - "ui.jsx"
-Cohesion: 0.09
-Nodes (11): P, RaiderCarousel(), SLIDES, FAQS, P, RaiderFAQ(), CAT_LABEL, CommanderCard() (+3 more)
+Cohesion: 0.10
+Nodes (14): FAQS, P, RaiderFAQ(), CAT_LABEL, CommanderCard(), EventCalendar(), fmtDate(), initials() (+6 more)
 
 ### Community 73 - "imageResize.js"
-Cohesion: 0.23
-Nodes (10): RenderRuns(), storageStringToRuns(), SlideAnnouncements(), SlideAnnouncementSingle(), formatEventDate(), SlideEventSpotlight(), NoticeRow(), SlideNoticeList() (+2 more)
+Cohesion: 0.24
+Nodes (8): SlideAnnouncements(), formatEventDate(), SlideEventSpotlight(), SlideNoticeList(), SlideRaiderPractice(), SlideStaffNotes(), SLIDE_COMPONENTS, TvRangeSlideshowScreen()
 
 ### Community 74 - "Syncing"
 Cohesion: 0.07
@@ -433,7 +426,7 @@ Nodes (20): Available extension bundles, Bun, Community questions, Development, 
 
 ### Community 77 - "PeoplePanel.jsx"
 Cohesion: 0.11
-Nodes (24): BLANK_ADD_FORM, COMPANIES, ConsentSection(), FORM_INITIAL, FORMS, GRADE_OPTIONS, LET_OPTIONS, STATUSES (+16 more)
+Nodes (20): BLANK_ADD_FORM, COMPANIES, FORM_INITIAL, FORMS, GRADE_OPTIONS, LET_OPTIONS, CONSENT_META, FORM_STATUS_COLS (+12 more)
 
 ### Community 78 - "Linking Stripe as a source - Docs"
 Cohesion: 0.10
@@ -445,7 +438,7 @@ Nodes (18): Community questions, Configuration, Configuring BigQuery, Configurin
 
 ### Community 80 - "dependencies"
 Cohesion: 0.11
-Nodes (19): @dnd-kit/core, @dnd-kit/sortable, @dnd-kit/utilities, expo-device, expo-file-system, expo-localization, dependencies, @dnd-kit/core (+11 more)
+Nodes (19): @dnd-kit/core, @dnd-kit/sortable, expo-device, expo-file-system, expo-localization, dependencies, @dnd-kit/core, @dnd-kit/sortable (+11 more)
 
 ### Community 81 - "Direct Snowflake connections"
 Cohesion: 0.12
@@ -457,7 +450,7 @@ Nodes (15): AI Data Processing, Connected Tools, Custom Scouts, Disabled scouts 
 
 ### Community 83 - "RaiderPolls.jsx"
 Cohesion: 0.16
-Nodes (15): AdminBulkUpload(), PhotosPanel(), VOTING_TEAMS, FILTERS, PhotoSubmissions(), TEAM_COLOR, TvTerminalManager(), EmptyState() (+7 more)
+Nodes (11): downloadWinnerCard(), AdminBulkUpload(), PhotosPanel(), VOTING_TEAMS, FILTERS, PhotoSubmissions(), TEAM_COLOR, defaultCloses() (+3 more)
 
 ### Community 84 - "Troubleshooting"
 Cohesion: 0.13
@@ -484,20 +477,20 @@ Cohesion: 0.20
 Nodes (9): name, private, scripts, build, dev, lint, preview, type (+1 more)
 
 ### Community 90 - "MediaPanel.jsx"
-Cohesion: 0.18
-Nodes (10): BATTALION_OPT, btnGold, getOption(), inputStyle, label, P, panel, PhotoUploader() (+2 more)
+Cohesion: 0.14
+Nodes (13): BATTALION_OPT, btnGold, getOption(), inputStyle, label, P, panel, PhotoUploader() (+5 more)
 
 ### Community 91 - "OverviewPanel.jsx"
-Cohesion: 0.22
-Nodes (10): sb, About(), ElementRegistry(), WidgetLibrary(), ADMIN_NAMES, displayName(), OverviewPanel(), safeCount() (+2 more)
+Cohesion: 0.33
+Nodes (6): ADMIN_NAMES, displayName(), OverviewPanel(), safeCount(), safeList(), useClock()
 
 ### Community 92 - "MonthGridCalendar.jsx"
 Cohesion: 0.29
 Nodes (9): daysInMonth(), eventsByDay(), firstWeekday(), MonthGridCalendar(), navBtn, P, pickInitialMonth(), WEEKDAYS (+1 more)
 
 ### Community 93 - "ConversationList.jsx"
-Cohesion: 0.20
-Nodes (18): TvRangePeriodProgressBar(), elapsedFraction(), formatDate(), timeParts(), toMinutes(), TvClockBellPanel(), formatCountdownClock(), formatHHMM() (+10 more)
+Cohesion: 0.08
+Nodes (47): RaiderCongratsBanner(), SlideRaiderCongrats(), TvRangeCompanyWelcomeScreen(), TvRangeCountdown(), TvRangeLunchScreen(), TvRangeOffHoursScreen(), TvRangePeriodEndingScreen(), TvRangePeriodProgressBar() (+39 more)
 
 ### Community 94 - "PostHog Data Warehouse Setup Report"
 Cohesion: 0.25
@@ -516,8 +509,8 @@ Cohesion: 0.33
 Nodes (6): CDC requirements, Database user permissions, Logical replication, PostgreSQL version, Replication slot capacity, Table primary keys
 
 ### Community 98 - "eventsPdfPrint.js"
-Cohesion: 0.44
-Nodes (8): EVENT_TEAMS, teamLabel(), documentHtml(), escapeHtml(), eventCardHtml(), flagSvg(), openEventsCalendarPdf(), qrDataUrl()
+Cohesion: 0.47
+Nodes (8): formatEventTime(), teamLabel(), documentHtml(), escapeHtml(), eventCardHtml(), flagSvg(), openEventsCalendarPdf(), qrDataUrl()
 
 ### Community 99 - "imageResize.js"
 Cohesion: 0.67
@@ -632,12 +625,12 @@ Cohesion: 0.67
 Nodes (3): Examples, remove a single property, remove multiple properties
 
 ### Community 181 - "expo-application"
-Cohesion: 0.19
+Cohesion: 0.21
 Nodes (12): backBtn, EventDetailCard(), formatDateRange(), ghostBtn, loadingStyle, modeTab, modeTabActive, P (+4 more)
 
 ### Community 182 - "expo-file-system"
-Cohesion: 0.36
-Nodes (5): SlideUniformCountdown(), targetDate(), uniformDateLabel(), todayNy(), useTvNextUniformDay()
+Cohesion: 0.20
+Nodes (11): SlideUniformCountdown(), targetDate(), uniformDateLabel(), daysUntil(), eventChipLabel(), TvTopStrip(), useBattalionCreed(), todayNy() (+3 more)
 
 ### Community 183 - "expo-localization"
 Cohesion: 0.33
@@ -652,12 +645,12 @@ Cohesion: 0.40
 Nodes (4): Troubleshooting, Upload source maps for React Native - Docs, Upload source maps for React Native - Docs, Was this page useful?
 
 ### Community 189 - "@simplewebauthn/browser"
-Cohesion: 0.73
-Nodes (5): documentHtml(), escapeHtml(), openConsentStatusPdf(), progressHtml(), rowHtml()
+Cohesion: 0.31
+Nodes (9): ConsentSection(), STATUSES, documentHtml(), escapeHtml(), openConsentStatusPdf(), progressHtml(), rowHtml(), byLastName() (+1 more)
 
 ### Community 197 - "emailRender.js"
-Cohesion: 0.21
-Nodes (8): SlidePhotoOfDay(), TEXT_SIZE, TvEmergencyOverlay(), TvInstrumentDivider(), TvPhotoCarousel(), TvStandardLayout(), useTvCarouselPhotos(), TV_PHOTOS
+Cohesion: 0.42
+Nodes (8): blockHtml(), blocksToHtml(), blocksToText(), C, collectAttachments(), escapeHtml(), fmtBytes(), safeUrl()
 
 ### Community 198 - "RaiderCarousel.jsx"
 Cohesion: 0.06
@@ -665,27 +658,27 @@ Nodes (56): COLORS, ConfettiBurst(), CreedHub(), GAMES, ageFromBirthdate(), Cree
 
 ### Community 202 - "TvRemotePanel.jsx"
 Cohesion: 0.24
-Nodes (9): targetDate(), TvCountdownBand(), daysUntil(), eventChipLabel(), TvTopStrip(), useBattalionCreed(), todayNy(), useTvUpcomingEvents() (+1 more)
+Nodes (11): ExistingEntry(), fieldBaseStyle, NewEntryForm(), AnnouncementSingleEditor(), runsToStorageString(), storageStringToRuns(), SlideAnnouncementSingle(), NoticeRow() (+3 more)
 
 ### Community 204 - "generate-on-this-day.mjs"
 Cohesion: 0.29
 Nodes (10): cleanText(), DAYS_IN_MONTH, __dirname, fetchDay(), fetchWithRetry(), HEADERS, lightnessScore(), main() (+2 more)
 
 ### Community 205 - "StepRangeNotices.jsx"
-Cohesion: 0.28
-Nodes (11): domToRuns(), mergeRuns(), runsToPlainText(), sameFormat(), stringToRuns(), truncateRuns(), walk(), buildDom() (+3 more)
+Cohesion: 0.26
+Nodes (12): domToRuns(), mergeRuns(), RenderRuns(), runsToPlainText(), sameFormat(), stringToRuns(), truncateRuns(), walk() (+4 more)
 
 ### Community 206 - "index.jsx"
-Cohesion: 0.31
-Nodes (8): ExistingEntry(), fieldBaseStyle, NewEntryForm(), AnnouncementSingleEditor(), runsToStorageString(), createTvNotice(), deleteTvNotice(), updateTvNotice()
+Cohesion: 0.22
+Nodes (8): react, Dashboard(), Admin(), ForcePasswordChange(), inputStyle(), FocalPointPicker(), Modal(), useAdminPresence()
 
 ### Community 207 - "tv_shoutouts.sql"
 Cohesion: 0.31
 Nodes (7): public.cadet_consent, public.compute_daily_birthday_shoutout(), public.tv_daily_settings, public.tv_daily_settings_guard(), public.tv_daily_settings_touch(), trg_tv_daily_settings_guard, trg_tv_daily_settings_touch
 
 ### Community 209 - "TabGrid.jsx"
-Cohesion: 0.19
-Nodes (15): TvPhotoAssignModal(), TvPhotoEditCropModal(), FOLDERS, miniBtn(), TvPhotosPanel(), TvSpotlightPushModal(), FOLDER_LABELS, FOLDER_ORDER (+7 more)
+Cohesion: 0.11
+Nodes (26): TvPhotoAssignModal(), TvPhotoEditCropModal(), FOLDERS, miniBtn(), TvPhotosPanel(), TvSpotlightPushModal(), StepPhotoSource(), todayNy() (+18 more)
 
 ### Community 211 - "tv_broadcast.sql"
 Cohesion: 0.50
@@ -704,36 +697,32 @@ Cohesion: 1.00
 Nodes (3): public.events, public.generate_uniform_reminders(), public.uniform_reminder_log
 
 ### Community 227 - "ReviewPortal.jsx"
-Cohesion: 0.31
-Nodes (7): CheckinSurvey(), isAnswered(), P, labelFor(), QUESTIONS, hasSeenCheckin(), markCheckinSeen()
+Cohesion: 0.39
+Nodes (5): ForcePasswordChange(), ReviewerPinControl(), ReviewLogin(), fmtDate(), ReviewPortal()
 
 ### Community 228 - "FaqSection.jsx"
 Cohesion: 0.67
 Nodes (3): personnel_sync_rank_let, public.personnel, public.sync_personnel_rank_let_to_cadet_consent()
 
 ### Community 229 - "RangeGridCountdown.jsx"
-Cohesion: 0.16
-Nodes (15): PhotoGrid(), backBtn, P, SubmitHub(), P, TabPlaceholder(), P, TeamPageMobile() (+7 more)
+Cohesion: 0.22
+Nodes (9): PhotoGrid(), eventDateLabel(), EventRow(), SlideUpcomingEvents(), targetDate(), TvCountdownBand(), getTeam(), isVotingTeam() (+1 more)
 
 ### Community 231 - "Companies.jsx"
-Cohesion: 0.25
-Nodes (9): TvKiosk(), TvPreviewBadge(), TvRangeKiosk(), isStale(), TvShoutoutsPanel(), getPreviewAt(), getPreviewOffsetMs(), useNowTicker() (+1 more)
+Cohesion: 0.35
+Nodes (8): EmergencyPushPanel(), TvKiosk(), TvPreviewBadge(), TvRangeKiosk(), getPreviewAt(), getPreviewOffsetMs(), useNowTicker(), useTvDailySettings()
 
 ### Community 232 - "RaiderCarousel.jsx"
-Cohesion: 0.16
-Nodes (17): allRosterNames, alreadyOn, cadetKeys, dryRun, matchedRosterNames, toInsert, unmatched, displayNameForName() (+9 more)
+Cohesion: 0.33
+Nodes (3): P, RaiderCarousel(), SLIDES
 
 ### Community 233 - "TvRangeRaiderPracticeWidget.jsx"
-Cohesion: 0.23
-Nodes (12): Composer(), conversationAvatar(), ConversationList(), conversationName(), isOtherOnline(), previewText(), timeLabel(), NewConversationModal() (+4 more)
-
-### Community 237 - "@dnd-kit/utilities"
-Cohesion: 0.25
-Nodes (11): TvRangeCompanyWelcomeScreen(), TvRangeCountdown(), TvRangeLunchScreen(), TvRangeOffHoursScreen(), TvRangePeriodEndingScreen(), TvRangePlanningScreen(), TvRangeScreenBase(), TvRangeT2Screen() (+3 more)
+Cohesion: 0.29
+Nodes (5): SlidePhotoOfDay(), TvPhotoCarousel(), TvStandardLayout(), useTvCarouselPhotos(), TV_PHOTOS
 
 ### Community 249 - "MediaPanel.jsx"
 Cohesion: 0.29
-Nodes (9): SlideRow(), RaiderCongratsBanner(), SlideRaiderCongrats(), RAIDER_CONGRATS_COMPANIES, TvRangeStaffScheduleScreen(), matchesForCompany(), matchesForStaff(), useRaiderCongrats() (+1 more)
+Nodes (5): TEXT_SIZE, TvEmergencyOverlay(), TvInstrumentDivider(), isStale(), TvShoutoutsPanel()
 
 ### Community 250 - "FaqSection.jsx"
 Cohesion: 0.29
@@ -747,64 +736,40 @@ Nodes (4): ALL_CHAPTERS, CadetManual(), P, UNITS
 Cohesion: 0.29
 Nodes (7): conditionKey(), hourLabel(), minutesAgo(), TvWeatherPanel(), fetchJson(), NWS_HEADERS, useWeather()
 
-### Community 254 - "tvPhotoCaption.js"
-Cohesion: 0.25
-Nodes (10): DayEventDetail(), EventCalendar(), fmtDate(), CATEGORY_COLOR, eventOccursOnDate(), formatEventTime(), formatEventTimeRange(), formatRecurrenceDays() (+2 more)
+### Community 254 - "StepRangeSchedule.jsx"
+Cohesion: 0.31
+Nodes (6): addCustomBlock(), fieldStyle, PERIODS, removeCustomBlock(), StepRangeSchedule(), updateCustomBlock()
 
 ### Community 255 - "EventSpotlightBand.jsx"
 Cohesion: 0.36
 Nodes (5): EventSpotlightBand(), formatEventDate(), P, readCachedActive(), writeCachedActive()
 
-### Community 256 - "site_checkin.sql"
-Cohesion: 0.83
-Nodes (3): public.site_checkin_rate_limit(), public.site_checkin_responses, site_checkin_rate_limit_trg
+### Community 256 - "TEAMS"
+Cohesion: 0.33
+Nodes (5): P, TabPlaceholder(), P, TeamPageMobile(), TEAMS
 
-### Community 257 - "emailRender.js"
-Cohesion: 0.42
-Nodes (8): blockHtml(), blocksToHtml(), blocksToText(), C, collectAttachments(), escapeHtml(), fmtBytes(), safeUrl()
-
-### Community 261 - "ReviewPortal.jsx"
-Cohesion: 0.39
-Nodes (5): ForcePasswordChange(), ReviewerPinControl(), ReviewLogin(), fmtDate(), ReviewPortal()
-
-### Community 262 - "StepRangeSchedule.jsx"
-Cohesion: 0.31
-Nodes (6): addCustomBlock(), fieldStyle, PERIODS, removeCustomBlock(), StepRangeSchedule(), updateCustomBlock()
-
-### Community 263 - "TvRangeRaiderPracticeWidget.jsx"
-Cohesion: 0.32
-Nodes (3): SlideRaiderPractice(), TvRangeRaiderPracticeWidget(), RAIDER_PRACTICE_TILES
-
-### Community 264 - "RaiderPolls.jsx"
-Cohesion: 0.48
-Nodes (4): downloadWinnerCard(), defaultCloses(), RCATS, RaiderPolls()
-
-### Community 265 - "RaiderParentWelcome.jsx"
-Cohesion: 0.43
-Nodes (5): CommanderCard(), initials(), RaiderParentWelcome(), useClock(), useQrDataUrl()
-
-### Community 266 - "TvRefreshNotice"
+### Community 257 - "TvRefreshNotice"
 Cohesion: 0.67
 Nodes (3): TvRefreshNotice(), assetSignature(), useTvRefreshNotice()
 
 ## Knowledge Gaps
-- **657 isolated node(s):** `$schema`, `oxc`, `react/rules-of-hooks`, `warn`, `name` (+652 more)
+- **648 isolated node(s):** `$schema`, `oxc`, `react/rules-of-hooks`, `warn`, `name` (+643 more)
   These have ≤1 connection - possible missing edges or undocumented components.
 - **112 thin communities (<3 nodes) omitted from report** — run `graphify query` to explore isolated nodes.
 
 ## Suggested Questions
 _Questions this graph is uniquely positioned to answer:_
 
-- **Why does `react` connect `react` to `PhotoUploader.jsx`, `EventsPanel.jsx`, `BattalionCommand.jsx`, `Raiders.jsx`, `ReviewPortal.jsx`, `RaiderPolls.jsx`, `App.jsx`, `RaiderParentWelcome.jsx`, `TvRangeRaiderPracticeWidget.jsx`, `blocks.js`, `About.jsx`, `emailRender.js`, `.oxlintrc.json`, `TvRefreshNotice`, `CadetManual.jsx`, `Footer.jsx`, `Companies.jsx`, `FaqSection.jsx`, `TabPlaceholder.jsx`, `PhotoUploader.jsx`, `Rifle.jsx`, `imageResize.js`, `expo-application`, `expo-file-system`, `AarsPanel.jsx`, `RaiderCarousel.jsx`, `emailRender.js`, `ui.jsx`, `imageResize.js`, `TvRemotePanel.jsx`, `PeoplePanel.jsx`, `index.jsx`, `StepRangeNotices.jsx`, `TabGrid.jsx`, `RaiderPolls.jsx`, `PhotoLightbox.jsx`, `MediaPanel.jsx`, `OverviewPanel.jsx`, `MonthGridCalendar.jsx`, `ReviewPortal.jsx`, `RangeGridCountdown.jsx`, `Companies.jsx`, `TvRangeRaiderPracticeWidget.jsx`, `MediaPanel.jsx`, `FaqSection.jsx`, `CadetManual.jsx`, `Companies.jsx`, `EventSpotlightBand.jsx`?**
-  _High betweenness centrality (0.101) - this node is a cross-community bridge._
+- **Why does `react` connect `index.jsx` to `react`, `TvRefreshNotice`, `PhotoUploader.jsx`, `EventsPanel.jsx`, `BattalionCommand.jsx`, `Raiders.jsx`, `App.jsx`, `emailRender.js`, `blocks.js`, `blocks.js`, `About.jsx`, `.oxlintrc.json`, `CadetManual.jsx`, `Footer.jsx`, `Companies.jsx`, `FaqSection.jsx`, `TabPlaceholder.jsx`, `PhotoUploader.jsx`, `Rifle.jsx`, `imageResize.js`, `expo-application`, `expo-file-system`, `AarsPanel.jsx`, `RaiderCarousel.jsx`, `ui.jsx`, `imageResize.js`, `TvRemotePanel.jsx`, `PeoplePanel.jsx`, `StepRangeNotices.jsx`, `TabGrid.jsx`, `RaiderPolls.jsx`, `PhotoLightbox.jsx`, `MediaPanel.jsx`, `OverviewPanel.jsx`, `MonthGridCalendar.jsx`, `ConversationList.jsx`, `ReviewPortal.jsx`, `RangeGridCountdown.jsx`, `Companies.jsx`, `RaiderCarousel.jsx`, `TvRangeRaiderPracticeWidget.jsx`, `MediaPanel.jsx`, `FaqSection.jsx`, `CadetManual.jsx`, `Companies.jsx`, `EventSpotlightBand.jsx`?**
+  _High betweenness centrality (0.104) - this node is a cross-community bridge._
 - **Why does `PostHog` connect `PostHog` to `Examples`, `Examples`, `Examples`, `Error tracking methods`, `Identification methods`, `Surveys methods`, `Examples`, `Examples`, `Capture methods`, `Examples`, `Logs methods`, `LLM analytics methods`, `Examples`, `Privacy methods`, `Examples`, `Initialization methods`, `Examples`, `Examples`, `Examples`, `Examples`, `Examples`, `Examples`, `Examples`, `Examples`, `Examples`, `Examples`, `Examples`, `Examples`, `Examples`, `Examples`, `Examples`, `Examples`, `Examples`, `Examples`, `Examples`, `Examples`, `Examples`, `Examples`, `Examples`, `Examples`, `Examples`, `Examples`, `Examples`, `Examples`, `Examples`, `Examples`, `Feature flags methods`, `Session replay methods`, `Lifecycle methods`, `Toolbar methods`, `Other methods`, `Examples`, `Examples`, `Examples`, `Examples`, `Examples`, `Examples`, `Examples`, `Examples`, `Examples`, `Examples`, `Examples`, `Examples`, `Examples`, `Examples`, `Examples`, `Examples`, `Examples`, `Examples`, `Examples`, `Examples`, `Examples`, `PostHog JavaScript Web SDK`, `Examples`?**
-  _High betweenness centrality (0.023) - this node is a cross-community bridge._
-- **Why does `P` connect `Rifle.jsx` to `react`, `PhotoUploader.jsx`, `EventsPanel.jsx`, `Raiders.jsx`, `StepRangeSchedule.jsx`, `RaiderPolls.jsx`, `RaiderParentWelcome.jsx`, `TvRangeRaiderPracticeWidget.jsx`, `emailRender.js`, `blocks.js`, `PhotoUploader.jsx`, `expo-file-system`, `AarsPanel.jsx`, `emailRender.js`, `imageResize.js`, `TvRemotePanel.jsx`, `PeoplePanel.jsx`, `index.jsx`, `StepRangeNotices.jsx`, `TabGrid.jsx`, `RaiderPolls.jsx`, `OverviewPanel.jsx`, `ConversationList.jsx`, `RangeGridCountdown.jsx`, `Companies.jsx`, `TvRangeRaiderPracticeWidget.jsx`, `@dnd-kit/utilities`, `MediaPanel.jsx`, `Companies.jsx`?**
-  _High betweenness centrality (0.016) - this node is a cross-community bridge._
+  _High betweenness centrality (0.026) - this node is a cross-community bridge._
+- **Why does `supabase` connect `react` to `EventsPanel.jsx`, `BattalionCommand.jsx`, `Raiders.jsx`, `App.jsx`, `blocks.js`, `About.jsx`, `CadetManual.jsx`, `Footer.jsx`, `Companies.jsx`, `FaqSection.jsx`, `PhotoUploader.jsx`, `Rifle.jsx`, `imageResize.js`, `expo-application`, `expo-file-system`, `AarsPanel.jsx`, `RaiderCarousel.jsx`, `ui.jsx`, `TvRemotePanel.jsx`, `PeoplePanel.jsx`, `index.jsx`, `TabGrid.jsx`, `RaiderPolls.jsx`, `MediaPanel.jsx`, `OverviewPanel.jsx`, `ConversationList.jsx`, `ReviewPortal.jsx`, `TvRangeRaiderPracticeWidget.jsx`, `FaqSection.jsx`, `EventSpotlightBand.jsx`?**
+  _High betweenness centrality (0.015) - this node is a cross-community bridge._
 - **What connects `$schema`, `oxc`, `react/rules-of-hooks` to the rest of the system?**
-  _657 weakly-connected nodes found - possible documentation gaps or missing edges._
+  _648 weakly-connected nodes found - possible documentation gaps or missing edges._
 - **Should `react` be split into smaller, more focused modules?**
-  _Cohesion score 0.10304789550072568 - nodes in this community are weakly interconnected._
+  _Cohesion score 0.10343061955965181 - nodes in this community are weakly interconnected._
 - **Should `PhotoUploader.jsx` be split into smaller, more focused modules?**
   _Cohesion score 0.06666666666666667 - nodes in this community are weakly interconnected._
 - **Should `devDependencies` be split into smaller, more focused modules?**

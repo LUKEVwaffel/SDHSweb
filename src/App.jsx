@@ -26,6 +26,7 @@ import ReviewPortal from './components/review/ReviewPortal';
 import TvKiosk from './components/tv/TvKiosk';
 import TvRangeKiosk from './components/tv/TvRangeKiosk';
 import RaiderParentWelcome from './components/tv/RaiderParentWelcome';
+import CheckinSurvey from './components/CheckinSurvey';
 
 const TABS = [
   { id: 'cadet-manual', label: 'Cadet Manual',  short: 'MANUAL' },
@@ -62,6 +63,7 @@ export default function App() {
 
   return (
     <div style={{ minHeight: '100vh', background: '#06101F', fontFamily: 'Inter, sans-serif' }}>
+      <CheckinSurvey />
       <TopNav />
 
       <Routes>

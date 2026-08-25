@@ -16,6 +16,7 @@ import SelfAccountPanel from './panels/SelfAccountPanel';
 import MessagesPanel from './panels/messages/MessagesPanel';
 import TvRemotePanel from './panels/tvremote/TvRemotePanel';
 import BetaFeaturesPanel from './panels/beta/BetaFeaturesPanel';
+import CheckinPanel from './panels/CheckinPanel';
 
 // Push-to-TV / TV Photos is intentionally restricted to this one account —
 // a deliberate departure from DISPATCH's usual "no per-email logic"
@@ -29,7 +30,7 @@ const SECTION_LABEL = {
   overview: 'OVERVIEW', events: 'EVENTS', aars: 'AAR TRACKER',
   people: 'PEOPLE', photos: 'PHOTOS', questions: 'FAQ QUESTIONS', email: 'EMAIL LIST',
   media: 'MEDIA', advanced: 'ADVANCED', account: 'MY ACCOUNT', messages: 'MESSAGES',
-  tvremote: 'TV REMOTE', beta: 'BETA FEATURES',
+  tvremote: 'TV REMOTE', beta: 'BETA FEATURES', checkin: 'SITE CHECK-IN',
 };
 
 // Which sections each role may see. s5 is scoped to the battalion calendar
@@ -50,6 +51,10 @@ const SECTION_LABEL = {
 // TV Photos is not a section of its own — it's a Luke-only tab inside the
 // 'photos' section (see showTvPhotos below), since it's restricted to one
 // account rather than a role.
+// 'checkin' (site feedback survey responses, see site_checkin.sql) IS its
+// own top-level section but is appended to `allowed` only for isLuke below,
+// not listed in either role's array — same one-account restriction as TV
+// Photos, matching public.is_luke() RLS on site_checkin_responses.
 const ROLE_SECTIONS = {
   s6: ['overview', 'events', 'people', 'photos', 'questions', 'email', 'media', 'messages', 'advanced', 'tvremote', 'beta'],
   s5: ['events', 'aars', 'messages', 'account', 'tvremote'],
@@ -57,7 +62,7 @@ const ROLE_SECTIONS = {
 
 export default function Dashboard({ onLogout, adminId, role = 's6' }) {
   const isLuke = (adminId || '').toLowerCase() === LUKE_EMAIL;
-  const allowed = ROLE_SECTIONS[role] || ROLE_SECTIONS.s6;
+  const allowed = [...(ROLE_SECTIONS[role] || ROLE_SECTIONS.s6), ...(isLuke ? ['checkin'] : [])];
   // S-5 has full events parity with S-6 (every team) — see
   // supabase/events_s5_full_access.sql for the matching RLS grant.
   const allowedTeams = undefined;
@@ -93,6 +98,7 @@ export default function Dashboard({ onLogout, adminId, role = 's6' }) {
           {section === 'messages' && <MessagesPanel adminId={adminId} />}
           {section === 'tvremote' && <TvRemotePanel />}
           {section === 'beta'     && <BetaFeaturesPanel adminId={adminId} />}
+          {section === 'checkin'  && isLuke && <CheckinPanel />}
         </div>
       </div>
       <StatusBar sectionLabel={SECTION_LABEL[section] || section.toUpperCase()} />
