@@ -1,4 +1,5 @@
 import { formatHHMM } from '../../../lib/bellSchedules.js';
+import { sp } from '../../admin/theme.js';
 import TvRangeScreenBase from './TvRangeScreenBase.jsx';
 import TvRangeCountdown from './TvRangeCountdown.jsx';
 
@@ -30,12 +31,20 @@ export default function TvRangeOffHoursScreen({ stage, bell, now }) {
     <TvRangeScreenBase
       kicker="IN MEMORY"
       title="RIP Dolly Parton"
+      sub="Zoe McCollum loved her music."
     >
-      <img
-        src="https://upload.wikimedia.org/wikipedia/commons/3/3a/Dolly_Parton_in_Nashville_2.jpg"
-        alt="Dolly Parton"
-        style={{ maxHeight: '48vh', maxWidth: '70vw', borderRadius: 12, objectFit: 'cover' }}
-      />
+      <div style={{ display: 'flex', gap: sp[8], alignItems: 'center', justifyContent: 'center' }}>
+        <img
+          src="https://tpracdgjahzmqtzjsiol.supabase.co/storage/v1/object/public/cadet-photos/c2d84ef7-067c-4240-80cf-dfdd7859f601.jpg"
+          alt="Zoe McCollum"
+          style={{ height: '42vh', width: 'auto', aspectRatio: '3 / 4', objectFit: 'cover', borderRadius: 12 }}
+        />
+        <img
+          src="https://upload.wikimedia.org/wikipedia/commons/3/3a/Dolly_Parton_in_Nashville_2.jpg"
+          alt="Dolly Parton"
+          style={{ height: '42vh', width: 'auto', borderRadius: 12, objectFit: 'cover' }}
+        />
+      </div>
     </TvRangeScreenBase>
   );
 }
