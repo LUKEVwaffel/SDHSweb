@@ -28,8 +28,14 @@ export default function TvRangeOffHoursScreen({ stage, bell, now }) {
 
   return (
     <TvRangeScreenBase
-      kicker="SCHOOL DAY COMPLETE"
-      title="See you tomorrow."
-    />
+      kicker="IN MEMORY"
+      title="RIP Dolly Parton"
+    >
+      <img
+        src="https://upload.wikimedia.org/wikipedia/commons/3/3a/Dolly_Parton_in_Nashville_2.jpg"
+        alt="Dolly Parton"
+        style={{ maxHeight: '48vh', maxWidth: '70vw', borderRadius: 12, objectFit: 'cover' }}
+      />
+    </TvRangeScreenBase>
   );
 }
