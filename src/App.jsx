@@ -27,6 +27,7 @@ import TvKiosk from './components/tv/TvKiosk';
 import TvRangeKiosk from './components/tv/TvRangeKiosk';
 import RaiderParentWelcome from './components/tv/RaiderParentWelcome';
 import CheckinSurvey from './components/CheckinSurvey';
+import EventFeedbackForm from './components/EventFeedbackForm';
 
 const TABS = [
   { id: 'cadet-manual', label: 'Cadet Manual',  short: 'MANUAL' },
@@ -60,6 +61,7 @@ export default function App() {
   if (location.pathname === '/tv') return <TvKiosk />;
   if (location.pathname === '/tv/range') return <TvRangeKiosk />;
   if (location.pathname === '/raiderparent') return <RaiderParentWelcome />;
+  if (location.pathname.startsWith('/feedback/')) return <EventFeedbackForm />;
 
   return (
     <div style={{ minHeight: '100vh', background: '#06101F', fontFamily: 'Inter, sans-serif' }}>

@@ -13,6 +13,7 @@ export const NAV_GROUPS = [
       { id: 'tvremote', icon: '▥', label: 'TV Remote' },
       { id: 'events',   icon: '◷', label: 'Events' },
       { id: 'aars',     icon: '▤', label: 'AAR Tracker' },
+      { id: 'feedback', icon: '✎', label: 'Event Feedback' },
       { id: 'people',   icon: '☰', label: 'People' },
       { id: 'photos',   icon: '⊞', label: 'Photos' },
       { id: 'questions', icon: '?', label: 'FAQ Questions' },

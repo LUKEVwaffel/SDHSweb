@@ -24,6 +24,7 @@ const emptyForm = () => ({
   color_guard_notes: '', honor_guard_notes: '',
   uniform_reminder_exempt: false,
   recurrence_days: [],
+  feedback_enabled: false, feedback_due_date: '',
 });
 
 // Default 5-position roster in spec'd order: first 4 required, Alternate
@@ -202,6 +203,7 @@ export default function EventsPanel({ adminId, allowedTeams }) {
       color_guard_notes: r.color_guard_notes || '', honor_guard_notes: r.honor_guard_notes || '',
       uniform_reminder_exempt: !!r.uniform_reminder_exempt,
       recurrence_days: r.recurrence_days || [],
+      feedback_enabled: !!r.feedback_enabled, feedback_due_date: r.feedback_due_date || '',
     });
     loadEventTopics(r.id);
     loadEventSecondaryTeams(r.id);
@@ -232,6 +234,8 @@ export default function EventsPanel({ adminId, allowedTeams }) {
       color_guard_notes: nz(f.color_guard_notes), honor_guard_notes: nz(f.honor_guard_notes),
       uniform_reminder_exempt: !!f.uniform_reminder_exempt,
       recurrence_days: recurring ? f.recurrence_days : null,
+      feedback_enabled: !!f.feedback_enabled,
+      feedback_due_date: f.feedback_enabled ? nz(f.feedback_due_date) : null,
     };
   }
 
@@ -827,6 +831,24 @@ export default function EventsPanel({ adminId, allowedTeams }) {
               <div style={{ fontFamily: mono, fontSize: 8, color: P.mute, letterSpacing: '0.06em', marginTop: sp[1] }}>
                 Gallery attaches, voting topics apply, and (for Raiders) OpticSend fires the day after.
               </div>
+            </div>
+
+            <div style={{ marginBottom: sp[4] }}>
+              <Label>Collect feedback</Label>
+              <div style={{ display: 'flex', gap: sp[2] }}>
+                {[false, true].map((v) => (
+                  <Btn key={String(v)} variant={form.feedback_enabled === v ? 'gold' : 'ghost'} size="sm" onClick={() => setForm((f) => ({ ...f, feedback_enabled: v }))}>{v ? 'YES' : 'NO'}</Btn>
+                ))}
+              </div>
+              <div style={{ fontFamily: mono, fontSize: 8, color: P.mute, letterSpacing: '0.06em', marginTop: sp[1] }}>
+                Opens a public no-login feedback form (/feedback/&lt;event id&gt;) for cadets/staff — link + submissions live under Event Feedback.
+              </div>
+              {form.feedback_enabled && (
+                <div style={{ marginTop: sp[3], maxWidth: 220 }}>
+                  <Label>Feedback due date (optional)</Label>
+                  <Input type="date" value={form.feedback_due_date} onChange={(e) => setForm((f) => ({ ...f, feedback_due_date: e.target.value }))} />
+                </div>
+              )}
             </div>
 
             {form.will_have_pictures && (

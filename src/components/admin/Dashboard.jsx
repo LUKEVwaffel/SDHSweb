@@ -17,6 +17,7 @@ import MessagesPanel from './panels/messages/MessagesPanel';
 import TvRemotePanel from './panels/tvremote/TvRemotePanel';
 import BetaFeaturesPanel from './panels/beta/BetaFeaturesPanel';
 import CheckinPanel from './panels/CheckinPanel';
+import EventFeedbackPanel from './panels/feedback/EventFeedbackPanel';
 
 // Push-to-TV / TV Photos is intentionally restricted to this one account —
 // a deliberate departure from DISPATCH's usual "no per-email logic"
@@ -31,6 +32,7 @@ const SECTION_LABEL = {
   people: 'PEOPLE', photos: 'PHOTOS', questions: 'FAQ QUESTIONS', email: 'EMAIL LIST',
   media: 'MEDIA', advanced: 'ADVANCED', account: 'MY ACCOUNT', messages: 'MESSAGES',
   tvremote: 'TV REMOTE', beta: 'BETA FEATURES', checkin: 'SITE CHECK-IN',
+  feedback: 'EVENT FEEDBACK',
 };
 
 // Which sections each role may see. s5 is scoped to the battalion calendar
@@ -59,8 +61,14 @@ const SECTION_LABEL = {
 // Photos this is read-only (AarsPanel's `readOnly` prop below), not full
 // access: S-5 stays the only role that can draft/upload/edit/archive AARs,
 // matching aars_select_luke (SELECT only) vs aars_all_s5 (ALL) in aars.sql.
+// 'feedback' (cadet/staff event feedback + DISPATCH AI beta analysis, see
+// supabase/event_feedback.sql) is S-6-only for NOW, same staged-rollout shape
+// as 'aars' was before S-5 got read access — Luke wants to verify the whole
+// submit → review → DISPATCH AI flow end-to-end on his own login first. Once
+// verified, add 'feedback' to s5's array below (and uncomment the matching
+// RLS policies in event_feedback.sql + the role check in the edge function).
 const ROLE_SECTIONS = {
-  s6: ['overview', 'events', 'people', 'photos', 'questions', 'email', 'media', 'messages', 'advanced', 'tvremote', 'beta'],
+  s6: ['overview', 'events', 'people', 'photos', 'questions', 'email', 'media', 'messages', 'advanced', 'tvremote', 'beta', 'feedback'],
   s5: ['events', 'aars', 'messages', 'account', 'tvremote'],
 };
 
@@ -103,6 +111,7 @@ export default function Dashboard({ onLogout, adminId, role = 's6' }) {
           {section === 'tvremote' && <TvRemotePanel />}
           {section === 'beta'     && <BetaFeaturesPanel adminId={adminId} />}
           {section === 'checkin'  && isLuke && <CheckinPanel />}
+          {section === 'feedback' && <EventFeedbackPanel />}
         </div>
       </div>
       <StatusBar sectionLabel={SECTION_LABEL[section] || section.toUpperCase()} />
