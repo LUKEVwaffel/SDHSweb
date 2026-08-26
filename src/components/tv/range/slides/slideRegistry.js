@@ -1,7 +1,7 @@
-// Companies eligible for a Raider Congrats slide (SLIDE_TYPES.raiderCongrats
-// below) — staff isn't a company cadets belong to on this roster, so it's
-// deliberately left out of this list rather than filtered later.
-export const RAIDER_CONGRATS_COMPANIES = [
+// Companies eligible for a Packets Due slide (SLIDE_TYPES.packetsDue below)
+// — staff gets its own copy on the Staff schedule screen instead of a
+// rotation slide, so it's deliberately left out of this list.
+export const PACKET_DUE_COMPANIES = [
   { id: 'alpha', label: 'Alpha' },
   { id: 'bravo', label: 'Bravo' },
   { id: 'charlie', label: 'Charlie' },
@@ -61,13 +61,21 @@ export const SLIDE_TYPES = {
     defaultDurationSec: 15,
     defaultConfig: {},
   },
-  raiderCongrats: {
-    label: 'Raider Team Congrats',
-    blurb: 'Cadets from one company who made a Raider team this year — add one per company below.',
+  packetsDue: {
+    label: 'Packets Due Reminder',
+    blurb: 'Reminder that DD Form 3203 + the JROTC Datasheet are due, with cadets from one company still missing them — add one per company below.',
     defaultDurationSec: 15,
-    defaultConfig: { company: RAIDER_CONGRATS_COMPANIES[0].id },
+    defaultConfig: { company: PACKET_DUE_COMPANIES[0].id },
   },
 };
+
+// Slide type saved before the Packets Due reminder replaced the Raider Team
+// Congrats slide — resolved transparently so Range TV screens already
+// configured with the old type keep working without a database migration.
+const LEGACY_SLIDE_TYPE_ALIASES = { raiderCongrats: 'packetsDue' };
+export function resolveSlideType(type) {
+  return LEGACY_SLIDE_TYPE_ALIASES[type] || type;
+}
 
 export function makeSlide(type, configOverride) {
   const def = SLIDE_TYPES[type];
@@ -81,11 +89,11 @@ export function makeSlide(type, configOverride) {
 
 // Seeded the first time an admin switches a screen into Slideshow mode, so
 // the TV never goes blank mid-switch waiting on someone to build a playlist
-// from scratch. One raiderCongrats slide per company (not one battalion-wide
-// slide) so every company sees only their own teammates on rotation.
+// from scratch. One packetsDue slide per company (not one battalion-wide
+// slide) so every company sees only their own outstanding names on rotation.
 export const DEFAULT_SLIDESHOW = [
   makeSlide('announcements'),
   makeSlide('uniformCountdown'),
   makeSlide('announcementSingle'),
-  ...RAIDER_CONGRATS_COMPANIES.map((c) => makeSlide('raiderCongrats', { company: c.id })),
+  ...PACKET_DUE_COMPANIES.map((c) => makeSlide('packetsDue', { company: c.id })),
 ];

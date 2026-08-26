@@ -12,7 +12,6 @@ const mono = "'JetBrains Mono', monospace";
 const oswald = 'Oswald, sans-serif';
 
 // Official 2026 Raider Roster. First name in each list is the team commander.
-// Shared with the Range TV congrats feature — see src/lib/raiderRoster.js.
 const TEAMS = RAIDER_TEAMS;
 
 function RosterStyles() {

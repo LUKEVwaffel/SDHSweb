@@ -2,7 +2,7 @@ import { useState, useEffect, useRef } from 'react';
 import { P, mono, inter, fs, sp, radius, shadow, ease } from '../../admin/theme.js';
 import { useTvUpcomingEvents } from '../../../hooks/useTvUpcomingEvents.js';
 import { useTvNotices } from '../../../hooks/useTvNotices.js';
-import { SLIDE_TYPES, RAIDER_CONGRATS_COMPANIES, makeSlide } from '../range/slides/slideRegistry.js';
+import { SLIDE_TYPES, PACKET_DUE_COMPANIES, makeSlide, resolveSlideType } from '../range/slides/slideRegistry.js';
 import { FONT_FAMILY_OPTIONS } from '../range/rangeGrid/fontOptions.js';
 import TvRangeSlideshowScreen from '../range/TvRangeSlideshowScreen.jsx';
 import RichTextField from '../range/rangeGrid/RichTextField.jsx';
@@ -95,14 +95,14 @@ function SlideExtraControls({ slide, onPatchConfig, upcomingEvents }) {
     );
   }
 
-  if (slide.type === 'raiderCongrats') {
+  if (resolveSlideType(slide.type) === 'packetsDue') {
     return (
       <select
-        value={slide.config?.company ?? RAIDER_CONGRATS_COMPANIES[0].id}
+        value={slide.config?.company ?? PACKET_DUE_COMPANIES[0].id}
         onChange={(e) => onPatchConfig({ company: e.target.value })}
         style={rowFieldStyle}
       >
-        {RAIDER_CONGRATS_COMPANIES.map((c) => <option key={c.id} value={c.id}>{c.label}</option>)}
+        {PACKET_DUE_COMPANIES.map((c) => <option key={c.id} value={c.id}>{c.label}</option>)}
       </select>
     );
   }
@@ -186,10 +186,10 @@ function SlideRow({ slide, index, count, onMove, onRemove, onUpdate, onPatchConf
 
         <div style={{ minWidth: 140, flexShrink: 0 }}>
           <div style={{ fontFamily: inter, fontSize: 14, fontWeight: 700, color: P.cream }}>
-            {SLIDE_TYPES[slide.type]?.label ?? slide.type}
-            {slide.type === 'raiderCongrats' && slide.config?.company && (
+            {SLIDE_TYPES[resolveSlideType(slide.type)]?.label ?? slide.type}
+            {resolveSlideType(slide.type) === 'packetsDue' && slide.config?.company && (
               <span style={{ color: P.mute, fontWeight: 400 }}>
-                {' — '}{RAIDER_CONGRATS_COMPANIES.find((c) => c.id === slide.config.company)?.label}
+                {' — '}{PACKET_DUE_COMPANIES.find((c) => c.id === slide.config.company)?.label}
               </span>
             )}
           </div>

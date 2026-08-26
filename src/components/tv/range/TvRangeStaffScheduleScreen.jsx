@@ -1,16 +1,13 @@
 import { P, mono, inter, fs, sp } from '../../admin/theme.js';
 import { BELL_SCHEDULES } from '../../../lib/bellSchedules.js';
 import TvRangePeriodProgressBar from './TvRangePeriodProgressBar.jsx';
-import RaiderCongratsBanner from './RaiderCongratsBanner.jsx';
-import { useRaiderCongrats, matchesForStaff } from '../../../hooks/useRaiderCongrats.js';
+import PacketsDueBanner from './PacketsDueBanner.jsx';
 
 // Fullscreen glanceable 3rd-period status — just the progress bar (elapsed/
 // remaining + time left), no full-day schedule list. Built straight from
 // BELL_SCHEDULES, no new data source.
 export default function TvRangeStaffScheduleScreen({ scheduleKey, bell, now }) {
   const schedule = BELL_SCHEDULES[scheduleKey];
-  const { matches } = useRaiderCongrats();
-  const staffCongrats = matchesForStaff(matches);
 
   return (
     <div style={{
@@ -32,7 +29,7 @@ export default function TvRangeStaffScheduleScreen({ scheduleKey, bell, now }) {
         )}
       </div>
 
-      <RaiderCongratsBanner matches={staffCongrats} />
+      <PacketsDueBanner company="staff" />
     </div>
   );
 }

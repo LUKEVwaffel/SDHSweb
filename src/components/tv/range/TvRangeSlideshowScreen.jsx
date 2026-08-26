@@ -7,7 +7,8 @@ import SlideStaffNotes from './slides/SlideStaffNotes.jsx';
 import SlideUpcomingEvents from './slides/SlideUpcomingEvents.jsx';
 import SlidePhotoOfDay from './slides/SlidePhotoOfDay.jsx';
 import SlideRaiderPractice from './slides/SlideRaiderPractice.jsx';
-import SlideRaiderCongrats from './slides/SlideRaiderCongrats.jsx';
+import SlidePacketsDue from './slides/SlidePacketsDue.jsx';
+import { resolveSlideType } from './slides/slideRegistry.js';
 
 const SLIDE_COMPONENTS = {
   announcements: SlideAnnouncements,
@@ -18,7 +19,7 @@ const SLIDE_COMPONENTS = {
   upcomingEvents: SlideUpcomingEvents,
   photoOfDay: SlidePhotoOfDay,
   raiderPractice: SlideRaiderPractice,
-  raiderCongrats: SlideRaiderCongrats,
+  packetsDue: SlidePacketsDue,
 };
 
 // Fades through black between slides rather than a hard cut — opacity only
@@ -95,7 +96,7 @@ export default function TvRangeSlideshowScreen({ slides, announcements, staffNot
     advance();
   }, [slides.length, advance]);
 
-  const SlideComponent = slide && SLIDE_COMPONENTS[slide.type];
+  const SlideComponent = slide && SLIDE_COMPONENTS[resolveSlideType(slide.type)];
   if (!SlideComponent) return null;
 
   return (
