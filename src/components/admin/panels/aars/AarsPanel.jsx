@@ -313,7 +313,7 @@ export default function AarsPanel({ adminId, readOnly = false }) {
                 <Card key={r.id} hover style={{ padding: 0, cursor: 'pointer' }} onClick={() => setPreview(r)}>
                   <div style={{ padding: sp[3] }}>
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: sp[2] }}>
-                      <div style={{ fontFamily: oswald, fontSize: fs.lg, color: P.gold, lineHeight: 1 }}>{drafted ? 'DRAFT' : (ext(r.file_name) || 'FILE')}</div>
+                      <div style={{ fontFamily: oswald, fontSize: fs.lg, color: P.gold, lineHeight: 1 }}>{drafted ? 'TEXT' : (ext(r.file_name) || 'FILE')}</div>
                       <div style={{ background: level.color, color: P.ink, fontFamily: mono, fontSize: 7, letterSpacing: '0.08em', padding: '2px 5px', borderRadius: 3, whiteSpace: 'nowrap' }}>{level.label}</div>
                     </div>
                     <div title={r.title} style={{ fontFamily: inter, fontSize: fs.sm, color: P.cream, marginTop: sp[2], overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{r.title}</div>

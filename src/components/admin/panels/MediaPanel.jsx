@@ -135,10 +135,14 @@ export default function MediaPanel({ adminId }) {
   }
 
   // Open the file in a new tab and trigger print — used for the consent-form PDF.
+  // getUrl() resolves to a Supabase Storage URL (a different origin from this
+  // app), so `win` is a cross-origin popup: addEventListener isn't available
+  // on it and throws "Illegal invocation" rather than just being a no-op.
+  // There's no reliable cross-origin load signal, so just open the tab —
+  // the browser's own PDF viewer has a print control.
   function printFile(name) {
     const win = window.open(getUrl(name), '_blank');
     if (!win) { alert('Popup blocked, allow popups to print.'); return; }
-    win.addEventListener('load', () => win.print());
   }
 
   const displayName = (f) => (isDocs && docMeta[f.name]?.title) || f.name;

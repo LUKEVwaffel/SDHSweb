@@ -1,5 +1,5 @@
 import { useState, useRef } from 'react';
-import { useTvDailySettings, updateTvDailySettings } from '../../../../hooks/useTvDailySettings';
+import { updateTvDailySettings } from '../../../../hooks/useTvDailySettings';
 import { uploadTvDailyPhoto, deleteTvDailyPhoto } from '../../../../lib/tvDailyPhotos';
 import { P, mono, oswald, inter, fs, sp, radius } from '../../theme';
 import { Btn, Label, Input, PanelHeader } from '../../shared/ui';
@@ -20,9 +20,14 @@ const TEXT_SIZES = [
 // split as the rest of DISPATCH's admin surfaces.
 // Lives as a tab inside TvRemotePanel, so screenSlug tracks whichever
 // screen is selected there (Outside/Range) instead of always targeting the
-// default screen.
-export default function EmergencyPushPanel({ screenSlug = 'default' }) {
-  const { settings } = useTvDailySettings(screenSlug);
+// default screen. `settings` is passed down from TvRemotePanel rather than
+// fetched here — TvRemotePanel already holds a live useTvDailySettings
+// subscription for the same screenSlug, and a second `useTvDailySettings`
+// call here opened a duplicate `tv-daily-settings-live:${screenSlug}`
+// channel with the same topic, which crashes ("cannot add postgres_changes
+// callbacks... after subscribe()") because Supabase reuses the channel
+// object for a topic it's already subscribed on.
+export default function EmergencyPushPanel({ screenSlug = 'default', settings }) {
   const [header, setHeader] = useState('');
   const [text, setText] = useState('');
   const [textSize, setTextSize] = useState('huge');
