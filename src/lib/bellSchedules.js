@@ -48,6 +48,29 @@ export const BELL_SCHEDULES = {
 
 const NY_TZ = 'America/New_York';
 
+// Mon/Wed/Fri run Normal, Tue/Thu run T2 — the school's fixed weekly
+// rotation. Weekend falls back to 'normal' too; it's never actually shown
+// (kiosk sits in off-hours), just a harmless default so this always returns
+// a valid key.
+const WEEKDAY_SCHEDULE = { Mon: 'normal', Tue: 't2', Wed: 'normal', Thu: 't2', Fri: 'normal', Sat: 'normal', Sun: 'normal' };
+
+/** 'normal' | 't2' for `now`'s weekday, read in America/New_York. */
+export function weekdayBellSchedule(now) {
+  const weekday = new Intl.DateTimeFormat('en-US', { timeZone: NY_TZ, weekday: 'short' }).format(now);
+  return WEEKDAY_SCHEDULE[weekday] ?? 'normal';
+}
+
+/**
+ * The bell schedule actually in effect right now: the day-of-week default,
+ * unless a screen's row has an explicit manual override
+ * (`bell_schedule_mode: 'manual'`) set for exception days (holidays, pep
+ * rallies, snow days) via the TV Remote panel's Bell Schedule tab.
+ */
+export function resolveBellSchedule(settings, now) {
+  if (settings?.bell_schedule_mode === 'manual') return settings.bell_schedule ?? 'normal';
+  return weekdayBellSchedule(now);
+}
+
 /** "HH:MM" (24h, schedule wall-clock time) -> "8:25 AM". */
 export function formatHHMM(hhmm) {
   const [h, m] = hhmm.split(':').map(Number);

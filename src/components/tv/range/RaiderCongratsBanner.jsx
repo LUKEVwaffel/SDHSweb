@@ -60,7 +60,12 @@ export default function RaiderCongratsBanner({ matches }) {
       <div style={{ position: 'relative', display: 'flex', flexWrap: 'wrap', justifyContent: 'center', gap: sp[4] }}>
         {matches.map((m, i) => (
           <div
-            key={m.name}
+            // `matches` only carries name + company (cadet_company_roster has
+            // no id column — see useRaiderCongrats.js), and two cadets can
+            // share a name across companies (confirmed on Range's roster: two
+            // "William Baker"s), so name alone collided as a key and threw
+            // React's duplicate-key warning on this battalion-wide slide.
+            key={`${m.company}:${m.name}:${i}`}
             className="raider-congrats-card"
             style={{
               animationDelay: `${i * 90}ms`,

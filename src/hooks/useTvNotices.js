@@ -24,7 +24,17 @@ export function useTvNotices(screenSlug = 'range') {
     setLoading(true);
     refetch().then(() => { if (alive) setLoading(false); });
 
-    const channel = SB.channel(`tv-notices-live:${screenSlug}`)
+    // Supabase reuses the channel object when `.channel()` is called again
+    // with a topic that's already subscribed (see useTvDailySettings.js for
+    // the same guard) — so if a stale instance for this topic is still
+    // registered (e.g. a fast unmount/remount before its own cleanup landed),
+    // drop it before creating a fresh one instead of calling `.on()` on an
+    // already-subscribed channel.
+    const topic = `tv-notices-live:${screenSlug}`;
+    const stale = SB.getChannels().find((c) => c.topic === `realtime:${topic}`);
+    if (stale) SB.removeChannel(stale);
+
+    const channel = SB.channel(topic)
       .on(
         'postgres_changes',
         { event: '*', schema: 'public', table: 'tv_notices', filter: `screen_slug=eq.${screenSlug}` },

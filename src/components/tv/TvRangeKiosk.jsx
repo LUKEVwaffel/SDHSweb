@@ -1,6 +1,7 @@
 import { useNowTicker } from '../../hooks/useNowTicker.js';
 import { useTvDailySettings } from '../../hooks/useTvDailySettings.js';
 import { getRangePhase } from '../../lib/tvRangeSchedule.js';
+import { resolveBellSchedule } from '../../lib/bellSchedules.js';
 import TvRangePlanningScreen from './range/TvRangePlanningScreen.jsx';
 import TvRangeT2Screen from './range/TvRangeT2Screen.jsx';
 import TvRangeCompanyWelcomeScreen from './range/TvRangeCompanyWelcomeScreen.jsx';
@@ -16,8 +17,10 @@ import TvRangeClock from './TvRangeClock.jsx';
 /**
  * Range — /tv/range. Unlike Outside (TvKiosk.jsx, a single fixed layout),
  * Range's content is period-driven: getRangePhase() reads the same bell
- * schedule Outside's clock/bell widget uses (settings.bell_schedule,
- * Normal/T2) plus this screen's own range_schedule_config, and picks which
+ * schedule Outside's clock/bell widget uses (resolveBellSchedule() —
+ * Mon/Wed/Fri Normal, Tue/Thu T2 by default, or a manual override from
+ * settings.bell_schedule when bell_schedule_mode is 'manual') plus this
+ * screen's own range_schedule_config, and picks which
  * fullscreen phase to show. 'rotation' is Range's own 3-panel Announcements /
  * Upcoming Events / Notes from Staff layout (TvRangeRotationLayout.jsx) — a
  * dedicated Range-only replacement for the old TvStandardLayout reuse; Outside
@@ -27,7 +30,7 @@ export default function TvRangeKiosk() {
   const now = useNowTicker();
   const { settings } = useTvDailySettings('range');
 
-  const scheduleKey = settings?.bell_schedule ?? 'normal';
+  const scheduleKey = resolveBellSchedule(settings, now);
   const config = settings?.range_schedule_config ?? null;
   const result = getRangePhase(scheduleKey, now, config);
 

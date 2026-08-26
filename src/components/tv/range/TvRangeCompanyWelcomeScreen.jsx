@@ -1,7 +1,6 @@
-import { P, mono, fraunces, inter, fs, sp } from '../../admin/theme.js';
+import { P, mono, fraunces, inter, fs, sp, radius, shadow } from '../../admin/theme.js';
 import { renderTemplate } from '../../../lib/tvRangeSchedule.js';
-import RaiderCongratsBanner from './RaiderCongratsBanner.jsx';
-import { useRaiderCongrats, matchesForCompany } from '../../../hooks/useRaiderCongrats.js';
+import { useTvConsentDue } from '../../../hooks/useTvConsentDue.js';
 
 // Item 3 (visual redesign) + item 5 (editable custom_blocks). Still the
 // sparsest screen in the set per spec — no carousel, no widgets — but "sparse"
@@ -26,8 +25,7 @@ export default function TvRangeCompanyWelcomeScreen({ config, company }) {
   const welcome = renderTemplate(config?.company_welcome_template || 'Welcome {company} Company', { company });
   const reminder = config?.attendance_reminder_template || '1SGT: Take attendance now';
   const customBlocks = config?.custom_blocks ?? [];
-  const { matches } = useRaiderCongrats();
-  const companyCongrats = matchesForCompany(matches, company);
+  const consentDue = useTvConsentDue(company);
 
   return (
     <div style={{
@@ -76,7 +74,41 @@ export default function TvRangeCompanyWelcomeScreen({ config, company }) {
           {reminder}
         </div>
 
-        <RaiderCongratsBanner matches={companyCongrats} />
+        <div
+          className="tv-welcome-block"
+          style={{
+            display: 'flex', flexDirection: 'column', alignItems: 'center', gap: sp[4],
+            padding: `${sp[5]}px ${sp[7]}px`, maxWidth: '84vw',
+            border: `1px solid ${P.hairStrong}`, borderRadius: radius.lg,
+            background: `linear-gradient(160deg, rgba(201,169,97,0.1), rgba(201,169,97,0.02))`,
+            boxShadow: shadow.lg,
+          }}
+        >
+          <div style={{
+            fontFamily: mono, fontSize: fs.md, color: P.gold, letterSpacing: '0.08em', fontWeight: 700,
+          }}>
+            ALL CADET CONSENT FORMS DUE AUGUST 31ST
+          </div>
+
+          {consentDue.length > 0 && (
+            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: sp[2] }}>
+              <div style={{ fontFamily: mono, fontSize: fs.tiny, color: P.mute, letterSpacing: '0.1em' }}>
+                STILL OUTSTANDING
+              </div>
+              <div style={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'center', gap: sp[2], maxWidth: '70vw' }}>
+                {consentDue.map((name) => (
+                  <span key={name} style={{
+                    fontFamily: inter, fontSize: fs.sm, color: P.cream,
+                    padding: `${sp[1]}px ${sp[3]}px`, borderRadius: radius.pill,
+                    border: `1px solid ${P.hairStrong}`, background: P.navyLift,
+                  }}>
+                    {name}
+                  </span>
+                ))}
+              </div>
+            </div>
+          )}
+        </div>
 
         {customBlocks.length > 0 && (
           <div style={{ display: 'flex', flexDirection: 'column', gap: sp[3], maxWidth: '70vw' }}>

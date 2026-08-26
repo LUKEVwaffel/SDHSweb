@@ -1,6 +1,8 @@
-import { useState, useEffect, useCallback, useRef } from 'react';
+import { useState, useEffect, useCallback, useRef, useMemo } from 'react';
 import { useTvDailySettings, updateTvDailySettings } from '../../../../hooks/useTvDailySettings.js';
-import { BELL_SCHEDULES } from '../../../../lib/bellSchedules.js';
+import { useNowTicker } from '../../../../hooks/useNowTicker.js';
+import { BELL_SCHEDULES, resolveBellSchedule, weekdayBellSchedule } from '../../../../lib/bellSchedules.js';
+import { getRangePhase } from '../../../../lib/tvRangeSchedule.js';
 import StepFeaturedTeams from '../../../tv/control-center/StepFeaturedTeams.jsx';
 import StepPhotoSource from '../../../tv/control-center/StepPhotoSource.jsx';
 import StepWidgetMode from '../../../tv/control-center/StepWidgetMode.jsx';
@@ -52,6 +54,30 @@ const DEFAULT_RANGE_CONFIG = {
   slideshowSlides: [],
 };
 
+const WIDGET_MODE_LABELS = {
+  facts: 'Historical Facts', quote: 'Quote of the Day', verse: 'Bible Verse', custom: 'Custom Message',
+};
+
+// Human label for whatever getRangePhase() says is airing right now — reads
+// the LIVE settings row (not the admin's in-progress draft), so this always
+// matches what the physical Range TV is actually showing, independent of
+// whatever an admin has mid-edited but not yet saved.
+function rangePhaseLabel(result) {
+  switch (result.phase) {
+    case 'off-hours':
+      return result.stage === 'before' ? 'Before school' : result.stage === 'after' ? 'After school' : 'Off hours';
+    case 'planning': return 'Planning Period (1st)';
+    case 't2': return 'T2 Block';
+    case 'staff-schedule': return 'Staff Schedule (3rd)';
+    case 'lunch1': return '1st Lunch';
+    case 'company-welcome': return `Welcome — ${result.company ?? '—'}`;
+    case 'period-ending': return `Period ending — ${result.company ?? result.periodName ?? ''}`;
+    case 'rotation':
+    default:
+      return 'Rotation Screen';
+  }
+}
+
 function rangeConfigFromRow(raw) {
   return {
     periodCompany: raw?.period_company ?? DEFAULT_RANGE_CONFIG.periodCompany,
@@ -71,6 +97,7 @@ function rangeConfigFromRow(raw) {
 function draftFromSettings(settings) {
   return {
     bellSchedule: settings?.bell_schedule ?? 'normal',
+    bellScheduleMode: settings?.bell_schedule_mode ?? 'auto',
     featuredTeams: settings?.featured_teams?.length ? settings.featured_teams : ['raiders'],
     photoSourceMode: settings?.photo_source_mode ?? 'team',
     photoSourceEventId: settings?.photo_source_event_id ?? null,
@@ -115,6 +142,18 @@ export default function TvRemotePanel() {
   const [flash, setFlash] = useState('');
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [previewDatetime, setPreviewDatetime] = useState('');
+  const [liveViewOpen, setLiveViewOpen] = useState(false);
+  const [previewOpen, setPreviewOpen] = useState(false);
+  const now = useNowTicker();
+
+  // Baseline snapshot to diff the draft against for an "unsaved changes"
+  // indicator — captured once at hydration (and again right after a
+  // successful save), NOT re-derived from `settings` on every realtime tick.
+  // If it tracked live `settings` directly, another admin's save on the same
+  // screen would make this admin's OWN untouched draft look "dirty" the
+  // instant that update arrived, which is misleading — this only answers
+  // "have I personally changed anything since I loaded/last saved."
+  const savedSnapshotRef = useRef(draftFromSettings(null));
 
   // Hydrate once per screen, from that screen's first settings load — not on
   // every realtime tick, so someone editing here doesn't get their
@@ -123,9 +162,32 @@ export default function TvRemotePanel() {
   // carrying the previous screen's draft over.
   useEffect(() => {
     if (!settings || hydratedFor === selectedScreen) return;
-    setDraft(draftFromSettings(settings));
+    const fresh = draftFromSettings(settings);
+    setDraft(fresh);
+    savedSnapshotRef.current = fresh;
     setHydratedFor(selectedScreen);
   }, [settings, selectedScreen, hydratedFor]);
+
+  const isDirty = hydratedFor === selectedScreen
+    && JSON.stringify(draft) !== JSON.stringify(savedSnapshotRef.current);
+
+  // Warn before an accidental tab close/refresh throws away in-progress
+  // edits nobody's pushed to the screen yet.
+  useEffect(() => {
+    if (!isDirty) return undefined;
+    const onBeforeUnload = (e) => { e.preventDefault(); e.returnValue = ''; };
+    window.addEventListener('beforeunload', onBeforeUnload);
+    return () => window.removeEventListener('beforeunload', onBeforeUnload);
+  }, [isDirty]);
+
+  // What's actually airing on the live Range kiosk right now, read straight
+  // off the live `settings` row (never the draft) — this is what makes the
+  // live-status readout trustworthy even while an admin has unsaved edits
+  // open in another tab.
+  const liveRangePhase = useMemo(() => {
+    if (selectedScreen !== 'range' || !settings) return null;
+    return getRangePhase(resolveBellSchedule(settings, now), now, settings.range_schedule_config ?? null);
+  }, [selectedScreen, settings, now]);
 
   useEffect(() => {
     // Compares against rootRef, not just truthiness — this panel isn't the
@@ -141,6 +203,11 @@ export default function TvRemotePanel() {
 
   function selectScreen(slug) {
     if (slug === selectedScreen) return;
+    if (isDirty) {
+      const current = SCREENS.find((s) => s.slug === selectedScreen)?.label ?? 'this screen';
+      const discard = window.confirm(`You have unsaved changes for ${current}. Switch screens and discard them?`);
+      if (!discard) return;
+    }
     setSelectedScreen(slug);
     sessionStorage.setItem(LAST_SCREEN_KEY, slug);
     setActiveTab('schedule');
@@ -181,6 +248,7 @@ export default function TvRemotePanel() {
     setSaveError(null);
     const basePatch = {
       bell_schedule: draft.bellSchedule,
+      bell_schedule_mode: draft.bellScheduleMode,
       featured_teams: draft.featuredTeams,
       photo_source_mode: draft.photoSourceMode,
       photo_source_event_id: draft.photoSourceMode === 'event' ? draft.photoSourceEventId : null,
@@ -217,6 +285,7 @@ export default function TvRemotePanel() {
       setSaveError(error.message || 'Something went wrong saving your changes.');
       return;
     }
+    savedSnapshotRef.current = draft;
     setFlash(`Pushed to ${SCREENS.find((s) => s.slug === selectedScreen)?.label ?? 'screen'} ✓`);
     setTimeout(() => setFlash(''), 2500);
   }
@@ -266,88 +335,213 @@ export default function TvRemotePanel() {
         ))}
       </div>
 
-      {/* Preview/test mode — punch in any date/time and see exactly what the
-          selected screen would show at that moment, without waiting for the
-          real clock to reach it. See openPreview()/useNowTicker.js for how
-          the override works and why it's safe (browser-local, opt-in query
-          param, real kiosks never load it). */}
+      {/* Live status — reads the LIVE settings row (never the draft), so this
+          answers "what is the physical TV actually showing right now" even
+          while an admin has unsaved edits open in another tab. The embedded
+          view below (collapsed by default) is the real /tv route rendering
+          for real, not a re-derived approximation — it can never drift out
+          of sync with the kiosk the way a hand-rolled summary could. */}
       <div style={{
-        display: 'flex', alignItems: 'flex-end', gap: sp[4], marginBottom: sp[6],
-        padding: sp[4], borderRadius: radius.md, border: `1px solid ${P.hair}`,
-        background: 'rgba(201,169,97,0.03)',
+        marginBottom: sp[6], borderRadius: radius.md, border: `1px solid ${P.hairStrong}`,
+        background: 'rgba(39,174,96,0.05)', overflow: 'hidden',
       }}>
-        <div style={{ flex: 1, minWidth: 0 }}>
-          <div style={{ fontFamily: mono, fontSize: fs.micro, color: P.gold, letterSpacing: '0.2em', marginBottom: sp[2] }}>
-            PREVIEW MODE — {SCREENS.find((s) => s.slug === selectedScreen)?.label.toUpperCase()}
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: sp[3], padding: sp[4], flexWrap: 'wrap' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: sp[3], minWidth: 0 }}>
+            <span style={{
+              flexShrink: 0, width: 9, height: 9, borderRadius: '50%', background: P.green,
+              boxShadow: '0 0 0 4px rgba(39,174,96,0.18)',
+            }} />
+            <div style={{ minWidth: 0 }}>
+              <div style={{ fontFamily: mono, fontSize: fs.micro, color: P.green, letterSpacing: '0.2em' }}>
+                LIVE NOW — {SCREENS.find((s) => s.slug === selectedScreen)?.label.toUpperCase()}
+              </div>
+              <div style={{ fontFamily: inter, fontSize: 15, fontWeight: 700, color: P.cream, marginTop: 3 }}>
+                {!settings ? 'Loading…' : selectedScreen === 'range' && liveRangePhase
+                  ? rangePhaseLabel(liveRangePhase)
+                  : selectedScreen === 'default'
+                    ? `${BELL_SCHEDULES[resolveBellSchedule(settings, now)]?.label ?? 'Normal'} schedule — ${WIDGET_MODE_LABELS[settings.bottom_widget_mode] ?? 'Historical Facts'}`
+                    : '—'}
+              </div>
+            </div>
           </div>
-          <div style={{ fontFamily: inter, fontSize: 13, color: P.mute, marginBottom: sp[3], lineHeight: 1.5 }}>
-            Opens this screen in a new tab as of the date/time below — ticks forward in real time from there. Doesn't touch the live kiosk.
+          <div style={{ display: 'flex', alignItems: 'center', gap: sp[2], flexShrink: 0 }}>
+            <a
+              href={SCREENS.find((s) => s.slug === selectedScreen)?.path ?? '/tv'}
+              target="_blank" rel="noopener noreferrer"
+              style={{
+                padding: `${sp[2]}px ${sp[4]}px`, borderRadius: radius.sm,
+                border: `1px solid ${P.hairStrong}`, color: P.mute, textDecoration: 'none',
+                fontFamily: mono, fontSize: fs.micro, letterSpacing: '0.1em',
+              }}
+            >
+              OPEN LIVE ↗
+            </a>
+            <Btn onClick={() => setLiveViewOpen((v) => !v)} variant="ghost" size="sm">
+              {liveViewOpen ? 'HIDE LIVE VIEW' : 'SHOW LIVE VIEW'}
+            </Btn>
           </div>
-          <input
-            type="datetime-local"
-            value={previewDatetime}
-            onChange={(e) => setPreviewDatetime(e.target.value)}
-            style={{
-              padding: sp[3], borderRadius: radius.sm, border: `1px solid ${P.hair}`,
-              background: P.deep, color: P.cream, fontFamily: inter, fontSize: 14,
-            }}
-          />
         </div>
-        <Btn onClick={openPreview} variant="ghost" size="sm" disabled={!previewDatetime}>
-          OPEN PREVIEW ↗
-        </Btn>
+
+        {liveViewOpen && (
+          <div style={{ borderTop: `1px solid ${P.hair}`, padding: sp[4] }}>
+            <div style={{
+              width: '100%', maxWidth: 640, aspectRatio: '16 / 9', borderRadius: radius.sm,
+              border: `1px solid ${P.hair}`, overflow: 'hidden', background: P.ink, position: 'relative',
+            }}>
+              <div style={{ width: 1920, height: 1080, transform: 'scale(0.3333)', transformOrigin: 'top left', position: 'absolute' }}>
+                <iframe
+                  key={selectedScreen}
+                  src={SCREENS.find((s) => s.slug === selectedScreen)?.path ?? '/tv'}
+                  title={`Live ${selectedScreen} kiosk`}
+                  style={{ width: 1920, height: 1080, border: 'none', pointerEvents: 'none' }}
+                />
+              </div>
+            </div>
+            <div style={{ fontFamily: inter, fontSize: 12, color: P.faint, marginTop: sp[2] }}>
+              This is the actual live kiosk page, rendering for real — not a simulation.
+            </div>
+          </div>
+        )}
+      </div>
+
+      {/* Preview/test mode — collapsed by default (a test-mode tool used far
+          less often than the tabs below it; leaving it expanded just pushed
+          the actual controls further down every time this panel opened).
+          Punch in any date/time and see exactly what the selected screen
+          would show at that moment, without waiting for the real clock to
+          reach it. See openPreview()/useNowTicker.js for how the override
+          works and why it's safe (browser-local, opt-in query param, real
+          kiosks never load it). */}
+      <div style={{
+        marginBottom: sp[6], borderRadius: radius.md, border: `1px solid ${P.hair}`,
+        background: 'rgba(201,169,97,0.03)', overflow: 'hidden',
+      }}>
+        <button
+          onClick={() => setPreviewOpen((v) => !v)}
+          style={{
+            width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+            padding: sp[4], background: 'transparent', border: 'none', cursor: 'pointer',
+            fontFamily: mono, fontSize: fs.micro, color: P.gold, letterSpacing: '0.2em',
+          }}
+        >
+          <span>TEST A DATE/TIME — {SCREENS.find((s) => s.slug === selectedScreen)?.label.toUpperCase()}</span>
+          <span style={{ color: P.faint }}>{previewOpen ? '▲' : '▼'}</span>
+        </button>
+        {previewOpen && (
+          <div style={{ display: 'flex', alignItems: 'flex-end', gap: sp[4], padding: `0 ${sp[4]}px ${sp[4]}px` }}>
+            <div style={{ flex: 1, minWidth: 0 }}>
+              <div style={{ fontFamily: inter, fontSize: 13, color: P.mute, marginBottom: sp[3], lineHeight: 1.5 }}>
+                Opens this screen in a new tab as of the date/time below — ticks forward in real time from there. Doesn't touch the live kiosk.
+              </div>
+              <input
+                type="datetime-local"
+                value={previewDatetime}
+                onChange={(e) => setPreviewDatetime(e.target.value)}
+                style={{
+                  padding: sp[3], borderRadius: radius.sm, border: `1px solid ${P.hair}`,
+                  background: P.deep, color: P.cream, fontFamily: inter, fontSize: 14,
+                }}
+              />
+            </div>
+            <Btn onClick={openPreview} variant="ghost" size="sm" disabled={!previewDatetime}>
+              OPEN PREVIEW ↗
+            </Btn>
+          </div>
+        )}
       </div>
 
       <div style={{ display: 'flex', gap: sp[6] }}>
         <div style={{ display: 'flex', flexDirection: 'column', gap: sp[2], width: 180, flexShrink: 0 }}>
           {tabs.map((t) => (
-            <button
-              key={t.id}
-              onClick={() => setActiveTab(t.id)}
-              style={{
-                textAlign: 'left', padding: `${sp[4]}px ${sp[3]}px`, borderRadius: radius.sm,
-                border: 'none', background: activeTab === t.id ? (t.danger ? 'rgba(192,57,43,0.14)' : P.goldWash) : 'transparent',
-                color: activeTab === t.id ? (t.danger ? P.red : P.bright) : (t.danger ? P.red : P.mute),
-                fontFamily: inter, fontSize: 15, fontWeight: activeTab === t.id ? 700 : 400,
-                cursor: 'pointer', transition: `all 150ms ${ease}`,
-              }}
-            >
-              {t.label}
-            </button>
+            <div key={t.id}>
+              {selectedScreen === 'range' && t.id === RANGE_TAB.id && (
+                <div style={{
+                  fontFamily: mono, fontSize: 9, color: P.faint, letterSpacing: '0.2em',
+                  margin: `${sp[3]}px 0 ${sp[1]}px ${sp[3]}px`,
+                }}>
+                  RANGE ONLY
+                </div>
+              )}
+              <button
+                onClick={() => setActiveTab(t.id)}
+                style={{
+                  width: '100%', textAlign: 'left', padding: `${sp[4]}px ${sp[3]}px`, borderRadius: radius.sm,
+                  border: 'none', background: activeTab === t.id ? (t.danger ? 'rgba(192,57,43,0.14)' : P.goldWash) : 'transparent',
+                  color: activeTab === t.id ? (t.danger ? P.red : P.bright) : (t.danger ? P.red : P.mute),
+                  fontFamily: inter, fontSize: 15, fontWeight: activeTab === t.id ? 700 : 400,
+                  cursor: 'pointer', transition: `all 150ms ${ease}`,
+                }}
+              >
+                {t.label}
+              </button>
+            </div>
           ))}
         </div>
 
         <div style={{ flex: 1, minWidth: 0 }}>
           {activeTab === 'emergency' && (
-            <EmergencyPushPanel screenSlug={selectedScreen} />
+            <EmergencyPushPanel screenSlug={selectedScreen} settings={settings} />
           )}
 
           {activeTab === 'schedule' && (
             <div>
               <div style={{ fontFamily: mono, fontSize: 10, color: P.gold, letterSpacing: '0.24em', marginBottom: sp[2] }}>
-                TODAY'S BELL SCHEDULE
+                BELL SCHEDULE
               </div>
               <div style={{ fontFamily: inter, fontSize: 13, color: P.mute, marginBottom: sp[5], lineHeight: 1.5 }}>
-                Applies to this screen. Remember to switch back to Normal once a T2 day is over.
+                Auto follows the weekly rotation — Mon/Wed/Fri Normal, Tue/Thu T2 —
+                with no admin action needed. Switch to Manual only for exception
+                days (holiday, pep rally, snow day); remember to switch back to
+                Auto once the exception day is over.
               </div>
-              <div style={{ display: 'flex', gap: sp[3] }}>
-                {Object.entries(BELL_SCHEDULES).map(([key, schedule]) => (
-                  <button
-                    key={key}
-                    onClick={() => patch({ bellSchedule: key })}
-                    style={{
-                      flex: 1, padding: '16px 12px', borderRadius: radius.md,
-                      border: `1px solid ${draft.bellSchedule === key ? P.gold : P.hair}`,
-                      background: draft.bellSchedule === key ? P.goldWash : 'transparent',
-                      color: draft.bellSchedule === key ? P.bright : P.mute,
-                      fontFamily: oswald, fontSize: 17, cursor: 'pointer',
-                      transition: `all 150ms ${ease}`,
-                    }}
-                  >
-                    {schedule.label}
-                  </button>
-                ))}
+              <div style={{ display: 'flex', gap: sp[3], marginBottom: sp[4] }}>
+                <button
+                  onClick={() => patch({ bellScheduleMode: 'auto' })}
+                  style={{
+                    flex: 1, padding: '16px 12px', borderRadius: radius.md,
+                    border: `1px solid ${draft.bellScheduleMode === 'auto' ? P.gold : P.hair}`,
+                    background: draft.bellScheduleMode === 'auto' ? P.goldWash : 'transparent',
+                    color: draft.bellScheduleMode === 'auto' ? P.bright : P.mute,
+                    fontFamily: oswald, fontSize: 17, cursor: 'pointer',
+                    transition: `all 150ms ${ease}`,
+                  }}
+                >
+                  AUTO — {BELL_SCHEDULES[weekdayBellSchedule(now)]?.label ?? 'Normal'} today
+                </button>
+                <button
+                  onClick={() => patch({ bellScheduleMode: 'manual' })}
+                  style={{
+                    flex: 1, padding: '16px 12px', borderRadius: radius.md,
+                    border: `1px solid ${draft.bellScheduleMode === 'manual' ? P.gold : P.hair}`,
+                    background: draft.bellScheduleMode === 'manual' ? P.goldWash : 'transparent',
+                    color: draft.bellScheduleMode === 'manual' ? P.bright : P.mute,
+                    fontFamily: oswald, fontSize: 17, cursor: 'pointer',
+                    transition: `all 150ms ${ease}`,
+                  }}
+                >
+                  MANUAL OVERRIDE
+                </button>
               </div>
+              {draft.bellScheduleMode === 'manual' && (
+                <div style={{ display: 'flex', gap: sp[3] }}>
+                  {Object.entries(BELL_SCHEDULES).map(([key, schedule]) => (
+                    <button
+                      key={key}
+                      onClick={() => patch({ bellSchedule: key })}
+                      style={{
+                        flex: 1, padding: '16px 12px', borderRadius: radius.md,
+                        border: `1px solid ${draft.bellSchedule === key ? P.gold : P.hair}`,
+                        background: draft.bellSchedule === key ? P.goldWash : 'transparent',
+                        color: draft.bellSchedule === key ? P.bright : P.mute,
+                        fontFamily: oswald, fontSize: 17, cursor: 'pointer',
+                        transition: `all 150ms ${ease}`,
+                      }}
+                    >
+                      {schedule.label}
+                    </button>
+                  ))}
+                </div>
+              )}
             </div>
           )}
 
@@ -452,7 +646,24 @@ export default function TvRemotePanel() {
         <Btn onClick={save} variant="gold" size="lg" disabled={saving}>
           {saving ? 'SAVING…' : `SAVE — PUSH TO ${SCREENS.find((s) => s.slug === selectedScreen)?.label.toUpperCase() ?? 'SCREEN'}`}
         </Btn>
-        {flash && <div style={{ fontFamily: mono, fontSize: fs.tiny, color: P.green }}>{flash}</div>}
+
+        {flash ? (
+          <div style={{
+            display: 'flex', alignItems: 'center', gap: 8, padding: '10px 16px', borderRadius: radius.sm,
+            background: 'rgba(39,174,96,0.14)', border: `1px solid ${P.green}`,
+            fontFamily: mono, fontSize: fs.tiny, color: P.green, letterSpacing: '0.05em',
+          }}>
+            <span>✓</span>{flash}
+          </div>
+        ) : isDirty && !saving ? (
+          <div style={{
+            display: 'flex', alignItems: 'center', gap: 8,
+            fontFamily: mono, fontSize: fs.tiny, color: P.bright, letterSpacing: '0.1em',
+          }}>
+            <span style={{ width: 7, height: 7, borderRadius: '50%', background: P.bright, flexShrink: 0 }} />
+            UNSAVED CHANGES
+          </div>
+        ) : null}
       </div>
       </div>
     </div>

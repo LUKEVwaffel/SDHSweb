@@ -1,4 +1,5 @@
 import { P, inter, sp } from '../admin/theme.js';
+import { resolveBellSchedule } from '../../lib/bellSchedules.js';
 import { useTvCarouselPhotos } from '../../hooks/useTvCarouselPhotos.js';
 import TvPhotoCarousel from './TvPhotoCarousel.jsx';
 import TvWeatherPanel from './TvWeatherPanel.jsx';
@@ -50,7 +51,7 @@ export default function TvStandardLayout({ settings, now }) {
     (settings?.featured_teams ?? []).slice().sort().join('+'),
   ].join(':');
 
-  const scheduleKey = settings?.bell_schedule ?? null;
+  const scheduleKey = settings ? resolveBellSchedule(settings, now) : null;
   const emergencyActive = !!settings?.emergency_active;
 
   return (

@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef, useCallback } from 'react';
+import { useState, useEffect, useMemo, useCallback, useRef } from 'react';
 import SlideAnnouncements from './slides/SlideAnnouncements.jsx';
 import SlideAnnouncementSingle from './slides/SlideAnnouncementSingle.jsx';
 import SlideUniformCountdown from './slides/SlideUniformCountdown.jsx';
@@ -61,24 +61,30 @@ export default function TvRangeSlideshowScreen({ slides, announcements, staffNot
     setVisible(true);
   }, [slides.length]);
 
-  const prevSlidesRef = useRef(slides);
-  if (prevSlidesRef.current !== slides) {
-    console.log('[SLIDESHOW DEBUG] slides identity CHANGED', prevSlidesRef.current === slides);
-    prevSlidesRef.current = slides;
-  }
+  // Realtime settings updates hand back a freshly-parsed JSON row on every
+  // save — including saves to totally unrelated fields (bell schedule,
+  // emergency push, shoutout, …) that share the same tv_daily_settings row —
+  // so `slides` gets a brand-new array reference even when the playlist
+  // itself hasn't changed. Keying the timer effect off this fingerprint
+  // instead of the array's identity means an unrelated save no longer
+  // restarts the current slide's countdown from zero, which is what made
+  // the rotation appear to stall/freeze on the live kiosk.
+  const slidesKey = useMemo(
+    () => slides.map((s) => `${s.id}:${s.durationSec}`).join('|'),
+    [slides]
+  );
 
   useEffect(() => {
-    console.log('[SLIDESHOW DEBUG] duration effect (re)armed for index', index, 'at', Date.now());
     if (slides.length <= 1) return undefined;
     const durationMs = Math.max(MIN_DURATION_SEC, slides[index]?.durationSec ?? MIN_DURATION_SEC) * 1000;
     const fadeTimer = setTimeout(() => setVisible(false), Math.max(0, durationMs - FADE_MS));
     const advanceTimer = setTimeout(() => {
-      console.log('[SLIDESHOW DEBUG] advanceTimer FIRED for index', index, 'at', Date.now());
       emptySkipStreakRef.current = 0;
       advance();
     }, durationMs);
-    return () => { console.log('[SLIDESHOW DEBUG] duration effect cleanup for index', index, 'at', Date.now()); clearTimeout(fadeTimer); clearTimeout(advanceTimer); };
-  }, [index, slides, advance]);
+    return () => { clearTimeout(fadeTimer); clearTimeout(advanceTimer); };
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- slidesKey is slides' content fingerprint; depending on `slides` itself would re-arm the timer on every unrelated settings-row update (see slidesKey above)
+  }, [index, slidesKey, advance]);
 
   const slide = slides[index];
 

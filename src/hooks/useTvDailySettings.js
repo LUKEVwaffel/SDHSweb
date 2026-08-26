@@ -30,7 +30,18 @@ export function useTvDailySettings(screenSlug = DEFAULT_SCREEN) {
       setLoading(false);
     });
 
-    const channel = SB.channel(`tv-daily-settings-live:${screenSlug}`)
+    // Guard against the "cannot add postgres_changes callbacks... after
+    // subscribe()" crash: Supabase reuses the channel object when `.channel()`
+    // is called again with a topic that's already subscribed (this bit us
+    // when EmergencyPushPanel and TvRemotePanel both independently called
+    // this hook for the same screenSlug — now fixed by passing `settings`
+    // down instead — but this guard also covers a fast unmount/remount
+    // racing its own cleanup).
+    const topic = `tv-daily-settings-live:${screenSlug}`;
+    const stale = SB.getChannels().find((c) => c.topic === `realtime:${topic}`);
+    if (stale) SB.removeChannel(stale);
+
+    const channel = SB.channel(topic)
       .on(
         'postgres_changes',
         { event: 'UPDATE', schema: 'public', table: 'tv_daily_settings', filter: `id=eq.${screenSlug}` },
