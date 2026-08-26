@@ -25,8 +25,8 @@
     "semantic_hash": "c1ee9ce6a4fe04105dbf8e619390df5e"
   },
   "src/App.jsx": {
-    "mtime": 1787746248.126452,
-    "ast_hash": "efbad5fc361aa68e14cead40b1638a8e",
+    "mtime": 1787657927.1841156,
+    "ast_hash": "4a83b85c74a17355bd9d0fbc98da97a3",
     "semantic_hash": ""
   },
   "src/components/About.jsx": {
@@ -130,8 +130,8 @@
     "semantic_hash": ""
   },
   "src/components/admin/Dashboard.jsx": {
-    "mtime": 1787746206.6675797,
-    "ast_hash": "d90e930587aa64785794fe56c3b92c02",
+    "mtime": 1787657968.80384,
+    "ast_hash": "ae3ebb87d0d3b6e4247adde02be6b579",
     "semantic_hash": ""
   },
   "src/components/admin/LoginScreen.jsx": {
@@ -150,8 +150,8 @@
     "semantic_hash": "872097bb6f2a4e8b32dfd0a1ba37dedc"
   },
   "src/components/admin/nav/Sidebar.jsx": {
-    "mtime": 1787746209.673459,
-    "ast_hash": "71521d2daa830931de1999ac818a8a13",
+    "mtime": 1787657951.5584927,
+    "ast_hash": "fc0f4b311545dd3c477c5c883b744755",
     "semantic_hash": ""
   },
   "src/components/admin/nav/StatusBar.jsx": {
@@ -165,8 +165,8 @@
     "semantic_hash": "77a430c16bda8921d643793b172afe2f"
   },
   "src/components/admin/panels/EventsPanel.jsx": {
-    "mtime": 1787746268.6463873,
-    "ast_hash": "692b23bb511948fc560c2f3d6def6d39",
+    "mtime": 1786910425.6632621,
+    "ast_hash": "f9ea15a9b492e929d2b4b0367a5e7701",
     "semantic_hash": ""
   },
   "src/components/admin/panels/MediaPanel.jsx": {
@@ -805,8 +805,8 @@
     "semantic_hash": ""
   },
   "src/components/admin/panels/aars/AarsPanel.jsx": {
-    "mtime": 1787744933.4834034,
-    "ast_hash": "27feefeff9f444b61753d610391b1163",
+    "mtime": 1787316824.7871776,
+    "ast_hash": "d8af8418eb63399186aeca004568cb6b",
     "semantic_hash": ""
   },
   "src/components/calendar/MonthGridCalendar.jsx": {
@@ -825,8 +825,8 @@
     "semantic_hash": ""
   },
   "supabase/aars.sql": {
-    "mtime": 1787744611.3618326,
-    "ast_hash": "6d50671ab572c994134a9490cde04590",
+    "mtime": 1785771956.6538846,
+    "ast_hash": "cb8be70e2d635951d365318e285069ef",
     "semantic_hash": ""
   },
   "supabase/achievements_icons_update.sql": {
@@ -1180,8 +1180,8 @@
     "semantic_hash": ""
   },
   "src/components/admin/panels/tvremote/TvRemotePanel.jsx": {
-    "mtime": 1787747691.4283614,
-    "ast_hash": "f2ea0da8827103c27583b1e0420e79f6",
+    "mtime": 1787316687.2116086,
+    "ast_hash": "2f9763ad349d533a4c8552128c4c1fe0",
     "semantic_hash": ""
   },
   "src/components/creed/CreedHub.jsx": {
@@ -1285,8 +1285,8 @@
     "semantic_hash": ""
   },
   "src/components/tv/TvRangeKiosk.jsx": {
-    "mtime": 1787747659.9369266,
-    "ast_hash": "a8735f5f48a9fa827412b30480be2502",
+    "mtime": 1787151051.6808603,
+    "ast_hash": "151706eeb917aa59640cf091faad2b14",
     "semantic_hash": ""
   },
   "src/components/tv/TvShoutoutsPanel.jsx": {
@@ -1295,8 +1295,8 @@
     "semantic_hash": ""
   },
   "src/components/tv/TvStandardLayout.jsx": {
-    "mtime": 1787747665.1658227,
-    "ast_hash": "7ddafc3781fc4804610c070569013ee5",
+    "mtime": 1786632384.4916523,
+    "ast_hash": "d487699cf794a3271a7c5ecde609ed40",
     "semantic_hash": ""
   },
   "src/components/tv/TvTopStrip.jsx": {
@@ -1350,8 +1350,8 @@
     "semantic_hash": ""
   },
   "src/components/tv/range/TvRangeCompanyWelcomeScreen.jsx": {
-    "mtime": 1787751653.7741723,
-    "ast_hash": "89aaf590fa03492b4ed7eecd5785e19f",
+    "mtime": 1787227319.513284,
+    "ast_hash": "dec24d2ac169e86fa0ad7e088e1c8d46",
     "semantic_hash": ""
   },
   "src/components/tv/range/TvRangeCountdown.jsx": {
@@ -1365,7 +1365,7 @@
     "semantic_hash": ""
   },
   "src/components/tv/range/TvRangeOffHoursScreen.jsx": {
-    "mtime": 1787683129.4471273,
+    "mtime": 1786614073.8199322,
     "ast_hash": "a5f40cc55d891f0918bf04fe95859bd7",
     "semantic_hash": ""
   },
@@ -1400,8 +1400,8 @@
     "semantic_hash": ""
   },
   "src/components/tv/range/TvRangeStaffScheduleScreen.jsx": {
-    "mtime": 1787751635.5568783,
-    "ast_hash": "030abdf58dd35c6182ffbcc494541f3f",
+    "mtime": 1787225558.0726063,
+    "ast_hash": "14833603bc2ce8d1b6da7998438c209c",
     "semantic_hash": ""
   },
   "src/components/tv/range/TvRangeT2Screen.jsx": {
@@ -1460,8 +1460,8 @@
     "semantic_hash": ""
   },
   "src/hooks/useTvUpcomingEvents.js": {
-    "mtime": 1787660601.6343117,
-    "ast_hash": "ea87378f8757c9c95eedde0775fc6916",
+    "mtime": 1786442812.3997653,
+    "ast_hash": "bc4b342cf4e467302315197ea41e9172",
     "semantic_hash": ""
   },
   "src/hooks/useWeather.js": {
@@ -1470,8 +1470,8 @@
     "semantic_hash": ""
   },
   "src/lib/bellSchedules.js": {
-    "mtime": 1787747633.2465432,
-    "ast_hash": "c6c2335ba3d8cacb6320069ebdc4c09b",
+    "mtime": 1787133159.471526,
+    "ast_hash": "ae50d71a392db3bba52963c75ee99225",
     "semantic_hash": ""
   },
   "src/lib/creedProgress.js": {
@@ -1690,13 +1690,13 @@
     "semantic_hash": ""
   },
   "src/components/tv/control-center/StepRangeSlideshow.jsx": {
-    "mtime": 1787751612.9754167,
-    "ast_hash": "d7b7d7ddf50b663a5b65e9c58be09f7d",
+    "mtime": 1787232313.7446616,
+    "ast_hash": "fad9cbdcca253f77eda747529b3c736a",
     "semantic_hash": ""
   },
   "src/components/tv/range/TvRangeSlideshowScreen.jsx": {
-    "mtime": 1787751586.6948273,
-    "ast_hash": "e3d017856d83d928b39ad765bdd4f4c2",
+    "mtime": 1787229656.9425542,
+    "ast_hash": "9dfde1c6d831aae698f1bc6a233fa5ef",
     "semantic_hash": ""
   },
   "src/components/tv/range/slides/SlideAnnouncementSingle.jsx": {
@@ -1715,8 +1715,8 @@
     "semantic_hash": ""
   },
   "src/components/tv/range/slides/slideRegistry.js": {
-    "mtime": 1787751571.994849,
-    "ast_hash": "7f9f9fc7764d7d25a26e5836bb56832b",
+    "mtime": 1787232331.6786427,
+    "ast_hash": "69e9cde14ae4b689e01fa86f304305a0",
     "semantic_hash": ""
   },
   "src/hooks/useTvNextUniformDay.js": {
@@ -1825,13 +1825,18 @@
     "semantic_hash": ""
   },
   "src/components/RaiderTeam.jsx": {
-    "mtime": 1787751692.0096843,
-    "ast_hash": "27477ec0d30afa5316045c151282e7a1",
+    "mtime": 1787225499.5034335,
+    "ast_hash": "cdba54bb461d25dbc36736b36109e045",
     "semantic_hash": ""
   },
   "src/components/tv/TvRefreshNotice.jsx": {
     "mtime": 1787133450.5641055,
     "ast_hash": "907d94fa85fd4c9857b77f6b83ed86bb",
+    "semantic_hash": ""
+  },
+  "src/components/tv/range/RaiderCongratsBanner.jsx": {
+    "mtime": 1787227735.3481867,
+    "ast_hash": "d73df3c07896ebc9fa549bd30e9608b9",
     "semantic_hash": ""
   },
   "src/components/tv/range/rangeGrid/fontOptions.js": {
@@ -1849,6 +1854,11 @@
     "ast_hash": "02081a7a9e1725e20c87c17e616c4d67",
     "semantic_hash": ""
   },
+  "src/components/tv/range/slides/SlideRaiderCongrats.jsx": {
+    "mtime": 1787232300.982928,
+    "ast_hash": "b95045b6a68f48242bde9cc3b1a74eb8",
+    "semantic_hash": ""
+  },
   "src/components/tv/range/slides/SlideRaiderPractice.jsx": {
     "mtime": 1787150987.6543074,
     "ast_hash": "76628c85553a79a8cf9c48bf20da0f89",
@@ -1864,14 +1874,19 @@
     "ast_hash": "b04179ac997e0390032b471ae8882574",
     "semantic_hash": ""
   },
+  "src/hooks/useRaiderCongrats.js": {
+    "mtime": 1787228789.3085945,
+    "ast_hash": "5ca997c6996bb9ae36737d34514e3f1e",
+    "semantic_hash": ""
+  },
   "src/hooks/useTvRefreshNotice.js": {
     "mtime": 1787133615.4857957,
     "ast_hash": "b7ccd4196d718daee7c66e31239eb454",
     "semantic_hash": ""
   },
   "src/lib/raiderRoster.js": {
-    "mtime": 1787751679.6038132,
-    "ast_hash": "705b8df040c493ed12d9a2b4035d6f41",
+    "mtime": 1787229463.593384,
+    "ast_hash": "192fcd23010b12d33785af0abe070943",
     "semantic_hash": ""
   },
   "supabase/cadet_company_roster_view.sql": {
@@ -1922,66 +1937,6 @@
   "supabase/site_checkin.sql": {
     "mtime": 1787658505.8296695,
     "ast_hash": "86d1fa8919fd4b393c08991688e190da",
-    "semantic_hash": ""
-  },
-  "scripts/upload-aars.mjs": {
-    "mtime": 1787744275.2911983,
-    "ast_hash": "926704fea28dc3332cc3d0399d74eabf",
-    "semantic_hash": ""
-  },
-  "src/components/EventFeedbackForm.jsx": {
-    "mtime": 1787746242.704009,
-    "ast_hash": "b0ea0f98c1694c455e3f7099cd3184c0",
-    "semantic_hash": ""
-  },
-  "src/components/admin/panels/feedback/EventFeedbackPanel.jsx": {
-    "mtime": 1787746289.8866365,
-    "ast_hash": "4ce7236cd11f61aa70027f042bd187d0",
-    "semantic_hash": ""
-  },
-  "src/components/tv/range/PacketsDueBanner.jsx": {
-    "mtime": 1787751536.6316895,
-    "ast_hash": "2e0441d772c71a5cfc4f22d5e5334e30",
-    "semantic_hash": ""
-  },
-  "src/components/tv/range/slides/SlidePacketsDue.jsx": {
-    "mtime": 1787751546.6932714,
-    "ast_hash": "d5fc819046743ecff7d779f1ab5f9255",
-    "semantic_hash": ""
-  },
-  "src/hooks/useTvConsentDue.js": {
-    "mtime": 1787747450.0409849,
-    "ast_hash": "f2b67d7b113d805405ec240b1a3097fc",
-    "semantic_hash": ""
-  },
-  "supabase/cadet_consent_add_mason_ray_myers.sql": {
-    "mtime": 1787666438.5835652,
-    "ast_hash": "660aa26e072fb91927a4581ab490a2a4",
-    "semantic_hash": ""
-  },
-  "supabase/cadet_consent_due_status_view.sql": {
-    "mtime": 1787747442.666085,
-    "ast_hash": "f25534577c137ec67d16093028ca74f6",
-    "semantic_hash": ""
-  },
-  "supabase/cadet_consent_restore_kaiden_write.sql": {
-    "mtime": 1787667185.2963738,
-    "ast_hash": "9392a71ce7108489ae4f8fb78f3674cd",
-    "semantic_hash": ""
-  },
-  "supabase/event_feedback.sql": {
-    "mtime": 1787746054.8382096,
-    "ast_hash": "66dc377a114d0fd52d8e17358e789bb9",
-    "semantic_hash": ""
-  },
-  "supabase/functions/analyze-event-feedback/index.ts": {
-    "mtime": 1787746089.4519045,
-    "ast_hash": "bd62ce7b3cf482edb291db9c4625aaff",
-    "semantic_hash": ""
-  },
-  "supabase/tv_bell_schedule_auto.sql": {
-    "mtime": 1787747640.8589861,
-    "ast_hash": "20ff7d53235a65ba8062a64d0273ad21",
     "semantic_hash": ""
   }
 }
