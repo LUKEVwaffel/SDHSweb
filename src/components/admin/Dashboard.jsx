@@ -55,6 +55,10 @@ const SECTION_LABEL = {
 // own top-level section but is appended to `allowed` only for isLuke below,
 // not listed in either role's array — same one-account restriction as TV
 // Photos, matching public.is_luke() RLS on site_checkin_responses.
+// 'aars' is appended for isLuke too, same pattern — but unlike checkin/TV
+// Photos this is read-only (AarsPanel's `readOnly` prop below), not full
+// access: S-5 stays the only role that can draft/upload/edit/archive AARs,
+// matching aars_select_luke (SELECT only) vs aars_all_s5 (ALL) in aars.sql.
 const ROLE_SECTIONS = {
   s6: ['overview', 'events', 'people', 'photos', 'questions', 'email', 'media', 'messages', 'advanced', 'tvremote', 'beta'],
   s5: ['events', 'aars', 'messages', 'account', 'tvremote'],
@@ -62,7 +66,7 @@ const ROLE_SECTIONS = {
 
 export default function Dashboard({ onLogout, adminId, role = 's6' }) {
   const isLuke = (adminId || '').toLowerCase() === LUKE_EMAIL;
-  const allowed = [...(ROLE_SECTIONS[role] || ROLE_SECTIONS.s6), ...(isLuke ? ['checkin'] : [])];
+  const allowed = [...(ROLE_SECTIONS[role] || ROLE_SECTIONS.s6), ...(isLuke ? ['checkin', 'aars'] : [])];
   // S-5 has full events parity with S-6 (every team) — see
   // supabase/events_s5_full_access.sql for the matching RLS grant.
   const allowedTeams = undefined;
@@ -87,7 +91,7 @@ export default function Dashboard({ onLogout, adminId, role = 's6' }) {
         <div style={{ flex: 1, overflowY: 'auto', padding: `${sp[6]}px ${sp[8]}px`, maxWidth: 1500, width: '100%', margin: '0 auto' }}>
           {section === 'overview' && <OverviewPanel adminId={adminId} goto={goto} />}
           {section === 'events'   && <EventsPanel adminId={adminId} allowedTeams={allowedTeams} />}
-          {section === 'aars'     && <AarsPanel adminId={adminId} />}
+          {section === 'aars'     && <AarsPanel adminId={adminId} readOnly={role !== 's5'} />}
           {section === 'people'   && <PeoplePanel adminId={adminId} />}
           {section === 'photos'   && <PhotosPanel adminId={adminId} showTvPhotos={isLuke} />}
           {section === 'questions' && <QuestionsPanel />}

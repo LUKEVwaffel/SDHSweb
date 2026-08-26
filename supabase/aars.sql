@@ -9,9 +9,11 @@
 --     nullable-FK pattern as raider_photo_hub.sql's optional event_id.
 --   • Storage: dedicated private `aar-documents` bucket, separate from the
 --     existing `documents` bucket. New bucket, new policy tier: is_s5()
---     only — AAR tracking is S-5's dedicated tool, hidden entirely from S-6
---     (no nav entry, no RLS grant), not scoped by team the way the
---     battalion calendar is.
+--     for writes — AAR tracking is S-5's dedicated tool. Luke additionally
+--     gets read-only visibility (is_luke(), see SECTION 2's aars_select_luke
+--     and this section's aar_documents_obj_read) so he can view/verify AARs
+--     from his own DISPATCH login without taking over S-5's write workflow;
+--     no other s6 account gets a nav entry or RLS grant here.
 --   • Backup = soft delete. There is no hard-delete path from the app. A
 --     "delete" sets status='archived' (+archived_at/archived_by); the file
 --     stays in storage and the row stays queryable/restorable. True
@@ -32,7 +34,7 @@ drop policy if exists aar_documents_obj_read   on storage.objects;
 drop policy if exists aar_documents_obj_insert on storage.objects;
 drop policy if exists aar_documents_obj_update on storage.objects;
 drop policy if exists aar_documents_obj_delete on storage.objects;
-create policy aar_documents_obj_read   on storage.objects for select to authenticated using (bucket_id = 'aar-documents' and public.is_s5());
+create policy aar_documents_obj_read   on storage.objects for select to authenticated using (bucket_id = 'aar-documents' and (public.is_s5() or public.is_luke()));
 create policy aar_documents_obj_insert on storage.objects for insert to authenticated with check (bucket_id = 'aar-documents' and public.is_s5());
 create policy aar_documents_obj_update on storage.objects for update to authenticated using (bucket_id = 'aar-documents' and public.is_s5()) with check (bucket_id = 'aar-documents' and public.is_s5());
 create policy aar_documents_obj_delete on storage.objects for delete to authenticated using (bucket_id = 'aar-documents' and public.is_s5());
@@ -86,6 +88,14 @@ drop policy if exists aars_all_admin on public.aars;
 drop policy if exists aars_all_s5 on public.aars;
 create policy aars_all_s5 on public.aars
   for all to authenticated using (public.is_s5()) with check (public.is_s5());
+
+-- Luke gets read-only visibility into S-5's AAR tracker (view/search/print),
+-- not write — S-5 stays the sole owner of drafting/uploading/archiving.
+-- public.is_luke() is defined in tv_photos.sql (single choke-point,
+-- see that file's comment) — run it first if this policy fails to create.
+drop policy if exists aars_select_luke on public.aars;
+create policy aars_select_luke on public.aars
+  for select to authenticated using (public.is_luke());
 
 -- ============================================================================
 -- Verify: select * from storage.buckets where id = 'aar-documents';

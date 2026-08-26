@@ -32,7 +32,7 @@ const emptyDraft = () => ({
   wentWell: '', needsImprovement: '', summary: '',
 });
 
-export default function AarsPanel({ adminId }) {
+export default function AarsPanel({ adminId, readOnly = false }) {
   const [rows, setRows] = useState([]);
   const [events, setEvents] = useState([]);
   const [urls, setUrls] = useState({}); // storage_path -> signed url
@@ -212,10 +212,14 @@ export default function AarsPanel({ adminId }) {
     load();
   }
 
+  // urls[row.storage_path] is a Supabase Storage URL (a different origin
+  // from this app), so `win` is a cross-origin popup: addEventListener
+  // isn't available on it and throws "Illegal invocation" rather than just
+  // being a no-op. There's no reliable cross-origin load signal, so just
+  // open the tab — the browser's own PDF viewer has a print control.
   function printFile(row) {
     const win = window.open(urls[row.storage_path], '_blank');
     if (!win) { alert('Popup blocked, allow popups to print.'); return; }
-    win.addEventListener('load', () => win.print());
   }
 
   function printDraft(row) {
@@ -257,10 +261,10 @@ export default function AarsPanel({ adminId }) {
     <div style={{ maxWidth: 1040 }}>
       <PanelHeader
         title="AAR TRACKER"
-        sub={`${activeCount} active · ${archivedCount} archived`}
-        action={<Btn onClick={() => setShowChoice(true)} variant="gold" size="sm">+ NEW AAR</Btn>}
+        sub={`${activeCount} active · ${archivedCount} archived${readOnly ? ' · READ-ONLY' : ''}`}
+        action={!readOnly && <Btn onClick={() => setShowChoice(true)} variant="gold" size="sm">+ NEW AAR</Btn>}
       />
-      <input ref={fileRef} type="file" accept=".pdf,.doc,.docx" style={{ display: 'none' }} onChange={onPickFile} />
+      {!readOnly && <input ref={fileRef} type="file" accept=".pdf,.doc,.docx" style={{ display: 'none' }} onChange={onPickFile} />}
 
       <div style={{ display: 'flex', gap: sp[2], marginBottom: sp[3], flexWrap: 'wrap' }}>
         <Btn variant={statusFilter === 'active' ? 'gold' : 'ghost'} size="sm" onClick={() => setStatusFilter('active')}>ACTIVE</Btn>
@@ -282,9 +286,9 @@ export default function AarsPanel({ adminId }) {
       </div>
 
       <div
-        onDragOver={(e) => { e.preventDefault(); setDragOver(true); }}
-        onDragLeave={() => setDragOver(false)}
-        onDrop={onDrop}
+        onDragOver={readOnly ? undefined : (e) => { e.preventDefault(); setDragOver(true); }}
+        onDragLeave={readOnly ? undefined : () => setDragOver(false)}
+        onDrop={readOnly ? undefined : onDrop}
         style={{
           border: dragOver ? `2px dashed ${P.gold}` : '2px dashed transparent',
           background: dragOver ? P.goldWash : 'transparent',
@@ -320,7 +324,7 @@ export default function AarsPanel({ adminId }) {
                       {drafted ? (
                         <>
                           <button onClick={() => printDraft(r)} style={miniBtn(false)}>PRINT</button>
-                          {r.status === 'active' && <button onClick={() => editDraft(r)} style={miniBtn(false)}>EDIT</button>}
+                          {!readOnly && r.status === 'active' && <button onClick={() => editDraft(r)} style={miniBtn(false)}>EDIT</button>}
                         </>
                       ) : (
                         <>
@@ -328,9 +332,9 @@ export default function AarsPanel({ adminId }) {
                           {isPdf(r.file_name) && <button onClick={() => printFile(r)} style={miniBtn(false)}>PRINT</button>}
                         </>
                       )}
-                      {r.status === 'active'
+                      {!readOnly && (r.status === 'active'
                         ? <button onClick={() => archive(r)} style={{ ...miniBtn(false), color: P.red, borderColor: 'rgba(192,57,43,0.4)' }}>ARCHIVE</button>
-                        : <button onClick={() => restore(r)} style={{ ...miniBtn(false), color: P.green, borderColor: 'rgba(39,174,96,0.4)' }}>RESTORE</button>}
+                        : <button onClick={() => restore(r)} style={{ ...miniBtn(false), color: P.green, borderColor: 'rgba(39,174,96,0.4)' }}>RESTORE</button>)}
                     </div>
                   </div>
                 </Card>
@@ -502,14 +506,14 @@ export default function AarsPanel({ adminId }) {
                 {preview.source === 'drafted' ? (
                   <>
                     <Btn onClick={() => printDraft(preview)} variant="ghost" size="sm">PRINT</Btn>
-                    {preview.status === 'active' && <Btn onClick={() => editDraft(preview)} variant="ghost" size="sm">EDIT</Btn>}
+                    {!readOnly && preview.status === 'active' && <Btn onClick={() => editDraft(preview)} variant="ghost" size="sm">EDIT</Btn>}
                   </>
                 ) : (
                   isPdf(preview.file_name) && <Btn onClick={() => printFile(preview)} variant="ghost" size="sm">PRINT</Btn>
                 )}
-                {preview.status === 'active'
+                {!readOnly && (preview.status === 'active'
                   ? <Btn onClick={() => archive(preview)} variant="danger" size="sm">ARCHIVE</Btn>
-                  : <Btn onClick={() => restore(preview)} variant="green" size="sm">RESTORE</Btn>}
+                  : <Btn onClick={() => restore(preview)} variant="green" size="sm">RESTORE</Btn>)}
                 <Btn onClick={() => setPreview(null)} variant="gold" size="sm">CLOSE</Btn>
               </div>
             </div>
