@@ -556,6 +556,14 @@ export default function Raiders() {
 
   const openProfile = (person) => navigate(`/profile/${person.id}`, { state: { from: 'raiders' } });
 
+  // Soonest upcoming raider event with a permission slip attached — right
+  // now that's the Rhea County comp, but this stays correct as new events
+  // with forms get posted through Dispatch without another code change.
+  const todayIso = new Date().toISOString().slice(0, 10);
+  const requiredFormEvent = [...events]
+    .filter((e) => e.permission_slip_required && e.permission_slip_url && e.date >= todayIso)
+    .sort((a, b) => a.date.localeCompare(b.date))[0];
+
   return (
     <div style={{ background: P.ink, minHeight: '100vh', fontFamily: 'Inter, sans-serif', position: 'relative' }}>
       <RaiderStyles />
@@ -601,6 +609,37 @@ export default function Raiders() {
         <div style={{ marginBottom: 40 }}>
           <RaiderCarousel />
         </div>
+
+        {/* ── Required-forms banner: surfaces whichever upcoming raider event
+            has a permission slip attached (DB-driven via events_by_calendar,
+            uploaded through Dispatch — see EventsPanel.jsx). Currently the
+            Rhea County comp on Sat Aug 29. Self-printing + paper-only
+            submission note is a hard SAI requirement, not decorative. ── */}
+        {requiredFormEvent && (
+          <div style={{ border: `1px solid ${P.green}66`, background: 'rgba(126,200,126,0.06)', padding: '32px 36px', marginBottom: 40, position: 'relative' }}>
+            <Brackets size={16} opacity={0.35} />
+            <div style={{ fontFamily: mono, fontSize: 9, color: P.green, letterSpacing: '0.28em', opacity: 0.85, marginBottom: 10 }}>
+              // REQUIRED FORMS · {fmtDate(requiredFormEvent.date).toUpperCase()}
+            </div>
+            <h2 style={{ fontFamily: oswald, fontWeight: 700, fontSize: 28, color: P.cream, letterSpacing: '0.02em', margin: '0 0 12px', lineHeight: 1.15 }}>
+              {requiredFormEvent.title.toUpperCase()} — PERMISSION SLIP &amp; LIABILITY FORM
+            </h2>
+            <p style={{ fontFamily: 'Inter, sans-serif', fontSize: 13, color: P.mute, lineHeight: 1.7, margin: '0 0 20px', maxWidth: 640 }}>
+              Digital copies are accessible for self-printing here. <strong style={{ color: P.cream }}>Electronic/online submissions sent to the SAI will not count</strong> — all
+              required documentation must be printed and handed directly to the SAI on paper prior to the event deadline.
+            </p>
+            <a href={requiredFormEvent.permission_slip_url} target="_blank" rel="noopener noreferrer" download
+              style={{
+                background: P.green, color: P.ink, textDecoration: 'none', display: 'inline-block',
+                fontFamily: mono, fontSize: 11, letterSpacing: '0.16em', fontWeight: 600, padding: '13px 24px',
+                transition: 'background 0.15s',
+              }}
+              onMouseEnter={(e) => (e.currentTarget.style.background = '#94D694')}
+              onMouseLeave={(e) => (e.currentTarget.style.background = P.green)}>
+              ↓ DOWNLOAD PERMISSION SLIP &amp; LIABILITY FORM
+            </a>
+          </div>
+        )}
 
         {/* ── Meet your commanders — its own full-width row ── */}
         <div>
