@@ -616,27 +616,44 @@ export default function Raiders() {
             Rhea County comp on Sat Aug 29. Self-printing + paper-only
             submission note is a hard SAI requirement, not decorative. ── */}
         {requiredFormEvent && (
-          <div style={{ border: `1px solid ${P.green}66`, background: 'rgba(126,200,126,0.06)', padding: '32px 36px', marginBottom: 40, position: 'relative' }}>
-            <Brackets size={16} opacity={0.35} />
-            <div style={{ fontFamily: mono, fontSize: 9, color: P.green, letterSpacing: '0.28em', opacity: 0.85, marginBottom: 10 }}>
-              // REQUIRED FORMS · {fmtDate(requiredFormEvent.date).toUpperCase()}
+          <div style={{
+            border: `1px solid ${P.gold}`, background: `linear-gradient(160deg, rgba(201,169,97,0.09), rgba(201,169,97,0.02))`,
+            padding: '36px 40px', marginBottom: 40, position: 'relative',
+          }}>
+            <Brackets size={16} opacity={0.5} />
+            <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 16 }}>
+              <span style={{ width: 6, height: 6, background: P.gold, flexShrink: 0 }} />
+              <span style={{ fontFamily: mono, fontSize: 9, color: P.gold, letterSpacing: '0.3em', opacity: 0.85 }}>
+                REQUIRED FORMS · DUE {fmtDate(requiredFormEvent.date).toUpperCase()}
+              </span>
             </div>
-            <h2 style={{ fontFamily: oswald, fontWeight: 700, fontSize: 28, color: P.cream, letterSpacing: '0.02em', margin: '0 0 12px', lineHeight: 1.15 }}>
-              {requiredFormEvent.title.toUpperCase()} — PERMISSION SLIP &amp; LIABILITY FORM
+            <h2 style={{ fontFamily: oswald, fontWeight: 700, fontSize: 26, color: P.cream, letterSpacing: '0.02em', margin: '0 0 8px', lineHeight: 1.2 }}>
+              {requiredFormEvent.title.toUpperCase()}
             </h2>
-            <p style={{ fontFamily: 'Inter, sans-serif', fontSize: 13, color: P.mute, lineHeight: 1.7, margin: '0 0 20px', maxWidth: 640 }}>
-              Digital copies are accessible for self-printing here. <strong style={{ color: P.cream }}>Electronic/online submissions sent to the SAI will not count</strong> — all
-              required documentation must be printed and handed directly to the SAI on paper prior to the event deadline.
+            <p style={{ fontFamily: 'Inter, sans-serif', fontSize: 13, color: P.mute, lineHeight: 1.7, margin: '0 0 20px', maxWidth: 620 }}>
+              Permission slip &amp; liability form — required for every cadet attending. Digital copies are available here for self-printing.
             </p>
+
+            <div style={{
+              display: 'flex', alignItems: 'flex-start', gap: 10, marginBottom: 24, maxWidth: 620,
+              border: `1px solid ${P.hairStrong}`, background: 'rgba(6,16,31,0.5)', padding: '12px 16px',
+            }}>
+              <span aria-hidden="true" style={{ fontSize: 14, lineHeight: 1.5, flexShrink: 0 }}>⚠</span>
+              <span style={{ fontFamily: 'Inter, sans-serif', fontSize: 12.5, color: P.cream, lineHeight: 1.6 }}>
+                <strong>Electronic/online submissions sent to the SAI will not count.</strong> All required documentation
+                must be printed and handed directly to the SAI on paper prior to the event deadline.
+              </span>
+            </div>
+
             <a href={requiredFormEvent.permission_slip_url} target="_blank" rel="noopener noreferrer" download
               style={{
-                background: P.green, color: P.ink, textDecoration: 'none', display: 'inline-block',
+                background: P.gold, color: P.ink, textDecoration: 'none', display: 'inline-block',
                 fontFamily: mono, fontSize: 11, letterSpacing: '0.16em', fontWeight: 600, padding: '13px 24px',
                 transition: 'background 0.15s',
               }}
-              onMouseEnter={(e) => (e.currentTarget.style.background = '#94D694')}
-              onMouseLeave={(e) => (e.currentTarget.style.background = P.green)}>
-              ↓ DOWNLOAD PERMISSION SLIP &amp; LIABILITY FORM
+              onMouseEnter={(e) => (e.currentTarget.style.background = P.bright)}
+              onMouseLeave={(e) => (e.currentTarget.style.background = P.gold)}>
+              ↓ DOWNLOAD PERMISSION SLIP
             </a>
           </div>
         )}
