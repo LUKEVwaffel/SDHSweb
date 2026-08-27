@@ -28,6 +28,11 @@ import TvRangeKiosk from './components/tv/TvRangeKiosk';
 import RaiderParentWelcome from './components/tv/RaiderParentWelcome';
 import CheckinSurvey from './components/CheckinSurvey';
 import EventFeedbackForm from './components/EventFeedbackForm';
+import BallLanding from './components/ball/BallLanding';
+import BallSignupWizard from './components/ball/signup/BallSignupWizard';
+import BallGuestVerify from './components/ball/BallGuestVerify';
+import BallOpsPortal from './components/ball/ops/BallOpsPortal';
+import BallDressPortal from './components/ball/dress/BallDressPortal';
 
 const TABS = [
   { id: 'cadet-manual', label: 'Cadet Manual',  short: 'MANUAL' },
@@ -62,6 +67,9 @@ export default function App() {
   if (location.pathname === '/tv/range') return <TvRangeKiosk />;
   if (location.pathname === '/raiderparent') return <RaiderParentWelcome />;
   if (location.pathname.startsWith('/feedback/')) return <EventFeedbackForm />;
+  if (location.pathname.startsWith('/ball/guest/')) return <BallGuestVerify />;
+  if (location.pathname === '/ball/ops' || location.pathname.startsWith('/ball/ops/')) return <BallOpsPortal />;
+  if (location.pathname === '/ball/dress' || location.pathname.startsWith('/ball/dress/')) return <BallDressPortal />;
 
   return (
     <div style={{ minHeight: '100vh', background: '#06101F', fontFamily: 'Inter, sans-serif' }}>
@@ -92,6 +100,8 @@ export default function App() {
         <Route path="/companies" element={<Companies />} />
         <Route path="/company/:id" element={<Companies />} />
         <Route path="/about" element={<About />} />
+        <Route path="/ball" element={<BallLanding />} />
+        <Route path="/ball/signup" element={<BallSignupWizard />} />
         <Route path="/profile/:id" element={<CommandProfile />} />
         <Route path="/:tabId" element={<TabRoute />} />
         <Route path="*" element={<Navigate to="/" replace />} />

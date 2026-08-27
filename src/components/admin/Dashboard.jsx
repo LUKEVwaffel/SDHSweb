@@ -18,6 +18,7 @@ import TvRemotePanel from './panels/tvremote/TvRemotePanel';
 import BetaFeaturesPanel from './panels/beta/BetaFeaturesPanel';
 import CheckinPanel from './panels/CheckinPanel';
 import EventFeedbackPanel from './panels/feedback/EventFeedbackPanel';
+import BallPanel from './panels/ball/BallPanel';
 
 // Push-to-TV / TV Photos is intentionally restricted to this one account —
 // a deliberate departure from DISPATCH's usual "no per-email logic"
@@ -32,7 +33,7 @@ const SECTION_LABEL = {
   people: 'PEOPLE', photos: 'PHOTOS', questions: 'FAQ QUESTIONS', email: 'EMAIL LIST',
   media: 'MEDIA', advanced: 'ADVANCED', account: 'MY ACCOUNT', messages: 'MESSAGES',
   tvremote: 'TV REMOTE', beta: 'BETA FEATURES', checkin: 'SITE CHECK-IN',
-  feedback: 'EVENT FEEDBACK',
+  feedback: 'EVENT FEEDBACK', ball: 'MILITARY BALL',
 };
 
 // Which sections each role may see. s5 is scoped to the battalion calendar
@@ -68,7 +69,7 @@ const SECTION_LABEL = {
 // verified, add 'feedback' to s5's array below (and uncomment the matching
 // RLS policies in event_feedback.sql + the role check in the edge function).
 const ROLE_SECTIONS = {
-  s6: ['overview', 'events', 'people', 'photos', 'questions', 'email', 'media', 'messages', 'advanced', 'tvremote', 'beta', 'feedback'],
+  s6: ['overview', 'events', 'people', 'photos', 'questions', 'email', 'media', 'messages', 'advanced', 'tvremote', 'beta', 'feedback', 'ball'],
   s5: ['events', 'aars', 'messages', 'account', 'tvremote'],
 };
 
@@ -112,6 +113,7 @@ export default function Dashboard({ onLogout, adminId, role = 's6' }) {
           {section === 'beta'     && <BetaFeaturesPanel adminId={adminId} />}
           {section === 'checkin'  && isLuke && <CheckinPanel />}
           {section === 'feedback' && <EventFeedbackPanel />}
+          {section === 'ball'     && <BallPanel />}
         </div>
       </div>
       <StatusBar sectionLabel={SECTION_LABEL[section] || section.toUpperCase()} />

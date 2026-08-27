@@ -26,6 +26,7 @@ export const NAV_GROUPS = [
     heading: 'LIBRARY',
     items: [
       { id: 'media', icon: '⊡', label: 'Media' },
+      { id: 'ball', icon: '♛', label: 'Military Ball' },
     ],
   },
   {
