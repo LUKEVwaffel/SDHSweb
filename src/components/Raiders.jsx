@@ -2,10 +2,10 @@ import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { supabase as SB } from '../lib/supabaseClient';
 import RaiderCarousel from './RaiderCarousel';
-import RaiderFAQ from './RaiderFAQ';
+import RaiderNextComp from './RaiderNextComp';
+import RaiderCompetitionResults from './RaiderCompetitionResults';
 import useIsMobile from '../hooks/useIsMobile';
 import { categoryColor, eventOccursOnDate, formatRecurrenceDays, formatEventTime, formatEventTimeRange, teamLabel, DEFAULT_POC } from '../lib/calendar';
-import { RAIDER_PRACTICE_TILES } from '../lib/raiderPracticeInfo';
 
 // Palette mirrors Rifle.jsx for a consistent specialty-team look. Green is the
 // raider live/event accent; gold stays the structural/command accent.
@@ -564,6 +564,13 @@ export default function Raiders() {
     .filter((e) => e.permission_slip_required && e.permission_slip_url && e.date >= todayIso)
     .sort((a, b) => a.date.localeCompare(b.date))[0];
 
+  // Soonest upcoming competition for the countdown — any posted one-off raider
+  // event that isn't a recurring practice. Stays correct as Dispatch posts new
+  // meets without another code change.
+  const nextComp = [...events]
+    .filter((e) => !e.recurrence_days?.length && e.category !== 'PRACTICE' && e.date >= todayIso)
+    .sort((a, b) => a.date.localeCompare(b.date))[0];
+
   return (
     <div style={{ background: P.ink, minHeight: '100vh', fontFamily: 'Inter, sans-serif', position: 'relative' }}>
       <RaiderStyles />
@@ -672,50 +679,8 @@ export default function Raiders() {
 
         <Divider tight />
 
-        {/* ── What Raiders is, below the commanders row ── */}
-        <div>
-          <SectionLabel tag="// ABOUT THE TEAM" title="WHAT IS RAIDERS" />
-          <p style={{ fontFamily: 'Inter, sans-serif', fontSize: 14, color: P.mute, lineHeight: 1.75, margin: '0 0 14px', maxWidth: 760 }}>
-            Raiders is the battalion's physical fitness and tactical skills competition team. Cadets train in rope bridge construction,
-            obstacle courses, land navigation, and team relays, then compete against other JROTC battalions at regional meets.
-          </p>
-          <p style={{ fontFamily: 'Inter, sans-serif', fontSize: 14, color: P.mute, lineHeight: 1.75, margin: 0, maxWidth: 760 }}>
-            No prior fitness level or JROTC experience is required to join. Training builds up over the season, and every cadet
-            is welcome at practice regardless of where they're starting from.
-          </p>
-        </div>
-
-        <Divider tight />
-
-        {/* ── Tryouts & standing practice info — static content, not DB-driven.
-            Placed right after the About/Commanders intro so it's the first
-            thing a prospective cadet hits after learning what Raiders is. ── */}
-        <div>
-          <SectionLabel
-            tag="// TRYOUTS · PRACTICE"
-            title="JOIN THE TEAM"
-            subtitle="Raiders fields three teams: Male, Coed, and JV. Tryouts are open to every cadet in the battalion."
-          />
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: 16, marginBottom: 24 }}>
-            {RAIDER_PRACTICE_TILES.map((t) => (
-              <div key={t.label} style={{ border: `1px solid ${P.hair}`, background: P.deep, padding: '24px 22px', position: 'relative' }}>
-                <Brackets size={14} opacity={0.3} />
-                <div style={{ fontFamily: oswald, fontWeight: 700, fontSize: 26, color: P.gold, letterSpacing: '0.02em', lineHeight: 1.15 }}>
-                  {t.value}
-                </div>
-                <div style={{ fontFamily: mono, fontSize: 9, color: P.cream, letterSpacing: '0.2em', marginTop: 12 }}>
-                  {t.label}
-                </div>
-                {t.sub && <div style={{ fontFamily: 'Inter, sans-serif', fontSize: 11, color: P.mute, marginTop: 6, lineHeight: 1.5 }}>{t.sub}</div>}
-              </div>
-            ))}
-          </div>
-          <p style={{ fontFamily: 'Inter, sans-serif', fontSize: 13, color: P.mute, lineHeight: 1.75, margin: 0, maxWidth: 640 }}>
-            Tryouts determine each season's Male, Coed, and JV rosters. Not every cadet who tries out will make a team;
-            spots are limited, and tryout results are final for that season. Cadets who don't make a roster are encouraged
-            to come back and try again next year.
-          </p>
-        </div>
+        {/* ── Next competition countdown + standing Varsity report time ── */}
+        <RaiderNextComp event={nextComp} />
 
         {/* ── Event calendar — omitted on mobile, same as the unified team
             template; full schedule stays reachable from /events. ── */}
@@ -726,23 +691,11 @@ export default function Raiders() {
           </>
         )}
 
-        <Divider tight />
+        <Divider />
 
-        {/* ── Season calendar download: static PDF, manually re-uploaded when
-            the schedule changes. Not generated from live event data. ── */}
-        <div style={{ border: `1px solid ${P.hairStrong}`, background: 'rgba(201,169,97,0.03)', padding: '40px 36px' }}>
-          <SectionLabel tag="// SCHEDULE" title="NEVER MISS A COMPETITION"
-            subtitle="Download the full season calendar — every meet, tryout, and practice date in one PDF." />
-          <a href="/assets/raiders-season-calendar.pdf" download="Raiders-Season-Calendar.pdf"
-            style={{
-              background: P.gold, color: P.ink, textDecoration: 'none', display: 'inline-block',
-              fontFamily: mono, fontSize: 11, letterSpacing: '0.16em', fontWeight: 600, padding: '13px 24px',
-            }}
-            onMouseEnter={(e) => (e.currentTarget.style.background = P.bright)}
-            onMouseLeave={(e) => (e.currentTarget.style.background = P.gold)}>
-            ↓ DOWNLOAD SEASON CALENDAR
-          </a>
-        </div>
+        {/* ── Competition results — season record, per-meet placements, event
+            splits. Static content (RaiderCompetitionResults own data). ── */}
+        <RaiderCompetitionResults />
 
         <Divider />
 
@@ -767,14 +720,6 @@ export default function Raiders() {
               VIEW FULL PHOTO GALLERY →
             </button>
           </div>
-        </div>
-
-        <Divider />
-
-        {/* ── FAQ ── */}
-        <div>
-          <SectionLabel tag="// FAQ" title="COMMON QUESTIONS" subtitle="What parents and cadets usually ask about Raiders. Edit freely." />
-          <RaiderFAQ />
         </div>
 
       </div>

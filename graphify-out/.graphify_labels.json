@@ -260,7 +260,9 @@
   "258": "cadet_company_roster_view.sql",
   "259": "cadet_consent_commander_company_fix.sql",
   "260": "personnel_add_hayden_ogle_jv_raider.sql",
+  "261": "getDeviceId",
   "262": "EventFeedbackForm.jsx",
+  "263": "RaiderCompetitionResults.jsx",
   "264": "RaiderPolls.jsx",
   "265": "CheckinSurvey.jsx",
   "266": "teams.js",
@@ -269,7 +271,12 @@
   "269": "SlideUniformCountdown.jsx",
   "270": "tvRangeSchedule.js",
   "271": "ball_signup.sql",
+  "272": "Messages.jsx",
+  "273": "RaiderParentWelcome.jsx",
   "274": "TvCountdownBand.jsx",
   "275": "emailAudience.js",
-  "277": "tv_remote_onboarding.sql"
+  "276": "RaiderNextComp.jsx",
+  "277": "tv_remote_onboarding.sql",
+  "278": "RaiderFAQ.jsx",
+  "279": "bc_force_reset.sql"
 }
