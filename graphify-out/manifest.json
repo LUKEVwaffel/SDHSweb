@@ -90,8 +90,8 @@
     "semantic_hash": ""
   },
   "src/components/Rifle.jsx": {
-    "mtime": 1785947218.9712312,
-    "ast_hash": "31d763bf462cb25db5768790ab9ff3a2",
+    "mtime": 1787929214.9674447,
+    "ast_hash": "08b2f35572fd1cf81af0ece5cebf6044",
     "semantic_hash": ""
   },
   "src/components/Staff.jsx": {
@@ -2160,8 +2160,8 @@
     "semantic_hash": ""
   },
   "src/components/RaiderCompetitionResults.jsx": {
-    "mtime": 1787926768.6237452,
-    "ast_hash": "1c2626371c2bb5b6cd8ea3cbcf5745eb",
+    "mtime": 1787927246.8785827,
+    "ast_hash": "729203d4e3487b45d15bd19a28c149e9",
     "semantic_hash": ""
   },
   "src/components/RaiderNextComp.jsx": {
@@ -2172,6 +2172,16 @@
   "supabase/bc_force_reset.sql": {
     "mtime": 1787921743.0381384,
     "ast_hash": "db1b31198ddd0c8d4cdb0d25a93e2c05",
+    "semantic_hash": ""
+  },
+  "src/components/RifleAnalysis.jsx": {
+    "mtime": 1787929229.181933,
+    "ast_hash": "5bfdbaf373fe8bf707b6394c2e620386",
+    "semantic_hash": ""
+  },
+  "src/components/rifleData.js": {
+    "mtime": 1787929065.7420135,
+    "ast_hash": "87382c8fd6b4539e24b5c2074550badd",
     "semantic_hash": ""
   }
 }

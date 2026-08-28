@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import TeamGallery from './TeamGallery';
+import RifleAnalysis from './RifleAnalysis';
 import useIsMobile from '../hooks/useIsMobile';
 
 const P = {
@@ -8,13 +9,6 @@ const P = {
   gold: '#C9A961', bright: '#E8C77A', cream: '#F4ECD8',
   mute: 'rgba(244,236,216,0.55)', hair: 'rgba(201,169,97,0.22)',
   hairStrong: 'rgba(201,169,97,0.5)',
-};
-
-// Season state — flip `started` to true (and fill `matches`) when the season opens.
-const SEASON = {
-  label: '2025–26',
-  started: false,
-  nextEvent: 'First postal match · schedule to be announced',
 };
 
 // ── Scoped motion (respects reduced-motion) ──────────────────────────────────
@@ -190,123 +184,6 @@ function CommanderCard() {
   );
 }
 
-// ── Season status pill (pre-season / live) ───────────────────────────────────
-function SeasonPill() {
-  const live = SEASON.started;
-  return (
-    <div style={{ textAlign: 'right', flexShrink: 0, paddingBottom: 8 }}>
-      <div style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: 8, color: P.gold, letterSpacing: '0.25em', opacity: 0.6, marginBottom: 6 }}>
-        {SEASON.label} SEASON
-      </div>
-      <div style={{
-        display: 'inline-flex', alignItems: 'center', gap: 8,
-        border: `1px solid ${live ? P.gold : P.hairStrong}`,
-        padding: '8px 16px', background: P.deep,
-      }}>
-        <span className={live ? 'rf-live-dot' : undefined} style={{ width: 7, height: 7, background: live ? '#7EC87E' : `${P.gold}77`, borderRadius: '50%', flexShrink: 0 }} />
-        <span style={{ fontFamily: 'Oswald, sans-serif', fontSize: 17, color: live ? P.cream : `${P.cream}88`, letterSpacing: '0.14em' }}>
-          {live ? 'IN SEASON' : 'PRE-SEASON'}
-        </span>
-      </div>
-    </div>
-  );
-}
-
-// ── Score Board ───────────────────────────────────────────────────────────────
-function ScoreBoard() {
-  return (
-    <div>
-      {/* Header row */}
-      <div style={{ display: 'flex', alignItems: 'flex-end', justifyContent: 'space-between', marginBottom: 20, gap: 24 }}>
-        <SectionLabel
-          tag="// COMPETITION · RESULTS"
-          title="SCORE BOARD"
-          subtitle="Postal-match results post here once the season opens."
-        />
-        <SeasonPill />
-      </div>
-
-      {/* Season status strip */}
-      <div style={{
-        display: 'flex', alignItems: 'center', gap: 14, flexWrap: 'wrap',
-        border: `1px solid ${P.hair}`, borderLeft: `2px solid ${P.gold}`,
-        background: 'linear-gradient(90deg, rgba(201,169,97,0.06), transparent 60%)',
-        padding: '14px 20px', marginBottom: 20,
-      }}>
-        <div style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: 8, color: P.gold, letterSpacing: '0.28em', opacity: 0.75 }}>
-          STATUS
-        </div>
-        <div style={{ fontFamily: 'Oswald, sans-serif', fontSize: 18, color: P.cream, letterSpacing: '0.08em' }}>
-          SEASON NOT STARTED
-        </div>
-        <div style={{ width: 1, height: 18, background: P.hair }} />
-        <div style={{ fontFamily: 'Inter, sans-serif', fontSize: 12.5, color: P.mute }}>
-          {SEASON.nextEvent}
-        </div>
-      </div>
-
-      {/* Table */}
-      <div style={{ border: `1px solid ${P.hair}`, overflow: 'hidden' }}>
-        {/* Table header — no rows exist until the season opens, so this is hidden
-            on mobile rather than squeezed; scores will render as stacked cards,
-            not this table, once real per-cadet data exists. */}
-        <div className="rifle-score-header" style={{ display: 'grid', gridTemplateColumns: '48px 1fr 100px 100px 100px 100px 120px', background: P.deep, borderBottom: `1px solid ${P.hair}` }}>
-          {['#', 'CADET', 'PRONE', 'STANDING', 'KNEELING', 'TOTAL', 'STATUS'].map((h, i) => (
-            <div key={h} style={{
-              padding: '10px 14px', fontFamily: "'JetBrains Mono', monospace", fontSize: 8,
-              color: P.gold, letterSpacing: '0.22em', opacity: 0.55,
-              borderRight: i < 6 ? `1px solid ${P.hair}` : 'none',
-            }}>{h}</div>
-          ))}
-        </div>
-
-        {/* Empty state — season not started */}
-        <div style={{ padding: '68px 20px 60px', textAlign: 'center', borderTop: `1px solid ${P.hair}`, position: 'relative', overflow: 'hidden' }}>
-          {/* Animated target */}
-          <div style={{ position: 'relative', width: 72, height: 72, margin: '0 auto 22px' }}>
-            <svg viewBox="0 0 72 72" fill="none" style={{ position: 'absolute', inset: 0 }}>
-              {/* Expanding ping ring */}
-              <circle className="rf-ping" cx="36" cy="36" r="20" stroke={P.gold} strokeWidth="1" fill="none" />
-            </svg>
-            <svg viewBox="0 0 72 72" fill="none" className="rf-target" style={{ position: 'absolute', inset: 0 }}>
-              <circle cx="36" cy="36" r="14" stroke={P.gold} strokeWidth="1.5" />
-              <circle cx="36" cy="36" r="25" stroke={P.gold} strokeWidth="0.5" strokeDasharray="3 4" />
-              <line x1="36" y1="4"  x2="36" y2="20" stroke={P.gold} strokeWidth="1.5" />
-              <line x1="36" y1="52" x2="36" y2="68" stroke={P.gold} strokeWidth="1.5" />
-              <line x1="4"  y1="36" x2="20" y2="36" stroke={P.gold} strokeWidth="1.5" />
-              <line x1="52" y1="36" x2="68" y2="36" stroke={P.gold} strokeWidth="1.5" />
-              <circle cx="36" cy="36" r="2.5" fill={P.gold} />
-            </svg>
-          </div>
-          <div style={{ fontFamily: 'Oswald, sans-serif', fontWeight: 700, fontSize: 26, color: P.cream, letterSpacing: '0.1em', marginBottom: 8 }}>
-            SEASON NOT STARTED
-          </div>
-          <div style={{ fontFamily: 'Inter, sans-serif', fontSize: 13, color: P.mute, lineHeight: 1.6, maxWidth: 420, margin: '0 auto' }}>
-            Match scores and cadet standings will appear here once the {SEASON.label} season begins.
-            Check the event calendar below for the schedule.
-          </div>
-          <div style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: 8, color: `${P.gold}55`, letterSpacing: '0.28em', marginTop: 18 }}>
-            // AWAITING FIRST MATCH
-          </div>
-        </div>
-      </div>
-
-      {/* Legend */}
-      <div style={{ display: 'flex', gap: 20, marginTop: 12, flexWrap: 'wrap' }}>
-        {[['WIN', P.gold], ['LOSS', `${P.cream}55`], ['DNS', `${P.mute}`]].map(([label, color]) => (
-          <div key={label} style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-            <div style={{ width: 8, height: 8, background: color, opacity: 0.8 }} />
-            <div style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: 8, color: P.mute, letterSpacing: '0.18em' }}>{label}</div>
-          </div>
-        ))}
-        <div style={{ marginLeft: 'auto', fontFamily: "'JetBrains Mono', monospace", fontSize: 8, color: `${P.gold}44`, letterSpacing: '0.14em' }}>
-          PRONE / STANDING / KNEELING · MAX 100 PER POSITION
-        </div>
-      </div>
-    </div>
-  );
-}
-
 // ── Calendar ──────────────────────────────────────────────────────────────────
 function EventCalendar() {
   const today = new Date();
@@ -473,9 +350,9 @@ export default function Rifle() {
           <div style={{ flex: 1, height: 1, background: P.hair }} />
         </div>
 
-        {/* ── Score board ── */}
+        {/* ── Shooter analysis (last season) ── */}
         <div style={{ marginBottom: 72 }}>
-          <ScoreBoard />
+          <RifleAnalysis />
         </div>
 
         {/* ── Calendar — omitted on mobile; the design's mobile team template
@@ -515,7 +392,6 @@ export default function Rifle() {
           .rifle-wrap { padding: 24px 20px 60px !important; }
           .rifle-title { font-size: 38px !important; }
           .rifle-commander-grid { grid-template-columns: 1fr !important; }
-          .rifle-score-header { display: none !important; }
         }
       `}</style>
     </div>

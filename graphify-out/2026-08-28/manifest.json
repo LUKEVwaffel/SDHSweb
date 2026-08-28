@@ -85,8 +85,8 @@
     "semantic_hash": ""
   },
   "src/components/Raiders.jsx": {
-    "mtime": 1787752508.8187432,
-    "ast_hash": "972e02ac6aba0a1c3551d8971f6dc102",
+    "mtime": 1787926821.3904483,
+    "ast_hash": "3d4665932fb622a9a51517f815a90334",
     "semantic_hash": ""
   },
   "src/components/Rifle.jsx": {
@@ -2157,6 +2157,21 @@
   "supabase/bc_no_forced_reset.sql": {
     "mtime": 1787918102.3266397,
     "ast_hash": "8f0df97767d3e5d2f9e1eb0d537f1a1b",
+    "semantic_hash": ""
+  },
+  "src/components/RaiderCompetitionResults.jsx": {
+    "mtime": 1787926768.6237452,
+    "ast_hash": "1c2626371c2bb5b6cd8ea3cbcf5745eb",
+    "semantic_hash": ""
+  },
+  "src/components/RaiderNextComp.jsx": {
+    "mtime": 1787926714.091941,
+    "ast_hash": "322970345a32439a905e05abe1f5a533",
+    "semantic_hash": ""
+  },
+  "supabase/bc_force_reset.sql": {
+    "mtime": 1787921743.0381384,
+    "ast_hash": "db1b31198ddd0c8d4cdb0d25a93e2c05",
     "semantic_hash": ""
   }
 }
