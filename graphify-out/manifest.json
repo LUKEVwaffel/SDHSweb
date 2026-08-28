@@ -135,8 +135,8 @@
     "semantic_hash": ""
   },
   "src/components/admin/LoginScreen.jsx": {
-    "mtime": 1784919128.4033432,
-    "ast_hash": "98a714a38c3d5d685ca17e36227bac41",
+    "mtime": 1787921482.5834906,
+    "ast_hash": "fd2839b92ef54b8afab9cd92862d415e",
     "semantic_hash": ""
   },
   "src/components/admin/index.jsx": {
@@ -425,8 +425,8 @@
     "semantic_hash": ""
   },
   "src/components/admin/login/AccountGrid.jsx": {
-    "mtime": 1784919128.4053798,
-    "ast_hash": "9860ed57ac754e40f2fabadfbe50f246",
+    "mtime": 1787921456.7978258,
+    "ast_hash": "20dc6c1588d74e2d6dfb1ed55be46870",
     "semantic_hash": ""
   },
   "src/components/admin/login/PasswordForm.jsx": {
@@ -2105,8 +2105,8 @@
     "semantic_hash": ""
   },
   "supabase/dispatch_bc_role.sql": {
-    "mtime": 1787918102.326285,
-    "ast_hash": "0c82435ae22c83c42c44112e717ea9f6",
+    "mtime": 1787919554.695284,
+    "ast_hash": "dff978c42ff9ae5f4bc3e83f43521155",
     "semantic_hash": ""
   },
   "supabase/functions/_shared/name.ts": {
