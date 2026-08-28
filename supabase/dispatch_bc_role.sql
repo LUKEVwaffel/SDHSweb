@@ -88,15 +88,19 @@ create trigger trg_tv_daily_settings_guard
 -- ── SECTION 4 — seed the BC account row ───────────────────────────────────
 -- STEP 1 (do this in the dashboard FIRST): Auth -> Users -> Add user
 --   email:    ao34967@student.hcde.org
---   password: TrojanRange-4471          <-- temp password, share with Aiden
+--   password: <pick one, hand it to Aiden directly>
 --   Auto Confirm User: ON
 --
--- STEP 2: run this. must_change_password = true -> first login forces a reset
--- (ForcePasswordChange -> complete-admin-first-login clears the flag). The
--- on_admin_password_changed trigger (admin_password_gate.sql) also re-arms
--- the flag automatically on any later dashboard password reset.
+-- STEP 2: run this.
+--
+-- must_change_password is seeded FALSE. The forced-first-reset flow
+-- (admin_password_gate.sql + complete-admin-first-login edge fn) proved
+-- unreliable for this account — the re-arm trigger stuck the flag true and
+-- Aiden got the reset screen on every login. bc_no_forced_reset.sql gives
+-- this one low-privilege account a permanent exemption; keep the seed false
+-- here so a re-run of this file doesn't undo that.
 insert into public.admin_roles (email, role, must_change_password)
-values ('ao34967@student.hcde.org', 'bc', true)
+values ('ao34967@student.hcde.org', 'bc', false)
 on conflict (email) do update
   set role = excluded.role,
       must_change_password = excluded.must_change_password;
@@ -119,8 +123,7 @@ end $$;
 -- ============================================================================
 -- VERIFY:
 --   select email, role, must_change_password from public.admin_roles
---     where email = 'ao34967@student.hcde.org';
---   -- run AS that account, before the first-login reset:  expect null / false
---   -- run AS that account, after the reset:               expect 'bc' / true
---   select public.admin_role(), public.is_bc();
+--     where email = 'ao34967@student.hcde.org';   -- expect 'bc' / false
+--   -- run AS that account:
+--   select public.admin_role(), public.is_bc();   -- expect 'bc' / true
 -- ============================================================================
