@@ -1,17 +1,17 @@
 -- ============================================================================
--- TV REMOTE — per-account onboarding + "what's new" tracking.
+-- TV REMOTE - per-account onboarding + "what's new" tracking.
 -- Run in the Supabase SQL editor. Idempotent. Run AFTER admin_roles.sql.
 --
 -- One row per DISPATCH account that has opened the TV Remote. Tracks:
---   • last_seen_version    — highest changelog version this account has seen
+--   • last_seen_version    - highest changelog version this account has seen
 --                            (src/data/tvRemoteChangelog.js). 0 = never opened,
 --                            which is what triggers the first-run slide tour.
---   • first_walkthrough_at — set once, when the guided tour is finished/skipped.
+--   • first_walkthrough_at - set once, when the guided tour is finished/skipped.
 --                            Stops the tour re-firing even if last_seen_version
 --                            is somehow reset.
 --
 -- Self-service: an account reads and writes ONLY its own row (email from the
--- JWT). No admin/service path needed — this is per-user UI state, not
+-- JWT). No admin/service path needed - this is per-user UI state, not
 -- privileged data.
 -- ============================================================================
 

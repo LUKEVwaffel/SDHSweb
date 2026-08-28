@@ -1,5 +1,5 @@
 -- ============================================================================
--- BC account — stop the forced-password-reset loop.
+-- BC account - stop the forced-password-reset loop.
 -- Run in the Supabase SQL editor. Idempotent. Run AFTER admin_password_gate.sql
 -- and dispatch_bc_role.sql.
 --
@@ -8,11 +8,11 @@
 --
 -- CAUSE: admin_password_gate.sql adds an auth.users trigger
 -- (on_admin_password_changed) that re-arms admin_roles.must_change_password
--- every time an account's password changes — for everyone except
+-- every time an account's password changes - for everyone except
 -- lukevetsch77@gmail.com. The first-login flow calls
 -- supabase.auth.updateUser({password}) and then a best-effort edge function
 -- (complete-admin-first-login) to clear the flag again. If that edge call
--- doesn't land (not deployed / errored — the UI only shows "Continuing
+-- doesn't land (not deployed / errored - the UI only shows "Continuing
 -- anyway"), the re-armed flag sticks and the gate fires again next login.
 --
 -- FIX: give the BC account the same permanent exemption Luke has, and clear
@@ -20,7 +20,7 @@
 --
 -- SECURITY NOTE: this removes the forced-password-change safety for THIS ONE
 -- low-privilege account (TV Remote only). The temp password shipped in
--- dispatch_bc_role.sql's comments is therefore still usable — after running
+-- dispatch_bc_role.sql's comments is therefore still usable - after running
 -- this, reset Aiden's password once from Auth -> Users and hand him the new
 -- one directly. With the exemption below, that reset will NOT re-trigger the
 -- loop.

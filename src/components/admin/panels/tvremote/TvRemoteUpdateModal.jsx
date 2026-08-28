@@ -23,7 +23,7 @@ export default function TvRemoteUpdateModal({ sinceVersion, onAck }) {
       }}>
         <div style={{ padding: `${sp[6]}px ${sp[6]}px ${sp[4]}px` }}>
           <div style={{ fontFamily: mono, fontSize: 9, color: P.gold, letterSpacing: '0.24em', marginBottom: sp[3] }}>
-            TV REMOTE — WHAT&apos;S NEW
+            TV REMOTE - WHAT&apos;S NEW
           </div>
           <div style={{ fontFamily: oswald, fontSize: fs.xl, color: P.cream, fontWeight: 600 }}>
             {entries.length === 1 ? 'A new update' : `${entries.length} new updates`}

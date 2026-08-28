@@ -5,14 +5,15 @@ import { Btn } from '../../shared/ui';
 import { WALKTHROUGH } from './tvRemoteHelpContent';
 
 // First-run guided tour for the BC. Eight short slides, Back / Next / Skip,
-// progress dots, arrow-key navigation. `onDone` fires on finish OR skip — the
+// progress dots, arrow-key navigation. `onDone` fires on finish OR skip - the
 // caller records that the tour is complete either way (skipping once is a
 // deliberate "I've got it", not something to nag about).
-export default function TvRemoteWalkthrough({ onDone }) {
+export default function TvRemoteWalkthrough({ onDone, name, avatarUrl }) {
   const [i, setI] = useState(0);
   const total = WALKTHROUGH.length;
   const slide = WALKTHROUGH[i];
   const last = i === total - 1;
+  const first = i === 0;
 
   const next = useCallback(() => (last ? onDone() : setI((n) => n + 1)), [last, onDone]);
   const back = useCallback(() => setI((n) => Math.max(0, n - 1)), []);
@@ -44,7 +45,7 @@ export default function TvRemoteWalkthrough({ onDone }) {
           padding: `${sp[3]}px ${sp[5]}px`, borderBottom: `1px solid ${P.hair}`,
         }}>
           <span style={{ fontFamily: mono, fontSize: 9, color: P.gold, letterSpacing: '0.24em' }}>
-            TV REMOTE — QUICK TOUR
+            TV REMOTE - QUICK TOUR
           </span>
           <span style={{ fontFamily: mono, fontSize: 9, color: P.faint, letterSpacing: '0.16em' }}>
             {i + 1} / {total}
@@ -53,7 +54,25 @@ export default function TvRemoteWalkthrough({ onDone }) {
 
         {/* slide body */}
         <div style={{ padding: `${sp[8]}px ${sp[8]}px ${sp[6]}px`, minHeight: 300 }}>
-          <div style={{ fontSize: 44, lineHeight: 1, marginBottom: sp[5] }} aria-hidden>{slide.icon}</div>
+          {first && (name || avatarUrl) ? (
+            <div style={{ display: 'flex', alignItems: 'center', gap: sp[3], marginBottom: sp[5] }}>
+              {avatarUrl ? (
+                <img src={avatarUrl} alt="" style={{
+                  width: 56, height: 56, borderRadius: '50%', objectFit: 'cover',
+                  border: `1px solid ${P.hairStrong}`,
+                }} />
+              ) : (
+                <div style={{ fontSize: 44, lineHeight: 1 }} aria-hidden>{slide.icon}</div>
+              )}
+              {name && (
+                <div style={{ fontFamily: mono, fontSize: fs.tiny, color: P.gold, letterSpacing: '0.14em' }}>
+                  {name.toUpperCase()}
+                </div>
+              )}
+            </div>
+          ) : (
+            <div style={{ fontSize: 44, lineHeight: 1, marginBottom: sp[5] }} aria-hidden>{slide.icon}</div>
+          )}
           <div style={{
             fontFamily: oswald, fontSize: fs.xl, color: P.cream, fontWeight: 600,
             letterSpacing: '0.01em', marginBottom: sp[4],

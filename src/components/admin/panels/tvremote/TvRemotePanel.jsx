@@ -11,6 +11,7 @@ import StepRangeSchedule from '../../../tv/control-center/StepRangeSchedule.jsx'
 import StepRangeNotices from '../../../tv/control-center/StepRangeNotices.jsx';
 import StepRangeSlideshow from '../../../tv/control-center/StepRangeSlideshow.jsx';
 import EmergencyPushPanel from '../tvphotos/EmergencyPushPanel.jsx';
+import { supabase as SB } from '../../../../lib/supabaseClient.js';
 import { P, mono, oswald, inter, fs, sp, radius, ease } from '../../theme.js';
 import { Btn, PanelHeader } from '../../shared/ui.jsx';
 import { useTvRemoteOnboarding } from '../../../../hooks/useTvRemoteOnboarding.js';
@@ -20,13 +21,17 @@ import TvRemoteUpdateModal from './TvRemoteUpdateModal.jsx';
 import TvRemoteGuide from './TvRemoteGuide.jsx';
 import { TAB_INTRO } from './tvRemoteHelpContent.js';
 
-// Hardcoded, not read from tv_screens — Staff Room 2 has a reserved slug in
+// Hardcoded, not read from tv_screens - Staff Room 2 has a reserved slug in
 // the registry (see supabase/tv_screens.sql) but no working kiosk yet, so it
 // deliberately doesn't appear here until it's actually built out.
 const SCREENS = [
   { slug: 'default', label: 'Outside', sub: 'Main JROTC entrance', path: '/tv' },
-  { slug: 'range', label: 'Range', sub: 'Range room · period program', path: '/tv/range' },
+  { slug: 'range', label: 'Range', sub: 'The range TV, runs on the school clock', path: '/tv/range' },
 ];
+
+// Tabs whose content saves itself per action (their own button, or on every
+// add/edit/delete) and never through the main gold Save button.
+const PER_ACTION_TABS = new Set(['announcements', 'staffNotes', 'rangeLayout']);
 
 const BASE_TABS = [
   { id: 'emergency', label: 'Emergency Push', danger: true, group: 'URGENT' },
@@ -36,14 +41,14 @@ const BASE_TABS = [
   { id: 'widget', label: 'Bottom Widget', group: 'EVERYDAY' },
   { id: 'shoutout', label: 'Shoutout', group: 'EVERYDAY' },
 ];
-const RANGE_TAB = { id: 'rangeSchedule', label: 'Schedule Editor', group: 'RANGE ROOM' };
-const RANGE_LAYOUT_TAB = { id: 'rangeLayout', label: 'Rotation Screen', group: 'RANGE ROOM' };
+const RANGE_TAB = { id: 'rangeSchedule', label: 'Schedule Editor', group: 'RANGE' };
+const RANGE_LAYOUT_TAB = { id: 'rangeLayout', label: 'Rotation Screen', group: 'RANGE' };
 const RANGE_NOTICE_TABS = [
-  { id: 'announcements', label: 'Announcements', group: 'RANGE ROOM' },
-  { id: 'staffNotes', label: 'Staff Notes', group: 'RANGE ROOM' },
+  { id: 'announcements', label: 'Announcements', group: 'RANGE' },
+  { id: 'staffNotes', label: 'Staff Notes', group: 'RANGE' },
 ];
 
-// Matches the seed values in supabase/tv_screens.sql — used as a fallback so
+// Matches the seed values in supabase/tv_screens.sql - used as a fallback so
 // the Schedule Editor still has sane defaults before that migration has run,
 // or if the 'range' row's range_schedule_config is null for any reason.
 const DEFAULT_RANGE_CONFIG = {
@@ -64,7 +69,7 @@ const WIDGET_MODE_LABELS = {
   facts: 'Historical Facts', quote: 'Quote of the Day', verse: 'Bible Verse', custom: 'Custom Message',
 };
 
-// Human label for whatever getRangePhase() says is airing right now — reads
+// Human label for whatever getRangePhase() says is airing right now - reads
 // the LIVE settings row (not the admin's in-progress draft), so this always
 // matches what the physical Range TV is actually showing, independent of
 // whatever an admin has mid-edited but not yet saved.
@@ -76,8 +81,8 @@ function rangePhaseLabel(result) {
     case 't2': return 'T2 Block';
     case 'staff-schedule': return 'Staff Schedule (3rd)';
     case 'lunch1': return '1st Lunch';
-    case 'company-welcome': return `Welcome — ${result.company ?? '—'}`;
-    case 'period-ending': return `Period ending — ${result.company ?? result.periodName ?? ''}`;
+    case 'company-welcome': return `Welcome - ${result.company ?? '-'}`;
+    case 'period-ending': return `Period ending - ${result.company ?? result.periodName ?? ''}`;
     case 'rotation':
     default:
       return 'Rotation Screen';
@@ -120,10 +125,10 @@ function draftFromSettings(settings) {
   };
 }
 
-// Every physical /tv kiosk is a pure display now — no on-site gear icon, no
+// Every physical /tv kiosk is a pure display now - no on-site gear icon, no
 // walking up to a screen to change anything. This is the one place that
 // controls all of them: writes land in tv_daily_settings (one row per
-// screen — see tv_screens.sql — each broadcast over realtime to every kiosk
+// screen - see tv_screens.sql - each broadcast over realtime to every kiosk
 // watching that screen), so a save here shows up live, no reload. The screen
 // selector below switches which screen's row this panel is reading/writing;
 // Range additionally gets a Schedule Editor tab since it's the one screen
@@ -134,14 +139,30 @@ const LAST_SCREEN_KEY = 'tvRemote.lastScreen';
 export default function TvRemotePanel({ adminId, role } = {}) {
   const rootRef = useRef(null);
   const [guideOpen, setGuideOpen] = useState(false);
-  // Onboarding + "what's new" is BC-scoped — Luke (s6) already knows this
+  // The Battalion Commander is scoped to the Range screen only - no Outside
+  // screen, no screen picker. Everyone else gets both screens.
+  const isBC = role === 'bc';
+  const availableScreens = isBC ? SCREENS.filter((s) => s.slug === 'range') : SCREENS;
+  // Onboarding + "what's new" is BC-scoped - Luke (s6) already knows this
   // panel and shouldn't get the tour. Passing null email makes the hook inert.
-  const onb = useTvRemoteOnboarding(role === 'bc' ? (adminId ?? null) : null);
+  const onb = useTvRemoteOnboarding(isBC ? (adminId ?? null) : null);
+  // BC's DISPATCH profile (admin_roles is self-readable) - drives the little
+  // "signed in as" chip + the tour's welcome slide.
+  const [bcProfile, setBcProfile] = useState(null);
+  useEffect(() => {
+    if (!isBC || !adminId) { setBcProfile(null); return undefined; }
+    let alive = true;
+    SB.from('admin_roles').select('display_name, photo_url, title').eq('email', adminId).maybeSingle()
+      .then(({ data }) => { if (alive) setBcProfile(data); });
+    return () => { alive = false; };
+  }, [isBC, adminId]);
   // Remembers the last screen tab across remounts (switching admin sections
   // and coming back to TV Remote) so a mid-edit visit to another panel
-  // doesn't dump the admin back on Outside/Bell Schedule.
+  // doesn't dump the admin back on Outside/Bell Schedule. BC is pinned to Range.
   const [selectedScreen, setSelectedScreen] = useState(
-    () => (SCREENS.some((s) => s.slug === sessionStorage.getItem(LAST_SCREEN_KEY)) && sessionStorage.getItem(LAST_SCREEN_KEY)) || 'default'
+    () => (isBC && 'range')
+      || (SCREENS.some((s) => s.slug === sessionStorage.getItem(LAST_SCREEN_KEY)) && sessionStorage.getItem(LAST_SCREEN_KEY))
+      || 'default'
   );
   const { settings, loading } = useTvDailySettings(selectedScreen);
   const [activeTab, setActiveTab] = useState('schedule');
@@ -157,15 +178,15 @@ export default function TvRemotePanel({ adminId, role } = {}) {
   const now = useNowTicker();
 
   // Baseline snapshot to diff the draft against for an "unsaved changes"
-  // indicator — captured once at hydration (and again right after a
+  // indicator - captured once at hydration (and again right after a
   // successful save), NOT re-derived from `settings` on every realtime tick.
   // If it tracked live `settings` directly, another admin's save on the same
   // screen would make this admin's OWN untouched draft look "dirty" the
-  // instant that update arrived, which is misleading — this only answers
+  // instant that update arrived, which is misleading - this only answers
   // "have I personally changed anything since I loaded/last saved."
   const savedSnapshotRef = useRef(draftFromSettings(null));
 
-  // Hydrate once per screen, from that screen's first settings load — not on
+  // Hydrate once per screen, from that screen's first settings load - not on
   // every realtime tick, so someone editing here doesn't get their
   // in-progress draft clobbered by another admin's save landing mid-edit.
   // Re-keyed on selectedScreen so switching screens re-hydrates instead of
@@ -191,7 +212,7 @@ export default function TvRemotePanel({ adminId, role } = {}) {
   }, [isDirty]);
 
   // What's actually airing on the live Range kiosk right now, read straight
-  // off the live `settings` row (never the draft) — this is what makes the
+  // off the live `settings` row (never the draft) - this is what makes the
   // live-status readout trustworthy even while an admin has unsaved edits
   // open in another tab.
   const liveRangePhase = useMemo(() => {
@@ -200,7 +221,7 @@ export default function TvRemotePanel({ adminId, role } = {}) {
   }, [selectedScreen, settings, now]);
 
   useEffect(() => {
-    // Compares against rootRef, not just truthiness — this panel isn't the
+    // Compares against rootRef, not just truthiness - this panel isn't the
     // only thing in DISPATCH that could go fullscreen, and we only want our
     // own button/state reflecting OUR element's fullscreen state.
     const onFsChange = () => setIsFullscreen(document.fullscreenElement === rootRef.current);
@@ -224,12 +245,12 @@ export default function TvRemotePanel({ adminId, role } = {}) {
     setSaveError(null);
   }
 
-  // Fullscreens THIS panel's own element, not document.documentElement — the
+  // Fullscreens THIS panel's own element, not document.documentElement - the
   // browser only ever paints that element's subtree while fullscreen is
   // active, so DISPATCH's sidebar/nav/branding around it is stripped
   // automatically rather than just visually hidden. Matters here specifically
   // because this runs on the same machine driving the physical Range TV,
-  // alongside the /tv kiosk tab — the person managing it needs just the
+  // alongside the /tv kiosk tab - the person managing it needs just the
   // remote, not the rest of DISPATCH's chrome.
   async function toggleFullscreen() {
     if (document.fullscreenElement) {
@@ -239,7 +260,7 @@ export default function TvRemotePanel({ adminId, role } = {}) {
     }
   }
 
-  // Opens the selected screen in a new tab with ?previewAt=<ISO> — read by
+  // Opens the selected screen in a new tab with ?previewAt=<ISO> - read by
   // useNowTicker.js in that tab only, so time-driven phases (bell schedule,
   // welcome windows, lunch states, period-ending warnings) render as they
   // would at that instant without waiting for the real clock. Purely
@@ -330,7 +351,11 @@ export default function TvRemotePanel({ adminId, role } = {}) {
       />
 
       {onb.needsWalkthrough && (
-        <TvRemoteWalkthrough onDone={onb.completeWalkthrough} />
+        <TvRemoteWalkthrough
+          onDone={onb.completeWalkthrough}
+          name={bcProfile?.display_name}
+          avatarUrl={bcProfile?.photo_url}
+        />
       )}
       {!onb.needsWalkthrough && onb.needsUpdate && (
         <TvRemoteUpdateModal sinceVersion={onb.lastSeenVersion} onAck={onb.acknowledgeUpdates} />
@@ -338,49 +363,82 @@ export default function TvRemotePanel({ adminId, role } = {}) {
       <TvRemoteGuide
         open={guideOpen}
         onClose={() => setGuideOpen(false)}
-        onReplayTour={role === 'bc' ? onb.replayWalkthrough : undefined}
+        onReplayTour={isBC ? onb.replayWalkthrough : undefined}
       />
 
-      <div style={{ marginBottom: sp[6] }}>
+      {isBC ? (
         <div style={{
-          fontFamily: mono, fontSize: 9, color: P.faint, letterSpacing: '0.24em', marginBottom: sp[3],
+          display: 'flex', alignItems: 'center', gap: sp[3], marginBottom: sp[6],
+          padding: `${sp[3]}px ${sp[4]}px`, borderRadius: radius.md,
+          border: `1px solid ${P.hair}`, background: P.goldWash,
         }}>
-          WHICH SCREEN ARE YOU EDITING?
+          {bcProfile?.photo_url ? (
+            <img
+              src={bcProfile.photo_url}
+              alt=""
+              style={{ width: 40, height: 40, borderRadius: '50%', objectFit: 'cover', flexShrink: 0, border: `1px solid ${P.hairStrong}` }}
+            />
+          ) : (
+            <div style={{
+              width: 40, height: 40, borderRadius: '50%', flexShrink: 0,
+              background: P.navy, border: `1px solid ${P.hairStrong}`,
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
+              fontFamily: oswald, fontSize: fs.md, color: P.gold,
+            }}>
+              {(bcProfile?.display_name || adminId || '?').trim().charAt(0).toUpperCase()}
+            </div>
+          )}
+          <div style={{ minWidth: 0 }}>
+            <div style={{ fontFamily: inter, fontSize: fs.base, fontWeight: 700, color: P.cream }}>
+              {bcProfile?.display_name || adminId}
+            </div>
+            <div style={{ fontFamily: mono, fontSize: 9, color: P.gold, letterSpacing: '0.2em', marginTop: 2 }}>
+              {(bcProfile?.title || 'BATTALION COMMANDER').toUpperCase()} · RANGE TV
+            </div>
+          </div>
         </div>
-        <div style={{ display: 'flex', gap: sp[3] }}>
-          {SCREENS.map((s) => {
-            const on = selectedScreen === s.slug;
-            return (
-              <button
-                key={s.slug}
-                onClick={() => selectScreen(s.slug)}
-                style={{
-                  flex: 1, textAlign: 'left', padding: `${sp[3]}px ${sp[4]}px`, borderRadius: radius.md,
-                  border: `1px solid ${on ? P.gold : P.hair}`,
-                  background: on ? P.goldWash : 'transparent',
-                  cursor: 'pointer', transition: `all 150ms ${ease}`,
-                }}
-              >
-                <div style={{
-                  fontFamily: oswald, fontSize: fs.md, fontWeight: 600,
-                  color: on ? P.bright : P.mute, letterSpacing: '0.04em',
-                }}>
-                  {s.label.toUpperCase()}
-                </div>
-                <div style={{ fontFamily: inter, fontSize: fs.xs, color: on ? P.mute : P.faint, marginTop: 2 }}>
-                  {s.sub}
-                </div>
-              </button>
-            );
-          })}
+      ) : (
+        <div style={{ marginBottom: sp[6] }}>
+          <div style={{
+            fontFamily: mono, fontSize: 9, color: P.faint, letterSpacing: '0.24em', marginBottom: sp[3],
+          }}>
+            WHICH SCREEN ARE YOU EDITING?
+          </div>
+          <div style={{ display: 'flex', gap: sp[3] }}>
+            {availableScreens.map((s) => {
+              const on = selectedScreen === s.slug;
+              return (
+                <button
+                  key={s.slug}
+                  onClick={() => selectScreen(s.slug)}
+                  style={{
+                    flex: 1, textAlign: 'left', padding: `${sp[3]}px ${sp[4]}px`, borderRadius: radius.md,
+                    border: `1px solid ${on ? P.gold : P.hair}`,
+                    background: on ? P.goldWash : 'transparent',
+                    cursor: 'pointer', transition: `all 150ms ${ease}`,
+                  }}
+                >
+                  <div style={{
+                    fontFamily: oswald, fontSize: fs.md, fontWeight: 600,
+                    color: on ? P.bright : P.mute, letterSpacing: '0.04em',
+                  }}>
+                    {s.label.toUpperCase()}
+                  </div>
+                  <div style={{ fontFamily: inter, fontSize: fs.xs, color: on ? P.mute : P.faint, marginTop: 2 }}>
+                    {s.sub}
+                  </div>
+                </button>
+              );
+            })}
+          </div>
         </div>
-      </div>
+      )}
 
-      {/* Live status — reads the LIVE settings row (never the draft), so this
+      {/* Live status - reads the LIVE settings row (never the draft), so this
           answers "what is the physical TV actually showing right now" even
           while an admin has unsaved edits open in another tab. The embedded
           view below (collapsed by default) is the real /tv route rendering
-          for real, not a re-derived approximation — it can never drift out
+          for real, not a re-derived approximation - it can never drift out
           of sync with the kiosk the way a hand-rolled summary could. */}
       <div style={{
         marginBottom: sp[6], borderRadius: radius.md, border: `1px solid ${P.hairStrong}`,
@@ -394,14 +452,14 @@ export default function TvRemotePanel({ adminId, role } = {}) {
             }} />
             <div style={{ minWidth: 0 }}>
               <div style={{ fontFamily: mono, fontSize: fs.micro, color: P.green, letterSpacing: '0.2em' }}>
-                LIVE NOW — {SCREENS.find((s) => s.slug === selectedScreen)?.label.toUpperCase()}
+                LIVE NOW - {SCREENS.find((s) => s.slug === selectedScreen)?.label.toUpperCase()}
               </div>
               <div style={{ fontFamily: inter, fontSize: 15, fontWeight: 700, color: P.cream, marginTop: 3 }}>
                 {!settings ? 'Loading…' : selectedScreen === 'range' && liveRangePhase
                   ? rangePhaseLabel(liveRangePhase)
                   : selectedScreen === 'default'
-                    ? `${BELL_SCHEDULES[resolveBellSchedule(settings, now)]?.label ?? 'Normal'} schedule — ${WIDGET_MODE_LABELS[settings.bottom_widget_mode] ?? 'Historical Facts'}`
-                    : '—'}
+                    ? `${BELL_SCHEDULES[resolveBellSchedule(settings, now)]?.label ?? 'Normal'} schedule - ${WIDGET_MODE_LABELS[settings.bottom_widget_mode] ?? 'Historical Facts'}`
+                    : '-'}
               </div>
             </div>
           </div>
@@ -439,13 +497,13 @@ export default function TvRemotePanel({ adminId, role } = {}) {
               </div>
             </div>
             <div style={{ fontFamily: inter, fontSize: 12, color: P.faint, marginTop: sp[2] }}>
-              This is the actual live kiosk page, rendering for real — not a simulation.
+              This is the actual live kiosk page, rendering for real - not a simulation.
             </div>
           </div>
         )}
       </div>
 
-      {/* Preview/test mode — collapsed by default (a test-mode tool used far
+      {/* Preview/test mode - collapsed by default (a test-mode tool used far
           less often than the tabs below it; leaving it expanded just pushed
           the actual controls further down every time this panel opened).
           Punch in any date/time and see exactly what the selected screen
@@ -465,14 +523,14 @@ export default function TvRemotePanel({ adminId, role } = {}) {
             fontFamily: mono, fontSize: fs.micro, color: P.gold, letterSpacing: '0.2em',
           }}
         >
-          <span>TEST A DATE/TIME — {SCREENS.find((s) => s.slug === selectedScreen)?.label.toUpperCase()}</span>
+          <span>TEST A DATE/TIME - {SCREENS.find((s) => s.slug === selectedScreen)?.label.toUpperCase()}</span>
           <span style={{ color: P.faint }}>{previewOpen ? '▲' : '▼'}</span>
         </button>
         {previewOpen && (
           <div style={{ display: 'flex', alignItems: 'flex-end', gap: sp[4], padding: `0 ${sp[4]}px ${sp[4]}px` }}>
             <div style={{ flex: 1, minWidth: 0 }}>
               <div style={{ fontFamily: inter, fontSize: 13, color: P.mute, marginBottom: sp[3], lineHeight: 1.5 }}>
-                Opens this screen in a new tab as of the date/time below — ticks forward in real time from there. Doesn't touch the live kiosk.
+                Opens this screen in a new tab as of the date/time below - ticks forward in real time from there. Doesn't touch the live kiosk.
               </div>
               <input
                 type="datetime-local"
@@ -542,7 +600,7 @@ export default function TvRemotePanel({ adminId, role } = {}) {
                 BELL SCHEDULE
               </div>
               <div style={{ fontFamily: inter, fontSize: 13, color: P.mute, marginBottom: sp[5], lineHeight: 1.5 }}>
-                Auto follows the weekly rotation — Mon/Wed/Fri Normal, Tue/Thu T2 —
+                Auto follows the weekly rotation - Mon/Wed/Fri Normal, Tue/Thu T2 -
                 with no admin action needed. Switch to Manual only for exception
                 days (holiday, pep rally, snow day); remember to switch back to
                 Auto once the exception day is over.
@@ -559,7 +617,7 @@ export default function TvRemotePanel({ adminId, role } = {}) {
                     transition: `all 150ms ${ease}`,
                   }}
                 >
-                  AUTO — {BELL_SCHEDULES[weekdayBellSchedule(now)]?.label ?? 'Normal'} today
+                  AUTO - {BELL_SCHEDULES[weekdayBellSchedule(now)]?.label ?? 'Normal'} today
                 </button>
                 <button
                   onClick={() => patch({ bellScheduleMode: 'manual' })}
@@ -670,7 +728,7 @@ export default function TvRemotePanel({ adminId, role } = {}) {
               screenSlug="range"
               category="announcement"
               heading="ANNOUNCEMENTS"
-              blurb="Shown in the Announcements panel of Range's rotation screen. Persists until deleted — nothing here expires on its own."
+              blurb="Shown in the Announcements panel of Range's rotation screen. Persists until deleted - nothing here expires on its own."
             />
           )}
 
@@ -679,7 +737,7 @@ export default function TvRemotePanel({ adminId, role } = {}) {
               screenSlug="range"
               category="staff_note"
               heading="NOTES FROM STAFF"
-              blurb="Shown in the Notes from Staff panel of Range's rotation screen. Persists until deleted — nothing here expires on its own."
+              blurb="Shown in the Notes from Staff panel of Range's rotation screen. Persists until deleted - nothing here expires on its own."
             />
           )}
         </div>
@@ -691,13 +749,31 @@ export default function TvRemotePanel({ adminId, role } = {}) {
           background: 'rgba(192,57,43,0.12)', border: `1px solid ${P.red}`,
           fontFamily: inter, fontSize: 14, color: P.cream, lineHeight: 1.5,
         }}>
-          <strong style={{ color: P.red }}>Didn't save.</strong> {saveError} Your choices are still here — press Save again.
+          <strong style={{ color: P.red }}>Didn't save.</strong> {saveError} Your choices are still here - press Save again.
         </div>
       )}
 
+      {/* The Announcements / Notes / Rotation Screen tabs save themselves, so
+          the main Save button below would only confuse (and people have
+          pressed it expecting it to post an announcement). Hide it on those
+          tabs - unless there are genuine unsaved edits from another tab, in
+          which case keep it available. */}
+      {PER_ACTION_TABS.has(activeTab) && !isDirty ? (
+        <div style={{
+          display: 'flex', alignItems: 'center', gap: sp[3], marginTop: sp[6],
+          padding: `${sp[3]}px ${sp[4]}px`, borderRadius: radius.md,
+          border: `1px solid ${P.hair}`, background: P.goldWash,
+          fontFamily: inter, fontSize: fs.sm, color: P.mute, lineHeight: 1.5,
+        }}>
+          <span style={{ fontSize: 15 }} aria-hidden>✓</span>
+          {activeTab === 'rangeLayout'
+            ? 'This tab has its own Save button above. The main Save button is not used here.'
+            : 'Everything on this tab saves the moment you add or edit it. There is no separate push step, and it stays up until you delete it.'}
+        </div>
+      ) : (
       <div style={{ display: 'flex', alignItems: 'center', gap: sp[4], marginTop: sp[6] }}>
         <Btn onClick={save} variant="gold" size="lg" disabled={saving}>
-          {saving ? 'SAVING…' : `SAVE — PUSH TO ${SCREENS.find((s) => s.slug === selectedScreen)?.label.toUpperCase() ?? 'SCREEN'}`}
+          {saving ? 'SAVING…' : `SAVE - PUSH TO ${SCREENS.find((s) => s.slug === selectedScreen)?.label.toUpperCase() ?? 'SCREEN'}`}
         </Btn>
 
         {flash ? (
@@ -718,6 +794,7 @@ export default function TvRemotePanel({ adminId, role } = {}) {
           </div>
         ) : null}
       </div>
+      )}
       </div>
     </div>
   );

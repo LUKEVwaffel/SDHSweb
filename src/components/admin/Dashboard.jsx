@@ -68,17 +68,16 @@ const SECTION_LABEL = {
 // submit → review → DISPATCH AI flow end-to-end on his own login first. Once
 // verified, add 'feedback' to s5's array below (and uncomment the matching
 // RLS policies in event_feedback.sql + the role check in the edge function).
-// 'bc' = Battalion Commander (Aiden O'Brien). Range TV control only — the
-// full TV Remote panel and nothing else, plus a self-only 'account' surface
-// for his own PIN / Touch ID (same self-enforcement s5's 'account' uses).
-// Server-side match: supabase/dispatch_bc_role.sql widens ONLY the tv_notices
-// write policy + the tv_daily_settings emergency guard to accept is_bc();
-// is_admin()/is_s6()/is_s5() are untouched, so every other admin table stays
-// locked to him.
+// 'bc' = Battalion Commander (Aiden O'Brien). Range TV control ONLY - the TV
+// Remote panel and nothing else. Inside that panel he is further scoped to
+// the Range screen (see TvRemotePanel's isBC handling). Server-side match:
+// supabase/dispatch_bc_role.sql widens ONLY the tv_notices write policy + the
+// tv_daily_settings emergency guard to accept is_bc(); is_admin()/is_s6()/
+// is_s5() are untouched, so every other admin table stays locked to him.
 const ROLE_SECTIONS = {
   s6: ['overview', 'events', 'people', 'photos', 'questions', 'email', 'media', 'messages', 'advanced', 'tvremote', 'beta', 'feedback', 'ball'],
   s5: ['events', 'aars', 'messages', 'account', 'tvremote'],
-  bc: ['tvremote', 'account'],
+  bc: ['tvremote'],
 };
 
 export default function Dashboard({ onLogout, adminId, role = 's6' }) {

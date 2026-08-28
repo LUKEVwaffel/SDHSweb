@@ -51,7 +51,7 @@ export default function TvRemoteGuide({ open, onClose, onReplayTour }) {
           padding: `${sp[4]}px ${sp[6]}px`, borderBottom: `1px solid ${P.hair}`, flexShrink: 0,
         }}>
           <div style={{ fontFamily: mono, fontSize: fs.sm, color: P.gold, letterSpacing: '0.18em' }}>
-            TV REMOTE — FULL GUIDE
+            TV REMOTE - FULL GUIDE
           </div>
           <div style={{ display: 'flex', alignItems: 'center', gap: sp[2] }}>
             {onReplayTour && (
@@ -71,7 +71,7 @@ export default function TvRemoteGuide({ open, onClose, onReplayTour }) {
             margin: `0 0 ${sp[6]}px`,
           }}>
             This panel is the remote control for the JROTC-area televisions. Below is how every
-            part of it works. New to it? The {WALKTHROUGH.length}-step tour is the fastest way in —
+            part of it works. New to it? The {WALKTHROUGH.length}-step tour is the fastest way in -
             use REPLAY TOUR above.
           </p>
 

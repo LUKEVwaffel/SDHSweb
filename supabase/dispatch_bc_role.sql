@@ -1,12 +1,12 @@
 -- ============================================================================
--- DISPATCH — "BC" role: Range TV control ONLY.
+-- DISPATCH - "BC" role: Range TV control ONLY.
 -- Run in the Supabase SQL editor. Idempotent. Run AFTER admin_roles.sql,
 -- tv_notices.sql, tv_broadcast.sql, and admin_password_gate.sql.
 --
 -- The Battalion Commander (Aiden O'Brien) gets a DISPATCH login that can do
--- EVERYTHING inside the TV Remote panel — daily schedule, featured team,
+-- EVERYTHING inside the TV Remote panel - daily schedule, featured team,
 -- widget, photo source, shoutout, Range schedule / slideshow / notices, bell
--- schedule, and Emergency Push — and NOTHING else. No People/PII, no Email,
+-- schedule, and Emergency Push - and NOTHING else. No People/PII, no Email,
 -- no Events, no guard rosters, no DISPATCH chat, no Advanced.
 --
 -- SCOPING MECHANISM:
@@ -17,23 +17,23 @@
 --     are widened to also accept is_bc():
 --       1. tv_notices write policy   (Announcements / Staff Notes CRUD)
 --       2. tv_daily_settings_guard   (Emergency Push emergency_* columns)
---     Everything else the panel writes lands in tv_daily_settings — whose
+--     Everything else the panel writes lands in tv_daily_settings - whose
 --     UPDATE policy is already open (tv_control_center.sql / tv_screens.sql)
---     — or the tv-daily-photos storage bucket, also already open.
+--     - or the tv-daily-photos storage bucket, also already open.
 --   • admin_role() returns NULL while must_change_password is true
 --     (admin_password_gate.sql), so a BC account still on its temp password
 --     has NO write access anywhere until the holder sets their own password.
 -- ============================================================================
 
 
--- ── SECTION 1 — allow 'bc' in admin_roles.role ─────────────────────────────
+-- ── SECTION 1 - allow 'bc' in admin_roles.role ─────────────────────────────
 alter table public.admin_roles
   drop constraint if exists admin_roles_role_check;
 alter table public.admin_roles
   add constraint admin_roles_role_check check (role in ('s6','s5','bc'));
 
 
--- ── SECTION 2 — is_bc() helper ────────────────────────────────────────────
+-- ── SECTION 2 - is_bc() helper ────────────────────────────────────────────
 -- Same shape as is_s6() / is_s5() (admin_roles.sql SECTION 2).
 create or replace function public.is_bc()
 returns boolean language sql stable security definer set search_path = public as $$
@@ -41,9 +41,9 @@ returns boolean language sql stable security definer set search_path = public as
 $$;
 
 
--- ── SECTION 3 — widen the two TV gates to accept is_bc() ──────────────────
+-- ── SECTION 3 - widen the two TV gates to accept is_bc() ──────────────────
 
--- 3a. tv_notices — Announcements + Staff Notes CRUD (Range Notices tab).
+-- 3a. tv_notices - Announcements + Staff Notes CRUD (Range Notices tab).
 --     Original policy: tv_notices.sql -> tv_notices_write_admin = is_admin().
 drop policy if exists tv_notices_write_admin on public.tv_notices;
 create policy tv_notices_write_admin on public.tv_notices
@@ -51,7 +51,7 @@ create policy tv_notices_write_admin on public.tv_notices
   using      (public.is_admin() or public.is_bc())
   with check (public.is_admin() or public.is_bc());
 
--- 3b. tv_daily_settings_guard — the BEFORE UPDATE trigger from tv_broadcast.sql
+-- 3b. tv_daily_settings_guard - the BEFORE UPDATE trigger from tv_broadcast.sql
 --     that column-guards the singleton row. Re-created here verbatim EXCEPT
 --     the emergency-field check also accepts is_bc(). Spotlight fields stay
 --     service-role-only (unchanged).
@@ -85,7 +85,7 @@ create trigger trg_tv_daily_settings_guard
   for each row execute function public.tv_daily_settings_guard();
 
 
--- ── SECTION 4 — seed the BC account row ───────────────────────────────────
+-- ── SECTION 4 - seed the BC account row ───────────────────────────────────
 -- STEP 1 (do this in the dashboard FIRST): Auth -> Users -> Add user
 --   email:    ao34967@student.hcde.org
 --   password: <pick one, hand it to Aiden directly>
@@ -95,7 +95,7 @@ create trigger trg_tv_daily_settings_guard
 --
 -- must_change_password is seeded FALSE. The forced-first-reset flow
 -- (admin_password_gate.sql + complete-admin-first-login edge fn) proved
--- unreliable for this account — the re-arm trigger stuck the flag true and
+-- unreliable for this account - the re-arm trigger stuck the flag true and
 -- Aiden got the reset screen on every login. bc_no_forced_reset.sql gives
 -- this one low-privilege account a permanent exemption; keep the seed false
 -- here so a re-run of this file doesn't undo that.
@@ -105,7 +105,7 @@ on conflict (email) do update
   set role = excluded.role,
       must_change_password = excluded.must_change_password;
 
--- Picker card fields — only if account_picker.sql has been run (adds the cols).
+-- Picker card fields - only if account_picker.sql has been run (adds the cols).
 do $$
 begin
   if exists (
