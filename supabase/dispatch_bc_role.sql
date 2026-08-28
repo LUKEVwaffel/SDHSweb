@@ -115,7 +115,8 @@ begin
   ) then
     update public.admin_roles
       set display_name = 'Aiden O''Brien',
-          title        = 'Battalion Commander'
+          title        = 'Battalion Commander',
+          photo_url    = 'https://bjgyvmdzcymruunzavni.supabase.co/storage/v1/object/public/staff-photos/Aiden%20O%20Brein.png'
       where email = 'ao34967@student.hcde.org';
   end if;
 end $$;
