@@ -1,0 +1,179 @@
+/* ============================================================================
+   /rhea first-run onboarding. Public-facing, so this is the polished surface:
+   big editorial type, one decision per screen, motion that guides the eye.
+   Scoped under .rob so it can never leak into the admin UIs.
+   ========================================================================= */
+.rob {
+  --ink: #06101F;
+  --navy: #142847;
+  --navy-deep: #0A1628;
+  --gold: #C9A961;
+  --gold-bright: #E8C77A;
+  --cream: #F4ECD8;
+  --mute: rgba(244, 236, 216, 0.62);
+  --faint: rgba(244, 236, 216, 0.40);
+  --hair: rgba(201, 169, 97, 0.22);
+  --hair-strong: rgba(201, 169, 97, 0.5);
+  --ease-out: cubic-bezier(0.23, 1, 0.32, 1);
+  --ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
+  --mono: 'JetBrains Mono', monospace;
+  --oswald: 'Oswald', sans-serif;
+  --inter: 'Inter', sans-serif;
+
+  position: fixed; inset: 0; z-index: 100;
+  display: flex; flex-direction: column;
+  background:
+    radial-gradient(120% 80% at 50% -10%, #1B3358 0%, var(--ink) 60%),
+    var(--ink);
+  color: var(--cream); font-family: var(--inter);
+  -webkit-tap-highlight-color: transparent;
+  overflow: hidden;
+}
+.rob::after {
+  content: ""; position: absolute; inset: 0; pointer-events: none;
+  background: radial-gradient(140% 100% at 50% 120%, rgba(0, 0, 0, 0.55), transparent 60%);
+}
+.rob * { box-sizing: border-box; }
+
+/* ── top rail: brand + progress ──────────────────────────────────────────── */
+.rob-top {
+  position: relative; z-index: 2;
+  padding: calc(18px + env(safe-area-inset-top)) 22px 0;
+  display: flex; align-items: center; justify-content: space-between; gap: 12px;
+}
+.rob-brand { font-family: var(--mono); font-size: 9px; letter-spacing: 0.34em; color: var(--gold); }
+.rob-dots { display: flex; gap: 6px; }
+.rob-dot { width: 6px; height: 6px; border: 1px solid var(--hair-strong); transition: all 260ms var(--ease-out); }
+.rob-dot[data-state="done"] { background: var(--gold); border-color: var(--gold); }
+.rob-dot[data-state="now"] { background: var(--gold-bright); border-color: var(--gold-bright); transform: scale(1.35); }
+
+/* ── stage ───────────────────────────────────────────────────────────────── */
+.rob-stage {
+  position: relative; z-index: 2; flex: 1;
+  display: flex; flex-direction: column;
+  padding: 24px 22px; max-width: 560px; width: 100%; margin: 0 auto;
+  overflow-y: auto;
+}
+/* margin-block:auto centres the panel when there is room and lets it scroll
+   cleanly when the install screen runs tall on a small phone. */
+.rob-panel { margin-block: auto; animation: rob-in 300ms var(--ease-out); }
+@keyframes rob-in {
+  from { opacity: 0; transform: translateX(26px); filter: blur(3px); }
+  to   { opacity: 1; transform: translateX(0);    filter: blur(0); }
+}
+.rob-panel[data-back="true"] { animation-name: rob-in-back; }
+@keyframes rob-in-back {
+  from { opacity: 0; transform: translateX(-26px); filter: blur(3px); }
+  to   { opacity: 1; transform: translateX(0);     filter: blur(0); }
+}
+
+.rob-kicker {
+  font-family: var(--mono); font-size: 10px; letter-spacing: 0.28em;
+  color: var(--gold); margin-bottom: 14px;
+}
+.rob-h {
+  font-family: var(--oswald); font-weight: 600;
+  font-size: clamp(30px, 9vw, 44px); line-height: 1.02; letter-spacing: 0.01em;
+  color: var(--cream); margin: 0;
+}
+.rob-h .accent { color: var(--gold); }
+.rob-sub {
+  font-family: var(--inter); font-size: 15px; line-height: 1.6;
+  color: var(--mute); margin: 16px 0 0; max-width: 42ch;
+}
+
+/* ── choice buttons ──────────────────────────────────────────────────────── */
+.rob-choices { display: flex; flex-direction: column; gap: 12px; margin-top: 30px; }
+.rob-choice {
+  position: relative; display: flex; align-items: center; gap: 14px;
+  width: 100%; text-align: left; cursor: pointer;
+  background: rgba(20, 40, 71, 0.6); border: 1px solid var(--hair-strong);
+  color: var(--cream); font-family: var(--inter);
+  padding: 18px 18px; min-height: 66px;
+  transition: transform 140ms var(--ease-out), border-color 140ms ease, background-color 140ms ease;
+}
+.rob-choice:active { transform: scale(0.975); }
+.rob-choice[data-sel="true"] { border-color: var(--gold); background: rgba(201, 169, 97, 0.12); }
+.rob-choice-t { font-family: var(--oswald); font-size: 19px; letter-spacing: 0.03em; display: block; }
+.rob-choice-d { font-size: 12.5px; color: var(--faint); display: block; margin-top: 2px; }
+.rob-choice-i {
+  flex: none; width: 26px; height: 26px; display: grid; place-items: center;
+  border: 1px solid var(--hair-strong); color: var(--gold); font-size: 14px;
+  transition: all 180ms var(--ease-spring);
+}
+.rob-choice[data-sel="true"] .rob-choice-i { background: var(--gold); color: var(--ink); border-color: var(--gold); transform: scale(1.05); }
+.rob-choice-arrow { margin-left: auto; color: var(--faint); font-size: 18px; transition: transform 160ms var(--ease-out); }
+.rob-choice:active .rob-choice-arrow { transform: translateX(3px); }
+
+/* ── walkthrough visual ──────────────────────────────────────────────────── */
+.rob-vis {
+  margin-top: 26px; border: 1px solid var(--hair); background: rgba(10, 22, 40, 0.7);
+  padding: 22px; display: flex; align-items: center; gap: 16px;
+}
+.rob-vis-glyph { font-size: 34px; line-height: 1; flex: none; filter: saturate(0.9); }
+.rob-vis-txt { font-family: var(--mono); font-size: 11px; letter-spacing: 0.06em; color: var(--mute); line-height: 1.6; }
+
+/* ── install screen ──────────────────────────────────────────────────────── */
+.rob-appicon {
+  width: 96px; height: 96px; margin: 0 auto 4px; display: block;
+  border: 1px solid var(--hair-strong);
+  box-shadow: 0 18px 44px rgba(0, 0, 0, 0.5), 0 0 0 6px rgba(201, 169, 97, 0.06);
+  animation: rob-float 4.5s ease-in-out infinite;
+}
+@keyframes rob-float { 50% { transform: translateY(-7px); } }
+.rob-badge {
+  display: inline-block; margin: 14px auto 0; font-family: var(--mono);
+  font-size: 8.5px; letter-spacing: 0.24em; color: var(--gold);
+  border: 1px solid var(--hair-strong); padding: 5px 10px;
+}
+.rob-ios {
+  margin-top: 20px; border: 1px dashed var(--hair-strong); background: rgba(10, 22, 40, 0.6);
+  padding: 14px 16px; font-family: var(--inter); font-size: 13px; color: var(--mute); line-height: 1.6;
+}
+.rob-ios b { color: var(--cream); }
+.rob-share { display: inline-grid; place-items: center; width: 20px; height: 20px; border: 1px solid var(--hair-strong); color: var(--gold); vertical-align: -5px; margin: 0 2px; }
+
+/* ── footer actions ──────────────────────────────────────────────────────── */
+.rob-foot {
+  position: relative; z-index: 2;
+  padding: 16px 22px calc(20px + env(safe-area-inset-bottom));
+  display: flex; flex-direction: column; gap: 10px; max-width: 560px; width: 100%; margin: 0 auto;
+}
+.rob-cta {
+  width: 100%; min-height: 56px; cursor: pointer; border: none;
+  background: var(--gold); color: var(--ink);
+  font-family: var(--mono); font-size: 12px; letter-spacing: 0.18em; font-weight: 700;
+  transition: transform 140ms var(--ease-out), box-shadow 220ms ease;
+  animation: rob-breathe 3.4s ease-in-out infinite;
+}
+@keyframes rob-breathe {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(201, 169, 97, 0.0); }
+  50%      { box-shadow: 0 0 0 8px rgba(201, 169, 97, 0.10); }
+}
+.rob-cta:active { transform: scale(0.98); }
+.rob-cta--ghost {
+  background: none; border: 1px solid var(--hair-strong); color: var(--cream);
+  font-weight: 400; animation: none; min-height: 52px;
+}
+.rob-skip {
+  background: none; border: none; color: var(--faint); cursor: pointer;
+  font-family: var(--mono); font-size: 10px; letter-spacing: 0.14em;
+  padding: 8px; align-self: center;
+}
+.rob-skip:active { color: var(--mute); }
+.rob-back {
+  background: none; border: none; color: var(--faint); cursor: pointer;
+  font-family: var(--mono); font-size: 10px; letter-spacing: 0.16em; padding: 4px 0;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .rob *, .rob *::before, .rob *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+  }
+}
+@media (hover: hover) and (pointer: fine) {
+  .rob-choice:hover { border-color: var(--gold); }
+  .rob-cta--ghost:hover { border-color: var(--gold); }
+}

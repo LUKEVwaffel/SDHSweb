@@ -1,46 +1,67 @@
-// PWA wiring for /lukepwa. Hand-rolled (no vite-plugin-pwa) so tonight's build
-// touches zero build config. The manifest + apple meta tags are injected on
-// mount rather than living in index.html, because this is a single-index SPA
-// and only this one route should advertise itself as an installable app.
+// Hand-rolled PWA wiring (no vite-plugin-pwa, zero build-config change). The
+// manifest + apple meta tags are injected on mount rather than living in
+// index.html, because this is a single-index SPA and each installable route
+// (/lukepwa for Luke, /rhea for the public viewer) must advertise ITS OWN app
+// identity — only while that route is mounted.
 
-const MANIFEST_HREF = '/lukepwa.webmanifest';
-const SW_URL = '/lukepwa-sw.js';
-const SW_SCOPE = '/lukepwa';
+const THEME = '#06101F';
+const APPLE_ICON = '/optic-icon-apple-180.png';
 
-const HEAD_TAGS = [
-  { tag: 'link', attrs: { rel: 'manifest', href: MANIFEST_HREF }, key: 'lukepwa-manifest' },
-  { tag: 'meta', attrs: { name: 'theme-color', content: '#06101F' }, key: 'lukepwa-theme' },
-  { tag: 'meta', attrs: { name: 'apple-mobile-web-app-capable', content: 'yes' }, key: 'lukepwa-apple-cap' },
-  { tag: 'meta', attrs: { name: 'apple-mobile-web-app-status-bar-style', content: 'black-translucent' }, key: 'lukepwa-apple-bar' },
-  { tag: 'meta', attrs: { name: 'apple-mobile-web-app-title', content: 'OPTIC Rhea' }, key: 'lukepwa-apple-title' },
-  // Appended after index.html's global apple-touch-icon so iOS uses the OPTIC
-  // mark for this route's home-screen icon (iOS takes the last one in <head>).
-  { tag: 'link', attrs: { rel: 'apple-touch-icon', href: '/optic-icon-apple-180.png' }, key: 'lukepwa-apple-icon' },
-];
+function headTags({ ns, manifest, appleTitle }) {
+  return [
+    { tag: 'link', attrs: { rel: 'manifest', href: manifest }, key: `${ns}-manifest` },
+    { tag: 'meta', attrs: { name: 'theme-color', content: THEME }, key: `${ns}-theme` },
+    { tag: 'meta', attrs: { name: 'apple-mobile-web-app-capable', content: 'yes' }, key: `${ns}-apple-cap` },
+    { tag: 'meta', attrs: { name: 'apple-mobile-web-app-status-bar-style', content: 'black-translucent' }, key: `${ns}-apple-bar` },
+    { tag: 'meta', attrs: { name: 'apple-mobile-web-app-title', content: appleTitle }, key: `${ns}-apple-title` },
+    // Appended after index.html's global apple-touch-icon so iOS uses the OPTIC
+    // mark for this route's home-screen icon (iOS takes the last one in <head>).
+    { tag: 'link', attrs: { rel: 'apple-touch-icon', href: APPLE_ICON }, key: `${ns}-apple-icon` },
+  ];
+}
 
-/** Inject the head tags + register the service worker. Returns a cleanup fn. */
-export function installPwaHooks() {
-  const added = [];
-  for (const { tag, attrs, key } of HEAD_TAGS) {
-    if (document.head.querySelector(`[data-lukepwa="${key}"]`)) continue;
+function registerPwa({ ns, manifest, swUrl, scope, appleTitle }) {
+  // Only one manifest can be active. Drop any other route's before adding ours.
+  document.head
+    .querySelectorAll(`link[rel="manifest"][data-pwa]:not([data-pwa="${ns}-manifest"])`)
+    .forEach((el) => el.remove());
+
+  for (const { tag, attrs, key } of headTags({ ns, manifest, appleTitle })) {
+    if (document.head.querySelector(`[data-pwa="${key}"]`)) continue;
     const el = document.createElement(tag);
     Object.entries(attrs).forEach(([k, v]) => el.setAttribute(k, v));
-    el.setAttribute('data-lukepwa', key);
+    el.setAttribute('data-pwa', key);
     document.head.appendChild(el);
-    added.push(el);
   }
 
   if ('serviceWorker' in navigator) {
-    navigator.serviceWorker.register(SW_URL, { scope: SW_SCOPE }).catch((err) => {
-      // Non-fatal — the app works fine without the SW, it just won't cache the
-      // shell for offline load.
-      console.warn('[lukepwa] service worker registration failed:', err);
+    navigator.serviceWorker.register(swUrl, { scope }).catch((err) => {
+      // Non-fatal — the app works without the SW, it just won't cache the shell.
+      console.warn(`[pwa:${ns}] service worker registration failed:`, err);
     });
   }
+}
 
-  // Leave the tags in place on unmount — removing the manifest link mid-session
-  // would break an in-progress "Add to Home Screen". They are keyed/idempotent.
-  return () => {};
+/** Wire /lukepwa as an installable app. */
+export function installPwaHooks() {
+  registerPwa({
+    ns: 'lukepwa',
+    manifest: '/lukepwa.webmanifest',
+    swUrl: '/lukepwa-sw.js',
+    scope: '/lukepwa',
+    appleTitle: 'OPTIC Rhea',
+  });
+}
+
+/** Wire /rhea as the installable public event viewer. */
+export function installRheaPwaHooks() {
+  registerPwa({
+    ns: 'rhea',
+    manifest: '/rhea.webmanifest',
+    swUrl: '/rhea-sw.js',
+    scope: '/rhea',
+    appleTitle: 'OPTIC',
+  });
 }
 
 /** True when the page is running as an installed standalone app. */

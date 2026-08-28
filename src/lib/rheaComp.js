@@ -95,6 +95,18 @@ export function feedChip(photo) {
   return sub || team || null;
 }
 
+const RHEA_ONBOARDED_KEY = 'rhea_onboarded';
+
+/** True once the visitor finished (or skipped) the /rhea first-run flow here. */
+export function hasOnboardedRhea() {
+  try { return localStorage.getItem(RHEA_ONBOARDED_KEY) === '1'; } catch { return false; }
+}
+
+/** Mark the /rhea first-run flow done on this device. */
+export function markOnboardedRhea() {
+  try { localStorage.setItem(RHEA_ONBOARDED_KEY, '1'); } catch { /* private mode */ }
+}
+
 /**
  * Force a real download (Save) of a cross-origin storage image. A plain
  * <a download> is ignored cross-origin and just opens the file in a tab.

@@ -6,6 +6,9 @@ import {
   uploadRheaPhoto, isAllowedImage, ACCEPT_ATTR, REJECT_MESSAGE,
   feedAttribution, feedChip, downloadPhoto,
 } from '../../lib/rheaComp';
+import { installRheaPwaHooks, isStandalone } from './pwa';
+import RheaOnboarding from './RheaOnboarding';
+import { hasOnboardedRhea } from '../../lib/rheaComp';
 import posthog from '../../lib/posthog';
 
 const P = {
@@ -28,6 +31,16 @@ const nextId = () => `u${Date.now()}_${uid++}`;
 // no staging), and the feed below streams every public photo (parent + Luke's
 // published) in realtime.
 export default function Rhea() {
+  // Skip the first-run flow for anyone already running the installed app, or
+  // who has been through it once on this device.
+  const [onboarded, setOnboarded] = useState(() => isStandalone() || hasOnboardedRhea());
+
+  // Register the installable-viewer identity as soon as /rhea mounts so the
+  // browser's install prompt is available by the time the flow asks for it.
+  useEffect(() => { installRheaPwaHooks(); }, []);
+
+  if (!onboarded) return <RheaOnboarding onDone={() => setOnboarded(true)} />;
+
   return (
     <div style={{ minHeight: '100vh', background: P.ink, color: P.cream, fontFamily: inter }}>
       <Header />
