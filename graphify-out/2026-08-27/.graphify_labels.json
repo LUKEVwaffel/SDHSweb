@@ -250,9 +250,7 @@
   "248": "events_s5_full_access.sql",
   "249": "MediaPanel.jsx",
   "250": "FaqSection.jsx",
-  "251": "Messages.jsx",
   "253": "beta_event_spotlight.sql",
-  "254": "TvPhotoCarousel.jsx",
   "255": "EventSpotlightBand.jsx",
   "256": "site_checkin.sql",
   "257": "emailRender.js",
@@ -262,8 +260,6 @@
   "261": "ReviewPortal.jsx",
   "263": "TvRangeRaiderPracticeWidget.jsx",
   "264": "RaiderPolls.jsx",
-  "271": "ball_signup.sql",
-  "272": "CadetManual.jsx",
-  "274": "TvCountdownBand.jsx",
-  "275": "emailAudience.js"
+  "265": "RaiderParentWelcome.jsx",
+  "266": "TvRefreshNotice"
 }

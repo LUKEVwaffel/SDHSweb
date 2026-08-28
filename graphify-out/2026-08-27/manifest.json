@@ -25,8 +25,8 @@
     "semantic_hash": "c1ee9ce6a4fe04105dbf8e619390df5e"
   },
   "src/App.jsx": {
-    "mtime": 1787831238.733905,
-    "ast_hash": "2b67821b1079f2f16245d670f7f63e39",
+    "mtime": 1787746248.126452,
+    "ast_hash": "efbad5fc361aa68e14cead40b1638a8e",
     "semantic_hash": ""
   },
   "src/components/About.jsx": {
@@ -85,8 +85,8 @@
     "semantic_hash": ""
   },
   "src/components/Raiders.jsx": {
-    "mtime": 1787752508.8187432,
-    "ast_hash": "972e02ac6aba0a1c3551d8971f6dc102",
+    "mtime": 1787237679.0615895,
+    "ast_hash": "95449bd13b4bc550e700f7e9709be4c1",
     "semantic_hash": ""
   },
   "src/components/Rifle.jsx": {
@@ -130,8 +130,8 @@
     "semantic_hash": ""
   },
   "src/components/admin/Dashboard.jsx": {
-    "mtime": 1787911695.0635996,
-    "ast_hash": "45d3ab11903b5178be97f05e8b3ca445",
+    "mtime": 1787746206.6675797,
+    "ast_hash": "d90e930587aa64785794fe56c3b92c02",
     "semantic_hash": ""
   },
   "src/components/admin/LoginScreen.jsx": {
@@ -150,8 +150,8 @@
     "semantic_hash": "872097bb6f2a4e8b32dfd0a1ba37dedc"
   },
   "src/components/admin/nav/Sidebar.jsx": {
-    "mtime": 1787911701.9061034,
-    "ast_hash": "d42f1335a72f148fe2586a773e5074a2",
+    "mtime": 1787746209.673459,
+    "ast_hash": "71521d2daa830931de1999ac818a8a13",
     "semantic_hash": ""
   },
   "src/components/admin/nav/StatusBar.jsx": {
@@ -1940,8 +1940,8 @@
     "semantic_hash": ""
   },
   "src/components/tv/range/PacketsDueBanner.jsx": {
-    "mtime": 1787753342.7732716,
-    "ast_hash": "35579e10a556e796258f100ed9fc2eec",
+    "mtime": 1787751536.6316895,
+    "ast_hash": "2e0441d772c71a5cfc4f22d5e5334e30",
     "semantic_hash": ""
   },
   "src/components/tv/range/slides/SlidePacketsDue.jsx": {
@@ -1982,136 +1982,6 @@
   "supabase/tv_bell_schedule_auto.sql": {
     "mtime": 1787747640.8589861,
     "ast_hash": "20ff7d53235a65ba8062a64d0273ad21",
-    "semantic_hash": ""
-  },
-  "src/components/admin/panels/ball/BallDressStaffTab.jsx": {
-    "mtime": 1787831225.2851453,
-    "ast_hash": "c668c3676a00fe49331c0f79c0ec3575",
-    "semantic_hash": ""
-  },
-  "src/components/admin/panels/ball/BallPanel.jsx": {
-    "mtime": 1787831211.3585932,
-    "ast_hash": "cbee2f60bcfeff069aa894123f87c4d8",
-    "semantic_hash": ""
-  },
-  "src/components/ball/BallGuestVerify.jsx": {
-    "mtime": 1787831110.8428917,
-    "ast_hash": "a1073e4752ad7504bc6776787d800089",
-    "semantic_hash": ""
-  },
-  "src/components/ball/BallLanding.jsx": {
-    "mtime": 1787830989.6526258,
-    "ast_hash": "b532f790e995a9b19f5b9004e42e87ba",
-    "semantic_hash": ""
-  },
-  "src/components/ball/dress/BallDressLogin.jsx": {
-    "mtime": 1787831153.5077107,
-    "ast_hash": "2242aed668e6b8d213db7aaa939c6d7c",
-    "semantic_hash": ""
-  },
-  "src/components/ball/dress/BallDressPortal.jsx": {
-    "mtime": 1787831171.597988,
-    "ast_hash": "6e39027397cb1361aa72fcf8fbdf9a93",
-    "semantic_hash": ""
-  },
-  "src/components/ball/ops/BallOpsPortal.jsx": {
-    "mtime": 1787831137.5489414,
-    "ast_hash": "247aaca18284c5fab0ae19ae9c1dd11a",
-    "semantic_hash": ""
-  },
-  "src/components/ball/signup/BallSignupWizard.jsx": {
-    "mtime": 1787832594.811175,
-    "ast_hash": "ad7a54f9a39ed14a6b3d01343e0110c2",
-    "semantic_hash": ""
-  },
-  "src/components/ball/signup/SignupConfirmation.jsx": {
-    "mtime": 1787832590.4084022,
-    "ast_hash": "90f59f0a359c3a065bae609d41e2731b",
-    "semantic_hash": ""
-  },
-  "src/components/ball/signup/StepCadetDetails.jsx": {
-    "mtime": 1787831042.701847,
-    "ast_hash": "6a3eaab359e3f71c6a3795d5b25846a4",
-    "semantic_hash": ""
-  },
-  "src/components/ball/signup/StepCadetVerify.jsx": {
-    "mtime": 1787831031.1681516,
-    "ast_hash": "b1a3caba507ce20149529ed2ed7a4762",
-    "semantic_hash": ""
-  },
-  "src/components/ball/signup/StepDocumentation.jsx": {
-    "mtime": 1787832575.8716757,
-    "ast_hash": "92dfe1a5520568939819202ba1b1ee16",
-    "semantic_hash": ""
-  },
-  "src/components/ball/signup/StepGuestInfo.jsx": {
-    "mtime": 1787832515.6845007,
-    "ast_hash": "76fde1a554f60d8ee0e6dda04d851db9",
-    "semantic_hash": ""
-  },
-  "src/components/ball/signup/formUi.jsx": {
-    "mtime": 1787831019.6334002,
-    "ast_hash": "e59574f631559da83037257e8544d97a",
-    "semantic_hash": ""
-  },
-  "src/lib/ballApi.js": {
-    "mtime": 1787830961.2140317,
-    "ast_hash": "970e2a6ea25544163111bad8f26092d8",
-    "semantic_hash": ""
-  },
-  "supabase/ball_signup.sql": {
-    "mtime": 1787830846.9382315,
-    "ast_hash": "94c8ed72233a16f87e033097cf9d6810",
-    "semantic_hash": ""
-  },
-  "supabase/functions/_shared/signupToken.ts": {
-    "mtime": 1787830864.6246364,
-    "ast_hash": "fc523cdb29a8bcb58d5bcd7ed73bb08c",
-    "semantic_hash": ""
-  },
-  "supabase/functions/ball-dress-pin-login/index.ts": {
-    "mtime": 1787830929.2402945,
-    "ast_hash": "73169f8f51f0e1c526d064fb183da9ce",
-    "semantic_hash": ""
-  },
-  "supabase/functions/ball-dress-set-pin/index.ts": {
-    "mtime": 1787830937.8425264,
-    "ast_hash": "42831c01aa24d6a6177ac06f946a0aec",
-    "semantic_hash": ""
-  },
-  "supabase/functions/ball-guest-verify/index.ts": {
-    "mtime": 1787830919.271321,
-    "ast_hash": "b4b1d20330c3862a50ed2e5971f83efa",
-    "semantic_hash": ""
-  },
-  "supabase/functions/ball-lookup-cadet/index.ts": {
-    "mtime": 1787832454.021478,
-    "ast_hash": "aee00c43fa6e40c8cd2b76cba0b415b3",
-    "semantic_hash": ""
-  },
-  "supabase/functions/ball-search-roster/index.ts": {
-    "mtime": 1787832469.9819806,
-    "ast_hash": "c107eedb4c877162d6d6c5b92cb27abc",
-    "semantic_hash": ""
-  },
-  "supabase/functions/ball-submit-signup/index.ts": {
-    "mtime": 1787833480.6751714,
-    "ast_hash": "6d0fc7018c24818c8a52117c5342617c",
-    "semantic_hash": ""
-  },
-  "supabase/functions/notify-ball-status-update/index.ts": {
-    "mtime": 1787830952.8342943,
-    "ast_hash": "e97f9f01ba6868ad6849a62d67db127d",
-    "semantic_hash": ""
-  },
-  "supabase/dispatch_bc_role.sql": {
-    "mtime": 1787911685.5581188,
-    "ast_hash": "6823fc69d511e0bec95a013473174a58",
-    "semantic_hash": ""
-  },
-  "supabase/functions/_shared/name.ts": {
-    "mtime": 1787832446.7710705,
-    "ast_hash": "1dceff1f15dd44175b686612983487d0",
     "semantic_hash": ""
   }
 }

@@ -130,8 +130,8 @@
     "semantic_hash": ""
   },
   "src/components/admin/Dashboard.jsx": {
-    "mtime": 1787911695.0635996,
-    "ast_hash": "45d3ab11903b5178be97f05e8b3ca445",
+    "mtime": 1787831265.5514948,
+    "ast_hash": "aca597ad3e190ef244cc3c80e9b9c944",
     "semantic_hash": ""
   },
   "src/components/admin/LoginScreen.jsx": {
@@ -150,8 +150,8 @@
     "semantic_hash": "872097bb6f2a4e8b32dfd0a1ba37dedc"
   },
   "src/components/admin/nav/Sidebar.jsx": {
-    "mtime": 1787911701.9061034,
-    "ast_hash": "d42f1335a72f148fe2586a773e5074a2",
+    "mtime": 1787831270.9551513,
+    "ast_hash": "2f259f096c366c1be6f7f22e17ff89bc",
     "semantic_hash": ""
   },
   "src/components/admin/nav/StatusBar.jsx": {
@@ -2020,13 +2020,13 @@
     "semantic_hash": ""
   },
   "src/components/ball/signup/BallSignupWizard.jsx": {
-    "mtime": 1787832594.811175,
-    "ast_hash": "ad7a54f9a39ed14a6b3d01343e0110c2",
+    "mtime": 1787831007.896703,
+    "ast_hash": "ac7c0a62c0ef37e738e07388026fbae4",
     "semantic_hash": ""
   },
   "src/components/ball/signup/SignupConfirmation.jsx": {
-    "mtime": 1787832590.4084022,
-    "ast_hash": "90f59f0a359c3a065bae609d41e2731b",
+    "mtime": 1787831089.1646168,
+    "ast_hash": "90e764a38b7eb6ec9253670a6723d5a9",
     "semantic_hash": ""
   },
   "src/components/ball/signup/StepCadetDetails.jsx": {
@@ -2040,13 +2040,13 @@
     "semantic_hash": ""
   },
   "src/components/ball/signup/StepDocumentation.jsx": {
-    "mtime": 1787832575.8716757,
-    "ast_hash": "92dfe1a5520568939819202ba1b1ee16",
+    "mtime": 1787831082.5021718,
+    "ast_hash": "93dff0a7bd2a25ff1eac6ad74d5f834a",
     "semantic_hash": ""
   },
   "src/components/ball/signup/StepGuestInfo.jsx": {
-    "mtime": 1787832515.6845007,
-    "ast_hash": "76fde1a554f60d8ee0e6dda04d851db9",
+    "mtime": 1787831065.8806686,
+    "ast_hash": "5e74d0465fbcb639973278dcb0b0e750",
     "semantic_hash": ""
   },
   "src/components/ball/signup/formUi.jsx": {
@@ -2085,33 +2085,23 @@
     "semantic_hash": ""
   },
   "supabase/functions/ball-lookup-cadet/index.ts": {
-    "mtime": 1787832454.021478,
-    "ast_hash": "aee00c43fa6e40c8cd2b76cba0b415b3",
+    "mtime": 1787830872.0851417,
+    "ast_hash": "7988d595491d797a37e12c6a5ad0e000",
     "semantic_hash": ""
   },
   "supabase/functions/ball-search-roster/index.ts": {
-    "mtime": 1787832469.9819806,
-    "ast_hash": "c107eedb4c877162d6d6c5b92cb27abc",
+    "mtime": 1787830886.1124847,
+    "ast_hash": "a041bcc689bc65b3c99403d205c8380d",
     "semantic_hash": ""
   },
   "supabase/functions/ball-submit-signup/index.ts": {
-    "mtime": 1787833480.6751714,
-    "ast_hash": "6d0fc7018c24818c8a52117c5342617c",
+    "mtime": 1787830907.5007133,
+    "ast_hash": "486bf20154e38066117eafa7425cf0e5",
     "semantic_hash": ""
   },
   "supabase/functions/notify-ball-status-update/index.ts": {
     "mtime": 1787830952.8342943,
     "ast_hash": "e97f9f01ba6868ad6849a62d67db127d",
-    "semantic_hash": ""
-  },
-  "supabase/dispatch_bc_role.sql": {
-    "mtime": 1787911685.5581188,
-    "ast_hash": "6823fc69d511e0bec95a013473174a58",
-    "semantic_hash": ""
-  },
-  "supabase/functions/_shared/name.ts": {
-    "mtime": 1787832446.7710705,
-    "ast_hash": "1dceff1f15dd44175b686612983487d0",
     "semantic_hash": ""
   }
 }
