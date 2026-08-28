@@ -117,7 +117,7 @@ export default function Dashboard({ onLogout, adminId, role = 's6' }) {
           {section === 'advanced' && <AdvancedPanel adminId={adminId} />}
           {section === 'account'  && <SelfAccountPanel adminId={adminId} />}
           {section === 'messages' && <MessagesPanel adminId={adminId} />}
-          {section === 'tvremote' && <TvRemotePanel />}
+          {section === 'tvremote' && <TvRemotePanel adminId={adminId} role={role} />}
           {section === 'beta'     && <BetaFeaturesPanel adminId={adminId} />}
           {section === 'checkin'  && isLuke && <CheckinPanel />}
           {section === 'feedback' && <EventFeedbackPanel />}

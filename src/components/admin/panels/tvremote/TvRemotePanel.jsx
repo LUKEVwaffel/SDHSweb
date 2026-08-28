@@ -13,28 +13,34 @@ import StepRangeSlideshow from '../../../tv/control-center/StepRangeSlideshow.js
 import EmergencyPushPanel from '../tvphotos/EmergencyPushPanel.jsx';
 import { P, mono, oswald, inter, fs, sp, radius, ease } from '../../theme.js';
 import { Btn, PanelHeader } from '../../shared/ui.jsx';
+import { useTvRemoteOnboarding } from '../../../../hooks/useTvRemoteOnboarding.js';
+import TabIntro from './TabIntro.jsx';
+import TvRemoteWalkthrough from './TvRemoteWalkthrough.jsx';
+import TvRemoteUpdateModal from './TvRemoteUpdateModal.jsx';
+import TvRemoteGuide from './TvRemoteGuide.jsx';
+import { TAB_INTRO } from './tvRemoteHelpContent.js';
 
 // Hardcoded, not read from tv_screens — Staff Room 2 has a reserved slug in
 // the registry (see supabase/tv_screens.sql) but no working kiosk yet, so it
 // deliberately doesn't appear here until it's actually built out.
 const SCREENS = [
-  { slug: 'default', label: 'Outside', path: '/tv' },
-  { slug: 'range', label: 'Range', path: '/tv/range' },
+  { slug: 'default', label: 'Outside', sub: 'Main JROTC entrance', path: '/tv' },
+  { slug: 'range', label: 'Range', sub: 'Range room · period program', path: '/tv/range' },
 ];
 
 const BASE_TABS = [
-  { id: 'emergency', label: 'Emergency Push', danger: true },
-  { id: 'schedule', label: 'Bell Schedule' },
-  { id: 'teams', label: 'Featured Team' },
-  { id: 'photos', label: 'Photo Source' },
-  { id: 'widget', label: 'Bottom Widget' },
-  { id: 'shoutout', label: 'Shoutout' },
+  { id: 'emergency', label: 'Emergency Push', danger: true, group: 'URGENT' },
+  { id: 'schedule', label: 'Bell Schedule', group: 'EVERYDAY' },
+  { id: 'teams', label: 'Featured Team', group: 'EVERYDAY' },
+  { id: 'photos', label: 'Photo Source', group: 'EVERYDAY' },
+  { id: 'widget', label: 'Bottom Widget', group: 'EVERYDAY' },
+  { id: 'shoutout', label: 'Shoutout', group: 'EVERYDAY' },
 ];
-const RANGE_TAB = { id: 'rangeSchedule', label: 'Schedule Editor' };
-const RANGE_LAYOUT_TAB = { id: 'rangeLayout', label: 'Rotation Screen' };
+const RANGE_TAB = { id: 'rangeSchedule', label: 'Schedule Editor', group: 'RANGE ROOM' };
+const RANGE_LAYOUT_TAB = { id: 'rangeLayout', label: 'Rotation Screen', group: 'RANGE ROOM' };
 const RANGE_NOTICE_TABS = [
-  { id: 'announcements', label: 'Announcements' },
-  { id: 'staffNotes', label: 'Staff Notes' },
+  { id: 'announcements', label: 'Announcements', group: 'RANGE ROOM' },
+  { id: 'staffNotes', label: 'Staff Notes', group: 'RANGE ROOM' },
 ];
 
 // Matches the seed values in supabase/tv_screens.sql — used as a fallback so
@@ -125,8 +131,12 @@ function draftFromSettings(settings) {
 // a flat all-day rotation.
 const LAST_SCREEN_KEY = 'tvRemote.lastScreen';
 
-export default function TvRemotePanel() {
+export default function TvRemotePanel({ adminId, role } = {}) {
   const rootRef = useRef(null);
+  const [guideOpen, setGuideOpen] = useState(false);
+  // Onboarding + "what's new" is BC-scoped — Luke (s6) already knows this
+  // panel and shouldn't get the tour. Passing null email makes the hook inert.
+  const onb = useTvRemoteOnboarding(role === 'bc' ? (adminId ?? null) : null);
   // Remembers the last screen tab across remounts (switching admin sections
   // and coming back to TV Remote) so a mid-edit visit to another panel
   // doesn't dump the admin back on Outside/Bell Schedule.
@@ -310,29 +320,60 @@ export default function TvRemotePanel() {
         title="TV REMOTE"
         sub="Controls the selected screen's kiosk(s) live, no reload needed. Nothing changes until you press Save."
         action={(
-          <Btn onClick={toggleFullscreen} variant="ghost" size="sm">
-            {isFullscreen ? 'EXIT FULLSCREEN' : 'FULLSCREEN'}
-          </Btn>
+          <div style={{ display: 'flex', gap: sp[2] }}>
+            <Btn onClick={() => setGuideOpen(true)} variant="ghost" size="sm">? GUIDE</Btn>
+            <Btn onClick={toggleFullscreen} variant="ghost" size="sm">
+              {isFullscreen ? 'EXIT FULLSCREEN' : 'FULLSCREEN'}
+            </Btn>
+          </div>
         )}
       />
 
-      <div style={{ display: 'flex', gap: sp[2], marginBottom: sp[6] }}>
-        {SCREENS.map((s) => (
-          <button
-            key={s.slug}
-            onClick={() => selectScreen(s.slug)}
-            style={{
-              padding: `${sp[2]}px ${sp[5]}px`, borderRadius: radius.pill,
-              border: `1px solid ${selectedScreen === s.slug ? P.gold : P.hair}`,
-              background: selectedScreen === s.slug ? P.goldWash : 'transparent',
-              color: selectedScreen === s.slug ? P.bright : P.mute,
-              fontFamily: mono, fontSize: fs.xs, letterSpacing: '0.12em',
-              cursor: 'pointer', transition: `all 150ms ${ease}`,
-            }}
-          >
-            {s.label.toUpperCase()}
-          </button>
-        ))}
+      {onb.needsWalkthrough && (
+        <TvRemoteWalkthrough onDone={onb.completeWalkthrough} />
+      )}
+      {!onb.needsWalkthrough && onb.needsUpdate && (
+        <TvRemoteUpdateModal sinceVersion={onb.lastSeenVersion} onAck={onb.acknowledgeUpdates} />
+      )}
+      <TvRemoteGuide
+        open={guideOpen}
+        onClose={() => setGuideOpen(false)}
+        onReplayTour={role === 'bc' ? onb.replayWalkthrough : undefined}
+      />
+
+      <div style={{ marginBottom: sp[6] }}>
+        <div style={{
+          fontFamily: mono, fontSize: 9, color: P.faint, letterSpacing: '0.24em', marginBottom: sp[3],
+        }}>
+          WHICH SCREEN ARE YOU EDITING?
+        </div>
+        <div style={{ display: 'flex', gap: sp[3] }}>
+          {SCREENS.map((s) => {
+            const on = selectedScreen === s.slug;
+            return (
+              <button
+                key={s.slug}
+                onClick={() => selectScreen(s.slug)}
+                style={{
+                  flex: 1, textAlign: 'left', padding: `${sp[3]}px ${sp[4]}px`, borderRadius: radius.md,
+                  border: `1px solid ${on ? P.gold : P.hair}`,
+                  background: on ? P.goldWash : 'transparent',
+                  cursor: 'pointer', transition: `all 150ms ${ease}`,
+                }}
+              >
+                <div style={{
+                  fontFamily: oswald, fontSize: fs.md, fontWeight: 600,
+                  color: on ? P.bright : P.mute, letterSpacing: '0.04em',
+                }}>
+                  {s.label.toUpperCase()}
+                </div>
+                <div style={{ fontFamily: inter, fontSize: fs.xs, color: on ? P.mute : P.faint, marginTop: 2 }}>
+                  {s.sub}
+                </div>
+              </button>
+            );
+          })}
+        </div>
       </div>
 
       {/* Live status — reads the LIVE settings row (never the draft), so this
@@ -451,34 +492,46 @@ export default function TvRemotePanel() {
       </div>
 
       <div style={{ display: 'flex', gap: sp[6] }}>
-        <div style={{ display: 'flex', flexDirection: 'column', gap: sp[2], width: 180, flexShrink: 0 }}>
-          {tabs.map((t) => (
-            <div key={t.id}>
-              {selectedScreen === 'range' && t.id === RANGE_TAB.id && (
-                <div style={{
-                  fontFamily: mono, fontSize: 9, color: P.faint, letterSpacing: '0.2em',
-                  margin: `${sp[3]}px 0 ${sp[1]}px ${sp[3]}px`,
-                }}>
-                  RANGE ONLY
-                </div>
-              )}
-              <button
-                onClick={() => setActiveTab(t.id)}
-                style={{
-                  width: '100%', textAlign: 'left', padding: `${sp[4]}px ${sp[3]}px`, borderRadius: radius.sm,
-                  border: 'none', background: activeTab === t.id ? (t.danger ? 'rgba(192,57,43,0.14)' : P.goldWash) : 'transparent',
-                  color: activeTab === t.id ? (t.danger ? P.red : P.bright) : (t.danger ? P.red : P.mute),
-                  fontFamily: inter, fontSize: 15, fontWeight: activeTab === t.id ? 700 : 400,
-                  cursor: 'pointer', transition: `all 150ms ${ease}`,
-                }}
-              >
-                {t.label}
-              </button>
-            </div>
-          ))}
+        <div style={{ display: 'flex', flexDirection: 'column', gap: sp[1], width: 208, flexShrink: 0 }}>
+          {tabs.map((t, idx) => {
+            const on = activeTab === t.id;
+            const showGroup = idx === 0 || tabs[idx - 1].group !== t.group;
+            return (
+              <div key={t.id}>
+                {showGroup && (
+                  <div style={{
+                    fontFamily: mono, fontSize: 9, color: P.faint, letterSpacing: '0.22em',
+                    margin: `${idx === 0 ? 0 : sp[4]}px 0 ${sp[2]}px ${sp[3]}px`,
+                  }}>
+                    {t.group}
+                  </div>
+                )}
+                <button
+                  onClick={() => setActiveTab(t.id)}
+                  style={{
+                    width: '100%', textAlign: 'left', display: 'flex', alignItems: 'center', gap: sp[3],
+                    padding: `${sp[3]}px ${sp[3]}px`, borderRadius: radius.sm,
+                    borderLeft: `3px solid ${on ? (t.danger ? P.red : P.gold) : 'transparent'}`,
+                    borderTop: 'none', borderRight: 'none', borderBottom: 'none',
+                    background: on ? (t.danger ? 'rgba(192,57,43,0.14)' : P.goldWash) : 'transparent',
+                    color: on ? (t.danger ? P.red : P.bright) : (t.danger ? P.red : P.mute),
+                    fontFamily: inter, fontSize: fs.base, fontWeight: on ? 700 : 400,
+                    cursor: 'pointer', transition: `all 150ms ${ease}`,
+                  }}
+                >
+                  <span style={{ fontSize: 15, width: 20, flexShrink: 0 }} aria-hidden>
+                    {TAB_INTRO[t.id]?.icon}
+                  </span>
+                  {t.label}
+                </button>
+              </div>
+            );
+          })}
         </div>
 
         <div style={{ flex: 1, minWidth: 0 }}>
+          <TabIntro id={activeTab} />
+
           {activeTab === 'emergency' && (
             <EmergencyPushPanel screenSlug={selectedScreen} settings={settings} />
           )}
