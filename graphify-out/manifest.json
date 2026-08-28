@@ -25,8 +25,8 @@
     "semantic_hash": "c1ee9ce6a4fe04105dbf8e619390df5e"
   },
   "src/App.jsx": {
-    "mtime": 1787831238.733905,
-    "ast_hash": "2b67821b1079f2f16245d670f7f63e39",
+    "mtime": 1787956194.5235426,
+    "ast_hash": "99525308d6837151288351c006e63a8f",
     "semantic_hash": ""
   },
   "src/components/About.jsx": {
@@ -925,8 +925,8 @@
     "semantic_hash": ""
   },
   "src/hooks/usePaginatedPhotos.js": {
-    "mtime": 1785859110.2731602,
-    "ast_hash": "51f37eaf8b96bc013529a7dd28426363",
+    "mtime": 1787956739.281862,
+    "ast_hash": "ca8afaf30076e94f3cca44491f53b4f6",
     "semantic_hash": ""
   },
   "src/lib/admins.js": {
@@ -1440,8 +1440,8 @@
     "semantic_hash": ""
   },
   "src/hooks/useTvCarouselPhotos.js": {
-    "mtime": 1786373068.972513,
-    "ast_hash": "a64cc715206f71bc76fe4dcfba5011d8",
+    "mtime": 1787956744.7467775,
+    "ast_hash": "6f7fc1bd7293243d3168b0069d6da866",
     "semantic_hash": ""
   },
   "src/hooks/useTvDailySettings.js": {
@@ -2182,6 +2182,81 @@
   "src/components/rifleData.js": {
     "mtime": 1787929065.7420135,
     "ast_hash": "87382c8fd6b4539e24b5c2074550badd",
+    "semantic_hash": ""
+  },
+  "public/lukepwa-sw.js": {
+    "mtime": 1787956101.8872573,
+    "ast_hash": "7b22ee700082d1164c09c417ba4245fb",
+    "semantic_hash": ""
+  },
+  "src/components/rhea/AdminGate.jsx": {
+    "mtime": 1787955953.6522522,
+    "ast_hash": "c324988049130a627c784307ad528e83",
+    "semantic_hash": ""
+  },
+  "src/components/rhea/LukePwa.jsx": {
+    "mtime": 1787958136.1782784,
+    "ast_hash": "3075770396a74de18e74626aef841a81",
+    "semantic_hash": ""
+  },
+  "src/components/rhea/LukeUpload.jsx": {
+    "mtime": 1787956223.5156775,
+    "ast_hash": "2f18a5a8f770acaad91bdad8c385645d",
+    "semantic_hash": ""
+  },
+  "src/components/rhea/Rhea.jsx": {
+    "mtime": 1787958457.8058896,
+    "ast_hash": "1f58a49df35d60c5f8077305ca99e94d",
+    "semantic_hash": ""
+  },
+  "src/components/rhea/pwa.js": {
+    "mtime": 1787958391.1489692,
+    "ast_hash": "4e711a5e7d8d77cff97ba29ccd7ec1a8",
+    "semantic_hash": ""
+  },
+  "src/hooks/useRheaPhotos.js": {
+    "mtime": 1787955924.2681878,
+    "ast_hash": "d2f88c3ffc3fccce5555f472bca0b0f8",
+    "semantic_hash": ""
+  },
+  "src/lib/rheaComp.js": {
+    "mtime": 1787958439.4146526,
+    "ast_hash": "1cdfac03a6228f7752a44c7d07f50c2c",
+    "semantic_hash": ""
+  },
+  "supabase/rhea_comp_photos.sql": {
+    "mtime": 1787955869.3877456,
+    "ast_hash": "d583e304303078594f90e983046ed7f8",
+    "semantic_hash": ""
+  },
+  "public/optic-icon-192.png": {
+    "mtime": 1787957114.326331,
+    "ast_hash": "0fe5a433b36f5bee9217176c08fcc87f",
+    "semantic_hash": ""
+  },
+  "public/optic-icon-512.png": {
+    "mtime": 1787957114.242615,
+    "ast_hash": "d0525efa16e2e483248a28c782362cb6",
+    "semantic_hash": ""
+  },
+  "public/optic-icon-apple-180.png": {
+    "mtime": 1787957129.9507656,
+    "ast_hash": "b1a84abb6a1eb284373a952603f4c91c",
+    "semantic_hash": ""
+  },
+  "public/optic-icon-maskable-512.png": {
+    "mtime": 1787957114.6920073,
+    "ast_hash": "f1ef229dd5602505d02852349056d44c",
+    "semantic_hash": ""
+  },
+  "public/rhea-sw.js": {
+    "mtime": 1787958402.6992607,
+    "ast_hash": "118cd2bee67f3aa45f08acdcba3579e7",
+    "semantic_hash": ""
+  },
+  "src/components/rhea/RheaOnboarding.jsx": {
+    "mtime": 1787958453.9773407,
+    "ast_hash": "53af99559fd9ac978da509e7efe58fb1",
     "semantic_hash": ""
   }
 }
