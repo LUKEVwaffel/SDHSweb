@@ -33,6 +33,9 @@ import BallSignupWizard from './components/ball/signup/BallSignupWizard';
 import BallGuestVerify from './components/ball/BallGuestVerify';
 import BallOpsPortal from './components/ball/ops/BallOpsPortal';
 import BallDressPortal from './components/ball/dress/BallDressPortal';
+import Rhea from './components/rhea/Rhea';
+import LukeUploadRoute from './components/rhea/LukeUpload';
+import LukePwaRoute from './components/rhea/LukePwa';
 
 const TABS = [
   { id: 'cadet-manual', label: 'Cadet Manual',  short: 'MANUAL' },
@@ -63,6 +66,11 @@ export default function App() {
   // — bypass TopNav/Footer entirely, same as the old hash early-return.
   if (location.pathname === '/admin' || location.pathname.startsWith('/admin/')) return <Admin />;
   if (location.pathname === '/review' || location.pathname.startsWith('/review/')) return <ReviewPortal />;
+  // Rhea County Raider Comp photo system — three self-contained surfaces,
+  // each its own auth/chrome, same early-return pattern as /admin.
+  if (location.pathname === '/rhea') return <Rhea />;
+  if (location.pathname === '/lukeupload') return <LukeUploadRoute />;
+  if (location.pathname === '/lukepwa' || location.pathname.startsWith('/lukepwa/')) return <LukePwaRoute />;
   if (location.pathname === '/tv') return <TvKiosk />;
   if (location.pathname === '/tv/range') return <TvRangeKiosk />;
   if (location.pathname === '/raiderparent') return <RaiderParentWelcome />;

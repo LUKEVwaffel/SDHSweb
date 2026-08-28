@@ -32,9 +32,10 @@ export function useTvCarouselPhotos(settings) {
     let alive = true;
 
     if (mode === 'event' && eventId) {
-      SB.from('photos').select('id,photo_url').eq('event_id', eventId).eq('status', 'live')
+      SB.from('photos').select('id,photo_url,visibility').eq('event_id', eventId).eq('status', 'live')
         .order('created_at', { ascending: false }).limit(30)
-        .then(({ data }) => { if (alive) setQueriedPhotos(data || []); });
+        // Filter staged rows client-side so this works pre- and post-migration.
+        .then(({ data }) => { if (alive) setQueriedPhotos((data || []).filter((p) => p.visibility !== 'staged')); });
       return () => { alive = false; };
     }
 

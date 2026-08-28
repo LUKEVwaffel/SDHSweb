@@ -1,0 +1,17 @@
+{
+  "name": "OPTIC — Rhea County Raider Comp",
+  "short_name": "OPTIC Rhea",
+  "description": "Photo curation for the Rhea County Raider Competition.",
+  "id": "/lukepwa",
+  "start_url": "/lukepwa",
+  "scope": "/lukepwa",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#06101F",
+  "theme_color": "#06101F",
+  "icons": [
+    { "src": "/android-chrome-192x192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "/android-chrome-512x512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "/android-chrome-512x512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ]
+}

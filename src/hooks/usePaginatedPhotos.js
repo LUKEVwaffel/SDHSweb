@@ -11,6 +11,13 @@ const PHOTO_SELECT = '*, events(title,date,team)';
 // live-inserting table (DISPATCH bulk upload, public submissions). Offset
 // pagination would skip or duplicate rows when new photos land between page
 // fetches; keyset (created_at < cursor) is stable regardless of new inserts.
+//
+// visibility='staged' rows (the Rhea comp's unpublished Luke dump) are filtered
+// out CLIENT-SIDE, not in the query — so this hook keeps working whether or not
+// the rhea_comp_photos migration has added the column yet. Pagination math uses
+// the raw page so a rare all-staged page can't stall it.
+const isPublicRow = (p) => p.visibility !== 'staged';
+
 export function usePaginatedPhotos({ team = null, eventId = null } = {}) {
   const [photos, setPhotos] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -35,7 +42,7 @@ export function usePaginatedPhotos({ team = null, eventId = null } = {}) {
     buildQuery(null).then(({ data, error }) => {
       if (!alive) return;
       const rows = error ? [] : (data || []);
-      setPhotos(rows);
+      setPhotos(rows.filter(isPublicRow));
       cursorRef.current = rows.length ? rows[rows.length - 1].created_at : null;
       setHasMore(rows.length === PAGE_SIZE);
       setLoading(false);
@@ -48,7 +55,7 @@ export function usePaginatedPhotos({ team = null, eventId = null } = {}) {
     setLoadingMore(true);
     const { data, error } = await buildQuery(cursorRef.current);
     const rows = error ? [] : (data || []);
-    setPhotos((prev) => [...prev, ...rows]);
+    setPhotos((prev) => [...prev, ...rows.filter(isPublicRow)]);
     cursorRef.current = rows.length ? rows[rows.length - 1].created_at : cursorRef.current;
     setHasMore(rows.length === PAGE_SIZE);
     setLoadingMore(false);
