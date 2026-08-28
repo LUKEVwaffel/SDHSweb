@@ -13,6 +13,9 @@ const HEAD_TAGS = [
   { tag: 'meta', attrs: { name: 'apple-mobile-web-app-capable', content: 'yes' }, key: 'lukepwa-apple-cap' },
   { tag: 'meta', attrs: { name: 'apple-mobile-web-app-status-bar-style', content: 'black-translucent' }, key: 'lukepwa-apple-bar' },
   { tag: 'meta', attrs: { name: 'apple-mobile-web-app-title', content: 'OPTIC Rhea' }, key: 'lukepwa-apple-title' },
+  // Appended after index.html's global apple-touch-icon so iOS uses the OPTIC
+  // mark for this route's home-screen icon (iOS takes the last one in <head>).
+  { tag: 'link', attrs: { rel: 'apple-touch-icon', href: '/optic-icon-apple-180.png' }, key: 'lukepwa-apple-icon' },
 ];
 
 /** Inject the head tags + register the service worker. Returns a cleanup fn. */
