@@ -1,5 +1,5 @@
 /* ============================================================================
-   /rhea — public live photo feed. This is a front-of-house surface (parents +
+   /rhea , public live photo feed. This is a front-of-house surface (parents +
    cadets, phones, in the stands), so it gets the full polish pass: layered
    navy surfaces, gold hairlines, editorial display type, motion that guides
    the eye, and an immersive photo viewer. Everything scoped under .rhea so it
@@ -234,6 +234,22 @@
 }
 .rhea-time { font-family: var(--mono); font-size: 8.5px; color: var(--faint); letter-spacing: 0.08em; margin-left: auto; }
 
+/* like control on a feed card */
+.rhea-shot-wrap { position: relative; }
+.rhea-like {
+  position: absolute; left: 10px; bottom: 10px; z-index: 2;
+  display: flex; align-items: center; gap: 7px;
+  border: 1px solid var(--hair-strong); border-radius: 999px; padding: 7px 12px 7px 10px;
+  background: rgba(6, 16, 31, 0.55); color: var(--cream); cursor: pointer;
+  font-family: var(--mono); font-size: 11px; letter-spacing: 0.04em;
+  backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px);
+  transition: transform 140ms var(--ease-spring), background-color 140ms ease, border-color 140ms ease;
+}
+.rhea-like:active { transform: scale(0.9); }
+.rhea-like[data-on="true"] { border-color: var(--gold); background: rgba(201, 169, 97, 0.16); }
+.rhea-like-ico { font-size: 14px; line-height: 1; transition: transform 200ms var(--ease-spring); }
+.rhea-like[data-on="true"] .rhea-like-ico { color: #ff5a7a; transform: scale(1.18); }
+
 /* skeletons */
 .rhea-skel {
   border-radius: 14px; overflow: hidden; border: 1px solid var(--hair); background: var(--navy-deep);
@@ -242,79 +258,109 @@
 .rhea-skel-cap { height: 38px; background: var(--navy); }
 @keyframes rhea-shimmer { from { background-position: 180% 0; } to { background-position: -80% 0; } }
 
-/* ── immersive lightbox ──────────────────────────────────────────────────── */
+/* ── shorts-style vertical photo reel ────────────────────────────────────── */
 .rhea-lb {
   position: fixed; inset: 0; z-index: 90;
-  background: rgba(3, 8, 16, 0.86);
-  backdrop-filter: blur(20px) saturate(1.2);
-  -webkit-backdrop-filter: blur(20px) saturate(1.2);
-  display: flex; flex-direction: column;
-  animation: rhea-lb-in 240ms var(--ease-out);
-  touch-action: pan-y;
+  background: #030810;
+  animation: rhea-lb-in 200ms var(--ease-out);
   overscroll-behavior: contain;
 }
 @keyframes rhea-lb-in { from { opacity: 0; } to { opacity: 1; } }
-.rhea-lb-bar {
+
+.rhea-lb-top {
+  position: absolute; top: 0; left: 0; right: 0; z-index: 4;
   display: flex; align-items: center; gap: 12px;
-  padding: calc(12px + env(safe-area-inset-top)) 16px 12px;
-  transition: opacity 220ms ease, transform 220ms ease;
+  padding: calc(12px + env(safe-area-inset-top)) 16px 28px;
+  background: linear-gradient(180deg, rgba(3, 8, 16, 0.72), transparent);
+  pointer-events: none;
 }
-.rhea-lb[data-chrome="false"] .rhea-lb-bar,
-.rhea-lb[data-chrome="false"] .rhea-lb-foot { opacity: 0; transform: translateY(-6px); pointer-events: none; }
-.rhea-lb[data-chrome="false"] .rhea-lb-foot { transform: translateY(6px); }
-.rhea-lb-idx { font-family: var(--mono); font-size: 10px; letter-spacing: 0.14em; color: var(--mute); }
+.rhea-lb-top > * { pointer-events: auto; }
+.rhea-lb-idx { font-family: var(--mono); font-size: 10px; letter-spacing: 0.14em; color: var(--cream); opacity: 0.75; }
 .rhea-lb-close {
   margin-left: auto; width: 34px; height: 34px; border-radius: 50%;
   border: 1px solid var(--hair-strong); background: rgba(6, 16, 31, 0.5); color: var(--cream);
   font-size: 15px; cursor: pointer; display: grid; place-items: center;
+  backdrop-filter: blur(4px); -webkit-backdrop-filter: blur(4px);
 }
 .rhea-lb-close:active { transform: scale(0.9); }
-.rhea-lb-stage {
-  flex: 1; position: relative; overflow: hidden; display: flex; align-items: center;
+
+.rhea-reel {
+  height: 100%; overflow-y: auto;
+  scroll-snap-type: y mandatory; overscroll-behavior: contain;
+  -webkit-overflow-scrolling: touch; scrollbar-width: none;
 }
-.rhea-lb-track {
-  display: flex; height: 100%; width: 100%;
-  transition: transform 320ms var(--ease-out);
+.rhea-reel::-webkit-scrollbar { display: none; }
+.rhea-page {
+  position: relative; height: 100%;
+  scroll-snap-align: start; scroll-snap-stop: always;
+  display: flex; align-items: center; justify-content: center; overflow: hidden;
 }
-.rhea-lb-track[data-drag="true"] { transition: none; }
-.rhea-lb-slide {
-  flex: 0 0 100%; height: 100%; display: flex; align-items: center; justify-content: center;
-  padding: 0 8px;
-}
-.rhea-lb-slide img {
+.rhea-page-img {
   max-width: 100%; max-height: 100%; object-fit: contain; display: block;
-  border-radius: 6px; box-shadow: 0 30px 80px -20px rgba(0, 0, 0, 0.8);
+  user-select: none; -webkit-user-select: none; -webkit-touch-callout: none;
 }
-.rhea-lb-nav {
-  position: absolute; top: 50%; transform: translateY(-50%);
-  width: 40px; height: 40px; border-radius: 50%; display: grid; place-items: center;
-  border: 1px solid var(--hair-strong); background: rgba(6, 16, 31, 0.45); color: var(--cream);
-  font-size: 16px; cursor: pointer; backdrop-filter: blur(4px);
-  transition: opacity 200ms ease;
+/* soft wash of the photo behind so letterboxing isn't dead black */
+.rhea-page-bg {
+  position: absolute; inset: -12%; z-index: -1;
+  background-size: cover; background-position: center;
+  filter: blur(44px) brightness(0.38) saturate(1.25); transform: scale(1.12);
 }
-.rhea-lb-nav[data-side="prev"] { left: 10px; }
-.rhea-lb-nav[data-side="next"] { right: 10px; }
-.rhea-lb-nav:disabled { opacity: 0.25; cursor: default; }
-.rhea-lb[data-chrome="false"] .rhea-lb-nav { opacity: 0; pointer-events: none; }
-.rhea-lb-foot {
-  padding: 14px 16px calc(18px + env(safe-area-inset-bottom));
-  display: flex; align-items: flex-end; gap: 12px;
-  background: linear-gradient(0deg, rgba(3, 8, 16, 0.65), transparent);
-  transition: opacity 220ms ease, transform 220ms ease;
+
+.rhea-burst {
+  position: absolute; inset: 0; margin: auto; width: 140px; height: 140px;
+  display: grid; place-items: center; font-size: 120px; color: #ff5a7a;
+  pointer-events: none; filter: drop-shadow(0 8px 24px rgba(0, 0, 0, 0.5));
+  animation: rhea-burst 640ms var(--ease-out) forwards;
 }
-.rhea-lb-meta { min-width: 0; }
-.rhea-lb-who { font-family: var(--inter); font-size: 14px; color: var(--cream); }
-.rhea-lb-who[data-luke="true"] { color: var(--gold-bright); font-weight: 600; }
-.rhea-lb-line { display: flex; align-items: center; gap: 8px; margin-top: 5px; }
-.rhea-lb-actions { margin-left: auto; display: flex; gap: 8px; }
-.rhea-lb-act {
-  display: flex; align-items: center; gap: 6px; white-space: nowrap;
-  border: 1px solid var(--hair-strong); border-radius: 9px; padding: 9px 12px;
-  background: rgba(6, 16, 31, 0.5); color: var(--cream); cursor: pointer;
-  font-family: var(--mono); font-size: 9.5px; letter-spacing: 0.12em;
-  transition: transform 130ms var(--ease-out), background-color 130ms ease;
+@keyframes rhea-burst {
+  0% { opacity: 0; transform: scale(0.4); }
+  30% { opacity: 1; transform: scale(1.08); }
+  55% { transform: scale(0.94); }
+  100% { opacity: 0; transform: scale(1.18); }
 }
-.rhea-lb-act:active { transform: scale(0.94); background: rgba(201, 169, 97, 0.14); }
+
+/* right-hand action rail */
+.rhea-rail {
+  position: absolute; right: 10px; z-index: 3;
+  bottom: calc(30px + env(safe-area-inset-bottom));
+  display: flex; flex-direction: column; gap: 18px; align-items: center;
+}
+.rhea-rail-btn {
+  display: flex; flex-direction: column; align-items: center; gap: 5px;
+  border: none; background: none; cursor: pointer; color: var(--cream);
+  font-family: var(--mono); font-size: 9.5px; letter-spacing: 0.06em;
+  text-shadow: 0 1px 8px rgba(0, 0, 0, 0.6);
+}
+.rhea-rail-ico {
+  width: 46px; height: 46px; border-radius: 50%; display: grid; place-items: center;
+  border: 1px solid var(--hair-strong); background: rgba(6, 16, 31, 0.5);
+  font-size: 20px; backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px);
+  transition: transform 160ms var(--ease-spring), background-color 160ms ease, border-color 160ms ease;
+}
+.rhea-rail-btn:active .rhea-rail-ico { transform: scale(0.86); }
+.rhea-rail-btn[data-on="true"] .rhea-rail-ico {
+  background: rgba(255, 90, 122, 0.18); border-color: #ff5a7a; color: #ff5a7a;
+  animation: rhea-heart 340ms var(--ease-spring);
+}
+@keyframes rhea-heart { 40% { transform: scale(1.3); } 70% { transform: scale(0.9); } }
+
+/* bottom-left attribution */
+.rhea-page-meta {
+  position: absolute; left: 16px; right: 82px; z-index: 3;
+  bottom: calc(22px + env(safe-area-inset-bottom));
+  text-shadow: 0 1px 14px rgba(0, 0, 0, 0.65);
+}
+.rhea-page-who { font-family: var(--inter); font-size: 14px; color: var(--cream); }
+.rhea-page-who[data-luke="true"] { color: var(--gold-bright); font-weight: 600; }
+.rhea-page-line { display: flex; align-items: center; gap: 8px; margin-top: 6px; flex-wrap: wrap; }
+
+.rhea-scroll-hint {
+  position: absolute; left: 0; right: 0; z-index: 3;
+  bottom: calc(10px + env(safe-area-inset-bottom)); text-align: center;
+  font-family: var(--mono); font-size: 8.5px; letter-spacing: 0.22em; color: var(--faint);
+  animation: rhea-hint 2s ease-in-out 4;
+}
+@keyframes rhea-hint { 50% { transform: translateY(-5px); opacity: 0.35; } }
 
 /* ── walkthrough (post-install tour) ─────────────────────────────────────── */
 .rhea-wt {
@@ -364,6 +410,72 @@
 }
 .rhea-wt-next:active { transform: scale(0.96); }
 
+/* ── beta banner ─────────────────────────────────────────────────────────── */
+.rhea-beta {
+  position: relative; z-index: 20;
+  display: flex; align-items: flex-start; gap: 10px;
+  padding: 9px 16px;
+  background: rgba(201, 169, 97, 0.09);
+  border-bottom: 1px solid var(--hair);
+  font-family: var(--inter); font-size: 11px; line-height: 1.45; color: var(--mute);
+}
+.rhea-beta-tag {
+  flex: none; font-family: var(--mono); font-size: 8.5px; letter-spacing: 0.18em;
+  color: var(--ink); background: var(--gold); border-radius: 4px;
+  padding: 3px 6px; margin-top: 1px;
+}
+
+/* ── locked / countdown hold ─────────────────────────────────────────────── */
+.rhea-lock {
+  position: relative; z-index: 1;
+  max-width: 520px; margin: 0 auto; padding: 40px 24px 96px;
+  display: flex; flex-direction: column; align-items: center; text-align: center;
+}
+.rhea-lock-badge {
+  font-family: var(--mono); font-size: 8.5px; letter-spacing: 0.26em; color: var(--gold);
+  border: 1px solid var(--hair-strong); border-radius: 999px; padding: 6px 12px;
+}
+.rhea-lock-glyph {
+  width: 84px; height: 84px; margin: 30px 0 6px;
+  filter: drop-shadow(0 12px 30px rgba(0, 0, 0, 0.5));
+  animation: rhea-lock-float 5s ease-in-out infinite;
+}
+@keyframes rhea-lock-float { 50% { transform: translateY(-8px); } }
+.rhea-lock-h {
+  font-family: var(--oswald); font-weight: 600; font-size: clamp(26px, 8vw, 38px);
+  line-height: 1.06; letter-spacing: 0.01em; color: var(--cream); margin: 18px 0 0;
+}
+.rhea-lock-h .accent { color: var(--gold); }
+.rhea-lock-p {
+  font-family: var(--inter); font-size: 14px; line-height: 1.65; color: var(--mute);
+  margin: 16px 0 0; max-width: 40ch;
+}
+.rhea-lock-hint {
+  font-family: var(--inter); font-size: 12px; line-height: 1.5; color: var(--faint);
+  margin: 22px 0 0; max-width: 34ch;
+}
+
+.rhea-cd {
+  display: flex; align-items: flex-start; gap: 6px; margin-top: 30px;
+  padding: 18px 22px; border: 1px solid var(--hair);
+  background: linear-gradient(180deg, var(--navy) 0%, var(--navy-deep) 100%);
+  border-radius: 16px;
+  box-shadow: 0 22px 50px -26px rgba(0, 0, 0, 0.7), inset 0 1px 0 rgba(244, 236, 216, 0.04);
+}
+.rhea-cd-unit { display: flex; flex-direction: column; align-items: center; min-width: 46px; }
+.rhea-cd-unit b {
+  font-family: var(--oswald); font-weight: 600; font-size: 34px; line-height: 1;
+  color: var(--cream); font-variant-numeric: tabular-nums;
+}
+.rhea-cd-unit i {
+  font-family: var(--mono); font-style: normal; font-size: 8px; letter-spacing: 0.18em;
+  color: var(--faint); margin-top: 6px;
+}
+.rhea-cd-sep {
+  font-family: var(--oswald); font-size: 30px; line-height: 1; color: var(--hair-strong);
+  padding-top: 1px;
+}
+
 @media (prefers-reduced-motion: reduce) {
   .rhea *, .rhea *::before, .rhea *::after {
     animation-duration: 0.001ms !important;
@@ -374,5 +486,6 @@
 @media (hover: hover) and (pointer: fine) {
   .rhea-drop:hover { border-color: var(--gold); }
   .rhea-btn:hover { box-shadow: 0 16px 34px -12px rgba(201, 169, 97, 0.8); }
-  .rhea-lb-act:hover { background: rgba(201, 169, 97, 0.12); }
+  .rhea-like:hover { border-color: var(--gold); }
+  .rhea-rail-btn:hover .rhea-rail-ico { border-color: var(--gold); }
 }

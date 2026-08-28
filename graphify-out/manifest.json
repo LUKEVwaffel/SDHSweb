@@ -2195,8 +2195,8 @@
     "semantic_hash": ""
   },
   "src/components/rhea/LukePwa.jsx": {
-    "mtime": 1787958136.1782784,
-    "ast_hash": "3075770396a74de18e74626aef841a81",
+    "mtime": 1787961241.6129458,
+    "ast_hash": "27afa071cb7ae6caebbd391a80326a5f",
     "semantic_hash": ""
   },
   "src/components/rhea/LukeUpload.jsx": {
@@ -2205,8 +2205,8 @@
     "semantic_hash": ""
   },
   "src/components/rhea/Rhea.jsx": {
-    "mtime": 1787959210.5366209,
-    "ast_hash": "7de41a75a2f3530b0408f09bb2ceaca1",
+    "mtime": 1787961241.5651782,
+    "ast_hash": "0418ca20ce852db14b37e4342e2f8748",
     "semantic_hash": ""
   },
   "src/components/rhea/pwa.js": {
@@ -2220,8 +2220,8 @@
     "semantic_hash": ""
   },
   "src/lib/rheaComp.js": {
-    "mtime": 1787959057.6570675,
-    "ast_hash": "a2bf11de7ad4e9f71a07ac9ea769a57b",
+    "mtime": 1787961241.6751492,
+    "ast_hash": "f218c42814f3134b54d76e33faaa1fb3",
     "semantic_hash": ""
   },
   "supabase/rhea_comp_photos.sql": {
@@ -2255,13 +2255,33 @@
     "semantic_hash": ""
   },
   "src/components/rhea/RheaOnboarding.jsx": {
-    "mtime": 1787959308.2465675,
-    "ast_hash": "3ed1f498201aa528de5cdeccf4a5a2d8",
+    "mtime": 1787961241.5770636,
+    "ast_hash": "85865752174bf3734b73d8ede63bf45d",
     "semantic_hash": ""
   },
   "public/optic-icon.svg": {
     "mtime": 1787959024.719354,
     "ast_hash": "4e732b41040aae678b4c2da413c8a3b4",
+    "semantic_hash": ""
+  },
+  "src/hooks/useRheaGate.js": {
+    "mtime": 1787961241.6277409,
+    "ast_hash": "354883ebd35660aa7deddb51a9d9d94e",
+    "semantic_hash": ""
+  },
+  "src/hooks/useRheaLikes.js": {
+    "mtime": 1787961241.6375637,
+    "ast_hash": "0a2fd190cda0dce603cf7f571b28d2a2",
+    "semantic_hash": ""
+  },
+  "supabase/rhea_gate.sql": {
+    "mtime": 1787961241.650416,
+    "ast_hash": "d95caf26b6baeb62ee7eedcfc274c544",
+    "semantic_hash": ""
+  },
+  "supabase/rhea_photo_likes.sql": {
+    "mtime": 1787961241.6626568,
+    "ast_hash": "b7eea99a55f73659ff5592ca932db779",
     "semantic_hash": ""
   }
 }

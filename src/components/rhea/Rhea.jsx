@@ -2,6 +2,8 @@ import { useState, useRef, useCallback, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { getDeviceId } from '../../lib/fingerprint';
 import { useRheaPhotos } from '../../hooks/useRheaPhotos';
+import { useRheaLikes } from '../../hooks/useRheaLikes';
+import { useRheaGate } from '../../hooks/useRheaGate';
 import {
   uploadRheaPhoto, isAllowedImage, ACCEPT_ATTR, REJECT_MESSAGE,
   feedAttribution, feedChip, downloadPhoto,
@@ -15,12 +17,12 @@ import './rhea.css';
 let uid = 0;
 const nextId = () => `u${Date.now()}_${uid++}`;
 
-// ── /rhea — public parent upload + live feed. Hardcoded to one event. Zero
+// ── /rhea , public parent upload + live feed. Hardcoded to one event. Zero
 // navigation: landing on the link IS the flow. Mobile-first (parents in the
 // stands on phones). Parent photos go live immediately (visibility='public',
 // no staging), and the feed below streams every public photo (parent + Luke's
 // published) in realtime. Front-of-house, so this surface carries the full
-// polish: layered navy, gold hairlines, an immersive photo viewer, and a
+// polish: layered navy, a Shorts-style vertical photo reel, likes, and a
 // first-launch walkthrough for people who installed the app.
 export default function Rhea() {
   const [onboarded, setOnboarded] = useState(() => isStandalone() || hasOnboardedRhea());
@@ -44,38 +46,111 @@ function OpticGlyph({ className }) {
 }
 
 function RheaApp() {
-  const { photos, loading, error } = useRheaPhotos({ scope: 'public' });
-  const [lightbox, setLightbox] = useState(null); // index into photos, or null
+  const gate = useRheaGate();
+  const { photos, loading, error } = useRheaPhotos({ scope: 'public', enabled: gate.open });
+  const likes = useRheaLikes(photos);
+  const [reel, setReel] = useState(null); // index into photos, or null
   const [walk, setWalk] = useState(() => isStandalone() && !hasWalkthroughRhea());
+
+  const showWalk = walk && gate.open;
 
   return (
     <div className="rhea">
       <div className="rhea-shell">
         <Header onHelp={() => setWalk(true)} />
-        <div className="rhea-wrap">
-          <UploadCard />
-          <Feed
-            photos={photos}
-            loading={loading}
-            error={error}
-            onOpen={(i) => setLightbox(i)}
-          />
-        </div>
+        <BetaBanner />
+        {gate.loading ? (
+          <div className="rhea-wrap"><div className="rhea-feed-msg">LOADING…</div></div>
+        ) : !gate.open ? (
+          <RheaLocked opensAt={gate.opensAt} />
+        ) : (
+          <div className="rhea-wrap">
+            <UploadCard />
+            <Feed
+              photos={photos}
+              loading={loading}
+              error={error}
+              likes={likes}
+              onOpen={(i) => setReel(i)}
+            />
+          </div>
+        )}
       </div>
 
-      {lightbox !== null && photos[lightbox] && (
-        <Lightbox
+      {gate.open && reel !== null && photos[reel] && (
+        <Reel
           photos={photos}
-          index={lightbox}
-          onIndex={setLightbox}
-          onClose={() => setLightbox(null)}
+          index={reel}
+          likes={likes}
+          onIndex={setReel}
+          onClose={() => setReel(null)}
         />
       )}
 
-      {walk && (
-        <Walkthrough
-          onClose={() => { markWalkthroughRhea(); setWalk(false); }}
-        />
+      {showWalk && (
+        <Walkthrough onClose={() => { markWalkthroughRhea(); setWalk(false); }} />
+      )}
+    </div>
+  );
+}
+
+function BetaBanner() {
+  return (
+    <div className="rhea-beta" role="note">
+      <span className="rhea-beta-tag">BETA</span>
+      <span>
+        OPTIC is a test run for the Rhea County Raider Competition. We may ask you
+        for quick feedback afterward.
+      </span>
+    </div>
+  );
+}
+
+// Countdown hold shown until the gate opens (scheduled time or Luke's manual
+// override). uses a local 1 Hz tick; useRheaGate flips `open` when it lands.
+function RheaLocked({ opensAt }) {
+  const [now, setNow] = useState(() => Date.now());
+  useEffect(() => {
+    const t = setInterval(() => setNow(Date.now()), 1000);
+    return () => clearInterval(t);
+  }, []);
+
+  const ms = Math.max(0, opensAt.getTime() - now);
+  const days = Math.floor(ms / 86400000);
+  const hrs = Math.floor(ms / 3600000) % 24;
+  const mins = Math.floor(ms / 60000) % 60;
+  const secs = Math.floor(ms / 1000) % 60;
+  const pad = (n) => String(n).padStart(2, '0');
+  const when = opensAt.toLocaleString([], {
+    weekday: 'long', hour: 'numeric', minute: '2-digit',
+  });
+
+  return (
+    <div className="rhea-lock">
+      <span className="rhea-lock-badge">BETA · RHEA COUNTY</span>
+      <OpticGlyph className="rhea-lock-glyph" />
+      <h1 className="rhea-lock-h">The feed opens <span className="accent">{when}</span>.</h1>
+      <p className="rhea-lock-p">
+        Uploads and the live feed are locked until go time. You&apos;re on the
+        list, nothing to do but be there. This is a one-event beta, so expect a
+        short feedback ask after the competition.
+      </p>
+
+      <div className="rhea-cd" role="timer" aria-label="Time until the feed opens">
+        {days > 0 && (
+          <span className="rhea-cd-unit"><b>{days}</b><i>{days === 1 ? 'day' : 'days'}</i></span>
+        )}
+        <span className="rhea-cd-unit"><b>{pad(hrs)}</b><i>hrs</i></span>
+        <span className="rhea-cd-sep">:</span>
+        <span className="rhea-cd-unit"><b>{pad(mins)}</b><i>min</i></span>
+        <span className="rhea-cd-sep">:</span>
+        <span className="rhea-cd-unit"><b>{pad(secs)}</b><i>sec</i></span>
+      </div>
+
+      {!isStandalone() && (
+        <p className="rhea-lock-hint">
+          Add OPTIC to your home screen now so it&apos;s one tap when the feed opens.
+        </p>
       )}
     </div>
   );
@@ -155,7 +230,7 @@ function UploadCard() {
   const allDone = items.length > 0 && pending.length === 0 && !busy;
 
   return (
-    <section className="rhea-card" data-tour="composer">
+    <section className="rhea-card">
       <div className="rhea-card-head">
         <div className="rhea-eyebrow">ADD YOUR PHOTOS</div>
         <div className="rhea-card-sub">
@@ -210,7 +285,7 @@ function UploadCard() {
         {allDone ? (
           <>
             <div className="rhea-ok">
-              ✓ {done.length} PHOTO{done.length === 1 ? '' : 'S'} ADDED — SCROLL DOWN TO SEE {done.length === 1 ? 'IT' : 'THEM'} IN THE FEED
+              ✓ {done.length} PHOTO{done.length === 1 ? '' : 'S'} ADDED. SCROLL DOWN TO SEE {done.length === 1 ? 'IT' : 'THEM'} IN THE FEED
             </div>
             <button className="rhea-btn rhea-btn--ghost" onClick={reset}>ADD MORE</button>
           </>
@@ -224,9 +299,9 @@ function UploadCard() {
   );
 }
 
-function Feed({ photos, loading, error, onOpen }) {
+function Feed({ photos, loading, error, likes, onOpen }) {
   return (
-    <section data-tour="feed">
+    <section>
       <div className="rhea-live">
         <span className="rhea-live-dot" />
         <span className="rhea-live-label">LIVE FEED</span>
@@ -247,17 +322,25 @@ function Feed({ photos, loading, error, onOpen }) {
       )}
 
       {error && !loading && (
-        <div className="rhea-feed-msg" data-err="true">FEED ERROR — {error}</div>
+        <div className="rhea-feed-msg" data-err="true">FEED ERROR: {error}</div>
       )}
 
       {!loading && !error && photos.length === 0 && (
-        <div className="rhea-empty">No photos yet. Be the first — add one above.</div>
+        <div className="rhea-empty">No photos yet. Be the first, add one above.</div>
       )}
 
       {!loading && photos.length > 0 && (
         <div className="rhea-feed">
           {photos.map((p, i) => (
-            <FeedItem key={p.id} photo={p} pos={i} onOpen={() => onOpen(i)} />
+            <FeedItem
+              key={p.id}
+              photo={p}
+              pos={i}
+              liked={likes.isLiked(p.id)}
+              likeCount={likes.countFor(p)}
+              onLike={() => likes.toggle(p)}
+              onOpen={() => onOpen(i)}
+            />
           ))}
         </div>
       )}
@@ -265,15 +348,27 @@ function Feed({ photos, loading, error, onOpen }) {
   );
 }
 
-function FeedItem({ photo, pos, onOpen }) {
+function FeedItem({ photo, pos, liked, likeCount, onLike, onOpen }) {
   const chip = feedChip(photo);
   const who = feedAttribution(photo);
   const isLuke = photo.source === 'luke';
   return (
     <figure className="rhea-item" style={{ '--d': `${Math.min(pos, 8) * 45}ms` }}>
-      <button className="rhea-shot" onClick={onOpen} aria-label="View photo full screen">
-        <img src={photo.photo_url} alt="" loading="lazy" />
-      </button>
+      <div className="rhea-shot-wrap">
+        <button className="rhea-shot" onClick={onOpen} aria-label="Open photo reel">
+          <img src={photo.photo_url} alt="" loading="lazy" />
+        </button>
+        <button
+          className="rhea-like"
+          data-on={liked}
+          onClick={(e) => { e.stopPropagation(); onLike(); }}
+          aria-pressed={liked}
+          aria-label={liked ? 'Unlike photo' : 'Like photo'}
+        >
+          <span className="rhea-like-ico">{liked ? '♥' : '♡'}</span>
+          {likeCount > 0 && <span>{likeCount}</span>}
+        </button>
+      </div>
       <figcaption className="rhea-cap">
         <span className="rhea-who" data-luke={isLuke}>{who}</span>
         {chip && <span className="rhea-chip">{chip}</span>}
@@ -285,129 +380,135 @@ function FeedItem({ photo, pos, onOpen }) {
   );
 }
 
-// ── immersive full-screen viewer ──────────────────────────────────────────
-const SWIPE_THRESHOLD = 60;
+// ── shorts-style vertical photo reel ─────────────────────────────────────
+function Reel({ photos, index, likes, onIndex, onClose }) {
+  const reelRef = useRef(null);
+  const [cur, setCur] = useState(index);
+  const curRef = useRef(index);
+  const [burstKey, setBurstKey] = useState(0);
+  const lastTap = useRef(0);
 
-function Lightbox({ photos, index, onIndex, onClose }) {
-  const [chrome, setChrome] = useState(true);
-  const [drag, setDrag] = useState(0);
-  const startX = useRef(null);
-  const startY = useRef(null);
-  const dragging = useRef(false);
-
-  const go = useCallback((next) => {
-    if (next < 0 || next >= photos.length) return;
-    onIndex(next);
-    setChrome(true);
-  }, [photos.length, onIndex]);
-
+  // Jump to the tapped photo on open + lock the page behind.
   useEffect(() => {
-    const onKey = (e) => {
-      if (e.key === 'Escape') onClose();
-      else if (e.key === 'ArrowLeft') go(index - 1);
-      else if (e.key === 'ArrowRight') go(index + 1);
-    };
-    window.addEventListener('keydown', onKey);
+    const el = reelRef.current;
+    if (el) el.scrollTop = index * el.clientHeight;
     const prev = document.body.style.overflow;
     document.body.style.overflow = 'hidden';
-    return () => { window.removeEventListener('keydown', onKey); document.body.style.overflow = prev; };
-  }, [index, go, onClose]);
+    return () => { document.body.style.overflow = prev; };
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
-  function onTouchStart(e) {
-    startX.current = e.touches[0].clientX;
-    startY.current = e.touches[0].clientY;
-    dragging.current = false;
-  }
-  function onTouchMove(e) {
-    if (startX.current == null) return;
-    const dx = e.touches[0].clientX - startX.current;
-    const dy = e.touches[0].clientY - startY.current;
-    if (!dragging.current && Math.abs(dx) > Math.abs(dy) + 6) dragging.current = true;
-    if (dragging.current) {
-      let d = dx;
-      if ((index === 0 && d > 0) || (index === photos.length - 1 && d < 0)) d *= 0.32; // rubber-band edges
-      setDrag(d);
+  useEffect(() => {
+    const el = reelRef.current;
+    const onKey = (e) => {
+      if (e.key === 'Escape') return onClose();
+      if (!el) return;
+      if (e.key === 'ArrowDown' || e.key === 'ArrowRight') el.scrollBy({ top: el.clientHeight, behavior: 'smooth' });
+      else if (e.key === 'ArrowUp' || e.key === 'ArrowLeft') el.scrollBy({ top: -el.clientHeight, behavior: 'smooth' });
+    };
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  }, [onClose]);
+
+  function onScroll(e) {
+    const el = e.currentTarget;
+    const i = Math.round(el.scrollTop / el.clientHeight);
+    if (i !== curRef.current && i >= 0 && i < photos.length) {
+      curRef.current = i;
+      setCur(i);
+      onIndex(i);
     }
   }
-  function onTouchEnd() {
-    if (dragging.current) {
-      if (drag <= -SWIPE_THRESHOLD) go(index + 1);
-      else if (drag >= SWIPE_THRESHOLD) go(index - 1);
-    } else if (startX.current != null) {
-      setChrome((c) => !c); // a tap toggles the chrome
+
+  function onPageTap(photo) {
+    const now = Date.now();
+    if (now - lastTap.current < 300) {   // double-tap = like (Instagram gesture)
+      if (!likes.isLiked(photo.id)) likes.toggle(photo);
+      setBurstKey((k) => k + 1);
+      lastTap.current = 0;
+    } else {
+      lastTap.current = now;
     }
-    startX.current = null; startY.current = null; dragging.current = false;
-    setDrag(0);
   }
 
-  const photo = photos[index];
-  const who = feedAttribution(photo);
-  const chip = feedChip(photo);
-  const isLuke = photo.source === 'luke';
-
-  async function share() {
+  async function share(photo) {
     const url = photo.photo_url;
+    const who = feedAttribution(photo);
     try {
       if (navigator.share) {
         await navigator.share({ title: 'Rhea County Raider Comp', text: `Photo by ${who}`, url });
         posthog.capture('rhea_photo_share', { photo_id: photo.id });
         return;
       }
-    } catch { /* user cancelled or unsupported */ }
+    } catch { /* cancelled / unsupported */ }
     try { await navigator.clipboard?.writeText(url); } catch { /* no clipboard */ }
   }
 
   return (
-    <div
-      className="rhea-lb"
-      data-chrome={chrome}
-      role="dialog"
-      aria-label="Photo viewer"
-      onTouchStart={onTouchStart}
-      onTouchMove={onTouchMove}
-      onTouchEnd={onTouchEnd}
-    >
-      <div className="rhea-lb-bar">
-        <span className="rhea-lb-idx">{index + 1} / {photos.length}</span>
+    <div className="rhea-lb" role="dialog" aria-label="Photo reel">
+      <div className="rhea-lb-top">
+        <span className="rhea-lb-idx">{cur + 1} / {photos.length}</span>
         <button className="rhea-lb-close" onClick={onClose} aria-label="Close">✕</button>
       </div>
 
-      <div className="rhea-lb-stage">
-        <div
-          className="rhea-lb-track"
-          data-drag={drag !== 0}
-          style={{ transform: `translateX(calc(${-index * 100}% + ${drag}px))` }}
-        >
-          {photos.map((p, i) => (
-            <div className="rhea-lb-slide" key={p.id}>
-              {Math.abs(i - index) <= 1 && (
-                <img src={p.photo_url} alt="" draggable="false" />
+      <div className="rhea-reel" ref={reelRef} onScroll={onScroll}>
+        {photos.map((p, i) => {
+          const near = Math.abs(i - cur) <= 2;
+          const who = feedAttribution(p);
+          const chip = feedChip(p);
+          const isLiked = likes.isLiked(p.id);
+          return (
+            <div className="rhea-page" key={p.id} onClick={() => onPageTap(p)}>
+              {near && (
+                <>
+                  <div className="rhea-page-bg" style={{ backgroundImage: `url(${p.photo_url})` }} />
+                  <img className="rhea-page-img" src={p.photo_url} alt="" draggable="false" />
+                </>
               )}
+
+              {i === cur && burstKey > 0 && (
+                <span className="rhea-burst" key={burstKey}>♥</span>
+              )}
+
+              <div className="rhea-rail">
+                <button
+                  className="rhea-rail-btn"
+                  data-on={isLiked}
+                  onClick={(e) => { e.stopPropagation(); likes.toggle(p); }}
+                  aria-pressed={isLiked}
+                  aria-label={isLiked ? 'Unlike' : 'Like'}
+                >
+                  <span className="rhea-rail-ico">{isLiked ? '♥' : '♡'}</span>
+                  <span>{likes.countFor(p) || 'LIKE'}</span>
+                </button>
+                <button className="rhea-rail-btn" onClick={(e) => { e.stopPropagation(); share(p); }} aria-label="Share">
+                  <span className="rhea-rail-ico">⇪</span><span>SHARE</span>
+                </button>
+                <button
+                  className="rhea-rail-btn"
+                  onClick={(e) => { e.stopPropagation(); downloadPhoto(p.photo_url, `rhea_${p.id}.jpg`); }}
+                  aria-label="Save"
+                >
+                  <span className="rhea-rail-ico">⬇</span><span>SAVE</span>
+                </button>
+              </div>
+
+              <div className="rhea-page-meta">
+                <div className="rhea-page-who" data-luke={p.source === 'luke'}>{who}</div>
+                <div className="rhea-page-line">
+                  {chip && <span className="rhea-chip">{chip}</span>}
+                  <span className="rhea-time">
+                    {new Date(p.created_at).toLocaleString([], { month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' })}
+                  </span>
+                </div>
+              </div>
             </div>
-          ))}
-        </div>
-
-        <button className="rhea-lb-nav" data-side="prev" onClick={() => go(index - 1)} disabled={index === 0} aria-label="Previous">‹</button>
-        <button className="rhea-lb-nav" data-side="next" onClick={() => go(index + 1)} disabled={index === photos.length - 1} aria-label="Next">›</button>
+          );
+        })}
       </div>
 
-      <div className="rhea-lb-foot">
-        <div className="rhea-lb-meta">
-          <div className="rhea-lb-who" data-luke={isLuke}>{who}</div>
-          <div className="rhea-lb-line">
-            {chip && <span className="rhea-chip">{chip}</span>}
-            <span className="rhea-time">
-              {new Date(photo.created_at).toLocaleString([], { month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' })}
-            </span>
-          </div>
-        </div>
-        <div className="rhea-lb-actions">
-          {(navigator.share || navigator.clipboard) && (
-            <button className="rhea-lb-act" onClick={share}>⇪ SHARE</button>
-          )}
-          <button className="rhea-lb-act" onClick={() => downloadPhoto(photo.photo_url, `rhea_${photo.id}.jpg`)}>⬇ SAVE</button>
-        </div>
-      </div>
+      {cur === 0 && photos.length > 1 && (
+        <div className="rhea-scroll-hint">SWIPE UP FOR MORE</div>
+      )}
     </div>
   );
 }
@@ -418,13 +519,13 @@ const WALK_STEPS = [
     glyph: '📡',
     step: 'STEP 1 / 3',
     h: <>One live feed for <span className="accent">the whole day.</span></>,
-    p: 'Every family and cadet posts to the same feed. It updates on its own as photos come in — no refresh, no hunting for a link.',
+    p: 'Every family and cadet posts to the same feed. It updates on its own as photos come in. No refresh, no hunting for a link.',
   },
   {
-    glyph: '⤢',
+    glyph: '↕',
     step: 'STEP 2 / 3',
-    h: <>Tap any photo to <span className="accent">open it full screen.</span></>,
-    p: 'Swipe left and right to move through the day. Pinch or tap the edges to browse. Save or share straight from the viewer.',
+    h: <>Tap a photo, then <span className="accent">scroll like Shorts.</span></>,
+    p: 'It opens full screen. Swipe up and down to move through the day. Double-tap a photo to like it, or use the heart on the side.',
   },
   {
     glyph: '＋',

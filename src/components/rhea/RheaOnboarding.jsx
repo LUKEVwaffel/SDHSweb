@@ -10,7 +10,7 @@ const haptic = (p) => { try { navigator.vibrate?.(p); } catch { /* unsupported *
 // Step graph. Everyone opens on a plain-language "what is this" panel so the
 // first question never lands cold. Cadets get an extra "competing vs viewing"
 // step; everyone reaches the install screen last. `done` is a terminal
-// hand-off screen shown only after a successful install — it is not part of
+// hand-off screen shown only after a successful install , it is not part of
 // the numbered sequence.
 function sequence(role) {
   return role === 'cadet'
@@ -46,7 +46,7 @@ function flavor(a) {
 /**
  * First-run flow for /rhea. Shown until the visitor finishes it (or opts to
  * continue in the browser). Ends on an install screen that strongly steers
- * toward adding the PWA — with an honest, visible way past it.
+ * toward adding the PWA , with an honest, visible way past it.
  */
 export default function RheaOnboarding({ onDone }) {
   const [step, setStep] = useState('welcome');
@@ -106,7 +106,7 @@ export default function RheaOnboarding({ onDone }) {
     onDone();
   }
 
-  // After a real install we do NOT drop the visitor into the browser feed —
+  // After a real install we do NOT drop the visitor into the browser feed ,
   // that makes people forget they just added the app. Show a hand-off screen
   // that points them at the new home-screen icon instead.
   function handoff() {
@@ -162,9 +162,10 @@ export default function RheaOnboarding({ onDone }) {
               <div className="rob-kicker">RHEA COUNTY RAIDER COMPETITION</div>
               <h1 className="rob-h">The whole day, <span className="accent">as it happens.</span></h1>
               <p className="rob-sub">
-                This is OPTIC — a shared photo feed for today&apos;s competition. Families and
-                cadets post from the stands and the sideline, and everyone sees it live. Nothing
-                to sign into. Nothing to download yet.
+                This is OPTIC, a beta photo feed we&apos;re running just for the Rhea County
+                Raider Competition. Families and cadets post from the stands and the sideline,
+                and everyone sees it live. Nothing to sign into, nothing to download yet.
+                We may ask you for quick feedback after the event.
               </p>
               <div className="rob-vis">
                 <span className="rob-vis-glyph">📸</span>
@@ -286,7 +287,7 @@ export default function RheaOnboarding({ onDone }) {
               </h1>
               <p className="rob-sub">
                 Close this tab and tap the new <b style={{ color: 'var(--cream)' }}>OPTIC</b> icon
-                on your home screen — that&apos;s where today runs live, full screen, no browser bar.
+                on your home screen. That&apos;s where today runs live, full screen, no browser bar.
                 Keep it handy; the feed updates on its own all day.
               </p>
             </>

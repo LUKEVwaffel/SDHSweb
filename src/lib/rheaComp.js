@@ -2,14 +2,14 @@ import { supabase as SB } from './supabaseClient';
 import { resizeForUpload } from './imageResize';
 import { adminDisplayName } from './admins';
 
-// ── Rhea County Raider Competition — one hardcoded real event ───────────────
+// ── Rhea County Raider Competition , one hardcoded real event ───────────────
 // events row confirmed: date 2026-08-29, status 'posted', team 'raiders',
 // 07:00-17:00. The whole feature is scoped to this id; there is no picker.
 export const RHEA_EVENT_ID = 'e8a305fe-86cf-4092-a580-5865423271b9';
 export const RHEA_EVENT_TITLE = 'Rhea County Raider Competition';
 
 const BUCKET = 'team-photos';
-// photos.team MUST stay 'raiders' — the photos_require_posted_event trigger
+// photos.team MUST stay 'raiders' , the photos_require_posted_event trigger
 // rejects any other value for this event. Sub-team goes in raider_team.
 const PHOTO_TEAM = 'raiders';
 
@@ -21,13 +21,13 @@ const ALLOWED_TYPES = new Set(['image/jpeg', 'image/png']);
 
 export function isAllowedImage(file) {
   if (ALLOWED_TYPES.has(file.type)) return true;
-  // Some browsers leave .jpg/.jpeg/.png with an empty type — fall back to ext.
+  // Some browsers leave .jpg/.jpeg/.png with an empty type , fall back to ext.
   const ext = file.name.split('.').pop()?.toLowerCase();
   return !file.type && ['jpg', 'jpeg', 'png'].includes(ext || '');
 }
 
 export const REJECT_MESSAGE =
-  'Only JPG and PNG files are accepted. iPhone photos saved as HEIC will not upload — ' +
+  'Only JPG and PNG files are accepted. iPhone photos saved as HEIC will not upload , ' +
   'set Settings › Camera › Formats to "Most Compatible", or send a screenshot of the photo instead.';
 
 const RAIDER_TEAM_LABEL = { male: 'Male Raiders', coed: 'Coed Raiders', both: 'Raiders' };
@@ -39,7 +39,7 @@ export const raiderTeamLabel = (t) => RAIDER_TEAM_LABEL[t] || null;
  * @param {object} opts
  * @param {'parent'|'luke'} opts.source
  * @param {string} [opts.uploaderName]  free-text attribution (optional both paths)
- * @param {string|null} [opts.deviceFp] device fingerprint — parent path only,
+ * @param {string|null} [opts.deviceFp] device fingerprint , parent path only,
  *        left null for Luke so his 50+ dump is never rate-limited
  * @returns {Promise<object>} the inserted photos row
  */
@@ -74,15 +74,15 @@ export async function uploadRheaPhoto(file, { source, uploaderName = '', deviceF
 
 /**
  * Feed attribution line for one photo row.
- *  - Luke's published photos  -> "Luke — Team Photographer"
+ *  - Luke's published photos  -> "Luke , Team Photographer"
  *  - parent with a name       -> that name
  *  - parent, no name          -> "Parent"
  */
 export function feedAttribution(photo) {
   if (photo.source === 'luke') {
     return adminDisplayName(photo.uploaded_by) === 'Luke' || !photo.uploaded_by
-      ? 'Luke — Team Photographer'
-      : `${adminDisplayName(photo.uploaded_by)} — Team Photographer`;
+      ? 'Luke , Team Photographer'
+      : `${adminDisplayName(photo.uploaded_by)} , Team Photographer`;
   }
   return photo.uploader_name?.trim() || 'Parent';
 }
@@ -116,6 +116,42 @@ export function hasWalkthroughRhea() {
 /** Mark the in-app walkthrough seen on this device. */
 export function markWalkthroughRhea() {
   try { localStorage.setItem(RHEA_WALKTHROUGH_KEY, '1'); } catch { /* private mode */ }
+}
+
+// ── likes ─────────────────────────────────────────────────────────────────
+// One like per photo per device. `deviceFp` is the same FingerprintJS +
+// localStorage-nonce string used for upload rate-limiting. The visible count
+// lives on photos.like_count (kept current by a DB trigger), so the feed hook
+// gets it with no extra query , these two helpers only manage THIS device's
+// own like rows.
+
+/** The set of photo ids this device has already liked. */
+export async function fetchMyLikes(deviceFp) {
+  if (!deviceFp) return new Set();
+  const { data, error } = await SB
+    .from('rhea_photo_likes')
+    .select('photo_id')
+    .eq('device_fp', deviceFp);
+  if (error) return new Set();
+  return new Set((data || []).map((r) => r.photo_id));
+}
+
+/** Add or remove this device's like on one photo. Throws on failure. */
+export async function setLike(photoId, deviceFp, liked) {
+  if (!photoId || !deviceFp) throw new Error('missing photo or device id');
+  if (liked) {
+    const { error } = await SB
+      .from('rhea_photo_likes')
+      .upsert({ photo_id: photoId, device_fp: deviceFp }, { onConflict: 'photo_id,device_fp', ignoreDuplicates: true });
+    if (error) throw error;
+  } else {
+    const { error } = await SB
+      .from('rhea_photo_likes')
+      .delete()
+      .eq('photo_id', photoId)
+      .eq('device_fp', deviceFp);
+    if (error) throw error;
+  }
 }
 
 /**

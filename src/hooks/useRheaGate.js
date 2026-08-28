@@ -1,0 +1,55 @@
+import { useState, useEffect, useRef } from 'react';
+import { supabase as SB } from '../lib/supabaseClient';
+
+const GATE_ID = 'default';
+// Fallback when the row can't be read (migration not run yet / offline): stay
+// LOCKED with this target so the countdown still renders. 8:00 AM Aug 29 2026 ET.
+const FALLBACK_OPENS_AT = '2026-08-29T08:00:00-04:00';
+
+/**
+ * Beta gate for /rhea. Reads the single `rhea_gate` row and stays live on it
+ * via realtime, plus a 1 Hz local tick so the derived `open` flips exactly
+ * when the countdown reaches the scheduled time , no reload needed.
+ *
+ * OPEN  ==  row.is_open  OR  now >= row.opens_at
+ */
+export function useRheaGate() {
+  const [row, setRow] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [, tick] = useState(0);
+  const aliveRef = useRef(true);
+
+  useEffect(() => {
+    aliveRef.current = true;
+
+    const load = async () => {
+      const { data, error } = await SB
+        .from('rhea_gate').select('*').eq('id', GATE_ID).maybeSingle();
+      if (!aliveRef.current) return;
+      setRow(!error && data ? data : { id: GATE_ID, is_open: false, opens_at: FALLBACK_OPENS_AT });
+      setLoading(false);
+    };
+    load();
+
+    const channel = SB.channel('rhea-gate')
+      .on(
+        'postgres_changes',
+        { event: '*', schema: 'public', table: 'rhea_gate', filter: `id=eq.${GATE_ID}` },
+        load,
+      )
+      .subscribe();
+
+    const t = setInterval(() => { if (aliveRef.current) tick((n) => (n + 1) % 60); }, 1000);
+
+    return () => {
+      aliveRef.current = false;
+      clearInterval(t);
+      SB.removeChannel(channel);
+    };
+  }, []);
+
+  const opensAt = new Date(row?.opens_at || FALLBACK_OPENS_AT);
+  const open = !!row && (row.is_open === true || Date.now() >= opensAt.getTime());
+
+  return { open, opensAt, isManualOpen: row?.is_open === true, loading };
+}

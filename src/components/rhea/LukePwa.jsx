@@ -18,7 +18,7 @@ const PARENT_SEEN_KEY = 'rhea_pwa_parent_seen';
 // win for how physical the console feels on a phone.
 const haptic = (p) => { try { navigator.vibrate?.(p); } catch { /* unsupported */ } };
 
-// ── /lukepwa — OPTIC command console. Luke's homebase for the 12h day: every
+// ── /lukepwa , OPTIC command console. Luke's homebase for the 12h day: every
 // tap answers instantly, selection feels physical, publishing commits with a
 // visible pulse. All curation / tagging / moderation happens here, from a
 // phone, and nothing in this file can reach the parent or cadet UIs.
@@ -52,7 +52,7 @@ function LukePwa() {
     SB.auth.getSession().then(({ data }) => { email.current = data.session?.user?.email || null; });
   }, []);
 
-  // A fresh photos array from realtime/refetch is server truth — drop the
+  // A fresh photos array from realtime/refetch is server truth , drop the
   // optimistic overlay so the two can't drift.
   useEffect(() => { setOverrides({}); }, [photos]);
 
@@ -162,7 +162,7 @@ function LukePwa() {
     flash(list);
     const { error: e } = await SB.from('photos').update(patch).in('id', list);
     if (e) {
-      setActionErr(e.message || 'Update failed — check signal and tap again.');
+      setActionErr(e.message || 'Update failed. Check signal and tap again.');
       setOverrides((o) => { const n = { ...o }; list.forEach((id) => delete n[id]); return n; });
       haptic([8, 40, 8]);
       return;
@@ -177,8 +177,28 @@ function LukePwa() {
     const thumb = photo.storage_path?.replace(/\.jpg$/i, '_t.jpg');
     await SB.storage.from('team-photos').remove([photo.storage_path, thumb].filter(Boolean));
     const { error: e } = await SB.from('photos').delete().eq('id', photo.id);
-    if (e) { setActionErr(e.message || 'Delete failed — tap again.'); return; }
+    if (e) { setActionErr(e.message || 'Delete failed. Tap again.'); return; }
     setSel((s) => { const n = new Set(s); n.delete(photo.id); return n; });
+    refresh();
+  }
+
+  // Permanently delete every selected photo , storage objects and rows. No
+  // undo; used from the bulk drawer for bad frames / dupes.
+  async function bulkDelete() {
+    const list = [...sel];
+    if (!list.length) return;
+    if (!window.confirm(`Permanently delete ${list.length} photo${list.length === 1 ? '' : 's'}? The files are removed for good, no undo.`)) return;
+    setActionErr('');
+    haptic([10, 40, 10]);
+    const targets = merged.filter((p) => sel.has(p.id));
+    const paths = targets.flatMap((p) => [
+      p.storage_path,
+      p.storage_path?.replace(/\.jpg$/i, '_t.jpg'),
+    ].filter(Boolean));
+    if (paths.length) await SB.storage.from('team-photos').remove(paths);
+    const { error: e } = await SB.from('photos').delete().in('id', list);
+    if (e) { setActionErr(e.message || 'Delete failed. Check signal and tap again.'); return; }
+    clearSel();
     refresh();
   }
 
@@ -200,6 +220,8 @@ function LukePwa() {
 
       {!isStandalone() && <InstallStrip />}
 
+      <GateControl />
+
       <nav className="lp-tabs">
         <button className="lp-tab" data-active={tab === 'tag'} onClick={() => go('tag')}>
           TAGGING <Count n={lukePhotos.length} bump={bump.luke} />
@@ -214,7 +236,7 @@ function LukePwa() {
         <span className="lp-tab-ind" style={{ transform: `translateX(${tabIndex * 100}%)` }} />
       </nav>
 
-      {error && <div className="lp-banner">FEED ERROR — {error}</div>}
+      {error && <div className="lp-banner">FEED ERROR: {error}</div>}
       {actionErr && (
         <div className="lp-banner">
           <span style={{ flex: 1 }}>{actionErr}</span>
@@ -297,6 +319,7 @@ function LukePwa() {
         onClearSub={() => applyPatch({ sub_event_id: null }, sel)}
         onPublish={() => { haptic(22); applyPatch({ visibility: 'public' }, sel); clearSel(); }}
         onUnpublish={() => { applyPatch({ visibility: 'staged' }, sel); clearSel(); }}
+        onDelete={bulkDelete}
         onClear={clearSel}
       />
     </div>
@@ -514,7 +537,7 @@ function SubEvents({ subEvents, counts, emailRef, refreshSubs, setActionErr, onJ
   );
 }
 
-function BulkDrawer({ open, count, subEvents, onTeam, onSubEvent, onClearSub, onPublish, onUnpublish, onClear }) {
+function BulkDrawer({ open, count, subEvents, onTeam, onSubEvent, onClearSub, onPublish, onUnpublish, onDelete, onClear }) {
   return (
     <div className="lp-drawer" data-open={open} aria-hidden={!open}>
       <div className="lp-drawer-hd">
@@ -533,7 +556,7 @@ function BulkDrawer({ open, count, subEvents, onTeam, onSubEvent, onClearSub, on
       <div className="lp-chips">
         {subEvents.length === 0 && (
           <span style={{ fontFamily: 'var(--mono)', fontSize: 9, color: 'var(--faint)', padding: '10px 2px', whiteSpace: 'nowrap' }}>
-            none yet — make one in EVENTS
+            none yet, make one in EVENTS
           </span>
         )}
         {subEvents.map((s) => (
@@ -546,6 +569,88 @@ function BulkDrawer({ open, count, subEvents, onTeam, onSubEvent, onClearSub, on
         <button className="lp-btn" style={{ flex: 2 }} onClick={onPublish}>PUBLISH</button>
         <button className="lp-btn lp-btn--ghost" style={{ flex: 1 }} onClick={onUnpublish}>UNPUBLISH</button>
       </div>
+      <button className="lp-btn lp-btn--danger" style={{ width: '100%', marginTop: 6 }} onClick={onDelete}>
+        DELETE PERMANENTLY
+      </button>
+    </div>
+  );
+}
+
+// datetime-local wants "YYYY-MM-DDTHH:mm" in the browser's local zone.
+function toLocalInput(ts) {
+  const d = new Date(ts);
+  return new Date(d.getTime() - d.getTimezoneOffset() * 60000).toISOString().slice(0, 16);
+}
+
+// Beta gate control. Reads/writes the single rhea_gate row (admin-only via
+// RLS; this whole surface is behind AdminGate). "OPEN NOW" flips the manual
+// override; "SET TIME" reschedules the countdown and re-locks to it.
+function GateControl() {
+  const [row, setRow] = useState(null);
+  const [draft, setDraft] = useState('');
+  const [busy, setBusy] = useState(false);
+  const [err, setErr] = useState('');
+
+  useEffect(() => {
+    const load = async () => {
+      const { data } = await SB.from('rhea_gate').select('*').eq('id', 'default').maybeSingle();
+      if (data) { setRow(data); setDraft((d) => d || toLocalInput(data.opens_at)); }
+    };
+    load();
+    const ch = SB.channel('lp-gate')
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'rhea_gate', filter: 'id=eq.default' }, load)
+      .subscribe();
+    return () => { SB.removeChannel(ch); };
+  }, []);
+
+  if (!row) return null;
+  const opensAt = new Date(row.opens_at);
+  const openNow = row.is_open === true || Date.now() >= opensAt.getTime();
+
+  async function patch(p) {
+    setBusy(true); setErr(''); haptic(14);
+    const { error } = await SB.from('rhea_gate')
+      .update({ ...p, updated_at: new Date().toISOString() })
+      .eq('id', 'default');
+    if (error) setErr(error.message || 'Save failed, tap again.');
+    setBusy(false);
+  }
+
+  return (
+    <div className="lp-gate" data-open={openNow}>
+      <div className="lp-gate-row">
+        <span className="lp-gate-status">{openNow ? '● FEED OPEN' : '○ FEED LOCKED'}</span>
+        {row.is_open === true ? (
+          <button className="lp-btn lp-btn--ghost lp-btn--sm" disabled={busy} onClick={() => patch({ is_open: false })}>
+            LOCK
+          </button>
+        ) : (
+          <button className="lp-btn lp-btn--sm" disabled={busy} onClick={() => patch({ is_open: true })}>
+            OPEN NOW
+          </button>
+        )}
+      </div>
+      <div className="lp-gate-row">
+        <input
+          type="datetime-local"
+          className="lp-gate-input"
+          value={draft}
+          onChange={(e) => setDraft(e.target.value)}
+        />
+        <button
+          className="lp-btn lp-btn--ghost lp-btn--sm"
+          disabled={busy || !draft}
+          onClick={() => patch({ opens_at: new Date(draft).toISOString(), is_open: false })}
+        >
+          SET TIME
+        </button>
+      </div>
+      {row.is_open !== true && (
+        <div className="lp-gate-note">
+          Countdown target: {opensAt.toLocaleString([], { weekday: 'short', month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' })}
+        </div>
+      )}
+      {err && <div className="lp-gate-note" data-err="true">{err}</div>}
     </div>
   );
 }
