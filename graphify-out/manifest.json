@@ -2185,8 +2185,8 @@
     "semantic_hash": ""
   },
   "public/lukepwa-sw.js": {
-    "mtime": 1787956101.8872573,
-    "ast_hash": "7b22ee700082d1164c09c417ba4245fb",
+    "mtime": 1787959324.2432053,
+    "ast_hash": "42c57a792abc0d820b73bb7f8aeffb89",
     "semantic_hash": ""
   },
   "src/components/rhea/AdminGate.jsx": {
@@ -2205,8 +2205,8 @@
     "semantic_hash": ""
   },
   "src/components/rhea/Rhea.jsx": {
-    "mtime": 1787958457.8058896,
-    "ast_hash": "1f58a49df35d60c5f8077305ca99e94d",
+    "mtime": 1787959210.5366209,
+    "ast_hash": "7de41a75a2f3530b0408f09bb2ceaca1",
     "semantic_hash": ""
   },
   "src/components/rhea/pwa.js": {
@@ -2220,8 +2220,8 @@
     "semantic_hash": ""
   },
   "src/lib/rheaComp.js": {
-    "mtime": 1787958439.4146526,
-    "ast_hash": "1cdfac03a6228f7752a44c7d07f50c2c",
+    "mtime": 1787959057.6570675,
+    "ast_hash": "a2bf11de7ad4e9f71a07ac9ea769a57b",
     "semantic_hash": ""
   },
   "supabase/rhea_comp_photos.sql": {
@@ -2230,33 +2230,38 @@
     "semantic_hash": ""
   },
   "public/optic-icon-192.png": {
-    "mtime": 1787957114.326331,
-    "ast_hash": "0fe5a433b36f5bee9217176c08fcc87f",
+    "mtime": 1787959024.648225,
+    "ast_hash": "1032795d59e12b3b7ec3e740dab95a3e",
     "semantic_hash": ""
   },
   "public/optic-icon-512.png": {
-    "mtime": 1787957114.242615,
-    "ast_hash": "d0525efa16e2e483248a28c782362cb6",
+    "mtime": 1787959024.5605407,
+    "ast_hash": "d666de60b68903c5bd342cc27f20b6a7",
     "semantic_hash": ""
   },
   "public/optic-icon-apple-180.png": {
-    "mtime": 1787957129.9507656,
-    "ast_hash": "b1a84abb6a1eb284373a952603f4c91c",
+    "mtime": 1787959024.711879,
+    "ast_hash": "aafaf3d7f2ebea14430f3ff0be663886",
     "semantic_hash": ""
   },
   "public/optic-icon-maskable-512.png": {
-    "mtime": 1787957114.6920073,
-    "ast_hash": "f1ef229dd5602505d02852349056d44c",
+    "mtime": 1787959024.5675154,
+    "ast_hash": "f1ad09064795d60035dcacd2d2835f27",
     "semantic_hash": ""
   },
   "public/rhea-sw.js": {
-    "mtime": 1787958402.6992607,
-    "ast_hash": "118cd2bee67f3aa45f08acdcba3579e7",
+    "mtime": 1787959321.645954,
+    "ast_hash": "2e2b7d26f17e7bbc0b11fa82e428577e",
     "semantic_hash": ""
   },
   "src/components/rhea/RheaOnboarding.jsx": {
-    "mtime": 1787958453.9773407,
-    "ast_hash": "53af99559fd9ac978da509e7efe58fb1",
+    "mtime": 1787959308.2465675,
+    "ast_hash": "3ed1f498201aa528de5cdeccf4a5a2d8",
+    "semantic_hash": ""
+  },
+  "public/optic-icon.svg": {
+    "mtime": 1787959024.719354,
+    "ast_hash": "4e732b41040aae678b4c2da413c8a3b4",
     "semantic_hash": ""
   }
 }

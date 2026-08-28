@@ -5,22 +5,12 @@ import { useRheaPhotos } from '../../hooks/useRheaPhotos';
 import {
   uploadRheaPhoto, isAllowedImage, ACCEPT_ATTR, REJECT_MESSAGE,
   feedAttribution, feedChip, downloadPhoto,
+  hasOnboardedRhea, hasWalkthroughRhea, markWalkthroughRhea,
 } from '../../lib/rheaComp';
 import { installRheaPwaHooks, isStandalone } from './pwa';
 import RheaOnboarding from './RheaOnboarding';
-import { hasOnboardedRhea } from '../../lib/rheaComp';
 import posthog from '../../lib/posthog';
-
-const P = {
-  ink: '#06101F', navy: '#142847', navyDeep: '#0A1628',
-  gold: '#C9A961', bright: '#E8C77A', cream: '#F4ECD8',
-  mute: 'rgba(244,236,216,0.62)', faint: 'rgba(244,236,216,0.4)',
-  hair: 'rgba(201,169,97,0.22)', hairStrong: 'rgba(201,169,97,0.5)',
-  green: '#4FB477', red: '#C0392B',
-};
-const mono = "'JetBrains Mono', monospace";
-const oswald = 'Oswald, sans-serif';
-const inter = 'Inter, sans-serif';
+import './rhea.css';
 
 let uid = 0;
 const nextId = () => `u${Date.now()}_${uid++}`;
@@ -29,48 +19,81 @@ const nextId = () => `u${Date.now()}_${uid++}`;
 // navigation: landing on the link IS the flow. Mobile-first (parents in the
 // stands on phones). Parent photos go live immediately (visibility='public',
 // no staging), and the feed below streams every public photo (parent + Luke's
-// published) in realtime.
+// published) in realtime. Front-of-house, so this surface carries the full
+// polish: layered navy, gold hairlines, an immersive photo viewer, and a
+// first-launch walkthrough for people who installed the app.
 export default function Rhea() {
-  // Skip the first-run flow for anyone already running the installed app, or
-  // who has been through it once on this device.
   const [onboarded, setOnboarded] = useState(() => isStandalone() || hasOnboardedRhea());
 
-  // Register the installable-viewer identity as soon as /rhea mounts so the
-  // browser's install prompt is available by the time the flow asks for it.
   useEffect(() => { installRheaPwaHooks(); }, []);
 
   if (!onboarded) return <RheaOnboarding onDone={() => setOnboarded(true)} />;
+  return <RheaApp />;
+}
+
+function OpticGlyph({ className }) {
+  return (
+    <svg className={className} viewBox="0 0 512 512" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+      <circle cx="256" cy="256" r="176" fill="none" stroke="#C9A961" strokeWidth="18" />
+      <circle cx="256" cy="256" r="150" fill="none" stroke="#C9A961" strokeOpacity="0.4" strokeWidth="7" />
+      <polygon points="256,172 328.7,214 328.7,298 256,340 183.3,298 183.3,214" fill="#C9A961" />
+      <polygon points="273,226.6 290,256 273,285.4 239,285.4 222,256 239,226.6" fill="#06101F" />
+      <ellipse cx="232" cy="206" rx="15" ry="9" fill="#F4ECD8" fillOpacity="0.9" transform="rotate(-35 232 206)" />
+    </svg>
+  );
+}
+
+function RheaApp() {
+  const { photos, loading, error } = useRheaPhotos({ scope: 'public' });
+  const [lightbox, setLightbox] = useState(null); // index into photos, or null
+  const [walk, setWalk] = useState(() => isStandalone() && !hasWalkthroughRhea());
 
   return (
-    <div style={{ minHeight: '100vh', background: P.ink, color: P.cream, fontFamily: inter }}>
-      <Header />
-      <div style={{ maxWidth: 640, margin: '0 auto', padding: '0 16px 96px' }}>
-        <UploadCard />
-        <Feed />
+    <div className="rhea">
+      <div className="rhea-shell">
+        <Header onHelp={() => setWalk(true)} />
+        <div className="rhea-wrap">
+          <UploadCard />
+          <Feed
+            photos={photos}
+            loading={loading}
+            error={error}
+            onOpen={(i) => setLightbox(i)}
+          />
+        </div>
       </div>
+
+      {lightbox !== null && photos[lightbox] && (
+        <Lightbox
+          photos={photos}
+          index={lightbox}
+          onIndex={setLightbox}
+          onClose={() => setLightbox(null)}
+        />
+      )}
+
+      {walk && (
+        <Walkthrough
+          onClose={() => { markWalkthroughRhea(); setWalk(false); }}
+        />
+      )}
     </div>
   );
 }
 
-function Header() {
+function Header({ onHelp }) {
   return (
-    <header style={{
-      borderBottom: `1px solid ${P.hair}`, background: P.navyDeep,
-      padding: '18px 16px', position: 'sticky', top: 0, zIndex: 20,
-      backdropFilter: 'blur(6px)',
-    }}>
-      <div style={{ maxWidth: 640, margin: '0 auto', display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', gap: 12 }}>
+    <header className="rhea-hdr">
+      <div className="rhea-hdr-in">
+        <OpticGlyph className="rhea-glyph" />
         <div>
-          <div style={{ fontFamily: mono, fontSize: 8.5, letterSpacing: '0.34em', color: P.gold }}>
-            SDHS JROTC · OPTIC
-          </div>
-          <div style={{ fontFamily: oswald, fontSize: 20, letterSpacing: '0.04em', color: P.cream, lineHeight: 1.1, marginTop: 2 }}>
-            RHEA COUNTY RAIDER COMP
-          </div>
+          <div className="rhea-kick">SDHS JROTC · OPTIC</div>
+          <div className="rhea-title">RHEA COUNTY RAIDER COMP</div>
         </div>
-        <Link to="/" style={{ fontFamily: mono, fontSize: 9, letterSpacing: '0.16em', color: P.faint, textDecoration: 'none', whiteSpace: 'nowrap' }}>
-          MAIN SITE ↗
-        </Link>
+        <div className="rhea-hdr-right">
+          <button className="rhea-help" onClick={onHelp} aria-label="Show walkthrough">?</button>
+          <Link to="/" className="rhea-link">MAIN SITE ↗</Link>
+        </div>
       </div>
     </header>
   );
@@ -132,52 +155,44 @@ function UploadCard() {
   const allDone = items.length > 0 && pending.length === 0 && !busy;
 
   return (
-    <section style={{ marginTop: 20, background: P.navy, border: `1px solid ${P.hair}` }}>
-      <div style={{ padding: '16px 16px 4px' }}>
-        <div style={{ fontFamily: mono, fontSize: 9, letterSpacing: '0.22em', color: P.gold }}>
-          ADD YOUR PHOTOS
-        </div>
-        <div style={{ fontFamily: inter, fontSize: 12.5, color: P.mute, marginTop: 4, lineHeight: 1.5 }}>
+    <section className="rhea-card" data-tour="composer">
+      <div className="rhea-card-head">
+        <div className="rhea-eyebrow">ADD YOUR PHOTOS</div>
+        <div className="rhea-card-sub">
           Shots from the stands go straight to the live feed below. No account needed.
         </div>
       </div>
 
-      <div style={{ padding: 16 }}>
+      <div className="rhea-card-body">
         <input ref={inputRef} type="file" accept={ACCEPT_ATTR} multiple style={{ display: 'none' }}
           onChange={(e) => { addFiles(e.target.files); e.target.value = ''; }} />
 
         <div
+          className="rhea-drop"
+          data-empty={items.length === 0}
+          data-drag={dragOver}
           onClick={() => !busy && inputRef.current?.click()}
           onDragOver={(e) => { e.preventDefault(); if (!busy) setDragOver(true); }}
           onDragLeave={() => setDragOver(false)}
           onDrop={(e) => { e.preventDefault(); setDragOver(false); if (!busy) addFiles(e.dataTransfer.files); }}
-          style={{
-            border: `1px dashed ${dragOver ? P.gold : P.hairStrong}`,
-            background: dragOver ? 'rgba(201,169,97,0.06)' : P.navyDeep,
-            padding: items.length ? 14 : '36px 16px', textAlign: 'center',
-            cursor: busy ? 'not-allowed' : 'pointer', transition: 'all .15s',
-          }}>
+        >
           {items.length === 0 ? (
             <>
-              <div style={{ fontSize: 26, color: P.gold, opacity: 0.7 }}>＋</div>
-              <div style={{ fontFamily: oswald, fontSize: 15, letterSpacing: '0.05em', marginTop: 6 }}>
-                TAP TO CHOOSE PHOTOS
-              </div>
-              <div style={{ fontFamily: mono, fontSize: 8.5, color: P.faint, letterSpacing: '0.14em', marginTop: 6 }}>
-                JPG / PNG · PICK SEVERAL AT ONCE
-              </div>
+              <div className="rhea-drop-plus">+</div>
+              <div className="rhea-drop-t">TAP TO CHOOSE PHOTOS</div>
+              <div className="rhea-drop-hint">JPG / PNG · PICK SEVERAL AT ONCE</div>
             </>
           ) : (
-            <div style={{ display: 'flex', gap: 8, overflowX: 'auto', paddingBottom: 2 }}>
+            <div className="rhea-tray">
               {items.map((it) => (
-                <div key={it.id} style={{ position: 'relative', flexShrink: 0, width: 76, height: 76, border: `1px solid ${it.status === 'failed' ? P.red : P.hair}` }}>
-                  <img src={it.previewUrl} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover', opacity: it.status === 'done' ? 0.5 : 1 }} />
-                  {it.status === 'uploading' && <span style={tileTag}>…</span>}
-                  {it.status === 'done' && <span style={{ ...tileTag, background: 'rgba(79,180,119,0.9)', color: P.ink }}>✓</span>}
-                  {it.status === 'failed' && <span style={{ ...tileTag, background: 'rgba(192,57,43,0.9)' }}>✕</span>}
+                <div key={it.id} className="rhea-thumb" data-status={it.status}>
+                  <img src={it.previewUrl} alt="" style={{ opacity: it.status === 'done' ? 0.5 : 1 }} />
+                  {it.status === 'uploading' && <span className="rhea-thumb-badge">…</span>}
+                  {it.status === 'done' && <span className="rhea-thumb-badge" data-kind="done">✓</span>}
+                  {it.status === 'failed' && <span className="rhea-thumb-badge" data-kind="failed">✕</span>}
                   {it.status === 'pending' && !busy && (
-                    <button onClick={(e) => { e.stopPropagation(); setItems((q) => q.filter((x) => x.id !== it.id)); URL.revokeObjectURL(it.previewUrl); }}
-                      style={{ position: 'absolute', top: 0, right: 0, border: 'none', background: 'rgba(6,16,31,0.8)', color: P.cream, fontSize: 12, lineHeight: 1, padding: '2px 5px', cursor: 'pointer' }}>×</button>
+                    <button className="rhea-thumb-x"
+                      onClick={(e) => { e.stopPropagation(); setItems((q) => q.filter((x) => x.id !== it.id)); URL.revokeObjectURL(it.previewUrl); }}>×</button>
                   )}
                 </div>
               ))}
@@ -185,26 +200,22 @@ function UploadCard() {
           )}
         </div>
 
-        {rejected.length > 0 && (
-          <div style={{ marginTop: 10, border: `1px solid ${P.red}`, background: 'rgba(192,57,43,0.08)', padding: '9px 11px', fontFamily: inter, fontSize: 11.5, color: '#EBB4AC', lineHeight: 1.5 }}>
-            {REJECT_MESSAGE}
-          </div>
-        )}
+        {rejected.length > 0 && <div className="rhea-reject">{REJECT_MESSAGE}</div>}
 
         <input
+          className="rhea-name"
           value={name} onChange={(e) => setName(e.target.value)} placeholder="Your name (optional)"
-          style={{ width: '100%', boxSizing: 'border-box', marginTop: 12, background: P.navyDeep, border: `1px solid ${P.hair}`, color: P.cream, fontFamily: inter, fontSize: 14, padding: '11px 12px', outline: 'none' }} />
+        />
 
         {allDone ? (
-          <div style={{ marginTop: 12 }}>
-            <div style={{ border: `1px solid ${P.green}`, background: 'rgba(79,180,119,0.1)', padding: '11px 13px', fontFamily: mono, fontSize: 12, letterSpacing: '0.06em', color: '#9FE0BB' }}>
+          <>
+            <div className="rhea-ok">
               ✓ {done.length} PHOTO{done.length === 1 ? '' : 'S'} ADDED — SCROLL DOWN TO SEE {done.length === 1 ? 'IT' : 'THEM'} IN THE FEED
             </div>
-            <button onClick={reset} style={{ ...goldBtn, width: '100%', marginTop: 10 }}>ADD MORE</button>
-          </div>
+            <button className="rhea-btn rhea-btn--ghost" onClick={reset}>ADD MORE</button>
+          </>
         ) : (
-          <button onClick={send} disabled={busy || pending.length === 0}
-            style={{ ...goldBtn, width: '100%', marginTop: 12, opacity: busy || pending.length === 0 ? 0.4 : 1, cursor: busy || pending.length === 0 ? 'not-allowed' : 'pointer' }}>
+          <button className="rhea-btn" onClick={send} disabled={busy || pending.length === 0}>
             {busy ? `UPLOADING… ${done.length}/${items.length}` : `POST ${pending.length || ''} PHOTO${pending.length === 1 ? '' : 'S'}`.trim()}
           </button>
         )}
@@ -213,76 +224,60 @@ function UploadCard() {
   );
 }
 
-function Feed() {
-  const { photos, loading, error } = useRheaPhotos({ scope: 'public' });
-
+function Feed({ photos, loading, error, onOpen }) {
   return (
-    <section style={{ marginTop: 30 }}>
-      <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 14 }}>
-        <span style={{ width: 7, height: 7, background: P.green, borderRadius: '50%', boxShadow: `0 0 0 3px rgba(79,180,119,0.25)` }} />
-        <h2 style={{ fontFamily: oswald, fontSize: 18, letterSpacing: '0.06em', color: P.cream, margin: 0 }}>
-          LIVE FEED
-        </h2>
-        <span style={{ fontFamily: mono, fontSize: 9, color: P.faint, letterSpacing: '0.14em', marginLeft: 'auto' }}>
+    <section data-tour="feed">
+      <div className="rhea-live">
+        <span className="rhea-live-dot" />
+        <span className="rhea-live-label">LIVE FEED</span>
+        <span className="rhea-live-count">
           {photos.length} PHOTO{photos.length === 1 ? '' : 'S'}
         </span>
       </div>
 
-      {loading && <div style={{ fontFamily: mono, fontSize: 10, color: P.faint, letterSpacing: '0.2em', padding: '24px 0' }}>LOADING…</div>}
-      {error && !loading && (
-        <div style={{ fontFamily: mono, fontSize: 10, color: '#EBB4AC', letterSpacing: '0.08em', padding: '16px 0' }}>
-          FEED ERROR — {error}
-        </div>
-      )}
-      {!loading && !error && photos.length === 0 && (
-        <div style={{ border: `1px dashed ${P.hair}`, padding: '32px 16px', textAlign: 'center', fontFamily: inter, fontSize: 13, color: P.mute }}>
-          No photos yet. Be the first — add one above.
+      {loading && (
+        <div className="rhea-feed">
+          {[0, 1, 2].map((i) => (
+            <div key={i} className="rhea-skel">
+              <div className="rhea-skel-img" />
+              <div className="rhea-skel-cap" />
+            </div>
+          ))}
         </div>
       )}
 
-      <div style={{ display: 'flex', flexDirection: 'column', gap: 18 }}>
-        {photos.map((p) => <FeedItem key={p.id} photo={p} />)}
-      </div>
+      {error && !loading && (
+        <div className="rhea-feed-msg" data-err="true">FEED ERROR — {error}</div>
+      )}
+
+      {!loading && !error && photos.length === 0 && (
+        <div className="rhea-empty">No photos yet. Be the first — add one above.</div>
+      )}
+
+      {!loading && photos.length > 0 && (
+        <div className="rhea-feed">
+          {photos.map((p, i) => (
+            <FeedItem key={p.id} photo={p} pos={i} onOpen={() => onOpen(i)} />
+          ))}
+        </div>
+      )}
     </section>
   );
 }
 
-function FeedItem({ photo }) {
+function FeedItem({ photo, pos, onOpen }) {
   const chip = feedChip(photo);
   const who = feedAttribution(photo);
   const isLuke = photo.source === 'luke';
   return (
-    <figure style={{ margin: 0, background: P.navy, border: `1px solid ${P.hair}` }}>
-      <div style={{ position: 'relative', background: P.navyDeep }}>
-        <img src={photo.photo_url} alt="" loading="lazy"
-          style={{ display: 'block', width: '100%', height: 'auto' }} />
-        <button
-          onClick={() => downloadPhoto(photo.photo_url, `rhea_${photo.id}.jpg`)}
-          aria-label="Download photo"
-          style={{
-            position: 'absolute', bottom: 8, right: 8, border: `1px solid ${P.hairStrong}`,
-            background: 'rgba(6,16,31,0.72)', color: P.cream, fontFamily: mono, fontSize: 9,
-            letterSpacing: '0.12em', padding: '6px 10px', cursor: 'pointer', backdropFilter: 'blur(4px)',
-          }}>
-          ⬇ SAVE
-        </button>
-      </div>
-      <figcaption style={{ padding: '10px 12px', display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
-        <span style={{
-          fontFamily: inter, fontSize: 12.5,
-          color: isLuke ? P.bright : P.cream, fontWeight: isLuke ? 600 : 400,
-        }}>
-          {who}
-        </span>
-        {chip && (
-          <span style={{
-            fontFamily: mono, fontSize: 8.5, letterSpacing: '0.1em', color: P.gold,
-            border: `1px solid ${P.hair}`, padding: '3px 7px', textTransform: 'uppercase',
-          }}>
-            {chip}
-          </span>
-        )}
-        <time style={{ fontFamily: mono, fontSize: 8.5, color: P.faint, letterSpacing: '0.08em', marginLeft: 'auto' }}>
+    <figure className="rhea-item" style={{ '--d': `${Math.min(pos, 8) * 45}ms` }}>
+      <button className="rhea-shot" onClick={onOpen} aria-label="View photo full screen">
+        <img src={photo.photo_url} alt="" loading="lazy" />
+      </button>
+      <figcaption className="rhea-cap">
+        <span className="rhea-who" data-luke={isLuke}>{who}</span>
+        {chip && <span className="rhea-chip">{chip}</span>}
+        <time className="rhea-time">
           {new Date(photo.created_at).toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' })}
         </time>
       </figcaption>
@@ -290,11 +285,181 @@ function FeedItem({ photo }) {
   );
 }
 
-const goldBtn = {
-  background: P.gold, color: P.ink, border: 'none',
-  fontFamily: mono, fontSize: 11, letterSpacing: '0.16em', fontWeight: 600, padding: '13px 16px', cursor: 'pointer',
-};
-const tileTag = {
-  position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center',
-  background: 'rgba(6,16,31,0.5)', fontFamily: mono, fontSize: 15, color: P.cream,
-};
+// ── immersive full-screen viewer ──────────────────────────────────────────
+const SWIPE_THRESHOLD = 60;
+
+function Lightbox({ photos, index, onIndex, onClose }) {
+  const [chrome, setChrome] = useState(true);
+  const [drag, setDrag] = useState(0);
+  const startX = useRef(null);
+  const startY = useRef(null);
+  const dragging = useRef(false);
+
+  const go = useCallback((next) => {
+    if (next < 0 || next >= photos.length) return;
+    onIndex(next);
+    setChrome(true);
+  }, [photos.length, onIndex]);
+
+  useEffect(() => {
+    const onKey = (e) => {
+      if (e.key === 'Escape') onClose();
+      else if (e.key === 'ArrowLeft') go(index - 1);
+      else if (e.key === 'ArrowRight') go(index + 1);
+    };
+    window.addEventListener('keydown', onKey);
+    const prev = document.body.style.overflow;
+    document.body.style.overflow = 'hidden';
+    return () => { window.removeEventListener('keydown', onKey); document.body.style.overflow = prev; };
+  }, [index, go, onClose]);
+
+  function onTouchStart(e) {
+    startX.current = e.touches[0].clientX;
+    startY.current = e.touches[0].clientY;
+    dragging.current = false;
+  }
+  function onTouchMove(e) {
+    if (startX.current == null) return;
+    const dx = e.touches[0].clientX - startX.current;
+    const dy = e.touches[0].clientY - startY.current;
+    if (!dragging.current && Math.abs(dx) > Math.abs(dy) + 6) dragging.current = true;
+    if (dragging.current) {
+      let d = dx;
+      if ((index === 0 && d > 0) || (index === photos.length - 1 && d < 0)) d *= 0.32; // rubber-band edges
+      setDrag(d);
+    }
+  }
+  function onTouchEnd() {
+    if (dragging.current) {
+      if (drag <= -SWIPE_THRESHOLD) go(index + 1);
+      else if (drag >= SWIPE_THRESHOLD) go(index - 1);
+    } else if (startX.current != null) {
+      setChrome((c) => !c); // a tap toggles the chrome
+    }
+    startX.current = null; startY.current = null; dragging.current = false;
+    setDrag(0);
+  }
+
+  const photo = photos[index];
+  const who = feedAttribution(photo);
+  const chip = feedChip(photo);
+  const isLuke = photo.source === 'luke';
+
+  async function share() {
+    const url = photo.photo_url;
+    try {
+      if (navigator.share) {
+        await navigator.share({ title: 'Rhea County Raider Comp', text: `Photo by ${who}`, url });
+        posthog.capture('rhea_photo_share', { photo_id: photo.id });
+        return;
+      }
+    } catch { /* user cancelled or unsupported */ }
+    try { await navigator.clipboard?.writeText(url); } catch { /* no clipboard */ }
+  }
+
+  return (
+    <div
+      className="rhea-lb"
+      data-chrome={chrome}
+      role="dialog"
+      aria-label="Photo viewer"
+      onTouchStart={onTouchStart}
+      onTouchMove={onTouchMove}
+      onTouchEnd={onTouchEnd}
+    >
+      <div className="rhea-lb-bar">
+        <span className="rhea-lb-idx">{index + 1} / {photos.length}</span>
+        <button className="rhea-lb-close" onClick={onClose} aria-label="Close">✕</button>
+      </div>
+
+      <div className="rhea-lb-stage">
+        <div
+          className="rhea-lb-track"
+          data-drag={drag !== 0}
+          style={{ transform: `translateX(calc(${-index * 100}% + ${drag}px))` }}
+        >
+          {photos.map((p, i) => (
+            <div className="rhea-lb-slide" key={p.id}>
+              {Math.abs(i - index) <= 1 && (
+                <img src={p.photo_url} alt="" draggable="false" />
+              )}
+            </div>
+          ))}
+        </div>
+
+        <button className="rhea-lb-nav" data-side="prev" onClick={() => go(index - 1)} disabled={index === 0} aria-label="Previous">‹</button>
+        <button className="rhea-lb-nav" data-side="next" onClick={() => go(index + 1)} disabled={index === photos.length - 1} aria-label="Next">›</button>
+      </div>
+
+      <div className="rhea-lb-foot">
+        <div className="rhea-lb-meta">
+          <div className="rhea-lb-who" data-luke={isLuke}>{who}</div>
+          <div className="rhea-lb-line">
+            {chip && <span className="rhea-chip">{chip}</span>}
+            <span className="rhea-time">
+              {new Date(photo.created_at).toLocaleString([], { month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' })}
+            </span>
+          </div>
+        </div>
+        <div className="rhea-lb-actions">
+          {(navigator.share || navigator.clipboard) && (
+            <button className="rhea-lb-act" onClick={share}>⇪ SHARE</button>
+          )}
+          <button className="rhea-lb-act" onClick={() => downloadPhoto(photo.photo_url, `rhea_${photo.id}.jpg`)}>⬇ SAVE</button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ── first-launch walkthrough (installed app only) ─────────────────────────
+const WALK_STEPS = [
+  {
+    glyph: '📡',
+    step: 'STEP 1 / 3',
+    h: <>One live feed for <span className="accent">the whole day.</span></>,
+    p: 'Every family and cadet posts to the same feed. It updates on its own as photos come in — no refresh, no hunting for a link.',
+  },
+  {
+    glyph: '⤢',
+    step: 'STEP 2 / 3',
+    h: <>Tap any photo to <span className="accent">open it full screen.</span></>,
+    p: 'Swipe left and right to move through the day. Pinch or tap the edges to browse. Save or share straight from the viewer.',
+  },
+  {
+    glyph: '＋',
+    step: 'STEP 3 / 3',
+    h: <>See a moment? <span className="accent">Add it.</span></>,
+    p: 'Use “Add your photos” at the top. Your shot is in the feed for every other family within seconds. No login, ever.',
+  },
+];
+
+function Walkthrough({ onClose }) {
+  const [i, setI] = useState(0);
+  const last = i === WALK_STEPS.length - 1;
+  const s = WALK_STEPS[i];
+
+  function next() {
+    try { navigator.vibrate?.(10); } catch { /* unsupported */ }
+    if (last) { posthog.capture('rhea_walkthrough_done'); onClose(); }
+    else setI(i + 1);
+  }
+
+  return (
+    <div className="rhea-wt" role="dialog" aria-label="App walkthrough">
+      <div className="rhea-wt-card" key={i}>
+        <div className="rhea-wt-glyph">{s.glyph}</div>
+        <div className="rhea-wt-step">{s.step}</div>
+        <h2 className="rhea-wt-h">{s.h}</h2>
+        <p className="rhea-wt-p">{s.p}</p>
+        <div className="rhea-wt-foot">
+          <div className="rhea-wt-dots" aria-hidden="true">
+            {WALK_STEPS.map((_, n) => <span key={n} className="rhea-wt-dot" data-on={n === i} />)}
+          </div>
+          {!last && <button className="rhea-wt-skip" onClick={() => { posthog.capture('rhea_walkthrough_skip'); onClose(); }}>Skip</button>}
+          <button className="rhea-wt-next" onClick={next}>{last ? 'GOT IT' : 'NEXT'}</button>
+        </div>
+      </div>
+    </div>
+  );
+}

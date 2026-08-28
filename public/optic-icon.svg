@@ -1,0 +1,23 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="512" height="512" viewBox="0 0 512 512">
+  <defs>
+    <radialGradient id="bg" cx="50%" cy="34%" r="80%">
+      <stop offset="0%" stop-color="#1B3358"/>
+      <stop offset="62%" stop-color="#0A1628"/>
+      <stop offset="100%" stop-color="#06101F"/>
+    </radialGradient>
+    <linearGradient id="gold" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#E8C77A"/>
+      <stop offset="55%" stop-color="#C9A961"/>
+      <stop offset="100%" stop-color="#A8894A"/>
+    </linearGradient>
+  </defs>
+  <rect width="512" height="512" rx="96" fill="url(#bg)"/>
+  <rect x="8" y="8" width="496" height="496" rx="90" fill="none" stroke="#C9A961" stroke-opacity="0.14" stroke-width="2"/>
+  <g transform="translate(256,256) scale(0.82) translate(-256,-256)">
+    <circle cx="256" cy="256" r="176" fill="none" stroke="url(#gold)" stroke-width="13"/>
+    <circle cx="256" cy="256" r="150" fill="none" stroke="#C9A961" stroke-opacity="0.4" stroke-width="5"/>
+    <polygon points="256,172 328.7,214 328.7,298 256,340 183.3,298 183.3,214" fill="url(#gold)"/>
+    <polygon points="273,226.6 290,256 273,285.4 239,285.4 222,256 239,226.6" fill="#06101F"/>
+    <ellipse cx="232" cy="206" rx="15" ry="9" fill="#F4ECD8" fill-opacity="0.9" transform="rotate(-35 232 206)"/>
+  </g>
+</svg>

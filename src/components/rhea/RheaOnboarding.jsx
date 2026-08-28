@@ -7,13 +7,19 @@ import './rhea-onboard.css';
 const ROLE_KEY = 'rhea_role';
 const haptic = (p) => { try { navigator.vibrate?.(p); } catch { /* unsupported */ } };
 
-// Step graph. Cadets get an extra "competing vs viewing" step; everyone lands
-// on the install screen last.
+// Step graph. Everyone opens on a plain-language "what is this" panel so the
+// first question never lands cold. Cadets get an extra "competing vs viewing"
+// step; everyone reaches the install screen last. `done` is a terminal
+// hand-off screen shown only after a successful install — it is not part of
+// the numbered sequence.
 function sequence(role) {
   return role === 'cadet'
-    ? ['role', 'intent', 'about1', 'about2', 'install']
-    : ['role', 'about1', 'about2', 'install'];
+    ? ['welcome', 'role', 'intent', 'about1', 'about2', 'install']
+    : ['welcome', 'role', 'about1', 'about2', 'install'];
 }
+// Steps that carry a progress dot (welcome is a soft intro, install/done are
+// terminal, so none of them count toward "how far along am I").
+const dotStepsOf = (role) => sequence(role).filter((s) => s !== 'welcome' && s !== 'install');
 
 function flavor(a) {
   if (a.role === 'cadet' && a.intent === 'competing') {
@@ -43,7 +49,7 @@ function flavor(a) {
  * toward adding the PWA — with an honest, visible way past it.
  */
 export default function RheaOnboarding({ onDone }) {
-  const [step, setStep] = useState('role');
+  const [step, setStep] = useState('welcome');
   const [answers, setAnswers] = useState({ role: null, intent: null });
   const [pending, setPending] = useState(null); // choice id flashing before advance
   const [back, setBack] = useState(false);
@@ -57,6 +63,8 @@ export default function RheaOnboarding({ onDone }) {
 
   const seq = sequence(answers.role);
   const idx = seq.indexOf(step);
+  const dotSteps = dotStepsOf(answers.role);
+  const dotIdx = dotSteps.indexOf(step);
 
   const goNext = useCallback((next) => {
     setBack(false);
@@ -82,8 +90,7 @@ export default function RheaOnboarding({ onDone }) {
     }, 240);
   }
 
-  function finish(installed) {
-    haptic(installed ? [10, 30, 10] : 8);
+  function record(installed) {
     markOnboardedRhea();
     try { if (answers.role) localStorage.setItem(ROLE_KEY, answers.role); } catch { /* private mode */ }
     posthog.capture('rhea_onboarded', {
@@ -91,8 +98,32 @@ export default function RheaOnboarding({ onDone }) {
       intent: answers.intent || null,
       installed: !!installed,
     });
+  }
+
+  function finish(installed) {
+    haptic(installed ? [10, 30, 10] : 8);
+    record(installed);
     onDone();
   }
+
+  // After a real install we do NOT drop the visitor into the browser feed —
+  // that makes people forget they just added the app. Show a hand-off screen
+  // that points them at the new home-screen icon instead.
+  function handoff() {
+    haptic([10, 30, 10]);
+    record(true);
+    setBack(false);
+    setStep('done');
+  }
+
+  // Fires when the OS actually completes the install (covers the browser-menu
+  // "Install" path that never goes through our button).
+  useEffect(() => {
+    const h = () => { record(true); setBack(false); setStep('done'); };
+    window.addEventListener('appinstalled', h);
+    return () => window.removeEventListener('appinstalled', h);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [answers.role, answers.intent]);
 
   async function doInstall() {
     if (!installPrompt) return;
@@ -100,19 +131,22 @@ export default function RheaOnboarding({ onDone }) {
     installPrompt.prompt();
     const { outcome } = await installPrompt.userChoice;
     setInstallPrompt(null);
-    if (outcome === 'accepted') finish(true);
+    if (outcome === 'accepted') handoff();
   }
 
   const f = flavor(answers);
-  const totalDots = seq.length;
 
   return (
     <div className="rob" role="dialog" aria-label="Welcome to OPTIC">
       <div className="rob-top">
         <span className="rob-brand">SDHS JROTC · OPTIC</span>
         <div className="rob-dots" aria-hidden="true">
-          {Array.from({ length: totalDots }).map((_, i) => (
-            <span key={i} className="rob-dot" data-state={i < idx ? 'done' : i === idx ? 'now' : 'next'} />
+          {dotSteps.map((_, i) => (
+            <span
+              key={i}
+              className="rob-dot"
+              data-state={dotIdx < 0 ? 'next' : i < dotIdx ? 'done' : i === dotIdx ? 'now' : 'next'}
+            />
           ))}
         </div>
       </div>
@@ -121,6 +155,27 @@ export default function RheaOnboarding({ onDone }) {
         <div className="rob-panel" key={step} data-back={back}>
           {idx > 0 && step !== 'install' && (
             <button className="rob-back" onClick={goBack}>‹ BACK</button>
+          )}
+
+          {step === 'welcome' && (
+            <>
+              <div className="rob-kicker">RHEA COUNTY RAIDER COMPETITION</div>
+              <h1 className="rob-h">The whole day, <span className="accent">as it happens.</span></h1>
+              <p className="rob-sub">
+                This is OPTIC — a shared photo feed for today&apos;s competition. Families and
+                cadets post from the stands and the sideline, and everyone sees it live. Nothing
+                to sign into. Nothing to download yet.
+              </p>
+              <div className="rob-vis">
+                <span className="rob-vis-glyph">📸</span>
+                <span className="rob-vis-txt">
+                  ONE FEED · EVERY TEAM · EVERY EVENT · FREE TO WATCH AND TO ADD TO
+                </span>
+              </div>
+              <p className="rob-sub" style={{ fontSize: 13, marginTop: 16 }}>
+                First, one quick question so the feed opens to the right place.
+              </p>
+            </>
           )}
 
           {step === 'role' && (
@@ -219,11 +274,35 @@ export default function RheaOnboarding({ onDone }) {
               )}
             </>
           )}
+
+          {step === 'done' && (
+            <>
+              <img className="rob-appicon" src="/optic-icon-192.png" alt="OPTIC app icon" width="96" height="96" />
+              <div style={{ textAlign: 'center' }}>
+                <span className="rob-badge rob-badge--ok">✓ ADDED TO YOUR HOME SCREEN</span>
+              </div>
+              <h1 className="rob-h" style={{ marginTop: 18 }}>
+                You&apos;re set. <span className="accent">Open OPTIC from there.</span>
+              </h1>
+              <p className="rob-sub">
+                Close this tab and tap the new <b style={{ color: 'var(--cream)' }}>OPTIC</b> icon
+                on your home screen — that&apos;s where today runs live, full screen, no browser bar.
+                Keep it handy; the feed updates on its own all day.
+              </p>
+            </>
+          )}
         </div>
       </div>
 
       <div className="rob-foot">
-        {step !== 'install' ? (
+        {step === 'welcome' && (
+          <>
+            <button className="rob-cta" onClick={() => goNext(seq[idx + 1])}>START</button>
+            <button className="rob-skip" onClick={() => finish(false)}>Skip, just show me the feed</button>
+          </>
+        )}
+
+        {step !== 'welcome' && step !== 'install' && step !== 'done' && (
           <>
             <button
               className="rob-cta"
@@ -235,16 +314,25 @@ export default function RheaOnboarding({ onDone }) {
             </button>
             <button className="rob-skip" onClick={() => finish(false)}>Skip setup</button>
           </>
-        ) : (
+        )}
+
+        {step === 'install' && (
           <>
             {installPrompt ? (
               <button className="rob-cta" onClick={doInstall}>INSTALL THE APP</button>
+            ) : isIos() ? (
+              <button className="rob-cta" onClick={handoff}>I&apos;VE ADDED IT</button>
             ) : (
-              <button className="rob-cta" onClick={() => finish(true)}>
-                {isIos() ? "I'VE ADDED IT" : 'CONTINUE'}
-              </button>
+              <button className="rob-cta" onClick={() => finish(true)}>CONTINUE</button>
             )}
             <button className="rob-skip" onClick={() => finish(false)}>Not now, open in browser</button>
+          </>
+        )}
+
+        {step === 'done' && (
+          <>
+            <button className="rob-cta" onClick={() => finish(true)}>I&apos;LL OPEN IT FROM MY HOME SCREEN</button>
+            <button className="rob-skip" onClick={() => finish(true)}>Keep watching in this tab for now</button>
           </>
         )}
       </div>

@@ -2205,13 +2205,13 @@
     "semantic_hash": ""
   },
   "src/components/rhea/Rhea.jsx": {
-    "mtime": 1787956217.2569547,
-    "ast_hash": "1738b35272967d68c94d1f62605db843",
+    "mtime": 1787958457.8058896,
+    "ast_hash": "1f58a49df35d60c5f8077305ca99e94d",
     "semantic_hash": ""
   },
   "src/components/rhea/pwa.js": {
-    "mtime": 1787957140.6244516,
-    "ast_hash": "ebd477f50f048ed067ca06ddbff3bd73",
+    "mtime": 1787958391.1489692,
+    "ast_hash": "4e711a5e7d8d77cff97ba29ccd7ec1a8",
     "semantic_hash": ""
   },
   "src/hooks/useRheaPhotos.js": {
@@ -2220,8 +2220,8 @@
     "semantic_hash": ""
   },
   "src/lib/rheaComp.js": {
-    "mtime": 1787955894.1834357,
-    "ast_hash": "c491ebabc98a399a25e76970ef64d880",
+    "mtime": 1787958439.4146526,
+    "ast_hash": "1cdfac03a6228f7752a44c7d07f50c2c",
     "semantic_hash": ""
   },
   "supabase/rhea_comp_photos.sql": {
@@ -2247,6 +2247,16 @@
   "public/optic-icon-maskable-512.png": {
     "mtime": 1787957114.6920073,
     "ast_hash": "f1ef229dd5602505d02852349056d44c",
+    "semantic_hash": ""
+  },
+  "public/rhea-sw.js": {
+    "mtime": 1787958402.6992607,
+    "ast_hash": "118cd2bee67f3aa45f08acdcba3579e7",
+    "semantic_hash": ""
+  },
+  "src/components/rhea/RheaOnboarding.jsx": {
+    "mtime": 1787958453.9773407,
+    "ast_hash": "53af99559fd9ac978da509e7efe58fb1",
     "semantic_hash": ""
   }
 }

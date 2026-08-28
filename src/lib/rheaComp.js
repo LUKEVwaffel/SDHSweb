@@ -96,6 +96,7 @@ export function feedChip(photo) {
 }
 
 const RHEA_ONBOARDED_KEY = 'rhea_onboarded';
+const RHEA_WALKTHROUGH_KEY = 'rhea_walkthrough';
 
 /** True once the visitor finished (or skipped) the /rhea first-run flow here. */
 export function hasOnboardedRhea() {
@@ -105,6 +106,16 @@ export function hasOnboardedRhea() {
 /** Mark the /rhea first-run flow done on this device. */
 export function markOnboardedRhea() {
   try { localStorage.setItem(RHEA_ONBOARDED_KEY, '1'); } catch { /* private mode */ }
+}
+
+/** True once the in-app walkthrough (post-install tour) has run on this device. */
+export function hasWalkthroughRhea() {
+  try { return localStorage.getItem(RHEA_WALKTHROUGH_KEY) === '1'; } catch { return false; }
+}
+
+/** Mark the in-app walkthrough seen on this device. */
+export function markWalkthroughRhea() {
+  try { localStorage.setItem(RHEA_WALKTHROUGH_KEY, '1'); } catch { /* private mode */ }
 }
 
 /**
