@@ -130,8 +130,8 @@
     "semantic_hash": ""
   },
   "src/components/admin/Dashboard.jsx": {
-    "mtime": 1787911695.0635996,
-    "ast_hash": "45d3ab11903b5178be97f05e8b3ca445",
+    "mtime": 1787917272.8133867,
+    "ast_hash": "29128f1fcf078c9bfbb6ea7b2979833c",
     "semantic_hash": ""
   },
   "src/components/admin/LoginScreen.jsx": {
@@ -1180,8 +1180,8 @@
     "semantic_hash": ""
   },
   "src/components/admin/panels/tvremote/TvRemotePanel.jsx": {
-    "mtime": 1787747691.4283614,
-    "ast_hash": "f2ea0da8827103c27583b1e0420e79f6",
+    "mtime": 1787917268.0912547,
+    "ast_hash": "c2c641b0d36eef79ae951edf9a3529d2",
     "semantic_hash": ""
   },
   "src/components/creed/CreedHub.jsx": {
@@ -2112,6 +2112,46 @@
   "supabase/functions/_shared/name.ts": {
     "mtime": 1787832446.7710705,
     "ast_hash": "1dceff1f15dd44175b686612983487d0",
+    "semantic_hash": ""
+  },
+  "src/components/admin/panels/tvremote/TabIntro.jsx": {
+    "mtime": 1787917131.8042083,
+    "ast_hash": "c796923240c0342ac450f8323431a99d",
+    "semantic_hash": ""
+  },
+  "src/components/admin/panels/tvremote/TvRemoteGuide.jsx": {
+    "mtime": 1787917186.1975129,
+    "ast_hash": "5a7131cfe57a375cac89166245919fe0",
+    "semantic_hash": ""
+  },
+  "src/components/admin/panels/tvremote/TvRemoteUpdateModal.jsx": {
+    "mtime": 1787917166.3746245,
+    "ast_hash": "c397388a2051a73f9da69d75298bbe6f",
+    "semantic_hash": ""
+  },
+  "src/components/admin/panels/tvremote/TvRemoteWalkthrough.jsx": {
+    "mtime": 1787917152.0890236,
+    "ast_hash": "a37b9ebbe31aeae154f28f0ab416ebd6",
+    "semantic_hash": ""
+  },
+  "src/components/admin/panels/tvremote/tvRemoteHelpContent.js": {
+    "mtime": 1787917114.9925919,
+    "ast_hash": "d4e9588b0f3da92b2bc2e77e4390820d",
+    "semantic_hash": ""
+  },
+  "src/data/tvRemoteChangelog.js": {
+    "mtime": 1787917036.3492563,
+    "ast_hash": "c5d00a3327234337d6abf2353af09937",
+    "semantic_hash": ""
+  },
+  "src/hooks/useTvRemoteOnboarding.js": {
+    "mtime": 1787917050.7800636,
+    "ast_hash": "e85010d9ad7e1958e2c3897429e838d8",
+    "semantic_hash": ""
+  },
+  "supabase/tv_remote_onboarding.sql": {
+    "mtime": 1787917024.8815393,
+    "ast_hash": "3efaa58ce497ea13a3d09bf6287c3161",
     "semantic_hash": ""
   }
 }

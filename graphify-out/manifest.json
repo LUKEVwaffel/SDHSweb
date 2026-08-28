@@ -130,8 +130,8 @@
     "semantic_hash": ""
   },
   "src/components/admin/Dashboard.jsx": {
-    "mtime": 1787917272.8133867,
-    "ast_hash": "29128f1fcf078c9bfbb6ea7b2979833c",
+    "mtime": 1787918252.6089644,
+    "ast_hash": "5f4677c11aabb8e71e1ed091682a2562",
     "semantic_hash": ""
   },
   "src/components/admin/LoginScreen.jsx": {
@@ -1180,8 +1180,8 @@
     "semantic_hash": ""
   },
   "src/components/admin/panels/tvremote/TvRemotePanel.jsx": {
-    "mtime": 1787917268.0912547,
-    "ast_hash": "c2c641b0d36eef79ae951edf9a3529d2",
+    "mtime": 1787918201.2162147,
+    "ast_hash": "639798ab2d122dc8b8e3231584f05a78",
     "semantic_hash": ""
   },
   "src/components/creed/CreedHub.jsx": {
@@ -2105,8 +2105,8 @@
     "semantic_hash": ""
   },
   "supabase/dispatch_bc_role.sql": {
-    "mtime": 1787911685.5581188,
-    "ast_hash": "6823fc69d511e0bec95a013473174a58",
+    "mtime": 1787918102.326285,
+    "ast_hash": "0c82435ae22c83c42c44112e717ea9f6",
     "semantic_hash": ""
   },
   "supabase/functions/_shared/name.ts": {
@@ -2115,43 +2115,48 @@
     "semantic_hash": ""
   },
   "src/components/admin/panels/tvremote/TabIntro.jsx": {
-    "mtime": 1787917131.8042083,
+    "mtime": 1787918102.323428,
     "ast_hash": "c796923240c0342ac450f8323431a99d",
     "semantic_hash": ""
   },
   "src/components/admin/panels/tvremote/TvRemoteGuide.jsx": {
-    "mtime": 1787917186.1975129,
-    "ast_hash": "5a7131cfe57a375cac89166245919fe0",
+    "mtime": 1787918102.324831,
+    "ast_hash": "cae412550babbad4347483a855bd0e62",
     "semantic_hash": ""
   },
   "src/components/admin/panels/tvremote/TvRemoteUpdateModal.jsx": {
-    "mtime": 1787917166.3746245,
-    "ast_hash": "c397388a2051a73f9da69d75298bbe6f",
+    "mtime": 1787918102.3244793,
+    "ast_hash": "6950b74b9f99fe5cf09cacdfe6754896",
     "semantic_hash": ""
   },
   "src/components/admin/panels/tvremote/TvRemoteWalkthrough.jsx": {
-    "mtime": 1787917152.0890236,
-    "ast_hash": "a37b9ebbe31aeae154f28f0ab416ebd6",
+    "mtime": 1787918240.7653654,
+    "ast_hash": "6e03859e9b7da49f7aab34cf81fb18a9",
     "semantic_hash": ""
   },
   "src/components/admin/panels/tvremote/tvRemoteHelpContent.js": {
-    "mtime": 1787917114.9925919,
-    "ast_hash": "d4e9588b0f3da92b2bc2e77e4390820d",
+    "mtime": 1787918065.821867,
+    "ast_hash": "4be12a3886b4175c6d49973665a89c3e",
     "semantic_hash": ""
   },
   "src/data/tvRemoteChangelog.js": {
-    "mtime": 1787917036.3492563,
-    "ast_hash": "c5d00a3327234337d6abf2353af09937",
+    "mtime": 1787918102.3222017,
+    "ast_hash": "de79ed2142a7af3b441265201f6e367a",
     "semantic_hash": ""
   },
   "src/hooks/useTvRemoteOnboarding.js": {
-    "mtime": 1787917050.7800636,
-    "ast_hash": "e85010d9ad7e1958e2c3897429e838d8",
+    "mtime": 1787918102.322953,
+    "ast_hash": "781ed459967689bdc29991c2c456b8a3",
     "semantic_hash": ""
   },
   "supabase/tv_remote_onboarding.sql": {
-    "mtime": 1787917024.8815393,
-    "ast_hash": "3efaa58ce497ea13a3d09bf6287c3161",
+    "mtime": 1787918102.3259704,
+    "ast_hash": "909fef9922a3cf0f32d53201d26d7074",
+    "semantic_hash": ""
+  },
+  "supabase/bc_no_forced_reset.sql": {
+    "mtime": 1787918102.3266397,
+    "ast_hash": "8f0df97767d3e5d2f9e1eb0d537f1a1b",
     "semantic_hash": ""
   }
 }
