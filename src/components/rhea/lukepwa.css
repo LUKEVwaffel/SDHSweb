@@ -125,6 +125,21 @@
 }
 .lp-strip b { color: var(--gold-bright); font-weight: 600; }
 
+/* ── tag panel filter bar ────────────────────────────────────────────────── */
+.lp-filter {
+  display: flex; gap: 6px; overflow-x: auto; padding: 10px 12px 2px;
+  scrollbar-width: none; -webkit-overflow-scrolling: touch;
+}
+.lp-filter::-webkit-scrollbar { display: none; }
+.lp-fchip {
+  flex: none; background: none; border: 1px solid var(--hair); color: var(--mute);
+  font-family: var(--mono); font-size: 9px; letter-spacing: 0.1em; padding: 9px 11px;
+  cursor: pointer; white-space: nowrap; min-height: 38px;
+}
+.lp-fchip[data-on="true"] { border-color: var(--gold); color: var(--cream); background: rgba(201, 169, 97, 0.10); }
+.lp-fchip .n { color: var(--faint); margin-left: 5px; }
+.lp-fchip[data-on="true"] .n { color: var(--gold); }
+
 /* ── grid + tiles ────────────────────────────────────────────────────────── */
 .lp-grid {
   display: grid; grid-template-columns: repeat(auto-fill, minmax(96px, 1fr));
@@ -239,8 +254,10 @@
 /* ── sub-events ──────────────────────────────────────────────────────────── */
 .lp-create { padding: 14px; display: flex; flex-direction: column; gap: 10px; }
 .lp-row {
-  display: flex; align-items: center; gap: 10px; border: 1px solid var(--hair);
-  background: var(--navy); padding: 13px 12px; animation: lp-row-in 280ms var(--ease-out);
+  display: flex; align-items: center; gap: 10px; width: 100%; text-align: left;
+  border: 1px solid var(--hair); background: var(--navy); padding: 13px 12px;
+  color: inherit; font: inherit; cursor: pointer;
+  animation: lp-row-in 280ms var(--ease-out);
 }
 @keyframes lp-row-in { from { opacity: 0; transform: translateX(-8px); } to { opacity: 1; transform: translateX(0); } }
 .lp-row[data-fresh="true"] { animation: lp-row-flash 900ms var(--ease-out); }

@@ -36,6 +36,7 @@ function LukePwa() {
   const { subEvents, refresh: refreshSubs } = useRheaSubEvents();
 
   const [tab, setTab] = useState('tag');
+  const [filter, setFilter] = useState('all'); // all | untagged | staged | live | sub:<id>
   const [sel, setSel] = useState(() => new Set());
   const [actionErr, setActionErr] = useState('');
   const [overrides, setOverrides] = useState({});      // optimistic patch overlay
@@ -70,6 +71,22 @@ function LukePwa() {
     [lukePhotos],
   );
   const liveCount = lukePhotos.length - stagedIds.length;
+  const untaggedCount = useMemo(
+    () => lukePhotos.filter((p) => !p.raider_team && !p.sub_event_id).length,
+    [lukePhotos],
+  );
+
+  // The photos actually shown in the Tagging grid, after the filter bar.
+  const shown = useMemo(() => {
+    if (filter === 'untagged') return lukePhotos.filter((p) => !p.raider_team && !p.sub_event_id);
+    if (filter === 'staged') return lukePhotos.filter((p) => p.visibility === 'staged');
+    if (filter === 'live') return lukePhotos.filter((p) => p.visibility === 'public');
+    if (filter.startsWith('sub:')) {
+      const id = filter.slice(4);
+      return lukePhotos.filter((p) => p.sub_event_id === id);
+    }
+    return lukePhotos;
+  }, [lukePhotos, filter]);
   const newParentCount = useMemo(
     () => parentPhotos.filter((p) => new Date(p.created_at).getTime() > seenAt).length,
     [parentPhotos, seenAt],
@@ -105,14 +122,25 @@ function LukePwa() {
     });
   }, []);
 
+  // Drop selected ids that no longer exist (deleted, or realtime removed them).
+  useEffect(() => {
+    setSel((s) => {
+      if (!s.size) return s;
+      const valid = new Set(lukePhotos.map((p) => p.id));
+      const n = new Set([...s].filter((id) => valid.has(id)));
+      return n.size === s.size ? s : n;
+    });
+  }, [lukePhotos]);
+
   const toggleSel = useCallback((id) => {
     haptic(9);
     setSel((s) => { const n = new Set(s); if (n.has(id)) n.delete(id); else n.add(id); return n; });
   }, []);
   const clearSel = useCallback(() => setSel(new Set()), []);
-  const selectAllStaged = useCallback(() => { haptic(14); setSel(new Set(stagedIds)); }, [stagedIds]);
+  const selectAllShown = useCallback(() => { haptic(14); setSel(new Set(shown.map((p) => p.id))); }, [shown]);
 
   const go = useCallback((t) => { haptic(9); setTab(t); }, []);
+  const jumpToSub = useCallback((subId) => { haptic(9); setFilter(`sub:${subId}`); setTab('tag'); }, []);
   const openParents = useCallback(() => {
     haptic(9);
     setTab('parents');
@@ -201,13 +229,38 @@ function LukePwa() {
           <div className="lp-strip">
             <span><b>{stagedIds.length}</b> STAGED</span>
             <span><b>{liveCount}</b> LIVE</span>
-            {stagedIds.length > 0 && (
-              <button className="lp-btn lp-btn--ghost lp-btn--sm" style={{ marginLeft: 'auto' }} onClick={selectAllStaged}>
-                SELECT ALL STAGED
+            <span><b>{untaggedCount}</b> UNTAGGED</span>
+          </div>
+
+          <div className="lp-filter">
+            <FilterChip id="all" cur={filter} set={setFilter} n={lukePhotos.length}>ALL</FilterChip>
+            <FilterChip id="untagged" cur={filter} set={setFilter} n={untaggedCount}>UNTAGGED</FilterChip>
+            <FilterChip id="staged" cur={filter} set={setFilter} n={stagedIds.length}>STAGED</FilterChip>
+            <FilterChip id="live" cur={filter} set={setFilter} n={liveCount}>LIVE</FilterChip>
+            {subEvents.map((s) => (
+              <FilterChip key={s.id} id={`sub:${s.id}`} cur={filter} set={setFilter} n={subCounts[s.id] || 0}>
+                {s.name.toUpperCase()}
+              </FilterChip>
+            ))}
+          </div>
+
+          <div className="lp-strip" style={{ paddingTop: 8 }}>
+            <span>{shown.length} SHOWN{sel.size > 0 ? ` · ${sel.size} SELECTED` : ''}</span>
+            {shown.length > 0 && (
+              <button
+                className="lp-btn lp-btn--ghost lp-btn--sm"
+                style={{ marginLeft: 'auto' }}
+                onClick={selectAllShown}
+              >
+                SELECT ALL {shown.length}
               </button>
             )}
+            {sel.size > 0 && (
+              <button className="lp-btn lp-btn--ghost lp-btn--sm" onClick={clearSel}>CLEAR</button>
+            )}
           </div>
-          <TagGrid photos={lukePhotos} sel={sel} pulseIds={pulseIds} toggleSel={toggleSel} />
+
+          <TagGrid photos={shown} sel={sel} pulseIds={pulseIds} toggleSel={toggleSel} filtered={filter !== 'all'} />
         </div>
       )}
 
@@ -230,6 +283,7 @@ function LukePwa() {
             emailRef={email}
             refreshSubs={refreshSubs}
             setActionErr={setActionErr}
+            onJump={jumpToSub}
           />
         </div>
       )}
@@ -251,6 +305,19 @@ function LukePwa() {
 
 function Count({ n, bump }) {
   return <span className="lp-count" data-bump={bump ? 'true' : 'false'}>{n}</span>;
+}
+
+function FilterChip({ id, cur, set, n, children }) {
+  return (
+    <button
+      className="lp-fchip"
+      data-on={cur === id}
+      aria-pressed={cur === id}
+      onClick={() => { haptic(8); set(id); }}
+    >
+      {children}<span className="n">{n}</span>
+    </button>
+  );
 }
 
 function InstallStrip() {
@@ -301,9 +368,11 @@ function LoadingGrid() {
   );
 }
 
-function TagGrid({ photos, sel, pulseIds, toggleSel }) {
+function TagGrid({ photos, sel, pulseIds, toggleSel, filtered }) {
   if (!photos.length) {
-    return (
+    return filtered ? (
+      <Empty k="NOTHING HERE">No photos match this filter. Tap ALL to see the full set.</Empty>
+    ) : (
       <Empty k="STANDING BY">
         No dump yet. Photos from the SD-card tool appear here the moment they finish uploading.
       </Empty>
@@ -371,7 +440,7 @@ function ParentGrid({ photos, pulseIds, onHideToggle, onDelete }) {
   );
 }
 
-function SubEvents({ subEvents, counts, emailRef, refreshSubs, setActionErr }) {
+function SubEvents({ subEvents, counts, emailRef, refreshSubs, setActionErr, onJump }) {
   const [name, setName] = useState('');
   const [team, setTeam] = useState('both');
   const [busy, setBusy] = useState(false);
@@ -428,11 +497,16 @@ function SubEvents({ subEvents, counts, emailRef, refreshSubs, setActionErr }) {
         {subEvents.map((s) => {
           const n = counts[s.id] || 0;
           return (
-            <div key={s.id} className="lp-row" data-fresh={s.id === freshId}>
+            <button
+              key={s.id}
+              className="lp-row press"
+              data-fresh={s.id === freshId}
+              onClick={() => onJump(s.id)}
+            >
               <span className="lp-row-name">{s.name}</span>
-              <span className="lp-row-n">{n} PHOTO{n === 1 ? '' : 'S'}</span>
+              <span className="lp-row-n">{n} PHOTO{n === 1 ? '' : 'S'} ›</span>
               <span className="lp-row-team">{s.team.toUpperCase()}</span>
-            </div>
+            </button>
           );
         })}
       </div>
