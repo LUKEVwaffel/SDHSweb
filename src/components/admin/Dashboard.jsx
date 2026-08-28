@@ -68,9 +68,17 @@ const SECTION_LABEL = {
 // submit → review → DISPATCH AI flow end-to-end on his own login first. Once
 // verified, add 'feedback' to s5's array below (and uncomment the matching
 // RLS policies in event_feedback.sql + the role check in the edge function).
+// 'bc' = Battalion Commander (Aiden O'Brien). Range TV control only — the
+// full TV Remote panel and nothing else, plus a self-only 'account' surface
+// for his own PIN / Touch ID (same self-enforcement s5's 'account' uses).
+// Server-side match: supabase/dispatch_bc_role.sql widens ONLY the tv_notices
+// write policy + the tv_daily_settings emergency guard to accept is_bc();
+// is_admin()/is_s6()/is_s5() are untouched, so every other admin table stays
+// locked to him.
 const ROLE_SECTIONS = {
   s6: ['overview', 'events', 'people', 'photos', 'questions', 'email', 'media', 'messages', 'advanced', 'tvremote', 'beta', 'feedback', 'ball'],
   s5: ['events', 'aars', 'messages', 'account', 'tvremote'],
+  bc: ['tvremote', 'account'],
 };
 
 export default function Dashboard({ onLogout, adminId, role = 's6' }) {
@@ -96,7 +104,7 @@ export default function Dashboard({ onLogout, adminId, role = 's6' }) {
     <div style={{ height: '100vh', display: 'flex', flexDirection: 'column', background: P.ink, fontFamily: inter }}>
       <TopBar adminId={adminId} onLogout={onLogout} />
       <div style={{ flex: 1, display: 'flex', overflow: 'hidden' }}>
-        <Sidebar active={section} allowed={allowed} />
+        <Sidebar active={section} allowed={allowed} role={role} />
         <div style={{ flex: 1, overflowY: 'auto', padding: `${sp[6]}px ${sp[8]}px`, maxWidth: 1500, width: '100%', margin: '0 auto' }}>
           {section === 'overview' && <OverviewPanel adminId={adminId} goto={goto} />}
           {section === 'events'   && <EventsPanel adminId={adminId} allowedTeams={allowedTeams} />}

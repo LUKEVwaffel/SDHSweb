@@ -74,7 +74,13 @@ function NavItem({ item, on, onClick }) {
   );
 }
 
-export default function Sidebar({ active, allowed = null }) {
+const ROLE_TAG = {
+  s6: 'S-6 · NET CONTROL',
+  s5: 'S-5 · CALENDAR',
+  bc: 'BC · RANGE TV',
+};
+
+export default function Sidebar({ active, allowed = null, role = 's6' }) {
   const navigate = useNavigate();
   // allowed = list of section ids this role may see; null = all.
   const groups = allowed
@@ -87,7 +93,7 @@ export default function Sidebar({ active, allowed = null }) {
     }}>
       <div style={{ padding: '20px 20px 16px', borderBottom: `1px solid ${P.hair}`, marginBottom: sp[3] }}>
         <div style={{ fontFamily: oswald, fontSize: fs.lg, color: P.cream, letterSpacing: '0.26em', fontWeight: 600 }}>DISPATCH</div>
-        <div style={{ fontFamily: mono, fontSize: fs.micro, color: P.gold, letterSpacing: '0.2em', marginTop: 5 }}>S-6 · NET CONTROL</div>
+        <div style={{ fontFamily: mono, fontSize: fs.micro, color: P.gold, letterSpacing: '0.2em', marginTop: 5 }}>{ROLE_TAG[role] || ROLE_TAG.s6}</div>
       </div>
       {groups.map((group) => (
         <div key={group.heading} style={{ marginBottom: sp[3] }}>
