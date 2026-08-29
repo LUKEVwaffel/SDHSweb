@@ -2185,8 +2185,8 @@
     "semantic_hash": ""
   },
   "public/lukepwa-sw.js": {
-    "mtime": 1787959324.2432053,
-    "ast_hash": "42c57a792abc0d820b73bb7f8aeffb89",
+    "mtime": 1787988688.636739,
+    "ast_hash": "d15f2f5b7197f131289c8795a0505cb4",
     "semantic_hash": ""
   },
   "src/components/rhea/AdminGate.jsx": {
@@ -2195,8 +2195,8 @@
     "semantic_hash": ""
   },
   "src/components/rhea/LukePwa.jsx": {
-    "mtime": 1787961241.6129458,
-    "ast_hash": "27afa071cb7ae6caebbd391a80326a5f",
+    "mtime": 1787988682.657545,
+    "ast_hash": "6803fe389bb3c2ddf9da5662d3a05dae",
     "semantic_hash": ""
   },
   "src/components/rhea/LukeUpload.jsx": {
@@ -2205,8 +2205,8 @@
     "semantic_hash": ""
   },
   "src/components/rhea/Rhea.jsx": {
-    "mtime": 1787988017.5258074,
-    "ast_hash": "d9cad69003b0b95b45858fca1b3244f4",
+    "mtime": 1787988522.364481,
+    "ast_hash": "a0bd25b158eba1ed7bf2f66dddf60e5b",
     "semantic_hash": ""
   },
   "src/components/rhea/pwa.js": {
@@ -2250,8 +2250,8 @@
     "semantic_hash": ""
   },
   "public/rhea-sw.js": {
-    "mtime": 1787959321.645954,
-    "ast_hash": "2e2b7d26f17e7bbc0b11fa82e428577e",
+    "mtime": 1787988686.1312869,
+    "ast_hash": "6ee01fb122417ea48d8ecff3d4f4f085",
     "semantic_hash": ""
   },
   "src/components/rhea/RheaOnboarding.jsx": {
@@ -2265,8 +2265,8 @@
     "semantic_hash": ""
   },
   "src/hooks/useRheaGate.js": {
-    "mtime": 1787961241.6277409,
-    "ast_hash": "354883ebd35660aa7deddb51a9d9d94e",
+    "mtime": 1787988470.5474656,
+    "ast_hash": "f57df9ca5d2175b96e163738ed540f33",
     "semantic_hash": ""
   },
   "src/hooks/useRheaLikes.js": {
@@ -2312,6 +2312,16 @@
   "src/lib/heicConvert.js": {
     "mtime": 1787987943.0044298,
     "ast_hash": "507508ba3ce1e8e2dfc2f2e799d62fac",
+    "semantic_hash": ""
+  },
+  "src/components/rhea/usePwaUpdate.jsx": {
+    "mtime": 1787988508.3112724,
+    "ast_hash": "95686a38fdee2601071550c67fc0d4c2",
+    "semantic_hash": ""
+  },
+  "supabase/rhea_gate_mode.sql": {
+    "mtime": 1787988458.3712692,
+    "ast_hash": "3f502b401e7ce7d979ed3154315c5166",
     "semantic_hash": ""
   }
 }

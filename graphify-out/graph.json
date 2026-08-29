@@ -6203,8 +6203,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "src_components_admin_panels_messages_composer",
-      "community": 43,
-      "community_name": "Rifle.jsx",
+      "community": 24,
+      "community_name": "FaqSection.jsx",
       "norm_label": "composer.jsx"
     },
     {
@@ -6214,8 +6214,8 @@
       "source_location": "L10",
       "_origin": "ast",
       "id": "src_components_admin_panels_messages_composer_allowed_mime",
-      "community": 43,
-      "community_name": "Rifle.jsx",
+      "community": 24,
+      "community_name": "FaqSection.jsx",
       "norm_label": "allowed_mime"
     },
     {
@@ -8939,7 +8939,7 @@
       "label": "Empty()",
       "file_type": "code",
       "source_file": "src/components/rhea/LukePwa.jsx",
-      "source_location": "L769",
+      "source_location": "L793",
       "_origin": "ast",
       "id": "src_components_rhea_lukepwa_empty",
       "community": 250,
@@ -12792,8 +12792,8 @@
       "source_location": "L21",
       "_origin": "ast",
       "id": "src_lib_calendar_categorycolor",
-      "community": 77,
-      "community_name": "PeoplePanel.jsx",
+      "community": 4,
+      "community_name": "EventsPanel.jsx",
       "norm_label": "categorycolor()"
     },
     {
@@ -12836,8 +12836,8 @@
       "source_location": "L44",
       "_origin": "ast",
       "id": "src_lib_calendar_formateventtimerange",
-      "community": 72,
-      "community_name": "ui.jsx",
+      "community": 77,
+      "community_name": "PeoplePanel.jsx",
       "norm_label": "formateventtimerange()"
     },
     {
@@ -54487,7 +54487,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "src/components/rhea/LukePwa.jsx",
-      "source_location": "L769",
+      "source_location": "L793",
       "weight": 1.0,
       "_origin": "ast",
       "source": "src_components_rhea_lukepwa",
@@ -79212,5 +79212,5 @@
     }
   ],
   "hyperedges": [],
-  "built_at_commit": "ecf464cb1d31e36ba3cc91bfef0bc2ea2a9382c2"
+  "built_at_commit": "2b7087272b0afbde0ed995559aed34cdb3707ac7"
 }
