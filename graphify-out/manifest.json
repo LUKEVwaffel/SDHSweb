@@ -25,8 +25,8 @@
     "semantic_hash": "c1ee9ce6a4fe04105dbf8e619390df5e"
   },
   "src/App.jsx": {
-    "mtime": 1787956194.5235426,
-    "ast_hash": "99525308d6837151288351c006e63a8f",
+    "mtime": 1787965493.1153302,
+    "ast_hash": "f074d0722342359758339867b6adb92c",
     "semantic_hash": ""
   },
   "src/components/About.jsx": {
@@ -60,8 +60,8 @@
     "semantic_hash": ""
   },
   "src/components/Footer.jsx": {
-    "mtime": 1785452721.3334277,
-    "ast_hash": "9d75a2c9a172f1942dd8267b32353e9c",
+    "mtime": 1787965533.3112855,
+    "ast_hash": "4127bc9fe013e4aa18883fa1eb8cae0d",
     "semantic_hash": ""
   },
   "src/components/Hero.jsx": {
@@ -120,8 +120,8 @@
     "semantic_hash": ""
   },
   "src/components/TopNav.jsx": {
-    "mtime": 1786915380.1618161,
-    "ast_hash": "afbd195ecd0f42cf01f699c5c603fb08",
+    "mtime": 1787965517.7062323,
+    "ast_hash": "6a2d0ea718efe079e8f46ce535746c1f",
     "semantic_hash": ""
   },
   "src/components/VerifiedTooltip.jsx": {
@@ -2290,8 +2290,23 @@
     "semantic_hash": ""
   },
   "supabase/raider_squads.sql": {
-    "mtime": 1787963664.594,
-    "ast_hash": "01d0f55cc5d8248fc0baa48920e085f4",
+    "mtime": 1787963856.3365946,
+    "ast_hash": "973127c47a3d19d35200e5a21de5067f",
+    "semantic_hash": ""
+  },
+  "src/components/OpticHeroStrip.jsx": {
+    "mtime": 1787965482.995964,
+    "ast_hash": "b05c379fd8ade192ae8267b5fccf84d5",
+    "semantic_hash": ""
+  },
+  "src/components/OpticPopup.jsx": {
+    "mtime": 1787965467.7891798,
+    "ast_hash": "bec523fada31bca9fe244759390cf347",
+    "semantic_hash": ""
+  },
+  "src/lib/opticSeen.js": {
+    "mtime": 1787965420.2959936,
+    "ast_hash": "92d8c06529a138cf9a70edeaf2b0792a",
     "semantic_hash": ""
   }
 }

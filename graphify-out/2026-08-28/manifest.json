@@ -260,8 +260,8 @@
     "semantic_hash": "4dedb03706602a67f8be7d1f02bda71a"
   },
   "src/components/admin/panels/people/ConsentSection.jsx": {
-    "mtime": 1786995209.7977571,
-    "ast_hash": "1768de7a9d953def0b89ebe29f26bfeb",
+    "mtime": 1787963704.9582329,
+    "ast_hash": "8eea834d0aeef61ac4f801bd31fc31a4",
     "semantic_hash": ""
   },
   "src/components/admin/panels/people/PeoplePanel.jsx": {
@@ -1640,8 +1640,8 @@
     "semantic_hash": ""
   },
   "src/lib/emailAudience.js": {
-    "mtime": 1787962373.6448517,
-    "ast_hash": "0035146b7e2bd7e5c66f6bcdd37e37d3",
+    "mtime": 1787963684.1983893,
+    "ast_hash": "4a23d4a80d68f7459af2de20967b4c70",
     "semantic_hash": ""
   },
   "supabase/email_audience_groups.sql": {
@@ -2287,6 +2287,11 @@
   "supabase/email_messages_audience_grants.sql": {
     "mtime": 1787962610.5187407,
     "ast_hash": "27ccca1ffcc9d40851490009374d2198",
+    "semantic_hash": ""
+  },
+  "supabase/raider_squads.sql": {
+    "mtime": 1787963664.594,
+    "ast_hash": "01d0f55cc5d8248fc0baa48920e085f4",
     "semantic_hash": ""
   }
 }
