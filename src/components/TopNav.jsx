@@ -55,6 +55,7 @@ const NAV_ITEMS = [
     ],
   },
   { id: 'about', label: 'ABOUT' },
+  { id: 'submit', label: 'OPTIC', highlight: true, sub: 'Battalion photo network — upload photos' },
 ];
 
 // Flattened for the mobile drawer — dropdown children become their own rows,
@@ -176,21 +177,23 @@ function NavItem({ item, active, setActive }) {
       <button
         onClick={() => { if (!item.dropdown) setActive(item.id); else setOpen(true); }}
         style={{
-          background: isActive ? 'rgba(201,169,97,0.1)' : 'transparent',
-          border: 'none', cursor: 'pointer',
-          color: isActive ? P.cream : P.mute,
+          background: item.highlight ? 'rgba(201,169,97,0.12)' : isActive ? 'rgba(201,169,97,0.1)' : 'transparent',
+          border: item.highlight ? `1px solid ${P.gold}` : 'none', cursor: 'pointer',
+          color: item.highlight ? P.goldBright : isActive ? P.cream : P.mute,
           fontFamily: 'Oswald, sans-serif',
-          fontSize: 12, fontWeight: 600,
+          fontSize: 12, fontWeight: item.highlight ? 700 : 600,
           letterSpacing: '0.18em',
           padding: '10px 14px',
+          marginLeft: item.highlight ? 8 : 0,
           position: 'relative',
           transition: 'color 0.15s, background 0.15s',
           whiteSpace: 'nowrap',
           display: 'flex', alignItems: 'center', gap: 5,
         }}
-        onMouseEnter={e => { if (!isActive) e.currentTarget.style.color = P.cream; }}
-        onMouseLeave={e => { if (!isActive) e.currentTarget.style.color = P.mute; }}
+        onMouseEnter={e => { if (item.highlight) { e.currentTarget.style.background = 'rgba(201,169,97,0.22)'; } else if (!isActive) { e.currentTarget.style.color = P.cream; } }}
+        onMouseLeave={e => { if (item.highlight) { e.currentTarget.style.background = 'rgba(201,169,97,0.12)'; } else if (!isActive) { e.currentTarget.style.color = P.mute; } }}
       >
+        {item.highlight && <span className="hp-blink" style={{ color: P.goldBright, fontSize: 8 }}>●</span>}
         {item.label}
         {item.dropdown && (
           <svg width="8" height="5" viewBox="0 0 8 5" fill="none"

@@ -20,7 +20,7 @@ const NAV_MAP = {
   'Academic':     'academic',
   'Drill':        'drill',
   'Events':       'events',
-  'Submit Photos': 'submit',
+  'OPTIC — Submit Photos': 'submit',
   'Staff':        'staff',
   'Companies':    'companies',
   'About':        'about',
@@ -29,7 +29,7 @@ const NAV_MAP = {
 
 const COLS = [
   { h: 'PROGRAMS',  items: ['Raiders', 'Rifle', 'Academic', 'Drill'] },
-  { h: 'BATTALION', items: ['Events', 'Submit Photos', 'Staff', 'Companies', 'Cadet Manual', 'About'] },
+  { h: 'BATTALION', items: ['Events', 'OPTIC — Submit Photos', 'Staff', 'Companies', 'Cadet Manual', 'About'] },
   { h: 'INFO',      items: ['Soddy Daisy HS', '618 Sequoyah Access Rd', 'Soddy Daisy, TN 37379', 'thrasher_michael@hcde.org'] },
 ];
 
@@ -111,6 +111,18 @@ export default function Footer() {
               U.S. Army Junior ROTC. Building leaders of character through discipline,
               service, and academic excellence.
             </p>
+            <Link
+              to={legacyIdToPath('submit')}
+              onClick={() => window.scrollTo({ top: 0, behavior: 'instant' })}
+              style={{
+                display: 'inline-flex', alignItems: 'center', gap: 10, marginTop: 18,
+                border: `1px solid ${P.hairline}`, padding: '8px 12px', textDecoration: 'none',
+              }}
+            >
+              <span style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: 8, letterSpacing: '0.2em', color: P.navyDeep, background: P.gold, padding: '3px 6px' }}>NEW</span>
+              <span style={{ fontFamily: 'Oswald, sans-serif', fontWeight: 700, fontSize: 13, letterSpacing: '0.16em', color: P.goldBright }}>OPTIC</span>
+              <span style={{ fontFamily: 'Inter, sans-serif', fontSize: 11.5, color: P.mute }}>Battalion photo network →</span>
+            </Link>
           </div>
 
           {/* nav columns */}

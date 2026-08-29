@@ -2,6 +2,7 @@ import { useEffect } from 'react';
 import { Routes, Route, Navigate, useParams, useLocation } from 'react-router-dom';
 import TopNav from './components/TopNav';
 import Hero from './components/Hero';
+import OpticHeroStrip from './components/OpticHeroStrip';
 import TabGrid from './components/TabGrid';
 import Bulletin from './components/Bulletin';
 import OpticPromoBand from './components/OpticPromoBand';
@@ -26,7 +27,7 @@ import ReviewPortal from './components/review/ReviewPortal';
 import TvKiosk from './components/tv/TvKiosk';
 import TvRangeKiosk from './components/tv/TvRangeKiosk';
 import RaiderParentWelcome from './components/tv/RaiderParentWelcome';
-import CheckinSurvey from './components/CheckinSurvey';
+import OpticPopup from './components/OpticPopup';
 import EventFeedbackForm from './components/EventFeedbackForm';
 import BallLanding from './components/ball/BallLanding';
 import BallSignupWizard from './components/ball/signup/BallSignupWizard';
@@ -81,13 +82,14 @@ export default function App() {
 
   return (
     <div style={{ minHeight: '100vh', background: '#06101F', fontFamily: 'Inter, sans-serif' }}>
-      <CheckinSurvey />
+      <OpticPopup />
       <TopNav />
 
       <Routes>
         <Route path="/" element={(
           <>
             <Hero />
+            <OpticHeroStrip />
             <EventSpotlightBand />
             <BattalionCommand />
             <TabGrid />
