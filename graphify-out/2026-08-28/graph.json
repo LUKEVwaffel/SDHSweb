@@ -1693,8 +1693,8 @@
       "source_location": "L537",
       "_origin": "ast",
       "id": "src_components_battalioncommand_battalioncommand",
-      "community": 20,
-      "community_name": "Companies.jsx",
+      "community": 5,
+      "community_name": "BattalionCommand.jsx",
       "norm_label": "battalioncommand()"
     },
     {
@@ -1946,7 +1946,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "src_components_companies",
-      "community": 20,
+      "community": 291,
       "community_name": "Companies.jsx",
       "norm_label": "companies.jsx"
     },
@@ -1957,7 +1957,7 @@
       "source_location": "L6",
       "_origin": "ast",
       "id": "src_components_companies_p",
-      "community": 20,
+      "community": 291,
       "community_name": "Companies.jsx",
       "norm_label": "p"
     },
@@ -1968,7 +1968,7 @@
       "source_location": "L79",
       "_origin": "ast",
       "id": "src_components_companies_companies",
-      "community": 20,
+      "community": 291,
       "community_name": "Companies.jsx",
       "norm_label": "companies"
     },
@@ -1979,7 +1979,7 @@
       "source_location": "L19",
       "_origin": "ast",
       "id": "src_components_companies_role_order",
-      "community": 20,
+      "community": 291,
       "community_name": "Companies.jsx",
       "norm_label": "role_order"
     },
@@ -1990,7 +1990,7 @@
       "source_location": "L22",
       "_origin": "ast",
       "id": "src_components_companies_activate",
-      "community": 20,
+      "community": 291,
       "community_name": "Companies.jsx",
       "norm_label": "activate()"
     },
@@ -2001,7 +2001,7 @@
       "source_location": "L29",
       "_origin": "ast",
       "id": "src_components_companies_cadetcard",
-      "community": 20,
+      "community": 291,
       "community_name": "Companies.jsx",
       "norm_label": "cadetcard()"
     },
@@ -2848,8 +2848,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "src_components_raidercarousel",
-      "community": 72,
-      "community_name": "ui.jsx",
+      "community": 292,
+      "community_name": "RaiderCarousel.jsx",
       "norm_label": "raidercarousel.jsx"
     },
     {
@@ -2859,8 +2859,8 @@
       "source_location": "L3",
       "_origin": "ast",
       "id": "src_components_raidercarousel_p",
-      "community": 72,
-      "community_name": "ui.jsx",
+      "community": 292,
+      "community_name": "RaiderCarousel.jsx",
       "norm_label": "p"
     },
     {
@@ -2870,8 +2870,8 @@
       "source_location": "L14",
       "_origin": "ast",
       "id": "src_components_raidercarousel_slides",
-      "community": 72,
-      "community_name": "ui.jsx",
+      "community": 292,
+      "community_name": "RaiderCarousel.jsx",
       "norm_label": "slides"
     },
     {
@@ -2881,8 +2881,8 @@
       "source_location": "L19",
       "_origin": "ast",
       "id": "src_components_raidercarousel_carouselstyles",
-      "community": 72,
-      "community_name": "ui.jsx",
+      "community": 292,
+      "community_name": "RaiderCarousel.jsx",
       "norm_label": "carouselstyles()"
     },
     {
@@ -2892,8 +2892,8 @@
       "source_location": "L31",
       "_origin": "ast",
       "id": "src_components_raidercarousel_slide",
-      "community": 72,
-      "community_name": "ui.jsx",
+      "community": 292,
+      "community_name": "RaiderCarousel.jsx",
       "norm_label": "slide()"
     },
     {
@@ -2903,8 +2903,8 @@
       "source_location": "L58",
       "_origin": "ast",
       "id": "src_components_raidercarousel_raidercarousel",
-      "community": 72,
-      "community_name": "ui.jsx",
+      "community": 292,
+      "community_name": "RaiderCarousel.jsx",
       "norm_label": "raidercarousel()"
     },
     {
@@ -3442,8 +3442,8 @@
       "source_location": "L474",
       "_origin": "ast",
       "id": "src_components_raiders_dayeventdetail",
-      "community": 77,
-      "community_name": "PeoplePanel.jsx",
+      "community": 72,
+      "community_name": "ui.jsx",
       "norm_label": "dayeventdetail()"
     },
     {
@@ -3486,8 +3486,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "src_components_rifle",
-      "community": 18,
-      "community_name": "CadetManual.jsx",
+      "community": 290,
+      "community_name": "Rifle.jsx",
       "norm_label": "rifle.jsx"
     },
     {
@@ -3497,8 +3497,8 @@
       "source_location": "L7",
       "_origin": "ast",
       "id": "src_components_rifle_p",
-      "community": 18,
-      "community_name": "CadetManual.jsx",
+      "community": 290,
+      "community_name": "Rifle.jsx",
       "norm_label": "p"
     },
     {
@@ -3508,8 +3508,8 @@
       "source_location": "L15",
       "_origin": "ast",
       "id": "src_components_rifle_riflestyles",
-      "community": 18,
-      "community_name": "CadetManual.jsx",
+      "community": 290,
+      "community_name": "Rifle.jsx",
       "norm_label": "riflestyles()"
     },
     {
@@ -3519,8 +3519,8 @@
       "source_location": "L33",
       "_origin": "ast",
       "id": "src_components_rifle_activate",
-      "community": 18,
-      "community_name": "CadetManual.jsx",
+      "community": 290,
+      "community_name": "Rifle.jsx",
       "norm_label": "activate()"
     },
     {
@@ -3530,8 +3530,8 @@
       "source_location": "L41",
       "_origin": "ast",
       "id": "src_components_rifle_pagebg",
-      "community": 18,
-      "community_name": "CadetManual.jsx",
+      "community": 290,
+      "community_name": "Rifle.jsx",
       "norm_label": "pagebg()"
     },
     {
@@ -3541,8 +3541,8 @@
       "source_location": "L77",
       "_origin": "ast",
       "id": "src_components_rifle_brackets",
-      "community": 18,
-      "community_name": "CadetManual.jsx",
+      "community": 290,
+      "community_name": "Rifle.jsx",
       "norm_label": "brackets()"
     },
     {
@@ -3552,8 +3552,8 @@
       "source_location": "L93",
       "_origin": "ast",
       "id": "src_components_rifle_sectionlabel",
-      "community": 18,
-      "community_name": "CadetManual.jsx",
+      "community": 290,
+      "community_name": "Rifle.jsx",
       "norm_label": "sectionlabel()"
     },
     {
@@ -3563,8 +3563,8 @@
       "source_location": "L111",
       "_origin": "ast",
       "id": "src_components_rifle_commandercard",
-      "community": 18,
-      "community_name": "CadetManual.jsx",
+      "community": 290,
+      "community_name": "Rifle.jsx",
       "norm_label": "commandercard()"
     },
     {
@@ -3574,8 +3574,8 @@
       "source_location": "L188",
       "_origin": "ast",
       "id": "src_components_rifle_eventcalendar",
-      "community": 18,
-      "community_name": "CadetManual.jsx",
+      "community": 290,
+      "community_name": "Rifle.jsx",
       "norm_label": "eventcalendar()"
     },
     {
@@ -3585,8 +3585,8 @@
       "source_location": "L307",
       "_origin": "ast",
       "id": "src_components_rifle_rifle",
-      "community": 20,
-      "community_name": "Companies.jsx",
+      "community": 290,
+      "community_name": "Rifle.jsx",
       "norm_label": "rifle()"
     },
     {
@@ -3728,8 +3728,8 @@
       "source_location": "L427",
       "_origin": "ast",
       "id": "src_components_rifleanalysis_rifleanalysis",
-      "community": 18,
-      "community_name": "CadetManual.jsx",
+      "community": 290,
+      "community_name": "Rifle.jsx",
       "norm_label": "rifleanalysis()"
     },
     {
@@ -3739,8 +3739,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "src_components_staff",
-      "community": 198,
-      "community_name": "RaiderCarousel.jsx",
+      "community": 20,
+      "community_name": "Companies.jsx",
       "norm_label": "staff.jsx"
     },
     {
@@ -3750,8 +3750,8 @@
       "source_location": "L6",
       "_origin": "ast",
       "id": "src_components_staff_p",
-      "community": 198,
-      "community_name": "RaiderCarousel.jsx",
+      "community": 20,
+      "community_name": "Companies.jsx",
       "norm_label": "p"
     },
     {
@@ -3761,8 +3761,8 @@
       "source_location": "L12",
       "_origin": "ast",
       "id": "src_components_staff_s_sections",
-      "community": 198,
-      "community_name": "RaiderCarousel.jsx",
+      "community": 20,
+      "community_name": "Companies.jsx",
       "norm_label": "s_sections"
     },
     {
@@ -3772,8 +3772,8 @@
       "source_location": "L23",
       "_origin": "ast",
       "id": "src_components_staff_activate",
-      "community": 198,
-      "community_name": "RaiderCarousel.jsx",
+      "community": 20,
+      "community_name": "Companies.jsx",
       "norm_label": "activate()"
     },
     {
@@ -3783,8 +3783,8 @@
       "source_location": "L31",
       "_origin": "ast",
       "id": "src_components_staff_cardstyles",
-      "community": 198,
-      "community_name": "RaiderCarousel.jsx",
+      "community": 20,
+      "community_name": "Companies.jsx",
       "norm_label": "cardstyles()"
     },
     {
@@ -3794,8 +3794,8 @@
       "source_location": "L40",
       "_origin": "ast",
       "id": "src_components_staff_pagebackground",
-      "community": 198,
-      "community_name": "RaiderCarousel.jsx",
+      "community": 20,
+      "community_name": "Companies.jsx",
       "norm_label": "pagebackground()"
     },
     {
@@ -3805,8 +3805,8 @@
       "source_location": "L83",
       "_origin": "ast",
       "id": "src_components_staff_brackets",
-      "community": 198,
-      "community_name": "RaiderCarousel.jsx",
+      "community": 20,
+      "community_name": "Companies.jsx",
       "norm_label": "brackets()"
     },
     {
@@ -3816,8 +3816,8 @@
       "source_location": "L101",
       "_origin": "ast",
       "id": "src_components_staff_photopending",
-      "community": 198,
-      "community_name": "RaiderCarousel.jsx",
+      "community": 20,
+      "community_name": "Companies.jsx",
       "norm_label": "photopending()"
     },
     {
@@ -3827,8 +3827,8 @@
       "source_location": "L124",
       "_origin": "ast",
       "id": "src_components_staff_staffcard",
-      "community": 198,
-      "community_name": "RaiderCarousel.jsx",
+      "community": 20,
+      "community_name": "Companies.jsx",
       "norm_label": "staffcard()"
     },
     {
@@ -3838,8 +3838,8 @@
       "source_location": "L204",
       "_origin": "ast",
       "id": "src_components_staff_sectionheader",
-      "community": 198,
-      "community_name": "RaiderCarousel.jsx",
+      "community": 20,
+      "community_name": "Companies.jsx",
       "norm_label": "sectionheader()"
     },
     {
@@ -3849,8 +3849,8 @@
       "source_location": "L234",
       "_origin": "ast",
       "id": "src_components_staff_staff",
-      "community": 198,
-      "community_name": "RaiderCarousel.jsx",
+      "community": 20,
+      "community_name": "Companies.jsx",
       "norm_label": "staff()"
     },
     {
@@ -9250,8 +9250,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "src_components_rifledata",
-      "community": 18,
-      "community_name": "CadetManual.jsx",
+      "community": 198,
+      "community_name": "RaiderCarousel.jsx",
       "norm_label": "rifledata.js"
     },
     {
@@ -9261,8 +9261,8 @@
       "source_location": "L12",
       "_origin": "ast",
       "id": "src_components_rifledata_season_meta",
-      "community": 18,
-      "community_name": "CadetManual.jsx",
+      "community": 198,
+      "community_name": "RaiderCarousel.jsx",
       "norm_label": "season_meta"
     },
     {
@@ -9272,8 +9272,8 @@
       "source_location": "L23",
       "_origin": "ast",
       "id": "src_components_rifledata_weeks",
-      "community": 18,
-      "community_name": "CadetManual.jsx",
+      "community": 198,
+      "community_name": "RaiderCarousel.jsx",
       "norm_label": "weeks"
     },
     {
@@ -9283,8 +9283,8 @@
       "source_location": "L37",
       "_origin": "ast",
       "id": "src_components_rifledata_raw",
-      "community": 18,
-      "community_name": "CadetManual.jsx",
+      "community": 198,
+      "community_name": "RaiderCarousel.jsx",
       "norm_label": "raw"
     },
     {
@@ -9294,8 +9294,8 @@
       "source_location": "L117",
       "_origin": "ast",
       "id": "src_components_rifledata_mean",
-      "community": 18,
-      "community_name": "CadetManual.jsx",
+      "community": 198,
+      "community_name": "RaiderCarousel.jsx",
       "norm_label": "mean()"
     },
     {
@@ -9305,8 +9305,8 @@
       "source_location": "L118",
       "_origin": "ast",
       "id": "src_components_rifledata_round",
-      "community": 18,
-      "community_name": "CadetManual.jsx",
+      "community": 198,
+      "community_name": "RaiderCarousel.jsx",
       "norm_label": "round()"
     },
     {
@@ -9316,8 +9316,8 @@
       "source_location": "L120",
       "_origin": "ast",
       "id": "src_components_rifledata_stdev",
-      "community": 18,
-      "community_name": "CadetManual.jsx",
+      "community": 198,
+      "community_name": "RaiderCarousel.jsx",
       "norm_label": "stdev()"
     },
     {
@@ -9327,8 +9327,8 @@
       "source_location": "L127",
       "_origin": "ast",
       "id": "src_components_rifledata_slope",
-      "community": 18,
-      "community_name": "CadetManual.jsx",
+      "community": 198,
+      "community_name": "RaiderCarousel.jsx",
       "norm_label": "slope()"
     },
     {
@@ -9338,8 +9338,8 @@
       "source_location": "L138",
       "_origin": "ast",
       "id": "src_components_rifledata_classify",
-      "community": 18,
-      "community_name": "CadetManual.jsx",
+      "community": 198,
+      "community_name": "RaiderCarousel.jsx",
       "norm_label": "classify()"
     },
     {
@@ -9349,8 +9349,8 @@
       "source_location": "L146",
       "_origin": "ast",
       "id": "src_components_rifledata_analyzeshooter",
-      "community": 18,
-      "community_name": "CadetManual.jsx",
+      "community": 198,
+      "community_name": "RaiderCarousel.jsx",
       "norm_label": "analyzeshooter()"
     },
     {
@@ -9360,8 +9360,8 @@
       "source_location": "L225",
       "_origin": "ast",
       "id": "src_components_rifledata_analyzeteam",
-      "community": 18,
-      "community_name": "CadetManual.jsx",
+      "community": 198,
+      "community_name": "RaiderCarousel.jsx",
       "norm_label": "analyzeteam()"
     },
     {
@@ -9371,8 +9371,8 @@
       "source_location": "L269",
       "_origin": "ast",
       "id": "src_components_rifledata_shooters",
-      "community": 18,
-      "community_name": "CadetManual.jsx",
+      "community": 198,
+      "community_name": "RaiderCarousel.jsx",
       "norm_label": "shooters"
     },
     {
@@ -9382,8 +9382,8 @@
       "source_location": "L270",
       "_origin": "ast",
       "id": "src_components_rifledata_team",
-      "community": 18,
-      "community_name": "CadetManual.jsx",
+      "community": 198,
+      "community_name": "RaiderCarousel.jsx",
       "norm_label": "team"
     },
     {
@@ -12693,8 +12693,8 @@
       "source_location": "L44",
       "_origin": "ast",
       "id": "src_lib_calendar_formateventtimerange",
-      "community": 77,
-      "community_name": "PeoplePanel.jsx",
+      "community": 72,
+      "community_name": "ui.jsx",
       "norm_label": "formateventtimerange()"
     },
     {
@@ -13097,7 +13097,7 @@
       "label": "COMPANIES",
       "file_type": "code",
       "source_file": "src/lib/emailAudience.js",
-      "source_location": "L34",
+      "source_location": "L35",
       "_origin": "ast",
       "id": "src_lib_emailaudience_companies",
       "community": 232,
@@ -13108,7 +13108,7 @@
       "label": "NAME_ALIASES",
       "file_type": "code",
       "source_file": "src/lib/emailAudience.js",
-      "source_location": "L40",
+      "source_location": "L41",
       "_origin": "ast",
       "id": "src_lib_emailaudience_name_aliases",
       "community": 232,
@@ -13119,7 +13119,7 @@
       "label": "normalizeName()",
       "file_type": "code",
       "source_file": "src/lib/emailAudience.js",
-      "source_location": "L44",
+      "source_location": "L45",
       "_origin": "ast",
       "id": "src_lib_emailaudience_normalizename",
       "community": 232,
@@ -13130,7 +13130,7 @@
       "label": "clean()",
       "file_type": "code",
       "source_file": "src/lib/emailAudience.js",
-      "source_location": "L54",
+      "source_location": "L55",
       "_origin": "ast",
       "id": "src_lib_emailaudience_clean",
       "community": 232,
@@ -13141,7 +13141,7 @@
       "label": "resolveAudienceEmails()",
       "file_type": "code",
       "source_file": "src/lib/emailAudience.js",
-      "source_location": "L65",
+      "source_location": "L66",
       "_origin": "ast",
       "id": "src_lib_emailaudience_resolveaudienceemails",
       "community": 232,
@@ -64242,7 +64242,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "src/lib/emailAudience.js",
-      "source_location": "L54",
+      "source_location": "L55",
       "weight": 1.0,
       "_origin": "ast",
       "source": "src_lib_emailaudience",
@@ -64253,7 +64253,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "src/lib/emailAudience.js",
-      "source_location": "L34",
+      "source_location": "L35",
       "weight": 1.0,
       "_origin": "ast",
       "source": "src_lib_emailaudience",
@@ -64264,7 +64264,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "src/lib/emailAudience.js",
-      "source_location": "L40",
+      "source_location": "L41",
       "weight": 1.0,
       "_origin": "ast",
       "source": "src_lib_emailaudience",
@@ -64275,7 +64275,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "src/lib/emailAudience.js",
-      "source_location": "L44",
+      "source_location": "L45",
       "weight": 1.0,
       "_origin": "ast",
       "source": "src_lib_emailaudience",
@@ -64286,7 +64286,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "src/lib/emailAudience.js",
-      "source_location": "L65",
+      "source_location": "L66",
       "weight": 1.0,
       "_origin": "ast",
       "source": "src_lib_emailaudience",
@@ -64322,7 +64322,7 @@
       "context": "argument",
       "confidence": "INFERRED",
       "source_file": "src/lib/emailAudience.js",
-      "source_location": "L92",
+      "source_location": "L94",
       "weight": 1.0,
       "_origin": "ast",
       "source": "src_lib_emailaudience_resolveaudienceemails",
@@ -64334,24 +64334,12 @@
       "context": "call",
       "confidence": "EXTRACTED",
       "source_file": "src/lib/emailAudience.js",
-      "source_location": "L73",
+      "source_location": "L74",
       "weight": 1.0,
       "_origin": "ast",
       "source": "src_lib_emailaudience_resolveaudienceemails",
       "target": "src_lib_emailaudience_clean",
       "confidence_score": 1.0
-    },
-    {
-      "relation": "references",
-      "context": "call",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "source_file": "src/lib/emailAudience.js",
-      "source_location": "L91",
-      "weight": 1.0,
-      "_origin": "ast",
-      "source": "src_lib_emailaudience_resolveaudienceemails",
-      "target": "src_lib_raiderroster_raider_teams"
     },
     {
       "relation": "contains",
@@ -78519,5 +78507,5 @@
     }
   ],
   "hyperedges": [],
-  "built_at_commit": "90fddb111f31da19ee61c49575c190340dfbc2b8"
+  "built_at_commit": "fc805bb4dced621a2098a1b7a3cb9e71ff3ee28f"
 }

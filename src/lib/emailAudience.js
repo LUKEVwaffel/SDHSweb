@@ -93,10 +93,20 @@ export async function resolveAudienceEmails(SB, groupId) {
     const members = RAIDER_TEAMS.filter((t) => keys.includes(t.key)).flatMap((t) => t.members || []);
     const wanted = new Set(members.map(normalizeName));
     if (!wanted.size) throw new Error(`No roster on file for ${rp[1]} raiders`);
-    const { data, error } = await SB.from('cadet_consent').select('name, parent_email, parent_email2');
-    if (error) throw error;
+    // parent_email2 is a newer column (cadet_consent_parent2.sql) that may not
+    // exist on every deployment — select it, but fall back to parent_email only
+    // if the column is missing rather than failing the whole save.
+    let rows;
+    const withBoth = await SB.from('cadet_consent').select('name, parent_email, parent_email2');
+    if (withBoth.error) {
+      const only = await SB.from('cadet_consent').select('name, parent_email');
+      if (only.error) throw only.error;
+      rows = only.data;
+    } else {
+      rows = withBoth.data;
+    }
     const emails = [];
-    for (const r of data || []) {
+    for (const r of rows || []) {
       if (!wanted.has(normalizeName(r.name))) continue;
       emails.push(r.parent_email, r.parent_email2);
     }

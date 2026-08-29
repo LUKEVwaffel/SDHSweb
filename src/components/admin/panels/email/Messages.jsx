@@ -164,13 +164,27 @@ export default function Messages({ adminId }) {
       }
     }
     const payload = { subject, body, body_html, content_json: form.blocks, ...targeting };
-    if (sel) {
-      await SB.from('email_messages').update(payload).eq('id', sel.id);
-    } else {
-      const { data } = await SB.from('email_messages').insert({ ...payload, created_by: adminId }).select().single();
-      setSel(data);
-      setIsNew(false);
-    }
+
+    // recipient_group is a cosmetic label column (email_audience_groups.sql) that
+    // may not exist on every deployment. If a write fails because of it, drop the
+    // key and retry once — the real targeting lives in recipient_emails.
+    const isMissingGroupCol = (err) =>
+      err && /recipient_group/.test(err.message || '') && /column|schema cache/i.test(err.message || '');
+    const writeRow = async (row) => {
+      const attempt = (r) => (sel
+        ? SB.from('email_messages').update(r).eq('id', sel.id).select().single()
+        : SB.from('email_messages').insert({ ...r, created_by: adminId }).select().single());
+      let res = await attempt(row);
+      if (res.error && isMissingGroupCol(res.error) && 'recipient_group' in row) {
+        const { recipient_group, ...rest } = row; // eslint-disable-line no-unused-vars
+        res = await attempt(rest);
+      }
+      return res;
+    };
+
+    const { data, error } = await writeRow(payload);
+    if (error) { flash(`Save failed: ${error.message}`); return; }
+    if (data) { setSel(data); setIsNew(false); }
     flash('Saved ✓');
     load();
     // Surface the next action (print → sign → send) without a scroll hunt.
