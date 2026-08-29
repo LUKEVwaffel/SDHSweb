@@ -13,9 +13,9 @@ const P = {
 const SHOW_DELAY_MS = 3200;
 
 const FEATURES = [
-  ['SEC', 'Upload from your phone in seconds'],
-  ['ALL', 'Seen by the whole battalion, not just your team'],
-  ['ANY', 'Every practice, competition, and formation'],
+  ['APP', 'Free beta app — add it to your phone home screen in seconds'],
+  ['LIVE', 'Shoot from the stands, the whole feed updates live'],
+  ['ALL', 'Every parent at the comp sees every photo, not just their team'],
 ];
 
 // Full-screen launch takeover for OPTIC — the Official Photo Tracking & Image
@@ -47,7 +47,7 @@ export default function OpticPopup() {
     posthog.capture('optic_popup_cta_clicked');
     markOpticSeen();
     setOpen(false);
-    navigate('/submit');
+    navigate('/rhea');
   }
 
   useEffect(() => {
@@ -63,7 +63,7 @@ export default function OpticPopup() {
     <div
       role="dialog"
       aria-modal="true"
-      aria-label="Introducing OPTIC — the battalion photo network"
+      aria-label="OPTIC beta app — live at the Rhea County Raider Competition"
       onClick={close}
       style={{
         position: 'fixed', inset: 0, zIndex: 9500,
@@ -139,7 +139,7 @@ export default function OpticPopup() {
             fontFamily: "'JetBrains Mono', monospace", fontSize: 10, letterSpacing: '0.34em',
             color: P.gold, display: 'flex', alignItems: 'center', gap: 10,
           }}>
-            <span className="optic-blink">●</span> NOW LIVE · BATTALION-WIDE
+            <span className="optic-blink">●</span> BETA · RHEA COUNTY RAIDER COMP
           </div>
 
           <div className="optic-row optic-wordmark" style={{ '--d': '0.12s',
@@ -151,15 +151,16 @@ export default function OpticPopup() {
           <div className="optic-row" style={{ '--d': '0.18s',
             fontFamily: "'JetBrains Mono', monospace", fontSize: 10.5, letterSpacing: '0.2em',
             color: P.mute, marginBottom: 20,
-          }}>OFFICIAL PHOTO TRACKING &amp; IMAGE COLLECTION</div>
+          }}>THE BATTALION PHOTO APP · NOW IN BETA</div>
 
           <p className="optic-row" style={{ '--d': '0.24s',
             fontFamily: 'Inter, sans-serif', fontSize: 15.5, lineHeight: 1.65,
             color: P.mute, maxWidth: 460, margin: '0 0 22px',
           }}>
-            Every photo the battalion takes now feeds one network. Parents, cadets, and
-            photographers upload straight from a phone — and the <strong style={{ color: P.gold }}>whole
-            battalion</strong> sees it, not just one team.
+            At the <strong style={{ color: P.gold }}>Rhea County Raider Competition</strong>? Add the
+            free OPTIC beta app to your phone and shoot straight from the stands. Every photo goes
+            live to one shared feed so <strong style={{ color: P.gold }}>every parent there</strong> sees
+            the whole day — not just their own team.
           </p>
 
           <div style={{ display: 'grid', gap: 10, marginBottom: 28 }}>
@@ -188,7 +189,7 @@ export default function OpticPopup() {
               }}
               onMouseEnter={(e) => { e.currentTarget.style.background = P.bright; e.currentTarget.style.boxShadow = '0 12px 30px -12px rgba(201,169,97,0.8)'; }}
               onMouseLeave={(e) => { e.currentTarget.style.background = P.gold; e.currentTarget.style.boxShadow = 'none'; }}
-            >UPLOAD TO OPTIC →</button>
+            >OPEN THE OPTIC BETA →</button>
             <button
               type="button"
               onClick={close}
