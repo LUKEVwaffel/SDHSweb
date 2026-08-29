@@ -90,6 +90,9 @@ export default function ConsentSection({ adminId }) {
   // joined to school_email/parent_email on this same row). See
   // supabase/opticsend.sql SECTION 3.
   const [cadetTeams, setCadetTeams] = useState([]);
+  // Varsity squad for the raiders row (male | coed | jv | ''), what the email
+  // drafter's "Male/Coed Raider Parents" audiences resolve against.
+  const [raiderSquad, setRaiderSquad] = useState('');
 
   // whether the open cadet is linked to a Staff/Command personnel row
   // (personnel.cadet_consent_id → this row, see personnel_cadet_consent_sync.sql).
@@ -145,8 +148,9 @@ export default function ConsentSection({ adminId }) {
   }
 
   async function loadCadetTeams(cadetConsentId) {
-    const { data } = await SB.from('cadet_teams').select('team').eq('cadet_consent_id', cadetConsentId);
+    const { data } = await SB.from('cadet_teams').select('team, squad').eq('cadet_consent_id', cadetConsentId);
     setCadetTeams((data || []).map((r) => r.team));
+    setRaiderSquad((data || []).find((r) => r.team === 'raiders')?.squad || '');
   }
 
   async function toggleCadetTeam(cadetConsentId, team, on) {
@@ -155,6 +159,16 @@ export default function ConsentSection({ adminId }) {
     } else {
       await SB.from('cadet_teams').insert({ cadet_consent_id: cadetConsentId, team });
     }
+    loadCadetTeams(cadetConsentId);
+  }
+
+  async function setRaiderSquadFor(cadetConsentId, squad) {
+    // Toggle off if the same squad is tapped again.
+    const next = raiderSquad === squad ? null : squad;
+    await SB.from('cadet_teams')
+      .update({ squad: next })
+      .eq('cadet_consent_id', cadetConsentId)
+      .eq('team', 'raiders');
     loadCadetTeams(cadetConsentId);
   }
 
@@ -638,6 +652,22 @@ export default function ConsentSection({ adminId }) {
               );
             })}
           </div>
+          {cadetTeams.includes('raiders') && (
+            <div style={{ marginTop: sp[2] }}>
+              <Label>RAIDERS SQUAD</Label>
+              <div style={{ display: 'flex', flexWrap: 'wrap', gap: sp[2] }}>
+                {[['male', 'MALE VARSITY'], ['coed', 'CO-ED VARSITY'], ['jv', 'JUNIOR VARSITY']].map(([id, label]) => (
+                  <Btn key={id} variant={raiderSquad === id ? 'gold' : 'ghost'} size="sm"
+                    onClick={() => setRaiderSquadFor(selectedId, id)}>
+                    {label}
+                  </Btn>
+                ))}
+              </div>
+              <div style={{ fontFamily: mono, fontSize: fs.micro, color: P.dim, marginTop: sp[1] }}>
+                Drives the "Male / Coed Raider Parents" email audiences.
+              </div>
+            </div>
+          )}
           {cadetTeams.includes('raiders') && (!form.school_email && !form.parent_email) && (
             <div style={{
               fontFamily: mono, fontSize: fs.micro, color: P.bright, marginTop: sp[2], lineHeight: 1.6,

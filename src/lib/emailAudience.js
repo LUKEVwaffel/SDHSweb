@@ -10,14 +10,12 @@
 // parent_email, and cadet_consent is s6-only RLS, so these only resolve
 // correctly when called by an s6 admin (Messages.jsx is already s6-gated).
 //
-// 'raider-parents-male' / 'raider-parents-coed' read cadet_consent.parent_email
-// (+ parent_email2). There is no male/coed split in the DB — cadet_teams only
-// knows team='raiders' — so the roster split comes from src/lib/raiderRoster.js
-// (RAIDER_TEAMS), matched to cadet_consent rows by normalized name. Cadets whose
-// roster name doesn't match a cadet_consent row, or whose row has no parent
-// email, are silently skipped.
-import { RAIDER_TEAMS } from './raiderRoster';
-
+// 'raider-parents-male' / 'raider-parents-coed' / 'raider-parents-all' read
+// cadet_consent.parent_email (+ parent_email2) for cadets tagged
+// cadet_teams.team='raiders' with the matching cadet_teams.squad. The squad
+// tag is seeded + maintained separately (supabase/raider_squads.sql, then the
+// Cadet Database picker) — no name matching happens here. A raider cadet with
+// no parent_email on file contributes nothing.
 export const AUDIENCE_GROUPS = [
   { id: 'broadcast',           label: 'ALL SUBSCRIBERS' }, // default: recipient_emails stays null
   { id: 'staff',               label: 'STAFF' },
@@ -33,24 +31,6 @@ export const AUDIENCE_GROUPS = [
 ];
 
 const COMPANIES = ['alpha', 'bravo', 'charlie', 'delta'];
-
-// Roster names carry things a cadet_consent row won't: "(Senior)" / "(Freshman)"
-// disambiguators, punctuation, casing. Strip all of it to a bare lowercase
-// "first last" for comparison. Known spelling drift between the two sources goes
-// in NAME_ALIASES (roster spelling → cadet_consent spelling), both normalized.
-const NAME_ALIASES = {
-  'mya sneideman': 'mya sneidman',
-};
-
-function normalizeName(name) {
-  const n = (name || '')
-    .toLowerCase()
-    .replace(/\([^)]*\)/g, ' ') // drop "(Senior)" etc.
-    .replace(/[^a-z\s]/g, ' ')  // drop punctuation
-    .replace(/\s+/g, ' ')
-    .trim();
-  return NAME_ALIASES[n] || n;
-}
 
 function clean(emails) {
   return Array.from(new Set(
@@ -89,26 +69,16 @@ export async function resolveAudienceEmails(SB, groupId) {
 
   const rp = /^raider-parents-(male|coed|all)$/.exec(groupId);
   if (rp) {
-    const keys = rp[1] === 'all' ? ['male', 'coed'] : [rp[1]];
-    const members = RAIDER_TEAMS.filter((t) => keys.includes(t.key)).flatMap((t) => t.members || []);
-    const wanted = new Set(members.map(normalizeName));
-    if (!wanted.size) throw new Error(`No roster on file for ${rp[1]} raiders`);
-    // parent_email2 is a newer column (cadet_consent_parent2.sql) that may not
-    // exist on every deployment — select it, but fall back to parent_email only
-    // if the column is missing rather than failing the whole save.
-    let rows;
-    const withBoth = await SB.from('cadet_consent').select('name, parent_email, parent_email2');
-    if (withBoth.error) {
-      const only = await SB.from('cadet_consent').select('name, parent_email');
-      if (only.error) throw only.error;
-      rows = only.data;
-    } else {
-      rows = withBoth.data;
-    }
+    const squads = rp[1] === 'all' ? ['male', 'coed'] : [rp[1]];
+    const { data, error } = await SB
+      .from('cadet_teams')
+      .select('squad, cadet_consent:cadet_consent_id(parent_email, parent_email2)')
+      .eq('team', 'raiders')
+      .in('squad', squads);
+    if (error) throw error;
     const emails = [];
-    for (const r of rows || []) {
-      if (!wanted.has(normalizeName(r.name))) continue;
-      emails.push(r.parent_email, r.parent_email2);
+    for (const r of data || []) {
+      emails.push(r.cadet_consent?.parent_email, r.cadet_consent?.parent_email2);
     }
     return clean(emails);
   }
