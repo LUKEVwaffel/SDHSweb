@@ -4,6 +4,7 @@ import AdminGate from './AdminGate';
 import { useRheaPhotos, useRheaSubEvents } from '../../hooks/useRheaPhotos';
 import { RHEA_EVENT_ID, RHEA_EVENT_TITLE, raiderTeamLabel } from '../../lib/rheaComp';
 import { installPwaHooks, isStandalone, isIos } from './pwa';
+import { usePwaUpdate, PwaUpdateBar } from './usePwaUpdate';
 import './lukepwa.css';
 
 const TEAMS = [
@@ -38,6 +39,7 @@ function LukePwa() {
   const [tab, setTab] = useState('tag');
   const [filter, setFilter] = useState('all'); // all | untagged | staged | live | sub:<id>
   const [sel, setSel] = useState(() => new Set());
+  const [pSel, setPSel] = useState(() => new Set()); // PARENTS-tab selection (separate from `sel`)
   const [actionErr, setActionErr] = useState('');
   const [overrides, setOverrides] = useState({});      // optimistic patch overlay
   const [pulseIds, setPulseIds] = useState(() => new Set()); // tiles flashing "changed"
@@ -47,6 +49,7 @@ function LukePwa() {
   const email = useRef(null);
   const flashTimers = useRef({});
   const prevCounts = useRef({ luke: 0, parent: 0, subs: 0 });
+  const updateReady = usePwaUpdate();
 
   useEffect(() => {
     SB.auth.getSession().then(({ data }) => { email.current = data.session?.user?.email || null; });
@@ -66,6 +69,10 @@ function LukePwa() {
     [merged],
   );
   const parentPhotos = useMemo(() => merged.filter((p) => p.source === 'parent'), [merged]);
+  const visibleParentIds = useMemo(
+    () => parentPhotos.filter((p) => p.status !== 'hidden').map((p) => p.id),
+    [parentPhotos],
+  );
   const stagedIds = useMemo(
     () => lukePhotos.filter((p) => p.visibility === 'staged').map((p) => p.id),
     [lukePhotos],
@@ -132,12 +139,31 @@ function LukePwa() {
     });
   }, [lukePhotos]);
 
+  useEffect(() => {
+    setPSel((s) => {
+      if (!s.size) return s;
+      const valid = new Set(parentPhotos.map((p) => p.id));
+      const n = new Set([...s].filter((id) => valid.has(id)));
+      return n.size === s.size ? s : n;
+    });
+  }, [parentPhotos]);
+
   const toggleSel = useCallback((id) => {
     haptic(9);
     setSel((s) => { const n = new Set(s); if (n.has(id)) n.delete(id); else n.add(id); return n; });
   }, []);
   const clearSel = useCallback(() => setSel(new Set()), []);
   const selectAllShown = useCallback(() => { haptic(14); setSel(new Set(shown.map((p) => p.id))); }, [shown]);
+
+  const togglePSel = useCallback((id) => {
+    haptic(9);
+    setPSel((s) => { const n = new Set(s); if (n.has(id)) n.delete(id); else n.add(id); return n; });
+  }, []);
+  const clearPSel = useCallback(() => setPSel(new Set()), []);
+  const selectAllParents = useCallback(
+    () => { haptic(14); setPSel(new Set(visibleParentIds)); },
+    [visibleParentIds],
+  );
 
   const go = useCallback((t) => { haptic(9); setTab(t); }, []);
   const jumpToSub = useCallback((subId) => { haptic(9); setFilter(`sub:${subId}`); setTab('tag'); }, []);
@@ -200,6 +226,25 @@ function LukePwa() {
     if (e) { setActionErr(e.message || 'Delete failed. Check signal and tap again.'); return; }
     clearSel();
     refresh();
+  }
+
+  // Soft-hide (status='hidden', reversible, file stays in storage) every
+  // selected parent photo. Same optimistic path as tagging via applyPatch.
+  function bulkHideParents() {
+    if (!pSel.size) return;
+    applyPatch({ status: 'hidden' }, pSel);
+    clearPSel();
+  }
+
+  // Panic button: soft-hide every parent photo that's currently public. One
+  // confirm tap, then it fires. Individual tiles can be unhidden afterward.
+  function hideAllParents() {
+    const ids = visibleParentIds;
+    if (!ids.length) return;
+    if (!window.confirm(`Hide all ${ids.length} visible parent photo${ids.length === 1 ? '' : 's'}? They stay recoverable , unhide any from its tile.`)) return;
+    haptic([10, 40, 10]);
+    applyPatch({ status: 'hidden' }, ids);
+    clearPSel();
   }
 
   const drawerOpen = sel.size > 0 && tab === 'tag';
@@ -288,9 +333,48 @@ function LukePwa() {
 
       {!loading && tab === 'parents' && (
         <div className="lp-panel" key="parents">
+          <div className="lp-strip">
+            <span>
+              {parentPhotos.length} PARENT{parentPhotos.length === 1 ? '' : 'S'}
+              {pSel.size > 0 ? ` · ${pSel.size} SELECTED` : ''}
+            </span>
+            {visibleParentIds.length > 0 && (
+              <button
+                className="lp-btn lp-btn--ghost lp-btn--sm"
+                style={{ marginLeft: 'auto' }}
+                onClick={selectAllParents}
+              >
+                SELECT ALL {visibleParentIds.length}
+              </button>
+            )}
+            {pSel.size > 0 && (
+              <button className="lp-btn lp-btn--ghost lp-btn--sm" onClick={clearPSel}>CLEAR</button>
+            )}
+          </div>
+
+          <div className="lp-strip" style={{ paddingTop: 8, gap: 6, flexWrap: 'wrap' }}>
+            <button
+              className="lp-btn lp-btn--sm"
+              disabled={pSel.size === 0}
+              onClick={bulkHideParents}
+            >
+              {pSel.size ? `HIDE ${pSel.size} SELECTED` : 'HIDE SELECTED'}
+            </button>
+            <button
+              className="lp-btn lp-btn--danger lp-btn--sm"
+              style={{ marginLeft: 'auto' }}
+              disabled={visibleParentIds.length === 0}
+              onClick={hideAllParents}
+            >
+              HIDE ALL PARENT UPLOADS
+            </button>
+          </div>
+
           <ParentGrid
             photos={parentPhotos}
             pulseIds={pulseIds}
+            sel={pSel}
+            onToggleSel={togglePSel}
             onHideToggle={(p) => applyPatch({ status: p.status === 'hidden' ? 'live' : 'hidden' }, [p.id])}
             onDelete={hardDelete}
           />
@@ -322,6 +406,8 @@ function LukePwa() {
         onDelete={bulkDelete}
         onClear={clearSel}
       />
+
+      <PwaUpdateBar show={updateReady} />
     </div>
   );
 }
@@ -429,7 +515,7 @@ function TagGrid({ photos, sel, pulseIds, toggleSel, filtered }) {
   );
 }
 
-function ParentGrid({ photos, pulseIds, onHideToggle, onDelete }) {
+function ParentGrid({ photos, pulseIds, sel, onToggleSel, onHideToggle, onDelete }) {
   if (!photos.length) {
     return (
       <Empty k="ALL QUIET">
@@ -441,20 +527,24 @@ function ParentGrid({ photos, pulseIds, onHideToggle, onDelete }) {
     <div className="lp-grid">
       {photos.map((p, i) => {
         const hidden = p.status === 'hidden';
+        const on = sel.has(p.id);
         return (
           <div
             key={p.id}
             className="lp-tile"
             data-dim={hidden}
+            data-sel={on}
             data-pulse={pulseIds.has(p.id)}
-            style={{ animationDelay: `${Math.min(i * 24, 300)}ms`, cursor: 'default' }}
+            style={{ animationDelay: `${Math.min(i * 24, 300)}ms`, cursor: 'pointer' }}
+            onClick={() => onToggleSel(p.id)}
           >
             <img src={p.thumb_url || p.photo_url} alt="" loading="lazy" />
             {hidden && <span className="lp-tilepill" data-hidden="true">HIDDEN</span>}
+            {on && <span className="lp-check">✓</span>}
             {!hidden && p.uploader_name && <span className="lp-cap lp-cap--top">{p.uploader_name}</span>}
             <div className="lp-tileact">
-              <button onClick={() => onHideToggle(p)}>{hidden ? 'UNHIDE' : 'HIDE'}</button>
-              <button className="x" onClick={() => onDelete(p)} aria-label="Delete permanently">✕</button>
+              <button onClick={(e) => { e.stopPropagation(); onHideToggle(p); }}>{hidden ? 'UNHIDE' : 'HIDE'}</button>
+              <button className="x" onClick={(e) => { e.stopPropagation(); onDelete(p); }} aria-label="Delete permanently">✕</button>
             </div>
           </div>
         );
@@ -583,8 +673,11 @@ function toLocalInput(ts) {
 }
 
 // Beta gate control. Reads/writes the single rhea_gate row (admin-only via
-// RLS; this whole surface is behind AdminGate). "OPEN NOW" flips the manual
-// override; "SET TIME" reschedules the countdown and re-locks to it.
+// RLS; this whole surface is behind AdminGate). Tri-state kill switch in
+// `mode`: FORCE OPEN / AUTO (countdown) / LOCK (force closed). LOCK wins over
+// the clock and takes effect immediately for anyone already on /rhea (the
+// change rides the same realtime channel useRheaGate listens on). "SET TIME"
+// reschedules the countdown and drops back to AUTO.
 function GateControl() {
   const [row, setRow] = useState(null);
   const [draft, setDraft] = useState('');
@@ -604,8 +697,13 @@ function GateControl() {
   }, []);
 
   if (!row) return null;
+  const mode = row.mode === 'open' || row.mode === 'closed' ? row.mode : 'auto';
   const opensAt = new Date(row.opens_at);
-  const openNow = row.is_open === true || Date.now() >= opensAt.getTime();
+  const autoOpen = Date.now() >= opensAt.getTime();
+  const openNow = mode === 'open' || (mode === 'auto' && autoOpen);
+  const stateLabel = mode === 'open' ? 'FORCED OPEN'
+    : mode === 'closed' ? 'FORCED CLOSED'
+      : autoOpen ? 'AUTO · OPEN' : 'AUTO · LOCKED';
 
   async function patch(p) {
     setBusy(true); setErr(''); haptic(14);
@@ -616,19 +714,26 @@ function GateControl() {
     setBusy(false);
   }
 
+  const modeBtn = (m, activeClass = '') =>
+    `lp-btn lp-btn--sm ${mode === m ? activeClass : 'lp-btn--ghost'}`.trim();
+
   return (
     <div className="lp-gate" data-open={openNow}>
       <div className="lp-gate-row">
-        <span className="lp-gate-status">{openNow ? '● FEED OPEN' : '○ FEED LOCKED'}</span>
-        {row.is_open === true ? (
-          <button className="lp-btn lp-btn--ghost lp-btn--sm" disabled={busy} onClick={() => patch({ is_open: false })}>
-            LOCK
-          </button>
-        ) : (
-          <button className="lp-btn lp-btn--sm" disabled={busy} onClick={() => patch({ is_open: true })}>
-            OPEN NOW
-          </button>
-        )}
+        <span className="lp-gate-status">
+          {openNow ? '● FEED OPEN' : '○ FEED LOCKED'} · {stateLabel}
+        </span>
+      </div>
+      <div className="lp-gate-row" role="group" aria-label="Gate override" style={{ flexWrap: 'wrap', gap: 6 }}>
+        <button className={modeBtn('open')} disabled={busy || mode === 'open'} onClick={() => patch({ mode: 'open' })}>
+          FORCE OPEN
+        </button>
+        <button className={modeBtn('auto')} disabled={busy || mode === 'auto'} onClick={() => patch({ mode: 'auto' })}>
+          AUTO
+        </button>
+        <button className={modeBtn('closed', 'lp-btn--danger')} disabled={busy || mode === 'closed'} onClick={() => patch({ mode: 'closed' })}>
+          LOCK
+        </button>
       </div>
       <div className="lp-gate-row">
         <input
@@ -640,15 +745,21 @@ function GateControl() {
         <button
           className="lp-btn lp-btn--ghost lp-btn--sm"
           disabled={busy || !draft}
-          onClick={() => patch({ opens_at: new Date(draft).toISOString(), is_open: false })}
+          onClick={() => patch({ opens_at: new Date(draft).toISOString(), mode: 'auto' })}
         >
           SET TIME
         </button>
       </div>
-      {row.is_open !== true && (
+      {mode === 'auto' && (
         <div className="lp-gate-note">
-          Countdown target: {opensAt.toLocaleString([], { weekday: 'short', month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' })}
+          Auto-opens {opensAt.toLocaleString([], { weekday: 'short', month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' })}
         </div>
+      )}
+      {mode === 'closed' && (
+        <div className="lp-gate-note">Force-locked. Tap AUTO or FORCE OPEN to release.</div>
+      )}
+      {mode === 'open' && (
+        <div className="lp-gate-note">Forced open, schedule ignored.</div>
       )}
       {err && <div className="lp-gate-note" data-err="true">{err}</div>}
     </div>

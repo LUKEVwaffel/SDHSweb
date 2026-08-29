@@ -6,12 +6,24 @@ const GATE_ID = 'default';
 // LOCKED with this target so the countdown still renders. 8:00 AM Aug 29 2026 ET.
 const FALLBACK_OPENS_AT = '2026-08-29T08:00:00-04:00';
 
+// Tri-state kill switch. `mode` is authoritative:
+//   'closed' -> feed locked, always (wins over the clock)
+//   'open'   -> feed open, always
+//   'auto'   -> open once now >= opens_at (the countdown)
+// Rows written before rhea_gate_mode.sql have no `mode`; treat that as 'auto'
+// so behaviour is unchanged until the migration lands.
+function resolveMode(row) {
+  const m = row?.mode;
+  return m === 'open' || m === 'closed' ? m : 'auto';
+}
+
 /**
  * Beta gate for /rhea. Reads the single `rhea_gate` row and stays live on it
  * via realtime, plus a 1 Hz local tick so the derived `open` flips exactly
- * when the countdown reaches the scheduled time , no reload needed.
- *
- * OPEN  ==  row.is_open  OR  now >= row.opens_at
+ * when the countdown reaches the scheduled time , no reload needed. A `mode`
+ * change (Luke hitting LOCK / FORCE OPEN / AUTO in /lukepwa) arrives on the
+ * same realtime channel and closes or opens the feed for anyone already
+ * viewing it.
  */
 export function useRheaGate() {
   const [row, setRow] = useState(null);
@@ -26,7 +38,7 @@ export function useRheaGate() {
       const { data, error } = await SB
         .from('rhea_gate').select('*').eq('id', GATE_ID).maybeSingle();
       if (!aliveRef.current) return;
-      setRow(!error && data ? data : { id: GATE_ID, is_open: false, opens_at: FALLBACK_OPENS_AT });
+      setRow(!error && data ? data : { id: GATE_ID, mode: 'auto', opens_at: FALLBACK_OPENS_AT });
       setLoading(false);
     };
     load();
@@ -49,7 +61,14 @@ export function useRheaGate() {
   }, []);
 
   const opensAt = new Date(row?.opens_at || FALLBACK_OPENS_AT);
-  const open = !!row && (row.is_open === true || Date.now() >= opensAt.getTime());
+  const mode = resolveMode(row);
+  const open = !!row && (
+    mode === 'open'
+      ? true
+      : mode === 'closed'
+        ? false
+        : Date.now() >= opensAt.getTime()
+  );
 
-  return { open, opensAt, isManualOpen: row?.is_open === true, loading };
+  return { open, opensAt, mode, loading };
 }

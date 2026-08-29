@@ -2,7 +2,7 @@
  * never touches the rest of the site. Caches the app shell so an installed
  * launch renders instantly on venue wifi. Photo requests and Supabase calls
  * always go to the network (never stale). */
-const CACHE = 'rhea-shell-v2';
+const CACHE = 'rhea-shell-v3';
 
 self.addEventListener('install', () => { self.skipWaiting(); });
 

@@ -11,6 +11,7 @@ import {
 } from '../../lib/rheaComp';
 import { isHeic, convertHeicToJpeg } from '../../lib/heicConvert';
 import { installRheaPwaHooks, isStandalone } from './pwa';
+import { usePwaUpdate, PwaUpdateBar } from './usePwaUpdate';
 import RheaOnboarding from './RheaOnboarding';
 import posthog from '../../lib/posthog';
 import './rhea.css';
@@ -52,6 +53,7 @@ function RheaApp() {
   const likes = useRheaLikes(photos);
   const [reel, setReel] = useState(null); // index into photos, or null
   const [walk, setWalk] = useState(() => isStandalone() && !hasWalkthroughRhea());
+  const updateReady = usePwaUpdate();
 
   const showWalk = walk && gate.open;
 
@@ -91,6 +93,8 @@ function RheaApp() {
       {showWalk && (
         <Walkthrough onClose={() => { markWalkthroughRhea(); setWalk(false); }} />
       )}
+
+      <PwaUpdateBar show={updateReady} />
     </div>
   );
 }
@@ -126,29 +130,46 @@ function RheaLocked({ opensAt }) {
     weekday: 'long', hour: 'numeric', minute: '2-digit',
   });
 
+  // No time left on the clock but the feed is still locked -> Luke has it
+  // force-closed (the tri-state kill switch). Show a hold message, not a
+  // frozen 00:00:00 countdown.
+  const paused = ms <= 0;
+
   return (
     <div className="rhea-lock">
       <span className="rhea-lock-badge">BETA · RHEA COUNTY</span>
       <OpticGlyph className="rhea-lock-glyph" />
-      <h1 className="rhea-lock-h">The feed opens <span className="accent">{when}</span>.</h1>
-      <p className="rhea-lock-p">
-        Uploads and the live feed are locked until go time. You&apos;re on the
-        list, nothing to do but be there. This is a one-event beta, so expect a
-        short feedback ask after the competition.
-      </p>
+      {paused ? (
+        <>
+          <h1 className="rhea-lock-h">The feed is <span className="accent">paused</span>.</h1>
+          <p className="rhea-lock-p">
+            Photos are on hold for a moment. Keep this page open , it comes back
+            on its own the second it reopens, no refresh needed.
+          </p>
+        </>
+      ) : (
+        <>
+          <h1 className="rhea-lock-h">The feed opens <span className="accent">{when}</span>.</h1>
+          <p className="rhea-lock-p">
+            Uploads and the live feed are locked until go time. You&apos;re on the
+            list, nothing to do but be there. This is a one-event beta, so expect a
+            short feedback ask after the competition.
+          </p>
 
-      <div className="rhea-cd" role="timer" aria-label="Time until the feed opens">
-        {days > 0 && (
-          <span className="rhea-cd-unit"><b>{days}</b><i>{days === 1 ? 'day' : 'days'}</i></span>
-        )}
-        <span className="rhea-cd-unit"><b>{pad(hrs)}</b><i>hrs</i></span>
-        <span className="rhea-cd-sep">:</span>
-        <span className="rhea-cd-unit"><b>{pad(mins)}</b><i>min</i></span>
-        <span className="rhea-cd-sep">:</span>
-        <span className="rhea-cd-unit"><b>{pad(secs)}</b><i>sec</i></span>
-      </div>
+          <div className="rhea-cd" role="timer" aria-label="Time until the feed opens">
+            {days > 0 && (
+              <span className="rhea-cd-unit"><b>{days}</b><i>{days === 1 ? 'day' : 'days'}</i></span>
+            )}
+            <span className="rhea-cd-unit"><b>{pad(hrs)}</b><i>hrs</i></span>
+            <span className="rhea-cd-sep">:</span>
+            <span className="rhea-cd-unit"><b>{pad(mins)}</b><i>min</i></span>
+            <span className="rhea-cd-sep">:</span>
+            <span className="rhea-cd-unit"><b>{pad(secs)}</b><i>sec</i></span>
+          </div>
+        </>
+      )}
 
-      {!isStandalone() && (
+      {!paused && !isStandalone() && (
         <p className="rhea-lock-hint">
           Add OPTIC to your home screen now so it&apos;s one tap when the feed opens.
         </p>

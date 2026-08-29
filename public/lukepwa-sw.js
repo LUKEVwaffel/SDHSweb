@@ -3,7 +3,7 @@
  * launch renders even on a flaky venue connection. NOT an offline data layer —
  * tag/publish/delete actions still require a live connection (by design).
  */
-const CACHE = 'lukepwa-shell-v2';
+const CACHE = 'lukepwa-shell-v3';
 
 self.addEventListener('install', (event) => {
   self.skipWaiting();
