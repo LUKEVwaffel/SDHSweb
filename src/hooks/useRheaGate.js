@@ -7,7 +7,7 @@ const GATE_ID = 'default';
 const FALLBACK_OPENS_AT = '2026-08-29T08:00:00-04:00';
 
 // Tri-state kill switch. `mode` is authoritative:
-//   'closed' -> feed locked, always (wins over the clock)
+//   'closed' -> feed locked, always (wins over the clock AND over is_open)
 //   'open'   -> feed open, always
 //   'auto'   -> open once now >= opens_at (the countdown)
 // Rows written before rhea_gate_mode.sql have no `mode`; treat that as 'auto'
@@ -62,11 +62,16 @@ export function useRheaGate() {
 
   const opensAt = new Date(row?.opens_at || FALLBACK_OPENS_AT);
   const mode = resolveMode(row);
+  // Legacy early-unlock lever: `is_open = true` still forces the feed open even
+  // with no `mode` column yet, so `update rhea_gate set is_open=true` opens
+  // /rhea before opens_at without the migration. A force-close (`mode='closed'`)
+  // still wins over it.
+  const forcedOpenLegacy = row?.is_open === true;
   const open = !!row && (
-    mode === 'open'
-      ? true
-      : mode === 'closed'
-        ? false
+    mode === 'closed'
+      ? false
+      : mode === 'open' || forcedOpenLegacy
+        ? true
         : Date.now() >= opensAt.getTime()
   );
 

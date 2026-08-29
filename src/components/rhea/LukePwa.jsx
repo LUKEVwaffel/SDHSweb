@@ -697,7 +697,11 @@ function GateControl() {
   }, []);
 
   if (!row) return null;
-  const mode = row.mode === 'open' || row.mode === 'closed' ? row.mode : 'auto';
+  const rawMode = row.mode === 'open' || row.mode === 'closed' ? row.mode : 'auto';
+  // Pre-migration rows have no `mode`; the legacy `is_open=true` flag still
+  // forces the feed open, so treat it as mode 'open' for the whole UI.
+  const preMigration = row.mode == null;
+  const mode = rawMode === 'auto' && row.is_open === true ? 'open' : rawMode;
   const opensAt = new Date(row.opens_at);
   const autoOpen = Date.now() >= opensAt.getTime();
   const openNow = mode === 'open' || (mode === 'auto' && autoOpen);
@@ -714,6 +718,13 @@ function GateControl() {
     setBusy(false);
   }
 
+  // target: 'open' | 'auto' | 'closed'. Post-migration writes `mode`.
+  // Pre-migration (no `mode` column) falls back to the legacy `is_open` flag,
+  // which still forces the feed open early / releases it back to the countdown.
+  function setGate(target) {
+    return patch(preMigration ? { is_open: target === 'open' } : { mode: target });
+  }
+
   const modeBtn = (m, activeClass = '') =>
     `lp-btn lp-btn--sm ${mode === m ? activeClass : 'lp-btn--ghost'}`.trim();
 
@@ -725,13 +736,17 @@ function GateControl() {
         </span>
       </div>
       <div className="lp-gate-row" role="group" aria-label="Gate override" style={{ flexWrap: 'wrap', gap: 6 }}>
-        <button className={modeBtn('open')} disabled={busy || mode === 'open'} onClick={() => patch({ mode: 'open' })}>
+        <button className={modeBtn('open')} disabled={busy || mode === 'open'} onClick={() => setGate('open')}>
           FORCE OPEN
         </button>
-        <button className={modeBtn('auto')} disabled={busy || mode === 'auto'} onClick={() => patch({ mode: 'auto' })}>
+        <button className={modeBtn('auto')} disabled={busy || mode === 'auto'} onClick={() => setGate('auto')}>
           AUTO
         </button>
-        <button className={modeBtn('closed', 'lp-btn--danger')} disabled={busy || mode === 'closed'} onClick={() => patch({ mode: 'closed' })}>
+        <button
+          className={modeBtn('closed', 'lp-btn--danger')}
+          disabled={busy || mode === 'closed' || preMigration}
+          onClick={() => setGate('closed')}
+        >
           LOCK
         </button>
       </div>
@@ -745,7 +760,11 @@ function GateControl() {
         <button
           className="lp-btn lp-btn--ghost lp-btn--sm"
           disabled={busy || !draft}
-          onClick={() => patch({ opens_at: new Date(draft).toISOString(), mode: 'auto' })}
+          onClick={() => patch(
+            preMigration
+              ? { opens_at: new Date(draft).toISOString(), is_open: false }
+              : { opens_at: new Date(draft).toISOString(), mode: 'auto' },
+          )}
         >
           SET TIME
         </button>
@@ -760,6 +779,11 @@ function GateControl() {
       )}
       {mode === 'open' && (
         <div className="lp-gate-note">Forced open, schedule ignored.</div>
+      )}
+      {preMigration && (
+        <div className="lp-gate-note">
+          Run rhea_gate_mode.sql to enable LOCK. FORCE OPEN / AUTO work now via the legacy flag.
+        </div>
       )}
       {err && <div className="lp-gate-note" data-err="true">{err}</div>}
     </div>
