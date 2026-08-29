@@ -230,8 +230,8 @@
     "semantic_hash": "2fb87b9ddc035aa17907879b1bd5e130"
   },
   "src/components/admin/panels/email/Messages.jsx": {
-    "mtime": 1786802826.5432107,
-    "ast_hash": "52fe9ea19cf637cccf791515db29ec10",
+    "mtime": 1787961765.4007373,
+    "ast_hash": "5d206fa5662314a0c9f6956d96e85a37",
     "semantic_hash": ""
   },
   "src/components/admin/panels/email/Subscribers.jsx": {
@@ -1640,8 +1640,8 @@
     "semantic_hash": ""
   },
   "src/lib/emailAudience.js": {
-    "mtime": 1786802777.1399784,
-    "ast_hash": "5f84280c25a836572ada81106bf3c1ab",
+    "mtime": 1787961761.6579478,
+    "ast_hash": "2f059e5f96edbcbc19d8559537e32ac1",
     "semantic_hash": ""
   },
   "supabase/email_audience_groups.sql": {

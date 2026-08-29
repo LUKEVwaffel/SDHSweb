@@ -1,16 +1,16 @@
 # Graph Report - Trojan Battalion Folder  (2026-08-28)
 
 ## Corpus Check
-- 424 files · ~715,081 words
+- 424 files · ~715,102 words
 - Verdict: corpus is large enough that graph structure adds value.
 
 ## Summary
-- 2283 nodes · 4608 edges · 290 communities (171 shown, 119 thin omitted)
+- 2283 nodes · 4607 edges · 293 communities (174 shown, 119 thin omitted)
 - Extraction: 100% EXTRACTED · 0% INFERRED · 0% AMBIGUOUS · INFERRED: 14 edges (avg confidence: 0.69)
 - Token cost: 0 input · 0 output
 
 ## Graph Freshness
-- Built from commit: `90fddb11`
+- Built from commit: `fc805bb4`
 - Run `git rev-parse HEAD` and compare to check if the graph is stale.
 - Run `graphify update .` after code changes (no API cost).
 
@@ -270,6 +270,9 @@
 - EventFeedbackPanel.jsx
 - TvRefreshNotice
 - TvTopStrip.jsx
+- Rifle.jsx
+- Companies.jsx
+- RaiderCarousel.jsx
 
 ## God Nodes (most connected - your core abstractions)
 1. `PostHog` - 210 edges
@@ -298,7 +301,7 @@
 ## Import Cycles
 - None detected.
 
-## Communities (290 total, 119 thin omitted)
+## Communities (293 total, 119 thin omitted)
 
 ### Community 0 - "react"
 Cohesion: 0.11
@@ -322,7 +325,7 @@ Nodes (21): ASCOT_COLORS, CATEGORY_OPTIONS, DEFAULT_COLOR_GUARD_POSITIONS(), DEF
 
 ### Community 5 - "BattalionCommand.jsx"
 Cohesion: 0.10
-Nodes (8): activate(), BOARD_MATH, boardColor(), CommandCard(), MathScatter(), P, ROLE_INFO, TacticalMap()
+Nodes (9): activate(), BattalionCommand(), BOARD_MATH, boardColor(), CommandCard(), MathScatter(), P, ROLE_INFO (+1 more)
 
 ### Community 6 - "Raiders.jsx"
 Cohesion: 0.08
@@ -373,16 +376,16 @@ Cohesion: 0.33
 Nodes (3): public.admin_role(), public.admin_roles, public.events
 
 ### Community 18 - "CadetManual.jsx"
-Cohesion: 0.08
-Nodes (21): activate(), CommanderCard(), P, cell(), P, RifleAnalysis(), ShooterDossier(), TIER_COLOR (+13 more)
+Cohesion: 0.18
+Nodes (6): cell(), P, ShooterDossier(), TIER_COLOR, WeekTable(), buildNarrative()
 
 ### Community 19 - "Footer.jsx"
 Cohesion: 0.12
 Nodes (14): CommandProfile(), P, ROLE_LABELS, COLS, Footer(), FooterLink(), NAV_MAP, P (+6 more)
 
 ### Community 20 - "Companies.jsx"
-Cohesion: 0.15
-Nodes (15): MessagesPanel(), BattalionCommand(), activate(), CadetCard(), Companies, P, ROLE_ORDER, Hero() (+7 more)
+Cohesion: 0.12
+Nodes (13): MessagesPanel(), Hero(), HERO_STATS, P, activate(), P, S_SECTIONS, Staff() (+5 more)
 
 ### Community 24 - "FaqSection.jsx"
 Cohesion: 0.16
@@ -429,8 +432,8 @@ Cohesion: 0.53
 Nodes (5): on_admin_password_changed, public.admin_password_changed(), public.admin_role(), public.admin_roles, public.login_accounts
 
 ### Community 72 - "ui.jsx"
-Cohesion: 0.11
-Nodes (13): P, RaiderCarousel(), SLIDES, CAT_LABEL, CommanderCard(), EventCalendar(), fmtDate(), initials() (+5 more)
+Cohesion: 0.14
+Nodes (12): CAT_LABEL, CommanderCard(), DayEventDetail(), EventCalendar(), fmtDate(), initials(), navBtn, P (+4 more)
 
 ### Community 73 - "imageResize.js"
 Cohesion: 0.31
@@ -449,8 +452,8 @@ Cohesion: 0.10
 Nodes (20): Available extension bundles, Bun, Community questions, Development, Identifying users, Installation, JavaScript web - Docs, npm (+12 more)
 
 ### Community 77 - "PeoplePanel.jsx"
-Cohesion: 0.17
-Nodes (14): backBtn, EventDetailCard(), formatDateRange(), ghostBtn, loadingStyle, modeTab, modeTabActive, P (+6 more)
+Cohesion: 0.19
+Nodes (12): backBtn, EventDetailCard(), formatDateRange(), ghostBtn, loadingStyle, modeTab, modeTabActive, P (+4 more)
 
 ### Community 78 - "Linking Stripe as a source - Docs"
 Cohesion: 0.10
@@ -681,8 +684,8 @@ Cohesion: 0.18
 Nodes (6): emptyForm(), EventFeedbackForm(), FUN_LABELS, LET_LEVELS, P, QUESTIONS
 
 ### Community 198 - "RaiderCarousel.jsx"
-Cohesion: 0.20
-Nodes (5): activate(), P, S_SECTIONS, Staff(), StaffCard()
+Cohesion: 0.24
+Nodes (11): analyzeShooter(), analyzeTeam(), classify(), mean(), RAW, SEASON_META, SHOOTERS, slope() (+3 more)
 
 ### Community 202 - "TvRemotePanel.jsx"
 Cohesion: 0.10
@@ -844,6 +847,18 @@ Nodes (3): TvRefreshNotice(), assetSignature(), useTvRefreshNotice()
 Cohesion: 0.60
 Nodes (4): daysUntil(), eventChipLabel(), TvTopStrip(), useBattalionCreed()
 
+### Community 290 - "Rifle.jsx"
+Cohesion: 0.20
+Nodes (5): activate(), CommanderCard(), P, Rifle(), RifleAnalysis()
+
+### Community 291 - "Companies.jsx"
+Cohesion: 0.53
+Nodes (5): activate(), CadetCard(), Companies, P, ROLE_ORDER
+
+### Community 292 - "RaiderCarousel.jsx"
+Cohesion: 0.33
+Nodes (3): P, RaiderCarousel(), SLIDES
+
 ## Knowledge Gaps
 - **707 isolated node(s):** `$schema`, `oxc`, `react/rules-of-hooks`, `warn`, `name` (+702 more)
   These have ≤1 connection - possible missing edges or undocumented components.
@@ -852,9 +867,9 @@ Nodes (4): daysUntil(), eventChipLabel(), TvTopStrip(), useBattalionCreed()
 ## Suggested Questions
 _Questions this graph is uniquely positioned to answer:_
 
-- **Why does `react` connect `react` to `PhotoUploader.jsx`, `EventsPanel.jsx`, `getDeviceId`, `BattalionCommand.jsx`, `Raiders.jsx`, `RaiderPolls.jsx`, `App.jsx`, `CheckinSurvey.jsx`, `RaiderCompetitionResults.jsx`, `blocks.js`, `About.jsx`, `emailRender.js`, `.oxlintrc.json`, `Messages.jsx`, `RaiderParentWelcome.jsx`, `CadetManual.jsx`, `ConversationList.jsx`, `Footer.jsx`, `Companies.jsx`, `RaiderFAQ.jsx`, `RaiderCarousel.jsx`, `FaqSection.jsx`, `RaiderNextComp.jsx`, `TabPlaceholder.jsx`, `TvTopStrip.jsx`, `ThreadView.jsx`, `EventFeedbackPanel.jsx`, `TvRefreshNotice`, `TvTopStrip.jsx`, `EventFeedbackForm.jsx`, `PhotoUploader.jsx`, `Rifle.jsx`, `imageResize.js`, `expo-file-system`, `RaiderVoting.jsx`, `AarsPanel.jsx`, `emailRender.js`, `RaiderCarousel.jsx`, `ui.jsx`, `imageResize.js`, `TvRemotePanel.jsx`, `PeoplePanel.jsx`, `RaiderPolls.jsx`, `PhotoLightbox.jsx`, `MediaPanel.jsx`, `OverviewPanel.jsx`, `MonthGridCalendar.jsx`, `eventsPdfPrint.js`, `TvRangeSlideshowScreen.jsx`, `RaiderCarousel.jsx`, `TvRangeRaiderPracticeWidget.jsx`, `FaqSection.jsx`, `TvRangeKiosk.jsx`, `TvPhotoCarousel.jsx`, `EventSpotlightBand.jsx`?**
+- **Why does `react` connect `react` to `PhotoUploader.jsx`, `EventsPanel.jsx`, `getDeviceId`, `BattalionCommand.jsx`, `Raiders.jsx`, `RaiderPolls.jsx`, `App.jsx`, `CheckinSurvey.jsx`, `RaiderCompetitionResults.jsx`, `blocks.js`, `About.jsx`, `emailRender.js`, `.oxlintrc.json`, `Messages.jsx`, `RaiderParentWelcome.jsx`, `CadetManual.jsx`, `ConversationList.jsx`, `Footer.jsx`, `Companies.jsx`, `RaiderFAQ.jsx`, `RaiderCarousel.jsx`, `FaqSection.jsx`, `RaiderNextComp.jsx`, `TabPlaceholder.jsx`, `TvTopStrip.jsx`, `ThreadView.jsx`, `EventFeedbackPanel.jsx`, `TvRefreshNotice`, `TvTopStrip.jsx`, `Rifle.jsx`, `Companies.jsx`, `RaiderCarousel.jsx`, `EventFeedbackForm.jsx`, `PhotoUploader.jsx`, `Rifle.jsx`, `imageResize.js`, `expo-file-system`, `RaiderVoting.jsx`, `AarsPanel.jsx`, `emailRender.js`, `ui.jsx`, `imageResize.js`, `TvRemotePanel.jsx`, `PeoplePanel.jsx`, `RaiderPolls.jsx`, `PhotoLightbox.jsx`, `MediaPanel.jsx`, `OverviewPanel.jsx`, `MonthGridCalendar.jsx`, `eventsPdfPrint.js`, `TvRangeSlideshowScreen.jsx`, `RaiderCarousel.jsx`, `TvRangeRaiderPracticeWidget.jsx`, `FaqSection.jsx`, `TvRangeKiosk.jsx`, `TvPhotoCarousel.jsx`, `EventSpotlightBand.jsx`?**
   _High betweenness centrality (0.138) - this node is a cross-community bridge._
-- **Why does `supabase` connect `react` to `PhotoUploader.jsx`, `EventsPanel.jsx`, `getDeviceId`, `BattalionCommand.jsx`, `Raiders.jsx`, `RaiderPolls.jsx`, `CheckinSurvey.jsx`, `blocks.js`, `About.jsx`, `Messages.jsx`, `RaiderParentWelcome.jsx`, `ConversationList.jsx`, `Footer.jsx`, `Companies.jsx`, `RaiderCarousel.jsx`, `FaqSection.jsx`, `TabPlaceholder.jsx`, `TvTopStrip.jsx`, `ThreadView.jsx`, `EventFeedbackPanel.jsx`, `TvTopStrip.jsx`, `PhotoUploader.jsx`, `Rifle.jsx`, `imageResize.js`, `expo-file-system`, `RaiderVoting.jsx`, `AarsPanel.jsx`, `emailRender.js`, `RaiderCarousel.jsx`, `ui.jsx`, `TvRemotePanel.jsx`, `PeoplePanel.jsx`, `RaiderPolls.jsx`, `MediaPanel.jsx`, `OverviewPanel.jsx`, `TvRangeSlideshowScreen.jsx`, `FaqSection.jsx`, `TvPhotoCarousel.jsx`, `EventSpotlightBand.jsx`?**
+- **Why does `supabase` connect `react` to `PhotoUploader.jsx`, `EventsPanel.jsx`, `getDeviceId`, `BattalionCommand.jsx`, `Raiders.jsx`, `RaiderPolls.jsx`, `CheckinSurvey.jsx`, `blocks.js`, `About.jsx`, `Messages.jsx`, `RaiderParentWelcome.jsx`, `ConversationList.jsx`, `Footer.jsx`, `Companies.jsx`, `RaiderCarousel.jsx`, `FaqSection.jsx`, `TabPlaceholder.jsx`, `TvTopStrip.jsx`, `ThreadView.jsx`, `EventFeedbackPanel.jsx`, `TvTopStrip.jsx`, `Companies.jsx`, `PhotoUploader.jsx`, `Rifle.jsx`, `imageResize.js`, `expo-file-system`, `RaiderVoting.jsx`, `AarsPanel.jsx`, `emailRender.js`, `ui.jsx`, `TvRemotePanel.jsx`, `PeoplePanel.jsx`, `RaiderPolls.jsx`, `MediaPanel.jsx`, `OverviewPanel.jsx`, `TvRangeSlideshowScreen.jsx`, `FaqSection.jsx`, `TvPhotoCarousel.jsx`, `EventSpotlightBand.jsx`?**
   _High betweenness centrality (0.021) - this node is a cross-community bridge._
 - **Why does `P` connect `Rifle.jsx` to `react`, `PhotoUploader.jsx`, `EventsPanel.jsx`, `EventFeedbackForm.jsx`, `RaiderPolls.jsx`, `emailRender.js`, `TvClockBellPanel.jsx`, `blocks.js`, `StepRangeSchedule.jsx`, `Messages.jsx`, `RaiderParentWelcome.jsx`, `ConversationList.jsx`, `FaqSection.jsx`, `TabPlaceholder.jsx`, `TvTopStrip.jsx`, `ThreadView.jsx`, `EventFeedbackPanel.jsx`, `TvTopStrip.jsx`, `PhotoUploader.jsx`, `imageResize.js`, `RaiderVoting.jsx`, `AarsPanel.jsx`, `TvRemotePanel.jsx`, `RaiderPolls.jsx`, `OverviewPanel.jsx`, `ConversationList.jsx`, `TvRangeRaiderPracticeWidget.jsx`?**
   _High betweenness centrality (0.019) - this node is a cross-community bridge._

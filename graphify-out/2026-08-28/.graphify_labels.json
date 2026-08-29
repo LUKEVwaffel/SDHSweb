@@ -285,5 +285,8 @@
   "283": "TvRangeRaiderPracticeWidget.jsx",
   "284": "TvTopStrip.jsx",
   "285": "rhea_gate.sql",
-  "288": "TvRefreshNotice"
+  "286": "ThreadView.jsx",
+  "287": "EventFeedbackPanel.jsx",
+  "288": "TvRefreshNotice",
+  "289": "TvTopStrip.jsx"
 }

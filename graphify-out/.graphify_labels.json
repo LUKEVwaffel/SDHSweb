@@ -288,5 +288,8 @@
   "286": "ThreadView.jsx",
   "287": "EventFeedbackPanel.jsx",
   "288": "TvRefreshNotice",
-  "289": "TvTopStrip.jsx"
+  "289": "TvTopStrip.jsx",
+  "290": "Rifle.jsx",
+  "291": "Companies.jsx",
+  "292": "RaiderCarousel.jsx"
 }

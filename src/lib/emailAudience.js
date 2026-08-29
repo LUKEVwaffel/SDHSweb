@@ -29,6 +29,7 @@ export const AUDIENCE_GROUPS = [
   { id: 'all-cadets',          label: 'ALL CADETS' },
   { id: 'raider-parents-male', label: 'MALE RAIDER PARENTS' },
   { id: 'raider-parents-coed', label: 'COED RAIDER PARENTS' },
+  { id: 'raider-parents-all',  label: 'RAIDER PARENTS (MALE + COED)' },
 ];
 
 const COMPANIES = ['alpha', 'bravo', 'charlie', 'delta'];
@@ -86,10 +87,11 @@ export async function resolveAudienceEmails(SB, groupId) {
     return clean((data || []).map((r) => r.school_email));
   }
 
-  const rp = /^raider-parents-(male|coed)$/.exec(groupId);
+  const rp = /^raider-parents-(male|coed|all)$/.exec(groupId);
   if (rp) {
-    const team = RAIDER_TEAMS.find((t) => t.key === rp[1]);
-    const wanted = new Set((team?.members || []).map(normalizeName));
+    const keys = rp[1] === 'all' ? ['male', 'coed'] : [rp[1]];
+    const members = RAIDER_TEAMS.filter((t) => keys.includes(t.key)).flatMap((t) => t.members || []);
+    const wanted = new Set(members.map(normalizeName));
     if (!wanted.size) throw new Error(`No roster on file for ${rp[1]} raiders`);
     const { data, error } = await SB.from('cadet_consent').select('name, parent_email, parent_email2');
     if (error) throw error;
