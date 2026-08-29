@@ -17,6 +17,12 @@ const PHOTO_TEAM = 'raiders';
 // path currently mishandles .CR2 and can leave partial rows. Restricting the
 // input sidesteps RAW entirely for tonight rather than fixing decode.
 export const ACCEPT_ATTR = 'image/jpeg,image/png';
+// /rhea only: also let iPhone parents pick HEIC/HEIF straight from the camera
+// roll. Those are converted to JPEG in the browser (see lib/heicConvert.js)
+// before they hit the upload pipeline. Extensions are listed alongside the
+// MIME types because iOS often reports HEIC files with no usable type.
+export const RHEA_ACCEPT_ATTR =
+  'image/jpeg,image/png,image/heic,image/heif,.jpg,.jpeg,.png,.heic,.heif';
 const ALLOWED_TYPES = new Set(['image/jpeg', 'image/png']);
 
 export function isAllowedImage(file) {

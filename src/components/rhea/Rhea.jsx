@@ -5,10 +5,11 @@ import { useRheaPhotos } from '../../hooks/useRheaPhotos';
 import { useRheaLikes } from '../../hooks/useRheaLikes';
 import { useRheaGate } from '../../hooks/useRheaGate';
 import {
-  uploadRheaPhoto, isAllowedImage, ACCEPT_ATTR, REJECT_MESSAGE,
+  uploadRheaPhoto, isAllowedImage, RHEA_ACCEPT_ATTR, REJECT_MESSAGE,
   feedAttribution, feedChip, downloadPhoto,
   hasOnboardedRhea, hasWalkthroughRhea, markWalkthroughRhea,
 } from '../../lib/rheaComp';
+import { isHeic, convertHeicToJpeg } from '../../lib/heicConvert';
 import { installRheaPwaHooks, isStandalone } from './pwa';
 import RheaOnboarding from './RheaOnboarding';
 import posthog from '../../lib/posthog';
@@ -186,19 +187,52 @@ function UploadCard() {
   useEffect(() => { getDeviceId(); }, []);
   useEffect(() => () => { itemsRef.current.forEach((it) => URL.revokeObjectURL(it.previewUrl)); }, []); // eslint-disable-line
 
-  const addFiles = useCallback((fileList) => {
-    const files = Array.from(fileList || []);
-    const ok = files.filter(isAllowedImage);
-    const bad = files.filter((f) => !isAllowedImage(f));
-    if (bad.length) setRejected(bad.map((f) => f.name));
-    else setRejected([]);
-    if (ok.length) {
-      setItems((q) => [
-        ...q,
-        ...ok.map((file) => ({ id: nextId(), file, previewUrl: URL.createObjectURL(file), status: 'pending', error: null })),
-      ]);
+  // HEIC/HEIF (default iPhone camera roll) is decoded to JPEG in the browser
+  // one file at a time — heic2any runs on the main thread and takes roughly a
+  // second per photo, so sequential keeps a multi-photo drop from locking the
+  // UI. On success the item swaps to the JPEG and joins the normal pending
+  // queue; on failure it drops out and its name goes to the reject notice so
+  // the parent gets the "switch to Most Compatible / send a screenshot" steer.
+  const processHeic = useCallback(async (batch) => {
+    for (const { id, file } of batch) {
+      try {
+        const jpeg = await convertHeicToJpeg(file);
+        const previewUrl = URL.createObjectURL(jpeg);
+        setItems((q) => {
+          if (!q.some((x) => x.id === id)) { URL.revokeObjectURL(previewUrl); return q; }
+          return q.map((x) => (x.id === id
+            ? { ...x, file: jpeg, previewUrl, status: 'pending', error: null }
+            : x));
+        });
+        posthog.capture('rhea_heic_converted');
+      } catch {
+        setItems((q) => q.filter((x) => x.id !== id));
+        setRejected((r) => (r.includes(file.name) ? r : [...r, file.name || 'HEIC photo']));
+        posthog.capture('rhea_heic_convert_failed');
+      }
     }
   }, []);
+
+  const addFiles = useCallback((fileList) => {
+    const files = Array.from(fileList || []);
+    const native = files.filter(isAllowedImage);
+    const heic = files.filter((f) => !isAllowedImage(f) && isHeic(f));
+    const bad = files.filter((f) => !isAllowedImage(f) && !isHeic(f));
+
+    setRejected(bad.map((f) => f.name));
+
+    const nativeItems = native.map((file) => ({
+      id: nextId(), file, previewUrl: URL.createObjectURL(file), status: 'pending', error: null,
+    }));
+    const heicItems = heic.map((file) => ({
+      id: nextId(), file, previewUrl: null, status: 'converting', error: null,
+    }));
+
+    if (nativeItems.length || heicItems.length) {
+      setItems((q) => [...q, ...nativeItems, ...heicItems]);
+    }
+    if (heicItems.length) processHeic(heicItems);
+  }, [processHeic]);
 
   async function send() {
     const targets = itemsRef.current.filter((it) => it.status === 'pending' || it.status === 'failed');
@@ -227,7 +261,8 @@ function UploadCard() {
 
   const pending = items.filter((it) => it.status === 'pending' || it.status === 'failed');
   const done = items.filter((it) => it.status === 'done');
-  const allDone = items.length > 0 && pending.length === 0 && !busy;
+  const converting = items.filter((it) => it.status === 'converting');
+  const allDone = items.length > 0 && pending.length === 0 && converting.length === 0 && !busy;
 
   return (
     <section className="rhea-card">
@@ -239,7 +274,7 @@ function UploadCard() {
       </div>
 
       <div className="rhea-card-body">
-        <input ref={inputRef} type="file" accept={ACCEPT_ATTR} multiple style={{ display: 'none' }}
+        <input ref={inputRef} type="file" accept={RHEA_ACCEPT_ATTR} multiple style={{ display: 'none' }}
           onChange={(e) => { addFiles(e.target.files); e.target.value = ''; }} />
 
         <div
@@ -261,7 +296,10 @@ function UploadCard() {
             <div className="rhea-tray">
               {items.map((it) => (
                 <div key={it.id} className="rhea-thumb" data-status={it.status}>
-                  <img src={it.previewUrl} alt="" style={{ opacity: it.status === 'done' ? 0.5 : 1 }} />
+                  {it.previewUrl
+                    ? <img src={it.previewUrl} alt="" style={{ opacity: it.status === 'done' ? 0.5 : 1 }} />
+                    : <span className="rhea-thumb-ph" />}
+                  {it.status === 'converting' && <span className="rhea-thumb-badge" data-kind="working">⟳</span>}
                   {it.status === 'uploading' && <span className="rhea-thumb-badge">…</span>}
                   {it.status === 'done' && <span className="rhea-thumb-badge" data-kind="done">✓</span>}
                   {it.status === 'failed' && <span className="rhea-thumb-badge" data-kind="failed">✕</span>}
@@ -274,6 +312,13 @@ function UploadCard() {
             </div>
           )}
         </div>
+
+        {converting.length > 0 && (
+          <div className="rhea-note">
+            Converting {converting.length} iPhone photo{converting.length === 1 ? '' : 's'}… this takes a
+            second. Keep the page open.
+          </div>
+        )}
 
         {rejected.length > 0 && <div className="rhea-reject">{REJECT_MESSAGE}</div>}
 
@@ -290,8 +335,16 @@ function UploadCard() {
             <button className="rhea-btn rhea-btn--ghost" onClick={reset}>ADD MORE</button>
           </>
         ) : (
-          <button className="rhea-btn" onClick={send} disabled={busy || pending.length === 0}>
-            {busy ? `UPLOADING… ${done.length}/${items.length}` : `POST ${pending.length || ''} PHOTO${pending.length === 1 ? '' : 'S'}`.trim()}
+          <button
+            className="rhea-btn"
+            onClick={send}
+            disabled={busy || converting.length > 0 || pending.length === 0}
+          >
+            {busy
+              ? `UPLOADING… ${done.length}/${items.length}`
+              : converting.length > 0
+                ? `CONVERTING ${converting.length} PHOTO${converting.length === 1 ? '' : 'S'}…`
+                : `POST ${pending.length || ''} PHOTO${pending.length === 1 ? '' : 'S'}`.trim()}
           </button>
         )}
       </div>

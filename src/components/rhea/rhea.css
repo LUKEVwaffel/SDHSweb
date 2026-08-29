@@ -152,9 +152,25 @@
 }
 .rhea-thumb-badge[data-kind="done"] { background: rgba(79, 180, 119, 0.86); color: var(--ink); }
 .rhea-thumb-badge[data-kind="failed"] { background: rgba(192, 57, 43, 0.86); }
+.rhea-thumb-badge[data-kind="working"] {
+  background: rgba(6, 16, 31, 0.72); color: var(--gold);
+  animation: rhea-spin 900ms linear infinite;
+}
+@keyframes rhea-spin { to { transform: rotate(360deg); } }
+.rhea-thumb[data-status="converting"] { border-color: var(--gold); }
+.rhea-thumb-ph {
+  display: block; width: 100%; height: 100%;
+  background: linear-gradient(120deg, rgba(201, 169, 97, 0.14), rgba(6, 16, 31, 0.5));
+}
 .rhea-thumb-x {
   position: absolute; top: 0; right: 0; border: none; cursor: pointer;
   background: rgba(6, 16, 31, 0.82); color: var(--cream); font-size: 13px; line-height: 1; padding: 3px 6px;
+}
+
+.rhea-note {
+  margin-top: 10px; border: 1px solid var(--hair); border-radius: 9px;
+  background: rgba(6, 16, 31, 0.5); padding: 9px 11px;
+  font-family: var(--inter); font-size: 11.5px; color: var(--cream); line-height: 1.5;
 }
 
 .rhea-reject {
