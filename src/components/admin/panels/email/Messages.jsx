@@ -183,7 +183,13 @@ export default function Messages({ adminId }) {
     };
 
     const { data, error } = await writeRow(payload);
-    if (error) { flash(`Save failed: ${error.message}`); return; }
+    if (error) {
+      const hint = /permission denied/i.test(error.message || '') && targeting.recipient_emails !== undefined
+        ? ' — run supabase/email_messages_audience_grants.sql'
+        : '';
+      flash(`Save failed: ${error.message}${hint}`);
+      return;
+    }
     if (data) { setSel(data); setIsNew(false); }
     flash('Saved ✓');
     load();
