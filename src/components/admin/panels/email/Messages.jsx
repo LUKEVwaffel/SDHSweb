@@ -318,7 +318,7 @@ export default function Messages({ adminId }) {
               ))}
             </div>
             <div style={{ fontFamily: mono, fontSize: fs.tiny, color: P.mute, marginTop: sp[1] }}>
-              Cadets only, never parents. Resolved fresh from the roster each time this draft is saved.
+              Company / cadet groups resolve to cadet school emails; raider-parent groups resolve to parent emails. Resolved fresh from the roster each time this draft is saved.
             </div>
 
             <div style={{ marginTop: sp[3] }}>
