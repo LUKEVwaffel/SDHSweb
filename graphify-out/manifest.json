@@ -1285,8 +1285,8 @@
     "semantic_hash": ""
   },
   "src/components/tv/TvRangeKiosk.jsx": {
-    "mtime": 1787747659.9369266,
-    "ast_hash": "a8735f5f48a9fa827412b30480be2502",
+    "mtime": 1788168621.9616115,
+    "ast_hash": "b9e1810db11ca3e8ac1b67a7722ed3b6",
     "semantic_hash": ""
   },
   "src/components/tv/TvShoutoutsPanel.jsx": {
@@ -1695,8 +1695,8 @@
     "semantic_hash": ""
   },
   "src/components/tv/range/TvRangeSlideshowScreen.jsx": {
-    "mtime": 1787751586.6948273,
-    "ast_hash": "e3d017856d83d928b39ad765bdd4f4c2",
+    "mtime": 1788168609.147354,
+    "ast_hash": "30e6e64e227f61093440b2359e82c926",
     "semantic_hash": ""
   },
   "src/components/tv/range/slides/SlideAnnouncementSingle.jsx": {
@@ -1715,8 +1715,8 @@
     "semantic_hash": ""
   },
   "src/components/tv/range/slides/slideRegistry.js": {
-    "mtime": 1787751571.994849,
-    "ast_hash": "7f9f9fc7764d7d25a26e5836bb56832b",
+    "mtime": 1788168598.1188395,
+    "ast_hash": "2402a423fd856290d996ac8cde2e7d96",
     "semantic_hash": ""
   },
   "src/hooks/useTvNextUniformDay.js": {
@@ -2335,8 +2335,8 @@
     "semantic_hash": ""
   },
   "src/components/tv/TvCongratsScreen.jsx": {
-    "mtime": 1788138480.7759402,
-    "ast_hash": "87fd38254eba127826604d46737ecef7",
+    "mtime": 1788168588.8922215,
+    "ast_hash": "1e9d179d494501bd65b8e690b953f02e",
     "semantic_hash": ""
   },
   "src/lib/tvCongratsData.js": {
@@ -2397,6 +2397,11 @@
   "supabase/comp_photo_vote.sql": {
     "mtime": 1788138198.597597,
     "ast_hash": "f304c1cfbc1543a1094619b3f8a21c61",
+    "semantic_hash": ""
+  },
+  "src/components/tv/range/slides/SlideRaiderCongrats.jsx": {
+    "mtime": 1788168602.5730743,
+    "ast_hash": "cb3965dd0b99830b812cfd2f5cc3f96a",
     "semantic_hash": ""
   }
 }
