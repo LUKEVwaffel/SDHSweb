@@ -1,7 +1,7 @@
 # Graph Report - Trojan Battalion Folder  (2026-08-29)
 
 ## Corpus Check
-- 432 files · ~720,209 words
+- 432 files · ~720,389 words
 - Verdict: corpus is large enough that graph structure adds value.
 
 ## Summary
@@ -10,7 +10,7 @@
 - Token cost: 0 input · 0 output
 
 ## Graph Freshness
-- Built from commit: `ecf464cb`
+- Built from commit: `2b708727`
 - Run `git rev-parse HEAD` and compare to check if the graph is stale.
 - Run `graphify update .` after code changes (no API cost).
 
@@ -291,8 +291,6 @@
 10. `Label()` - 30 edges
 
 ## Surprising Connections (you probably didn't know these)
-- `TeaserRow()` --calls--> `categoryColor()`  [EXTRACTED]
-  src/components/Bulletin.jsx → src/lib/calendar.js
 - `AdminBulkUpload()` --indirect_call--> `isRawFile()`  [INFERRED]
   src/components/admin/panels/photos/AdminBulkUpload.jsx → src/lib/imageResize.js
 - `GateControl()` --indirect_call--> `load()`  [INFERRED]
@@ -301,6 +299,8 @@
   src/hooks/useRheaGate.js → src/lib/creedProgress.js
 - `useTvCarouselPhotos()` --indirect_call--> `load()`  [INFERRED]
   src/hooks/useTvCarouselPhotos.js → src/lib/creedProgress.js
+- `TeaserRow()` --calls--> `categoryColor()`  [EXTRACTED]
+  src/components/Bulletin.jsx → src/lib/calendar.js
 
 ## Import Cycles
 - None detected.
@@ -324,8 +324,8 @@ Cohesion: 0.13
 Nodes (21): addSlide(), cardBase, chromeBtnBase, FONT_STYLEABLE_TYPES, moveSlide(), removeSlide(), rowFieldStyle, SlideExtraControls() (+13 more)
 
 ### Community 4 - "EventsPanel.jsx"
-Cohesion: 0.13
-Nodes (21): ASCOT_COLORS, CATEGORY_OPTIONS, DEFAULT_COLOR_GUARD_POSITIONS(), DEFAULT_HONOR_GUARD_POSITIONS(), emptyForm(), EventsPanel(), GLOVE_COLORS, missingCore() (+13 more)
+Cohesion: 0.14
+Nodes (22): ASCOT_COLORS, CATEGORY_OPTIONS, DEFAULT_COLOR_GUARD_POSITIONS(), DEFAULT_HONOR_GUARD_POSITIONS(), emptyForm(), EventsPanel(), GLOVE_COLORS, missingCore() (+14 more)
 
 ### Community 5 - "BattalionCommand.jsx"
 Cohesion: 0.10
@@ -392,8 +392,8 @@ Cohesion: 0.33
 Nodes (8): EventsPage(), ghostBtn, loadingStyle, P, TeamGallery(), isPublicRow(), useInfiniteScrollSentinel(), usePaginatedPhotos()
 
 ### Community 24 - "FaqSection.jsx"
-Cohesion: 0.14
-Nodes (17): Dashboard(), Admin(), ForcePasswordChange(), inputStyle(), Composer(), conversationAvatar(), ConversationList(), conversationName() (+9 more)
+Cohesion: 0.13
+Nodes (18): Dashboard(), Admin(), ForcePasswordChange(), inputStyle(), ALLOWED_MIME, Composer(), conversationAvatar(), ConversationList() (+10 more)
 
 ### Community 27 - "TabPlaceholder.jsx"
 Cohesion: 0.20
@@ -409,7 +409,7 @@ Nodes (3): public.reviewer_credentials, public.reviewer_has_pin(), public.review
 
 ### Community 43 - "Rifle.jsx"
 Cohesion: 0.09
-Nodes (25): AccountAuth(), AccountGrid(), EyeIcon(), PasswordForm(), LoginScreen(), ALLOWED_MIME, TEXT_SIZES, ROW (+17 more)
+Nodes (24): AccountAuth(), AccountGrid(), EyeIcon(), PasswordForm(), LoginScreen(), TEXT_SIZES, ROW, GUIDE_SECTIONS (+16 more)
 
 ### Community 44 - "imageResize.js"
 Cohesion: 0.16
@@ -437,7 +437,7 @@ Nodes (5): on_admin_password_changed, public.admin_password_changed(), public.ad
 
 ### Community 72 - "ui.jsx"
 Cohesion: 0.14
-Nodes (12): CAT_LABEL, CommanderCard(), DayEventDetail(), EventCalendar(), fmtDate(), initials(), navBtn, P (+4 more)
+Nodes (11): CAT_LABEL, CommanderCard(), DayEventDetail(), EventCalendar(), fmtDate(), initials(), navBtn, P (+3 more)
 
 ### Community 73 - "imageResize.js"
 Cohesion: 0.31
@@ -456,7 +456,7 @@ Cohesion: 0.10
 Nodes (20): Available extension bundles, Bun, Community questions, Development, Identifying users, Installation, JavaScript web - Docs, npm (+12 more)
 
 ### Community 77 - "PeoplePanel.jsx"
-Cohesion: 0.19
+Cohesion: 0.18
 Nodes (12): backBtn, EventDetailCard(), formatDateRange(), ghostBtn, loadingStyle, modeTab, modeTabActive, P (+4 more)
 
 ### Community 78 - "Linking Stripe as a source - Docs"

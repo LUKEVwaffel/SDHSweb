@@ -25,8 +25,8 @@
     "semantic_hash": "c1ee9ce6a4fe04105dbf8e619390df5e"
   },
   "src/App.jsx": {
-    "mtime": 1788138461.4205167,
-    "ast_hash": "2e7e6aa7e13ae8a2d36a69368798ca92",
+    "mtime": 1788133787.580978,
+    "ast_hash": "5a11ccc1ddb82daf0af2922c46d371a2",
     "semantic_hash": ""
   },
   "src/components/About.jsx": {
@@ -60,8 +60,8 @@
     "semantic_hash": ""
   },
   "src/components/Footer.jsx": {
-    "mtime": 1788166699.1302257,
-    "ast_hash": "ce2516d6ba979b1c34add001527e5cd5",
+    "mtime": 1787965533.3112855,
+    "ast_hash": "4127bc9fe013e4aa18883fa1eb8cae0d",
     "semantic_hash": ""
   },
   "src/components/Hero.jsx": {
@@ -120,8 +120,8 @@
     "semantic_hash": ""
   },
   "src/components/TopNav.jsx": {
-    "mtime": 1788166683.9379284,
-    "ast_hash": "8232d9c1f17e24da8b19d3c980d97c57",
+    "mtime": 1787965517.7062323,
+    "ast_hash": "6a2d0ea718efe079e8f46ce535746c1f",
     "semantic_hash": ""
   },
   "src/components/VerifiedTooltip.jsx": {
@@ -275,8 +275,8 @@
     "semantic_hash": ""
   },
   "src/components/admin/panels/photos/PhotosPanel.jsx": {
-    "mtime": 1788138437.2627645,
-    "ast_hash": "efcd74a72e2a2741a7c3748006ec5cd2",
+    "mtime": 1786909260.1548905,
+    "ast_hash": "f9537de22c3accf87171d133dfc7e14f",
     "semantic_hash": ""
   },
   "src/components/admin/panels/photos/RaiderPolls.jsx": {
@@ -2335,8 +2335,8 @@
     "semantic_hash": ""
   },
   "src/components/tv/TvCongratsScreen.jsx": {
-    "mtime": 1788138480.7759402,
-    "ast_hash": "87fd38254eba127826604d46737ecef7",
+    "mtime": 1788106188.042229,
+    "ast_hash": "5e8e6d509b01aed8ae42a11b0eb1b2de",
     "semantic_hash": ""
   },
   "src/lib/tvCongratsData.js": {
@@ -2357,46 +2357,6 @@
   "src/lib/raiderCompGallery.js": {
     "mtime": 1788136260.9998133,
     "ast_hash": "71e364d670f9eefdb00e8bdfc0cf2d0f",
-    "semantic_hash": ""
-  },
-  "src/components/CompPhotoBand.jsx": {
-    "mtime": 1788138346.0143883,
-    "ast_hash": "ac7bac6ff002676d3d1f3b923fc0de66",
-    "semantic_hash": ""
-  },
-  "src/components/CompPhotoVote.jsx": {
-    "mtime": 1788138558.8498745,
-    "ast_hash": "b64d2ed2d465c93658be5fa30ecaf2a7",
-    "semantic_hash": ""
-  },
-  "src/components/CongratsPopup.jsx": {
-    "mtime": 1788138319.1591744,
-    "ast_hash": "f4a54de0a75613bf04e663d99559e42c",
-    "semantic_hash": ""
-  },
-  "src/components/admin/panels/photos/CompPhotoBallot.jsx": {
-    "mtime": 1788166968.699385,
-    "ast_hash": "f8dddff7ce71d46ccf68333e14a1b18b",
-    "semantic_hash": ""
-  },
-  "src/hooks/useCompPhotoPoll.js": {
-    "mtime": 1788138229.850779,
-    "ast_hash": "f843d19c3ea75d34db2c9821f5dd9cd2",
-    "semantic_hash": ""
-  },
-  "src/lib/compPhotoVote.js": {
-    "mtime": 1788138223.413725,
-    "ast_hash": "c22c7fbf5fa17165ef7c7675e904b5b8",
-    "semantic_hash": ""
-  },
-  "src/lib/congratsSeen.js": {
-    "mtime": 1788138203.635105,
-    "ast_hash": "3a732114c6ea77422ebcc1f1c1e03edb",
-    "semantic_hash": ""
-  },
-  "supabase/comp_photo_vote.sql": {
-    "mtime": 1788138198.597597,
-    "ast_hash": "f304c1cfbc1543a1094619b3f8a21c61",
     "semantic_hash": ""
   }
 }

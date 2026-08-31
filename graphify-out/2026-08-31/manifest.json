@@ -2375,8 +2375,8 @@
     "semantic_hash": ""
   },
   "src/components/admin/panels/photos/CompPhotoBallot.jsx": {
-    "mtime": 1788166968.699385,
-    "ast_hash": "f8dddff7ce71d46ccf68333e14a1b18b",
+    "mtime": 1788138420.0871298,
+    "ast_hash": "4a7dc24b51cc1f70fb17b4037abc6267",
     "semantic_hash": ""
   },
   "src/hooks/useCompPhotoPoll.js": {
