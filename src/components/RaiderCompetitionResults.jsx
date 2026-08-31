@@ -12,6 +12,15 @@ import { useState } from 'react';
 
 const SEASON = {
   label: '2025–26 SEASON',
+  // Manual headline tiles — the auto-summary derives only from `teams[]` (division
+  // standings) and would miss event-level podiums like the Co-Ed CCR win. Keep
+  // these in sync with the meet log below.
+  summary: [
+    { label: 'MEETS', value: '1' },
+    { label: 'TROPHIES', value: '5', sub: 'podium placements' },
+    { label: 'FIRST-PLACE FINISHES', value: '1', sub: 'CCR · Co-Ed' },
+    { label: 'BEST DIVISION FINISH', value: '2nd', sub: 'Male · overall' },
+  ],
   // Add one object per meet as results come in:
   //   {
   //     name: 'Rhea County Raider Challenge',
@@ -20,7 +29,22 @@ const SEASON = {
   //     teams: [{ team: 'MALE', place: '1st', of: 14 }, ...],   // place: '1st' | 'DNF' etc.
   //     events: [{ name: 'One-Rope Bridge', result: '3:42', note: '1st' }, ...],
   //   }
-  meets: [],
+  meets: [
+    {
+      name: 'Rhea County Raider Competition',
+      date: 'Aug 29, 2026',
+      location: 'Evensville, TN',
+      teams: [
+        { team: 'MALE', place: '2nd' }, // Overall Male Division
+      ],
+      events: [
+        { name: 'Cross Country Rescue · Co-Ed', result: '1st' },
+        { name: 'Cross Country Rescue · Male', result: '2nd' },
+        { name: 'Tire Stacker · Male', result: '2nd' },
+        { name: 'One Rope Bridge · Male', result: '1:44', note: '3rd' },
+      ],
+    },
+  ],
 };
 
 const P = {

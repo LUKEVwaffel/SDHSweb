@@ -5,6 +5,7 @@ import { Btn } from '../../shared/ui';
 import RaiderPolls from './RaiderPolls';
 import PhotoSubmissions from './PhotoSubmissions';
 import AdminBulkUpload from './AdminBulkUpload';
+import CompPhotoBallot from './CompPhotoBallot';
 
 // Single home for all team photos. SUBMISSIONS is the default — that's where
 // every public upload (battalion + specialty teams) lives, AND (Luke-only,
@@ -20,6 +21,7 @@ export default function PhotosPanel({ adminId, showTvPhotos = false }) {
   const tabs = [
     { id: 'submissions', label: 'SUBMISSIONS · ALL PHOTOS' },
     { id: 'bulk', label: 'BULK UPLOAD' },
+    { id: 'comp-ballot', label: 'PICTURE OF THE COMP' },
     ...VOTING_TEAMS.map((t) => ({ id: `polls-${t.id}`, label: `${t.label.toUpperCase()} POLLS` })),
   ];
 
@@ -32,6 +34,7 @@ export default function PhotosPanel({ adminId, showTvPhotos = false }) {
       </div>
       {tab === 'submissions' && <PhotoSubmissions adminId={adminId} showTvPhotos={showTvPhotos} />}
       {tab === 'bulk' && <AdminBulkUpload adminId={adminId} />}
+      {tab === 'comp-ballot' && <CompPhotoBallot />}
       {tab === 'polls-raiders' && <RaiderPolls adminId={adminId} />}
       {tab.startsWith('polls-') && tab !== 'polls-raiders' && (
         <div style={{ fontFamily: mono, fontSize: fs.xs, color: P.mute, textAlign: 'center', marginTop: sp[10] }}>

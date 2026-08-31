@@ -1,8 +1,15 @@
 import { useNowTicker } from '../../hooks/useNowTicker.js';
 import { useTvDailySettings } from '../../hooks/useTvDailySettings.js';
 import TvStandardLayout from './TvStandardLayout.jsx';
+import TvCongratsScreen from './TvCongratsScreen.jsx';
 import TvPreviewBadge from './TvPreviewBadge.jsx';
 import TvRefreshNotice from './TvRefreshNotice.jsx';
+
+// Temporary override: after the Rhea County meet the kiosk shows the congrats
+// takeover instead of the normal rotation. Flip CONGRATS_MODE to false (or
+// delete the branch) to restore TvStandardLayout. `settings`/`now` stay wired
+// so the revert is a one-line change.
+const CONGRATS_MODE = true;
 
 /**
  * Outside — the original public kiosk, mounted at /tv. Thin per-screen
@@ -17,7 +24,11 @@ export default function TvKiosk() {
 
   return (
     <>
-      <TvStandardLayout settings={settings} now={now} />
+      {CONGRATS_MODE ? (
+        <TvCongratsScreen />
+      ) : (
+        <TvStandardLayout settings={settings} now={now} />
+      )}
       <TvPreviewBadge />
       <TvRefreshNotice />
     </>

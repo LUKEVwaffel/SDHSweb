@@ -2,9 +2,9 @@ import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { supabase as SB } from '../lib/supabaseClient';
 import RaiderCarousel from './RaiderCarousel';
-import RaiderNextComp from './RaiderNextComp';
 import RaiderCompetitionResults from './RaiderCompetitionResults';
 import useIsMobile from '../hooks/useIsMobile';
+import { COMP_EVENT_ID, COMP_EVENT_TITLE } from '../lib/raiderCompGallery';
 import { categoryColor, eventOccursOnDate, formatRecurrenceDays, formatEventTime, formatEventTimeRange, teamLabel, DEFAULT_POC } from '../lib/calendar';
 
 // Palette mirrors Rifle.jsx for a consistent specialty-team look. Green is the
@@ -18,7 +18,10 @@ const P = {
 const mono = "'JetBrains Mono', monospace";
 const oswald = 'Oswald, sans-serif';
 
-const CAT_LABEL = { funny: 'FUNNY', aura: 'AURA', team: 'TEAM LEADING' };
+// Hand-picked cover for the "View Competition" card (right-hand image). Fixed
+// URL rather than the first gallery photo so it stays the intended shot.
+const COMP_CARD_COVER =
+  'https://bjgyvmdzcymruunzavni.supabase.co/storage/v1/object/public/team-photos/raiders/e8a305fe-86cf-4092-a580-5865423271b9/1788013805333_og3xef.jpg';
 
 function initials(name) {
   return name.split(/\s+/).map((w) => w[0]).join('').slice(0, 2).toUpperCase();
@@ -215,44 +218,59 @@ function CommanderCard({ person, onOpen }) {
   );
 }
 
-// ── Photo winners (from last event's closed poll) ────────────────────────────
-function PhotoWinners({ cards }) {
+// ── View Competition card → /raiders/comp ───────────────────────────────────
+// Shown only once a comp has photos or run footage posted (through the
+// RAIDER COMP tab in Dispatch → Photos). Cover frame is the first photo.
+function CompCard({ comp, onOpen }) {
+  const [hover, setHover] = useState(false);
+  if (!comp || !comp.photoCount) return null;
   return (
-    <div>
-      <SectionLabel
-        tag="// LAST EVENT · PHOTO VOTE"
-        title="LATEST WINNERS"
-        subtitle="Top Funny / Aura / Team-Leading photos from the most recent closed poll."
-      />
-      {cards.length > 0 ? (
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: 16 }}>
-          {cards.map((w) => (
-            <div key={w.key} style={{ background: P.deep, border: `1px solid ${P.hairStrong}`, overflow: 'hidden' }}>
-              <div style={{ position: 'relative', aspectRatio: '4/3', background: P.navy }}>
-                <img src={w.url} alt={w.label} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-                <div style={{ position: 'absolute', top: 10, left: 10, background: P.gold, color: P.ink, fontFamily: mono, fontSize: 9, letterSpacing: '0.14em', padding: '4px 10px' }}>
-                  🏆 {w.label}
-                </div>
-              </div>
-              <div style={{ padding: '12px 14px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                <span style={{ fontFamily: mono, fontSize: 10, color: P.mute }}>{w.caption ? `📷 ${w.caption}` : 'RAIDER TEAM'}</span>
-                <span style={{ fontFamily: oswald, fontSize: 16, color: P.gold }}>{w.votes} ▲</span>
-              </div>
-            </div>
-          ))}
+    <button
+      onClick={onOpen}
+      onMouseEnter={() => setHover(true)}
+      onMouseLeave={() => setHover(false)}
+      style={{
+        display: 'grid', gridTemplateColumns: 'minmax(0, 1fr) 260px', gap: 0, width: '100%',
+        border: `1px solid ${hover ? P.gold : P.hairStrong}`, background: P.deep, cursor: 'pointer',
+        textAlign: 'left', padding: 0, overflow: 'hidden', position: 'relative', transition: 'border-color 0.2s',
+      }}
+      className="raiders-compcard"
+    >
+      <Brackets size={18} opacity={hover ? 0.7 : 0.4} />
+      <div style={{ padding: '40px 40px 40px' }}>
+        <div style={{ fontFamily: mono, fontSize: 9, color: P.gold, letterSpacing: '0.3em', opacity: 0.8, marginBottom: 14 }}>
+          // COMPETITION GALLERY
         </div>
-      ) : (
-        <div style={{ border: `1px solid ${P.hair}`, background: P.deep, padding: '48px 24px', textAlign: 'center', position: 'relative' }}>
-          <Brackets size={16} opacity={0.3} />
-          <div style={{ fontFamily: oswald, fontWeight: 700, fontSize: 22, color: P.cream, letterSpacing: '0.08em', marginBottom: 8 }}>
-            NO CLOSED POLLS YET
-          </div>
-          <div style={{ fontFamily: 'Inter, sans-serif', fontSize: 13, color: P.mute, lineHeight: 1.6, maxWidth: 420, margin: '0 auto' }}>
-            Winners post here after an event's photo vote closes. Vote in the live poll below.
-          </div>
+        <h2 style={{ fontFamily: oswald, fontWeight: 700, fontSize: 34, color: P.cream, letterSpacing: '0.02em', margin: '0 0 10px', lineHeight: 1.1 }}>
+          {COMP_EVENT_TITLE.toUpperCase()}
+        </h2>
+        <p style={{ fontFamily: 'Inter, sans-serif', fontSize: 13, color: P.mute, lineHeight: 1.7, margin: '0 0 20px', maxWidth: 460 }}>
+          Photos and run footage by event: Tire Stacker, Gauntlet, CCR, Obstacle Course, One Rope Bridge, and Highland Games. A few are still being edited; up by Wednesday.
+        </p>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
+          <span style={{
+            background: P.gold, color: P.ink, fontFamily: mono, fontSize: 11, letterSpacing: '0.16em',
+            fontWeight: 600, padding: '12px 22px',
+          }}>VIEW COMPETITION →</span>
+          <span style={{ fontFamily: mono, fontSize: 9, color: P.gold, opacity: 0.6, letterSpacing: '0.16em' }}>
+            {comp.photoCount} PHOTO{comp.photoCount === 1 ? '' : 'S'}
+          </span>
         </div>
-      )}
-    </div>
+      </div>
+      <div style={{ position: 'relative', background: P.navy, minHeight: 200 }}>
+        {comp.cover && (
+          <img
+            src={comp.cover}
+            alt=""
+            style={{
+              position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover',
+              transform: hover ? 'scale(1.05)' : 'scale(1)', transition: 'transform 0.4s',
+            }}
+          />
+        )}
+        <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(90deg, rgba(10,22,40,0.95), rgba(10,22,40,0.25))' }} />
+      </div>
+    </button>
   );
 }
 
@@ -528,16 +546,25 @@ export default function Raiders() {
   const navigate = useNavigate();
   const isMobile = useIsMobile();
   const [commanders, setCommanders] = useState([]);
-  const [winners, setWinners] = useState(null);
   const [events, setEvents] = useState([]);
+  const [comp, setComp] = useState(null); // { photoCount, cover } for the View Competition card
+
+  useEffect(() => {
+    // View Competition card — photo count gates whether the card shows. Cover
+    // frame is a fixed hand-picked shot (COMP_CARD_COVER), not the first DB row.
+    // Same filter as the gallery: Luke's own uploads (source='luke'), tagged to
+    // one of the 6 events, not hidden. Parent uploads are excluded here.
+    SB.from('photos').select('id', { count: 'exact', head: true })
+      .eq('event_id', COMP_EVENT_ID).eq('source', 'luke').eq('status', 'live')
+      .not('sub_event_id', 'is', null)
+      .then(({ count }) => setComp({ photoCount: count || 0, cover: COMP_CARD_COVER }))
+      .then(null, () => setComp({ photoCount: 0, cover: COMP_CARD_COVER }));
+  }, []);
 
   useEffect(() => {
     // Commanders: real personnel rows (photos + bios live in DB).
     SB.from('personnel').select('*').eq('section', 'raider').eq('visible', true).order('sort_order')
       .then(({ data }) => setCommanders(data || []));
-    // Latest closed-poll winners for raiders.
-    SB.from('photo_bulletin').select('*').eq('team', 'raiders').order('published_at', { ascending: false }).limit(1)
-      .then(({ data }) => setWinners(data?.[0] || null));
     // Team-tagged events for the calendar (includes the recurring practice
     // series row, if one is posted — see events_recurrence.sql). Reads from
     // the events_by_calendar view so events secondarily tagged 'raiders'
@@ -547,13 +574,6 @@ export default function Raiders() {
       .then(({ data }) => setEvents(data || []));
   }, []);
 
-  const winnerCards = winners
-    ? ['funny', 'aura', 'team'].map((k) => ({
-        key: k, label: CAT_LABEL[k],
-        url: winners[`winner_${k}_url`], caption: winners[`winner_${k}_caption`], votes: winners[`winner_${k}_votes`],
-      })).filter((w) => w.url)
-    : [];
-
   const openProfile = (person) => navigate(`/profile/${person.id}`, { state: { from: 'raiders' } });
 
   // Soonest upcoming raider event with a permission slip attached — right
@@ -562,13 +582,6 @@ export default function Raiders() {
   const todayIso = new Date().toISOString().slice(0, 10);
   const requiredFormEvent = [...events]
     .filter((e) => e.permission_slip_required && e.permission_slip_url && e.date >= todayIso)
-    .sort((a, b) => a.date.localeCompare(b.date))[0];
-
-  // Soonest upcoming competition for the countdown — any posted one-off raider
-  // event that isn't a recurring practice. Stays correct as Dispatch posts new
-  // meets without another code change.
-  const nextComp = [...events]
-    .filter((e) => !e.recurrence_days?.length && e.category !== 'PRACTICE' && e.date >= todayIso)
     .sort((a, b) => a.date.localeCompare(b.date))[0];
 
   return (
@@ -612,10 +625,18 @@ export default function Raiders() {
           </div>
         </div>
 
-        {/* ── Hero carousel ── */}
+        {/* ── Hero carousel — Rhea County competition photos ── */}
         <div style={{ marginBottom: 40 }}>
           <RaiderCarousel />
         </div>
+
+        {/* ── View Competition gallery link — surfaced right under the hero so
+            families reach the full Rhea County set fast. ── */}
+        {comp && comp.photoCount > 0 && (
+          <div style={{ marginBottom: 40 }}>
+            <CompCard comp={comp} onOpen={() => navigate('/raiders/comp')} />
+          </div>
+        )}
 
         {/* ── Required-forms banner: surfaces whichever upcoming raider event
             has a permission slip attached (DB-driven via events_by_calendar,
@@ -679,8 +700,9 @@ export default function Raiders() {
 
         <Divider tight />
 
-        {/* ── Next competition countdown + standing Varsity report time ── */}
-        <RaiderNextComp event={nextComp} />
+        {/* ── Competition results — season record, per-meet placements, event
+            splits. Static content (RaiderCompetitionResults own data). ── */}
+        <RaiderCompetitionResults />
 
         {/* ── Event calendar — omitted on mobile, same as the unified team
             template; full schedule stays reachable from /events. ── */}
@@ -691,42 +713,13 @@ export default function Raiders() {
           </>
         )}
 
-        <Divider />
-
-        {/* ── Competition results — season record, per-meet placements, event
-            splits. Static content (RaiderCompetitionResults own data). ── */}
-        <RaiderCompetitionResults />
-
-        <Divider />
-
-        {/* ── Raider Photos: frozen winners from the latest closed poll. Live
-            voting + uploads now live on /events (the primary photo gateway) —
-            see /submit for the standalone hub. ── */}
-        <div style={{ border: `1px solid ${P.hairStrong}`, background: 'rgba(201,169,97,0.03)', padding: '40px 36px' }}>
-          <SectionLabel tag="// PHOTOS" title="RAIDER PHOTOS" subtitle="Latest winners from the most recent closed poll." />
-
-          <PhotoWinners cards={winnerCards} />
-
-          <div style={{
-            marginTop: 32, paddingTop: 28, borderTop: `1px solid ${P.hair}`,
-            display: 'flex', gap: 16, flexWrap: 'wrap', alignItems: 'center',
-          }}>
-            <button onClick={() => navigate('/events')} style={{
-              background: P.gold, color: P.ink, border: 'none', cursor: 'pointer',
-              fontFamily: mono, fontSize: 11, letterSpacing: '0.16em', fontWeight: 600, padding: '13px 24px',
-            }}
-              onMouseEnter={(e) => (e.currentTarget.style.background = P.bright)}
-              onMouseLeave={(e) => (e.currentTarget.style.background = P.gold)}>
-              VIEW FULL PHOTO GALLERY →
-            </button>
-          </div>
-        </div>
-
       </div>
       <style>{`
         @media (max-width: 767px) {
           .raiders-wrap { padding: 24px 20px 60px !important; }
           .raiders-title { font-size: 46px !important; }
+          .raiders-compcard { grid-template-columns: 1fr !important; }
+          .raiders-compcard > div:last-child { min-height: 160px !important; }
         }
       `}</style>
     </div>

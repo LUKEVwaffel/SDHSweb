@@ -2,17 +2,21 @@ import { useEffect } from 'react';
 import { Routes, Route, Navigate, useParams, useLocation } from 'react-router-dom';
 import TopNav from './components/TopNav';
 import Hero from './components/Hero';
-import OpticHeroStrip from './components/OpticHeroStrip';
+import CompPhotoBand from './components/CompPhotoBand';
 import TabGrid from './components/TabGrid';
 import Bulletin from './components/Bulletin';
-import OpticPromoBand from './components/OpticPromoBand';
 import EventSpotlightBand from './components/EventSpotlightBand';
+// OPTIC campaign — dormant between competitions, restore next comp:
+//   import OpticHeroStrip from './components/OpticHeroStrip';
+//   import OpticPromoBand from './components/OpticPromoBand';
+//   import OpticPopup from './components/OpticPopup';
 import HomeNewsletterBand from './components/HomeNewsletterBand';
 import Footer from './components/Footer';
 import TabPlaceholder from './components/TabPlaceholder';
 import CadetManual from './components/CadetManual';
 import CreedHub from './components/creed/CreedHub';
 import Raiders from './components/Raiders';
+import CompGallery from './components/raiders/CompGallery';
 import RaiderTeam from './components/RaiderTeam';
 import Rifle from './components/Rifle';
 import Staff from './components/Staff';
@@ -27,8 +31,10 @@ import ReviewPortal from './components/review/ReviewPortal';
 import TvKiosk from './components/tv/TvKiosk';
 import TvRangeKiosk from './components/tv/TvRangeKiosk';
 import RaiderParentWelcome from './components/tv/RaiderParentWelcome';
-import OpticPopup from './components/OpticPopup';
+import CongratsPopup from './components/CongratsPopup';
+import CompPhotoVote from './components/CompPhotoVote';
 import EventFeedbackForm from './components/EventFeedbackForm';
+import OpticSurvey from './components/OpticSurvey';
 import BallLanding from './components/ball/BallLanding';
 import BallSignupWizard from './components/ball/signup/BallSignupWizard';
 import BallGuestVerify from './components/ball/BallGuestVerify';
@@ -76,31 +82,33 @@ export default function App() {
   if (location.pathname === '/tv/range') return <TvRangeKiosk />;
   if (location.pathname === '/raiderparent') return <RaiderParentWelcome />;
   if (location.pathname.startsWith('/feedback/')) return <EventFeedbackForm />;
+  if (location.pathname === '/vote') return <CompPhotoVote />;
+  if (location.pathname === '/survey') return <OpticSurvey />;
   if (location.pathname.startsWith('/ball/guest/')) return <BallGuestVerify />;
   if (location.pathname === '/ball/ops' || location.pathname.startsWith('/ball/ops/')) return <BallOpsPortal />;
   if (location.pathname === '/ball/dress' || location.pathname.startsWith('/ball/dress/')) return <BallDressPortal />;
 
   return (
     <div style={{ minHeight: '100vh', background: '#06101F', fontFamily: 'Inter, sans-serif' }}>
-      <OpticPopup />
+      <CongratsPopup />
       <TopNav />
 
       <Routes>
         <Route path="/" element={(
           <>
             <Hero />
-            <OpticHeroStrip />
+            <CompPhotoBand />
             <EventSpotlightBand />
             <BattalionCommand />
             <TabGrid />
             <Bulletin />
-            <OpticPromoBand />
             <HomeNewsletterBand />
           </>
         )} />
         <Route path="/cadet-manual" element={<CadetManual />} />
         <Route path="/creed" element={<CreedHub />} />
         <Route path="/raiders" element={<Raiders />} />
+        <Route path="/raiders/comp" element={<CompGallery />} />
         <Route path="/raiderteam" element={<RaiderTeam />} />
         <Route path="/rifle" element={<Rifle />} />
         <Route path="/staff" element={<Staff />} />

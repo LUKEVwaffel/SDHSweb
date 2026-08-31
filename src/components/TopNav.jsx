@@ -55,7 +55,9 @@ const NAV_ITEMS = [
     ],
   },
   { id: 'about', label: 'ABOUT' },
-  { id: 'submit', label: 'OPTIC', highlight: true, sub: 'Battalion photo network — upload photos' },
+  // OPTIC photo-network link — dormant between competitions, restore next comp:
+  //   { id: 'submit', label: 'OPTIC', highlight: true, sub: 'Battalion photo network — upload photos' },
+  { id: 'vote', label: 'VOTE', highlight: true, sub: 'Pick the Picture of the Comp' },
 ];
 
 // Flattened for the mobile drawer — dropdown children become their own rows,
