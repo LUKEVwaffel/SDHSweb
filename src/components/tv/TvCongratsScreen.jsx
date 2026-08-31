@@ -148,7 +148,7 @@ export default function TvCongratsScreen() {
             lineHeight: 0.98, color: P.cream, letterSpacing: '-0.02em',
           }}>
             Congratulations,<br />
-            <span style={{ color: P.bright }}>Trojan Battalion</span>
+            <span style={{ color: P.bright }}>Trojan Raiders</span>
           </h1>
 
           <div className="congrats-rise" style={{

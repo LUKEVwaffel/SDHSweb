@@ -58,7 +58,7 @@ export default function CongratsPopup() {
     <div
       role="dialog"
       aria-modal="true"
-      aria-label={`Congratulations, Trojan Battalion — ${CONGRATS_MEET.label}`}
+      aria-label={`Congratulations, Trojan Raiders — ${CONGRATS_MEET.label}`}
       onClick={close}
       style={{
         position: 'fixed', inset: 0, zIndex: 9500,
@@ -123,7 +123,7 @@ export default function CongratsPopup() {
             fontSize: 'clamp(34px, 7vw, 56px)', letterSpacing: '0.02em',
             color: P.cream, lineHeight: 1, margin: '16px 0 6px',
           }}>
-            CONGRATULATIONS,<br /><span style={{ color: P.bright }}>TROJAN BATTALION</span>
+            CONGRATULATIONS,<br /><span style={{ color: P.bright }}>TROJAN RAIDERS</span>
           </h2>
 
           <p className="cg-row" style={{ '--d': '0.18s',

@@ -2335,8 +2335,8 @@
     "semantic_hash": ""
   },
   "src/components/tv/TvCongratsScreen.jsx": {
-    "mtime": 1788168588.8922215,
-    "ast_hash": "1e9d179d494501bd65b8e690b953f02e",
+    "mtime": 1788169053.460824,
+    "ast_hash": "71203d6068916d55bc58c6f25ccd73cc",
     "semantic_hash": ""
   },
   "src/lib/tvCongratsData.js": {
@@ -2370,8 +2370,8 @@
     "semantic_hash": ""
   },
   "src/components/CongratsPopup.jsx": {
-    "mtime": 1788138319.1591744,
-    "ast_hash": "f4a54de0a75613bf04e663d99559e42c",
+    "mtime": 1788169050.4835985,
+    "ast_hash": "d98eb1cd675dcd9eec0da0fe204e47e5",
     "semantic_hash": ""
   },
   "src/components/admin/panels/photos/CompPhotoBallot.jsx": {
