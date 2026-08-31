@@ -67,12 +67,19 @@ export const SLIDE_TYPES = {
     defaultDurationSec: 15,
     defaultConfig: { company: PACKET_DUE_COMPANIES[0].id },
   },
+  raiderCongrats: {
+    label: 'Raider Team Congrats',
+    blurb: 'Full-screen Rhea County podium takeover with the live OPTIC photo carousel — the same board /tv shows.',
+    defaultDurationSec: 30,
+    defaultConfig: {},
+  },
 };
 
-// Slide type saved before the Packets Due reminder replaced the Raider Team
-// Congrats slide — resolved transparently so Range TV screens already
-// configured with the old type keep working without a database migration.
-const LEGACY_SLIDE_TYPE_ALIASES = { raiderCongrats: 'packetsDue' };
+// No legacy slide-type remaps in play right now. `raiderCongrats` was once
+// aliased to `packetsDue`; that alias is gone now that the Raider Team
+// Congrats slide is a real type again, so any screen still saved with
+// `raiderCongrats` resolves straight to the restored slide.
+const LEGACY_SLIDE_TYPE_ALIASES = {};
 export function resolveSlideType(type) {
   return LEGACY_SLIDE_TYPE_ALIASES[type] || type;
 }

@@ -1,6 +1,8 @@
 import { P, mono, oswald, fraunces, inter, fs, sp, ease } from '../admin/theme.js';
 import { CONGRATS_MEET, CONGRATS_TROPHIES, CONGRATS_PHOTOS } from '../../lib/tvCongratsData.js';
 import { useCompPhotoPoll } from '../../hooks/useCompPhotoPoll.js';
+import { useRheaPhotos } from '../../hooks/useRheaPhotos.js';
+import { feedChip } from '../../lib/rheaComp.js';
 import TvPhotoCarousel from './TvPhotoCarousel.jsx';
 
 // Full-screen /tv takeover celebrating a meet result. Left column = the
@@ -78,13 +80,30 @@ export default function TvCongratsScreen() {
   // Once the Picture of the Comp winner is declared in DISPATCH, it leads the
   // carousel. Until then the screen is unchanged (winner === null).
   const { winner } = useCompPhotoPoll();
+
+  // Right column now pulls the whole OPTIC feed for the Rhea comp — every
+  // published photo, Luke's AND the parents', not just the hardcoded
+  // CONGRATS_PHOTOS placeholders. 'public' scope = visibility public + status
+  // live, the same set the /rhea (OPTIC) feed shows. Live-synced, so a new
+  // parent upload appears on the kiosk without a reload. Falls back to
+  // CONGRATS_PHOTOS only while the feed is genuinely empty.
+  const { photos: opticRows } = useRheaPhotos({ scope: 'public' });
+  const opticPhotos = opticRows.map((row, i) => ({
+    src: row.photo_url,
+    alt: row.uploader_name ? `OPTIC — ${row.uploader_name}` : `OPTIC photo ${i + 1}`,
+    title: feedChip(row) || CONGRATS_MEET.label,
+    focalX: row.focal_x ?? 0.5,
+    focalY: row.focal_y ?? 0.5,
+  }));
+
+  const basePhotos = opticPhotos.length ? opticPhotos : CONGRATS_PHOTOS;
   const photos = winner
     ? [{
         src: winner.photoUrl || winner.thumbUrl,
         alt: 'Picture of the Comp',
         title: 'Picture of the Comp',
-      }, ...CONGRATS_PHOTOS]
-    : CONGRATS_PHOTOS;
+      }, ...basePhotos]
+    : basePhotos;
 
   return (
     <div style={{
@@ -150,7 +169,7 @@ export default function TvCongratsScreen() {
 
       {/* Right — carousel. Leads with the Picture of the Comp winner once declared. */}
       <div style={{ height: '100%', width: '100%' }}>
-        <TvPhotoCarousel key={winner ? 'congrats-winner' : 'congrats'} photos={photos} />
+        <TvPhotoCarousel key={`congrats-${winner ? 'w' : 'x'}-${photos.length}`} photos={photos} />
       </div>
     </div>
   );

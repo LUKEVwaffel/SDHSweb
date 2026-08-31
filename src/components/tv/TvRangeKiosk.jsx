@@ -10,6 +10,7 @@ import TvRangeStaffScheduleScreen from './range/TvRangeStaffScheduleScreen.jsx';
 import TvRangeOffHoursScreen from './range/TvRangeOffHoursScreen.jsx';
 import TvRangePeriodEndingScreen from './range/TvRangePeriodEndingScreen.jsx';
 import TvRangeRotationLayout from './range/TvRangeRotationLayout.jsx';
+import TvCongratsScreen from './TvCongratsScreen.jsx';
 import TvPreviewBadge from './TvPreviewBadge.jsx';
 import TvRefreshNotice from './TvRefreshNotice.jsx';
 import TvRangeClock from './TvRangeClock.jsx';
@@ -25,7 +26,18 @@ import TvRangeClock from './TvRangeClock.jsx';
  * Upcoming Events / Notes from Staff layout (TvRangeRotationLayout.jsx) — a
  * dedicated Range-only replacement for the old TvStandardLayout reuse; Outside
  * (TvKiosk.jsx) still renders TvStandardLayout unchanged.
+ *
+ * Mirror of TvKiosk.jsx's CONGRATS_MODE: after the Rhea County meet, Range's
+ * 'rotation' phase — everything that runs *after* the bell-driven countdowns,
+ * welcome windows, period-ending reminders and off-hours screens — shows the
+ * Raider Team Congrats takeover (TvCongratsScreen, the same board /tv shows)
+ * instead of the slideshow rotation. Every scheduled phase above it is
+ * untouched. Flip RANGE_CONGRATS_MODE to false (or delete the branch) to
+ * restore TvRangeRotationLayout; `settings`/`config` stay wired so the revert
+ * is a one-line change.
  */
+const RANGE_CONGRATS_MODE = true;
+
 export default function TvRangeKiosk() {
   const now = useNowTicker();
   const { settings } = useTvDailySettings('range');
@@ -59,7 +71,9 @@ export default function TvRangeKiosk() {
       break;
     case 'rotation':
     default:
-      phaseContent = <TvRangeRotationLayout settings={settings} config={config} />;
+      phaseContent = RANGE_CONGRATS_MODE
+        ? <TvCongratsScreen />
+        : <TvRangeRotationLayout settings={settings} config={config} />;
   }
 
   return (
