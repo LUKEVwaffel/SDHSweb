@@ -86,9 +86,15 @@ export function isConnected(session, side /* 'tv' | 'remote' */) {
 
 // Remote -> session. Always bumps command_id so the TV re-applies even when a
 // value (e.g. a repeat seek to the same spot) is unchanged from last time.
+//
+// seek_to_sec is a per-command target, not sticky state: unless THIS intent is
+// itself a seek, it's cleared to null. Otherwise every command_id bump (rate,
+// play, pause, loop…) would make the TV re-seek to the last seek point.
 export async function sendRemoteIntent(sessionId, patch) {
+  const update = { ...patch, command_id: crypto.randomUUID() };
+  if (!('seek_to_sec' in patch)) update.seek_to_sec = null;
   const { error } = await SB.from('raider_tv_sessions')
-    .update({ ...patch, command_id: crypto.randomUUID() })
+    .update(update)
     .eq('id', sessionId);
   return { error };
 }

@@ -1,7 +1,7 @@
 # Graph Report - Trojan Battalion Folder  (2026-09-01)
 
 ## Corpus Check
-- 456 files · ~740,966 words
+- 456 files · ~741,018 words
 - Verdict: corpus is large enough that graph structure adds value.
 
 ## Summary
@@ -10,7 +10,7 @@
 - Token cost: 0 input · 0 output
 
 ## Graph Freshness
-- Built from commit: `519754b2`
+- Built from commit: `bf1517e1`
 - Run `git rev-parse HEAD` and compare to check if the graph is stale.
 - Run `graphify update .` after code changes (no API cost).
 
