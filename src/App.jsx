@@ -43,6 +43,8 @@ import BallDressPortal from './components/ball/dress/BallDressPortal';
 import Rhea from './components/rhea/Rhea';
 import LukeUploadRoute from './components/rhea/LukeUpload';
 import LukePwaRoute from './components/rhea/LukePwa';
+import RaiderTv from './components/raidertv/RaiderTv';
+import RaiderRemote from './components/raidertv/RaiderRemote';
 
 const TABS = [
   { id: 'cadet-manual', label: 'Cadet Manual',  short: 'MANUAL' },
@@ -80,6 +82,10 @@ export default function App() {
   if (location.pathname === '/lukepwa' || location.pathname.startsWith('/lukepwa/')) return <LukePwaRoute />;
   if (location.pathname === '/tv') return <TvKiosk />;
   if (location.pathname === '/tv/range') return <TvRangeKiosk />;
+  // Raider film-review: /raidertv is the display (shows a pair code),
+  // /raiderremote is the phone that drives it. Self-contained anon routes.
+  if (location.pathname === '/raidertv') return <RaiderTv />;
+  if (location.pathname === '/raiderremote') return <RaiderRemote />;
   if (location.pathname === '/raiderparent') return <RaiderParentWelcome />;
   if (location.pathname.startsWith('/feedback/')) return <EventFeedbackForm />;
   if (location.pathname === '/vote') return <CompPhotoVote />;

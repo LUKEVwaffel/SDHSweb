@@ -15,6 +15,7 @@ import AdvancedPanel from './panels/advanced/AdvancedPanel';
 import SelfAccountPanel from './panels/SelfAccountPanel';
 import MessagesPanel from './panels/messages/MessagesPanel';
 import TvRemotePanel from './panels/tvremote/TvRemotePanel';
+import RaiderTvPanel from './panels/raidertv/RaiderTvPanel';
 import BetaFeaturesPanel from './panels/beta/BetaFeaturesPanel';
 import CheckinPanel from './panels/CheckinPanel';
 import EventFeedbackPanel from './panels/feedback/EventFeedbackPanel';
@@ -33,7 +34,7 @@ const SECTION_LABEL = {
   people: 'PEOPLE', photos: 'PHOTOS', questions: 'FAQ QUESTIONS', email: 'EMAIL LIST',
   media: 'MEDIA', advanced: 'ADVANCED', account: 'MY ACCOUNT', messages: 'MESSAGES',
   tvremote: 'TV REMOTE', beta: 'BETA FEATURES', checkin: 'SITE CHECK-IN',
-  feedback: 'EVENT FEEDBACK', ball: 'MILITARY BALL',
+  feedback: 'EVENT FEEDBACK', ball: 'MILITARY BALL', raidertv: 'RAIDER TV',
 };
 
 // Which sections each role may see. s5 is scoped to the battalion calendar
@@ -75,7 +76,7 @@ const SECTION_LABEL = {
 // tv_daily_settings emergency guard to accept is_bc(); is_admin()/is_s6()/
 // is_s5() are untouched, so every other admin table stays locked to him.
 const ROLE_SECTIONS = {
-  s6: ['overview', 'events', 'people', 'photos', 'questions', 'email', 'media', 'messages', 'advanced', 'tvremote', 'beta', 'feedback', 'ball'],
+  s6: ['overview', 'events', 'people', 'photos', 'questions', 'email', 'media', 'messages', 'advanced', 'tvremote', 'raidertv', 'beta', 'feedback', 'ball'],
   s5: ['events', 'aars', 'messages', 'account', 'tvremote'],
   bc: ['tvremote'],
 };
@@ -117,6 +118,7 @@ export default function Dashboard({ onLogout, adminId, role = 's6' }) {
           {section === 'account'  && <SelfAccountPanel adminId={adminId} />}
           {section === 'messages' && <MessagesPanel adminId={adminId} />}
           {section === 'tvremote' && <TvRemotePanel adminId={adminId} role={role} />}
+          {section === 'raidertv' && <RaiderTvPanel adminId={adminId} />}
           {section === 'beta'     && <BetaFeaturesPanel adminId={adminId} />}
           {section === 'checkin'  && isLuke && <CheckinPanel />}
           {section === 'feedback' && <EventFeedbackPanel />}
