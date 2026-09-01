@@ -25,8 +25,8 @@
     "semantic_hash": "c1ee9ce6a4fe04105dbf8e619390df5e"
   },
   "src/App.jsx": {
-    "mtime": 1788263735.2144287,
-    "ast_hash": "c48fcce941fdc0a29d62ec0ddcdf7ff5",
+    "mtime": 1788138461.4205167,
+    "ast_hash": "2e7e6aa7e13ae8a2d36a69368798ca92",
     "semantic_hash": ""
   },
   "src/components/About.jsx": {
@@ -130,8 +130,8 @@
     "semantic_hash": ""
   },
   "src/components/admin/Dashboard.jsx": {
-    "mtime": 1788263806.4042273,
-    "ast_hash": "1285940c603df9e5526f7bfd7d735ef1",
+    "mtime": 1787918252.6089644,
+    "ast_hash": "5f4677c11aabb8e71e1ed091682a2562",
     "semantic_hash": ""
   },
   "src/components/admin/LoginScreen.jsx": {
@@ -150,8 +150,8 @@
     "semantic_hash": "872097bb6f2a4e8b32dfd0a1ba37dedc"
   },
   "src/components/admin/nav/Sidebar.jsx": {
-    "mtime": 1788263812.0113142,
-    "ast_hash": "d6e24cbac8ed89f4ebcdec88605ff6f5",
+    "mtime": 1787911701.9061034,
+    "ast_hash": "d42f1335a72f148fe2586a773e5074a2",
     "semantic_hash": ""
   },
   "src/components/admin/nav/StatusBar.jsx": {
@@ -2402,46 +2402,6 @@
   "src/components/tv/range/slides/SlideRaiderCongrats.jsx": {
     "mtime": 1788168602.5730743,
     "ast_hash": "cb3965dd0b99830b812cfd2f5cc3f96a",
-    "semantic_hash": ""
-  },
-  "src/components/admin/panels/raidertv/RaiderTvPanel.jsx": {
-    "mtime": 1788263789.7537148,
-    "ast_hash": "f65d08e39ab6a913a80c6d79c7a2281f",
-    "semantic_hash": ""
-  },
-  "src/components/raidertv/RaiderRemote.jsx": {
-    "mtime": 1788263724.4899635,
-    "ast_hash": "d3e776c7a60a6e0ad2f646fcf8b1b228",
-    "semantic_hash": ""
-  },
-  "src/components/raidertv/RaiderTv.jsx": {
-    "mtime": 1788263823.731559,
-    "ast_hash": "f23a4ea2e56ea51542ddda981e944c08",
-    "semantic_hash": ""
-  },
-  "src/components/raidertv/useQrDataUrl.js": {
-    "mtime": 1788263562.2677069,
-    "ast_hash": "aadc9b3b608fae5c940d1fcdaf47a636",
-    "semantic_hash": ""
-  },
-  "src/hooks/useRaiderTvState.js": {
-    "mtime": 1788263511.0962906,
-    "ast_hash": "4c27b3f858fa97e0f24d189dc5dd2614",
-    "semantic_hash": ""
-  },
-  "src/hooks/useRaiderVideos.js": {
-    "mtime": 1788263518.6665838,
-    "ast_hash": "80dd78b6fbd233658b043d7dffbb57ec",
-    "semantic_hash": ""
-  },
-  "src/lib/raiderTv.js": {
-    "mtime": 1788263500.3550713,
-    "ast_hash": "0187610403ed524427e0bdf9dffa8d42",
-    "semantic_hash": ""
-  },
-  "supabase/raider_tv.sql": {
-    "mtime": 1788263479.6373527,
-    "ast_hash": "6651c1d8d0583fd69d1c9ce066305dac",
     "semantic_hash": ""
   }
 }
