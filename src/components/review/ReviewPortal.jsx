@@ -32,6 +32,28 @@ function fmtDate(v) {
   return v ? new Date(v).toLocaleString() : '—';
 }
 
+// Post-login chooser: the 3 reviewers use one account for two jobs.
+function PortalPicker({ name, onEmail, onBall }) {
+  const card = {
+    display: 'block', width: '100%', textAlign: 'left', cursor: 'pointer',
+    padding: '20px 22px', marginBottom: 12,
+  };
+  return (
+    <div>
+      <h1 className="rv-h1" style={{ fontSize: 22, margin: '4px 0 6px' }}>Hi {name}</h1>
+      <p className="rv-sub" style={{ marginBottom: 22 }}>Which one are you here for?</p>
+      <button className="rv-row" style={card} onClick={onEmail}>
+        <div className="rv-row-title">Email Review</div>
+        <div className="rv-row-meta">Approve or deny outgoing DISPATCH email before it sends.</div>
+      </button>
+      <button className="rv-row" style={card} onClick={onBall}>
+        <div className="rv-row-title">Ball Payments</div>
+        <div className="rv-row-meta">Mark cash and field-trip forms received for Military Ball signups.</div>
+      </button>
+    </div>
+  );
+}
+
 export default function ReviewPortal() {
   const navigate = useNavigate();
   const location = useLocation();
@@ -43,6 +65,11 @@ export default function ReviewPortal() {
   const [reviewerEmail, setReviewerEmail] = useState('');
   const [showSettings, setShowSettings] = useState(false);
   const [hasPin, setHasPin] = useState(false);
+  // After login the reviewer picks which portal to use — Email Review (this
+  // component) or Ball Payments (/ball/ops, same account). null = show the
+  // picker; 'email' = show the review UI below. A ?draft deep link from a
+  // notification email skips the picker (see the mount effect).
+  const [portal, setPortal] = useState(null);
 
   const [rows, setRows] = useState([]);
   const [sentRows, setSentRows] = useState([]);
@@ -114,7 +141,10 @@ export default function ReviewPortal() {
 
   useEffect(() => {
     const draft = searchParams.get('draft');
-    if (draft) setFocusId(draft);
+    // A deep link to a specific draft, or landing straight on a sub-tab,
+    // means "I want email review" — skip the portal picker.
+    if (draft) { setFocusId(draft); setPortal('email'); }
+    if (location.pathname !== '/review') setPortal('email');
     verifyReviewerAndLoad();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
@@ -241,6 +271,14 @@ export default function ReviewPortal() {
     </div>
   );
 
+  if (phase === 'ready' && portal === null) return shell(
+    <PortalPicker
+      name={reviewerName}
+      onEmail={() => setPortal('email')}
+      onBall={() => { window.location.href = '/ball/ops'; }}
+    />
+  );
+
   if (open) {
     const isPending = openMode === 'pending';
     return shell(
@@ -347,7 +385,10 @@ export default function ReviewPortal() {
     <div>
       <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: 12 }}>
         <h1 className="rv-h1" style={{ fontSize: 22, margin: '4px 0 4px' }}>Hi {reviewerName}</h1>
-        <button className="rv-link" style={{ marginTop: 6 }} onClick={() => setShowSettings(true)}>Settings</button>
+        <div style={{ display: 'flex', gap: 14, marginTop: 6 }}>
+          <button className="rv-link" onClick={() => { setPortal(null); navigate('/review'); }}>Switch portal</button>
+          <button className="rv-link" onClick={() => setShowSettings(true)}>Settings</button>
+        </div>
       </div>
       <p className="rv-sub" style={{ marginBottom: 22 }}>
         {myRows.length} draft{myRows.length === 1 ? '' : 's'} awaiting your review.

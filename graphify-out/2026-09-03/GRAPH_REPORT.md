@@ -1,16 +1,16 @@
 # Graph Report - Trojan Battalion Folder  (2026-09-03)
 
 ## Corpus Check
-- 475 files · ~762,152 words
+- 475 files · ~762,269 words
 - Verdict: corpus is large enough that graph structure adds value.
 
 ## Summary
-- 2575 nodes · 5222 edges · 313 communities (185 shown, 128 thin omitted)
+- 2575 nodes · 5222 edges · 314 communities (186 shown, 128 thin omitted)
 - Extraction: 100% EXTRACTED · 0% INFERRED · 0% AMBIGUOUS · INFERRED: 16 edges (avg confidence: 0.71)
 - Token cost: 0 input · 0 output
 
 ## Graph Freshness
-- Built from commit: `5408bdb3`
+- Built from commit: `480f14a9`
 - Run `git rev-parse HEAD` and compare to check if the graph is stale.
 - Run `graphify update .` after code changes (no API cost).
 
@@ -289,6 +289,7 @@
 - ball_hardening.sql
 - ball_finalize.sql
 - RichTextField.jsx
+- pwa.js
 - TvStandardLayout.jsx
 
 ## God Nodes (most connected - your core abstractions)
@@ -318,7 +319,7 @@
 ## Import Cycles
 - None detected.
 
-## Communities (313 total, 128 thin omitted)
+## Communities (314 total, 128 thin omitted)
 
 ### Community 0 - "react"
 Cohesion: 0.10
@@ -453,8 +454,8 @@ Cohesion: 0.14
 Nodes (11): CommanderCard(), DayEventDetail(), EventCalendar(), fmtDate(), initials(), navBtn, P, eventOccursOnDate() (+3 more)
 
 ### Community 73 - "imageResize.js"
-Cohesion: 0.20
-Nodes (12): InstallStrip(), LukePwaRoute(), headTags(), installPwaHooks(), installRheaPwaHooks(), isIos(), registerPwa(), dotStepsOf() (+4 more)
+Cohesion: 0.31
+Nodes (7): InstallStrip(), isIos(), dotStepsOf(), flavor(), RheaOnboarding(), sequence(), markOnboardedRhea()
 
 ### Community 74 - "Syncing"
 Cohesion: 0.07
@@ -885,8 +886,8 @@ Cohesion: 0.43
 Nodes (5): CommanderCard(), initials(), RaiderParentWelcome(), useClock(), useQrDataUrl()
 
 ### Community 300 - "RaiderCarousel.jsx"
-Cohesion: 0.12
-Nodes (23): TagGrid(), isStandalone(), FeedItem(), Reel(), Rhea(), RheaApp(), RheaLocked(), WALK_STEPS (+15 more)
+Cohesion: 0.13
+Nodes (19): TagGrid(), FeedItem(), Reel(), RheaApp(), WALK_STEPS, PwaUpdateBar(), usePwaUpdate(), resolveMode() (+11 more)
 
 ### Community 301 - "TvRefreshNotice"
 Cohesion: 0.29
@@ -903,6 +904,10 @@ Nodes (4): buildRound(), DIFFICULTY, FillBlankGame(), pickBlankIndices()
 ### Community 307 - "ball_finalize.sql"
 Cohesion: 0.25
 Nodes (3): public.ball_config, public.ball_dress_staff, public.ball_signups
+
+### Community 310 - "pwa.js"
+Cohesion: 0.29
+Nodes (9): LukePwaRoute(), headTags(), installPwaHooks(), installRheaPwaHooks(), isStandalone(), registerPwa(), Rhea(), RheaLocked() (+1 more)
 
 ### Community 312 - "TvStandardLayout.jsx"
 Cohesion: 0.18

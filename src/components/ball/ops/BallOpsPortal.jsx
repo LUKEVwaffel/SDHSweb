@@ -96,6 +96,7 @@ export default function BallOpsPortal() {
 
   return shell(
     <div>
+      <button className="rv-link" onClick={() => { window.location.href = '/review'; }}>&lsaquo; Switch portal</button>
       <div className="bp-head">
         <h1 className="bp-title">Ball Payments</h1>
         <button className="bp-refresh" onClick={loadAll}>Refresh</button>

@@ -2040,8 +2040,8 @@
     "semantic_hash": ""
   },
   "src/components/ball/signup/StepDocumentation.jsx": {
-    "mtime": 1788440594.192339,
-    "ast_hash": "44ae5fa0d2d9d9c3beb87ca4c3f541e5",
+    "mtime": 1788444223.1636715,
+    "ast_hash": "cdf0d44a997fd4ce1a3dee682e7d0ab7",
     "semantic_hash": ""
   },
   "src/components/ball/signup/StepGuestInfo.jsx": {
@@ -2095,8 +2095,8 @@
     "semantic_hash": ""
   },
   "supabase/functions/ball-submit-signup/index.ts": {
-    "mtime": 1788440564.0576115,
-    "ast_hash": "a3928426ec1a6d7ce375faf5f4ec2740",
+    "mtime": 1788444189.6743968,
+    "ast_hash": "50526b590c087e97bd80bd49b2ec8b52",
     "semantic_hash": ""
   },
   "supabase/functions/notify-ball-status-update/index.ts": {
@@ -2490,8 +2490,8 @@
     "semantic_hash": ""
   },
   "supabase/ball_guest_model.sql": {
-    "mtime": 1788440461.630126,
-    "ast_hash": "382786e24b3f5cab9647a38168fe2645",
+    "mtime": 1788444254.7962315,
+    "ast_hash": "9fdd0579a4fe6097dc606810108b0d35",
     "semantic_hash": ""
   },
   "src/components/admin/panels/ball/BallOverviewTab.jsx": {
