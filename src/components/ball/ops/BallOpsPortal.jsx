@@ -26,6 +26,13 @@ export default function BallOpsPortal() {
   const [guestsBySignup, setGuestsBySignup] = useState({});
   const [busyId, setBusyId] = useState(null);
   const [q, setQ] = useState('');
+  const [flash, setFlash] = useState(null); // { tone: 'ok' | 'err', msg }
+
+  useEffect(() => {
+    if (!flash || flash.tone === 'err') return undefined;
+    const t = setTimeout(() => setFlash(null), 3500);
+    return () => clearTimeout(t);
+  }, [flash]);
 
   const loadAll = useCallback(async () => {
     const [{ data: signups, error: sErr }, { data: guests, error: gErr }] = await Promise.all([
@@ -51,15 +58,33 @@ export default function BallOpsPortal() {
 
   useEffect(() => { verifyAndLoad(); }, [verifyAndLoad]);
 
-  async function toggle(row, field) {
+  async function toggle(row, field, guest) {
+    const label = field === 'cash_received' ? 'cash payment' : 'field trip form';
+    const turningOn = !row[field];
+    const who = `${row.cadet_name}${guest?.name ? ` (+ ${guest.name})` : ''}`;
+    const ok = window.confirm(
+      turningOn
+        ? `Mark ${label} RECEIVED for ${who}?`
+        : `REVOKE ${label} for ${who}? It will show as not received again.`,
+    );
+    if (!ok) return;
+
     setBusyId(row.id);
-    const nextValue = !row[field];
-    const { error } = await SB.from('ball_signups').update({ [field]: nextValue }).eq('id', row.id);
-    if (!error) {
-      await SB.functions.invoke('notify-ball-status-update', { body: { signup_id: row.id, field: field === 'cash_received' ? 'cash' : 'form' } });
-      await loadAll();
+    setFlash(null);
+    const { error } = await SB.from('ball_signups').update({ [field]: turningOn }).eq('id', row.id);
+    if (error) {
+      setBusyId(null);
+      setFlash({ tone: 'err', msg: `Could not update: ${error.message}` });
+      return;
     }
+    // Notification is fire-and-forget — a failed email must not block the flip.
+    await SB.functions
+      .invoke('notify-ball-status-update', { body: { signup_id: row.id, field: field === 'cash_received' ? 'cash' : 'form' } })
+      .catch(() => {});
+    await loadAll();
     setBusyId(null);
+    const Label = label.charAt(0).toUpperCase() + label.slice(1);
+    setFlash({ tone: 'ok', msg: `${Label} ${turningOn ? 'marked received' : 'revoked'} for ${who}.` });
   }
 
   const settled = (r) => r.cash_received && (!r.field_trip_form_required || r.field_trip_form_received);
@@ -107,6 +132,22 @@ export default function BallOpsPortal() {
         <span className="bp-stat"><b>{awaiting.length}</b> awaiting guest</span>
         <span className={`bp-stat ${done.length === totalVerified && totalVerified > 0 ? 'is-done' : ''}`}><b>{done.length}</b> settled</span>
       </div>
+
+      {flash && (
+        <div
+          role="status"
+          style={{
+            display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12,
+            border: `1px solid ${flash.tone === 'err' ? 'var(--rv-red)' : 'var(--rv-green)'}`,
+            background: flash.tone === 'err' ? 'var(--rv-red-soft)' : 'var(--rv-green-soft)',
+            color: flash.tone === 'err' ? 'var(--rv-red)' : 'var(--rv-green)',
+            borderRadius: 'var(--rv-radius)', padding: '10px 14px', fontSize: 13, marginBottom: 18,
+          }}
+        >
+          <span>{flash.msg}</span>
+          <button className="rv-link" style={{ margin: 0, color: 'inherit' }} onClick={() => setFlash(null)}>Dismiss</button>
+        </div>
+      )}
 
       {rows.length > 6 && (
         <input className="bp-search" placeholder="Search by cadet or guest name…" value={q} onChange={(e) => setQ(e.target.value)} />
@@ -168,12 +209,22 @@ function OpsRow({ r, guest, busy, onToggle, state }) {
 
       {state !== 'wait' && (
         <div className="bp-actions">
-          <button className={`bp-toggle ${r.cash_received ? 'is-on' : ''}`} disabled={busy} onClick={() => onToggle(r, 'cash_received')}>
-            {r.cash_received ? '✓ Cash' : 'Cash'}
+          <button
+            className={`bp-toggle ${r.cash_received ? 'is-on' : ''}`}
+            disabled={busy}
+            title={r.cash_received ? 'Click to revoke cash received' : 'Click to mark cash received'}
+            onClick={() => onToggle(r, 'cash_received', guest)}
+          >
+            {r.cash_received ? '✓ Cash — revoke' : 'Cash received'}
           </button>
           {r.field_trip_form_required && (
-            <button className={`bp-toggle ${r.field_trip_form_received ? 'is-on' : ''}`} disabled={busy} onClick={() => onToggle(r, 'field_trip_form_received')}>
-              {r.field_trip_form_received ? '✓ Form' : 'Form'}
+            <button
+              className={`bp-toggle ${r.field_trip_form_received ? 'is-on' : ''}`}
+              disabled={busy}
+              title={r.field_trip_form_received ? 'Click to revoke form received' : 'Click to mark form received'}
+              onClick={() => onToggle(r, 'field_trip_form_received', guest)}
+            >
+              {r.field_trip_form_received ? '✓ Form — revoke' : 'Form received'}
             </button>
           )}
         </div>
