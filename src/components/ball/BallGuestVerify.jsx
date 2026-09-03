@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { useLocation } from 'react-router-dom';
 import { supabase as SB } from '../../lib/supabaseClient';
 import { guestVerify } from '../../lib/ballApi';
+import { DRESS_APPROVERS, WESTON } from '../../lib/ballApprovers';
 import { P, mono, oswald } from '../admin/theme';
 import './ball.css';
 import { FadeUp, Skeleton, Spinner } from './ballUi';
@@ -22,7 +23,7 @@ export default function BallGuestVerify() {
 
   useEffect(() => {
     SB.from('ball_config')
-      .select('dress_code_text, dress_approvers, weston_name, weston_phone')
+      .select('dress_code_text')
       .maybeSingle()
       .then(({ data }) => setConfig(data || null));
   }, []);
@@ -84,12 +85,12 @@ export default function BallGuestVerify() {
                   <p style={{ fontFamily: mono, fontSize: 12, color: P.mute, lineHeight: 1.6, marginTop: 10 }}>
                     <strong style={{ color: P.cream }}>Wearing a dress?</strong> Text a photo of it to one of these approvers:
                   </p>
-                  {(config?.dress_approvers || []).map((a, i) => (
-                    <div key={i} style={{ fontFamily: mono, fontSize: 13, padding: '5px 0' }}>{a.name} · {a.phone}</div>
+                  {DRESS_APPROVERS.map((a) => (
+                    <div key={a.name} style={{ fontFamily: mono, fontSize: 13, padding: '5px 0' }}>{a.name} · {a.phone}</div>
                   ))}
                   <p style={{ fontFamily: mono, fontSize: 12, color: P.mute, lineHeight: 1.6, marginTop: 10 }}>
                     <strong style={{ color: P.cream }}>Male guest?</strong> You're not in uniform, so text a photo of your outfit to{' '}
-                    {config?.weston_name || 'Weston'}{config?.weston_phone ? ` at ${config.weston_phone}` : ''} for approval.
+                    {WESTON.name} at {WESTON.phone} for approval.
                   </p>
                 </>
               )}

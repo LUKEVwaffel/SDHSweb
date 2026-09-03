@@ -8,6 +8,8 @@
 // Deploy WITH jwt verification (default).
 import { json, preflight, escapeHtml, siteOrigin } from "../_shared/http.ts";
 import { serviceClient, getReviewer } from "../_shared/supabase.ts";
+import { ballEmailShell } from "../_shared/ballEmail.ts";
+import { loadBallTemplate, isDisabled, pick, paras } from "../_shared/ballTemplate.ts";
 
 const FIELD_LABEL: Record<string, string> = {
   cash: "Cash/check payment has been marked received",
@@ -35,10 +37,27 @@ Deno.serve(async (req) => {
     if (!signup) return json({ error: "not_found" }, 404);
     if (!signup.notification_email) return json({ ok: true, notified: false });
 
+    const t = await loadBallTemplate(svc, "signup_update");
+    if (isDisabled(t)) return json({ ok: true, notified: false, skipped: true });
+
     const RESEND_API_KEY = Deno.env.get("RESEND_API_KEY");
     const FROM = Deno.env.get("FROM_EMAIL") ?? "Trojan Battalion <onboarding@resend.dev>";
     const origin = siteOrigin();
     if (!RESEND_API_KEY) return json({ error: "RESEND_API_KEY not configured" }, 500);
+
+    const whatText = FIELD_LABEL[field];
+    const vars = { cadet_name: escapeHtml(signup.cadet_name), what: escapeHtml(whatText) };
+    const noticeHtml = pick(t, "notice_html", "", vars);
+    const closingHtml = pick(t, "closing_html", "", vars);
+
+    const html = ballEmailShell({
+      preheader: whatText,
+      heading: pick(t, "heading", "Signup Update", vars),
+      introHtml: paras(pick(t, "intro_html", "{{what}} for {{cadet_name}}.", vars)),
+      noticeHtml: noticeHtml || undefined,
+      closingHtml: closingHtml ? paras(closingHtml) : undefined,
+      siteUrl: origin ? `${origin}/ball` : undefined,
+    });
 
     const res = await fetch("https://api.resend.com/emails", {
       method: "POST",
@@ -46,9 +65,9 @@ Deno.serve(async (req) => {
       body: JSON.stringify({
         from: FROM,
         to: [signup.notification_email],
-        subject: "Military Ball signup update",
-        html: `<p>${escapeHtml(FIELD_LABEL[field])} for ${escapeHtml(signup.cadet_name)}.</p>${origin ? `<p><a href="${escapeHtml(origin)}/ball">${escapeHtml(origin)}/ball</a></p>` : ""}`,
-        text: `${FIELD_LABEL[field]} for ${signup.cadet_name}.`,
+        subject: pick(t, "subject", "Military Ball signup update", vars),
+        html,
+        text: `${whatText} for ${signup.cadet_name}.`,
       }),
     });
 

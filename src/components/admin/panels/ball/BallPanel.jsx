@@ -5,16 +5,17 @@ import { Btn, Input, Label, PanelHeader } from '../../shared/ui';
 import BallDressStaffTab from './BallDressStaffTab';
 import BallOverviewTab from './BallOverviewTab';
 import BallReviewerAccountsTab from './BallReviewerAccountsTab';
+import BallEmailsTab from './BallEmailsTab';
+import { DRESS_APPROVERS, WESTON } from '../../../../lib/ballApprovers';
 
 const TABS = [
   { id: 'overview', label: 'OVERVIEW' },
   { id: 'settings', label: 'SETTINGS' },
+  { id: 'emails', label: 'EMAILS' },
   { id: 'dress-staff', label: 'ATTIRE STAFF ACCOUNTS' },
   { id: 'reviewers', label: 'REVIEW PORTAL ACCOUNTS' },
 ];
 const BUCKET = 'ball-assets';
-
-function emptyApprover() { return { name: '', phone: '', email: '' }; }
 
 // S-6-only Ball admin panel. Settings tab covers the full public-landing +
 // wizard config surface (dates, venue, dinner + flat menu, split pricing,
@@ -40,20 +41,12 @@ export default function BallPanel() {
     setConfig(cfg || {
       ball_date: '', signup_deadline: '', event_time_text: '', venue_address: '', venue_phone: '',
       dinner_caterer: '', dinner_menu: [], price_cadet: '', price_couple: '',
-      field_trip_form_pdf_url: '', dress_code_text: '', dress_approvers: [emptyApprover(), emptyApprover(), emptyApprover()],
-      weston_name: 'Weston', weston_phone: '',
+      field_trip_form_pdf_url: '', dress_code_text: '',
     });
     setGallery(photos || []);
   }
 
   function setField(field, value) { setConfig((c) => ({ ...c, [field]: value })); }
-  function setApprover(i, field, value) {
-    setConfig((c) => {
-      const next = [...(c.dress_approvers || [])];
-      next[i] = { ...(next[i] || emptyApprover()), [field]: value };
-      return { ...c, dress_approvers: next };
-    });
-  }
 
   const menu = Array.isArray(config?.dinner_menu) ? config.dinner_menu : [];
   function setMenuItem(i, field, value) {
@@ -83,9 +76,6 @@ export default function BallPanel() {
       price_couple: config.price_couple === '' || config.price_couple == null ? null : Number(config.price_couple),
       field_trip_form_pdf_url: config.field_trip_form_pdf_url || null,
       dress_code_text: config.dress_code_text || null,
-      dress_approvers: config.dress_approvers || [],
-      weston_name: config.weston_name || null,
-      weston_phone: config.weston_phone || null,
     }).eq('id', true);
     setSaving(false);
     setFlash(error ? `Save failed: ${error.message}` : 'Saved ✓');
@@ -143,6 +133,7 @@ export default function BallPanel() {
       </div>
 
       {tab === 'overview' && <BallOverviewTab />}
+      {tab === 'emails' && <BallEmailsTab />}
       {tab === 'dress-staff' && <BallDressStaffTab />}
       {tab === 'reviewers' && <BallReviewerAccountsTab />}
 
@@ -196,27 +187,19 @@ export default function BallPanel() {
             style={{ width: '100%', boxSizing: 'border-box', background: P.deep, border: `1px solid ${P.hair}`, color: P.cream, fontFamily: mono, fontSize: 13, padding: 12, marginBottom: sp[4] }}
           />
 
-          <Label>DRESS APPROVERS (3, female attire)</Label>
-          <div style={{ marginBottom: sp[4] }}>
-            {[0, 1, 2].map((i) => {
-              const a = config.dress_approvers?.[i] || emptyApprover();
-              return (
-                <div key={i} style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: sp[2], marginBottom: sp[2] }}>
-                  <Input placeholder="Name" value={a.name} onChange={(e) => setApprover(i, 'name', e.target.value)} />
-                  <Input placeholder="Phone" value={a.phone} onChange={(e) => setApprover(i, 'phone', e.target.value)} />
-                  <Input placeholder="Email" value={a.email} onChange={(e) => setApprover(i, 'email', e.target.value)} />
-                </div>
-              );
-            })}
+          <Label>ATTIRE APPROVERS (fixed in code)</Label>
+          <div style={{ border: `1px solid ${P.hair}`, background: P.deep, padding: sp[3], marginBottom: sp[2] }}>
+            {DRESS_APPROVERS.map((a) => (
+              <div key={a.name} style={{ fontFamily: mono, fontSize: 12, color: P.cream, padding: '3px 0' }}>
+                {a.name} · {a.phone} <span style={{ color: P.mute }}>— female attire</span>
+              </div>
+            ))}
+            <div style={{ fontFamily: mono, fontSize: 12, color: P.cream, padding: '3px 0' }}>
+              {WESTON.name} · {WESTON.phone} <span style={{ color: P.mute }}>— male-guest attire + Class A questions</span>
+            </div>
           </div>
-
-          <Label>WESTON · MALE-GUEST ATTIRE CONTACT</Label>
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: sp[2], marginBottom: sp[2] }}>
-            <Input placeholder="Name" value={config.weston_name || ''} onChange={(e) => setField('weston_name', e.target.value)} />
-            <Input placeholder="Phone" value={config.weston_phone || ''} onChange={(e) => setField('weston_phone', e.target.value)} />
-          </div>
-          <div style={{ fontFamily: mono, fontSize: 11, color: P.mute, marginBottom: sp[4] }}>
-            Shown to male cadets (Class A questions) and male guests (attire photo approval). Provision his login PIN under "Attire Staff Accounts".
+          <div style={{ fontFamily: mono, fontSize: 11, color: P.mute, marginBottom: sp[4], lineHeight: 1.6 }}>
+            Names and numbers are hardcoded (src/lib/ballApprovers.js) — a change needs a deploy. This panel only provisions their portal PIN logins under "Attire Staff Accounts". New-signup email alerts go to whatever addresses are set on those accounts (female signup → female-dress staff, male-guest signup → Weston).
           </div>
 
           <Label>LAST YEAR'S PHOTOS</Label>

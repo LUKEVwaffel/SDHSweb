@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { P, mono } from '../../admin/theme';
 import { supabase as SB } from '../../../lib/supabaseClient';
 import { submitSignup } from '../../../lib/ballApi';
+import { DRESS_APPROVERS, WESTON } from '../../../lib/ballApprovers';
 import { Btn, ErrorText } from './formUi';
 
 // Step 4 — documentation / info + final submit. Shows what the host owes
@@ -20,7 +21,7 @@ export default function StepDocumentation({ signupToken, cadetGender, cadetDetai
 
   useEffect(() => {
     SB.from('ball_config')
-      .select('field_trip_form_pdf_url, dress_code_text, dress_approvers, weston_name, weston_phone, price_cadet, price_couple')
+      .select('field_trip_form_pdf_url, dress_code_text, price_cadet, price_couple')
       .maybeSingle()
       .then(({ data }) => setConfig(data));
   }, []);
@@ -36,7 +37,6 @@ export default function StepDocumentation({ signupToken, cadetGender, cadetDetai
   const hostDue = (!hasGuest || isFriend) ? config?.price_cadet : config?.price_couple;
   const friendDue = isFriend ? config?.price_cadet : null;
   const isFemale = cadetGender === 'female';
-  const westonName = config?.weston_name || 'Weston';
 
   async function submit() {
     setBusy(true);
@@ -120,8 +120,8 @@ export default function StepDocumentation({ signupToken, cadetGender, cadetDetai
         <Section title="DRESS APPROVAL">
           <p style={p}>{config?.dress_code_text || 'Dress code details will be provided by S-6.'}</p>
           <p style={p}>Text a photo of your dress to one of the approvers below for approval:</p>
-          {(config?.dress_approvers || []).map((a, i) => (
-            <div key={i} style={{ fontFamily: mono, fontSize: 13, padding: '6px 0', borderBottom: i < config.dress_approvers.length - 1 ? `1px solid ${P.hair}` : 'none' }}>
+          {DRESS_APPROVERS.map((a, i) => (
+            <div key={a.name} style={{ fontFamily: mono, fontSize: 13, padding: '6px 0', borderBottom: i < DRESS_APPROVERS.length - 1 ? `1px solid ${P.hair}` : 'none' }}>
               {a.name} · {a.phone}
             </div>
           ))}
@@ -133,7 +133,7 @@ export default function StepDocumentation({ signupToken, cadetGender, cadetDetai
             photo-approval step.
           </p>
           <p style={p}>
-            Questions about your Class A? Contact {westonName}{config?.weston_phone ? ` at ${config.weston_phone}` : ''}.
+            Questions about your Class A? Contact {WESTON.name} at {WESTON.phone}.
           </p>
         </Section>
       )}

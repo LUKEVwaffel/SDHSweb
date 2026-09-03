@@ -9,6 +9,8 @@
 //   supabase functions deploy ball-guest-verify --no-verify-jwt
 import { json, preflight, escapeHtml, siteOrigin } from "../_shared/http.ts";
 import { serviceClient } from "../_shared/supabase.ts";
+import { ballEmailShell } from "../_shared/ballEmail.ts";
+import { loadBallTemplate, isDisabled, pick, paras } from "../_shared/ballTemplate.ts";
 
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return preflight();
@@ -24,7 +26,7 @@ Deno.serve(async (req) => {
 
     const { data: guest } = await svc
       .from("ball_guests")
-      .select("id, signup_id, verified_at")
+      .select("id, signup_id, verified_at, name")
       .eq("verification_token", tok)
       .maybeSingle();
     if (!guest) return json({ error: "not_found" }, 404);
@@ -53,15 +55,31 @@ Deno.serve(async (req) => {
       const RESEND_API_KEY = Deno.env.get("RESEND_API_KEY");
       const FROM = Deno.env.get("FROM_EMAIL") ?? "Trojan Battalion <onboarding@resend.dev>";
       const origin = siteOrigin();
-      if (RESEND_API_KEY) {
+      const t = await loadBallTemplate(svc, "guest_verified");
+      if (RESEND_API_KEY && !isDisabled(t)) {
+        const vars = {
+          cadet_name: escapeHtml(signup.cadet_name ?? ""),
+          guest_name: escapeHtml(guest.name ?? "your guest"),
+          site_url: origin ? escapeHtml(`${origin}/ball`) : "",
+        };
+        const defaultIntro = "Your guest has finished their part of the Military Ball signup. Your entry is now fully verified.";
+        const closing = pick(t, "closing_html", "", vars);
+        const html = ballEmailShell({
+          preheader: "Your Military Ball guest has been verified.",
+          heading: pick(t, "heading", "Guest Confirmed", vars),
+          introHtml: paras(pick(t, "intro_html", defaultIntro, vars)),
+          noticeHtml: pick(t, "notice_html", "", vars) || undefined,
+          closingHtml: closing ? paras(closing) : undefined,
+          siteUrl: origin ? `${origin}/ball` : undefined,
+        });
         await fetch("https://api.resend.com/emails", {
           method: "POST",
           headers: { Authorization: `Bearer ${RESEND_API_KEY}`, "Content-Type": "application/json" },
           body: JSON.stringify({
             from: FROM,
             to: [signup.notification_email],
-            subject: "Your Ball guest is verified",
-            html: `<p>Your guest has finished their part of the Military Ball signup — your entry is now fully verified.</p>${origin ? `<p><a href="${escapeHtml(origin)}/ball">${escapeHtml(origin)}/ball</a></p>` : ""}`,
+            subject: pick(t, "subject", "Your Ball guest is verified", { cadet_name: signup.cadet_name ?? "", guest_name: guest.name ?? "" }),
+            html,
             text: "Your guest has finished their part of the Military Ball signup — your entry is now fully verified.",
           }),
         }).catch((e) => console.error("ball-guest-verify notify cadet email send", e));

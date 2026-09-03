@@ -10,6 +10,8 @@
 //   supabase functions deploy notify-ball-allergy --no-verify-jwt
 import { json, preflight, escapeHtml, siteOrigin } from "../_shared/http.ts";
 import { serviceClient } from "../_shared/supabase.ts";
+import { ballEmailShell } from "../_shared/ballEmail.ts";
+import { loadBallTemplate, isDisabled, pick, paras } from "../_shared/ballTemplate.ts";
 
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return preflight();
@@ -36,11 +38,29 @@ Deno.serve(async (req) => {
     const recipients = (s5 ?? []).map((r: { email: string }) => r.email).filter(Boolean);
     if (!recipients.length) return json({ ok: true, notified: 0 });
 
+    const t = await loadBallTemplate(svc, "allergy_flag");
+    if (isDisabled(t)) return json({ ok: true, notified: 0, skipped: true });
+
     const RESEND_API_KEY = Deno.env.get("RESEND_API_KEY");
     const FROM = Deno.env.get("FROM_EMAIL") ?? "Trojan Battalion <onboarding@resend.dev>";
     if (!RESEND_API_KEY) return json({ error: "RESEND_API_KEY not configured" }, 500);
     const origin = siteOrigin();
     const link = origin ? `${origin}/admin/ballallergy` : null;
+
+    const cadet = escapeHtml(signup.cadet_name);
+    const vars = { cadet_name: cadet, dispatch_url: link ? escapeHtml(link) : "" };
+    const defaultIntro = "{{cadet_name}} flagged a food allergy on their Military Ball signup.\n\nFollow up with them directly about food options.";
+    const closing = pick(t, "closing_html", "", vars);
+
+    const html = ballEmailShell({
+      preheader: `${signup.cadet_name} flagged a food allergy on their Ball signup.`,
+      heading: pick(t, "heading", "Food Allergy Flagged", vars),
+      introHtml: paras(pick(t, "intro_html", defaultIntro, vars)),
+      noticeHtml: pick(t, "notice_html", "", vars) || undefined,
+      closingHtml: closing ? paras(closing) : undefined,
+      cta: link ? { label: "Open the Ball allergy list", url: link } : null,
+      siteUrl: origin ? `${origin}/ball` : undefined,
+    });
 
     const res = await fetch("https://api.resend.com/emails", {
       method: "POST",
@@ -48,9 +68,8 @@ Deno.serve(async (req) => {
       body: JSON.stringify({
         from: FROM,
         to: recipients,
-        subject: `New Ball allergy flag: ${signup.cadet_name}`,
-        html: `<p><strong>${escapeHtml(signup.cadet_name)}</strong> flagged a food allergy on their Military Ball signup.</p>
-<p>Follow up with them directly about food options.${link ? ` <a href="${escapeHtml(link)}">Open the Ball allergy list in DISPATCH</a>.` : ""}</p>`,
+        subject: pick(t, "subject", "New Ball allergy flag: {{cadet_name}}", { cadet_name: signup.cadet_name }),
+        html,
         text: `${signup.cadet_name} flagged a food allergy on their Military Ball signup. Follow up directly.${link ? `\n\n${link}` : ""}`,
       }),
     });

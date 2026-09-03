@@ -1990,13 +1990,13 @@
     "semantic_hash": ""
   },
   "src/components/admin/panels/ball/BallPanel.jsx": {
-    "mtime": 1788441258.864846,
-    "ast_hash": "47cbb4957d52a6d4783a254f6401603c",
+    "mtime": 1788470475.1055555,
+    "ast_hash": "8316620f0b0be5f4edb4c751b2476c77",
     "semantic_hash": ""
   },
   "src/components/ball/BallGuestVerify.jsx": {
-    "mtime": 1788428979.1059647,
-    "ast_hash": "045b01b76e8a4efcb68f07e2329e9691",
+    "mtime": 1788470437.6550713,
+    "ast_hash": "c4763d472a0648d26d384fe23b4fcbc8",
     "semantic_hash": ""
   },
   "src/components/ball/BallLanding.jsx": {
@@ -2040,8 +2040,8 @@
     "semantic_hash": ""
   },
   "src/components/ball/signup/StepDocumentation.jsx": {
-    "mtime": 1788453755.1654584,
-    "ast_hash": "56ee01aebd9264a765e7f8ab07fbe779",
+    "mtime": 1788470421.6651847,
+    "ast_hash": "589ba59e62829c5cd186284a9fb65cb9",
     "semantic_hash": ""
   },
   "src/components/ball/signup/StepGuestInfo.jsx": {
@@ -2080,8 +2080,8 @@
     "semantic_hash": ""
   },
   "supabase/functions/ball-guest-verify/index.ts": {
-    "mtime": 1787830919.271321,
-    "ast_hash": "b4b1d20330c3862a50ed2e5971f83efa",
+    "mtime": 1788470665.8673284,
+    "ast_hash": "4f5102f55405adbd016b46119bbcba63",
     "semantic_hash": ""
   },
   "supabase/functions/ball-lookup-cadet/index.ts": {
@@ -2095,13 +2095,13 @@
     "semantic_hash": ""
   },
   "supabase/functions/ball-submit-signup/index.ts": {
-    "mtime": 1788448549.810086,
-    "ast_hash": "515fa2e0fa6bafb0e14b11e657aa8125",
+    "mtime": 1788470761.9692914,
+    "ast_hash": "9ae85ad8d7212a293791d81bbdbd5164",
     "semantic_hash": ""
   },
   "supabase/functions/notify-ball-status-update/index.ts": {
-    "mtime": 1787830952.8342943,
-    "ast_hash": "e97f9f01ba6868ad6849a62d67db127d",
+    "mtime": 1788470623.482848,
+    "ast_hash": "a25a0b99671ee1461107ada5fcd7660c",
     "semantic_hash": ""
   },
   "supabase/dispatch_bc_role.sql": {
@@ -2470,8 +2470,8 @@
     "semantic_hash": ""
   },
   "supabase/functions/notify-ball-allergy/index.ts": {
-    "mtime": 1788429104.278068,
-    "ast_hash": "ddae7c781aa94ff8bbbbf2445b73545a",
+    "mtime": 1788470645.2388654,
+    "ast_hash": "eadd2edf0f3f63f6a9e077e02fd22e41",
     "semantic_hash": ""
   },
   "supabase/functions/send-allergy-email/index.ts": {
@@ -2552,6 +2552,41 @@
   "src/lib/schoolEmail.js": {
     "mtime": 1788458076.2567484,
     "ast_hash": "15c1a170b4664cc1712dbbf2a93559a5",
+    "semantic_hash": ""
+  },
+  "src/components/admin/panels/ball/BallEmailsTab.jsx": {
+    "mtime": 1788470517.3398702,
+    "ast_hash": "58de8c0a1db34c3763196022cd075fab",
+    "semantic_hash": ""
+  },
+  "src/lib/ballApprovers.js": {
+    "mtime": 1788470396.0798922,
+    "ast_hash": "ef0a4ebd38301ccc9ca40797f9014229",
+    "semantic_hash": ""
+  },
+  "supabase/ball_email_templates.sql": {
+    "mtime": 1788470899.8599808,
+    "ast_hash": "e862c07d3e80815b4c486ffcb494df76",
+    "semantic_hash": ""
+  },
+  "supabase/functions/_shared/ballApprovers.ts": {
+    "mtime": 1788470399.4167776,
+    "ast_hash": "4790750ccec6a7eec763ac1c9508795b",
+    "semantic_hash": ""
+  },
+  "supabase/functions/_shared/ballTemplate.ts": {
+    "mtime": 1788470826.8609576,
+    "ast_hash": "e304ac282c57240ac7cd79033f84f7f8",
+    "semantic_hash": ""
+  },
+  "supabase/functions/ball-email-preview/index.ts": {
+    "mtime": 1788470801.9621837,
+    "ast_hash": "8b0d6831db37cf169efcd1a0bb29c6e0",
+    "semantic_hash": ""
+  },
+  "supabase/functions/notify-ball-attire/index.ts": {
+    "mtime": 1788470605.7734082,
+    "ast_hash": "928c4a88018f00a6e174b80b55281c94",
     "semantic_hash": ""
   }
 }

@@ -20,6 +20,8 @@ import { serviceClient } from "../_shared/supabase.ts";
 import { verifySignupToken } from "../_shared/signupToken.ts";
 import { ballEmailShell } from "../_shared/ballEmail.ts";
 import type { BallEmailParticular } from "../_shared/ballEmail.ts";
+import { loadBallTemplate, isDisabled, pick, paras } from "../_shared/ballTemplate.ts";
+import type { BallTemplate } from "../_shared/ballTemplate.ts";
 
 function required(v: unknown): string {
   return typeof v === "string" ? v.trim() : "";
@@ -86,6 +88,7 @@ interface ConfirmInfo {
   friendName: string | null;
   friendAmountDue: number | null;
   friendPaymentMethod: "host_delivers" | "self_pays" | null;
+  tmpl: BallTemplate | null; // S-6 prose overrides (ball_email_templates: registration_received)
 }
 
 // Registration receipt for the cadet. Not a click-to-verify link (that's the
@@ -98,6 +101,8 @@ async function sendCadetConfirmation(to: string, info: ConfirmInfo): Promise<voi
     console.error("ball-submit-signup: RESEND_API_KEY not configured, cadet confirmation not sent");
     return;
   }
+  const t = info.tmpl;
+  if (isDisabled(t)) return; // S-6 turned this email off
 
   const amount = money(info.amountDue);
   const formAttach = info.fieldTripFormRequired ? fieldTripAttachment(info.cfg) : [];
@@ -142,18 +147,39 @@ async function sendCadetConfirmation(to: string, info: ConfirmInfo): Promise<voi
     ? escapeHtml(new Date(`${info.cfg.signup_deadline}T00:00:00`).toLocaleDateString("en-US", { month: "long", day: "numeric", year: "numeric" }))
     : null;
 
+  const metaParen = meta ? ` (${meta})` : "";
+  const vars: Record<string, string> = {
+    name: escapeHtml(info.name),
+    meta: metaParen,
+    deadline: deadlinePretty ?? "",
+    amount_due: amount ?? "",
+    ball_date: info.cfg?.ball_date ? escapeHtml(fmtLongDate(info.cfg.ball_date)) : "",
+  };
+  const noticeRendered = pick(
+    t,
+    "notice_html",
+    deadlinePretty ? "All items above must be completed on or before <strong>{{deadline}}</strong>." : "",
+    vars,
+  );
   const html = ballEmailShell({
     preheader: "Your Military Ball registration has been received.",
-    heading: "Registration Received",
-    introHtml: `<p style="margin:0 0 12px;">${escapeHtml(info.name)},</p>
-<p style="margin:0;">Your registration for the Trojan Battalion Military Ball has been received and recorded${meta ? ` (${meta})` : ""}.</p>`,
+    heading: pick(t, "heading", "Registration Received", vars),
+    introHtml: paras(pick(
+      t,
+      "intro_html",
+      "{{name}},\n\nYour registration for the Trojan Battalion Military Ball has been received and recorded{{meta}}.",
+      vars,
+    )),
     particulars: eventParticulars(info.cfg),
     listTitle: "What Remains",
     listItems: todo,
-    noticeHtml: deadlinePretty
-      ? `All items above must be completed on or before <strong>${deadlinePretty}</strong>.`
-      : undefined,
-    closingHtml: `<p style="margin:0;">You will receive further notice as your payment${info.fieldTripFormRequired ? " and permission form are" : " is"} recorded${info.hasGuest ? ", and once your guest confirms" : ""}.</p>`,
+    noticeHtml: noticeRendered || undefined,
+    closingHtml: paras(pick(
+      t,
+      "closing_html",
+      "You will receive further notice as your payment and any required forms are recorded.",
+      vars,
+    )),
     siteUrl: siteOrigin() ? `${siteOrigin()}/ball` : undefined,
   });
 
@@ -172,7 +198,9 @@ ${deadlinePretty ? `\nAll items due on or before ${deadlinePretty}.` : ""}`;
     body: JSON.stringify({
       from: FROM,
       to: [to],
-      subject: "Trojan Battalion Military Ball: Registration Received",
+      subject: pick(t, "subject", "Trojan Battalion Military Ball: Registration Received", {
+        name: info.name, meta: metaParen, deadline: deadlinePretty ?? "",
+      }),
       html,
       text,
       ...(formAttach.length ? { attachments: formAttach } : {}),
@@ -377,6 +405,19 @@ Deno.serve(async (req) => {
         .catch((e) => console.error("ball-submit-signup notify-ball-allergy", e));
     }
 
+    // Alert the attire approvers on a new signup: female attendee → female-dress
+    // staff; male guest → Weston. For a solo signup we can fire now; when there
+    // is a guest, this runs again after the guest row exists (below) so the
+    // guest's gender is seen. Fire-and-forget.
+    if (!hasGuest) {
+      svc.functions.invoke("notify-ball-attire", { body: { signup_id: signup.id } })
+        .catch((e) => console.error("ball-submit-signup notify-ball-attire (solo)", e));
+    }
+
+    // S-6-editable prose for the two signup emails (ball_email_templates).
+    // Loaded once here; null on any failure → each sender uses its defaults.
+    const tRegistration = await loadBallTemplate(svc, "registration_received");
+
     // Confirmation / receipt email to the cadet (fire-and-forget). Address is
     // notification_email, which equals the required allergy email whenever a
     // food allergy was flagged. No address → the cadet opted out of emails.
@@ -395,6 +436,7 @@ Deno.serve(async (req) => {
         friendName: guestType === "friend" ? guestName : null,
         friendAmountDue,
         friendPaymentMethod,
+        tmpl: tRegistration,
       }).catch((e) => console.error("ball-submit-signup cadet confirmation email", e));
     }
 
@@ -441,6 +483,12 @@ Deno.serve(async (req) => {
       return json({ error: "internal error" }, 500);
     }
 
+    // Attire approver alert — now that the guest row exists (female attendee →
+    // female-dress staff, male guest → Weston). Fire-and-forget.
+    svc.functions.invoke("notify-ball-attire", { body: { signup_id: signup.id } })
+      .catch((e) => console.error("ball-submit-signup notify-ball-attire", e));
+
+    const tGuest = await loadBallTemplate(svc, "guest_invitation");
     const RESEND_API_KEY = Deno.env.get("RESEND_API_KEY");
     const FROM = Deno.env.get("FROM_EMAIL") ?? "Trojan Battalion <onboarding@resend.dev>";
     const origin = siteOrigin();
@@ -457,14 +505,32 @@ Deno.serve(async (req) => {
       const guestFormText = guestIsSdhsStudent
         ? `\n\nYou attend Soddy Daisy High School, so a signed field trip permission form is also required${cfg?.field_trip_form_pdf_url ? " (attached to this email)" : " — it will be sent separately or picked up from Chief's desk"}. Physical signature only; return it to Chief or 1SG.`
         : "";
+      // S-6 prose overrides. This email is NOT gated by `enabled` — the guest
+      // cannot confirm without the link, so it always sends.
+      const gVars: Record<string, string> = {
+        guest_name: escapeHtml(guestName),
+        cadet_name: `<strong style="color:#F4ECD8;">${escapeHtml(cadet.name)}</strong>`,
+        verify_url: escapeHtml(link),
+      };
+      const guestClosing = paras(pick(
+        tGuest,
+        "closing_html",
+        "This step confirms any food allergies and your review of the attire requirements. Your host's registration is not complete until it is done.",
+        gVars,
+      ), { lastMargin: "10px" });
       const guestHtml = ballEmailShell({
         preheader: `${cadet.name} has invited you to the Trojan Battalion Military Ball.`,
-        heading: "You Are Invited",
-        introHtml: `<p style="margin:0 0 12px;">${escapeHtml(guestName)},</p>
-<p style="margin:0;"><strong style="color:#F4ECD8;">${escapeHtml(cadet.name)}</strong> has requested the honor of your company at the Trojan Battalion Military Ball.</p>`,
+        heading: pick(tGuest, "heading", "You Are Invited", gVars),
+        introHtml: paras(pick(
+          tGuest,
+          "intro_html",
+          "{{guest_name}},\n\n{{cadet_name}} has requested the honor of your company at the Trojan Battalion Military Ball.",
+          gVars,
+        )),
         particulars: eventParticulars(cfg ?? null),
         cta: { label: "Confirm Your Attendance", url: escapeHtml(link) },
-        closingHtml: `<p style="margin:0 0 10px;">This step confirms any food allergies and your review of the attire requirements. Your host's registration is not complete until it is done.</p>
+        noticeHtml: pick(tGuest, "notice_html", "", gVars) || undefined,
+        closingHtml: `${guestClosing}
 ${guestFormHtml}<p style="margin:0;font-size:12px;color:#8A8266;">If the button does not work, use this link:<br />${escapeHtml(link)}</p>`,
         siteUrl: `${origin}/ball`,
       });
@@ -474,7 +540,9 @@ ${guestFormHtml}<p style="margin:0;font-size:12px;color:#8A8266;">If the button 
         body: JSON.stringify({
           from: FROM,
           to: [personalEmail],
-          subject: "Trojan Battalion Military Ball: Invitation",
+          subject: pick(tGuest, "subject", "Trojan Battalion Military Ball: Invitation", {
+            guest_name: guestName, cadet_name: cadet.name,
+          }),
           html: guestHtml,
           ...(guestFormAttach.length ? { attachments: guestFormAttach } : {}),
           text: `${guestName},
