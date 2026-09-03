@@ -8,8 +8,13 @@
 // SIGNUP_SESSION_SECRET must be set as an edge function secret
 // (`supabase secrets set SIGNUP_SESSION_SECRET=...`, a long random string —
 // NOT reused from any other secret). Rotating it invalidates all outstanding
-// tokens, which is fine: they're 15-20 min lived by design.
-const TOKEN_TTL_MS = 18 * 60 * 1000; // 18 minutes
+// tokens, which is fine: they're short-lived by design.
+//
+// 45 min: the signup wizard has 4 steps incl. a roster search and a lot of
+// reading; 18 min was expiring on real (slow, distracted) users mid-form,
+// which surfaced as a confusing "start over" bounce. Still single-use (jti)
+// and identity-scoped, so a longer window is low-risk.
+const TOKEN_TTL_MS = 45 * 60 * 1000; // 45 minutes
 
 function b64url(bytes: Uint8Array): string {
   return btoa(String.fromCharCode(...bytes)).replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/, "");

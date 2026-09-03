@@ -3,7 +3,7 @@ import { supabase as SB } from '../../../../lib/supabaseClient';
 import '../../../review/review.css';
 import '../../../ball/portal.css';
 
-// S-6 provisioning for the review-portal accounts (Chief/SAI, Sgt Kaz, 1SG).
+// S-6 provisioning for the review-portal accounts (Chief/SAI, Sgt Kaz).
 // ONE login per person covers BOTH /review (DISPATCH email approvals) and
 // /ball/ops (Military Ball payment tracking) — same email_reviewers population.
 // Built on the warm-paper review CSS, not the dark DISPATCH theme, to match the
@@ -237,7 +237,7 @@ function AddReviewer({ onDone }) {
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(180px, 1fr))', gap: 10, marginBottom: 10 }}>
         <input className="rv-textarea" style={editInput} value={f.display_name} onChange={(e) => set('display_name', e.target.value)} placeholder="Display name" />
         <input className="rv-textarea" style={editInput} value={f.email} onChange={(e) => set('email', e.target.value)} placeholder="name@hcde.org" />
-        <input className="rv-textarea" style={editInput} value={f.title} onChange={(e) => set('title', e.target.value)} placeholder="Title (SAI, Sgt Kaz, 1SG…)" />
+        <input className="rv-textarea" style={editInput} value={f.title} onChange={(e) => set('title', e.target.value)} placeholder="Title (SAI, Sgt Kaz…)" />
         <input className="rv-textarea" style={pinInput} value={f.pin} inputMode="numeric" onChange={(e) => set('pin', e.target.value.replace(/\D/g, '').slice(0, 4))} placeholder="4-digit PIN" />
       </div>
       <label style={{ display: 'flex', alignItems: 'center', gap: 8, fontFamily: "'JetBrains Mono', monospace", fontSize: 12, color: 'var(--rv-mute)', marginBottom: 12, cursor: 'pointer' }}>

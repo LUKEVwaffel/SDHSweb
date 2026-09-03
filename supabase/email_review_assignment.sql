@@ -4,7 +4,7 @@
 -- email_messages review columns).
 --
 -- WHAT THIS ADDS:
---   • email_messages.assigned_reviewer_email — which of the 3 reviewers a
+--   • email_messages.assigned_reviewer_email — which reviewer a
 --     draft was actually sent to. Set by submit-for-review on every submit /
 --     resubmit (overwritten fresh each time, so it always reflects the last
 --     pick — no separate nulling step needed like reviewed_by/feedback).

@@ -18,6 +18,7 @@ export default function StepDocumentation({ signupToken, cadetGender, cadetDetai
   const [config, setConfig] = useState(null);
   const [busy, setBusy] = useState(false);
   const [err, setErr] = useState('');
+  const [sessionDead, setSessionDead] = useState(false);
 
   useEffect(() => {
     SB.from('ball_config')
@@ -64,12 +65,11 @@ export default function StepDocumentation({ signupToken, cadetGender, cadetDetai
     });
     setBusy(false);
     if (error) {
-      // Session-level failures (bad/expired token, or a token already burned by
-      // a prior successful submit) send the cadet back to step 1 to re-verify.
-      // "Signups are closed" and "you already have a signup on file" are
-      // terminal — show them in place, re-verifying wouldn't change anything.
-      if (/expired|invalid|already used/i.test(error)) { onSessionExpired(); return; }
+      // Always show the real error — never silently bounce the cadet back to
+      // step 1 (that wipes everything they typed with no explanation). A
+      // genuinely dead session gets a visible "start over" button instead.
       setErr(error);
+      setSessionDead(/expired|invalid or expired|already used|start again from step 1/i.test(error));
       return;
     }
     onSubmitted(data);
@@ -141,6 +141,21 @@ export default function StepDocumentation({ signupToken, cadetGender, cadetDetai
       )}
 
       <ErrorText>{err}</ErrorText>
+      {err && !sessionDead && (
+        <p style={{ ...p, color: P.mute, marginTop: 4 }}>
+          Your answers are still here — fix the issue above and press submit again. If it keeps failing, screenshot this and send it to 1SG Kaz or Chief.
+        </p>
+      )}
+      {sessionDead && (
+        <div style={{ marginTop: 8 }}>
+          <button
+            onClick={onSessionExpired}
+            style={{ background: 'none', border: `1px solid ${P.gold}`, color: P.gold, fontFamily: mono, fontSize: 12, padding: '8px 14px', cursor: 'pointer' }}
+          >
+            START OVER FROM STEP 1
+          </button>
+        </div>
+      )}
 
       <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: 24 }}>
         <button onClick={onBack} style={{ background: 'none', border: 'none', color: P.mute, fontFamily: mono, fontSize: 12, cursor: 'pointer' }}>‹ BACK</button>

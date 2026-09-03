@@ -18,11 +18,11 @@
 --     the client) by the complete-first-login edge function once
 --     supabase.auth.updateUser({ password }) has succeeded.
 --
--- ⚠ CRITICAL: the 3 reviewers seeded in email_review.sql already have real,
+-- ⚠ CRITICAL: the reviewers seeded in email_review.sql already have real,
 -- self-chosen passwords in active use (confirmed live 2026-07-22, per the
 -- portal's password-based login design). Defaulting this column to true would
 -- force-wall them into a change-password screen on their NEXT login for no
--- reason. This script explicitly backfills those 3 to false in the same
+-- reason. This script explicitly backfills them to false in the same
 -- migration that adds the column — only NEW reviewer rows created after this
 -- point default to true (dashboard-created temp password → real first-login
 -- gate). Do not run the column ADD without the backfill UPDATE below.
@@ -32,13 +32,13 @@
 alter table public.email_reviewers
   add column if not exists must_change_password boolean not null default true;
 
--- Backfill: the 3 already-live reviewers keep using their existing password,
--- no gate on next login.
+-- Backfill: the already-live reviewers keep using their existing password,
+-- no gate on next login. (1SG / hodges_tim removed from the reviewer
+-- population 2026-09-03 — Kaz + Chief only.)
 update public.email_reviewers set must_change_password = false
   where email in (
     'thrasher_michael@hcde.org',
-    'kazminski_jay@hcde.org',
-    'hodges_tim@hcde.org'
+    'kazminski_jay@hcde.org'
   );
 
 -- ── SECTION 2 — enforce the gate at the RLS layer, not just in React state ──

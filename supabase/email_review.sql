@@ -4,7 +4,7 @@
 -- existing email_messages table (email_system.sql + email_builder.sql).
 --
 -- WHAT THIS ADDS:
---   • email_reviewers        — the 3 adult approvers (Chief/SAI, Sgt Kaz, 1SG).
+--   • email_reviewers        — the 2 adult approvers (Chief/SAI, Sgt Kaz).
 --                              Separate population from admin_roles; they only
 --                              ever review, never manage DISPATCH.
 --   • is_reviewer()          — SECURITY DEFINER, true for an active reviewer.
@@ -51,7 +51,7 @@
 create table if not exists public.email_reviewers (
   email        text primary key,
   display_name text not null,
-  title        text,                         -- 'SAI' | 'Sgt Kaz' | '1SG'
+  title        text,                         -- 'SAI' | 'Sgt Kaz'
   active       boolean not null default true,
   created_at   timestamptz not null default now()
 );
@@ -135,13 +135,18 @@ create policy email_messages_read_reviewer on public.email_messages
 
 
 -- ── SECTION 5 — seeds ────────────────────────────────────────────────────────
--- The 3 adult reviewers.
+-- The 2 adult reviewers. (1SG is NOT a reviewer — removed 2026-09-03. If an old
+-- hodges_tim@hcde.org row exists from a prior run, delete it manually:
+--   delete from public.email_reviewers where email = 'hodges_tim@hcde.org';)
 insert into public.email_reviewers (email, display_name, title) values
   ('thrasher_michael@hcde.org', 'Chief (SAI)',             'SAI'),
-  ('kazminski_jay@hcde.org',    'Sgt Kaz (Jay Kazminski)', 'Sgt Kaz'),
-  ('hodges_tim@hcde.org',       '1SGT',                    '1SG')
+  ('kazminski_jay@hcde.org',    'Sgt Kaz (Jay Kazminski)', 'Sgt Kaz')
 on conflict (email) do update
   set display_name = excluded.display_name, title = excluded.title, active = true;
+
+update public.email_messages set assigned_reviewer_email = null
+  where assigned_reviewer_email = 'hodges_tim@hcde.org';
+delete from public.email_reviewers where email = 'hodges_tim@hcde.org';
 
 -- The override capability — set true ONLY on Kaiden's account (NOT Luke's, even
 -- though Luke is also s6).

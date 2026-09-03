@@ -8,7 +8,7 @@ import ReviewerPinControl from './ReviewerPinControl';
 import './review.css';
 
 // Reviewer portal — deliberately NOT the DISPATCH theme. This is a separate,
-// non-admin population (Chief/SAI, Sgt Kaz, 1SGT), so it stays a plain,
+// non-admin population (Chief/SAI, Sgt Kaz), so it stays a plain,
 // self-explanatory light surface instead of matching the navy/gold admin
 // console — polished (real type/palette/motion, see review.css) but simple.
 //
@@ -32,7 +32,7 @@ function fmtDate(v) {
   return v ? new Date(v).toLocaleString() : '—';
 }
 
-// Post-login chooser: the 3 reviewers use one account for two jobs.
+// Post-login chooser: the reviewers use one account for two jobs.
 function PortalPicker({ name, onEmail, onBall }) {
   const card = {
     display: 'block', width: '100%', textAlign: 'left', cursor: 'pointer',

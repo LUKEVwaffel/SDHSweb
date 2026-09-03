@@ -11,7 +11,7 @@ function money(n) {
 // Ball Ops portal — Kaz/Chief payment + field trip form tracking. Reuses the
 // EXISTING reviewer PIN/password login wholesale (ReviewLogin.jsx, same
 // email_reviewers population + reviewer-pin-login edge fn as the email review
-// portal) — same 3 people, second surface. Reads through
+// portal) — same people (Kaz + Chief), second surface. Reads through
 // ball_signups_ops_view / ball_guests_ops_view (RLS-scoped, no dress fields,
 // no allergies). Writes go directly to the base table under the column-guard
 // trigger, then a fire-and-forget notify-ball-status-update.

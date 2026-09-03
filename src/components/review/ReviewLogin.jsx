@@ -2,8 +2,8 @@ import { useState, useRef } from 'react';
 import { supabase as SB } from '../../lib/supabaseClient';
 import './review.css';
 
-// Email+password (default) or email+PIN gate for the 3 reviewers (Chief/SAI,
-// Sgt Kaz, 1SGT). No pre-auth "which method does this account have" lookup —
+// Email+password (default) or email+PIN gate for the 2 reviewers (Chief/SAI,
+// Sgt Kaz). No pre-auth "which method does this account have" lookup —
 // unlike the DISPATCH admin picker's login_accounts view, this form doesn't
 // know anything about the account until the reviewer picks a mode themselves,
 // so there's no per-account enumeration surface here.
