@@ -37,9 +37,10 @@ export default function BallSignupWizard() {
   const [step, setStep] = useState(0);
   const [signupToken, setSignupToken] = useState(null);
   const [cadet, setCadet] = useState(null);
-  // has_allergy: null until answered. When true, allergy_email doubles as the
-  // notification address (StepCadetDetails hides the separate optional field).
-  const [cadetDetails, setCadetDetails] = useState({ age: '', gender: '', has_allergy: null, allergy_email: '', notification_email: '' });
+  // has_allergy: null until answered. notification_email is REQUIRED for every
+  // signer (personal, non-school) — it's the confirmation address and, when an
+  // allergy is flagged, the S-5 contact too.
+  const [cadetDetails, setCadetDetails] = useState({ age: '', gender: '', has_allergy: null, notification_email: '' });
   const [guest, setGuest] = useState(emptyGuest());
   const [submitted, setSubmitted] = useState(false);
   const [result, setResult] = useState(null); // ball-submit-signup response (amounts, form-required, guest_type)
@@ -50,9 +51,7 @@ export default function BallSignupWizard() {
       .then(({ data }) => setDeadline(data?.signup_deadline || null));
   }, []);
 
-  const contactEmail = cadetDetails.has_allergy === true
-    ? (cadetDetails.allergy_email || '').trim()
-    : (cadetDetails.notification_email || '').trim();
+  const contactEmail = (cadetDetails.notification_email || '').trim();
 
   // Client-side deadline gate. /ball/signup is a direct route, so the landing
   // page's disabled CTA isn't enough — but this is only the friendly stop;

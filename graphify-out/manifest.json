@@ -2020,8 +2020,8 @@
     "semantic_hash": ""
   },
   "src/components/ball/signup/BallSignupWizard.jsx": {
-    "mtime": 1788440611.3866777,
-    "ast_hash": "693aa285e397065eb50e50bc38e0c231",
+    "mtime": 1788453749.8371186,
+    "ast_hash": "1878feffe7a20e54f12de150bca9b86a",
     "semantic_hash": ""
   },
   "src/components/ball/signup/SignupConfirmation.jsx": {
@@ -2030,8 +2030,8 @@
     "semantic_hash": ""
   },
   "src/components/ball/signup/StepCadetDetails.jsx": {
-    "mtime": 1788428953.9195952,
-    "ast_hash": "d4e29bc0b9fcd05ea0a836a526df1479",
+    "mtime": 1788458083.738205,
+    "ast_hash": "0755f5582cf4a3363d071f076c3efac1",
     "semantic_hash": ""
   },
   "src/components/ball/signup/StepCadetVerify.jsx": {
@@ -2040,13 +2040,13 @@
     "semantic_hash": ""
   },
   "src/components/ball/signup/StepDocumentation.jsx": {
-    "mtime": 1788444223.1636715,
-    "ast_hash": "cdf0d44a997fd4ce1a3dee682e7d0ab7",
+    "mtime": 1788453755.1654584,
+    "ast_hash": "56ee01aebd9264a765e7f8ab07fbe779",
     "semantic_hash": ""
   },
   "src/components/ball/signup/StepGuestInfo.jsx": {
-    "mtime": 1788437028.3903885,
-    "ast_hash": "53fbe990f7f8233e5e08e440340c234e",
+    "mtime": 1788458087.6020076,
+    "ast_hash": "0ba96e8bf3e3e002b208aa03c31e94a6",
     "semantic_hash": ""
   },
   "src/components/ball/signup/formUi.jsx": {
@@ -2095,8 +2095,8 @@
     "semantic_hash": ""
   },
   "supabase/functions/ball-submit-signup/index.ts": {
-    "mtime": 1788444189.6743968,
-    "ast_hash": "50526b590c087e97bd80bd49b2ec8b52",
+    "mtime": 1788448549.810086,
+    "ast_hash": "515fa2e0fa6bafb0e14b11e657aa8125",
     "semantic_hash": ""
   },
   "supabase/functions/notify-ball-status-update/index.ts": {
@@ -2547,6 +2547,11 @@
   "supabase/ball_guard_service_role_fix.sql": {
     "mtime": 1788447909.655727,
     "ast_hash": "793e80c71d46355241dd5678e112a144",
+    "semantic_hash": ""
+  },
+  "src/lib/schoolEmail.js": {
+    "mtime": 1788458076.2567484,
+    "ast_hash": "15c1a170b4664cc1712dbbf2a93559a5",
     "semantic_hash": ""
   }
 }

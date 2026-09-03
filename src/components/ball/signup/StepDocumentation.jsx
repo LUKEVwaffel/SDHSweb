@@ -45,13 +45,10 @@ export default function StepDocumentation({ signupToken, cadetGender, cadetDetai
       cadet_age: Number(cadetDetails.age),
       cadet_gender: cadetGender,
       cadet_has_allergy: cadetDetails.has_allergy === true,
-      cadet_allergy_email: cadetDetails.has_allergy === true ? (cadetDetails.allergy_email || '').trim() : null,
-      // When an allergy is flagged the personal email is required anyway, so
-      // it doubles as the notification/confirmation address — the separate
-      // optional field is hidden in that case (see StepCadetDetails).
-      notification_email: (cadetDetails.has_allergy === true
-        ? (cadetDetails.allergy_email || '').trim()
-        : (cadetDetails.notification_email || '').trim()) || null,
+      // One required personal (non-school) email for everyone — it's the
+      // confirmation address and, when an allergy is flagged, the S-5 contact.
+      cadet_allergy_email: cadetDetails.has_allergy === true ? (cadetDetails.notification_email || '').trim() : null,
+      notification_email: (cadetDetails.notification_email || '').trim() || null,
       guest: hasGuest ? {
         guest_type: guest.guest_type,
         name: guest.name, age: Number(guest.age), gender: guest.gender,

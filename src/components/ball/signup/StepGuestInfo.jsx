@@ -4,6 +4,9 @@ import { supabase as SB } from '../../../lib/supabaseClient';
 import { searchRoster, resolveRosterCadet } from '../../../lib/ballApi';
 import { Field, TextInput, Btn, Radio, ErrorText } from './formUi';
 import { Spinner } from '../ballUi';
+import { isSchoolEmail } from '../../../lib/schoolEmail';
+
+const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
 // Step 3 — guest info. First: bringing a guest at all? Then the guest TYPE:
 //   • DATE   — couple rate ($50 total, host covers both). May be an in-program
@@ -95,10 +98,12 @@ export default function StepGuestInfo({ signupToken, value, onChange, onBack, on
     (value.goes_to_sdhs === true || (value.school_attended && (!value.other_jrotc || value.other_jrotc_school)))
   );
   const friendOk = !isFriend || value.friend_payment_method === 'host_delivers' || value.friend_payment_method === 'self_pays';
+  const guestEmail = (value.personal_email || '').trim();
+  const guestEmailOk = EMAIL_RE.test(guestEmail) && !isSchoolEmail(guestEmail);
   const canContinue =
     value.bringing_guest === false ||
     (hasGuest && (isDate || isFriend) &&
-      value.name && ageOk && value.gender && value.personal_email &&
+      value.name && ageOk && value.gender && guestEmailOk &&
       manualOk && friendOk);
 
   return (
@@ -250,8 +255,13 @@ export default function StepGuestInfo({ signupToken, value, onChange, onBack, on
             <Field label="GUEST PERSONAL (NON-SCHOOL) EMAIL">
               <TextInput type="email" value={value.personal_email} onChange={set('personal_email')} placeholder={isFriend ? 'A personal email, not a school one' : 'Required, even if your date is also a cadet'} />
               <div style={{ fontFamily: mono, fontSize: 11, color: P.mute, marginTop: 6 }}>
-                Your guest will get an email here to finish their part. The signup isn't complete until they do.
+                Your guest will get an email here to finish their part (and the field trip form, if they go to Soddy Daisy). The signup isn't complete until they do. A school (@hcde.org) address will not work.
               </div>
+              {guestEmail && !guestEmailOk && (
+                <div style={{ fontFamily: mono, fontSize: 11, color: P.red, marginTop: 4 }}>
+                  {isSchoolEmail(guestEmail) ? 'Use a personal email, not a school one.' : 'Enter a valid email address.'}
+                </div>
+              )}
             </Field>
           )}
 

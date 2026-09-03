@@ -38,6 +38,25 @@ interface BallCfg {
   venue_address: string | null;
   price_cadet: number | null;
   price_couple: number | null;
+  field_trip_form_pdf_url: string | null;
+}
+
+// hcde.org inboxes do not receive outside mail reliably (and the whole point
+// of this address is that the cadet/guest can read it after they leave for the
+// summer) — every signer must give a personal address.
+const SCHOOL_EMAIL_DOMAINS = ["students.hcde.org", "hcde.org"];
+function isSchoolEmail(e: string): boolean {
+  const at = e.toLowerCase().lastIndexOf("@");
+  if (at < 0) return false;
+  const domain = e.slice(at + 1).toLowerCase();
+  return SCHOOL_EMAIL_DOMAINS.some((d) => domain === d || domain.endsWith(`.${d}`));
+}
+
+// Field trip permission form as a Resend attachment (path = a public URL Resend
+// fetches). Empty when the S-6 hasn't uploaded the PDF yet.
+function fieldTripAttachment(cfg: BallCfg | null): Array<{ filename: string; path: string }> {
+  const url = cfg?.field_trip_form_pdf_url;
+  return url ? [{ filename: "field-trip-permission-form.pdf", path: url }] : [];
 }
 
 function money(n: number | null): string | null {
@@ -81,9 +100,14 @@ async function sendCadetConfirmation(to: string, info: ConfirmInfo): Promise<voi
   }
 
   const amount = money(info.amountDue);
+  const formAttach = info.fieldTripFormRequired ? fieldTripAttachment(info.cfg) : [];
   const todo: string[] = [];
   if (info.fieldTripFormRequired) {
-    todo.push("Submit your <strong>signed field trip permission form</strong> (physical signature only) to 1SG Kaz or Chief.");
+    todo.push(
+      formAttach.length
+        ? "Print and sign the <strong>field trip permission form</strong> attached to this email (physical signature only) and return it to 1SG Kaz or Chief."
+        : "Submit your <strong>signed field trip permission form</strong> (physical signature only) to 1SG Kaz or Chief.",
+    );
   }
   todo.push(
     amount
@@ -151,6 +175,7 @@ ${deadlinePretty ? `\nAll items due on or before ${deadlinePretty}.` : ""}`;
       subject: "Trojan Battalion Military Ball: Registration Received",
       html,
       text,
+      ...(formAttach.length ? { attachments: formAttach } : {}),
     }),
   });
 }
@@ -176,7 +201,7 @@ Deno.serve(async (req) => {
 
     const { data: cfg } = await svc
       .from("ball_config")
-      .select("signup_deadline, ball_date, event_time_text, venue_address, price_cadet, price_couple")
+      .select("signup_deadline, ball_date, event_time_text, venue_address, price_cadet, price_couple, field_trip_form_pdf_url")
       .maybeSingle();
 
     // Item 1: server-side deadline enforcement. The landing page disables its
@@ -193,19 +218,27 @@ Deno.serve(async (req) => {
 
     const cadetAge = Number(body?.cadet_age);
     const cadetGender = required(body?.cadet_gender);
-    const notificationEmail = required(body?.notification_email) || null;
-
-    // Item 2: allergy is a yes/no flag — NO details collected here. If yes, a
-    // personal (non-school) email is REQUIRED so S-5 can follow up directly.
-    const cadetHasAllergy = body?.cadet_has_allergy === true;
-    const cadetAllergyEmail = required(body?.cadet_allergy_email) || null;
     const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+    // EVERY signer must give a personal, non-school email. It's the address the
+    // confirmation/receipt goes to and the only one S-5 / ops can reach after
+    // the school year. When an allergy is flagged it's also the S-5 contact.
+    const notificationEmail = required(body?.notification_email) || null;
+    const cadetHasAllergy = body?.cadet_has_allergy === true;
+    // cadet_allergy_email is kept in sync with notification_email client-side;
+    // fall back to it so an older client still validates.
+    const cadetAllergyEmail = cadetHasAllergy
+      ? (required(body?.cadet_allergy_email) || notificationEmail)
+      : null;
 
     if (!cadetGender || !Number.isFinite(cadetAge) || cadetAge <= 0) {
       return json({ error: "cadet age and gender are required" }, 400);
     }
-    if (cadetHasAllergy && (!cadetAllergyEmail || !EMAIL_RE.test(cadetAllergyEmail))) {
-      return json({ error: "a personal email is required when a food allergy is flagged" }, 400);
+    if (!notificationEmail || !EMAIL_RE.test(notificationEmail)) {
+      return json({ error: "a personal email address is required" }, 400);
+    }
+    if (isSchoolEmail(notificationEmail)) {
+      return json({ error: "use a personal (non-school) email — a school inbox won't receive these" }, 400);
     }
 
     const hasGuest = body?.guest != null;
@@ -244,6 +277,12 @@ Deno.serve(async (req) => {
     if (hasGuest) {
       if (!guestName || !Number.isFinite(guestAge) || guestAge <= 0 || !guestGender || !personalEmail) {
         return json({ error: "guest name, age, gender, and personal email are required" }, 400);
+      }
+      if (!EMAIL_RE.test(personalEmail)) {
+        return json({ error: "the guest's email address looks invalid" }, 400);
+      }
+      if (isSchoolEmail(personalEmail)) {
+        return json({ error: "the guest must give a personal (non-school) email" }, 400);
       }
       if (!isSdhsJrotc && (!schoolAttended || !pocName || !pocEmail || !pocPhone)) {
         return json({ error: "school attended and POC name/email/phone are required for a non-SDHS guest" }, 400);
@@ -407,6 +446,17 @@ Deno.serve(async (req) => {
     const origin = siteOrigin();
     if (RESEND_API_KEY && origin) {
       const link = `${origin}/ball/guest/${verificationToken}`;
+      // SDHS-student guests must also complete the field trip permission form.
+      // Attach the PDF when S-6 has uploaded it; otherwise just tell them.
+      const guestFormAttach = guestIsSdhsStudent ? fieldTripAttachment(cfg ?? null) : [];
+      const guestFormHtml = guestIsSdhsStudent
+        ? (cfg?.field_trip_form_pdf_url
+          ? `<p style="margin:0 0 10px;"><strong style="color:#F4ECD8;">You attend Soddy Daisy High School</strong>, so a signed field trip permission form is also required. It is attached to this email &mdash; print it, sign it (physical signature only), and return it to Chief or 1SG.</p>`
+          : `<p style="margin:0 0 10px;"><strong style="color:#F4ECD8;">You attend Soddy Daisy High School</strong>, so a signed field trip permission form is also required. It will be sent separately &mdash; or pick one up from Chief's desk.</p>`)
+        : "";
+      const guestFormText = guestIsSdhsStudent
+        ? `\n\nYou attend Soddy Daisy High School, so a signed field trip permission form is also required${cfg?.field_trip_form_pdf_url ? " (attached to this email)" : " — it will be sent separately or picked up from Chief's desk"}. Physical signature only; return it to Chief or 1SG.`
+        : "";
       const guestHtml = ballEmailShell({
         preheader: `${cadet.name} has invited you to the Trojan Battalion Military Ball.`,
         heading: "You Are Invited",
@@ -415,7 +465,7 @@ Deno.serve(async (req) => {
         particulars: eventParticulars(cfg ?? null),
         cta: { label: "Confirm Your Attendance", url: escapeHtml(link) },
         closingHtml: `<p style="margin:0 0 10px;">This step confirms any food allergies and your review of the attire requirements. Your host's registration is not complete until it is done.</p>
-<p style="margin:0;font-size:12px;color:#8A8266;">If the button does not work, use this link:<br />${escapeHtml(link)}</p>`,
+${guestFormHtml}<p style="margin:0;font-size:12px;color:#8A8266;">If the button does not work, use this link:<br />${escapeHtml(link)}</p>`,
         siteUrl: `${origin}/ball`,
       });
       await fetch("https://api.resend.com/emails", {
@@ -426,6 +476,7 @@ Deno.serve(async (req) => {
           to: [personalEmail],
           subject: "Trojan Battalion Military Ball: Invitation",
           html: guestHtml,
+          ...(guestFormAttach.length ? { attachments: guestFormAttach } : {}),
           text: `${guestName},
 
 ${cadet.name} has requested the honor of your company at the Trojan Battalion Military Ball.
@@ -434,7 +485,7 @@ ${cfg?.ball_date ? `\nDate:  ${fmtLongDate(cfg.ball_date)}` : ""}${cfg?.event_ti
 Confirm your attendance here:
 ${link}
 
-This step confirms any food allergies and your review of the attire requirements. The registration is not complete until it is done.`,
+This step confirms any food allergies and your review of the attire requirements. The registration is not complete until it is done.${guestFormText}`,
         }),
       }).catch((e) => console.error("ball-submit-signup guest email send", e));
     } else {
