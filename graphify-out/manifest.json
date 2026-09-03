@@ -2080,8 +2080,8 @@
     "semantic_hash": ""
   },
   "supabase/functions/ball-guest-verify/index.ts": {
-    "mtime": 1788471860.4064386,
-    "ast_hash": "92bdbcff59b8f77e2930a38c94780f6d",
+    "mtime": 1788473239.7730858,
+    "ast_hash": "6790afa5ca37cf3e5c3d25d5e47dcda6",
     "semantic_hash": ""
   },
   "supabase/functions/ball-lookup-cadet/index.ts": {
@@ -2095,13 +2095,13 @@
     "semantic_hash": ""
   },
   "supabase/functions/ball-submit-signup/index.ts": {
-    "mtime": 1788472917.6698492,
-    "ast_hash": "6278a75fc2f65f97196e2d66f2de0ddd",
+    "mtime": 1788473239.7535172,
+    "ast_hash": "9d4444187e40502685369c28debe2fc6",
     "semantic_hash": ""
   },
   "supabase/functions/notify-ball-status-update/index.ts": {
-    "mtime": 1788470623.482848,
-    "ast_hash": "a25a0b99671ee1461107ada5fcd7660c",
+    "mtime": 1788473239.7919278,
+    "ast_hash": "6e9cbbcb918f149eafbeeee4de0fe00d",
     "semantic_hash": ""
   },
   "supabase/dispatch_bc_role.sql": {
@@ -2470,8 +2470,8 @@
     "semantic_hash": ""
   },
   "supabase/functions/notify-ball-allergy/index.ts": {
-    "mtime": 1788470645.2388654,
-    "ast_hash": "eadd2edf0f3f63f6a9e077e02fd22e41",
+    "mtime": 1788473239.811158,
+    "ast_hash": "cd16b2f6090fb5ca736d1cc1bb070357",
     "semantic_hash": ""
   },
   "supabase/functions/send-allergy-email/index.ts": {
@@ -2585,8 +2585,8 @@
     "semantic_hash": ""
   },
   "supabase/functions/notify-ball-attire/index.ts": {
-    "mtime": 1788470605.7734082,
-    "ast_hash": "928c4a88018f00a6e174b80b55281c94",
+    "mtime": 1788473239.8300672,
+    "ast_hash": "a34472074a73abef766395e2663fb79c",
     "semantic_hash": ""
   },
   "supabase/ball_phone_numbers.sql": {
@@ -2597,6 +2597,11 @@
   "supabase/ball_dress_staff_status.sql": {
     "mtime": 1788472120.6318078,
     "ast_hash": "545090b1c4140b9f8c3900a7f53f8f1c",
+    "semantic_hash": ""
+  },
+  "supabase/functions/_shared/ballNotify.ts": {
+    "mtime": 1788473226.3482873,
+    "ast_hash": "65591dab4231ca22d953efba74c906ae",
     "semantic_hash": ""
   }
 }

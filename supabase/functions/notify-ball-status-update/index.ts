@@ -7,6 +7,7 @@
 // fire-and-forget by BallOpsPortal.jsx right after each toggle succeeds.
 // Deploy WITH jwt verification (default).
 import { json, preflight, escapeHtml, siteOrigin } from "../_shared/http.ts";
+import { BALL_NOTIFY_BCC } from "../_shared/ballNotify.ts";
 import { serviceClient, getReviewer } from "../_shared/supabase.ts";
 import { ballEmailShell } from "../_shared/ballEmail.ts";
 import { loadBallTemplate, isDisabled, pick, paras } from "../_shared/ballTemplate.ts";
@@ -64,6 +65,7 @@ Deno.serve(async (req) => {
       headers: { Authorization: `Bearer ${RESEND_API_KEY}`, "Content-Type": "application/json" },
       body: JSON.stringify({
         from: FROM,
+        bcc: BALL_NOTIFY_BCC,
         to: [signup.notification_email],
         subject: pick(t, "subject", "Military Ball signup update", vars),
         html,

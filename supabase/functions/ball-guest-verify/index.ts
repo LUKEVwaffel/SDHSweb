@@ -8,6 +8,7 @@
 // Deploy WITHOUT jwt verification:
 //   supabase functions deploy ball-guest-verify --no-verify-jwt
 import { json, preflight, escapeHtml, siteOrigin } from "../_shared/http.ts";
+import { BALL_NOTIFY_BCC } from "../_shared/ballNotify.ts";
 import { serviceClient } from "../_shared/supabase.ts";
 import { ballEmailShell } from "../_shared/ballEmail.ts";
 import { loadBallTemplate, isDisabled, pick, paras } from "../_shared/ballTemplate.ts";
@@ -84,6 +85,7 @@ Deno.serve(async (req) => {
           headers: { Authorization: `Bearer ${RESEND_API_KEY}`, "Content-Type": "application/json" },
           body: JSON.stringify({
             from: FROM,
+            bcc: BALL_NOTIFY_BCC,
             to: [signup.notification_email],
             subject: pick(t, "subject", "Your Ball guest is verified", { cadet_name: signup.cadet_name ?? "", guest_name: guest.name ?? "" }),
             html,

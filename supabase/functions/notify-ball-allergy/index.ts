@@ -9,6 +9,7 @@
 // Public-triggered (chained off a pre-auth submit). Deploy WITHOUT jwt:
 //   supabase functions deploy notify-ball-allergy --no-verify-jwt
 import { json, preflight, escapeHtml, siteOrigin } from "../_shared/http.ts";
+import { BALL_NOTIFY_BCC } from "../_shared/ballNotify.ts";
 import { serviceClient } from "../_shared/supabase.ts";
 import { ballEmailShell } from "../_shared/ballEmail.ts";
 import { loadBallTemplate, isDisabled, pick, paras } from "../_shared/ballTemplate.ts";
@@ -67,6 +68,7 @@ Deno.serve(async (req) => {
       headers: { Authorization: `Bearer ${RESEND_API_KEY}`, "Content-Type": "application/json" },
       body: JSON.stringify({
         from: FROM,
+        bcc: BALL_NOTIFY_BCC,
         to: recipients,
         subject: pick(t, "subject", "New Ball allergy flag: {{cadet_name}}", { cadet_name: signup.cadet_name }),
         html,

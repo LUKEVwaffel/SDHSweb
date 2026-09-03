@@ -2095,8 +2095,8 @@
     "semantic_hash": ""
   },
   "supabase/functions/ball-submit-signup/index.ts": {
-    "mtime": 1788471853.443581,
-    "ast_hash": "7b71987be2ae602b230f5e0d779d6454",
+    "mtime": 1788472917.6698492,
+    "ast_hash": "6278a75fc2f65f97196e2d66f2de0ddd",
     "semantic_hash": ""
   },
   "supabase/functions/notify-ball-status-update/index.ts": {

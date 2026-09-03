@@ -10,6 +10,7 @@
 // submit). Deploy WITHOUT jwt:
 //   supabase functions deploy notify-ball-attire --no-verify-jwt
 import { json, preflight, escapeHtml, siteOrigin } from "../_shared/http.ts";
+import { BALL_NOTIFY_BCC } from "../_shared/ballNotify.ts";
 import { serviceClient } from "../_shared/supabase.ts";
 
 Deno.serve(async (req) => {
@@ -78,6 +79,7 @@ Deno.serve(async (req) => {
         headers: { Authorization: `Bearer ${RESEND_API_KEY}`, "Content-Type": "application/json" },
         body: JSON.stringify({
           from: FROM,
+          bcc: BALL_NOTIFY_BCC,
           to,
           subject: `New Ball signup — ${label} approval needed`,
           html: `<p><strong>${escapeHtml(who)}</strong>${meta ? ` (${escapeHtml(meta)})` : ""} just signed up for the Military Ball and needs ${escapeHtml(label)} approval.</p>${portal ? `<p><a href="${escapeHtml(portal)}">Open the approval portal</a></p>` : ""}`,

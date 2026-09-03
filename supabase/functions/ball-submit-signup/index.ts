@@ -16,6 +16,7 @@
 // Deploy WITHOUT jwt verification:
 //   supabase functions deploy ball-submit-signup --no-verify-jwt
 import { json, preflight, escapeHtml, siteOrigin } from "../_shared/http.ts";
+import { BALL_NOTIFY_BCC } from "../_shared/ballNotify.ts";
 import { serviceClient } from "../_shared/supabase.ts";
 import { verifySignupToken } from "../_shared/signupToken.ts";
 import { ballEmailShell } from "../_shared/ballEmail.ts";
@@ -197,6 +198,7 @@ ${deadlinePretty ? `\nAll items due on or before ${deadlinePretty}.` : ""}`;
     headers: { Authorization: `Bearer ${RESEND_API_KEY}`, "Content-Type": "application/json" },
     body: JSON.stringify({
       from: FROM,
+      bcc: BALL_NOTIFY_BCC,
       to: [to],
       subject: pick(t, "subject", "Trojan Battalion Military Ball: Registration Received", {
         name: info.name, meta: metaParen, deadline: deadlinePretty ?? "",
@@ -548,6 +550,7 @@ ${guestFormHtml}<p style="margin:0;font-size:12px;color:#8A8266;">If the button 
         headers: { Authorization: `Bearer ${RESEND_API_KEY}`, "Content-Type": "application/json" },
         body: JSON.stringify({
           from: FROM,
+          bcc: BALL_NOTIFY_BCC,
           to: [personalEmail],
           subject: pick(tGuest, "subject", "Trojan Battalion Military Ball: Invitation", {
             guest_name: guestName, cadet_name: cadet.name,
