@@ -9,15 +9,17 @@ import { isSchoolEmail } from '../../../lib/schoolEmail';
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
 // Step 3 — guest info. First: bringing a guest at all? Then the guest TYPE:
-//   • DATE   — couple rate ($50 total, host covers both). May be an in-program
-//              SDHS cadet (roster tag) OR anyone else (manual entry).
-//              Permission form only needed if the date is an in-program cadet.
-//   • FRIEND — NOT a JROTC cadet. Usually still a Soddy Daisy student, just not
-//              in the program; can also be from another school. A cadet who
-//              wants to attend registers on their own, never as someone's
-//              friend. Host pays only their own $35; the friend owes their own
-//              $35 separately, and we record how that payment reaches the
-//              school. No permission form.
+//   • DATE   — you attend as a couple. ONE ticket at the couple rate ($50)
+//              covers both of you. The date may be a current SDHS JROTC cadet
+//              (picked from the roster) OR anyone else (entered by hand).
+//   • FRIEND — someone you bring who is NOT your date and NOT a current JROTC
+//              cadet. You each buy your own ticket: you pay $35 for yourself,
+//              the friend owes their own $35 separately (we record how that
+//              payment reaches the school).
+//   A current JROTC cadet who just wants to attend registers on their own —
+//   never as anyone's date or friend.
+//   Field trip form: required for every SDHS student attending — the cadet
+//   always, and the guest too if they are a current cadet OR go to Soddy Daisy.
 // The manual-entry block (name / "goes to Soddy Daisy?" / school / POC) is
 // shared by every non-roster guest (manual dates and all friends). "Goes to
 // Soddy Daisy?" just auto-fills the school and hides the other-school fields.
@@ -31,6 +33,7 @@ export default function StepGuestInfo({ signupToken, value, onChange, onBack, on
   const [searching, setSearching] = useState(false);
   const [err, setErr] = useState('');
   const [priceCadet, setPriceCadet] = useState(null);
+  const [priceCouple, setPriceCouple] = useState(null);
   const debounceRef = useRef(null);
 
   const set = (field) => (e) => onChange({ ...value, [field]: e.target.value });
@@ -41,7 +44,10 @@ export default function StepGuestInfo({ signupToken, value, onChange, onBack, on
   const showManual = isFriend || (isDate && !value.is_sdhs_jrotc);
 
   useEffect(() => {
-    SB.from('ball_config').select('price_cadet').maybeSingle().then(({ data }) => setPriceCadet(data?.price_cadet ?? null));
+    SB.from('ball_config').select('price_cadet, price_couple').maybeSingle().then(({ data }) => {
+      setPriceCadet(data?.price_cadet ?? null);
+      setPriceCouple(data?.price_couple ?? null);
+    });
   }, []);
 
   useEffect(() => {
@@ -122,35 +128,37 @@ export default function StepGuestInfo({ signupToken, value, onChange, onBack, on
 
       {hasGuest && (
         <>
-          <Field label="ARE THEY YOUR DATE OR A FRIEND?">
+          <div style={{ border: `1px solid ${P.hair}`, background: P.navy, padding: '12px 14px', margin: '0 0 14px', fontFamily: mono, fontSize: 11, color: P.mute, lineHeight: 1.7 }}>
+            <div style={{ marginBottom: 6 }}>
+              <span style={{ color: P.gold }}>DATE</span> — you're going together as a couple.
+              One ticket{priceCouple != null ? ` (${money(priceCouple)})` : ''} at the couple rate covers both of you.
+            </div>
+            <div style={{ marginBottom: 6 }}>
+              <span style={{ color: P.gold }}>FRIEND</span> — someone you're bringing who isn't your date.
+              You each pay your own ticket: {priceCadet != null ? money(priceCadet) : 'your rate'} for you, and your friend owes their own {priceCadet != null ? money(priceCadet) : 'ticket'} separately.
+            </div>
+            <div>A current JROTC cadet can't be added either way — they sign up on their own.</div>
+          </div>
+
+          <Field label="IS THIS GUEST YOUR DATE, OR A FRIEND?">
             <Radio
               value={value.guest_type || ''}
               onChange={setGuestType}
-              options={[{ value: 'date', label: 'DATE' }, { value: 'friend', label: 'FRIEND' }]}
+              options={[{ value: 'date', label: 'MY DATE' }, { value: 'friend', label: 'A FRIEND' }]}
             />
-            <div style={{ fontFamily: mono, fontSize: 11, color: P.mute, marginTop: 6, lineHeight: 1.6 }}>
-              {isFriend
-                ? `Friend rate: you pay your own ticket, and your friend owes their own${priceCadet != null ? ` ${money(priceCadet)}` : ''} separately.`
-                : isDate
-                  ? 'Date rate: the couple ticket covers both of you.'
-                  : 'Date = the couple ticket covers both of you. Friend = each of you pays your own ticket.'}
-            </div>
           </Field>
 
           {isDate && (
-            <Field label="IS YOUR DATE IN SDHS JROTC?">
+            <Field label="IS YOUR DATE A CURRENT SDHS JROTC CADET?">
               <Radio
                 value={value.is_sdhs_jrotc ? 'yes' : 'no'}
                 onChange={(v) => onChange({ ...value, is_sdhs_jrotc: v === 'yes', sdhs_matched_cadet_id: null, name: '', age: '' })}
                 options={[{ value: 'yes', label: 'YES' }, { value: 'no', label: 'NO' }]}
               />
+              <div style={{ fontFamily: mono, fontSize: 11, color: P.mute, marginTop: 6, lineHeight: 1.6 }}>
+                Yes — pick them from the battalion roster below. No — you'll type their details in yourself.
+              </div>
             </Field>
-          )}
-
-          {isFriend && (
-            <div style={{ border: `1px solid ${P.hair}`, background: P.navy, padding: '12px 14px', margin: '4px 0 16px', fontFamily: mono, fontSize: 11, color: P.mute, lineHeight: 1.6 }}>
-              A friend is anyone who isn't a JROTC cadet — a Soddy Daisy student or someone from another school. Any cadet who wants to attend signs up on their own.
-            </div>
           )}
 
           {inProgramDate ? (
@@ -198,8 +206,8 @@ export default function StepGuestInfo({ signupToken, value, onChange, onBack, on
                   })}
                   options={[{ value: 'yes', label: 'YES' }, { value: 'no', label: 'NO' }]}
                 />
-                <div style={{ fontFamily: mono, fontSize: 11, color: P.mute, marginTop: 6 }}>
-                  No field trip form either way — that's only for JROTC cadets.
+                <div style={{ fontFamily: mono, fontSize: 11, color: P.mute, marginTop: 6, lineHeight: 1.6 }}>
+                  If yes, they're an SDHS student, so they'll also need to sign a field trip permission form — we'll send it to their email. If no, no form is needed for them.
                 </div>
               </Field>
 
@@ -236,8 +244,8 @@ export default function StepGuestInfo({ signupToken, value, onChange, onBack, on
           ) : null}
 
           {(isFriend || (isDate && !value.is_sdhs_jrotc)) && (
-            <Field label="GUEST AGE">
-              <TextInput type="number" min="1" value={value.age} onChange={set('age')} />
+            <Field label={`${isFriend ? "FRIEND" : "DATE"}'S AGE`}>
+              <TextInput type="number" min="1" max="99" inputMode="numeric" value={value.age} onChange={set('age')} placeholder="Their age" />
             </Field>
           )}
 

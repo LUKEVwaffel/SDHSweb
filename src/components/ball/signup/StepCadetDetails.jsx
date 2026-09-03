@@ -17,15 +17,18 @@ export default function StepCadetDetails({ cadet, value, onChange, onBack, onNex
 
   return (
     <div>
-      <div style={{ fontFamily: mono, fontSize: 12, color: P.mute, marginBottom: 20 }}>
+      <div style={{ fontFamily: mono, fontSize: 12, color: P.mute, marginBottom: 6 }}>
         Signed up as <span style={{ color: P.gold }}>{cadet.name}</span>
       </div>
+      <div style={{ fontFamily: mono, fontSize: 11, color: P.mute, marginBottom: 20, lineHeight: 1.6 }}>
+        Your name is locked to your roster record. Fill in everything below yourself.
+      </div>
 
-      <Field label="AGE">
-        <TextInput type="number" min="1" value={value.age} onChange={set('age')} placeholder="16" />
+      <Field label="YOUR AGE">
+        <TextInput type="number" min="1" max="99" inputMode="numeric" value={value.age} onChange={set('age')} placeholder="Type your age" />
       </Field>
 
-      <Field label="GENDER">
+      <Field label="YOUR GENDER">
         <Radio
           value={value.gender}
           onChange={(v) => onChange({ ...value, gender: v })}
