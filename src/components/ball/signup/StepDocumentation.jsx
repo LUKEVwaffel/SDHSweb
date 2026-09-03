@@ -28,8 +28,11 @@ export default function StepDocumentation({ signupToken, cadetGender, cadetDetai
   const hasGuest = guest.bringing_guest === true;
   const guestType = hasGuest ? guest.guest_type : null;
   const isFriend = guestType === 'friend';
-  const inProgramDate = guestType === 'date' && guest.is_sdhs_jrotc;
-  const formRequired = !hasGuest || inProgramDate;
+  // Any SDHS student attending needs the field trip form: the cadet always,
+  // plus a guest who is an SDHS student (in-program roster cadet OR attends
+  // Soddy Daisy). Applies whether the guest is a date or a friend.
+  const guestIsSdhsStudent = (guestType === 'date' && guest.is_sdhs_jrotc) || guest.goes_to_sdhs === true;
+  const formRequired = !hasGuest || guestIsSdhsStudent;
   const hostDue = (!hasGuest || isFriend) ? config?.price_cadet : config?.price_couple;
   const friendDue = isFriend ? config?.price_cadet : null;
   const isFemale = cadetGender === 'female';
@@ -54,7 +57,8 @@ export default function StepDocumentation({ signupToken, cadetGender, cadetDetai
         name: guest.name, age: Number(guest.age), gender: guest.gender,
         is_sdhs_jrotc: guest.is_sdhs_jrotc, sdhs_matched_cadet_id: guest.sdhs_matched_cadet_id,
         other_jrotc: guest.other_jrotc, other_jrotc_school: guest.other_jrotc_school,
-        school_attended: guest.school_attended, poc_name: guest.poc_name,
+        school_attended: guest.school_attended, goes_to_sdhs: guest.goes_to_sdhs,
+        poc_name: guest.poc_name,
         poc_email: guest.poc_email, poc_phone: guest.poc_phone, personal_email: guest.personal_email,
         friend_payment_method: guest.friend_payment_method || null,
       } : null,
@@ -100,7 +104,7 @@ export default function StepDocumentation({ signupToken, cadetGender, cadetDetai
         {formRequired ? (
           <>
             <p style={p}>
-              Must be physically signed. No electronic signatures accepted. Only the SDHS cadet signs this, not the guest.
+              Must be physically signed. No electronic signatures accepted. Every SDHS student attending fills one out &mdash; you, and your guest too if they go to Soddy Daisy.
             </p>
             {config?.field_trip_form_pdf_url ? (
               <a href={config.field_trip_form_pdf_url} target="_blank" rel="noopener noreferrer" style={{ ...linkBtn }}>DOWNLOAD FORM ↓</a>
@@ -110,7 +114,7 @@ export default function StepDocumentation({ signupToken, cadetGender, cadetDetai
           </>
         ) : (
           <p style={p}>
-            Not required for this signup. The field trip form is only for JROTC cadets, and your guest isn't one.
+            Not required for this signup. The field trip form is only for Soddy Daisy students, and your guest goes to another school.
           </p>
         )}
       </Section>

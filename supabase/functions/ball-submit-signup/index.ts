@@ -275,9 +275,12 @@ Deno.serve(async (req) => {
     const priceCouple = cfg?.price_couple != null ? Number(cfg.price_couple) : null;
     const hostAmountDue = (!hasGuest || guestType === "friend") ? priceCadet : priceCouple;
     const friendAmountDue = guestType === "friend" ? priceCadet : null;
-    // Permission form: host always needs one when solo; with a guest, only
-    // when the date is an in-program SDHS student.
-    const fieldTripFormRequired = !hasGuest || (guestType === "date" && isSdhsJrotc);
+    // Permission form: any SDHS student attending needs one. The cadet host
+    // always does. A guest needs one when they are an SDHS student too —
+    // whether an in-program roster cadet (isSdhsJrotc) or a non-cadet who
+    // attends Soddy Daisy High School (goesToSdhs). Applies to date AND friend.
+    const guestIsSdhsStudent = isSdhsJrotc || goesToSdhs;
+    const fieldTripFormRequired = !hasGuest || guestIsSdhsStudent;
 
     // Item 4: burn the signup token so it can't be replayed for the rest of
     // its ~18-minute TTL. The primary-key collision on `jti` is what actually

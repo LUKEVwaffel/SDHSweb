@@ -7,14 +7,16 @@
 --   • guest_type = 'date'   — couple rate. Host pays price_couple ($50) for
 --     both; no separate charge for the date. The date may be an in-program
 --     SDHS cadet (added via the roster tag) OR an out-of-program person
---     (manual entry). Field trip form is required ONLY when the date is an
---     in-program SDHS student.
+--     (manual entry). Field trip form is required whenever the date is an
+--     SDHS student — in-program roster cadet OR a Soddy Daisy non-cadet.
+--     (Rule widened 2026-09-03: was in-program-cadet-only.)
 --   • guest_type = 'friend' — OUT-OF-PROGRAM ONLY. Never an SDHS cadet (a
 --     cadet who wants to attend registers on their own). Couple rate does
 --     NOT apply: host pays price_cadet ($35) for themselves only; the friend
 --     owes their OWN $35, tracked separately (friend_amount_due) and NOT
 --     added to the host's amount_due. friend_payment_method records how that
---     $35 is expected to reach the school. Field trip form NOT required.
+--     $35 is expected to reach the school. Field trip form required only if
+--     the friend is a Soddy Daisy student (they are still an SDHS student).
 --
 -- Amounts are snapshotted onto the rows at submit time (ball-submit-signup
 -- reads price_cadet/price_couple off ball_config) so a later price change in
