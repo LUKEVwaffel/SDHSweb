@@ -1,56 +1,62 @@
 import { useState, useEffect, useCallback, useMemo } from 'react';
 import { supabase as SB } from '../../../../lib/supabaseClient';
-import { P, mono, sp, fs } from '../../theme';
-import { Btn, Input } from '../../shared/ui';
+import '../../../review/review.css';
+import '../../../ball/portal.css';
 
-// S-6 full-visibility overview of the Military Ball. S-6 has FOR ALL RLS on
-// ball_signups / ball_guests (ball_signups_all_s6 / ball_guests_all_s6) and
-// bypasses the column-guard trigger entirely (is_s6() returns NEW immediately),
-// so this reads AND edits/deletes the base rows directly — every column, both
-// populations — where the ops / dress / attire portals each see only their
-// RLS-scoped view.
-//
-// Edit / Delete here are the S-6 override: fix a bad signup, remove a test or
-// duplicate. Routine flips (cash, form, dress, allergy status) still have their
-// own purpose-built surfaces at /ball/ops, /ball/dress, /ball/attire and the
-// S-5 Ball Allergies panel — but S-6 can also do them from the edit form.
+// S-6 full-visibility overview of the Military Ball. Deliberately built on the
+// warm-paper review/portal CSS (.rv / .bp-*), NOT the dark DISPATCH theme —
+// same look as /ball/ops so it reads as a simple portal, not a dense admin
+// panel. S-6 has FOR ALL RLS on ball_signups / ball_guests and bypasses the
+// column-guard trigger, so this reads AND edits/deletes the base rows directly.
 
 const money = (n) => (n == null ? '—' : `$${Number(n).toFixed(Number.isInteger(Number(n)) ? 0 : 2)}`);
 const fmt = (d) => (d ? new Date(d).toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' }) : '—');
 const numOrNull = (v) => (v === '' || v == null ? null : Number(v));
 
-function Chip({ children, tone = 'mute' }) {
-  const c = { gold: P.gold, green: P.green, red: P.red, mute: P.mute }[tone] || P.mute;
-  return (
-    <span style={{
-      fontFamily: mono, fontSize: fs.micro, letterSpacing: '0.1em', padding: '3px 7px',
-      border: `1px solid ${c}`, color: c, whiteSpace: 'nowrap', textTransform: 'uppercase',
-    }}>
-      {children}
-    </span>
-  );
-}
+// Embedded warm-paper surface — .rv owns the palette + fonts; drop its
+// full-screen layout so it sits inside the DISPATCH content area.
+const RV_EMBED = { minHeight: 'auto', margin: 0, borderRadius: 12, overflow: 'hidden' };
+const SHELL = { maxWidth: 'none', margin: 0, padding: '26px 24px 34px' };
+
+const chip = (tone) => {
+  const map = {
+    green: ['var(--rv-green)', 'var(--rv-green-soft)'],
+    red: ['var(--rv-red)', 'var(--rv-red-soft)'],
+    accent: ['var(--rv-accent)', 'var(--rv-accent-soft)'],
+    mute: ['var(--rv-mute)', 'transparent'],
+  };
+  const [c, bg] = map[tone] || map.mute;
+  return {
+    fontFamily: "'JetBrains Mono', monospace", fontSize: 10, letterSpacing: '0.08em',
+    textTransform: 'uppercase', padding: '3px 8px', borderRadius: 999, color: c,
+    background: bg, border: `1px solid ${c}`, whiteSpace: 'nowrap',
+  };
+};
+
+const lbl = { fontFamily: "'JetBrains Mono', monospace", fontSize: 10, letterSpacing: '0.1em', textTransform: 'uppercase', color: 'var(--rv-faint)', marginBottom: 3 };
+const val = { fontFamily: "'JetBrains Mono', monospace", fontSize: 12, color: 'var(--rv-ink)', wordBreak: 'break-word' };
+const grid = { display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(150px, 1fr))', gap: 12 };
+const groupHead = { fontFamily: "'JetBrains Mono', monospace", fontSize: 10, letterSpacing: '0.16em', textTransform: 'uppercase', color: 'var(--rv-accent)', margin: '0 0 8px' };
+const detailWrap = { padding: '14px 16px 16px', borderTop: '1px solid var(--rv-border)', display: 'flex', flexDirection: 'column', gap: 16 };
 
 function Field({ label, value }) {
-  return (
-    <div style={{ minWidth: 0 }}>
-      <div style={{ fontFamily: mono, fontSize: fs.micro, letterSpacing: '0.12em', color: P.faint, textTransform: 'uppercase' }}>{label}</div>
-      <div style={{ fontFamily: mono, fontSize: fs.xs, color: P.cream, wordBreak: 'break-word' }}>{value ?? '—'}</div>
-    </div>
-  );
+  return <div style={{ minWidth: 0 }}><div style={lbl}>{label}</div><div style={val}>{value ?? '—'}</div></div>;
 }
 
-// --- edit primitives ---------------------------------------------------------
-const inputSm = { fontSize: fs.xs, padding: '7px 9px' };
-
+// --- edit primitives -------------------------------------------------------
+const editSelect = {
+  width: '100%', boxSizing: 'border-box', border: '1px solid var(--rv-border-strong)',
+  borderRadius: 8, padding: '9px 11px', fontSize: 13, fontFamily: 'inherit',
+  color: 'var(--rv-ink)', background: '#fffefb',
+};
 function ELabel({ children }) {
-  return <div style={{ fontFamily: mono, fontSize: fs.micro, letterSpacing: '0.12em', color: P.gold, textTransform: 'uppercase', marginBottom: 3 }}>{children}</div>;
+  return <div style={{ ...lbl, color: 'var(--rv-mute)', marginBottom: 6 }}>{children}</div>;
 }
 function EText({ label, value, onChange, ...rest }) {
   return (
     <div style={{ minWidth: 0 }}>
       <ELabel>{label}</ELabel>
-      <Input value={value ?? ''} onChange={(e) => onChange(e.target.value)} style={inputSm} {...rest} />
+      <input className="rv-textarea" value={value ?? ''} onChange={(e) => onChange(e.target.value)} style={{ padding: '9px 11px', fontSize: 13 }} {...rest} />
     </div>
   );
 }
@@ -58,14 +64,7 @@ function ESelect({ label, value, onChange, options }) {
   return (
     <div style={{ minWidth: 0 }}>
       <ELabel>{label}</ELabel>
-      <select
-        value={value ?? ''}
-        onChange={(e) => onChange(e.target.value || null)}
-        style={{
-          width: '100%', boxSizing: 'border-box', background: P.deep, border: `1px solid ${P.hair}`,
-          color: P.cream, fontFamily: mono, fontSize: fs.xs, padding: '7px 9px', borderRadius: 5,
-        }}
-      >
+      <select value={value ?? ''} onChange={(e) => onChange(e.target.value || null)} style={editSelect}>
         {options.map((o) => <option key={String(o.value)} value={o.value ?? ''}>{o.label}</option>)}
       </select>
     </div>
@@ -73,7 +72,7 @@ function ESelect({ label, value, onChange, options }) {
 }
 function ECheck({ label, checked, onChange }) {
   return (
-    <label style={{ display: 'flex', alignItems: 'center', gap: sp[2], fontFamily: mono, fontSize: fs.xs, color: P.cream, cursor: 'pointer', minWidth: 0 }}>
+    <label style={{ display: 'flex', alignItems: 'center', gap: 8, fontFamily: "'JetBrains Mono', monospace", fontSize: 12, color: 'var(--rv-ink)', cursor: 'pointer' }}>
       <input type="checkbox" checked={!!checked} onChange={(e) => onChange(e.target.checked)} />
       {label}
     </label>
@@ -86,7 +85,7 @@ const ALLERGY_OPTS = [{ value: 'pending', label: 'pending' }, { value: 'contacte
 const GTYPE_OPTS = [{ value: 'date', label: 'date' }, { value: 'friend', label: 'friend' }];
 const FPAY_OPTS = [{ value: null, label: '—' }, { value: 'host_delivers', label: 'host brings it' }, { value: 'self_pays', label: 'friend pays direct' }];
 
-// ---------------------------------------------------------------------------
+// ------------------------------------------------------------------------
 
 export default function BallOverviewTab() {
   const [signups, setSignups] = useState(null);
@@ -135,66 +134,63 @@ export default function BallOverviewTab() {
     };
   }, [signups, guestBySignup, q]);
 
-  if (signups === null) return <div style={{ fontFamily: mono, fontSize: 13, color: P.mute }}>LOADING…</div>;
+  if (signups === null) {
+    return (
+      <div className="rv" style={RV_EMBED}><div className="rv-shell" style={SHELL}>
+        <p className="rv-sub"><span className="rv-dot" />Loading signups&hellip;</p>
+      </div></div>
+    );
+  }
 
   return (
-    <div style={{ maxWidth: 900 }}>
-      <div style={{ display: 'flex', gap: sp[2], flexWrap: 'wrap', marginBottom: sp[4] }}>
-        <StatPill n={stats.total} label="signups" />
-        <StatPill n={stats.verified} label="fully verified" tone="green" />
-        <StatPill n={stats.awaiting} label="awaiting guest" />
-        <StatPill n={stats.cashOut} label="cash outstanding" tone={stats.cashOut ? 'gold' : 'mute'} />
-        <StatPill n={stats.formOut} label="field-trip form outstanding" tone={stats.formOut ? 'gold' : 'mute'} />
-        <StatPill n={stats.allergies} label="allergy flags" />
-        <Btn size="sm" variant="ghost" onClick={load} style={{ marginLeft: 'auto' }}>REFRESH</Btn>
-      </div>
-
-      {signups.length > 6 && (
-        <Input value={q} onChange={(e) => setQ(e.target.value)} placeholder="Search cadet, guest, or email…" style={{ marginBottom: sp[4] }} />
-      )}
-
-      {err && <div style={{ fontFamily: mono, fontSize: 12, color: P.red, marginBottom: sp[3] }}>{err}</div>}
-
-      {signups.length === 0 ? (
-        <div style={{ fontFamily: mono, fontSize: 13, color: P.mute, border: `1px dashed ${P.hairStrong}`, padding: sp[5], textAlign: 'center' }}>
-          No ball signups yet.
+    <div className="rv" style={RV_EMBED}>
+      <div className="rv-shell" style={SHELL}>
+        <div className="bp-head">
+          <h1 className="bp-title">Ball Signups</h1>
+          <button className="bp-refresh" onClick={load}>Refresh</button>
         </div>
-      ) : (
-        <div style={{ display: 'flex', flexDirection: 'column', gap: sp[2] }}>
-          {list.map((r) => (
-            <SignupRow
-              key={r.id}
-              r={r}
-              guest={guestBySignup[r.id]}
-              open={openId === r.id}
-              onToggle={() => setOpenId(openId === r.id ? null : r.id)}
-              onChanged={load}
-            />
-          ))}
-        </div>
-      )}
 
-      <div style={{ fontFamily: mono, fontSize: 11, color: P.faint, marginTop: sp[4] }}>
-        Expand a row to edit any field or delete the signup (guest cascades). Routine flips also live at /ball/ops, /ball/dress, /ball/attire and the Ball Allergies panel.
+        <div className="bp-stats">
+          <span className="bp-stat"><b>{stats.total}</b> signups</span>
+          <span className={`bp-stat ${stats.verified ? 'is-done' : ''}`}><b>{stats.verified}</b> verified</span>
+          <span className="bp-stat"><b>{stats.awaiting}</b> awaiting guest</span>
+          <span className={`bp-stat ${stats.cashOut ? 'is-alert' : ''}`}><b>{stats.cashOut}</b> cash outstanding</span>
+          <span className={`bp-stat ${stats.formOut ? 'is-alert' : ''}`}><b>{stats.formOut}</b> form outstanding</span>
+          <span className="bp-stat"><b>{stats.allergies}</b> allergy flags</span>
+        </div>
+
+        {signups.length > 6 && (
+          <input className="bp-search" value={q} onChange={(e) => setQ(e.target.value)} placeholder="Search cadet, guest, or email…" />
+        )}
+
+        {err && <div className="rv-flash">{err}</div>}
+
+        {signups.length === 0 ? (
+          <div className="bp-empty">No ball signups yet.</div>
+        ) : (
+          <div className="rv-list">
+            {list.map((r) => (
+              <SignupItem
+                key={r.id}
+                r={r}
+                guest={guestBySignup[r.id]}
+                open={openId === r.id}
+                onToggle={() => setOpenId(openId === r.id ? null : r.id)}
+                onChanged={load}
+              />
+            ))}
+          </div>
+        )}
+
+        <p className="rv-sub" style={{ fontSize: 12, marginTop: 18 }}>
+          Open a row to edit any field or delete the signup (guest cascades). Routine flips also live at /ball/ops, /ball/dress, /ball/attire and the Ball Allergies panel.
+        </p>
       </div>
     </div>
   );
 }
 
-function StatPill({ n, label, tone = 'mute' }) {
-  const c = { gold: P.gold, green: P.green, mute: P.mute }[tone] || P.mute;
-  const lit = tone !== 'mute';
-  return (
-    <span style={{
-      fontFamily: mono, fontSize: fs.xs, letterSpacing: '0.06em', padding: '6px 12px',
-      border: `1px solid ${lit ? c : P.hair}`, background: lit ? P.goldWash : 'transparent', color: lit ? c : P.mute,
-    }}>
-      <b style={{ color: lit ? c : P.cream }}>{n}</b> {label}
-    </span>
-  );
-}
-
-function SignupRow({ r, guest, open, onToggle, onChanged }) {
+function SignupItem({ r, guest, open, onToggle, onChanged }) {
   const [editing, setEditing] = useState(false);
   const verified = r.status === 'fully_verified';
   const cashDone = r.cash_received;
@@ -203,40 +199,32 @@ function SignupRow({ r, guest, open, onToggle, onChanged }) {
   const settled = verified && cashDone && formDone;
 
   return (
-    <div style={{
-      border: `1px solid ${open ? P.hairStrong : P.hair}`,
-      borderLeft: `3px solid ${settled ? P.green : verified ? P.gold : P.hair}`,
-      background: P.navy,
-    }}>
+    <div style={{ background: 'var(--rv-surface)', border: '1px solid var(--rv-border)', borderLeft: `3px solid ${settled ? 'var(--rv-green)' : verified ? 'var(--rv-accent)' : 'var(--rv-faint)'}`, borderRadius: 'var(--rv-radius)', overflow: 'hidden' }}>
       <button
         onClick={() => { if (open) setEditing(false); onToggle(); }}
-        style={{
-          width: '100%', textAlign: 'left', background: 'transparent', border: 'none', cursor: 'pointer',
-          padding: `${sp[3]}px ${sp[4]}px`, display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: sp[3],
-        }}
+        style={{ width: '100%', textAlign: 'left', background: 'transparent', border: 'none', cursor: 'pointer', padding: '14px 16px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 14 }}
       >
         <div style={{ minWidth: 0 }}>
-          <div style={{ fontFamily: mono, fontSize: fs.sm, color: P.cream }}>
-            {r.cadet_name}
-            {guest && <span style={{ color: P.mute }}> + {guest.name}</span>}
+          <div style={{ fontSize: 15, fontWeight: 600, color: 'var(--rv-ink)' }}>
+            {r.cadet_name}{guest && <span style={{ color: 'var(--rv-mute)', fontWeight: 400 }}> + {guest.name}</span>}
           </div>
-          <div style={{ fontFamily: mono, fontSize: fs.xs, color: P.mute, marginTop: 2 }}>
-            LET {r.cadet_let_level || '--'} · {(r.cadet_company || '—').toUpperCase()} · {r.cadet_gender || '—'} · signed up {fmt(r.created_at)}
+          <div style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: 11, color: 'var(--rv-mute)', marginTop: 4 }}>
+            LET {r.cadet_let_level || '--'} · {(r.cadet_company || '—').toUpperCase()} · {r.cadet_gender || '—'} · {fmt(r.created_at)}
           </div>
         </div>
-        <div style={{ display: 'flex', gap: sp[1], flexWrap: 'wrap', justifyContent: 'flex-end' }}>
-          <Chip tone={verified ? 'green' : 'mute'}>{verified ? 'verified' : 'awaiting guest'}</Chip>
-          <Chip tone={cashDone ? 'green' : 'gold'}>{cashDone ? 'paid' : `owes ${money(r.amount_due)}`}</Chip>
-          {formNeeded && <Chip tone={r.field_trip_form_received ? 'green' : 'gold'}>{r.field_trip_form_received ? 'form in' : 'form out'}</Chip>}
-          {r.cadet_has_allergy && <Chip tone={r.allergy_status === 'contacted' ? 'green' : 'red'}>allergy</Chip>}
+        <div style={{ display: 'flex', gap: 5, flexWrap: 'wrap', justifyContent: 'flex-end' }}>
+          <span style={chip(verified ? 'green' : 'mute')}>{verified ? 'verified' : 'awaiting guest'}</span>
+          <span style={chip(cashDone ? 'green' : 'accent')}>{cashDone ? 'paid' : `owes ${money(r.amount_due)}`}</span>
+          {formNeeded && <span style={chip(r.field_trip_form_received ? 'green' : 'accent')}>{r.field_trip_form_received ? 'form in' : 'form out'}</span>}
+          {r.cadet_has_allergy && <span style={chip(r.allergy_status === 'contacted' ? 'green' : 'red')}>allergy</span>}
         </div>
       </button>
 
       {open && !editing && (
-        <div style={{ padding: `${sp[3]}px ${sp[4]}px ${sp[4]}px`, borderTop: `1px solid ${P.hair}`, display: 'flex', flexDirection: 'column', gap: sp[4] }}>
+        <div style={detailWrap}>
           <div>
-            <div style={{ fontFamily: mono, fontSize: fs.micro, letterSpacing: '0.16em', color: P.gold, textTransform: 'uppercase', marginBottom: sp[2] }}>Cadet</div>
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(150px, 1fr))', gap: sp[3] }}>
+            <div style={groupHead}>Cadet</div>
+            <div style={grid}>
               <Field label="School email" value={r.cadet_school_email} />
               <Field label="Notify email" value={r.notification_email} />
               <Field label="Age" value={r.cadet_age} />
@@ -252,10 +240,8 @@ function SignupRow({ r, guest, open, onToggle, onChanged }) {
 
           {guest ? (
             <div>
-              <div style={{ fontFamily: mono, fontSize: fs.micro, letterSpacing: '0.16em', color: P.gold, textTransform: 'uppercase', marginBottom: sp[2] }}>
-                Guest — {guest.guest_type || 'date'}
-              </div>
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(150px, 1fr))', gap: sp[3] }}>
+              <div style={groupHead}>Guest — {guest.guest_type || 'date'}</div>
+              <div style={grid}>
                 <Field label="Name" value={guest.name} />
                 <Field label="Age" value={guest.age} />
                 <Field label="Gender" value={guest.gender} />
@@ -275,19 +261,17 @@ function SignupRow({ r, guest, open, onToggle, onChanged }) {
               </div>
             </div>
           ) : (
-            <div style={{ fontFamily: mono, fontSize: fs.xs, color: P.mute }}>Solo — no guest on this signup.</div>
+            <div className="rv-sub" style={{ fontSize: 13 }}>Solo — no guest on this signup.</div>
           )}
 
-          <div style={{ display: 'flex', gap: sp[2] }}>
-            <Btn size="sm" variant="ghost" onClick={() => setEditing(true)}>EDIT INFO</Btn>
+          <div style={{ display: 'flex', gap: 10, alignItems: 'center', flexWrap: 'wrap' }}>
+            <button className="rv-btn ghost" onClick={() => setEditing(true)}>Edit info</button>
             <DeleteButton r={r} guest={guest} onChanged={onChanged} />
           </div>
         </div>
       )}
 
-      {open && editing && (
-        <EditForm r={r} guest={guest} onDone={(changed) => { setEditing(false); if (changed) onChanged(); }} />
-      )}
+      {open && editing && <EditForm r={r} guest={guest} onDone={(changed) => { setEditing(false); if (changed) onChanged(); }} />}
     </div>
   );
 }
@@ -308,8 +292,8 @@ function DeleteButton({ r, guest, onChanged }) {
 
   return (
     <>
-      <Btn size="sm" variant="danger" disabled={busy} onClick={del}>{busy ? 'DELETING…' : 'DELETE SIGNUP'}</Btn>
-      {err && <span style={{ fontFamily: mono, fontSize: 11, color: P.red, alignSelf: 'center' }}>{err}</span>}
+      <button className="rv-btn deny" disabled={busy} onClick={del}>{busy ? 'Deleting…' : 'Delete signup'}</button>
+      {err && <span className="rv-flash" style={{ margin: 0 }}>{err}</span>}
     </>
   );
 }
@@ -396,10 +380,10 @@ function EditForm({ r, guest, onDone }) {
   }
 
   return (
-    <div style={{ padding: `${sp[3]}px ${sp[4]}px ${sp[4]}px`, borderTop: `1px solid ${P.hair}`, display: 'flex', flexDirection: 'column', gap: sp[4] }}>
+    <div style={detailWrap}>
       <div>
-        <div style={{ fontFamily: mono, fontSize: fs.micro, letterSpacing: '0.16em', color: P.gold, textTransform: 'uppercase', marginBottom: sp[2] }}>Edit cadet</div>
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(160px, 1fr))', gap: sp[3] }}>
+        <div style={groupHead}>Edit cadet</div>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(160px, 1fr))', gap: 12 }}>
           <EText label="Cadet name" value={s.cadet_name} onChange={(v) => setSF('cadet_name', v)} />
           <EText label="LET level" value={s.cadet_let_level} onChange={(v) => setSF('cadet_let_level', v)} />
           <EText label="Company" value={s.cadet_company} onChange={(v) => setSF('cadet_company', v)} />
@@ -409,7 +393,7 @@ function EditForm({ r, guest, onDone }) {
           <ESelect label="Status" value={s.status} onChange={(v) => setSF('status', v)} options={STATUS_OPTS} />
           <EText label="Amount due ($)" value={s.amount_due} onChange={(v) => setSF('amount_due', v)} inputMode="decimal" />
         </div>
-        <div style={{ display: 'flex', flexWrap: 'wrap', gap: sp[4], marginTop: sp[3] }}>
+        <div style={{ display: 'flex', flexWrap: 'wrap', gap: 16, marginTop: 12 }}>
           <ECheck label="Field trip form required" checked={s.field_trip_form_required} onChange={(v) => setSF('field_trip_form_required', v)} />
           <ECheck label="Field trip form received" checked={s.field_trip_form_received} onChange={(v) => setSF('field_trip_form_received', v)} />
           <ECheck label="Cash received" checked={s.cash_received} onChange={(v) => setSF('cash_received', v)} />
@@ -417,7 +401,7 @@ function EditForm({ r, guest, onDone }) {
           <ECheck label="Has allergy" checked={s.cadet_has_allergy} onChange={(v) => setSF('cadet_has_allergy', v)} />
         </div>
         {s.cadet_has_allergy && (
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(160px, 1fr))', gap: sp[3], marginTop: sp[3] }}>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(160px, 1fr))', gap: 12, marginTop: 12 }}>
             <EText label="Allergy email" value={s.cadet_allergy_email} onChange={(v) => setSF('cadet_allergy_email', v)} />
             <ESelect label="Allergy status" value={s.allergy_status} onChange={(v) => setSF('allergy_status', v)} options={ALLERGY_OPTS} />
           </div>
@@ -426,8 +410,8 @@ function EditForm({ r, guest, onDone }) {
 
       {g && (
         <div>
-          <div style={{ fontFamily: mono, fontSize: fs.micro, letterSpacing: '0.16em', color: P.gold, textTransform: 'uppercase', marginBottom: sp[2] }}>Edit guest</div>
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(160px, 1fr))', gap: sp[3] }}>
+          <div style={groupHead}>Edit guest</div>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(160px, 1fr))', gap: 12 }}>
             <EText label="Guest name" value={g.name} onChange={(v) => setGF('name', v)} />
             <EText label="Age" value={g.age} onChange={(v) => setGF('age', v)} inputMode="numeric" />
             <ESelect label="Gender" value={g.gender} onChange={(v) => setGF('gender', v)} options={GENDER_OPTS} />
@@ -440,20 +424,20 @@ function EditForm({ r, guest, onDone }) {
             {g.guest_type === 'friend' && <EText label="Friend owes ($)" value={g.friend_amount_due} onChange={(v) => setGF('friend_amount_due', v)} inputMode="decimal" />}
             {g.guest_type === 'friend' && <ESelect label="Friend pays via" value={g.friend_payment_method} onChange={(v) => setGF('friend_payment_method', v)} options={FPAY_OPTS} />}
           </div>
-          <div style={{ marginTop: sp[3] }}>
+          <div style={{ marginTop: 12 }}>
             <ECheck label="Guest dress approved" checked={g.dress_approved} onChange={(v) => setGF('dress_approved', v)} />
           </div>
         </div>
       )}
 
-      {err && <div style={{ fontFamily: mono, fontSize: 12, color: P.red }}>{err}</div>}
-      <div style={{ display: 'flex', gap: sp[2] }}>
-        <Btn size="sm" variant="gold" disabled={busy} onClick={save}>{busy ? 'SAVING…' : 'SAVE CHANGES'}</Btn>
-        <Btn size="sm" variant="ghost" disabled={busy} onClick={() => onDone(false)}>CANCEL</Btn>
+      {err && <div className="rv-flash" style={{ margin: 0 }}>{err}</div>}
+      <div className="rv-actions" style={{ marginTop: 0 }}>
+        <button className="rv-btn approve" disabled={busy} onClick={save}>{busy ? 'Saving…' : 'Save changes'}</button>
+        <button className="rv-btn ghost" disabled={busy} onClick={() => onDone(false)}>Cancel</button>
       </div>
-      <div style={{ fontFamily: mono, fontSize: 11, color: P.faint }}>
-        S-6 write — bypasses the column guard. Friend-only fields save as null when guest type is "date".
-      </div>
+      <p className="rv-sub" style={{ fontSize: 11, margin: 0 }}>
+        S-6 write — bypasses the column guard. Friend-only fields save as null when guest type is “date”.
+      </p>
     </div>
   );
 }

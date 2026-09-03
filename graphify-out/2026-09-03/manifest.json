@@ -2495,8 +2495,8 @@
     "semantic_hash": ""
   },
   "src/components/admin/panels/ball/BallOverviewTab.jsx": {
-    "mtime": 1788441183.9038155,
-    "ast_hash": "c178fd8641c3fdd8372a7aaba3492649",
+    "mtime": 1788441872.6648476,
+    "ast_hash": "b9b724747c827c933cee1d771688424c",
     "semantic_hash": ""
   },
   "src/components/admin/panels/ball/BallReviewerAccountsTab.jsx": {
@@ -2532,6 +2532,11 @@
   "supabase/BALL_DEPLOY_ORDER.md": {
     "mtime": 1788441314.9755569,
     "ast_hash": "c4e894a76489b559f389f08a11c19903",
+    "semantic_hash": ""
+  },
+  "supabase/ball_signups_wipe.sql": {
+    "mtime": 1788441786.142107,
+    "ast_hash": "685bbaafe44e4762490a3c501be59f1f",
     "semantic_hash": ""
   }
 }
