@@ -17,6 +17,7 @@ export default function BallGuestVerify() {
   const token = location.pathname.replace(/^\/ball\/guest\/?/, '').split('/')[0];
   const [config, setConfig] = useState(undefined); // undefined = loading
   const [allergies, setAllergies] = useState('');
+  const [phone, setPhone] = useState('');
   const [accepted, setAccepted] = useState(false);
   const [state, setState] = useState('form'); // form | busy | done | already | err
   const [err, setErr] = useState('');
@@ -29,10 +30,11 @@ export default function BallGuestVerify() {
   }, []);
 
   async function submit() {
+    if ((phone || '').replace(/\D/g, '').length < 10) { setErr('Please enter your phone number.'); return; }
     if (!accepted) { setErr('Please confirm you\'ve read the attire requirements.'); return; }
     setState('busy');
     setErr('');
-    const { data, error } = await guestVerify(token, { allergies, accepted_dress_code: accepted });
+    const { data, error } = await guestVerify(token, { allergies, phone: phone.trim(), accepted_dress_code: accepted });
     if (error) { setState('err'); setErr(error); return; }
     setState(data?.already_verified ? 'already' : 'done');
   }
@@ -65,6 +67,17 @@ export default function BallGuestVerify() {
 
         {state !== 'done' && state !== 'already' && (
           <FadeUp delay={2}>
+            <Field label="YOUR PHONE NUMBER">
+              <input
+                type="tel" inputMode="tel" value={phone} onChange={(e) => setPhone(e.target.value)}
+                placeholder="(423) 555-0123" className="ball-input"
+                style={{ width: '100%', boxSizing: 'border-box', background: P.navy, border: `1px solid ${P.hair}`, color: P.cream, fontFamily: mono, fontSize: 14, padding: '11px 12px', outline: 'none' }}
+              />
+              <div style={{ fontFamily: mono, fontSize: 11, color: P.mute, marginTop: 6 }}>
+                Your own cell — so the JROTC staff can reach you about attire or the event.
+              </div>
+            </Field>
+
             <Field label="FOOD ALLERGIES (leave blank if none)">
               <textarea
                 value={allergies} onChange={(e) => setAllergies(e.target.value)} rows={2} className="ball-input"

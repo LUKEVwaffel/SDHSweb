@@ -45,6 +45,7 @@ export default function StepDocumentation({ signupToken, cadetGender, cadetDetai
       cadet_age: Number(cadetDetails.age),
       cadet_gender: cadetGender,
       cadet_has_allergy: cadetDetails.has_allergy === true,
+      cadet_phone: (cadetDetails.phone || '').trim() || null,
       // One required personal (non-school) email for everyone — it's the
       // confirmation address and, when an allergy is flagged, the S-5 contact.
       cadet_allergy_email: cadetDetails.has_allergy === true ? (cadetDetails.notification_email || '').trim() : null,
@@ -57,6 +58,7 @@ export default function StepDocumentation({ signupToken, cadetGender, cadetDetai
         school_attended: guest.school_attended, goes_to_sdhs: guest.goes_to_sdhs,
         poc_name: guest.poc_name,
         poc_email: guest.poc_email, poc_phone: guest.poc_phone, personal_email: guest.personal_email,
+        phone: (guest.phone || '').trim() || null,
         friend_payment_method: guest.friend_payment_method || null,
       } : null,
     });

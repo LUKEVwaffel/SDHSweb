@@ -227,6 +227,7 @@ function SignupItem({ r, guest, open, onToggle, onChanged }) {
             <div style={grid}>
               <Field label="School email" value={r.cadet_school_email} />
               <Field label="Notify email" value={r.notification_email} />
+              <Field label="Phone" value={r.cadet_phone} />
               <Field label="Age" value={r.cadet_age} />
               <Field label="Amount due" value={money(r.amount_due)} />
               <Field label="Cash received" value={r.cash_received ? 'yes' : 'no'} />
@@ -246,6 +247,7 @@ function SignupItem({ r, guest, open, onToggle, onChanged }) {
                 <Field label="Age" value={guest.age} />
                 <Field label="Gender" value={guest.gender} />
                 <Field label="Personal email" value={guest.personal_email} />
+                <Field label="Guest phone" value={guest.guest_phone} />
                 <Field label="SDHS JROTC" value={guest.is_sdhs_jrotc ? 'yes' : 'no'} />
                 <Field label="School attended" value={guest.school_attended} />
                 {guest.other_jrotc && <Field label="Other JROTC" value={guest.other_jrotc_school || 'yes'} />}
@@ -305,6 +307,7 @@ function EditForm({ r, guest, onDone }) {
     cadet_company: r.cadet_company || '',
     cadet_age: r.cadet_age ?? '',
     cadet_gender: r.cadet_gender || null,
+    cadet_phone: r.cadet_phone || '',
     notification_email: r.notification_email || '',
     status: r.status || 'guest_pending',
     amount_due: r.amount_due ?? '',
@@ -322,6 +325,7 @@ function EditForm({ r, guest, onDone }) {
     gender: guest.gender || null,
     guest_type: guest.guest_type || 'date',
     personal_email: guest.personal_email || '',
+    guest_phone: guest.guest_phone || '',
     school_attended: guest.school_attended || '',
     poc_name: guest.poc_name || '',
     poc_email: guest.poc_email || '',
@@ -344,6 +348,7 @@ function EditForm({ r, guest, onDone }) {
       cadet_company: s.cadet_company.trim() || null,
       cadet_age: numOrNull(s.cadet_age),
       cadet_gender: s.cadet_gender || null,
+      cadet_phone: s.cadet_phone.trim() || null,
       notification_email: s.notification_email.trim() || null,
       status: s.status,
       amount_due: numOrNull(s.amount_due),
@@ -364,6 +369,7 @@ function EditForm({ r, guest, onDone }) {
         gender: g.gender || null,
         guest_type: g.guest_type,
         personal_email: g.personal_email.trim(),
+        guest_phone: g.guest_phone.trim() || null,
         school_attended: g.school_attended.trim() || null,
         poc_name: g.poc_name.trim() || null,
         poc_email: g.poc_email.trim() || null,
@@ -390,6 +396,7 @@ function EditForm({ r, guest, onDone }) {
           <EText label="Age" value={s.cadet_age} onChange={(v) => setSF('cadet_age', v)} inputMode="numeric" />
           <ESelect label="Gender" value={s.cadet_gender} onChange={(v) => setSF('cadet_gender', v)} options={GENDER_OPTS} />
           <EText label="Notify email" value={s.notification_email} onChange={(v) => setSF('notification_email', v)} />
+          <EText label="Phone" value={s.cadet_phone} onChange={(v) => setSF('cadet_phone', v)} inputMode="tel" />
           <ESelect label="Status" value={s.status} onChange={(v) => setSF('status', v)} options={STATUS_OPTS} />
           <EText label="Amount due ($)" value={s.amount_due} onChange={(v) => setSF('amount_due', v)} inputMode="decimal" />
         </div>
@@ -417,6 +424,7 @@ function EditForm({ r, guest, onDone }) {
             <ESelect label="Gender" value={g.gender} onChange={(v) => setGF('gender', v)} options={GENDER_OPTS} />
             <ESelect label="Guest type" value={g.guest_type} onChange={(v) => setGF('guest_type', v)} options={GTYPE_OPTS} />
             <EText label="Personal email" value={g.personal_email} onChange={(v) => setGF('personal_email', v)} />
+            <EText label="Guest phone" value={g.guest_phone} onChange={(v) => setGF('guest_phone', v)} inputMode="tel" />
             <EText label="School attended" value={g.school_attended} onChange={(v) => setGF('school_attended', v)} />
             <EText label="POC name" value={g.poc_name} onChange={(v) => setGF('poc_name', v)} />
             <EText label="POC email" value={g.poc_email} onChange={(v) => setGF('poc_email', v)} />

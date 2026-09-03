@@ -17,10 +17,12 @@ Deno.serve(async (req) => {
   if (req.method !== "POST") return json({ error: "method not allowed" }, 405);
 
   try {
-    const { token, allergies, accepted_dress_code } = await req.json().catch(() => ({}));
+    const { token, allergies, accepted_dress_code, phone } = await req.json().catch(() => ({}));
     const tok = String(token || "").trim();
+    const phoneClean = String(phone || "").trim();
     if (!tok) return json({ error: "invalid" }, 400);
     if (!accepted_dress_code) return json({ error: "must accept the dress code" }, 400);
+    if (phoneClean.replace(/\D/g, "").length < 10) return json({ error: "a phone number is required" }, 400);
 
     const svc = serviceClient();
 
@@ -42,6 +44,11 @@ Deno.serve(async (req) => {
       })
       .eq("id", guest.id);
     if (guestErr) { console.error("ball-guest-verify update guest", guestErr); return json({ error: "internal error" }, 500); }
+
+    // Phone in a separate non-fatal update so verification still completes if
+    // ball_phone_numbers.sql hasn't been run yet (missing guest_phone column).
+    const { error: phoneErr } = await svc.from("ball_guests").update({ guest_phone: phoneClean }).eq("id", guest.id);
+    if (phoneErr) console.error("ball-guest-verify guest_phone (run ball_phone_numbers.sql)", phoneErr);
 
     const { data: signup, error: signupErr } = await svc
       .from("ball_signups")

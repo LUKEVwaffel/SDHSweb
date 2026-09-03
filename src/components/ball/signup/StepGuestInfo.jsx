@@ -273,6 +273,15 @@ export default function StepGuestInfo({ signupToken, value, onChange, onBack, on
             </Field>
           )}
 
+          {(isDate || isFriend) && (
+            <Field label={`${isFriend ? "FRIEND" : "DATE"}'S PHONE NUMBER (optional)`}>
+              <TextInput type="tel" inputMode="tel" value={value.phone || ''} onChange={set('phone')} placeholder="They'll confirm it on their own page" />
+              <div style={{ fontFamily: mono, fontSize: 11, color: P.mute, marginTop: 6 }}>
+                Leave blank if you don't know it — your guest enters their own number when they finish their part.
+              </div>
+            </Field>
+          )}
+
           {isFriend && (
             <Field label={`HOW WILL YOUR FRIEND'S ${money(priceCadet) || 'PAYMENT'} REACH THE SCHOOL?`}>
               <Radio
@@ -305,6 +314,6 @@ function emptyGuestKeepFlag() {
   return {
     guest_type: null, name: '', age: '', gender: '', is_sdhs_jrotc: false, sdhs_matched_cadet_id: null,
     goes_to_sdhs: null, other_jrotc: false, other_jrotc_school: '', school_attended: '',
-    poc_name: '', poc_email: '', poc_phone: '', personal_email: '', friend_payment_method: '',
+    poc_name: '', poc_email: '', poc_phone: '', personal_email: '', phone: '', friend_payment_method: '',
   };
 }

@@ -44,9 +44,9 @@ export async function submitSignup(signupToken, payload) {
   return { data };
 }
 
-export async function guestVerify(token, { allergies, accepted_dress_code }) {
+export async function guestVerify(token, { allergies, accepted_dress_code, phone }) {
   const { data, error } = await SB.functions.invoke('ball-guest-verify', {
-    body: { token, allergies, accepted_dress_code },
+    body: { token, allergies, accepted_dress_code, phone },
   });
   if (error || data?.error) return { error: await invokeError(data, error, 'Verification failed.') };
   return { data };

@@ -26,7 +26,7 @@ function emptyGuest() {
     bringing_guest: null, guest_type: null,
     name: '', age: '', gender: '', is_sdhs_jrotc: false, sdhs_matched_cadet_id: null,
     goes_to_sdhs: null, other_jrotc: false, other_jrotc_school: '', school_attended: '',
-    poc_name: '', poc_email: '', poc_phone: '', personal_email: '', friend_payment_method: '',
+    poc_name: '', poc_email: '', poc_phone: '', personal_email: '', phone: '', friend_payment_method: '',
   };
 }
 
@@ -40,7 +40,7 @@ export default function BallSignupWizard() {
   // has_allergy: null until answered. notification_email is REQUIRED for every
   // signer (personal, non-school) — it's the confirmation address and, when an
   // allergy is flagged, the S-5 contact too.
-  const [cadetDetails, setCadetDetails] = useState({ age: '', gender: '', has_allergy: null, notification_email: '' });
+  const [cadetDetails, setCadetDetails] = useState({ age: '', gender: '', has_allergy: null, notification_email: '', phone: '' });
   const [guest, setGuest] = useState(emptyGuest());
   const [submitted, setSubmitted] = useState(false);
   const [result, setResult] = useState(null); // ball-submit-signup response (amounts, form-required, guest_type)

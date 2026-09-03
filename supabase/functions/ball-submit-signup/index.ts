@@ -246,6 +246,7 @@ Deno.serve(async (req) => {
 
     const cadetAge = Number(body?.cadet_age);
     const cadetGender = required(body?.cadet_gender);
+    const cadetPhone = required(body?.cadet_phone) || null;
     const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
     // EVERY signer must give a personal, non-school email. It's the address the
@@ -288,6 +289,7 @@ Deno.serve(async (req) => {
     const guestName = required(guest.name);
     const guestAge = Number(guest.age);
     const guestGender = required(guest.gender);
+    const guestPhone = required(guest.phone) || null;
     // A non-roster guest (manual date or any friend) who attends SDHS but is
     // NOT a cadet: school is fixed, the other-school questions don't apply.
     const goesToSdhs = !isSdhsJrotc && guest.goes_to_sdhs === true;
@@ -397,6 +399,13 @@ Deno.serve(async (req) => {
       return json({ error: "internal error" }, 500);
     }
 
+    // Phone numbers go on in a separate, non-fatal update so a signup still
+    // succeeds if ball_phone_numbers.sql hasn't been run yet (missing column).
+    if (cadetPhone) {
+      const { error: phoneErr } = await svc.from("ball_signups").update({ cadet_phone: cadetPhone }).eq("id", signup.id);
+      if (phoneErr) console.error("ball-submit-signup cadet_phone (run ball_phone_numbers.sql)", phoneErr);
+    }
+
     // Item 2: alert S-5 on a new allergy flag (fire-and-forget, same pattern
     // as the guest-invite email below — a failure here must not fail the
     // signup, which is already committed).
@@ -481,6 +490,13 @@ Deno.serve(async (req) => {
       await svc.from("ball_signups").delete().eq("id", signup.id); // roll back the orphaned signup row
       await svc.from("ball_signup_tokens_used").delete().eq("jti", payload.jti); // free the token for a clean retry
       return json({ error: "internal error" }, 500);
+    }
+
+    // Guest phone (if the cadet pre-filled one) — non-fatal, same reason as
+    // the cadet phone above. The guest confirms/sets it on their verify page.
+    if (guestPhone) {
+      const { error: gpErr } = await svc.from("ball_guests").update({ guest_phone: guestPhone }).eq("signup_id", signup.id);
+      if (gpErr) console.error("ball-submit-signup guest_phone (run ball_phone_numbers.sql)", gpErr);
     }
 
     // Attire approver alert — now that the guest row exists (female attendee →

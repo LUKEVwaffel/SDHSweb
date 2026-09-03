@@ -13,7 +13,9 @@ export default function StepCadetDetails({ cadet, value, onChange, onBack, onNex
   const set = (field) => (e) => onChange({ ...value, [field]: e.target.value });
   const email = (value.notification_email || '').trim();
   const emailValid = EMAIL_RE.test(email) && !isSchoolEmail(email);
-  const canContinue = value.age && Number(value.age) > 0 && value.gender && value.has_allergy !== null && emailValid;
+  const phoneDigits = (value.phone || '').replace(/\D/g, '');
+  const phoneValid = phoneDigits.length >= 10;
+  const canContinue = value.age && Number(value.age) > 0 && value.gender && value.has_allergy !== null && emailValid && phoneValid;
 
   return (
     <div>
@@ -34,6 +36,16 @@ export default function StepCadetDetails({ cadet, value, onChange, onBack, onNex
           onChange={(v) => onChange({ ...value, gender: v })}
           options={[{ value: 'male', label: 'MALE' }, { value: 'female', label: 'FEMALE' }]}
         />
+      </Field>
+
+      <Field label="YOUR PHONE NUMBER">
+        <TextInput type="tel" inputMode="tel" value={value.phone || ''} onChange={set('phone')} placeholder="(423) 555-0123" />
+        <div style={{ fontFamily: mono, fontSize: 11, color: P.mute, marginTop: 6 }}>
+          Your own cell. 1SG Kaz / Chief use it to reach you about payment or your field trip form.
+        </div>
+        {(value.phone || '').trim() && !phoneValid && (
+          <div style={{ fontFamily: mono, fontSize: 11, color: P.red, marginTop: 4 }}>Enter a full phone number (at least 10 digits).</div>
+        )}
       </Field>
 
       <Field label="DO YOU HAVE A FOOD ALLERGY?">
