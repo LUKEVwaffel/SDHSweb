@@ -43,8 +43,8 @@
       "source_location": "L3",
       "_origin": "ast",
       "id": "ref_react",
-      "community": 261,
-      "community_name": "getDeviceId",
+      "community": 313,
+      "community_name": "ThreadView.jsx",
       "norm_label": "react"
     },
     {
@@ -4168,8 +4168,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "src_components_submithub",
-      "community": 187,
-      "community_name": "PhotoUploader.jsx",
+      "community": 10,
+      "community_name": "emailRender.js",
       "norm_label": "submithub.jsx"
     },
     {
@@ -4179,8 +4179,8 @@
       "source_location": "L8",
       "_origin": "ast",
       "id": "src_components_submithub_p",
-      "community": 187,
-      "community_name": "PhotoUploader.jsx",
+      "community": 10,
+      "community_name": "emailRender.js",
       "norm_label": "p"
     },
     {
@@ -4190,8 +4190,8 @@
       "source_location": "L17",
       "_origin": "ast",
       "id": "src_components_submithub_submithub",
-      "community": 187,
-      "community_name": "PhotoUploader.jsx",
+      "community": 10,
+      "community_name": "emailRender.js",
       "norm_label": "submithub()"
     },
     {
@@ -4201,8 +4201,8 @@
       "source_location": "L92",
       "_origin": "ast",
       "id": "src_components_submithub_backbtn",
-      "community": 187,
-      "community_name": "PhotoUploader.jsx",
+      "community": 10,
+      "community_name": "emailRender.js",
       "norm_label": "backbtn"
     },
     {
@@ -4322,8 +4322,8 @@
       "source_location": "L19",
       "_origin": "ast",
       "id": "src_components_teamgallery_teamgallery",
-      "community": 298,
-      "community_name": "emailAudience.js",
+      "community": 10,
+      "community_name": "emailRender.js",
       "norm_label": "teamgallery()"
     },
     {
@@ -4531,8 +4531,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "src_components_admin_loginscreen",
-      "community": 43,
-      "community_name": "Rifle.jsx",
+      "community": 313,
+      "community_name": "ThreadView.jsx",
       "norm_label": "loginscreen.jsx"
     },
     {
@@ -4542,8 +4542,8 @@
       "source_location": "L15",
       "_origin": "ast",
       "id": "src_components_admin_loginscreen_loginscreen",
-      "community": 43,
-      "community_name": "Rifle.jsx",
+      "community": 313,
+      "community_name": "ThreadView.jsx",
       "norm_label": "loginscreen()"
     },
     {
@@ -4553,8 +4553,8 @@
       "source_location": "L42",
       "_origin": "ast",
       "id": "src_components_admin_loginscreen_loginshell",
-      "community": 43,
-      "community_name": "Rifle.jsx",
+      "community": 313,
+      "community_name": "ThreadView.jsx",
       "norm_label": "loginshell()"
     },
     {
@@ -4608,8 +4608,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "src_components_admin_login_accountauth",
-      "community": 43,
-      "community_name": "Rifle.jsx",
+      "community": 313,
+      "community_name": "ThreadView.jsx",
       "norm_label": "accountauth.jsx"
     },
     {
@@ -4619,8 +4619,8 @@
       "source_location": "L11",
       "_origin": "ast",
       "id": "src_components_admin_login_accountauth_accountauth",
-      "community": 43,
-      "community_name": "Rifle.jsx",
+      "community": 313,
+      "community_name": "ThreadView.jsx",
       "norm_label": "accountauth()"
     },
     {
@@ -4696,8 +4696,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "src_components_admin_login_eyeicon",
-      "community": 43,
-      "community_name": "Rifle.jsx",
+      "community": 313,
+      "community_name": "ThreadView.jsx",
       "norm_label": "eyeicon.jsx"
     },
     {
@@ -4707,8 +4707,8 @@
       "source_location": "L3",
       "_origin": "ast",
       "id": "src_components_admin_login_eyeicon_eyeicon",
-      "community": 43,
-      "community_name": "Rifle.jsx",
+      "community": 313,
+      "community_name": "ThreadView.jsx",
       "norm_label": "eyeicon()"
     },
     {
@@ -4762,8 +4762,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "src_components_admin_login_passwordform",
-      "community": 43,
-      "community_name": "Rifle.jsx",
+      "community": 313,
+      "community_name": "ThreadView.jsx",
       "norm_label": "passwordform.jsx"
     },
     {
@@ -4773,8 +4773,8 @@
       "source_location": "L9",
       "_origin": "ast",
       "id": "src_components_admin_login_passwordform_passwordform",
-      "community": 43,
-      "community_name": "Rifle.jsx",
+      "community": 313,
+      "community_name": "ThreadView.jsx",
       "norm_label": "passwordform()"
     },
     {
@@ -4861,8 +4861,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "src_components_admin_nav_topbar",
-      "community": 43,
-      "community_name": "Rifle.jsx",
+      "community": 41,
+      "community_name": "PhotoUploader.jsx",
       "norm_label": "topbar.jsx"
     },
     {
@@ -4872,8 +4872,8 @@
       "source_location": "L5",
       "_origin": "ast",
       "id": "src_components_admin_nav_topbar_topbar",
-      "community": 43,
-      "community_name": "Rifle.jsx",
+      "community": 41,
+      "community_name": "PhotoUploader.jsx",
       "norm_label": "topbar()"
     },
     {
@@ -5059,8 +5059,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "src_components_admin_panels_mediapanel",
-      "community": 41,
-      "community_name": "PhotoUploader.jsx",
+      "community": 324,
+      "community_name": "BallAllergyPanel.jsx",
       "norm_label": "mediapanel.jsx"
     },
     {
@@ -5070,8 +5070,8 @@
       "source_location": "L9",
       "_origin": "ast",
       "id": "src_components_admin_panels_mediapanel_buckets",
-      "community": 41,
-      "community_name": "PhotoUploader.jsx",
+      "community": 324,
+      "community_name": "BallAllergyPanel.jsx",
       "norm_label": "buckets"
     },
     {
@@ -5081,8 +5081,8 @@
       "source_location": "L15",
       "_origin": "ast",
       "id": "src_components_admin_panels_mediapanel_isimage",
-      "community": 41,
-      "community_name": "PhotoUploader.jsx",
+      "community": 324,
+      "community_name": "BallAllergyPanel.jsx",
       "norm_label": "isimage()"
     },
     {
@@ -5092,8 +5092,8 @@
       "source_location": "L16",
       "_origin": "ast",
       "id": "src_components_admin_panels_mediapanel_ispdf",
-      "community": 41,
-      "community_name": "PhotoUploader.jsx",
+      "community": 324,
+      "community_name": "BallAllergyPanel.jsx",
       "norm_label": "ispdf()"
     },
     {
@@ -5103,8 +5103,8 @@
       "source_location": "L17",
       "_origin": "ast",
       "id": "src_components_admin_panels_mediapanel_ext",
-      "community": 41,
-      "community_name": "PhotoUploader.jsx",
+      "community": 324,
+      "community_name": "BallAllergyPanel.jsx",
       "norm_label": "ext()"
     },
     {
@@ -5114,8 +5114,8 @@
       "source_location": "L18",
       "_origin": "ast",
       "id": "src_components_admin_panels_mediapanel_basename",
-      "community": 41,
-      "community_name": "PhotoUploader.jsx",
+      "community": 324,
+      "community_name": "BallAllergyPanel.jsx",
       "norm_label": "basename()"
     },
     {
@@ -5125,8 +5125,8 @@
       "source_location": "L20",
       "_origin": "ast",
       "id": "src_components_admin_panels_mediapanel_confidentiality_levels",
-      "community": 41,
-      "community_name": "PhotoUploader.jsx",
+      "community": 324,
+      "community_name": "BallAllergyPanel.jsx",
       "norm_label": "confidentiality_levels"
     },
     {
@@ -5136,8 +5136,8 @@
       "source_location": "L25",
       "_origin": "ast",
       "id": "src_components_admin_panels_mediapanel_levelinfo",
-      "community": 41,
-      "community_name": "PhotoUploader.jsx",
+      "community": 324,
+      "community_name": "BallAllergyPanel.jsx",
       "norm_label": "levelinfo()"
     },
     {
@@ -5147,8 +5147,8 @@
       "source_location": "L27",
       "_origin": "ast",
       "id": "src_components_admin_panels_mediapanel_mediapanel",
-      "community": 41,
-      "community_name": "PhotoUploader.jsx",
+      "community": 324,
+      "community_name": "BallAllergyPanel.jsx",
       "norm_label": "mediapanel()"
     },
     {
@@ -5158,8 +5158,8 @@
       "source_location": "L298",
       "_origin": "ast",
       "id": "src_components_admin_panels_mediapanel_minibtn",
-      "community": 41,
-      "community_name": "PhotoUploader.jsx",
+      "community": 324,
+      "community_name": "BallAllergyPanel.jsx",
       "norm_label": "minibtn()"
     },
     {
@@ -5917,8 +5917,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "src_components_admin_panels_ball_ballallergypanel",
-      "community": 324,
-      "community_name": "BallAllergyPanel.jsx",
+      "community": 41,
+      "community_name": "PhotoUploader.jsx",
       "norm_label": "ballallergypanel.jsx"
     },
     {
@@ -5928,8 +5928,8 @@
       "source_location": "L11",
       "_origin": "ast",
       "id": "src_components_admin_panels_ball_ballallergypanel_esc",
-      "community": 324,
-      "community_name": "BallAllergyPanel.jsx",
+      "community": 41,
+      "community_name": "PhotoUploader.jsx",
       "norm_label": "esc()"
     },
     {
@@ -5939,8 +5939,8 @@
       "source_location": "L16",
       "_origin": "ast",
       "id": "src_components_admin_panels_ball_ballallergypanel_fmt",
-      "community": 324,
-      "community_name": "BallAllergyPanel.jsx",
+      "community": 41,
+      "community_name": "PhotoUploader.jsx",
       "norm_label": "fmt()"
     },
     {
@@ -5950,8 +5950,8 @@
       "source_location": "L20",
       "_origin": "ast",
       "id": "src_components_admin_panels_ball_ballallergypanel_ballallergypanel",
-      "community": 324,
-      "community_name": "BallAllergyPanel.jsx",
+      "community": 41,
+      "community_name": "PhotoUploader.jsx",
       "norm_label": "ballallergypanel()"
     },
     {
@@ -5961,8 +5961,8 @@
       "source_location": "L93",
       "_origin": "ast",
       "id": "src_components_admin_panels_ball_ballallergypanel_sectiongroup",
-      "community": 324,
-      "community_name": "BallAllergyPanel.jsx",
+      "community": 41,
+      "community_name": "PhotoUploader.jsx",
       "norm_label": "sectiongroup()"
     },
     {
@@ -5972,8 +5972,8 @@
       "source_location": "L106",
       "_origin": "ast",
       "id": "src_components_admin_panels_ball_ballallergypanel_row",
-      "community": 324,
-      "community_name": "BallAllergyPanel.jsx",
+      "community": 41,
+      "community_name": "PhotoUploader.jsx",
       "norm_label": "row()"
     },
     {
@@ -6676,8 +6676,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "src_components_admin_panels_email_builder_blockfields",
-      "community": 198,
-      "community_name": "RaiderCarousel.jsx",
+      "community": 0,
+      "community_name": "react",
       "norm_label": "blockfields.jsx"
     },
     {
@@ -7523,8 +7523,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "src_components_admin_panels_photos_photosubmissions",
-      "community": 11,
-      "community_name": "blocks.js",
+      "community": 261,
+      "community_name": "getDeviceId",
       "norm_label": "photosubmissions.jsx"
     },
     {
@@ -7534,8 +7534,8 @@
       "source_location": "L18",
       "_origin": "ast",
       "id": "src_components_admin_panels_photos_photosubmissions_filters",
-      "community": 11,
-      "community_name": "blocks.js",
+      "community": 261,
+      "community_name": "getDeviceId",
       "norm_label": "filters"
     },
     {
@@ -7545,8 +7545,8 @@
       "source_location": "L27",
       "_origin": "ast",
       "id": "src_components_admin_panels_photos_photosubmissions_team_color",
-      "community": 11,
-      "community_name": "blocks.js",
+      "community": 261,
+      "community_name": "getDeviceId",
       "norm_label": "team_color"
     },
     {
@@ -7556,8 +7556,8 @@
       "source_location": "L32",
       "_origin": "ast",
       "id": "src_components_admin_panels_photos_photosubmissions_thumbpath",
-      "community": 11,
-      "community_name": "blocks.js",
+      "community": 261,
+      "community_name": "getDeviceId",
       "norm_label": "thumbpath()"
     },
     {
@@ -7732,8 +7732,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "src_components_admin_panels_tvphotos_emergencypushpanel",
-      "community": 261,
-      "community_name": "getDeviceId",
+      "community": 43,
+      "community_name": "Rifle.jsx",
       "norm_label": "emergencypushpanel.jsx"
     },
     {
@@ -7743,8 +7743,8 @@
       "source_location": "L7",
       "_origin": "ast",
       "id": "src_components_admin_panels_tvphotos_emergencypushpanel_text_sizes",
-      "community": 261,
-      "community_name": "getDeviceId",
+      "community": 43,
+      "community_name": "Rifle.jsx",
       "norm_label": "text_sizes"
     },
     {
@@ -7754,8 +7754,8 @@
       "source_location": "L30",
       "_origin": "ast",
       "id": "src_components_admin_panels_tvphotos_emergencypushpanel_emergencypushpanel",
-      "community": 83,
-      "community_name": "RaiderPolls.jsx",
+      "community": 43,
+      "community_name": "Rifle.jsx",
       "norm_label": "emergencypushpanel()"
     },
     {
@@ -7897,8 +7897,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "src_components_admin_panels_tvphotos_tvterminalmanager",
-      "community": 11,
-      "community_name": "blocks.js",
+      "community": 261,
+      "community_name": "getDeviceId",
       "norm_label": "tvterminalmanager.jsx"
     },
     {
@@ -7908,8 +7908,8 @@
       "source_location": "L15",
       "_origin": "ast",
       "id": "src_components_admin_panels_tvphotos_tvterminalmanager_tvterminalmanager",
-      "community": 11,
-      "community_name": "blocks.js",
+      "community": 261,
+      "community_name": "getDeviceId",
       "norm_label": "tvterminalmanager()"
     },
     {
@@ -7941,8 +7941,8 @@
       "source_location": "L13",
       "_origin": "ast",
       "id": "src_components_admin_panels_tvremote_tabintro_tabintro",
-      "community": 83,
-      "community_name": "RaiderPolls.jsx",
+      "community": 43,
+      "community_name": "Rifle.jsx",
       "norm_label": "tabintro()"
     },
     {
@@ -7974,8 +7974,8 @@
       "source_location": "L28",
       "_origin": "ast",
       "id": "src_components_admin_panels_tvremote_tvremoteguide_tvremoteguide",
-      "community": 83,
-      "community_name": "RaiderPolls.jsx",
+      "community": 43,
+      "community_name": "Rifle.jsx",
       "norm_label": "tvremoteguide()"
     },
     {
@@ -7985,8 +7985,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "src_components_admin_panels_tvremote_tvremotepanel",
-      "community": 83,
-      "community_name": "RaiderPolls.jsx",
+      "community": 43,
+      "community_name": "Rifle.jsx",
       "norm_label": "tvremotepanel.jsx"
     },
     {
@@ -7996,8 +7996,8 @@
       "source_location": "L27",
       "_origin": "ast",
       "id": "src_components_admin_panels_tvremote_tvremotepanel_screens",
-      "community": 83,
-      "community_name": "RaiderPolls.jsx",
+      "community": 267,
+      "community_name": "RecallGame",
       "norm_label": "screens"
     },
     {
@@ -8007,8 +8007,8 @@
       "source_location": "L34",
       "_origin": "ast",
       "id": "src_components_admin_panels_tvremote_tvremotepanel_per_action_tabs",
-      "community": 83,
-      "community_name": "RaiderPolls.jsx",
+      "community": 267,
+      "community_name": "RecallGame",
       "norm_label": "per_action_tabs"
     },
     {
@@ -8018,8 +8018,8 @@
       "source_location": "L36",
       "_origin": "ast",
       "id": "src_components_admin_panels_tvremote_tvremotepanel_base_tabs",
-      "community": 83,
-      "community_name": "RaiderPolls.jsx",
+      "community": 43,
+      "community_name": "Rifle.jsx",
       "norm_label": "base_tabs"
     },
     {
@@ -8029,8 +8029,8 @@
       "source_location": "L44",
       "_origin": "ast",
       "id": "src_components_admin_panels_tvremote_tvremotepanel_range_tab",
-      "community": 83,
-      "community_name": "RaiderPolls.jsx",
+      "community": 43,
+      "community_name": "Rifle.jsx",
       "norm_label": "range_tab"
     },
     {
@@ -8040,8 +8040,8 @@
       "source_location": "L45",
       "_origin": "ast",
       "id": "src_components_admin_panels_tvremote_tvremotepanel_range_layout_tab",
-      "community": 83,
-      "community_name": "RaiderPolls.jsx",
+      "community": 43,
+      "community_name": "Rifle.jsx",
       "norm_label": "range_layout_tab"
     },
     {
@@ -8051,8 +8051,8 @@
       "source_location": "L46",
       "_origin": "ast",
       "id": "src_components_admin_panels_tvremote_tvremotepanel_range_notice_tabs",
-      "community": 83,
-      "community_name": "RaiderPolls.jsx",
+      "community": 43,
+      "community_name": "Rifle.jsx",
       "norm_label": "range_notice_tabs"
     },
     {
@@ -8062,8 +8062,8 @@
       "source_location": "L54",
       "_origin": "ast",
       "id": "src_components_admin_panels_tvremote_tvremotepanel_default_range_config",
-      "community": 83,
-      "community_name": "RaiderPolls.jsx",
+      "community": 43,
+      "community_name": "Rifle.jsx",
       "norm_label": "default_range_config"
     },
     {
@@ -8073,8 +8073,8 @@
       "source_location": "L68",
       "_origin": "ast",
       "id": "src_components_admin_panels_tvremote_tvremotepanel_widget_mode_labels",
-      "community": 83,
-      "community_name": "RaiderPolls.jsx",
+      "community": 43,
+      "community_name": "Rifle.jsx",
       "norm_label": "widget_mode_labels"
     },
     {
@@ -8084,8 +8084,8 @@
       "source_location": "L76",
       "_origin": "ast",
       "id": "src_components_admin_panels_tvremote_tvremotepanel_rangephaselabel",
-      "community": 83,
-      "community_name": "RaiderPolls.jsx",
+      "community": 267,
+      "community_name": "RecallGame",
       "norm_label": "rangephaselabel()"
     },
     {
@@ -8095,8 +8095,8 @@
       "source_location": "L92",
       "_origin": "ast",
       "id": "src_components_admin_panels_tvremote_tvremotepanel_rangeconfigfromrow",
-      "community": 83,
-      "community_name": "RaiderPolls.jsx",
+      "community": 267,
+      "community_name": "RecallGame",
       "norm_label": "rangeconfigfromrow()"
     },
     {
@@ -8106,8 +8106,8 @@
       "source_location": "L108",
       "_origin": "ast",
       "id": "src_components_admin_panels_tvremote_tvremotepanel_draftfromsettings",
-      "community": 83,
-      "community_name": "RaiderPolls.jsx",
+      "community": 267,
+      "community_name": "RecallGame",
       "norm_label": "draftfromsettings()"
     },
     {
@@ -8117,8 +8117,8 @@
       "source_location": "L139",
       "_origin": "ast",
       "id": "src_components_admin_panels_tvremote_tvremotepanel_tvremotepanel",
-      "community": 83,
-      "community_name": "RaiderPolls.jsx",
+      "community": 267,
+      "community_name": "RecallGame",
       "norm_label": "tvremotepanel()"
     },
     {
@@ -8139,8 +8139,8 @@
       "source_location": "L9",
       "_origin": "ast",
       "id": "src_components_admin_panels_tvremote_tvremoteupdatemodal_tvremoteupdatemodal",
-      "community": 83,
-      "community_name": "RaiderPolls.jsx",
+      "community": 43,
+      "community_name": "Rifle.jsx",
       "norm_label": "tvremoteupdatemodal()"
     },
     {
@@ -8161,8 +8161,8 @@
       "source_location": "L11",
       "_origin": "ast",
       "id": "src_components_admin_panels_tvremote_tvremotewalkthrough_tvremotewalkthrough",
-      "community": 83,
-      "community_name": "RaiderPolls.jsx",
+      "community": 43,
+      "community_name": "Rifle.jsx",
       "norm_label": "tvremotewalkthrough()"
     },
     {
@@ -8436,8 +8436,8 @@
       "source_location": "L28",
       "_origin": "ast",
       "id": "src_components_admin_theme_sp",
-      "community": 43,
-      "community_name": "Rifle.jsx",
+      "community": 261,
+      "community_name": "getDeviceId",
       "norm_label": "sp"
     },
     {
@@ -9005,7 +9005,7 @@
       "label": "money()",
       "file_type": "code",
       "source_file": "src/components/ball/signup/SignupConfirmation.jsx",
-      "source_location": "L7",
+      "source_location": "L8",
       "_origin": "ast",
       "id": "src_components_ball_signup_signupconfirmation_money",
       "community": 202,
@@ -9016,7 +9016,7 @@
       "label": "SignupConfirmation()",
       "file_type": "code",
       "source_file": "src/components/ball/signup/SignupConfirmation.jsx",
-      "source_location": "L11",
+      "source_location": "L14",
       "_origin": "ast",
       "id": "src_components_ball_signup_signupconfirmation_signupconfirmation",
       "community": 202,
@@ -9027,7 +9027,7 @@
       "label": "para",
       "file_type": "code",
       "source_file": "src/components/ball/signup/SignupConfirmation.jsx",
-      "source_location": "L52",
+      "source_location": "L79",
       "_origin": "ast",
       "id": "src_components_ball_signup_signupconfirmation_para",
       "community": 202,
@@ -9115,7 +9115,7 @@
       "label": "p",
       "file_type": "code",
       "source_file": "src/components/ball/signup/StepDocumentation.jsx",
-      "source_location": "L153",
+      "source_location": "L168",
       "_origin": "ast",
       "id": "src_components_ball_signup_stepdocumentation_p",
       "community": 202,
@@ -9126,7 +9126,7 @@
       "label": "linkBtn",
       "file_type": "code",
       "source_file": "src/components/ball/signup/StepDocumentation.jsx",
-      "source_location": "L154",
+      "source_location": "L169",
       "_origin": "ast",
       "id": "src_components_ball_signup_stepdocumentation_linkbtn",
       "community": 202,
@@ -9137,7 +9137,7 @@
       "label": "Section()",
       "file_type": "code",
       "source_file": "src/components/ball/signup/StepDocumentation.jsx",
-      "source_location": "L156",
+      "source_location": "L171",
       "_origin": "ast",
       "id": "src_components_ball_signup_stepdocumentation_section",
       "community": 202,
@@ -10702,8 +10702,8 @@
       "source_location": "L50",
       "_origin": "ast",
       "id": "src_components_rhea_rhea_rheaapp",
-      "community": 252,
-      "community_name": "TvRangeKiosk.jsx",
+      "community": 300,
+      "community_name": "RaiderCarousel.jsx",
       "norm_label": "rheaapp()"
     },
     {
@@ -10966,8 +10966,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "src_components_rhea_usepwaupdate",
-      "community": 250,
-      "community_name": "FaqSection.jsx",
+      "community": 300,
+      "community_name": "RaiderCarousel.jsx",
       "norm_label": "usepwaupdate.jsx"
     },
     {
@@ -10977,8 +10977,8 @@
       "source_location": "L16",
       "_origin": "ast",
       "id": "src_components_rhea_usepwaupdate_usepwaupdate",
-      "community": 250,
-      "community_name": "FaqSection.jsx",
+      "community": 300,
+      "community_name": "RaiderCarousel.jsx",
       "norm_label": "usepwaupdate()"
     },
     {
@@ -10988,8 +10988,8 @@
       "source_location": "L63",
       "_origin": "ast",
       "id": "src_components_rhea_usepwaupdate_pwaupdatebar",
-      "community": 250,
-      "community_name": "FaqSection.jsx",
+      "community": 300,
+      "community_name": "RaiderCarousel.jsx",
       "norm_label": "pwaupdatebar()"
     },
     {
@@ -11186,8 +11186,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "src_components_tv_raiderparentwelcome",
-      "community": 4,
-      "community_name": "ui.jsx",
+      "community": 313,
+      "community_name": "ThreadView.jsx",
       "norm_label": "raiderparentwelcome.jsx"
     },
     {
@@ -11197,8 +11197,8 @@
       "source_location": "L18",
       "_origin": "ast",
       "id": "src_components_tv_raiderparentwelcome_useqrdataurl",
-      "community": 4,
-      "community_name": "ui.jsx",
+      "community": 197,
+      "community_name": "emailRender.js",
       "norm_label": "useqrdataurl()"
     },
     {
@@ -11208,8 +11208,8 @@
       "source_location": "L34",
       "_origin": "ast",
       "id": "src_components_tv_raiderparentwelcome_useclock",
-      "community": 4,
-      "community_name": "ui.jsx",
+      "community": 197,
+      "community_name": "emailRender.js",
       "norm_label": "useclock()"
     },
     {
@@ -11219,8 +11219,8 @@
       "source_location": "L43",
       "_origin": "ast",
       "id": "src_components_tv_raiderparentwelcome_initials",
-      "community": 4,
-      "community_name": "ui.jsx",
+      "community": 313,
+      "community_name": "ThreadView.jsx",
       "norm_label": "initials()"
     },
     {
@@ -11230,8 +11230,8 @@
       "source_location": "L47",
       "_origin": "ast",
       "id": "src_components_tv_raiderparentwelcome_qrcard",
-      "community": 4,
-      "community_name": "ui.jsx",
+      "community": 313,
+      "community_name": "ThreadView.jsx",
       "norm_label": "qrcard()"
     },
     {
@@ -11241,8 +11241,8 @@
       "source_location": "L70",
       "_origin": "ast",
       "id": "src_components_tv_raiderparentwelcome_commandercard",
-      "community": 4,
-      "community_name": "ui.jsx",
+      "community": 313,
+      "community_name": "ThreadView.jsx",
       "norm_label": "commandercard()"
     },
     {
@@ -11252,8 +11252,8 @@
       "source_location": "L103",
       "_origin": "ast",
       "id": "src_components_tv_raiderparentwelcome_raiderparentwelcome",
-      "community": 4,
-      "community_name": "ui.jsx",
+      "community": 197,
+      "community_name": "emailRender.js",
       "norm_label": "raiderparentwelcome()"
     },
     {
@@ -11395,8 +11395,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "src_components_tv_tvcongratsscreen",
-      "community": 273,
-      "community_name": "RaiderParentWelcome.jsx",
+      "community": 83,
+      "community_name": "RaiderPolls.jsx",
       "norm_label": "tvcongratsscreen.jsx"
     },
     {
@@ -11406,8 +11406,8 @@
       "source_location": "L13",
       "_origin": "ast",
       "id": "src_components_tv_tvcongratsscreen_tier_badge",
-      "community": 273,
-      "community_name": "RaiderParentWelcome.jsx",
+      "community": 83,
+      "community_name": "RaiderPolls.jsx",
       "norm_label": "tier_badge"
     },
     {
@@ -11417,8 +11417,8 @@
       "source_location": "L19",
       "_origin": "ast",
       "id": "src_components_tv_tvcongratsscreen_congratsstyles",
-      "community": 273,
-      "community_name": "RaiderParentWelcome.jsx",
+      "community": 83,
+      "community_name": "RaiderPolls.jsx",
       "norm_label": "congratsstyles()"
     },
     {
@@ -11428,8 +11428,8 @@
       "source_location": "L34",
       "_origin": "ast",
       "id": "src_components_tv_tvcongratsscreen_placementbadge",
-      "community": 273,
-      "community_name": "RaiderParentWelcome.jsx",
+      "community": 83,
+      "community_name": "RaiderPolls.jsx",
       "norm_label": "placementbadge()"
     },
     {
@@ -11439,8 +11439,8 @@
       "source_location": "L50",
       "_origin": "ast",
       "id": "src_components_tv_tvcongratsscreen_trophyrow",
-      "community": 273,
-      "community_name": "RaiderParentWelcome.jsx",
+      "community": 83,
+      "community_name": "RaiderPolls.jsx",
       "norm_label": "trophyrow()"
     },
     {
@@ -11450,8 +11450,8 @@
       "source_location": "L79",
       "_origin": "ast",
       "id": "src_components_tv_tvcongratsscreen_tvcongratsscreen",
-      "community": 273,
-      "community_name": "RaiderParentWelcome.jsx",
+      "community": 83,
+      "community_name": "RaiderPolls.jsx",
       "norm_label": "tvcongratsscreen()"
     },
     {
@@ -11670,7 +11670,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "src_components_tv_tvphotocarousel",
-      "community": 273,
+      "community": 299,
       "community_name": "RaiderParentWelcome.jsx",
       "norm_label": "tvphotocarousel.jsx"
     },
@@ -11681,7 +11681,7 @@
       "source_location": "L9",
       "_origin": "ast",
       "id": "src_components_tv_tvphotocarousel_carouselstyles",
-      "community": 273,
+      "community": 299,
       "community_name": "RaiderParentWelcome.jsx",
       "norm_label": "carouselstyles()"
     },
@@ -11692,7 +11692,7 @@
       "source_location": "L23",
       "_origin": "ast",
       "id": "src_components_tv_tvphotocarousel_slideimage",
-      "community": 273,
+      "community": 299,
       "community_name": "RaiderParentWelcome.jsx",
       "norm_label": "slideimage()"
     },
@@ -11703,7 +11703,7 @@
       "source_location": "L68",
       "_origin": "ast",
       "id": "src_components_tv_tvphotocarousel_tvphotocarousel",
-      "community": 273,
+      "community": 299,
       "community_name": "RaiderParentWelcome.jsx",
       "norm_label": "tvphotocarousel()"
     },
@@ -11901,8 +11901,8 @@
       "source_location": "L35",
       "_origin": "ast",
       "id": "src_components_tv_tvstandardlayout_tvstandardlayout",
-      "community": 83,
-      "community_name": "RaiderPolls.jsx",
+      "community": 299,
+      "community_name": "RaiderParentWelcome.jsx",
       "norm_label": "tvstandardlayout()"
     },
     {
@@ -12110,8 +12110,8 @@
       "source_location": "L4",
       "_origin": "ast",
       "id": "src_components_tv_control_center_stepfeaturedteams_stepfeaturedteams",
-      "community": 83,
-      "community_name": "RaiderPolls.jsx",
+      "community": 43,
+      "community_name": "Rifle.jsx",
       "norm_label": "stepfeaturedteams()"
     },
     {
@@ -12154,8 +12154,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "src_components_tv_control_center_steprangenotices",
-      "community": 6,
-      "community_name": "Raiders.jsx",
+      "community": 314,
+      "community_name": "useTvUpcomingEvents",
       "norm_label": "steprangenotices.jsx"
     },
     {
@@ -12165,8 +12165,8 @@
       "source_location": "L11",
       "_origin": "ast",
       "id": "src_components_tv_control_center_steprangenotices_fieldbasestyle",
-      "community": 6,
-      "community_name": "Raiders.jsx",
+      "community": 314,
+      "community_name": "useTvUpcomingEvents",
       "norm_label": "fieldbasestyle"
     },
     {
@@ -12176,8 +12176,8 @@
       "source_location": "L17",
       "_origin": "ast",
       "id": "src_components_tv_control_center_steprangenotices_newentryform",
-      "community": 6,
-      "community_name": "Raiders.jsx",
+      "community": 314,
+      "community_name": "useTvUpcomingEvents",
       "norm_label": "newentryform()"
     },
     {
@@ -12187,8 +12187,8 @@
       "source_location": "L78",
       "_origin": "ast",
       "id": "src_components_tv_control_center_steprangenotices_existingentry",
-      "community": 6,
-      "community_name": "Raiders.jsx",
+      "community": 314,
+      "community_name": "useTvUpcomingEvents",
       "norm_label": "existingentry()"
     },
     {
@@ -12440,8 +12440,8 @@
       "source_location": "L131",
       "_origin": "ast",
       "id": "src_components_tv_control_center_steprangeslideshow_announcementsingleeditor",
-      "community": 6,
-      "community_name": "Raiders.jsx",
+      "community": 314,
+      "community_name": "useTvUpcomingEvents",
       "norm_label": "announcementsingleeditor()"
     },
     {
@@ -12484,8 +12484,8 @@
       "source_location": "L16",
       "_origin": "ast",
       "id": "src_components_tv_control_center_stepshoutout_stepshoutout",
-      "community": 83,
-      "community_name": "RaiderPolls.jsx",
+      "community": 43,
+      "community_name": "Rifle.jsx",
       "norm_label": "stepshoutout()"
     },
     {
@@ -12605,8 +12605,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "src_components_tv_range_tvrangecountdown",
-      "community": 9,
-      "community_name": "App.jsx",
+      "community": 4,
+      "community_name": "ui.jsx",
       "norm_label": "tvrangecountdown.jsx"
     },
     {
@@ -12616,8 +12616,8 @@
       "source_location": "L9",
       "_origin": "ast",
       "id": "src_components_tv_range_tvrangecountdown_tvrangecountdown",
-      "community": 9,
-      "community_name": "App.jsx",
+      "community": 4,
+      "community_name": "ui.jsx",
       "norm_label": "tvrangecountdown()"
     },
     {
@@ -12649,8 +12649,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "src_components_tv_range_tvrangeoffhoursscreen",
-      "community": 9,
-      "community_name": "App.jsx",
+      "community": 4,
+      "community_name": "ui.jsx",
       "norm_label": "tvrangeoffhoursscreen.jsx"
     },
     {
@@ -12660,8 +12660,8 @@
       "source_location": "L15",
       "_origin": "ast",
       "id": "src_components_tv_range_tvrangeoffhoursscreen_tvrangeoffhoursscreen",
-      "community": 9,
-      "community_name": "App.jsx",
+      "community": 4,
+      "community_name": "ui.jsx",
       "norm_label": "tvrangeoffhoursscreen()"
     },
     {
@@ -12693,8 +12693,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "src_components_tv_range_tvrangeperiodprogressbar",
-      "community": 182,
-      "community_name": "TvHistoryPanel.jsx",
+      "community": 4,
+      "community_name": "ui.jsx",
       "norm_label": "tvrangeperiodprogressbar.jsx"
     },
     {
@@ -12704,8 +12704,8 @@
       "source_location": "L14",
       "_origin": "ast",
       "id": "src_components_tv_range_tvrangeperiodprogressbar_tvrangeperiodprogressbar",
-      "community": 182,
-      "community_name": "TvHistoryPanel.jsx",
+      "community": 4,
+      "community_name": "ui.jsx",
       "norm_label": "tvrangeperiodprogressbar()"
     },
     {
@@ -12781,8 +12781,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "src_components_tv_range_tvrangerotationlayout",
-      "community": 314,
-      "community_name": "useTvUpcomingEvents",
+      "community": 305,
+      "community_name": "react-native",
       "norm_label": "tvrangerotationlayout.jsx"
     },
     {
@@ -12792,8 +12792,8 @@
       "source_location": "L15",
       "_origin": "ast",
       "id": "src_components_tv_range_tvrangerotationlayout_tvrangerotationlayout",
-      "community": 314,
-      "community_name": "useTvUpcomingEvents",
+      "community": 305,
+      "community_name": "react-native",
       "norm_label": "tvrangerotationlayout()"
     },
     {
@@ -12858,8 +12858,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "src_components_tv_range_tvrangestaffschedulescreen",
-      "community": 182,
-      "community_name": "TvHistoryPanel.jsx",
+      "community": 4,
+      "community_name": "ui.jsx",
       "norm_label": "tvrangestaffschedulescreen.jsx"
     },
     {
@@ -12869,8 +12869,8 @@
       "source_location": "L9",
       "_origin": "ast",
       "id": "src_components_tv_range_tvrangestaffschedulescreen_tvrangestaffschedulescreen",
-      "community": 182,
-      "community_name": "TvHistoryPanel.jsx",
+      "community": 9,
+      "community_name": "App.jsx",
       "norm_label": "tvrangestaffschedulescreen()"
     },
     {
@@ -13045,8 +13045,8 @@
       "source_location": "L44",
       "_origin": "ast",
       "id": "src_components_tv_range_rangegrid_richtext_runstostoragestring",
-      "community": 6,
-      "community_name": "Raiders.jsx",
+      "community": 314,
+      "community_name": "useTvUpcomingEvents",
       "norm_label": "runstostoragestring()"
     },
     {
@@ -13056,8 +13056,8 @@
       "source_location": "L48",
       "_origin": "ast",
       "id": "src_components_tv_range_rangegrid_richtext_storagestringtoruns",
-      "community": 6,
-      "community_name": "Raiders.jsx",
+      "community": 314,
+      "community_name": "useTvUpcomingEvents",
       "norm_label": "storagestringtoruns()"
     },
     {
@@ -13111,8 +13111,8 @@
       "source_location": "L104",
       "_origin": "ast",
       "id": "src_components_tv_range_rangegrid_richtext_renderruns",
-      "community": 6,
-      "community_name": "Raiders.jsx",
+      "community": 314,
+      "community_name": "useTvUpcomingEvents",
       "norm_label": "renderruns()"
     },
     {
@@ -13133,8 +13133,8 @@
       "source_location": "L11",
       "_origin": "ast",
       "id": "src_components_tv_range_slides_slideannouncementsingle_slideannouncementsingle",
-      "community": 93,
-      "community_name": "ConversationList.jsx",
+      "community": 314,
+      "community_name": "useTvUpcomingEvents",
       "norm_label": "slideannouncementsingle()"
     },
     {
@@ -13199,8 +13199,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "src_components_tv_range_slides_slidenoticelist",
-      "community": 6,
-      "community_name": "Raiders.jsx",
+      "community": 314,
+      "community_name": "useTvUpcomingEvents",
       "norm_label": "slidenoticelist.jsx"
     },
     {
@@ -13210,8 +13210,8 @@
       "source_location": "L5",
       "_origin": "ast",
       "id": "src_components_tv_range_slides_slidenoticelist_noticerow",
-      "community": 6,
-      "community_name": "Raiders.jsx",
+      "community": 314,
+      "community_name": "useTvUpcomingEvents",
       "norm_label": "noticerow()"
     },
     {
@@ -13254,7 +13254,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "src_components_tv_range_slides_slidephotoofday",
-      "community": 273,
+      "community": 299,
       "community_name": "RaiderParentWelcome.jsx",
       "norm_label": "slidephotoofday.jsx"
     },
@@ -13265,7 +13265,7 @@
       "source_location": "L9",
       "_origin": "ast",
       "id": "src_components_tv_range_slides_slidephotoofday_slidephotoofday",
-      "community": 273,
+      "community": 299,
       "community_name": "RaiderParentWelcome.jsx",
       "norm_label": "slidephotoofday()"
     },
@@ -13276,8 +13276,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "src_components_tv_range_slides_slideraidercongrats",
-      "community": 273,
-      "community_name": "RaiderParentWelcome.jsx",
+      "community": 83,
+      "community_name": "RaiderPolls.jsx",
       "norm_label": "slideraidercongrats.jsx"
     },
     {
@@ -13287,8 +13287,8 @@
       "source_location": "L9",
       "_origin": "ast",
       "id": "src_components_tv_range_slides_slideraidercongrats_slideraidercongrats",
-      "community": 273,
-      "community_name": "RaiderParentWelcome.jsx",
+      "community": 83,
+      "community_name": "RaiderPolls.jsx",
       "norm_label": "slideraidercongrats()"
     },
     {
@@ -13408,8 +13408,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "src_components_tv_range_slides_slideupcomingevents",
-      "community": 10,
-      "community_name": "emailRender.js",
+      "community": 328,
+      "community_name": "SlideUpcomingEvents.jsx",
       "norm_label": "slideupcomingevents.jsx"
     },
     {
@@ -13419,8 +13419,8 @@
       "source_location": "L13",
       "_origin": "ast",
       "id": "src_components_tv_range_slides_slideupcomingevents_eventdatelabel",
-      "community": 10,
-      "community_name": "emailRender.js",
+      "community": 328,
+      "community_name": "SlideUpcomingEvents.jsx",
       "norm_label": "eventdatelabel()"
     },
     {
@@ -13430,8 +13430,8 @@
       "source_location": "L20",
       "_origin": "ast",
       "id": "src_components_tv_range_slides_slideupcomingevents_eventrow",
-      "community": 10,
-      "community_name": "emailRender.js",
+      "community": 328,
+      "community_name": "SlideUpcomingEvents.jsx",
       "norm_label": "eventrow()"
     },
     {
@@ -13441,8 +13441,8 @@
       "source_location": "L44",
       "_origin": "ast",
       "id": "src_components_tv_range_slides_slideupcomingevents_slideupcomingevents",
-      "community": 10,
-      "community_name": "emailRender.js",
+      "community": 328,
+      "community_name": "SlideUpcomingEvents.jsx",
       "norm_label": "slideupcomingevents()"
     },
     {
@@ -13452,8 +13452,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "src_components_tv_range_slides_slideregistry",
-      "community": 314,
-      "community_name": "useTvUpcomingEvents",
+      "community": 93,
+      "community_name": "ConversationList.jsx",
       "norm_label": "slideregistry.js"
     },
     {
@@ -13474,8 +13474,8 @@
       "source_location": "L15",
       "_origin": "ast",
       "id": "src_components_tv_range_slides_slideregistry_slide_types",
-      "community": 314,
-      "community_name": "useTvUpcomingEvents",
+      "community": 93,
+      "community_name": "ConversationList.jsx",
       "norm_label": "slide_types"
     },
     {
@@ -13485,8 +13485,8 @@
       "source_location": "L82",
       "_origin": "ast",
       "id": "src_components_tv_range_slides_slideregistry_legacy_slide_type_aliases",
-      "community": 314,
-      "community_name": "useTvUpcomingEvents",
+      "community": 93,
+      "community_name": "ConversationList.jsx",
       "norm_label": "legacy_slide_type_aliases"
     },
     {
@@ -13518,8 +13518,8 @@
       "source_location": "L101",
       "_origin": "ast",
       "id": "src_components_tv_range_slides_slideregistry_default_slideshow",
-      "community": 314,
-      "community_name": "useTvUpcomingEvents",
+      "community": 93,
+      "community_name": "ConversationList.jsx",
       "norm_label": "default_slideshow"
     },
     {
@@ -13617,8 +13617,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "src_data_tvremotechangelog",
-      "community": 83,
-      "community_name": "RaiderPolls.jsx",
+      "community": 313,
+      "community_name": "ThreadView.jsx",
       "norm_label": "tvremotechangelog.js"
     },
     {
@@ -13628,8 +13628,8 @@
       "source_location": "L21",
       "_origin": "ast",
       "id": "src_data_tvremotechangelog_tv_remote_changelog",
-      "community": 83,
-      "community_name": "RaiderPolls.jsx",
+      "community": 313,
+      "community_name": "ThreadView.jsx",
       "norm_label": "tv_remote_changelog"
     },
     {
@@ -13639,8 +13639,8 @@
       "source_location": "L37",
       "_origin": "ast",
       "id": "src_data_tvremotechangelog_tv_remote_latest_version",
-      "community": 83,
-      "community_name": "RaiderPolls.jsx",
+      "community": 313,
+      "community_name": "ThreadView.jsx",
       "norm_label": "tv_remote_latest_version"
     },
     {
@@ -13650,8 +13650,8 @@
       "source_location": "L44",
       "_origin": "ast",
       "id": "src_data_tvremotechangelog_changelogsince",
-      "community": 83,
-      "community_name": "RaiderPolls.jsx",
+      "community": 43,
+      "community_name": "Rifle.jsx",
       "norm_label": "changelogsince()"
     },
     {
@@ -13980,8 +13980,8 @@
       "source_location": "L23",
       "_origin": "ast",
       "id": "src_hooks_userheaphotos_userheaphotos",
-      "community": 250,
-      "community_name": "FaqSection.jsx",
+      "community": 83,
+      "community_name": "RaiderPolls.jsx",
       "norm_label": "userheaphotos()"
     },
     {
@@ -14002,8 +14002,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "src_hooks_usetvcarouselphotos",
-      "community": 261,
-      "community_name": "getDeviceId",
+      "community": 313,
+      "community_name": "ThreadView.jsx",
       "norm_label": "usetvcarouselphotos.js"
     },
     {
@@ -14013,7 +14013,7 @@
       "source_location": "L24",
       "_origin": "ast",
       "id": "src_hooks_usetvcarouselphotos_usetvcarouselphotos",
-      "community": 273,
+      "community": 299,
       "community_name": "RaiderParentWelcome.jsx",
       "norm_label": "usetvcarouselphotos()"
     },
@@ -14024,8 +14024,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "src_hooks_usetvconsentdue",
-      "community": 229,
-      "community_name": "rheaComp.js",
+      "community": 313,
+      "community_name": "ThreadView.jsx",
       "norm_label": "usetvconsentdue.js"
     },
     {
@@ -14035,8 +14035,8 @@
       "source_location": "L14",
       "_origin": "ast",
       "id": "src_hooks_usetvconsentdue_usetvconsentdue",
-      "community": 229,
-      "community_name": "rheaComp.js",
+      "community": 43,
+      "community_name": "Rifle.jsx",
       "norm_label": "usetvconsentdue()"
     },
     {
@@ -14046,8 +14046,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "src_hooks_usetvdailysettings",
-      "community": 261,
-      "community_name": "getDeviceId",
+      "community": 313,
+      "community_name": "ThreadView.jsx",
       "norm_label": "usetvdailysettings.js"
     },
     {
@@ -14068,8 +14068,8 @@
       "source_location": "L69",
       "_origin": "ast",
       "id": "src_hooks_usetvdailysettings_updatetvdailysettings",
-      "community": 261,
-      "community_name": "getDeviceId",
+      "community": 43,
+      "community_name": "Rifle.jsx",
       "norm_label": "updatetvdailysettings()"
     },
     {
@@ -14145,8 +14145,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "src_hooks_usetvnotices",
-      "community": 314,
-      "community_name": "useTvUpcomingEvents",
+      "community": 3,
+      "community_name": "PhotoUploader.jsx",
       "norm_label": "usetvnotices.js"
     },
     {
@@ -14156,8 +14156,8 @@
       "source_location": "L12",
       "_origin": "ast",
       "id": "src_hooks_usetvnotices_usetvnotices",
-      "community": 314,
-      "community_name": "useTvUpcomingEvents",
+      "community": 3,
+      "community_name": "PhotoUploader.jsx",
       "norm_label": "usetvnotices()"
     },
     {
@@ -14200,8 +14200,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "src_hooks_usetvremoteonboarding",
-      "community": 83,
-      "community_name": "RaiderPolls.jsx",
+      "community": 313,
+      "community_name": "ThreadView.jsx",
       "norm_label": "usetvremoteonboarding.js"
     },
     {
@@ -14211,8 +14211,8 @@
       "source_location": "L21",
       "_origin": "ast",
       "id": "src_hooks_usetvremoteonboarding_usetvremoteonboarding",
-      "community": 83,
-      "community_name": "RaiderPolls.jsx",
+      "community": 313,
+      "community_name": "ThreadView.jsx",
       "norm_label": "usetvremoteonboarding()"
     },
     {
@@ -14222,8 +14222,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "src_hooks_usetvupcomingevents",
-      "community": 239,
-      "community_name": "expo-application",
+      "community": 305,
+      "community_name": "react-native",
       "norm_label": "usetvupcomingevents.js"
     },
     {
@@ -14233,8 +14233,8 @@
       "source_location": "L6",
       "_origin": "ast",
       "id": "src_hooks_usetvupcomingevents_todayny",
-      "community": 239,
-      "community_name": "expo-application",
+      "community": 305,
+      "community_name": "react-native",
       "norm_label": "todayny()"
     },
     {
@@ -14244,8 +14244,8 @@
       "source_location": "L25",
       "_origin": "ast",
       "id": "src_hooks_usetvupcomingevents_usetvupcomingevents",
-      "community": 239,
-      "community_name": "expo-application",
+      "community": 305,
+      "community_name": "react-native",
       "norm_label": "usetvupcomingevents()"
     },
     {
@@ -14453,8 +14453,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "src_lib_bellschedules",
-      "community": 182,
-      "community_name": "TvHistoryPanel.jsx",
+      "community": 4,
+      "community_name": "ui.jsx",
       "norm_label": "bellschedules.js"
     },
     {
@@ -14464,8 +14464,8 @@
       "source_location": "L9",
       "_origin": "ast",
       "id": "src_lib_bellschedules_bell_schedules",
-      "community": 182,
-      "community_name": "TvHistoryPanel.jsx",
+      "community": 4,
+      "community_name": "ui.jsx",
       "norm_label": "bell_schedules"
     },
     {
@@ -14475,8 +14475,8 @@
       "source_location": "L55",
       "_origin": "ast",
       "id": "src_lib_bellschedules_weekday_schedule",
-      "community": 182,
-      "community_name": "TvHistoryPanel.jsx",
+      "community": 4,
+      "community_name": "ui.jsx",
       "norm_label": "weekday_schedule"
     },
     {
@@ -14486,8 +14486,8 @@
       "source_location": "L58",
       "_origin": "ast",
       "id": "src_lib_bellschedules_weekdaybellschedule",
-      "community": 83,
-      "community_name": "RaiderPolls.jsx",
+      "community": 267,
+      "community_name": "RecallGame",
       "norm_label": "weekdaybellschedule()"
     },
     {
@@ -14497,8 +14497,8 @@
       "source_location": "L69",
       "_origin": "ast",
       "id": "src_lib_bellschedules_resolvebellschedule",
-      "community": 83,
-      "community_name": "RaiderPolls.jsx",
+      "community": 267,
+      "community_name": "RecallGame",
       "norm_label": "resolvebellschedule()"
     },
     {
@@ -14508,8 +14508,8 @@
       "source_location": "L75",
       "_origin": "ast",
       "id": "src_lib_bellschedules_formathhmm",
-      "community": 182,
-      "community_name": "TvHistoryPanel.jsx",
+      "community": 4,
+      "community_name": "ui.jsx",
       "norm_label": "formathhmm()"
     },
     {
@@ -14563,8 +14563,8 @@
       "source_location": "L157",
       "_origin": "ast",
       "id": "src_lib_bellschedules_nymillisofday",
-      "community": 182,
-      "community_name": "TvHistoryPanel.jsx",
+      "community": 4,
+      "community_name": "ui.jsx",
       "norm_label": "nymillisofday()"
     },
     {
@@ -14574,8 +14574,8 @@
       "source_location": "L162",
       "_origin": "ast",
       "id": "src_lib_bellschedules_msuntilhhmm",
-      "community": 9,
-      "community_name": "App.jsx",
+      "community": 4,
+      "community_name": "ui.jsx",
       "norm_label": "msuntilhhmm()"
     },
     {
@@ -14585,8 +14585,8 @@
       "source_location": "L167",
       "_origin": "ast",
       "id": "src_lib_bellschedules_formatcountdownclock",
-      "community": 182,
-      "community_name": "TvHistoryPanel.jsx",
+      "community": 4,
+      "community_name": "ui.jsx",
       "norm_label": "formatcountdownclock()"
     },
     {
@@ -15685,8 +15685,8 @@
       "source_location": "L25",
       "_origin": "ast",
       "id": "src_lib_passkey_loginwithpasskey",
-      "community": 43,
-      "community_name": "Rifle.jsx",
+      "community": 313,
+      "community_name": "ThreadView.jsx",
       "norm_label": "loginwithpasskey()"
     },
     {
@@ -15993,8 +15993,8 @@
       "source_location": "L26",
       "_origin": "ast",
       "id": "src_lib_rheacomp_allowed_types",
-      "community": 254,
-      "community_name": "TvPhotoCarousel.jsx",
+      "community": 252,
+      "community_name": "TvRangeKiosk.jsx",
       "norm_label": "allowed_types"
     },
     {
@@ -16004,8 +16004,8 @@
       "source_location": "L28",
       "_origin": "ast",
       "id": "src_lib_rheacomp_isallowedimage",
-      "community": 254,
-      "community_name": "TvPhotoCarousel.jsx",
+      "community": 252,
+      "community_name": "TvRangeKiosk.jsx",
       "norm_label": "isallowedimage()"
     },
     {
@@ -16081,8 +16081,8 @@
       "source_location": "L113",
       "_origin": "ast",
       "id": "src_lib_rheacomp_markonboardedrhea",
-      "community": 73,
-      "community_name": "imageResize.js",
+      "community": 252,
+      "community_name": "TvRangeKiosk.jsx",
       "norm_label": "markonboardedrhea()"
     },
     {
@@ -16092,8 +16092,8 @@
       "source_location": "L118",
       "_origin": "ast",
       "id": "src_lib_rheacomp_haswalkthroughrhea",
-      "community": 252,
-      "community_name": "TvRangeKiosk.jsx",
+      "community": 300,
+      "community_name": "RaiderCarousel.jsx",
       "norm_label": "haswalkthroughrhea()"
     },
     {
@@ -16103,8 +16103,8 @@
       "source_location": "L123",
       "_origin": "ast",
       "id": "src_lib_rheacomp_markwalkthroughrhea",
-      "community": 252,
-      "community_name": "TvRangeKiosk.jsx",
+      "community": 300,
+      "community_name": "RaiderCarousel.jsx",
       "norm_label": "markwalkthroughrhea()"
     },
     {
@@ -16246,8 +16246,8 @@
       "source_location": "L4",
       "_origin": "ast",
       "id": "src_lib_teams_teams",
-      "community": 43,
-      "community_name": "Rifle.jsx",
+      "community": 261,
+      "community_name": "getDeviceId",
       "norm_label": "teams"
     },
     {
@@ -16301,8 +16301,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "src_lib_tvcongratsdata",
-      "community": 273,
-      "community_name": "RaiderParentWelcome.jsx",
+      "community": 83,
+      "community_name": "RaiderPolls.jsx",
       "norm_label": "tvcongratsdata.js"
     },
     {
@@ -16323,8 +16323,8 @@
       "source_location": "L13",
       "_origin": "ast",
       "id": "src_lib_tvcongratsdata_congrats_trophies",
-      "community": 273,
-      "community_name": "RaiderParentWelcome.jsx",
+      "community": 83,
+      "community_name": "RaiderPolls.jsx",
       "norm_label": "congrats_trophies"
     },
     {
@@ -16334,8 +16334,8 @@
       "source_location": "L21",
       "_origin": "ast",
       "id": "src_lib_tvcongratsdata_congrats_photos",
-      "community": 273,
-      "community_name": "RaiderParentWelcome.jsx",
+      "community": 83,
+      "community_name": "RaiderPolls.jsx",
       "norm_label": "congrats_photos"
     },
     {
@@ -16378,8 +16378,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "src_lib_tvnotices",
-      "community": 6,
-      "community_name": "Raiders.jsx",
+      "community": 314,
+      "community_name": "useTvUpcomingEvents",
       "norm_label": "tvnotices.js"
     },
     {
@@ -16389,8 +16389,8 @@
       "source_location": "L12",
       "_origin": "ast",
       "id": "src_lib_tvnotices_createtvnotice",
-      "community": 6,
-      "community_name": "Raiders.jsx",
+      "community": 314,
+      "community_name": "useTvUpcomingEvents",
       "norm_label": "createtvnotice()"
     },
     {
@@ -16400,8 +16400,8 @@
       "source_location": "L24",
       "_origin": "ast",
       "id": "src_lib_tvnotices_updatetvnotice",
-      "community": 6,
-      "community_name": "Raiders.jsx",
+      "community": 314,
+      "community_name": "useTvUpcomingEvents",
       "norm_label": "updatetvnotice()"
     },
     {
@@ -16411,8 +16411,8 @@
       "source_location": "L29",
       "_origin": "ast",
       "id": "src_lib_tvnotices_deletetvnotice",
-      "community": 6,
-      "community_name": "Raiders.jsx",
+      "community": 314,
+      "community_name": "useTvUpcomingEvents",
       "norm_label": "deletetvnotice()"
     },
     {
@@ -16466,7 +16466,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "src_lib_tvphotos",
-      "community": 273,
+      "community": 299,
       "community_name": "RaiderParentWelcome.jsx",
       "norm_label": "tvphotos.js"
     },
@@ -16477,7 +16477,7 @@
       "source_location": "L4",
       "_origin": "ast",
       "id": "src_lib_tvphotos_tv_photos",
-      "community": 273,
+      "community": 299,
       "community_name": "RaiderParentWelcome.jsx",
       "norm_label": "tv_photos"
     },
@@ -19323,7 +19323,7 @@
       "label": "b64url()",
       "file_type": "code",
       "source_file": "supabase/functions/_shared/signupToken.ts",
-      "source_location": "L14",
+      "source_location": "L19",
       "_origin": "ast",
       "id": "supabase_functions_shared_signuptoken_b64url",
       "community": 14,
@@ -19334,7 +19334,7 @@
       "label": "unb64url()",
       "file_type": "code",
       "source_file": "supabase/functions/_shared/signupToken.ts",
-      "source_location": "L17",
+      "source_location": "L22",
       "_origin": "ast",
       "id": "supabase_functions_shared_signuptoken_unb64url",
       "community": 14,
@@ -19345,7 +19345,7 @@
       "label": "hmacKey()",
       "file_type": "code",
       "source_file": "supabase/functions/_shared/signupToken.ts",
-      "source_location": "L22",
+      "source_location": "L27",
       "_origin": "ast",
       "id": "supabase_functions_shared_signuptoken_hmackey",
       "community": 14,
@@ -19356,7 +19356,7 @@
       "label": "SignupTokenPayload",
       "file_type": "code",
       "source_file": "supabase/functions/_shared/signupToken.ts",
-      "source_location": "L30",
+      "source_location": "L35",
       "_origin": "ast",
       "id": "supabase_functions_shared_signuptoken_signuptokenpayload",
       "community": 14,
@@ -19367,7 +19367,7 @@
       "label": "mintSignupToken()",
       "file_type": "code",
       "source_file": "supabase/functions/_shared/signupToken.ts",
-      "source_location": "L38",
+      "source_location": "L43",
       "_origin": "ast",
       "id": "supabase_functions_shared_signuptoken_mintsignuptoken",
       "community": 14,
@@ -19378,7 +19378,7 @@
       "label": "verifySignupToken()",
       "file_type": "code",
       "source_file": "supabase/functions/_shared/signupToken.ts",
-      "source_location": "L54",
+      "source_location": "L59",
       "_origin": "ast",
       "id": "supabase_functions_shared_signuptoken_verifysignuptoken",
       "community": 14,
@@ -29798,6 +29798,18 @@
       "weight": 1.0,
       "_origin": "ast",
       "source": "src_components_ball_signup_ballsignupwizard",
+      "target": "ref_react",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "src/components/ball/signup/SignupConfirmation.jsx",
+      "source_location": "L1",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "src_components_ball_signup_signupconfirmation",
       "target": "ref_react",
       "confidence_score": 1.0
     },
@@ -54900,7 +54912,7 @@
       "context": "import",
       "confidence": "EXTRACTED",
       "source_file": "src/components/ball/signup/SignupConfirmation.jsx",
-      "source_location": "L1",
+      "source_location": "L2",
       "weight": 1.0,
       "_origin": "ast",
       "source": "src_components_ball_signup_signupconfirmation",
@@ -55560,7 +55572,7 @@
       "context": "import",
       "confidence": "EXTRACTED",
       "source_file": "src/components/ball/signup/SignupConfirmation.jsx",
-      "source_location": "L1",
+      "source_location": "L2",
       "weight": 1.0,
       "_origin": "ast",
       "source": "src_components_ball_signup_signupconfirmation",
@@ -58495,7 +58507,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "src/components/ball/signup/SignupConfirmation.jsx",
-      "source_location": "L7",
+      "source_location": "L8",
       "weight": 1.0,
       "_origin": "ast",
       "source": "src_components_ball_signup_signupconfirmation",
@@ -58506,7 +58518,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "src/components/ball/signup/SignupConfirmation.jsx",
-      "source_location": "L52",
+      "source_location": "L79",
       "weight": 1.0,
       "_origin": "ast",
       "source": "src_components_ball_signup_signupconfirmation",
@@ -58517,7 +58529,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "src/components/ball/signup/SignupConfirmation.jsx",
-      "source_location": "L11",
+      "source_location": "L14",
       "weight": 1.0,
       "_origin": "ast",
       "source": "src_components_ball_signup_signupconfirmation",
@@ -58529,7 +58541,7 @@
       "context": "call",
       "confidence": "EXTRACTED",
       "source_file": "src/components/ball/signup/SignupConfirmation.jsx",
-      "source_location": "L13",
+      "source_location": "L16",
       "weight": 1.0,
       "_origin": "ast",
       "source": "src_components_ball_signup_signupconfirmation_signupconfirmation",
@@ -58778,7 +58790,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "src/components/ball/signup/StepDocumentation.jsx",
-      "source_location": "L154",
+      "source_location": "L169",
       "weight": 1.0,
       "_origin": "ast",
       "source": "src_components_ball_signup_stepdocumentation",
@@ -58800,7 +58812,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "src/components/ball/signup/StepDocumentation.jsx",
-      "source_location": "L153",
+      "source_location": "L168",
       "weight": 1.0,
       "_origin": "ast",
       "source": "src_components_ball_signup_stepdocumentation",
@@ -58811,7 +58823,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "src/components/ball/signup/StepDocumentation.jsx",
-      "source_location": "L156",
+      "source_location": "L171",
       "weight": 1.0,
       "_origin": "ast",
       "source": "src_components_ball_signup_stepdocumentation",
@@ -80636,7 +80648,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "supabase/functions/_shared/signupToken.ts",
-      "source_location": "L14",
+      "source_location": "L19",
       "weight": 1.0,
       "_origin": "ast",
       "source": "supabase_functions_shared_signuptoken",
@@ -80647,7 +80659,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "supabase/functions/_shared/signupToken.ts",
-      "source_location": "L22",
+      "source_location": "L27",
       "weight": 1.0,
       "_origin": "ast",
       "source": "supabase_functions_shared_signuptoken",
@@ -80658,7 +80670,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "supabase/functions/_shared/signupToken.ts",
-      "source_location": "L38",
+      "source_location": "L43",
       "weight": 1.0,
       "_origin": "ast",
       "source": "supabase_functions_shared_signuptoken",
@@ -80669,7 +80681,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "supabase/functions/_shared/signupToken.ts",
-      "source_location": "L30",
+      "source_location": "L35",
       "weight": 1.0,
       "_origin": "ast",
       "source": "supabase_functions_shared_signuptoken",
@@ -80680,7 +80692,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "supabase/functions/_shared/signupToken.ts",
-      "source_location": "L17",
+      "source_location": "L22",
       "weight": 1.0,
       "_origin": "ast",
       "source": "supabase_functions_shared_signuptoken",
@@ -80691,7 +80703,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "supabase/functions/_shared/signupToken.ts",
-      "source_location": "L54",
+      "source_location": "L59",
       "weight": 1.0,
       "_origin": "ast",
       "source": "supabase_functions_shared_signuptoken",
@@ -80703,7 +80715,7 @@
       "context": "call",
       "confidence": "EXTRACTED",
       "source_file": "supabase/functions/_shared/signupToken.ts",
-      "source_location": "L47",
+      "source_location": "L52",
       "weight": 1.0,
       "_origin": "ast",
       "source": "supabase_functions_shared_signuptoken_mintsignuptoken",
@@ -80715,7 +80727,7 @@
       "context": "call",
       "confidence": "EXTRACTED",
       "source_file": "supabase/functions/_shared/signupToken.ts",
-      "source_location": "L58",
+      "source_location": "L63",
       "weight": 1.0,
       "_origin": "ast",
       "source": "supabase_functions_shared_signuptoken_verifysignuptoken",
@@ -80727,7 +80739,7 @@
       "context": "call",
       "confidence": "EXTRACTED",
       "source_file": "supabase/functions/_shared/signupToken.ts",
-      "source_location": "L45",
+      "source_location": "L50",
       "weight": 1.0,
       "_origin": "ast",
       "source": "supabase_functions_shared_signuptoken_mintsignuptoken",
@@ -80739,7 +80751,7 @@
       "context": "call",
       "confidence": "EXTRACTED",
       "source_file": "supabase/functions/_shared/signupToken.ts",
-      "source_location": "L60",
+      "source_location": "L65",
       "weight": 1.0,
       "_origin": "ast",
       "source": "supabase_functions_shared_signuptoken_verifysignuptoken",
@@ -90935,5 +90947,5 @@
     }
   ],
   "hyperedges": [],
-  "built_at_commit": "272b0b6669ae34b6518a887c3bbf6f0b60e2edb5"
+  "built_at_commit": "f63800b27299a4458ffad477983c51e772f0b60a"
 }

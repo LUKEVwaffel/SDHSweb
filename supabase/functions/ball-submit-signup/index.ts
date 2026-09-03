@@ -351,19 +351,11 @@ Deno.serve(async (req) => {
     const guestIsSdhsStudent = isSdhsJrotc || goesToSdhs;
     const fieldTripFormRequired = !hasGuest || guestIsSdhsStudent;
 
-    // Item 4: burn the signup token so it can't be replayed for the rest of
-    // its ~18-minute TTL. The primary-key collision on `jti` is what actually
-    // blocks a double-submit — it holds even across concurrent requests and
-    // multiple edge-function instances, unlike an in-memory guard. Reserved
-    // here (after every 4xx-returning validation above, so a rejected attempt
-    // doesn't spend the token) and rolled back below if the write fails.
-    const { error: jtiErr } = await svc
-      .from("ball_signup_tokens_used")
-      .insert({ jti: payload.jti, email: payload.email });
-    if (jtiErr) {
-      return json({ error: "This signup link was already used. Start again from step 1." }, 409);
-    }
-
+    // Double-submit protection is the unique(lower(cadet_school_email)) index
+    // on ball_signups below (→ 23505 → clean 409). The jti ledger is a
+    // secondary guard, burned AFTER the row commits (see below) so a
+    // post-insert error can never strand a token and force the cadet to
+    // re-verify — that "This signup link was already used" loop was the bug.
     const { data: signup, error: signupErr } = await svc
       .from("ball_signups")
       .insert({
@@ -387,17 +379,18 @@ Deno.serve(async (req) => {
       .single();
     if (signupErr || !signup) {
       console.error("ball-submit-signup insert signup", signupErr);
-      // Free the token again so a genuine retry (e.g. transient DB error) isn't
-      // permanently locked out.
-      await svc.from("ball_signup_tokens_used").delete().eq("jti", payload.jti);
-      // Item 4: the unique(lower(cadet_school_email)) index rejects a second
-      // signup for the same cadet (double-submit via two separately-verified
-      // tokens). Surface that as a clear 409, not a generic 500.
+      // The unique(lower(cadet_school_email)) index rejects a second signup for
+      // the same cadet — surface it as a clear 409, not a generic 500.
       if (signupErr?.code === "23505") {
         return json({ error: "You already have a Ball signup on file. See 1SG Kaz or Chief to change it." }, 409);
       }
       return json({ error: "internal error" }, 500);
     }
+
+    // Row committed — now burn the jti (single-use). Best-effort: a failure or
+    // collision here must NOT fail the request, the signup already exists.
+    await svc.from("ball_signup_tokens_used").insert({ jti: payload.jti, email: payload.email })
+      .then(({ error }) => { if (error) console.error("ball-submit-signup jti burn (non-fatal)", error); });
 
     // Phone numbers go on in a separate, non-fatal update so a signup still
     // succeeds if ball_phone_numbers.sql hasn't been run yet (missing column).
@@ -582,3 +575,7 @@ This step confirms any food allergies and your review of the attire requirements
     return json({ error: "internal error" }, 500);
   }
 });
+
+// NOTE: the jti is burned only after a committed signup row (best-effort), and
+// the cadet-email unique index is the real double-submit guard — so a caught
+// error above never leaves a token stranded.

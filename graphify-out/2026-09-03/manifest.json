@@ -365,8 +365,8 @@
     "semantic_hash": "b99e6ea5a0fdbe33bcda6db72905aff8"
   },
   "supabase/email_review.sql": {
-    "mtime": 1784919128.4388442,
-    "ast_hash": "ada87d11bd2ac9684344f6acd369078b",
+    "mtime": 1788472321.0823295,
+    "ast_hash": "c8f30aeb77ef29a3fa1a91b6b8f07c36",
     "semantic_hash": ""
   },
   "supabase/email_system.sql": {
@@ -575,13 +575,13 @@
     "semantic_hash": ""
   },
   "src/components/review/ReviewLogin.jsx": {
-    "mtime": 1785788800.7437308,
-    "ast_hash": "66a143f8015d7e0c7b47ea44b357fe00",
+    "mtime": 1788472340.947953,
+    "ast_hash": "ece6faddd31efaa36437a5f6c9a50239",
     "semantic_hash": ""
   },
   "src/components/review/ReviewPortal.jsx": {
-    "mtime": 1788445824.7570734,
-    "ast_hash": "bcfc47029c12ae9a6f50964e2c8dd7c7",
+    "mtime": 1788472346.9739306,
+    "ast_hash": "922df87c60bdf50992688fb9781341d5",
     "semantic_hash": ""
   },
   "supabase/email_review_history.sql": {
@@ -655,8 +655,8 @@
     "semantic_hash": ""
   },
   "supabase/email_review_assignment.sql": {
-    "mtime": 1784919128.43931,
-    "ast_hash": "deff5f7f37ba0aa40b95643548b7c3c4",
+    "mtime": 1788472431.4199452,
+    "ast_hash": "c20f6f99baddee784b10b564a9427c23",
     "semantic_hash": ""
   },
   "supabase/email_review_decisions_add_delete.sql": {
@@ -670,8 +670,8 @@
     "semantic_hash": ""
   },
   "supabase/email_reviewer_first_login.sql": {
-    "mtime": 1784919128.44103,
-    "ast_hash": "6e2275e8d0562feeda46fea3822ed7c6",
+    "mtime": 1788472335.186115,
+    "ast_hash": "211e8e14f6831d38765d752e057032af",
     "semantic_hash": ""
   },
   "supabase/email_reviewer_password_gate_fix.sql": {
@@ -2015,8 +2015,8 @@
     "semantic_hash": ""
   },
   "src/components/ball/ops/BallOpsPortal.jsx": {
-    "mtime": 1788447192.575506,
-    "ast_hash": "de6e3ba498e3638dd5c77e79d7f0b8cb",
+    "mtime": 1788472428.5843334,
+    "ast_hash": "54a62af4a6502d8b03a3e81916078a00",
     "semantic_hash": ""
   },
   "src/components/ball/signup/BallSignupWizard.jsx": {
@@ -2025,8 +2025,8 @@
     "semantic_hash": ""
   },
   "src/components/ball/signup/SignupConfirmation.jsx": {
-    "mtime": 1788436433.3774223,
-    "ast_hash": "d2159c7abd0d165932fde9761d30bb06",
+    "mtime": 1788472495.2971027,
+    "ast_hash": "80372872c3b7c20398f39329dbf771be",
     "semantic_hash": ""
   },
   "src/components/ball/signup/StepCadetDetails.jsx": {
@@ -2040,8 +2040,8 @@
     "semantic_hash": ""
   },
   "src/components/ball/signup/StepDocumentation.jsx": {
-    "mtime": 1788471643.8233879,
-    "ast_hash": "25d46c99b711f29d4b6f8a0881ed417a",
+    "mtime": 1788472466.1358895,
+    "ast_hash": "1e60b8315edd038384ad3a8093fe5c52",
     "semantic_hash": ""
   },
   "src/components/ball/signup/StepGuestInfo.jsx": {
@@ -2065,8 +2065,8 @@
     "semantic_hash": ""
   },
   "supabase/functions/_shared/signupToken.ts": {
-    "mtime": 1788440481.3456392,
-    "ast_hash": "97d2ca88eb717450cf9d6032435df2d8",
+    "mtime": 1788472517.6245573,
+    "ast_hash": "b4f248e139f5aef82b28bedffbde230d",
     "semantic_hash": ""
   },
   "supabase/functions/ball-dress-pin-login/index.ts": {
@@ -2500,8 +2500,8 @@
     "semantic_hash": ""
   },
   "src/components/admin/panels/ball/BallReviewerAccountsTab.jsx": {
-    "mtime": 1788442172.7382867,
-    "ast_hash": "d81f025c016a1c3e086cc563fee2807b",
+    "mtime": 1788472425.483042,
+    "ast_hash": "6b9701592d9ebfc3a31880bc88cfa6ea",
     "semantic_hash": ""
   },
   "supabase/ball_guards.sql": {
