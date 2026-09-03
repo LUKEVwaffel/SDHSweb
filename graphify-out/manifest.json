@@ -2055,8 +2055,8 @@
     "semantic_hash": ""
   },
   "src/lib/ballApi.js": {
-    "mtime": 1787830961.2140317,
-    "ast_hash": "970e2a6ea25544163111bad8f26092d8",
+    "mtime": 1788447978.6830146,
+    "ast_hash": "3964bf3bed2648bbed0ebcffd912a0c5",
     "semantic_hash": ""
   },
   "supabase/ball_signup.sql": {
@@ -2505,8 +2505,8 @@
     "semantic_hash": ""
   },
   "supabase/ball_guards.sql": {
-    "mtime": 1788440415.5747972,
-    "ast_hash": "7facf5ecc6ff3cce8bf35d83b1dea0ac",
+    "mtime": 1788447927.9181507,
+    "ast_hash": "dce4818899b82e8430a84ab85d64bd8c",
     "semantic_hash": ""
   },
   "supabase/ball_hardening.sql": {
@@ -2542,6 +2542,11 @@
   "supabase/ball_ops_dress_views_fix.sql": {
     "mtime": 1788446217.5083306,
     "ast_hash": "ea20c7027917ab953a1de468afdc0dbf",
+    "semantic_hash": ""
+  },
+  "supabase/ball_guard_service_role_fix.sql": {
+    "mtime": 1788447909.655727,
+    "ast_hash": "793e80c71d46355241dd5678e112a144",
     "semantic_hash": ""
   }
 }

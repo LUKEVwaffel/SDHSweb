@@ -1,106 +1,50 @@
 -- ============================================================================
--- MILITARY BALL — COLUMN-GUARD SINGLE SOURCE OF TRUTH. Run in the Supabase SQL
--- editor (project bjgyvmdzcymruunzavni). Idempotent, re-runnable any number of
--- times. THIS FILE IS AUTHORITATIVE for:
---   • public.is_ball_dress()              (female-dress approver gate)
---   • public.is_ball_attire()             (Weston / male-guest attire gate)
---   • public.ball_signups_column_guard()  (BEFORE UPDATE column allow-list)
---   • public.ball_guests_column_guard()   (BEFORE UPDATE column allow-list)
---   • the two triggers that bind those guards
+-- MILITARY BALL — HOTFIX: column guards block the signup / guest-verify /
+-- allergy edge functions. Run in the Supabase SQL editor (project
+-- bjgyvmdzcymruunzavni). Idempotent, re-runnable.
 --
--- WHY THIS FILE EXISTS: those four objects were previously `create or replace`d
--- in three different files (ball_signup.sql, ball_finalize.sql,
--- ball_guest_model.sql). Because every one of those files advertises itself as
--- "idempotent, safe to re-run", re-pasting an EARLIER file after a later one
--- silently reverted the guard to a version missing newer frozen columns
--- (amount_due / field_trip_form_required / guest_type / friend_*) or a whole
--- role branch (S-5 allergy, Weston attire). That is a privilege-escalation
--- foot-gun for the ops / dress / S-5 staff writers.
+-- SYMPTOM: the guest's "Finish Your Ball Invite" page (and other flows) fail
+-- with "Edge Function returned a non-2xx status code". Server log shows
+-- ball-guest-verify raising `not authorized to update ball_signups` /
+-- `... ball_guests`.
 --
--- THE FIX:
---   1. public.ball_guard_version() returns an integer that only ever goes up.
---   2. This file bumps it and installs the current guards unconditionally.
---   3. The three legacy files now wrap their historical guard definitions in
---      `if public.ball_guard_version() >= N then <skip> end if`, so re-running
---      any of them after this file is a NO-OP for the guards.
+-- CAUSE: ball_signups_column_guard() / ball_guests_column_guard() are BEFORE
+-- UPDATE triggers that allow s6 / reviewer / dress / attire / s5 and RAISE for
+-- everyone else. They only look at auth.jwt() role helpers (is_s6() etc).
+-- The public edge functions (ball-guest-verify, ball-submit-signup rollback,
+-- send-allergy-email, notify-ball-status-update) use the SERVICE-ROLE key —
+-- no user JWT — so every one of those helpers is false and the trigger hits
+-- its final `raise`. Service-role callers bypass RLS but NOT triggers, so the
+-- guard fires and the whole UPDATE rolls back.
 --
--- DEPLOY ORDER (see BALL_DEPLOY_ORDER.md):
---   ball_signup.sql → ball_finalize.sql → ball_guest_model.sql →
---   ball_hardening.sql → ball_guards.sql → (then deploy the edge functions)
+-- FIX: let the service role through at the top of each guard, same as s6.
+-- Trusted server code (the edge functions) is already the authority on these
+-- rows — the guard exists to stop a logged-in reviewer/dress/s5 session from
+-- writing columns outside its lane, not to stop our own backend. A plain
+-- unauthenticated PostgREST caller is `anon` (not `service_role`) and is
+-- already stopped by RLS before the trigger, so this does not widen anything.
 --
--- WHEN YOU ADD A NEW COLUMN to ball_signups / ball_guests that a non-S6 writer
--- must NOT be able to change: add it to the relevant frozen list(s) below AND
--- bump GUARD_VERSION. Then raise the `>= N` checks in the three legacy files to
--- match (a lower N there still resolves to "skip", so this is optional
--- tidy-up, not correctness).
+-- Also bumps ball_guard_version() to 5 so the legacy in-file guard copies in
+-- ball_signup.sql / ball_finalize.sql / ball_guest_model.sql keep skipping.
+-- ball_guards.sql carries this same definition going forward.
 -- ============================================================================
 
--- Prerequisite gate — this file must run AFTER files 1–3 (their columns are
--- referenced in the guard bodies / is_ball_* definitions below).
 do $$
 begin
-  if to_regclass('public.ball_dress_staff') is null then
-    raise exception 'ball_guards.sql: run ball_signup.sql first (ball_dress_staff missing)';
-  end if;
-  if not exists (select 1 from information_schema.columns
-    where table_schema = 'public' and table_name = 'ball_dress_staff' and column_name = 'role') then
-    raise exception 'ball_guards.sql: run ball_finalize.sql first (ball_dress_staff.role missing)';
-  end if;
-  if not exists (select 1 from information_schema.columns
-    where table_schema = 'public' and table_name = 'ball_signups' and column_name = 'amount_due') then
-    raise exception 'ball_guards.sql: run ball_guest_model.sql first (ball_signups.amount_due missing)';
+  if to_regprocedure('public.ball_signups_column_guard()') is null then
+    raise exception 'run ball_signup.sql (and the rest of the ball chain) first';
   end if;
 end $$;
 
--- Current guard schema version. Bump on every change to the objects below.
--- v5 (2026-09-03): both column guards now allow auth.role() = 'service_role'
--- at the top — the public edge functions (ball-guest-verify, allergy pipeline,
--- notify-ball-status-update, submit-signup rollback) write these tables with
--- the service-role key and have no user JWT, so every is_*() helper was false
--- and the guard raised. See ball_guard_service_role_fix.sql.
 create or replace function public.ball_guard_version()
 returns int language sql immutable as $$ select 5 $$;
 
 
--- ── is_ball_dress() — female-dress approvers ONLY ──────────────────────────
--- role = 'female_dress'. A 'male_guest_attire' row (Weston) must NOT satisfy
--- this — otherwise he could reach the female approvers' portal / views / the
--- ball_signups+ball_guests dress column-guard branch.
-create or replace function public.is_ball_dress()
-returns boolean language sql stable security definer set search_path = public as $$
-  select exists (
-    select 1 from public.ball_dress_staff
-    where lower(email) = lower(auth.jwt() ->> 'email') and active and role = 'female_dress'
-  );
-$$;
-
--- ── is_ball_attire() — Weston / male-guest attire ONLY ────────────────────
-create or replace function public.is_ball_attire()
-returns boolean language sql stable security definer set search_path = public as $$
-  select exists (
-    select 1 from public.ball_dress_staff
-    where lower(email) = lower(auth.jwt() ->> 'email') and active and role = 'male_guest_attire'
-  );
-$$;
-
-
--- ── ball_signups_column_guard() ──────────────────────────────────────────
--- S-6           → anything.
--- Ops (reviewer)→ cash_received / field_trip_form_received ONLY.
--- Dress         → dress_approved / dress_approved_by ONLY.
--- S-5           → allergy_status / allergy_contacted_at ONLY.
--- anyone else   → denied.
--- NB: NEW.<field> is resolved at trigger-fire time, not CREATE time, so this
--- may reference columns added by ball_finalize.sql / ball_guest_model.sql even
--- if this file is (wrongly) run before them — but an UPDATE would then fail
--- loudly. Keep the deploy order.
+-- ── ball_signups_column_guard() ─────────────────────────────────────────
 create or replace function public.ball_signups_column_guard()
 returns trigger language plpgsql as $$
 begin
-  -- Trusted backend (edge functions using the service-role key). No user JWT,
-  -- so none of the is_*() helpers below would match. RLS already stops a plain
-  -- anon/authenticated caller before this trigger, so this only lets OUR
-  -- server code through.
+  -- Trusted backend (edge functions using the service-role key). No user JWT.
   if auth.role() = 'service_role' then
     return new;
   end if;
@@ -185,10 +129,7 @@ begin
 end $$;
 
 
--- ── ball_guests_column_guard() ──────────────────────────────────────────
--- S-6                    → anything.
--- Dress OR attire staff  → dress_approved / dress_approved_by ONLY.
--- anyone else            → denied.
+-- ── ball_guests_column_guard() ─────────────────────────────────────────
 create or replace function public.ball_guests_column_guard()
 returns trigger language plpgsql as $$
 begin
@@ -231,7 +172,8 @@ begin
 end $$;
 
 
--- ── triggers ────────────────────────────────────────────────────────────
+-- Triggers are unchanged (already bound in ball_signup.sql / ball_guards.sql),
+-- but re-bind defensively in case only an older chain ran.
 drop trigger if exists ball_signups_column_guard_trg on public.ball_signups;
 create trigger ball_signups_column_guard_trg
   before update on public.ball_signups
@@ -242,14 +184,9 @@ create trigger ball_guests_column_guard_trg
   before update on public.ball_guests
   for each row execute function public.ball_guests_column_guard();
 
-
 -- ============================================================================
--- VERIFY AFTER RUNNING:
---   select public.ball_guard_version();                                   -- 4
---   select tgname from pg_trigger where tgrelid = 'public.ball_signups'::regclass; -- includes ball_signups_column_guard_trg
---   -- as a seeded 'male_guest_attire' session:
---   --   select public.is_ball_dress(), public.is_ball_attire();          -- f, t
---   -- as an ops (reviewer) session:
---   --   update ball_signups set cash_received = true where id = '<row>'; -- OK
---   --   update ball_signups set amount_due = 0     where id = '<row>';   -- raises
+-- VERIFY:
+--   select public.ball_guard_version();   -- 5
+--   -- then re-test the guest "Finish Your Ball Invite" page — CONFIRM should
+--   -- 2xx and flip the signup to fully_verified.
 -- ============================================================================
