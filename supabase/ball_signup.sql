@@ -388,16 +388,19 @@ create trigger ball_guests_column_guard_trg
 
 
 -- ── SECTION 4 — scoped views for ops + dress staff ──────────────────────────
--- WITH (security_invoker = true) — requires Postgres 15+. Verify:
---   select current_setting('server_version_num')::int >= 150000;
--- If this project predates 15, do NOT run this section as-is — replace both
--- view pairs with SECURITY DEFINER table-returning functions instead
--- (same is_reviewer()/is_ball_dress() gate inside a `where` clause, called
--- via SB.rpc(...) from the client instead of SB.from(...)).
+-- SECURITY DEFINER views (the default — no security_invoker reloption). They
+-- run as the owner (`postgres`, BYPASSRLS), so base-table RLS does NOT blank
+-- them for a non-s6 caller. The `WHERE public.is_reviewer()` /
+-- `WHERE public.is_ball_dress()` clause inside each view IS the access gate; a
+-- caller who is neither gets 0 rows. The column list is the field-scoping.
+-- `security_barrier = true` pins the gate ahead of any user predicate.
+--   ⚠ An earlier revision used `WITH (security_invoker = true)` here. That
+--   returned 0 rows for ops / dress (they hold no SELECT policy on the base
+--   tables) — see ball_ops_dress_views_fix.sql. Do not reintroduce it.
 
 drop view if exists public.ball_signups_ops_view;
 create view public.ball_signups_ops_view
-with (security_invoker = true) as
+with (security_barrier = true) as
   select id, cadet_name, cadet_let_level, cadet_company, status,
          cash_received, field_trip_form_received, created_at
   from public.ball_signups
@@ -406,7 +409,7 @@ grant select on public.ball_signups_ops_view to authenticated;
 
 drop view if exists public.ball_guests_ops_view;
 create view public.ball_guests_ops_view
-with (security_invoker = true) as
+with (security_barrier = true) as
   select id, signup_id, name, age
   from public.ball_guests
   where public.is_reviewer();
@@ -414,7 +417,7 @@ grant select on public.ball_guests_ops_view to authenticated;
 
 drop view if exists public.ball_signups_dress_view;
 create view public.ball_signups_dress_view
-with (security_invoker = true) as
+with (security_barrier = true) as
   select id, cadet_name, cadet_let_level, cadet_company, cadet_gender,
          dress_approved, dress_approved_by
   from public.ball_signups
@@ -423,7 +426,7 @@ grant select on public.ball_signups_dress_view to authenticated;
 
 drop view if exists public.ball_guests_dress_view;
 create view public.ball_guests_dress_view
-with (security_invoker = true) as
+with (security_barrier = true) as
   select id, signup_id, name, gender, dress_approved, dress_approved_by
   from public.ball_guests
   where public.is_ball_dress();

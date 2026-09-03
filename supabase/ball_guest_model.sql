@@ -223,13 +223,15 @@ $wrap$;
 
 
 -- ── SECTION 4 — widen the ops views (Kaz/Chief) ──────────────────────────
--- These security_invoker views are the ONLY thing ops reads. Add the new
--- fields Kaz/Chief need for payment logistics: what the host owes, whether a
--- form is even required, and — for a friend guest — the friend's own $35 and
--- how it's being delivered.
+-- These views are the ONLY thing ops reads. Add the new fields Kaz/Chief need
+-- for payment logistics: what the host owes, whether a form is even required,
+-- and — for a friend guest — the friend's own $35 and how it's being
+-- delivered. SECURITY DEFINER (no security_invoker reloption) + the inner
+-- `where public.is_reviewer()` gate — see ball_signup.sql SECTION 4 and
+-- ball_ops_dress_views_fix.sql for why an invoker view returned 0 rows here.
 drop view if exists public.ball_signups_ops_view;
 create view public.ball_signups_ops_view
-with (security_invoker = true) as
+with (security_barrier = true) as
   select id, cadet_name, cadet_let_level, cadet_company, status,
          cash_received, field_trip_form_received, field_trip_form_required,
          amount_due, created_at
@@ -239,7 +241,7 @@ grant select on public.ball_signups_ops_view to authenticated;
 
 drop view if exists public.ball_guests_ops_view;
 create view public.ball_guests_ops_view
-with (security_invoker = true) as
+with (security_barrier = true) as
   select id, signup_id, name, age, guest_type, is_sdhs_jrotc, school_attended,
          friend_payment_method, friend_amount_due
   from public.ball_guests

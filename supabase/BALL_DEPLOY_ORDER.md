@@ -16,11 +16,12 @@ them **in this exact order**, top to bottom, and only deploy the edge functions
 | 4 | `ball_hardening.sql` | audit remediation — `unique(cadet_school_email)`, gender `CHECK`s, dress-approver email dropped from the public projection, `ball_signup_tokens_used` (single-use signup tokens) |
 | 5 | `ball_guards.sql` | **authoritative** `is_ball_dress()` / `is_ball_attire()` / `ball_signups_column_guard()` / `ball_guests_column_guard()` + triggers + `ball_guard_version()` |
 
-### Independent add-on (not part of the ordered chain above)
+### Independent add-ons (not part of the ordered chain above)
 
 | File | Adds | Depends on |
 |------|------|------------|
 | `reviewer_admin_pin_status.sql` | `reviewer_pin_status()` — S-6-gated read of each reviewer's PIN-set / lockout / must-change-password state, for the **REVIEW PORTAL ACCOUNTS** tab in the DISPATCH Ball panel | `email_review.sql`, `reviewer_pin.sql`, `admin_roles.sql` (all already live) |
+| `ball_ops_dress_views_fix.sql` | **fixes ops / dress portals showing 0 signups** — recreates the 4 `ball_*_ops_view` / `ball_*_dress_view` as SECURITY DEFINER (was `security_invoker=true`, which RLS blanked for non-s6 callers). Re-run any time; files 1–3 now carry the same non-invoker definition so a re-paste won't revert it. | files 1–3 |
 
 Run any time; order vs. the ball chain does not matter. The tab degrades
 gracefully (roster only, no PIN status) if this file has not been run yet.
