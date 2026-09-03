@@ -7,7 +7,7 @@ import '../../review/review.css';
 // email+PIN→verifyOtp flow as ReviewLogin's pin mode, just pointed at the
 // new ball-dress-pin-login edge fn and with no password fallback mode since
 // these accounts never get a password.
-export default function BallDressLogin({ onSignedIn, notice }) {
+export default function BallDressLogin({ onSignedIn, notice, heading = 'Dress Approval' }) {
   const [email, setEmail] = useState('');
   const [pin, setPin] = useState('');
   const [err, setErr] = useState('');
@@ -51,7 +51,7 @@ export default function BallDressLogin({ onSignedIn, notice }) {
 
   return (
     <div className={`rv-panel${shake ? ' rv-shake' : ''}`}>
-      <h1 className="rv-h1" style={{ fontSize: 20, marginBottom: 6 }}>Sign in to Dress Approval</h1>
+      <h1 className="rv-h1" style={{ fontSize: 20, marginBottom: 6 }}>Sign in to {heading}</h1>
       <p className="rv-sub" style={{ marginTop: 0, marginBottom: 22, fontSize: 14 }}>{notice || 'Enter your email and 4-digit PIN.'}</p>
       <label className="rv-label">Email</label>
       <input

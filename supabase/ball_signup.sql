@@ -50,6 +50,24 @@
 -- ============================================================================
 
 
+-- ── SECTION 0 — guard-version bootstrap ───────────────────────────────────
+-- public.ball_guard_version() is owned by ball_guards.sql — the single source
+-- of truth for ball_signups_column_guard() / ball_guests_column_guard() /
+-- is_ball_dress() / is_ball_attire(). It may not exist yet on a first-ever
+-- deploy, so stub it at 0 here; ball_guards.sql bumps it. The guard
+-- definitions further down in THIS file are wrapped in a version check so a
+-- stray re-run of ball_signup.sql after ball_guards.sql cannot silently
+-- downgrade them. See BALL_DEPLOY_ORDER.md.
+do $$
+begin
+  if to_regprocedure('public.ball_guard_version()') is null then
+    execute 'create function public.ball_guard_version() returns int language sql immutable as $b$ select 0 $b$';
+  elsif public.ball_guard_version() >= 4 then
+    raise warning 'ball_signup.sql carries SUPERSEDED guard definitions; ball_guards.sql v% is authoritative. If you just re-ran this file, RE-RUN ball_guards.sql now.', public.ball_guard_version();
+  end if;
+end $$;
+
+
 -- ── SECTION 1 — ball_config (single row, admin-editable) ────────────────────
 create table if not exists public.ball_config (
   id                    boolean primary key default true check (id),  -- singleton
@@ -95,6 +113,15 @@ alter table public.ball_dress_staff enable row level security;
 -- account_credentials/reviewer_credentials)
 revoke all on public.ball_dress_staff from anon, authenticated;
 
+-- LEGACY DEFINITION — authoritative copy is in ball_guards.sql (which scopes
+-- this to role = 'female_dress'). Wrapped so a re-run after ball_guards.sql
+-- does not revert to this pre-role-split version.
+do $wrap$
+begin
+  if public.ball_guard_version() >= 4 then
+    raise notice 'ball_guards.sql v% authoritative — skipping legacy is_ball_dress()', public.ball_guard_version();
+  else
+    execute $sql$
 create or replace function public.is_ball_dress()
 returns boolean language sql stable security definer set search_path = public as $$
   select exists (
@@ -102,6 +129,10 @@ returns boolean language sql stable security definer set search_path = public as
     where lower(email) = lower(auth.jwt() ->> 'email') and active
   );
 $$;
+    $sql$;
+  end if;
+end
+$wrap$;
 
 -- Atomic reserve/reset lockout primitives — verbatim copy of
 -- account_picker.sql's reserve_pin_attempt/reset_pin_attempts (SECTION 2),
@@ -231,6 +262,15 @@ create policy ball_signups_update_ops_dress on public.ball_signups
   using (public.is_reviewer() or public.is_ball_dress())
   with check (public.is_reviewer() or public.is_ball_dress());
 
+-- LEGACY DEFINITION — authoritative copy (with the S-5 branch and the
+-- amount_due / field_trip_form_required / allergy freezes) is in
+-- ball_guards.sql. Wrapped so a re-run after ball_guards.sql cannot downgrade.
+do $wrap$
+begin
+  if public.ball_guard_version() >= 4 then
+    raise notice 'ball_guards.sql v% authoritative — skipping legacy ball_signups_column_guard()', public.ball_guard_version();
+  else
+    execute $sql$
 create or replace function public.ball_signups_column_guard()
 returns trigger language plpgsql as $$
 begin
@@ -276,6 +316,10 @@ begin
 
   raise exception 'not authorized to update ball_signups';
 end $$;
+    $sql$;
+  end if;
+end
+$wrap$;
 
 drop trigger if exists ball_signups_column_guard_trg on public.ball_signups;
 create trigger ball_signups_column_guard_trg
@@ -290,6 +334,15 @@ create policy ball_guests_update_dress on public.ball_guests
   for update to authenticated
   using (public.is_ball_dress()) with check (public.is_ball_dress());
 
+-- LEGACY DEFINITION — authoritative copy (is_ball_attire branch +
+-- guest_type / friend_* freezes) is in ball_guards.sql. Wrapped so a re-run
+-- after ball_guards.sql cannot downgrade.
+do $wrap$
+begin
+  if public.ball_guard_version() >= 4 then
+    raise notice 'ball_guards.sql v% authoritative — skipping legacy ball_guests_column_guard()', public.ball_guard_version();
+  else
+    execute $sql$
 create or replace function public.ball_guests_column_guard()
 returns trigger language plpgsql as $$
 begin
@@ -323,6 +376,10 @@ begin
 
   raise exception 'not authorized to update ball_guests';
 end $$;
+    $sql$;
+  end if;
+end
+$wrap$;
 
 drop trigger if exists ball_guests_column_guard_trg on public.ball_guests;
 create trigger ball_guests_column_guard_trg

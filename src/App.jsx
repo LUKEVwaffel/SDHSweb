@@ -40,6 +40,7 @@ import BallSignupWizard from './components/ball/signup/BallSignupWizard';
 import BallGuestVerify from './components/ball/BallGuestVerify';
 import BallOpsPortal from './components/ball/ops/BallOpsPortal';
 import BallDressPortal from './components/ball/dress/BallDressPortal';
+import BallAttirePortal from './components/ball/attire/BallAttirePortal';
 import Rhea from './components/rhea/Rhea';
 import LukeUploadRoute from './components/rhea/LukeUpload';
 import LukePwaRoute from './components/rhea/LukePwa';
@@ -93,6 +94,7 @@ export default function App() {
   if (location.pathname.startsWith('/ball/guest/')) return <BallGuestVerify />;
   if (location.pathname === '/ball/ops' || location.pathname.startsWith('/ball/ops/')) return <BallOpsPortal />;
   if (location.pathname === '/ball/dress' || location.pathname.startsWith('/ball/dress/')) return <BallDressPortal />;
+  if (location.pathname === '/ball/attire' || location.pathname.startsWith('/ball/attire/')) return <BallAttirePortal />;
 
   return (
     <div style={{ minHeight: '100vh', background: '#06101F', fontFamily: 'Inter, sans-serif' }}>

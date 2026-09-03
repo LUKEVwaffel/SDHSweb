@@ -1,0 +1,218 @@
+/* Military Ball — shared motion + surface polish for the public signup
+   surfaces (landing, wizard, guest verify, confirmation). Navy/gold/cream,
+   sharp edges. Motion is compositor-only (transform/opacity) and fully
+   disabled under prefers-reduced-motion. */
+
+.ball-root {
+  --ball-ink: #06101f;
+  --ball-navy: #142847;
+  --ball-deep: #0a1628;
+  --ball-gold: #c9a961;
+  --ball-gold-bright: #e8c77a;
+  --ball-cream: #f4ecd8;
+  --ball-hair: rgba(201, 169, 97, 0.22);
+  --ball-hair-strong: rgba(201, 169, 97, 0.4);
+  --ball-wash: rgba(201, 169, 97, 0.08);
+  --ball-ease: cubic-bezier(0.16, 1, 0.3, 1);
+
+  min-height: 100vh;
+  position: relative;
+  isolation: isolate;
+  overflow-x: clip;
+  background:
+    radial-gradient(1100px 520px at 12% -8%, rgba(201, 169, 97, 0.10), transparent 60%),
+    radial-gradient(900px 600px at 100% 0%, rgba(41, 71, 122, 0.28), transparent 55%),
+    linear-gradient(180deg, var(--ball-ink) 0%, var(--ball-deep) 100%);
+  color: var(--ball-cream);
+  font-family: 'Inter', sans-serif;
+}
+
+/* Hairline blueprint grid + soft off-centre gold glow behind everything —
+   same decorative treatment as the Range TV welcome screen
+   (TvRangeCompanyWelcomeScreen.jsx). Fixed so it holds steady while the page
+   scrolls; radial-masked so it fades out at the edges instead of hard-cropping;
+   pointer-events:none so it never intercepts input. */
+.ball-root::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  background-image:
+    linear-gradient(var(--ball-hair) 1px, transparent 1px),
+    linear-gradient(90deg, var(--ball-hair) 1px, transparent 1px);
+  background-size: 64px 64px;
+  opacity: 0.55;
+  -webkit-mask-image: radial-gradient(ellipse 72% 60% at 50% 38%, #000 0%, transparent 78%);
+  mask-image: radial-gradient(ellipse 72% 60% at 50% 38%, #000 0%, transparent 78%);
+}
+.ball-root::after {
+  content: '';
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  background:
+    radial-gradient(ellipse 55% 45% at 22% 12%, rgba(201, 169, 97, 0.10) 0%, transparent 62%),
+    radial-gradient(ellipse 50% 40% at 85% 88%, rgba(201, 169, 97, 0.05) 0%, transparent 66%);
+}
+.ball-root > * {
+  position: relative;
+  z-index: 1;
+}
+
+/* ── keyframes ─────────────────────────────────────────────────────────── */
+@keyframes ball-spin { to { transform: rotate(360deg); } }
+@keyframes ball-fade-up {
+  from { opacity: 0; transform: translateY(14px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+@keyframes ball-scale-in {
+  from { opacity: 0; transform: scale(0.94); }
+  to   { opacity: 1; transform: scale(1); }
+}
+@keyframes ball-shimmer {
+  from { background-position: -180% 0; }
+  to   { background-position: 180% 0; }
+}
+@keyframes ball-draw { to { stroke-dashoffset: 0; } }
+@keyframes ball-pulse {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50%      { opacity: 0.45; transform: scale(0.82); }
+}
+
+/* ── entrance ─────────────────────────────────────────────────────────── */
+.ball-fade-up { animation: ball-fade-up 0.55s var(--ball-ease) both; }
+.ball-scale-in { animation: ball-scale-in 0.5s var(--ball-ease) both; }
+.ball-d1 { animation-delay: 0.06s; }
+.ball-d2 { animation-delay: 0.13s; }
+.ball-d3 { animation-delay: 0.2s; }
+.ball-d4 { animation-delay: 0.27s; }
+.ball-d5 { animation-delay: 0.34s; }
+
+/* wizard step swap — re-runs because the node is keyed on the step index */
+.ball-step { animation: ball-fade-up 0.4s var(--ball-ease) both; }
+
+/* ── spinner ──────────────────────────────────────────────────────────── */
+.ball-spinner {
+  display: inline-block;
+  width: 1em;
+  height: 1em;
+  border: 2px solid currentColor;
+  border-right-color: transparent;
+  border-radius: 50%;
+  animation: ball-spin 0.7s linear infinite;
+  vertical-align: -0.15em;
+}
+
+/* ── skeleton ─────────────────────────────────────────────────────────── */
+.ball-skel {
+  position: relative;
+  overflow: hidden;
+  background: var(--ball-navy);
+  border: 1px solid var(--ball-hair);
+}
+.ball-skel::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(90deg, transparent 0%, rgba(201, 169, 97, 0.12) 50%, transparent 100%);
+  background-size: 220% 100%;
+  animation: ball-shimmer 1.5s ease-in-out infinite;
+}
+
+/* ── dot ──────────────────────────────────────────────────────────────── */
+.ball-dot {
+  display: inline-block;
+  width: 7px;
+  height: 7px;
+  background: var(--ball-gold);
+  animation: ball-pulse 1.7s var(--ball-ease) infinite;
+}
+
+/* ── CTA ──────────────────────────────────────────────────────────────── */
+.ball-cta {
+  --shift: 0px;
+  background: var(--ball-gold);
+  color: var(--ball-ink);
+  border: none;
+  cursor: pointer;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 14px;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  padding: 16px 32px;
+  transition: transform 0.18s var(--ball-ease), box-shadow 0.18s var(--ball-ease), background 0.18s var(--ball-ease);
+}
+.ball-cta:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 14px 32px rgba(201, 169, 97, 0.28);
+  background: var(--ball-gold-bright);
+}
+.ball-cta:active { transform: translateY(0); }
+.ball-cta:disabled { opacity: 0.5; cursor: not-allowed; transform: none; box-shadow: none; }
+
+/* ── inputs (opt-in via className) ────────────────────────────────────── */
+.ball-input {
+  transition: border-color 0.15s var(--ball-ease), box-shadow 0.15s var(--ball-ease);
+}
+.ball-input:focus {
+  border-color: var(--ball-gold) !important;
+  box-shadow: 0 0 0 3px rgba(201, 169, 97, 0.22);
+}
+
+/* ── gallery ─────────────────────────────────────────────────────────── */
+.ball-gallery-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+  filter: grayscale(0.55) contrast(1.02);
+  transform: scale(1);
+  transition: transform 0.4s var(--ball-ease), filter 0.4s var(--ball-ease);
+}
+.ball-gallery-cell:hover .ball-gallery-img {
+  transform: scale(1.05);
+  filter: grayscale(0) contrast(1);
+}
+
+/* ── confirmation check ──────────────────────────────────────────────── */
+.ball-check circle {
+  stroke-dasharray: 166;
+  stroke-dashoffset: 166;
+  animation: ball-draw 0.5s var(--ball-ease) 0.1s forwards;
+}
+.ball-check path {
+  stroke-dasharray: 48;
+  stroke-dashoffset: 48;
+  animation: ball-draw 0.35s var(--ball-ease) 0.5s forwards;
+}
+
+/* ── landing hero layout ─────────────────────────────────────────────── */
+.ball-hero-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 28px;
+  align-items: start;
+}
+@media (max-width: 640px) {
+  .ball-hero-grid { grid-template-columns: 1fr; }
+  .ball-date-plate { justify-self: start; }
+}
+
+/* ── row hover (portals / lists) ─────────────────────────────────────── */
+.ball-row {
+  transition: border-color 0.15s var(--ball-ease), background 0.15s var(--ball-ease);
+}
+.ball-row:hover { border-color: var(--ball-hair-strong); background: var(--ball-wash); }
+
+@media (prefers-reduced-motion: reduce) {
+  .ball-fade-up, .ball-scale-in, .ball-step,
+  .ball-spinner, .ball-skel::after, .ball-dot,
+  .ball-check circle, .ball-check path {
+    animation: none !important;
+  }
+  .ball-fade-up, .ball-scale-in, .ball-step { opacity: 1; transform: none; }
+  .ball-check circle, .ball-check path { stroke-dashoffset: 0; }
+  .ball-cta:hover { transform: none; }
+}

@@ -28,6 +28,7 @@ export const NAV_GROUPS = [
       { id: 'media', icon: '⊡', label: 'Media' },
       { id: 'raidertv', icon: '▶', label: 'Raider TV' },
       { id: 'ball', icon: '♛', label: 'Military Ball' },
+      { id: 'ballallergy', icon: '⚕', label: 'Ball Allergies' },
     ],
   },
   {

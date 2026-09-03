@@ -20,6 +20,7 @@ import BetaFeaturesPanel from './panels/beta/BetaFeaturesPanel';
 import CheckinPanel from './panels/CheckinPanel';
 import EventFeedbackPanel from './panels/feedback/EventFeedbackPanel';
 import BallPanel from './panels/ball/BallPanel';
+import BallAllergyPanel from './panels/ball/BallAllergyPanel';
 
 // Push-to-TV / TV Photos is intentionally restricted to this one account —
 // a deliberate departure from DISPATCH's usual "no per-email logic"
@@ -34,7 +35,7 @@ const SECTION_LABEL = {
   people: 'PEOPLE', photos: 'PHOTOS', questions: 'FAQ QUESTIONS', email: 'EMAIL LIST',
   media: 'MEDIA', advanced: 'ADVANCED', account: 'MY ACCOUNT', messages: 'MESSAGES',
   tvremote: 'TV REMOTE', beta: 'BETA FEATURES', checkin: 'SITE CHECK-IN',
-  feedback: 'EVENT FEEDBACK', ball: 'MILITARY BALL', raidertv: 'RAIDER TV',
+  feedback: 'EVENT FEEDBACK', ball: 'MILITARY BALL', ballallergy: 'BALL ALLERGIES', raidertv: 'RAIDER TV',
 };
 
 // Which sections each role may see. s5 is scoped to the battalion calendar
@@ -76,8 +77,8 @@ const SECTION_LABEL = {
 // tv_daily_settings emergency guard to accept is_bc(); is_admin()/is_s6()/
 // is_s5() are untouched, so every other admin table stays locked to him.
 const ROLE_SECTIONS = {
-  s6: ['overview', 'events', 'people', 'photos', 'questions', 'email', 'media', 'messages', 'advanced', 'tvremote', 'raidertv', 'beta', 'feedback', 'ball'],
-  s5: ['events', 'aars', 'messages', 'account', 'tvremote'],
+  s6: ['overview', 'events', 'people', 'photos', 'questions', 'email', 'media', 'messages', 'advanced', 'tvremote', 'raidertv', 'beta', 'feedback', 'ball', 'ballallergy'],
+  s5: ['events', 'aars', 'messages', 'account', 'tvremote', 'ballallergy'],
   bc: ['tvremote'],
 };
 
@@ -123,6 +124,7 @@ export default function Dashboard({ onLogout, adminId, role = 's6' }) {
           {section === 'checkin'  && isLuke && <CheckinPanel />}
           {section === 'feedback' && <EventFeedbackPanel />}
           {section === 'ball'     && <BallPanel />}
+          {section === 'ballallergy' && <BallAllergyPanel />}
         </div>
       </div>
       <StatusBar sectionLabel={SECTION_LABEL[section] || section.toUpperCase()} />

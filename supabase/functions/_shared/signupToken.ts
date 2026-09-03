@@ -30,10 +30,17 @@ async function hmacKey(): Promise<CryptoKey> {
 export interface SignupTokenPayload {
   email: string;   // lowercased cadet school email, the identity this token proves
   exp: number;      // epoch ms
+  jti: string;      // random per-mint id — ball-submit-signup burns it on first
+                    // successful submit (ball_signup_tokens_used) so the token
+                    // is single-use, not replayable for the full TTL.
 }
 
 export async function mintSignupToken(email: string): Promise<string> {
-  const payload: SignupTokenPayload = { email: email.toLowerCase(), exp: Date.now() + TOKEN_TTL_MS };
+  const payload: SignupTokenPayload = {
+    email: email.toLowerCase(),
+    exp: Date.now() + TOKEN_TTL_MS,
+    jti: crypto.randomUUID(),
+  };
   const payloadBytes = new TextEncoder().encode(JSON.stringify(payload));
   const key = await hmacKey();
   const sig = new Uint8Array(await crypto.subtle.sign("HMAC", key, payloadBytes));
@@ -55,6 +62,7 @@ export async function verifySignupToken(token: unknown): Promise<SignupTokenPayl
     if (!ok) return null;
     const payload = JSON.parse(new TextDecoder().decode(payloadBytes)) as SignupTokenPayload;
     if (typeof payload.email !== "string" || typeof payload.exp !== "number") return null;
+    if (typeof payload.jti !== "string" || !payload.jti) return null;
     if (Date.now() > payload.exp) return null;
     return payload;
   } catch {

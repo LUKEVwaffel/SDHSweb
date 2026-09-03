@@ -31,14 +31,24 @@ export default function StepCadetVerify({ onVerified }) {
 
   if (match) {
     return (
-      <div>
+      <div className="ball-scale-in">
         <div style={{ border: `1px solid ${P.hairStrong}`, background: P.navy, padding: 24 }}>
           <div style={{ fontFamily: mono, fontSize: 11, color: P.gold, letterSpacing: '0.14em', marginBottom: 10 }}>WELCOME</div>
           <div style={{ fontSize: 18, marginBottom: 4 }}>{match.name}</div>
           <div style={{ fontFamily: mono, fontSize: 12, color: P.mute }}>
-            LET {match.let_level || '—'} · {(match.company || '').toUpperCase() || '—'} COMPANY
+            LET {match.let_level || '--'} · {(match.company || '').toUpperCase() || '--'} COMPANY
           </div>
         </div>
+
+        {match.date_tag && (
+          <div style={{ marginTop: 14, border: `1px solid ${P.gold}`, background: P.goldWash, padding: '14px 16px' }}>
+            <div style={{ fontFamily: mono, fontSize: 11, color: P.gold, letterSpacing: '0.14em', marginBottom: 6 }}>HEADS UP</div>
+            <div style={{ fontFamily: mono, fontSize: 12, color: P.cream, lineHeight: 1.6 }}>
+              You've already been added as {match.date_tag.host_name}'s date. Your guest status: <strong>{match.date_tag.status}</strong>.
+              You can still continue below to start your own separate signup if you want to.
+            </div>
+          </div>
+        )}
         <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: 20 }}>
           <button
             onClick={() => setMatch(null)}
@@ -71,7 +81,7 @@ export default function StepCadetVerify({ onVerified }) {
       </div>
       <ErrorText>{err}</ErrorText>
       <div style={{ marginTop: 20 }}>
-        <Btn type="submit" disabled={busy || !username.trim()}>{busy ? 'CHECKING…' : 'FIND ME →'}</Btn>
+        <Btn type="submit" busy={busy} disabled={!username.trim()}>{busy ? 'CHECKING' : 'FIND ME →'}</Btn>
       </div>
     </form>
   );

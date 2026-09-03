@@ -15,10 +15,19 @@ Deno.serve(async (req) => {
   try {
     const caller = await getCaller(req);
     if (!caller || caller.role !== "s6") return json({ error: "not authorized" }, 403);
+    // Item 9: this bypasses RLS via the service-role client, so per the
+    // getCaller() contract in _shared/supabase.ts it must also enforce the
+    // password gate itself — RLS's admin_role() check does not cover
+    // service-role calls. Same guard as send-allergy-email.
+    if (caller.mustChangePassword) return json({ error: "set your own password first" }, 403);
 
-    const { email, name, pin } = await req.json().catch(() => ({}));
+    const { email, name, pin, role } = await req.json().catch(() => ({}));
     const targetEmail = String(email || "").trim().toLowerCase();
     const targetName = String(name || "").trim();
+    // 'female_dress' = the 3 female-attire approvers; 'male_guest_attire' =
+    // Weston's male-guest queue (see ball_finalize.sql SECTION 3). Default
+    // keeps every existing caller (no role param) on the female-dress role.
+    const targetRole = role === "male_guest_attire" ? "male_guest_attire" : "female_dress";
     if (!targetEmail || !targetName) return json({ error: "name and email are required" }, 400);
     if (!PIN_RE.test(String(pin ?? ""))) return json({ error: "PIN must be exactly 4 digits" }, 400);
 
@@ -27,6 +36,7 @@ Deno.serve(async (req) => {
       email: targetEmail,
       name: targetName,
       active: true,
+      role: targetRole,
       pin_hash,
       pin_fail_count: 0,
       pin_locked_until: null,
