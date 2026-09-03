@@ -1985,8 +1985,8 @@
     "semantic_hash": ""
   },
   "src/components/admin/panels/ball/BallDressStaffTab.jsx": {
-    "mtime": 1788429076.1615314,
-    "ast_hash": "fce225f18730501014cbc5bd732ef623",
+    "mtime": 1788472154.9154344,
+    "ast_hash": "87dbc38d20bbc042fc5d3b8948fc7142",
     "semantic_hash": ""
   },
   "src/components/admin/panels/ball/BallPanel.jsx": {
@@ -2592,6 +2592,11 @@
   "supabase/ball_phone_numbers.sql": {
     "mtime": 1788471596.483915,
     "ast_hash": "2f08c8db117fd9ab6aafac423cbde3ad",
+    "semantic_hash": ""
+  },
+  "supabase/ball_dress_staff_status.sql": {
+    "mtime": 1788472120.6318078,
+    "ast_hash": "545090b1c4140b9f8c3900a7f53f8f1c",
     "semantic_hash": ""
   }
 }
