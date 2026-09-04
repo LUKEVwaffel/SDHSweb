@@ -34,6 +34,7 @@ import RaiderParentWelcome from './components/tv/RaiderParentWelcome';
 import CongratsPopup from './components/CongratsPopup';
 import CompPhotoVote from './components/CompPhotoVote';
 import EventFeedbackForm from './components/EventFeedbackForm';
+import EventFeedbackPicker from './components/EventFeedbackPicker';
 import OpticSurvey from './components/OpticSurvey';
 import BallLanding from './components/ball/BallLanding';
 import BallSignupWizard from './components/ball/signup/BallSignupWizard';
@@ -88,6 +89,7 @@ export default function App() {
   if (location.pathname === '/raidertv') return <RaiderTv />;
   if (location.pathname === '/raiderremote') return <RaiderRemote />;
   if (location.pathname === '/raiderparent') return <RaiderParentWelcome />;
+  if (location.pathname === '/feedback') return <EventFeedbackPicker />;
   if (location.pathname.startsWith('/feedback/')) return <EventFeedbackForm />;
   if (location.pathname === '/vote') return <CompPhotoVote />;
   if (location.pathname === '/survey') return <OpticSurvey />;

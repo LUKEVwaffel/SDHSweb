@@ -2030,8 +2030,8 @@
     "semantic_hash": ""
   },
   "src/components/ball/signup/StepCadetDetails.jsx": {
-    "mtime": 1788471608.6728625,
-    "ast_hash": "f40857b9443293c4432daa951ca81e09",
+    "mtime": 1788513726.3435552,
+    "ast_hash": "fe7a7ae9e10f98fa056a50d97a5a967e",
     "semantic_hash": ""
   },
   "src/components/ball/signup/StepCadetVerify.jsx": {
@@ -2095,8 +2095,8 @@
     "semantic_hash": ""
   },
   "supabase/functions/ball-submit-signup/index.ts": {
-    "mtime": 1788473239.7535172,
-    "ast_hash": "9d4444187e40502685369c28debe2fc6",
+    "mtime": 1788513742.5932114,
+    "ast_hash": "c8e67f5c4aefe012fd88f9f19aec0186",
     "semantic_hash": ""
   },
   "supabase/functions/notify-ball-status-update/index.ts": {
@@ -2445,8 +2445,8 @@
     "semantic_hash": ""
   },
   "src/components/admin/panels/ball/BallAllergyPanel.jsx": {
-    "mtime": 1788438881.9428396,
-    "ast_hash": "5f2e01223707bb5c8da071081fbb2dbf",
+    "mtime": 1788513695.9531431,
+    "ast_hash": "d9dfde86aec329c09164fb79d64b24a8",
     "semantic_hash": ""
   },
   "src/components/ball/attire/BallAttirePortal.jsx": {
@@ -2470,8 +2470,8 @@
     "semantic_hash": ""
   },
   "supabase/functions/notify-ball-allergy/index.ts": {
-    "mtime": 1788473239.811158,
-    "ast_hash": "cd16b2f6090fb5ca736d1cc1bb070357",
+    "mtime": 1788513773.1278162,
+    "ast_hash": "5c30e8ec4ea2fd1182d903ff89ab251b",
     "semantic_hash": ""
   },
   "supabase/functions/send-allergy-email/index.ts": {
@@ -2565,8 +2565,8 @@
     "semantic_hash": ""
   },
   "supabase/ball_email_templates.sql": {
-    "mtime": 1788470899.8599808,
-    "ast_hash": "e862c07d3e80815b4c486ffcb494df76",
+    "mtime": 1788513782.8555624,
+    "ast_hash": "e768d788a603e47508dc1b85998cfba0",
     "semantic_hash": ""
   },
   "supabase/functions/_shared/ballApprovers.ts": {
@@ -2580,8 +2580,8 @@
     "semantic_hash": ""
   },
   "supabase/functions/ball-email-preview/index.ts": {
-    "mtime": 1788470801.9621837,
-    "ast_hash": "8b0d6831db37cf169efcd1a0bb29c6e0",
+    "mtime": 1788513790.6559315,
+    "ast_hash": "f72b0d6a6c167cd877f75d1c62e1d9c8",
     "semantic_hash": ""
   },
   "supabase/functions/notify-ball-attire/index.ts": {
@@ -2602,6 +2602,11 @@
   "supabase/functions/_shared/ballNotify.ts": {
     "mtime": 1788473226.3482873,
     "ast_hash": "65591dab4231ca22d953efba74c906ae",
+    "semantic_hash": ""
+  },
+  "supabase/ball_allergy_list_phone.sql": {
+    "mtime": 1788513629.5509694,
+    "ast_hash": "235033b013c42c7cabaa27c2a26548c8",
     "semantic_hash": ""
   }
 }
