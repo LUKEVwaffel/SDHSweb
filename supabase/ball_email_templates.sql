@@ -98,13 +98,13 @@ Your registration for the Trojan Battalion Military Ball has been received and r
   (
     'allergy_flag',
     'New allergy flag (S-5)',
-    'Sent to every S-5 when a cadet submits a signup with a food allergy flagged.',
-    '{{cadet_name}} {{dispatch_url}}',
+    'Sent to every S-5 when a cadet submits a signup with a food allergy flagged. {{contact}} = the cadet''s phone and/or email, or a note that neither is on file.',
+    '{{cadet_name}} {{contact}} {{dispatch_url}}',
     'New Ball allergy flag: {{cadet_name}}',
     'Food Allergy Flagged',
     '{{cadet_name}} flagged a food allergy on their Military Ball signup.
 
-Follow up with them directly about food options.',
+Reach them: {{contact}}. Call or text is fastest.',
     '',
     ''
   )

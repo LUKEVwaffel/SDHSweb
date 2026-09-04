@@ -265,11 +265,19 @@ Deno.serve(async (req) => {
     if (!cadetGender || !Number.isFinite(cadetAge) || cadetAge <= 0) {
       return json({ error: "cadet age and gender are required" }, 400);
     }
-    if (!notificationEmail || !EMAIL_RE.test(notificationEmail)) {
-      return json({ error: "a personal email address is required" }, 400);
+    // Contact: phone preferred, personal email as an alternative. At least one
+    // required. An email, if given, must be a valid non-school address.
+    const phoneOk = cadetPhone !== null && cadetPhone.replace(/\D/g, "").length >= 10;
+    if (notificationEmail) {
+      if (!EMAIL_RE.test(notificationEmail)) {
+        return json({ error: "that email address looks invalid" }, 400);
+      }
+      if (isSchoolEmail(notificationEmail)) {
+        return json({ error: "use a personal (non-school) email — a school inbox won't receive these" }, 400);
+      }
     }
-    if (isSchoolEmail(notificationEmail)) {
-      return json({ error: "use a personal (non-school) email — a school inbox won't receive these" }, 400);
+    if (!phoneOk && !notificationEmail) {
+      return json({ error: "give a phone number or a personal email so we can reach you" }, 400);
     }
 
     const hasGuest = body?.guest != null;

@@ -26,12 +26,18 @@ Deno.serve(async (req) => {
 
     const { data: signup, error } = await svc
       .from("ball_signups")
-      .select("cadet_name, cadet_has_allergy")
+      .select("cadet_name, cadet_has_allergy, cadet_allergy_email")
       .eq("id", signup_id)
       .maybeSingle();
     if (error) { console.error("notify-ball-allergy lookup", error); return json({ error: "internal error" }, 500); }
     if (!signup) return json({ error: "not_found" }, 404);
     if (!signup.cadet_has_allergy) return json({ ok: true, notified: 0 });
+
+    // Phone in a separate best-effort read so this still works before
+    // ball_phone_numbers.sql is run.
+    let cadetPhone = "";
+    const { data: pRow } = await svc.from("ball_signups").select("cadet_phone").eq("id", signup_id).maybeSingle();
+    if (pRow && typeof pRow.cadet_phone === "string") cadetPhone = pRow.cadet_phone;
 
     const { data: s5, error: rErr } = await svc
       .from("admin_roles").select("email").eq("role", "s5");
@@ -49,8 +55,14 @@ Deno.serve(async (req) => {
     const link = origin ? `${origin}/admin/ballallergy` : null;
 
     const cadet = escapeHtml(signup.cadet_name);
-    const vars = { cadet_name: cadet, dispatch_url: link ? escapeHtml(link) : "" };
-    const defaultIntro = "{{cadet_name}} flagged a food allergy on their Military Ball signup.\n\nFollow up with them directly about food options.";
+    const contactBits: string[] = [];
+    if (cadetPhone.replace(/\D/g, "").length >= 10) contactBits.push(`phone <strong>${escapeHtml(cadetPhone)}</strong> (call or text)`);
+    if (signup.cadet_allergy_email) contactBits.push(`email ${escapeHtml(signup.cadet_allergy_email)}`);
+    const contact = contactBits.length
+      ? contactBits.join(" &middot; ")
+      : "no phone or email on file — reach them through 1SG Kaz / Chief";
+    const vars = { cadet_name: cadet, dispatch_url: link ? escapeHtml(link) : "", contact };
+    const defaultIntro = "{{cadet_name}} flagged a food allergy on their Military Ball signup.\n\nReach them: {{contact}}. Call or text is fastest.";
     const closing = pick(t, "closing_html", "", vars);
 
     const html = ballEmailShell({

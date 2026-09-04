@@ -149,13 +149,17 @@ function build(key: string, t: BallTemplate | null, origin: string): { subject: 
 
   // allergy_flag
   const link = `${origin}/admin/ballallergy`;
-  const vars: Record<string, string> = { cadet_name: "Cadet A. Rivera", dispatch_url: escapeHtml(link) };
+  const vars: Record<string, string> = {
+    cadet_name: "Cadet A. Rivera",
+    dispatch_url: escapeHtml(link),
+    contact: "phone <strong>(423) 555-0148</strong> (call or text) &middot; email a.rivera@example.com",
+  };
   return {
     subject: pick(t, "subject", "New Ball allergy flag: {{cadet_name}}", { cadet_name: "Cadet A. Rivera" }),
     html: ballEmailShell({
       preheader: "Cadet A. Rivera flagged a food allergy on their Ball signup.",
       heading: pick(t, "heading", "Food Allergy Flagged", vars),
-      introHtml: paras(pick(t, "intro_html", "{{cadet_name}} flagged a food allergy on their Military Ball signup.\n\nFollow up with them directly about food options.", vars)),
+      introHtml: paras(pick(t, "intro_html", "{{cadet_name}} flagged a food allergy on their Military Ball signup.\n\nReach them: {{contact}}. Call or text is fastest.", vars)),
       noticeHtml: pick(t, "notice_html", "", vars) || undefined,
       closingHtml: (() => { const c = pick(t, "closing_html", "", vars); return c ? paras(c) : undefined; })(),
       cta: { label: "Open the Ball allergy list", url: link },

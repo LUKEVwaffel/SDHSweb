@@ -297,6 +297,7 @@
   "295": "expo-device",
   "296": "expo-localization",
   "297": "heic2any",
+  "298": "usePaginatedPhotos.js",
   "299": "RaiderParentWelcome.jsx",
   "301": "TvRefreshNotice",
   "302": "raider_tv.sql",
@@ -309,11 +310,13 @@
   "309": "RichTextField.jsx",
   "310": "Rifle.jsx",
   "311": "admin_change_email.sql",
+  "312": "TvStandardLayout.jsx",
   "313": "ThreadView.jsx",
   "316": "pwa.js",
   "317": "ball_guard_service_role_fix.sql",
   "318": "FillBlankGame.jsx",
   "319": "ball_signups_wipe.sql",
   "321": "TvHistoryPanel.jsx",
+  "326": "TvRefreshNotice",
   "327": "ball_dress_staff_status.sql"
 }
