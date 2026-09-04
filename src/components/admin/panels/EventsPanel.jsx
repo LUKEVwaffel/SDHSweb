@@ -353,9 +353,14 @@ export default function EventsPanel({ adminId, allowedTeams }) {
   // drafts never leak and the PDF matches whatever's currently live.
   async function exportPdf() {
     setGeneratingPdf(true);
-    const { data } = await SB.from('events').select('*').eq('status', 'posted').order('date', { ascending: true });
-    await openEventsCalendarPdf(data || [], { team: pdfTeam });
-    setGeneratingPdf(false);
+    try {
+      const { data } = await SB.from('events').select('*').eq('status', 'posted').order('date', { ascending: true });
+      await openEventsCalendarPdf(data || [], { team: pdfTeam });
+    } catch {
+      setMsg('PDF export failed — refresh the page and try again.');
+    } finally {
+      setGeneratingPdf(false);
+    }
   }
 
   async function del(r) {
