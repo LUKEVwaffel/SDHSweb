@@ -6,6 +6,7 @@ import CompPhotoBand from './components/CompPhotoBand';
 import TabGrid from './components/TabGrid';
 import Bulletin from './components/Bulletin';
 import EventSpotlightBand from './components/EventSpotlightBand';
+import RaftingPhotoBand from './components/RaftingPhotoBand';
 // OPTIC campaign — dormant between competitions, restore next comp:
 //   import OpticHeroStrip from './components/OpticHeroStrip';
 //   import OpticPromoBand from './components/OpticPromoBand';
@@ -17,6 +18,7 @@ import CadetManual from './components/CadetManual';
 import CreedHub from './components/creed/CreedHub';
 import Raiders from './components/Raiders';
 import CompGallery from './components/raiders/CompGallery';
+import RaftingGallery from './components/rafting/RaftingGallery';
 import RaiderTeam from './components/RaiderTeam';
 import Rifle from './components/Rifle';
 import Staff from './components/Staff';
@@ -108,6 +110,8 @@ export default function App() {
           <>
             <Hero />
             <CompPhotoBand />
+            <RaftingPhotoBand />
+            {/* Disabled via SPOTLIGHT_BAND_ENABLED — kept mounted so re-enabling is a one-flag flip. */}
             <EventSpotlightBand />
             <BattalionCommand />
             <TabGrid />
@@ -119,6 +123,7 @@ export default function App() {
         <Route path="/creed" element={<CreedHub />} />
         <Route path="/raiders" element={<Raiders />} />
         <Route path="/raiders/comp" element={<CompGallery />} />
+        <Route path="/rafting" element={<RaftingGallery />} />
         <Route path="/raiderteam" element={<RaiderTeam />} />
         <Route path="/rifle" element={<Rifle />} />
         <Route path="/staff" element={<Staff />} />

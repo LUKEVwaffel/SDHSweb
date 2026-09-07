@@ -5,6 +5,12 @@ import TvRangeScreenBase from '../TvRangeScreenBase.jsx';
 
 const PHOTO_ROTATE_MS = 4000;
 
+// Matches SPOTLIGHT_BAND_ENABLED in EventSpotlightBand.jsx - off while the
+// rafting trip is the headline. When false this slide reports itself empty
+// so the Range TV rotation skips it (the beta_event_spotlight row and the
+// DISPATCH panel are untouched). Flip both flags back together.
+const SPOTLIGHT_SLIDE_ENABLED = false;
+
 // See EventSpotlightBand.jsx's identical helper for why this doesn't just
 // call `new Date(dateStr)` — a bare "YYYY-MM-DD" parses as UTC midnight and
 // rolls back a day in negative-UTC timezones.
@@ -30,7 +36,8 @@ export default function SlideEventSpotlight({ onEmpty }) {
   }, []);
 
   const photos = row?.photos || [];
-  const isEmpty = row !== null && (!row.active || (!row.title && !row.description && !photos.length));
+  const isEmpty = !SPOTLIGHT_SLIDE_ENABLED
+    || (row !== null && (!row.active || (!row.title && !row.description && !photos.length)));
 
   useEffect(() => {
     if (isEmpty) onEmpty?.();

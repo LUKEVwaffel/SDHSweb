@@ -11,6 +11,14 @@ const P = {
 const CAROUSEL_INTERVAL_MS = 4500;
 const FADE_MS = 500;
 
+// Kill switch for the homepage "// SPECIAL RECOGNITION" band. Turned OFF
+// while the rafting trip is the headline item (that lives at /rafting via
+// RaftingPhotoBand). The DISPATCH -> Beta Features panel and the
+// beta_event_spotlight row are untouched; flip this back to `true` to bring
+// the band back for the next one-off event. SlideEventSpotlight.jsx has the
+// matching flag for the Range TV slide.
+const SPOTLIGHT_BAND_ENABLED = false;
+
 // Postgres `date` columns come back as a bare "YYYY-MM-DD" string — parsing
 // that directly with `new Date()` reads it as UTC midnight, which rolls
 // back a day in any negative-UTC timezone. Building the Date from parts
@@ -113,6 +121,7 @@ export default function EventSpotlightBand() {
   const [cachedActive] = useState(readCachedActive);
 
   useEffect(() => {
+    if (!SPOTLIGHT_BAND_ENABLED) return undefined;
     SB.from('beta_event_spotlight').select('*').eq('active', true).order('created_at', { ascending: false }).limit(1).maybeSingle()
       .then(({ data }) => {
         const active = !!(data && (data.title || data.description || (data.photos || []).length));
@@ -121,6 +130,10 @@ export default function EventSpotlightBand() {
         setLoaded(true);
       });
   }, []);
+
+  // Disabled while the rafting trip owns the homepage slot - see the flag
+  // comment above. All hooks are declared, so this early return is legal.
+  if (!SPOTLIGHT_BAND_ENABLED) return null;
 
   const hasContent = !!(row && (row.title || row.description || (row.photos || []).length));
 

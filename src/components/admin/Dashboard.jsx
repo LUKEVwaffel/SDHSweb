@@ -17,6 +17,7 @@ import MessagesPanel from './panels/messages/MessagesPanel';
 import TvRemotePanel from './panels/tvremote/TvRemotePanel';
 import RaiderTvPanel from './panels/raidertv/RaiderTvPanel';
 import BetaFeaturesPanel from './panels/beta/BetaFeaturesPanel';
+import RaftingPanel from './panels/rafting/RaftingPanel';
 import CheckinPanel from './panels/CheckinPanel';
 import EventFeedbackPanel from './panels/feedback/EventFeedbackPanel';
 import BallPanel from './panels/ball/BallPanel';
@@ -34,7 +35,7 @@ const SECTION_LABEL = {
   overview: 'OVERVIEW', events: 'EVENTS', aars: 'AAR TRACKER',
   people: 'PEOPLE', photos: 'PHOTOS', questions: 'FAQ QUESTIONS', email: 'EMAIL LIST',
   media: 'MEDIA', advanced: 'ADVANCED', account: 'MY ACCOUNT', messages: 'MESSAGES',
-  tvremote: 'TV REMOTE', beta: 'BETA FEATURES', checkin: 'SITE CHECK-IN',
+  tvremote: 'TV REMOTE', beta: 'BETA FEATURES', rafting: 'RAFTING TRIP', checkin: 'SITE CHECK-IN',
   feedback: 'EVENT FEEDBACK', ball: 'MILITARY BALL', ballallergy: 'BALL ALLERGIES', raidertv: 'RAIDER TV',
 };
 
@@ -77,7 +78,7 @@ const SECTION_LABEL = {
 // tv_daily_settings emergency guard to accept is_bc(); is_admin()/is_s6()/
 // is_s5() are untouched, so every other admin table stays locked to him.
 const ROLE_SECTIONS = {
-  s6: ['overview', 'events', 'people', 'photos', 'questions', 'email', 'media', 'messages', 'advanced', 'tvremote', 'raidertv', 'beta', 'feedback', 'ball', 'ballallergy'],
+  s6: ['overview', 'events', 'people', 'photos', 'questions', 'email', 'media', 'messages', 'advanced', 'tvremote', 'raidertv', 'beta', 'rafting', 'feedback', 'ball', 'ballallergy'],
   s5: ['events', 'aars', 'messages', 'account', 'tvremote', 'ballallergy'],
   bc: ['tvremote'],
 };
@@ -121,6 +122,7 @@ export default function Dashboard({ onLogout, adminId, role = 's6' }) {
           {section === 'tvremote' && <TvRemotePanel adminId={adminId} role={role} />}
           {section === 'raidertv' && <RaiderTvPanel adminId={adminId} />}
           {section === 'beta'     && <BetaFeaturesPanel adminId={adminId} />}
+          {section === 'rafting'  && <RaftingPanel adminId={adminId} />}
           {section === 'checkin'  && isLuke && <CheckinPanel />}
           {section === 'feedback' && <EventFeedbackPanel />}
           {section === 'ball'     && <BallPanel />}
