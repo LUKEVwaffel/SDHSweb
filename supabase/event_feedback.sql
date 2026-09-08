@@ -18,11 +18,10 @@
 --     flags, recommendations. Each run is a NEW row in
 --     event_feedback_analysis (append-only, not overwrite) so runs can be
 --     compared as the prompt gets tuned during the beta.
---   • ACCESS: S-6 only for now, on purpose — Luke wants to verify the whole
---     flow end-to-end on his own login before S-5 (the actual AAR owners)
---     gets access. The S-5 grant is written below but commented out; uncomment
---     both policies once verified. Same staged-rollout shape as every other
---     role split in this codebase (see admin_roles.sql).
+--   • ACCESS: S-5 (the AAR/feedback owners) + S-6. S-5 gets SELECT on
+--     event_feedback + event_feedback_analysis and can run DISPATCH AI;
+--     row writes stay S-6-only. See the *_select_s5 policies below and the
+--     caller.role check in supabase/functions/analyze-event-feedback.
 -- ============================================================================
 
 -- ── 1. Per-event toggle ─────────────────────────────────────────────────────
@@ -62,10 +61,12 @@ create policy event_feedback_insert_public on public.event_feedback
 create policy event_feedback_all_s6 on public.event_feedback
   for all to authenticated using (public.is_s6()) with check (public.is_s6());
 
--- S-5 read grant — deliberately NOT enabled yet. Uncomment once Luke has
--- verified the full submit → review → DISPATCH AI flow on his own S-6 login:
--- create policy event_feedback_select_s5 on public.event_feedback
---   for select to authenticated using (public.is_s5());
+-- S-5 read grant — S-5 are the AAR/feedback owners, they view every
+-- submission and run DISPATCH AI. Write stays S-6-only (no s5 ALL policy):
+-- feedback rows are never edited from the panel.
+drop policy if exists event_feedback_select_s5 on public.event_feedback;
+create policy event_feedback_select_s5 on public.event_feedback
+  for select to authenticated using (public.is_s5());
 
 -- Per-device rate limit backstop, same shape as site_checkin_rate_limit —
 -- client already soft-limits one submission per event per device, this caps
@@ -119,9 +120,10 @@ select public._drop_all_policies('event_feedback_analysis');
 create policy event_feedback_analysis_all_s6 on public.event_feedback_analysis
   for all to authenticated using (public.is_s6()) with check (public.is_s6());
 
--- Same S-5 deferral as event_feedback above:
--- create policy event_feedback_analysis_select_s5 on public.event_feedback_analysis
---   for select to authenticated using (public.is_s5());
+-- S-5 reads past DISPATCH AI runs (edge function still writes via service role).
+drop policy if exists event_feedback_analysis_select_s5 on public.event_feedback_analysis;
+create policy event_feedback_analysis_select_s5 on public.event_feedback_analysis
+  for select to authenticated using (public.is_s5());
 
 -- ============================================================================
 -- Verify: select * from public.event_feedback;

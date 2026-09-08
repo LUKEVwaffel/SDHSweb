@@ -324,13 +324,5 @@
   "322": "emailAudience.js",
   "323": "event_feedback_opens_at.sql",
   "324": "rafting_photos.sql",
-  "325": "BallSignupWizard.jsx",
-  "326": "CreedLeaderboardPanel.jsx",
-  "327": "ball_dress_staff_status.sql",
-  "328": "TvKiosk.jsx",
-  "329": "StepRangeNotices.jsx",
-  "330": "SlideUniformCountdown.jsx",
-  "331": "BallAllergyPanel.jsx",
-  "332": "calendar.js",
-  "333": "RaiderCarousel.jsx"
+  "327": "ball_dress_staff_status.sql"
 }

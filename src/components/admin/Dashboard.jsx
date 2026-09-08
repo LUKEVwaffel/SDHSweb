@@ -65,12 +65,12 @@ const SECTION_LABEL = {
 // Photos this is read-only (AarsPanel's `readOnly` prop below), not full
 // access: S-5 stays the only role that can draft/upload/edit/archive AARs,
 // matching aars_select_luke (SELECT only) vs aars_all_s5 (ALL) in aars.sql.
-// 'feedback' (cadet/staff event feedback + DISPATCH AI beta analysis, see
-// supabase/event_feedback.sql) is S-6-only for NOW, same staged-rollout shape
-// as 'aars' was before S-5 got read access — Luke wants to verify the whole
-// submit → review → DISPATCH AI flow end-to-end on his own login first. Once
-// verified, add 'feedback' to s5's array below (and uncomment the matching
-// RLS policies in event_feedback.sql + the role check in the edge function).
+// 'feedback' (cadet/staff event feedback + DISPATCH AI analysis, see
+// supabase/event_feedback.sql) is now S-5's — they are the AAR/feedback
+// owners. Full parity with S-6: view submissions + run DISPATCH AI. Matching
+// server-side grants: event_feedback_select_s5 / event_feedback_analysis_select_s5
+// in event_feedback.sql, and the caller.role check in
+// supabase/functions/analyze-event-feedback (both accept s5 now).
 // 'bc' = Battalion Commander (Aiden O'Brien). Range TV control ONLY - the TV
 // Remote panel and nothing else. Inside that panel he is further scoped to
 // the Range screen (see TvRemotePanel's isBC handling). Server-side match:
@@ -79,7 +79,7 @@ const SECTION_LABEL = {
 // is_s5() are untouched, so every other admin table stays locked to him.
 const ROLE_SECTIONS = {
   s6: ['overview', 'events', 'people', 'photos', 'questions', 'email', 'media', 'messages', 'advanced', 'tvremote', 'raidertv', 'beta', 'rafting', 'feedback', 'ball', 'ballallergy'],
-  s5: ['events', 'aars', 'messages', 'account', 'tvremote', 'ballallergy'],
+  s5: ['events', 'aars', 'feedback', 'messages', 'account', 'tvremote', 'ballallergy'],
   bc: ['tvremote'],
 };
 

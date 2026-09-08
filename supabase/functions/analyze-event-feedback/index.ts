@@ -1,8 +1,7 @@
 // Edge function: analyze-event-feedback
-// DISPATCH AI (Beta). S-6-only for now — see supabase/event_feedback.sql for
-// why (Luke verifies end-to-end before S-5 gets access; caller.role check
-// below is the enforcement point once that's flipped to allow s5 too, just
-// widen the check here AND uncomment the matching RLS policy).
+// DISPATCH AI (Beta). S-5 (AAR/feedback owners) + S-6 — see
+// supabase/event_feedback.sql for the matching RLS grants. caller.role check
+// below is the enforcement point for service-role calls (RLS is bypassed here).
 //
 // Pulls every event_feedback row for one event, sends the whole batch to
 // Claude in a single call, and asks for a deep, structured analysis — not a
@@ -47,9 +46,9 @@ Deno.serve(async (req) => {
   try {
     const caller = await getCaller(req);
     if (!caller) return json({ error: "unauthorized" }, 401);
-    // S-6 only during the beta — widen to include "s5" here once Luke has
-    // verified the flow and the matching RLS policies are uncommented.
-    if (caller.role !== "s6") return json({ error: "forbidden" }, 403);
+    // S-5 (AAR/feedback owners) and S-6. Matching RLS: event_feedback_select_s5
+    // / event_feedback_analysis_select_s5 in supabase/event_feedback.sql.
+    if (caller.role !== "s6" && caller.role !== "s5") return json({ error: "forbidden" }, 403);
     if (caller.mustChangePassword) return json({ error: "password_change_required" }, 403);
 
     const { event_id } = await req.json().catch(() => ({}));

@@ -3,11 +3,9 @@ import { supabase as SB } from '../../../../lib/supabaseClient';
 import { P, mono, inter, fs, sp, radius } from '../../theme';
 import { Btn, Card, Label, Select, PanelHeader, EmptyState, Toast } from '../../shared/ui';
 
-// Cadet/staff event feedback + DISPATCH AI (Beta). S-6-only for now — see
-// supabase/event_feedback.sql for why (Luke verifies end-to-end before S-5,
-// the actual AAR/feedback owners, get access). Once verified, this panel is
-// meant to move under S-5 the same way AarsPanel did, and the ROLE_SECTIONS
-// entry in Dashboard.jsx just needs 's5' added.
+// Cadet/staff event feedback + DISPATCH AI (Beta). Available to S-5 (the
+// AAR/feedback owners) and S-6 — see supabase/event_feedback.sql for the
+// matching RLS grants and ROLE_SECTIONS in Dashboard.jsx for the nav gate.
 
 const FUN_LABELS = ['', 'Rough', 'Meh', 'Decent', 'Fun', 'Best one yet'];
 
@@ -193,7 +191,7 @@ export default function EventFeedbackPanel() {
     <div>
       <PanelHeader
         title="EVENT FEEDBACK"
-        sub="DISPATCH AI (Beta) · S-6 only during verification"
+        sub="DISPATCH AI (Beta)"
         action={selectedEvent && <Btn onClick={() => copyLink(selectedEvent.id, setMsg)} variant="ghost" size="sm">COPY FEEDBACK LINK</Btn>}
       />
 
