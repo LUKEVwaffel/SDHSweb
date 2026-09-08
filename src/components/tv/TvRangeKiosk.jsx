@@ -1,5 +1,6 @@
 import { useNowTicker } from '../../hooks/useNowTicker.js';
 import { useTvDailySettings } from '../../hooks/useTvDailySettings.js';
+import { useStayAwake } from '../../hooks/useStayAwake.js';
 import { getRangePhase } from '../../lib/tvRangeSchedule.js';
 import { resolveBellSchedule } from '../../lib/bellSchedules.js';
 import TvRangePlanningScreen from './range/TvRangePlanningScreen.jsx';
@@ -10,7 +11,7 @@ import TvRangeStaffScheduleScreen from './range/TvRangeStaffScheduleScreen.jsx';
 import TvRangeOffHoursScreen from './range/TvRangeOffHoursScreen.jsx';
 import TvRangePeriodEndingScreen from './range/TvRangePeriodEndingScreen.jsx';
 import TvRangeRotationLayout from './range/TvRangeRotationLayout.jsx';
-import TvCongratsScreen from './TvCongratsScreen.jsx';
+import TvRaftingScreen from './TvRaftingScreen.jsx';
 import TvPreviewBadge from './TvPreviewBadge.jsx';
 import TvRefreshNotice from './TvRefreshNotice.jsx';
 import TvRangeClock from './TvRangeClock.jsx';
@@ -27,20 +28,25 @@ import TvRangeClock from './TvRangeClock.jsx';
  * dedicated Range-only replacement for the old TvStandardLayout reuse; Outside
  * (TvKiosk.jsx) still renders TvStandardLayout unchanged.
  *
- * Mirror of TvKiosk.jsx's CONGRATS_MODE: after the Rhea County meet, Range's
- * 'rotation' phase — everything that runs *after* the bell-driven countdowns,
- * welcome windows, period-ending reminders and off-hours screens — shows the
- * Raider Team Congrats takeover (TvCongratsScreen, the same board /tv shows)
- * instead of the slideshow rotation. Every scheduled phase above it is
- * untouched. Flip RANGE_CONGRATS_MODE to false (or delete the branch) to
- * restore TvRangeRotationLayout; `settings`/`config` stay wired so the revert
- * is a one-line change.
+ * Mirror of TvKiosk.jsx's TAKEOVER_MODE: Range's 'rotation' phase —
+ * everything that runs *after* the bell-driven countdowns, welcome windows,
+ * period-ending reminders and off-hours screens — shows the rafting-trip photo
+ * takeover (TvRaftingScreen, the same board /tv shows) instead of the
+ * slideshow rotation. Every scheduled phase above it is untouched. Flip
+ * RANGE_TAKEOVER_MODE to false (or delete the branch) to restore
+ * TvRangeRotationLayout; `settings`/`config` stay wired so the revert is a
+ * one-line change.
+ *
+ * useStayAwake() runs the kiosk anti-sleep layers (Screen Wake Lock + a
+ * playing hidden <video> + synthetic activity) so the wall-mounted display PC
+ * stops dozing off the way it does on the plain web kiosk.
  */
-const RANGE_CONGRATS_MODE = true;
+const RANGE_TAKEOVER_MODE = true;
 
 export default function TvRangeKiosk() {
   const now = useNowTicker();
   const { settings } = useTvDailySettings('range');
+  useStayAwake();
 
   const scheduleKey = resolveBellSchedule(settings, now);
   const config = settings?.range_schedule_config ?? null;
@@ -71,8 +77,8 @@ export default function TvRangeKiosk() {
       break;
     case 'rotation':
     default:
-      phaseContent = RANGE_CONGRATS_MODE
-        ? <TvCongratsScreen />
+      phaseContent = RANGE_TAKEOVER_MODE
+        ? <TvRaftingScreen />
         : <TvRangeRotationLayout settings={settings} config={config} />;
   }
 
