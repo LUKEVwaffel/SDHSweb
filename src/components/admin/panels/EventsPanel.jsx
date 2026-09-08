@@ -13,6 +13,15 @@ import { openEventsCalendarPdf } from '../../../lib/eventsPdfPrint';
 const CATEGORY_OPTIONS = EVENT_CATEGORIES.filter((c) => c.id !== 'EVENT');
 const PERMISSION_SLIP_BUCKET = 'permission-slips';
 
+// timestamptz (from Supabase) -> the local "YYYY-MM-DDTHH:mm" a <input
+// type="datetime-local"> needs. Empty/null stays empty (no lock).
+function toDatetimeLocal(iso) {
+  if (!iso) return '';
+  const d = new Date(iso);
+  const pad = (n) => String(n).padStart(2, '0');
+  return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
+}
+
 const emptyForm = () => ({
   title: '', date: '', end_date: '', team: '', category: 'BATTALION',
   event_time: '', end_time: '', location: '', poc: DEFAULT_POC.name, description: '', will_have_pictures: false, status: 'draft',
@@ -24,7 +33,7 @@ const emptyForm = () => ({
   color_guard_notes: '', honor_guard_notes: '',
   uniform_reminder_exempt: false,
   recurrence_days: [],
-  feedback_enabled: false, feedback_due_date: '',
+  feedback_enabled: false, feedback_due_date: '', feedback_opens_at: '',
 });
 
 // Default 5-position roster in spec'd order: first 4 required, Alternate
@@ -204,6 +213,7 @@ export default function EventsPanel({ adminId, allowedTeams }) {
       uniform_reminder_exempt: !!r.uniform_reminder_exempt,
       recurrence_days: r.recurrence_days || [],
       feedback_enabled: !!r.feedback_enabled, feedback_due_date: r.feedback_due_date || '',
+      feedback_opens_at: toDatetimeLocal(r.feedback_opens_at),
     });
     loadEventTopics(r.id);
     loadEventSecondaryTeams(r.id);
@@ -236,6 +246,7 @@ export default function EventsPanel({ adminId, allowedTeams }) {
       recurrence_days: recurring ? f.recurrence_days : null,
       feedback_enabled: !!f.feedback_enabled,
       feedback_due_date: f.feedback_enabled ? nz(f.feedback_due_date) : null,
+      feedback_opens_at: f.feedback_enabled && f.feedback_opens_at ? new Date(f.feedback_opens_at).toISOString() : null,
     };
   }
 
@@ -844,9 +855,18 @@ export default function EventsPanel({ adminId, allowedTeams }) {
                 Opens a public no-login feedback form (/feedback/&lt;event id&gt;) for cadets/staff — link + submissions live under Event Feedback.
               </div>
               {form.feedback_enabled && (
-                <div style={{ marginTop: sp[3], maxWidth: 220 }}>
-                  <Label>Feedback due date (optional)</Label>
-                  <Input type="date" value={form.feedback_due_date} onChange={(e) => setForm((f) => ({ ...f, feedback_due_date: e.target.value }))} />
+                <div style={{ marginTop: sp[3], display: 'flex', gap: sp[3], flexWrap: 'wrap' }}>
+                  <div style={{ maxWidth: 220 }}>
+                    <Label>Feedback due date (optional)</Label>
+                    <Input type="date" value={form.feedback_due_date} onChange={(e) => setForm((f) => ({ ...f, feedback_due_date: e.target.value }))} />
+                  </div>
+                  <div style={{ maxWidth: 240 }}>
+                    <Label>Locked until (optional)</Label>
+                    <Input type="datetime-local" value={form.feedback_opens_at} onChange={(e) => setForm((f) => ({ ...f, feedback_opens_at: e.target.value }))} />
+                    <div style={{ fontFamily: mono, fontSize: 8, color: P.mute, letterSpacing: '0.06em', marginTop: sp[1] }}>
+                      Form + picker stay locked until this time. Leave blank to open immediately.
+                    </div>
+                  </div>
                 </div>
               )}
             </div>

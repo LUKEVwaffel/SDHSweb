@@ -14,6 +14,13 @@ const P = {
   hair: 'rgba(201,169,97,0.22)',
 };
 
+function formatOpensAt(iso) {
+  const d = new Date(iso);
+  const dateStr = d.toLocaleDateString(undefined, { weekday: 'short', month: 'short', day: 'numeric' });
+  const timeStr = d.toLocaleTimeString(undefined, { hour: 'numeric', minute: '2-digit' });
+  return `Opens ${dateStr} · ${timeStr}`;
+}
+
 export default function EventFeedbackPicker() {
   const navigate = useNavigate();
   const [events, setEvents] = useState(undefined); // undefined=loading, []=none
@@ -21,7 +28,7 @@ export default function EventFeedbackPicker() {
   useEffect(() => {
     (async () => {
       const { data } = await SB.from('events')
-        .select('id,title,date')
+        .select('id,title,date,feedback_opens_at')
         .eq('feedback_enabled', true)
         .order('date', { ascending: false });
       setEvents(data || []);
@@ -52,25 +59,30 @@ export default function EventFeedbackPicker() {
               No events are open for feedback right now. Check back after your next event.
             </div>
           )}
-          {events && events.map((ev) => (
-            <button
-              key={ev.id}
-              type="button"
-              onClick={() => navigate(`/feedback/${ev.id}`)}
-              style={{
-                display: 'block', width: '100%', textAlign: 'left', background: P.deep,
-                border: `1px solid ${P.hair}`, color: P.cream, padding: '16px 18px',
-                marginBottom: 10, cursor: 'pointer', fontFamily: 'Inter, sans-serif',
-              }}
-            >
-              <div style={{ fontFamily: 'Oswald, sans-serif', fontSize: 16, fontWeight: 500 }}>{ev.title}</div>
-              {ev.date && (
-                <div style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: 11, color: P.faint, marginTop: 5, letterSpacing: '0.04em' }}>
-                  {new Date(ev.date).toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' })}
+          {events && events.map((ev) => {
+            const locked = ev.feedback_opens_at && new Date(ev.feedback_opens_at) > new Date();
+            return (
+              <button
+                key={ev.id}
+                type="button"
+                disabled={locked}
+                onClick={() => navigate(`/feedback/${ev.id}`)}
+                style={{
+                  display: 'block', width: '100%', textAlign: 'left', background: P.deep,
+                  border: `1px solid ${P.hair}`, color: locked ? P.faint : P.cream, padding: '16px 18px',
+                  marginBottom: 10, cursor: locked ? 'not-allowed' : 'pointer', fontFamily: 'Inter, sans-serif',
+                  opacity: locked ? 0.6 : 1,
+                }}
+              >
+                <div style={{ fontFamily: 'Oswald, sans-serif', fontSize: 16, fontWeight: 500 }}>{ev.title}</div>
+                <div style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: 11, color: locked ? P.gold : P.faint, marginTop: 5, letterSpacing: '0.04em' }}>
+                  {locked
+                    ? formatOpensAt(ev.feedback_opens_at)
+                    : (ev.date && new Date(ev.date).toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' }))}
                 </div>
-              )}
-            </button>
-          ))}
+              </button>
+            );
+          })}
         </div>
       </div>
     </div>

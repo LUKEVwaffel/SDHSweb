@@ -46,6 +46,13 @@ const QUESTIONS = [
   },
 ];
 
+function formatOpensAt(iso) {
+  const d = new Date(iso);
+  const dateStr = d.toLocaleDateString(undefined, { weekday: 'long', month: 'short', day: 'numeric' });
+  const timeStr = d.toLocaleTimeString(undefined, { hour: 'numeric', minute: '2-digit' });
+  return `${dateStr} at ${timeStr}`;
+}
+
 function emptyForm() {
   return {
     submitter_name: '', submitter_type: 'cadet', let_level: '', company: '',
@@ -68,7 +75,7 @@ export default function EventFeedbackForm() {
 
   useEffect(() => {
     (async () => {
-      const { data } = await SB.from('events').select('id,title,date,feedback_enabled').eq('id', eventId).maybeSingle();
+      const { data } = await SB.from('events').select('id,title,date,feedback_enabled,feedback_opens_at').eq('id', eventId).maybeSingle();
       setEvent(data || null);
     })();
   }, [eventId]);
@@ -117,6 +124,20 @@ export default function EventFeedbackForm() {
   }
   if (!event.feedback_enabled) {
     return <Shell><Centered>Feedback isn't open for this event right now.</Centered></Shell>;
+  }
+  if (event.feedback_opens_at && new Date(event.feedback_opens_at) > new Date()) {
+    return (
+      <Shell>
+        <Centered>
+          <div style={{ fontFamily: 'Oswald, sans-serif', fontSize: 18, color: P.cream, fontWeight: 600, marginBottom: 8 }}>
+            Feedback isn't open yet
+          </div>
+          <div style={{ fontFamily: 'Inter, sans-serif', fontSize: 13, color: P.mute, maxWidth: 360 }}>
+            Come back {formatOpensAt(event.feedback_opens_at)} to submit feedback for {event.title}.
+          </div>
+        </Centered>
+      </Shell>
+    );
   }
   if (state === 'ok') {
     return (
