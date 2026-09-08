@@ -25,8 +25,8 @@
     "semantic_hash": "c1ee9ce6a4fe04105dbf8e619390df5e"
   },
   "src/App.jsx": {
-    "mtime": 1788804264.5137675,
-    "ast_hash": "f41f385172552550e8d54daff4324707",
+    "mtime": 1788877291.5637507,
+    "ast_hash": "47526b9aa44e2f7f1ac6238c75df1a53",
     "semantic_hash": ""
   },
   "src/components/About.jsx": {
@@ -120,8 +120,8 @@
     "semantic_hash": ""
   },
   "src/components/TopNav.jsx": {
-    "mtime": 1788360565.530517,
-    "ast_hash": "a0375deaf307bad171d7cc879faaddaf",
+    "mtime": 1788877295.5353453,
+    "ast_hash": "236882abb2190c4154170ececc679505",
     "semantic_hash": ""
   },
   "src/components/VerifiedTooltip.jsx": {

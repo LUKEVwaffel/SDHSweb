@@ -38,8 +38,13 @@ import CompPhotoVote from './components/CompPhotoVote';
 import EventFeedbackForm from './components/EventFeedbackForm';
 import EventFeedbackPicker from './components/EventFeedbackPicker';
 import OpticSurvey from './components/OpticSurvey';
-import BallLanding from './components/ball/BallLanding';
-import BallSignupWizard from './components/ball/signup/BallSignupWizard';
+// Military Ball hidden from public view 2026-09-08 — /ball + /ball/signup
+// redirect home and the TopNav entry is commented out. Re-enable by restoring
+// these two imports, their <Route>s below, and the TopNav 'ball' item. The
+// staff portals (/ball/ops, /ball/dress, /ball/attire) and guest links
+// (/ball/guest/*) stay live and keep their imports.
+// import BallLanding from './components/ball/BallLanding';
+// import BallSignupWizard from './components/ball/signup/BallSignupWizard';
 import BallGuestVerify from './components/ball/BallGuestVerify';
 import BallOpsPortal from './components/ball/ops/BallOpsPortal';
 import BallDressPortal from './components/ball/dress/BallDressPortal';
@@ -133,8 +138,9 @@ export default function App() {
         <Route path="/companies" element={<Companies />} />
         <Route path="/company/:id" element={<Companies />} />
         <Route path="/about" element={<About />} />
-        <Route path="/ball" element={<BallLanding />} />
-        <Route path="/ball/signup" element={<BallSignupWizard />} />
+        {/* Military Ball hidden from public 2026-09-08 — see import block up top. */}
+        <Route path="/ball" element={<Navigate to="/" replace />} />
+        <Route path="/ball/signup" element={<Navigate to="/" replace />} />
         <Route path="/profile/:id" element={<CommandProfile />} />
         <Route path="/:tabId" element={<TabRoute />} />
         <Route path="*" element={<Navigate to="/" replace />} />

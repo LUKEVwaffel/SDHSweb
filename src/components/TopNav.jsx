@@ -55,7 +55,9 @@ const NAV_ITEMS = [
     ],
   },
   { id: 'about', label: 'ABOUT' },
-  { id: 'ball', label: 'MILITARY BALL' },
+  // Military Ball hidden from public view 2026-09-08 — restore this entry (and
+  // the /ball routes in App.jsx) to bring it back:
+  //   { id: 'ball', label: 'MILITARY BALL' },
   // OPTIC photo-network link — dormant between competitions, restore next comp:
   //   { id: 'submit', label: 'OPTIC', highlight: true, sub: 'Battalion photo network — upload photos' },
   { id: 'vote', label: 'VOTE', highlight: true, sub: 'Pick the Picture of the Comp' },

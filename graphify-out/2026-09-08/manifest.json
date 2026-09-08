@@ -130,8 +130,8 @@
     "semantic_hash": ""
   },
   "src/components/admin/Dashboard.jsx": {
-    "mtime": 1788804277.3367653,
-    "ast_hash": "a80ac9e505a68e98f3ad0e05da520808",
+    "mtime": 1788876943.915858,
+    "ast_hash": "bb11d7dc18d0d39dae9f489eb98760f3",
     "semantic_hash": ""
   },
   "src/components/admin/LoginScreen.jsx": {
@@ -1260,8 +1260,8 @@
     "semantic_hash": ""
   },
   "src/components/tv/TvKiosk.jsx": {
-    "mtime": 1788106195.8049192,
-    "ast_hash": "079dea3965ded33b71649ca55aeb5674",
+    "mtime": 1788862869.0886116,
+    "ast_hash": "87f0f8f6b02c318a1498489eb5cab7c0",
     "semantic_hash": ""
   },
   "src/components/tv/TvPhotoCarousel.jsx": {
@@ -1285,8 +1285,8 @@
     "semantic_hash": ""
   },
   "src/components/tv/TvRangeKiosk.jsx": {
-    "mtime": 1788168621.9616115,
-    "ast_hash": "b9e1810db11ca3e8ac1b67a7722ed3b6",
+    "mtime": 1788862891.474897,
+    "ast_hash": "c8a0c660ea3d2b1dc5b95fbd32495df7",
     "semantic_hash": ""
   },
   "src/components/tv/TvShoutoutsPanel.jsx": {
@@ -1935,8 +1935,8 @@
     "semantic_hash": ""
   },
   "src/components/admin/panels/feedback/EventFeedbackPanel.jsx": {
-    "mtime": 1787746289.8866365,
-    "ast_hash": "4ce7236cd11f61aa70027f042bd187d0",
+    "mtime": 1788876952.1267126,
+    "ast_hash": "2e1afec00ff8ef49fa9cd1710070a881",
     "semantic_hash": ""
   },
   "src/components/tv/range/PacketsDueBanner.jsx": {
@@ -1970,13 +1970,13 @@
     "semantic_hash": ""
   },
   "supabase/event_feedback.sql": {
-    "mtime": 1787746054.8382096,
-    "ast_hash": "66dc377a114d0fd52d8e17358e789bb9",
+    "mtime": 1788876978.0659702,
+    "ast_hash": "8fc3c99f65d6dfbe728bb691ce6541bf",
     "semantic_hash": ""
   },
   "supabase/functions/analyze-event-feedback/index.ts": {
-    "mtime": 1787746089.4519045,
-    "ast_hash": "bd62ce7b3cf482edb291db9c4625aaff",
+    "mtime": 1788876961.8058443,
+    "ast_hash": "016a04332b7db899e330558b1409c474",
     "semantic_hash": ""
   },
   "supabase/tv_bell_schedule_auto.sql": {
@@ -2647,6 +2647,16 @@
   "supabase/rafting_photos.sql": {
     "mtime": 1788804127.5599442,
     "ast_hash": "3aaa86c2c68756d214aac970602e3a88",
+    "semantic_hash": ""
+  },
+  "src/components/tv/TvRaftingScreen.jsx": {
+    "mtime": 1788862858.9409223,
+    "ast_hash": "347a4003e8a8072b45398db508de8404",
+    "semantic_hash": ""
+  },
+  "src/hooks/useStayAwake.js": {
+    "mtime": 1788862837.7023416,
+    "ast_hash": "72ca1434c9e86318b36239751fbbd976",
     "semantic_hash": ""
   }
 }
