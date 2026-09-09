@@ -25,8 +25,8 @@
     "semantic_hash": "c1ee9ce6a4fe04105dbf8e619390df5e"
   },
   "src/App.jsx": {
-    "mtime": 1788912593.2105463,
-    "ast_hash": "b10c8cb53ca27bd0207d23d75e0c8962",
+    "mtime": 1788946262.3720875,
+    "ast_hash": "56a46f7312851d2da82264247f9d9561",
     "semantic_hash": ""
   },
   "src/components/About.jsx": {
@@ -2677,6 +2677,16 @@
   "src/components/ball/signup/guestShape.js": {
     "mtime": 1788945305.429271,
     "ast_hash": "d860a056df7f1f830b6f41a14b258c57",
+    "semantic_hash": ""
+  },
+  "src/components/ball/BallSignupPopup.jsx": {
+    "mtime": 1788946254.652927,
+    "ast_hash": "14e713e5412efc430fcfba0fb8c302a5",
+    "semantic_hash": ""
+  },
+  "src/lib/ballSignupPopupSeen.js": {
+    "mtime": 1788946216.363677,
+    "ast_hash": "d0114fe5d062e4db7f099fa36ec45a54",
     "semantic_hash": ""
   }
 }
