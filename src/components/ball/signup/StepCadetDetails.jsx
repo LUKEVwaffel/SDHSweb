@@ -5,12 +5,14 @@ import { isSchoolEmail } from '../../../lib/schoolEmail';
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
 // Step 2 — cadet details: age, gender, a yes/no food-allergy flag, and a
-// contact method. PHONE is preferred (S-5 / ops reach the cadet fastest by
-// call/text). A personal (non-school) email works instead. AT LEAST ONE is
-// required — a cadet with neither can't finish online and signs up in person.
-// We do NOT collect allergy details on this form.
+// contact method. PHONE is REQUIRED (S-5 / ops reach the cadet fastest by
+// call/text) — UNLESS the cadet ticks "I don't have a cell phone", and then a
+// personal (non-school) email is required instead. A cadet with neither can't
+// finish online and signs up in person. We do NOT collect allergy details here.
 export default function StepCadetDetails({ cadet, value, onChange, onBack, onNext }) {
   const set = (field) => (e) => onChange({ ...value, [field]: e.target.value });
+
+  const noPhone = value.no_phone === true;
 
   const email = (value.notification_email || '').trim();
   const emailEntered = email.length > 0;
@@ -22,10 +24,16 @@ export default function StepCadetDetails({ cadet, value, onChange, onBack, onNex
   const phoneOk = phone.replace(/\D/g, '').length >= 10;
   const phoneBad = phoneEntered && !phoneOk;
 
-  const hasContact = phoneOk || emailOk;
+  // Phone required by default; when "no cell phone" is ticked, a valid personal
+  // email takes its place.
+  const contactOk = noPhone ? emailOk : phoneOk;
   const canContinue =
     value.age && Number(value.age) > 0 && value.gender && value.has_allergy !== null
-    && hasContact && !emailBad && !phoneBad;
+    && contactOk && !emailBad && !phoneBad;
+
+  function toggleNoPhone(checked) {
+    onChange({ ...value, no_phone: checked, phone: checked ? '' : value.phone });
+  }
 
   return (
     <div>
@@ -56,20 +64,30 @@ export default function StepCadetDetails({ cadet, value, onChange, onBack, onNex
         />
       </Field>
 
-      <Field label="YOUR PHONE NUMBER (preferred)">
-        <TextInput type="tel" inputMode="tel" value={value.phone || ''} onChange={set('phone')} placeholder="(423) 555-0123" />
-        <div style={{ fontFamily: mono, fontSize: 11, color: P.mute, marginTop: 6, lineHeight: 1.6 }}>
-          Your own cell — the fastest way for 1SG Kaz / Chief{value.has_allergy === true ? ' and S-5' : ''} to reach you (call or text) about payment, your field trip form{value.has_allergy === true ? ', or food options for your allergy' : ''}.
-        </div>
-        {phoneBad && (
-          <div style={{ fontFamily: mono, fontSize: 11, color: P.red, marginTop: 4 }}>Enter a full phone number (at least 10 digits).</div>
-        )}
-      </Field>
+      {!noPhone && (
+        <Field label="YOUR PHONE NUMBER (required)">
+          <TextInput type="tel" inputMode="tel" value={value.phone || ''} onChange={set('phone')} placeholder="(423) 555-0123" />
+          <div style={{ fontFamily: mono, fontSize: 11, color: P.mute, marginTop: 6, lineHeight: 1.6 }}>
+            Your own cell — the fastest way for 1SG Kaz / Chief{value.has_allergy === true ? ' and S-5' : ''} to reach you (call or text) about payment, your field trip form{value.has_allergy === true ? ', or food options for your allergy' : ''}.
+          </div>
+          {phoneBad && (
+            <div style={{ fontFamily: mono, fontSize: 11, color: P.red, marginTop: 4 }}>Enter a full phone number (at least 10 digits).</div>
+          )}
+        </Field>
+      )}
 
-      <Field label="YOUR PERSONAL (NON-SCHOOL) EMAIL">
+      <label style={{ display: 'flex', alignItems: 'flex-start', gap: 8, fontFamily: mono, fontSize: 11, color: P.mute, marginBottom: 18, cursor: 'pointer', lineHeight: 1.5 }}>
+        <input type="checkbox" checked={noPhone} onChange={(e) => toggleNoPhone(e.target.checked)} style={{ marginTop: 2 }} />
+        I don&apos;t have a cell phone — reach me by email instead.
+      </label>
+
+      <Field label={noPhone ? 'YOUR PERSONAL (NON-SCHOOL) EMAIL (required)' : 'YOUR PERSONAL (NON-SCHOOL) EMAIL'}>
         <TextInput type="email" value={value.notification_email} onChange={set('notification_email')} placeholder="you@gmail.com" />
         <div style={{ fontFamily: mono, fontSize: 11, color: P.mute, marginTop: 6, lineHeight: 1.6 }}>
-          Optional if you gave a phone number. If you add it, we email your signup confirmation and every status update here{value.has_allergy === true ? ', and S-5 can reach you about food options' : ''}. A school (@hcde.org) address will not work.
+          {noPhone
+            ? 'Required — with no phone on file, this is the only way staff can reach you. '
+            : 'Optional. '}
+          We email your signup confirmation and every status update here{value.has_allergy === true ? ', and S-5 can reach you about food options' : ''}. A school (@hcde.org) address will not work.
         </div>
         {emailBad && (
           <div style={{ fontFamily: mono, fontSize: 11, color: P.red, marginTop: 4 }}>
@@ -78,9 +96,9 @@ export default function StepCadetDetails({ cadet, value, onChange, onBack, onNex
         )}
       </Field>
 
-      {!hasContact && (phoneEntered || emailEntered || value.gender) && (
+      {noPhone && !emailOk && (emailEntered || value.gender) && (
         <div style={{ fontFamily: mono, fontSize: 11, color: P.gold, lineHeight: 1.6, marginBottom: 12 }}>
-          Give us a phone number or a personal email so the staff can reach you. No phone and no email? Sign up in person with 1SG Kaz or Chief.
+          Enter a valid personal email. No phone and no email? Sign up in person with 1SG Kaz or Chief.
         </div>
       )}
 

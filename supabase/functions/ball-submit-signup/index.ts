@@ -249,6 +249,9 @@ Deno.serve(async (req) => {
     const cadetAge = Number(body?.cadet_age);
     const cadetGender = required(body?.cadet_gender);
     const cadetPhone = required(body?.cadet_phone) || null;
+    // Phone is required for every signer UNLESS they explicitly say they have
+    // no cell phone, in which case a personal email is required instead.
+    const cadetNoPhone = body?.cadet_no_phone === true;
     const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
     // EVERY signer must give a personal, non-school email. It's the address the
@@ -276,8 +279,11 @@ Deno.serve(async (req) => {
         return json({ error: "use a personal (non-school) email — a school inbox won't receive these" }, 400);
       }
     }
-    if (!phoneOk && !notificationEmail) {
-      return json({ error: "give a phone number or a personal email so we can reach you" }, 400);
+    if (!cadetNoPhone && !phoneOk) {
+      return json({ error: "a phone number is required — or check “I don’t have a cell phone” and give a personal email instead" }, 400);
+    }
+    if (cadetNoPhone && !notificationEmail) {
+      return json({ error: "give a personal email — with no phone number there is no other way to reach you" }, 400);
     }
 
     const hasGuest = body?.guest != null;

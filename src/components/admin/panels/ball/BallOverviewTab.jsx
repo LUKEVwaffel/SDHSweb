@@ -268,6 +268,7 @@ function SignupItem({ r, guest, open, onToggle, onChanged }) {
 
           <div style={{ display: 'flex', gap: 10, alignItems: 'center', flexWrap: 'wrap' }}>
             <button className="rv-btn ghost" onClick={() => setEditing(true)}>Edit info</button>
+            {guest && <ResendGuestButton r={r} guest={guest} />}
             <DeleteButton r={r} guest={guest} onChanged={onChanged} />
           </div>
         </div>
@@ -275,6 +276,46 @@ function SignupItem({ r, guest, open, onToggle, onChanged }) {
 
       {open && editing && <EditForm r={r} guest={guest} onDone={(changed) => { setEditing(false); if (changed) onChanged(); }} />}
     </div>
+  );
+}
+
+function ResendGuestButton({ r, guest }) {
+  const [busy, setBusy] = useState(false);
+  const [msg, setMsg] = useState('');
+  const [isErr, setIsErr] = useState(false);
+
+  async function resend() {
+    if (!confirm(
+      `Re-send the guest email to ${guest.name || 'the guest'} (${guest.personal_email || 'no email on file'})?\n\n`
+      + 'It carries their existing verification link and the current field trip form. Safe to send more than once.',
+    )) return;
+    setBusy(true); setMsg(''); setIsErr(false);
+    const { data, error } = await SB.functions.invoke('ball-resend-guest-invite', { body: { signup_id: r.id } });
+    setBusy(false);
+
+    let emsg = data?.error;
+    if (!emsg && error) {
+      try { emsg = (await error.context?.json())?.error; } catch { /* body already read / not JSON */ }
+      emsg = emsg || error.message;
+    }
+    if (emsg) { setIsErr(true); setMsg(emsg); return; }
+
+    setMsg(
+      `Sent to ${data.sent_to}`
+      + (data.attached_form ? ' · field trip form attached' : '')
+      + (data.already_verified ? ' · note: guest already verified' : ''),
+    );
+  }
+
+  return (
+    <>
+      <button className="rv-btn ghost" disabled={busy || !guest.personal_email} onClick={resend}>
+        {busy ? 'Sending…' : 'Resend guest email'}
+      </button>
+      {msg && (
+        <span className={isErr ? 'rv-flash' : 'rv-sub'} style={{ fontSize: 12, margin: 0 }}>{msg}</span>
+      )}
+    </>
   );
 }
 

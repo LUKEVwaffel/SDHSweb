@@ -54,7 +54,7 @@ export default function BallSignupWizard() {
   // signer (personal, non-school) — it's the confirmation address and, when an
   // allergy is flagged, the S-5 contact too.
   const [cadetDetails, setCadetDetails] = useState(
-    draft?.cadetDetails ?? { age: '', gender: '', has_allergy: null, notification_email: '', phone: '' },
+    draft?.cadetDetails ?? { age: '', gender: '', has_allergy: null, notification_email: '', phone: '', no_phone: false },
   );
   const [guest, setGuest] = useState(draft?.guest ?? emptyGuest());
   const [submitted, setSubmitted] = useState(false);

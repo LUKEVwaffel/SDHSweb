@@ -47,6 +47,7 @@ export default function StepDocumentation({ signupToken, cadetGender, cadetDetai
       cadet_gender: cadetGender,
       cadet_has_allergy: cadetDetails.has_allergy === true,
       cadet_phone: (cadetDetails.phone || '').trim() || null,
+      cadet_no_phone: cadetDetails.no_phone === true,
       // One required personal (non-school) email for everyone — it's the
       // confirmation address and, when an allergy is flagged, the S-5 contact.
       cadet_allergy_email: cadetDetails.has_allergy === true ? (cadetDetails.notification_email || '').trim() : null,
