@@ -3,6 +3,7 @@ import { DRESS_APPROVERS, WESTON } from '../../lib/ballApprovers';
 import {
   FEMALE_AVOID, FEMALE_WEAR, MALE_AVOID, MALE_WEAR, DRESS_APPROVAL_RULES,
 } from '../../lib/ballDressCode';
+import { openBallDressCodePdf } from '../../lib/ballDressCodePdf';
 
 // Full Military Ball dress code — female + male, what to wear / what not to
 // wear, plus the approval process and approver contacts. Shared by the guest
@@ -66,8 +67,23 @@ export default function DressCodeDetails({ note, only }) {
       )}
 
       {note && (
-        <p style={{ fontFamily: mono, fontSize: 12, color: P.mute, lineHeight: 1.6, whiteSpace: 'pre-line', marginBottom: 0 }}>{note}</p>
+        <p style={{ fontFamily: mono, fontSize: 12, color: P.mute, lineHeight: 1.6, whiteSpace: 'pre-line', marginBottom: 14 }}>{note}</p>
       )}
+
+      <button
+        type="button"
+        onClick={() => openBallDressCodePdf({ only, note })}
+        style={{
+          display: 'inline-flex', alignItems: 'center', gap: 8, cursor: 'pointer',
+          background: 'transparent', border: `1px solid ${P.gold}`, color: P.gold,
+          fontFamily: mono, fontSize: 12, letterSpacing: '0.08em', padding: '10px 16px',
+        }}
+      >
+        ↓ SAVE / PRINT THIS DRESS CODE (PDF)
+      </button>
+      <div style={{ fontFamily: mono, fontSize: 11, color: P.mute, marginTop: 6, lineHeight: 1.5 }}>
+        Opens a clean one-page version — save it as a PDF and keep it on your phone while you shop.
+      </div>
     </div>
   );
 }

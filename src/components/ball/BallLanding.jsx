@@ -4,6 +4,7 @@ import { supabase as SB } from '../../lib/supabaseClient';
 import { P, mono, oswald } from '../admin/theme';
 import './ball.css';
 import { FadeUp, Skeleton } from './ballUi';
+import { openBallDressCodePdf } from '../../lib/ballDressCodePdf';
 
 // Step 0 — public landing. Ceremonial / editorial treatment: a date monolith,
 // an engraved invitation frame, a detail grid, and perforated price stubs —
@@ -136,6 +137,17 @@ export default function BallLanding() {
               <Cell label="DRESS">
                 Formal
                 <span style={cellSub}>Females: long formal dress, approved. Males: black-and-white suit or Class A. Full code on the signup form.</span>
+                <button
+                  type="button"
+                  onClick={() => openBallDressCodePdf({ note: config.dress_code_text })}
+                  style={{
+                    marginTop: 10, cursor: 'pointer', background: 'transparent',
+                    border: `1px solid ${P.gold}`, color: P.gold, fontFamily: mono,
+                    fontSize: 10, letterSpacing: '0.1em', padding: '7px 10px',
+                  }}
+                >
+                  ↓ SAVE DRESS CODE (PDF)
+                </button>
               </Cell>
               <Cell label="DEADLINE">
                 {fmtShort(deadlineDate)}
