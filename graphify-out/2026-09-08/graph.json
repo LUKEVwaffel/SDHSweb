@@ -43,8 +43,8 @@
       "source_location": "L3",
       "_origin": "ast",
       "id": "ref_react",
-      "community": 20,
-      "community_name": "Companies.jsx",
+      "community": 261,
+      "community_name": "getDeviceId",
       "norm_label": "react"
     },
     {
@@ -1228,7 +1228,7 @@
       "label": "TABS",
       "file_type": "code",
       "source_file": "src/App.jsx",
-      "source_location": "L58",
+      "source_location": "L59",
       "_origin": "ast",
       "id": "src_app_tabs",
       "community": 77,
@@ -1239,7 +1239,7 @@
       "label": "TabRoute()",
       "file_type": "code",
       "source_file": "src/App.jsx",
-      "source_location": "L69",
+      "source_location": "L70",
       "_origin": "ast",
       "id": "src_app_tabroute",
       "community": 77,
@@ -1250,7 +1250,7 @@
       "label": "App()",
       "file_type": "code",
       "source_file": "src/App.jsx",
-      "source_location": "L76",
+      "source_location": "L77",
       "_origin": "ast",
       "id": "src_app_app",
       "community": 77,
@@ -1748,8 +1748,8 @@
       "source_location": "L18",
       "_origin": "ast",
       "id": "src_components_bulletin_teaserrow",
-      "community": 272,
-      "community_name": "Messages.jsx",
+      "community": 241,
+      "community_name": "TvCongratsScreen.jsx",
       "norm_label": "teaserrow()"
     },
     {
@@ -2144,19 +2144,19 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "src_components_congratspopup",
-      "community": 273,
-      "community_name": "RaiderParentWelcome.jsx",
+      "community": 4,
+      "community_name": "ui.jsx",
       "norm_label": "congratspopup.jsx"
     },
     {
       "label": "P",
       "file_type": "code",
       "source_file": "src/components/CongratsPopup.jsx",
-      "source_location": "L7",
+      "source_location": "L6",
       "_origin": "ast",
       "id": "src_components_congratspopup_p",
-      "community": 273,
-      "community_name": "RaiderParentWelcome.jsx",
+      "community": 4,
+      "community_name": "ui.jsx",
       "norm_label": "p"
     },
     {
@@ -2166,8 +2166,8 @@
       "source_location": "L20",
       "_origin": "ast",
       "id": "src_components_congratspopup_congratspopup",
-      "community": 273,
-      "community_name": "RaiderParentWelcome.jsx",
+      "community": 4,
+      "community_name": "ui.jsx",
       "norm_label": "congratspopup()"
     },
     {
@@ -3607,7 +3607,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "src_components_raidervoting",
-      "community": 83,
+      "community": 264,
       "community_name": "RaiderPolls.jsx",
       "norm_label": "raidervoting.jsx"
     },
@@ -3618,7 +3618,7 @@
       "source_location": "L7",
       "_origin": "ast",
       "id": "src_components_raidervoting_p",
-      "community": 83,
+      "community": 264,
       "community_name": "RaiderPolls.jsx",
       "norm_label": "p"
     },
@@ -3629,7 +3629,7 @@
       "source_location": "L18",
       "_origin": "ast",
       "id": "src_components_raidervoting_cats",
-      "community": 83,
+      "community": 264,
       "community_name": "RaiderPolls.jsx",
       "norm_label": "cats"
     },
@@ -3640,7 +3640,7 @@
       "source_location": "L24",
       "_origin": "ast",
       "id": "src_components_raidervoting_fmtcountdown",
-      "community": 83,
+      "community": 264,
       "community_name": "RaiderPolls.jsx",
       "norm_label": "fmtcountdown()"
     },
@@ -3651,7 +3651,7 @@
       "source_location": "L37",
       "_origin": "ast",
       "id": "src_components_raidervoting_raidervoting",
-      "community": 83,
+      "community": 264,
       "community_name": "RaiderPolls.jsx",
       "norm_label": "raidervoting()"
     },
@@ -3662,7 +3662,7 @@
       "source_location": "L277",
       "_origin": "ast",
       "id": "src_components_raidervoting_loadingstyle",
-      "community": 83,
+      "community": 264,
       "community_name": "RaiderPolls.jsx",
       "norm_label": "loadingstyle"
     },
@@ -3673,7 +3673,7 @@
       "source_location": "L278",
       "_origin": "ast",
       "id": "src_components_raidervoting_statlabel",
-      "community": 83,
+      "community": 264,
       "community_name": "RaiderPolls.jsx",
       "norm_label": "statlabel"
     },
@@ -3684,7 +3684,7 @@
       "source_location": "L279",
       "_origin": "ast",
       "id": "src_components_raidervoting_centered",
-      "community": 83,
+      "community": 264,
       "community_name": "RaiderPolls.jsx",
       "norm_label": "centered"
     },
@@ -3695,7 +3695,7 @@
       "source_location": "L280",
       "_origin": "ast",
       "id": "src_components_raidervoting_ghostbtn",
-      "community": 83,
+      "community": 264,
       "community_name": "RaiderPolls.jsx",
       "norm_label": "ghostbtn"
     },
@@ -4256,8 +4256,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "src_components_submithub",
-      "community": 92,
-      "community_name": "MonthGridCalendar.jsx",
+      "community": 264,
+      "community_name": "RaiderPolls.jsx",
       "norm_label": "submithub.jsx"
     },
     {
@@ -4267,8 +4267,8 @@
       "source_location": "L8",
       "_origin": "ast",
       "id": "src_components_submithub_p",
-      "community": 92,
-      "community_name": "MonthGridCalendar.jsx",
+      "community": 264,
+      "community_name": "RaiderPolls.jsx",
       "norm_label": "p"
     },
     {
@@ -4278,8 +4278,8 @@
       "source_location": "L17",
       "_origin": "ast",
       "id": "src_components_submithub_submithub",
-      "community": 92,
-      "community_name": "MonthGridCalendar.jsx",
+      "community": 264,
+      "community_name": "RaiderPolls.jsx",
       "norm_label": "submithub()"
     },
     {
@@ -4289,8 +4289,8 @@
       "source_location": "L92",
       "_origin": "ast",
       "id": "src_components_submithub_backbtn",
-      "community": 92,
-      "community_name": "MonthGridCalendar.jsx",
+      "community": 264,
+      "community_name": "RaiderPolls.jsx",
       "norm_label": "backbtn"
     },
     {
@@ -4630,8 +4630,8 @@
       "source_location": "L15",
       "_origin": "ast",
       "id": "src_components_admin_loginscreen_loginscreen",
-      "community": 20,
-      "community_name": "Companies.jsx",
+      "community": 43,
+      "community_name": "Rifle.jsx",
       "norm_label": "loginscreen()"
     },
     {
@@ -5026,8 +5026,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "src_components_admin_panels_eventspanel",
-      "community": 229,
-      "community_name": "rheaComp.js",
+      "community": 0,
+      "community_name": "react",
       "norm_label": "eventspanel.jsx"
     },
     {
@@ -5037,8 +5037,8 @@
       "source_location": "L13",
       "_origin": "ast",
       "id": "src_components_admin_panels_eventspanel_category_options",
-      "community": 229,
-      "community_name": "rheaComp.js",
+      "community": 0,
+      "community_name": "react",
       "norm_label": "category_options"
     },
     {
@@ -5048,8 +5048,8 @@
       "source_location": "L18",
       "_origin": "ast",
       "id": "src_components_admin_panels_eventspanel_todatetimelocal",
-      "community": 229,
-      "community_name": "rheaComp.js",
+      "community": 0,
+      "community_name": "react",
       "norm_label": "todatetimelocal()"
     },
     {
@@ -5081,8 +5081,8 @@
       "source_location": "L49",
       "_origin": "ast",
       "id": "src_components_admin_panels_eventspanel_ascot_colors",
-      "community": 229,
-      "community_name": "rheaComp.js",
+      "community": 0,
+      "community_name": "react",
       "norm_label": "ascot_colors"
     },
     {
@@ -5092,8 +5092,8 @@
       "source_location": "L50",
       "_origin": "ast",
       "id": "src_components_admin_panels_eventspanel_glove_colors",
-      "community": 229,
-      "community_name": "rheaComp.js",
+      "community": 0,
+      "community_name": "react",
       "norm_label": "glove_colors"
     },
     {
@@ -5136,8 +5136,8 @@
       "source_location": "L1002",
       "_origin": "ast",
       "id": "src_components_admin_panels_eventspanel_cadetpicker",
-      "community": 229,
-      "community_name": "rheaComp.js",
+      "community": 0,
+      "community_name": "react",
       "norm_label": "cadetpicker()"
     },
     {
@@ -5147,8 +5147,8 @@
       "source_location": "L1057",
       "_origin": "ast",
       "id": "src_components_admin_panels_eventspanel_selectstyle",
-      "community": 229,
-      "community_name": "rheaComp.js",
+      "community": 0,
+      "community_name": "react",
       "norm_label": "selectstyle"
     },
     {
@@ -5158,8 +5158,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "src_components_admin_panels_mediapanel",
-      "community": 238,
-      "community_name": "expo",
+      "community": 41,
+      "community_name": "PhotoUploader.jsx",
       "norm_label": "mediapanel.jsx"
     },
     {
@@ -5169,8 +5169,8 @@
       "source_location": "L9",
       "_origin": "ast",
       "id": "src_components_admin_panels_mediapanel_buckets",
-      "community": 238,
-      "community_name": "expo",
+      "community": 41,
+      "community_name": "PhotoUploader.jsx",
       "norm_label": "buckets"
     },
     {
@@ -5180,8 +5180,8 @@
       "source_location": "L15",
       "_origin": "ast",
       "id": "src_components_admin_panels_mediapanel_isimage",
-      "community": 238,
-      "community_name": "expo",
+      "community": 41,
+      "community_name": "PhotoUploader.jsx",
       "norm_label": "isimage()"
     },
     {
@@ -5191,8 +5191,8 @@
       "source_location": "L16",
       "_origin": "ast",
       "id": "src_components_admin_panels_mediapanel_ispdf",
-      "community": 238,
-      "community_name": "expo",
+      "community": 41,
+      "community_name": "PhotoUploader.jsx",
       "norm_label": "ispdf()"
     },
     {
@@ -5202,8 +5202,8 @@
       "source_location": "L17",
       "_origin": "ast",
       "id": "src_components_admin_panels_mediapanel_ext",
-      "community": 238,
-      "community_name": "expo",
+      "community": 41,
+      "community_name": "PhotoUploader.jsx",
       "norm_label": "ext()"
     },
     {
@@ -5213,8 +5213,8 @@
       "source_location": "L18",
       "_origin": "ast",
       "id": "src_components_admin_panels_mediapanel_basename",
-      "community": 238,
-      "community_name": "expo",
+      "community": 41,
+      "community_name": "PhotoUploader.jsx",
       "norm_label": "basename()"
     },
     {
@@ -5224,8 +5224,8 @@
       "source_location": "L20",
       "_origin": "ast",
       "id": "src_components_admin_panels_mediapanel_confidentiality_levels",
-      "community": 238,
-      "community_name": "expo",
+      "community": 41,
+      "community_name": "PhotoUploader.jsx",
       "norm_label": "confidentiality_levels"
     },
     {
@@ -5235,8 +5235,8 @@
       "source_location": "L25",
       "_origin": "ast",
       "id": "src_components_admin_panels_mediapanel_levelinfo",
-      "community": 238,
-      "community_name": "expo",
+      "community": 41,
+      "community_name": "PhotoUploader.jsx",
       "norm_label": "levelinfo()"
     },
     {
@@ -5246,8 +5246,8 @@
       "source_location": "L27",
       "_origin": "ast",
       "id": "src_components_admin_panels_mediapanel_mediapanel",
-      "community": 238,
-      "community_name": "expo",
+      "community": 41,
+      "community_name": "PhotoUploader.jsx",
       "norm_label": "mediapanel()"
     },
     {
@@ -5257,8 +5257,8 @@
       "source_location": "L298",
       "_origin": "ast",
       "id": "src_components_admin_panels_mediapanel_minibtn",
-      "community": 238,
-      "community_name": "expo",
+      "community": 41,
+      "community_name": "PhotoUploader.jsx",
       "norm_label": "minibtn()"
     },
     {
@@ -5598,8 +5598,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "src_components_admin_panels_advanced_accountspanel",
-      "community": 0,
-      "community_name": "react",
+      "community": 20,
+      "community_name": "Companies.jsx",
       "norm_label": "accountspanel.jsx"
     },
     {
@@ -5631,8 +5631,8 @@
       "source_location": "L199",
       "_origin": "ast",
       "id": "src_components_admin_panels_advanced_accountspanel_methoddot",
-      "community": 0,
-      "community_name": "react",
+      "community": 20,
+      "community_name": "Companies.jsx",
       "norm_label": "methoddot()"
     },
     {
@@ -6104,8 +6104,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "src_components_admin_panels_ball_balldressstafftab",
-      "community": 20,
-      "community_name": "Companies.jsx",
+      "community": 238,
+      "community_name": "expo",
       "norm_label": "balldressstafftab.jsx"
     },
     {
@@ -6115,8 +6115,8 @@
       "source_location": "L16",
       "_origin": "ast",
       "id": "src_components_admin_panels_ball_balldressstafftab_role_label",
-      "community": 20,
-      "community_name": "Companies.jsx",
+      "community": 238,
+      "community_name": "expo",
       "norm_label": "role_label"
     },
     {
@@ -6126,8 +6126,8 @@
       "source_location": "L21",
       "_origin": "ast",
       "id": "src_components_admin_panels_ball_balldressstafftab_fmttime",
-      "community": 20,
-      "community_name": "Companies.jsx",
+      "community": 238,
+      "community_name": "expo",
       "norm_label": "fmttime()"
     },
     {
@@ -6137,8 +6137,8 @@
       "source_location": "L23",
       "_origin": "ast",
       "id": "src_components_admin_panels_ball_balldressstafftab_badge",
-      "community": 20,
-      "community_name": "Companies.jsx",
+      "community": 238,
+      "community_name": "expo",
       "norm_label": "badge()"
     },
     {
@@ -6148,8 +6148,8 @@
       "source_location": "L32",
       "_origin": "ast",
       "id": "src_components_admin_panels_ball_balldressstafftab_balldressstafftab",
-      "community": 20,
-      "community_name": "Companies.jsx",
+      "community": 238,
+      "community_name": "expo",
       "norm_label": "balldressstafftab()"
     },
     {
@@ -6159,8 +6159,8 @@
       "source_location": "L108",
       "_origin": "ast",
       "id": "src_components_admin_panels_ball_balldressstafftab_staffadder",
-      "community": 20,
-      "community_name": "Companies.jsx",
+      "community": 238,
+      "community_name": "expo",
       "norm_label": "staffadder()"
     },
     {
@@ -6170,8 +6170,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "src_components_admin_panels_ball_ballemailstab",
-      "community": 20,
-      "community_name": "Companies.jsx",
+      "community": 238,
+      "community_name": "expo",
       "norm_label": "ballemailstab.jsx"
     },
     {
@@ -6181,8 +6181,8 @@
       "source_location": "L16",
       "_origin": "ast",
       "id": "src_components_admin_panels_ball_ballemailstab_fields",
-      "community": 20,
-      "community_name": "Companies.jsx",
+      "community": 238,
+      "community_name": "expo",
       "norm_label": "fields"
     },
     {
@@ -6192,8 +6192,8 @@
       "source_location": "L24",
       "_origin": "ast",
       "id": "src_components_admin_panels_ball_ballemailstab_ta",
-      "community": 20,
-      "community_name": "Companies.jsx",
+      "community": 238,
+      "community_name": "expo",
       "norm_label": "ta"
     },
     {
@@ -6203,8 +6203,8 @@
       "source_location": "L29",
       "_origin": "ast",
       "id": "src_components_admin_panels_ball_ballemailstab_ballemailstab",
-      "community": 20,
-      "community_name": "Companies.jsx",
+      "community": 238,
+      "community_name": "expo",
       "norm_label": "ballemailstab()"
     },
     {
@@ -6511,8 +6511,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "src_components_admin_panels_ball_ballpanel",
-      "community": 20,
-      "community_name": "Companies.jsx",
+      "community": 238,
+      "community_name": "expo",
       "norm_label": "ballpanel.jsx"
     },
     {
@@ -6522,8 +6522,8 @@
       "source_location": "L11",
       "_origin": "ast",
       "id": "src_components_admin_panels_ball_ballpanel_tabs",
-      "community": 20,
-      "community_name": "Companies.jsx",
+      "community": 238,
+      "community_name": "expo",
       "norm_label": "tabs"
     },
     {
@@ -6533,8 +6533,8 @@
       "source_location": "L25",
       "_origin": "ast",
       "id": "src_components_admin_panels_ball_ballpanel_ballpanel",
-      "community": 20,
-      "community_name": "Companies.jsx",
+      "community": 238,
+      "community_name": "expo",
       "norm_label": "ballpanel()"
     },
     {
@@ -6544,8 +6544,8 @@
       "source_location": "L231",
       "_origin": "ast",
       "id": "src_components_admin_panels_ball_ballpanel_minibtn",
-      "community": 20,
-      "community_name": "Companies.jsx",
+      "community": 238,
+      "community_name": "expo",
       "norm_label": "minibtn"
     },
     {
@@ -6731,8 +6731,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "src_components_admin_panels_email_messages",
-      "community": 0,
-      "community_name": "react",
+      "community": 43,
+      "community_name": "Rifle.jsx",
       "norm_label": "messages.jsx"
     },
     {
@@ -6742,8 +6742,8 @@
       "source_location": "L10",
       "_origin": "ast",
       "id": "src_components_admin_panels_email_messages_status_meta",
-      "community": 0,
-      "community_name": "react",
+      "community": 43,
+      "community_name": "Rifle.jsx",
       "norm_label": "status_meta"
     },
     {
@@ -6764,8 +6764,8 @@
       "source_location": "L26",
       "_origin": "ast",
       "id": "src_components_admin_panels_email_messages_messages",
-      "community": 0,
-      "community_name": "react",
+      "community": 43,
+      "community_name": "Rifle.jsx",
       "norm_label": "messages()"
     },
     {
@@ -6852,8 +6852,8 @@
       "source_location": "L59",
       "_origin": "ast",
       "id": "src_components_admin_panels_email_builder_emailbuilder_emailbuilder",
-      "community": 0,
-      "community_name": "react",
+      "community": 43,
+      "community_name": "Rifle.jsx",
       "norm_label": "emailbuilder()"
     },
     {
@@ -7039,8 +7039,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "src_components_admin_panels_feedback_eventfeedbackpanel",
-      "community": 41,
-      "community_name": "PhotoUploader.jsx",
+      "community": 0,
+      "community_name": "react",
       "norm_label": "eventfeedbackpanel.jsx"
     },
     {
@@ -7050,8 +7050,8 @@
       "source_location": "L10",
       "_origin": "ast",
       "id": "src_components_admin_panels_feedback_eventfeedbackpanel_fun_labels",
-      "community": 41,
-      "community_name": "PhotoUploader.jsx",
+      "community": 0,
+      "community_name": "react",
       "norm_label": "fun_labels"
     },
     {
@@ -7061,8 +7061,8 @@
       "source_location": "L12",
       "_origin": "ast",
       "id": "src_components_admin_panels_feedback_eventfeedbackpanel_copylink",
-      "community": 41,
-      "community_name": "PhotoUploader.jsx",
+      "community": 0,
+      "community_name": "react",
       "norm_label": "copylink()"
     },
     {
@@ -7072,8 +7072,8 @@
       "source_location": "L20",
       "_origin": "ast",
       "id": "src_components_admin_panels_feedback_eventfeedbackpanel_analysisresult",
-      "community": 41,
-      "community_name": "PhotoUploader.jsx",
+      "community": 0,
+      "community_name": "react",
       "norm_label": "analysisresult()"
     },
     {
@@ -7083,8 +7083,8 @@
       "source_location": "L96",
       "_origin": "ast",
       "id": "src_components_admin_panels_feedback_eventfeedbackpanel_submissionrow",
-      "community": 41,
-      "community_name": "PhotoUploader.jsx",
+      "community": 0,
+      "community_name": "react",
       "norm_label": "submissionrow()"
     },
     {
@@ -7094,8 +7094,8 @@
       "source_location": "L131",
       "_origin": "ast",
       "id": "src_components_admin_panels_feedback_eventfeedbackpanel_eventfeedbackpanel",
-      "community": 41,
-      "community_name": "PhotoUploader.jsx",
+      "community": 0,
+      "community_name": "react",
       "norm_label": "eventfeedbackpanel()"
     },
     {
@@ -7127,8 +7127,8 @@
       "source_location": "L16",
       "_origin": "ast",
       "id": "src_components_admin_panels_messages_composer_composer",
-      "community": 20,
-      "community_name": "Companies.jsx",
+      "community": 73,
+      "community_name": "imageResize.js",
       "norm_label": "composer()"
     },
     {
@@ -7138,8 +7138,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "src_components_admin_panels_messages_conversationlist",
-      "community": 304,
-      "community_name": "TEAMS",
+      "community": 73,
+      "community_name": "imageResize.js",
       "norm_label": "conversationlist.jsx"
     },
     {
@@ -7149,8 +7149,8 @@
       "source_location": "L5",
       "_origin": "ast",
       "id": "src_components_admin_panels_messages_conversationlist_conversationname",
-      "community": 304,
-      "community_name": "TEAMS",
+      "community": 73,
+      "community_name": "imageResize.js",
       "norm_label": "conversationname()"
     },
     {
@@ -7160,8 +7160,8 @@
       "source_location": "L12",
       "_origin": "ast",
       "id": "src_components_admin_panels_messages_conversationlist_conversationavatar",
-      "community": 304,
-      "community_name": "TEAMS",
+      "community": 73,
+      "community_name": "imageResize.js",
       "norm_label": "conversationavatar()"
     },
     {
@@ -7171,8 +7171,8 @@
       "source_location": "L19",
       "_origin": "ast",
       "id": "src_components_admin_panels_messages_conversationlist_isotheronline",
-      "community": 304,
-      "community_name": "TEAMS",
+      "community": 73,
+      "community_name": "imageResize.js",
       "norm_label": "isotheronline()"
     },
     {
@@ -7182,8 +7182,8 @@
       "source_location": "L26",
       "_origin": "ast",
       "id": "src_components_admin_panels_messages_conversationlist_previewtext",
-      "community": 304,
-      "community_name": "TEAMS",
+      "community": 73,
+      "community_name": "imageResize.js",
       "norm_label": "previewtext()"
     },
     {
@@ -7193,8 +7193,8 @@
       "source_location": "L32",
       "_origin": "ast",
       "id": "src_components_admin_panels_messages_conversationlist_timelabel",
-      "community": 304,
-      "community_name": "TEAMS",
+      "community": 73,
+      "community_name": "imageResize.js",
       "norm_label": "timelabel()"
     },
     {
@@ -7204,8 +7204,8 @@
       "source_location": "L42",
       "_origin": "ast",
       "id": "src_components_admin_panels_messages_conversationlist_conversationlist",
-      "community": 304,
-      "community_name": "TEAMS",
+      "community": 73,
+      "community_name": "imageResize.js",
       "norm_label": "conversationlist()"
     },
     {
@@ -7215,8 +7215,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "src_components_admin_panels_messages_messagespanel",
-      "community": 20,
-      "community_name": "Companies.jsx",
+      "community": 73,
+      "community_name": "imageResize.js",
       "norm_label": "messagespanel.jsx"
     },
     {
@@ -7226,8 +7226,8 @@
       "source_location": "L24",
       "_origin": "ast",
       "id": "src_components_admin_panels_messages_messagespanel_messagespanel",
-      "community": 93,
-      "community_name": "ConversationList.jsx",
+      "community": 73,
+      "community_name": "imageResize.js",
       "norm_label": "messagespanel()"
     },
     {
@@ -7237,8 +7237,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "src_components_admin_panels_messages_newconversationmodal",
-      "community": 229,
-      "community_name": "rheaComp.js",
+      "community": 73,
+      "community_name": "imageResize.js",
       "norm_label": "newconversationmodal.jsx"
     },
     {
@@ -7248,8 +7248,8 @@
       "source_location": "L6",
       "_origin": "ast",
       "id": "src_components_admin_panels_messages_newconversationmodal_newconversationmodal",
-      "community": 20,
-      "community_name": "Companies.jsx",
+      "community": 73,
+      "community_name": "imageResize.js",
       "norm_label": "newconversationmodal()"
     },
     {
@@ -7259,8 +7259,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "src_components_admin_panels_messages_threadview",
-      "community": 20,
-      "community_name": "Companies.jsx",
+      "community": 73,
+      "community_name": "imageResize.js",
       "norm_label": "threadview.jsx"
     },
     {
@@ -7270,8 +7270,8 @@
       "source_location": "L11",
       "_origin": "ast",
       "id": "src_components_admin_panels_messages_threadview_conversationname",
-      "community": 20,
-      "community_name": "Companies.jsx",
+      "community": 73,
+      "community_name": "imageResize.js",
       "norm_label": "conversationname()"
     },
     {
@@ -7281,8 +7281,8 @@
       "source_location": "L19",
       "_origin": "ast",
       "id": "src_components_admin_panels_messages_threadview_isotheronline",
-      "community": 20,
-      "community_name": "Companies.jsx",
+      "community": 73,
+      "community_name": "imageResize.js",
       "norm_label": "isotheronline()"
     },
     {
@@ -7292,8 +7292,8 @@
       "source_location": "L26",
       "_origin": "ast",
       "id": "src_components_admin_panels_messages_threadview_timelabel",
-      "community": 20,
-      "community_name": "Companies.jsx",
+      "community": 73,
+      "community_name": "imageResize.js",
       "norm_label": "timelabel()"
     },
     {
@@ -7303,8 +7303,8 @@
       "source_location": "L30",
       "_origin": "ast",
       "id": "src_components_admin_panels_messages_threadview_threadview",
-      "community": 20,
-      "community_name": "Companies.jsx",
+      "community": 73,
+      "community_name": "imageResize.js",
       "norm_label": "threadview()"
     },
     {
@@ -7875,8 +7875,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "src_components_admin_panels_tvphotos_emergencypushpanel",
-      "community": 4,
-      "community_name": "ui.jsx",
+      "community": 304,
+      "community_name": "TEAMS",
       "norm_label": "emergencypushpanel.jsx"
     },
     {
@@ -7886,8 +7886,8 @@
       "source_location": "L7",
       "_origin": "ast",
       "id": "src_components_admin_panels_tvphotos_emergencypushpanel_text_sizes",
-      "community": 4,
-      "community_name": "ui.jsx",
+      "community": 304,
+      "community_name": "TEAMS",
       "norm_label": "text_sizes"
     },
     {
@@ -7897,8 +7897,8 @@
       "source_location": "L30",
       "_origin": "ast",
       "id": "src_components_admin_panels_tvphotos_emergencypushpanel_emergencypushpanel",
-      "community": 4,
-      "community_name": "ui.jsx",
+      "community": 43,
+      "community_name": "Rifle.jsx",
       "norm_label": "emergencypushpanel()"
     },
     {
@@ -8062,8 +8062,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "src_components_admin_panels_tvremote_tabintro",
-      "community": 4,
-      "community_name": "ui.jsx",
+      "community": 43,
+      "community_name": "Rifle.jsx",
       "norm_label": "tabintro.jsx"
     },
     {
@@ -8073,8 +8073,8 @@
       "source_location": "L7",
       "_origin": "ast",
       "id": "src_components_admin_panels_tvremote_tabintro_row",
-      "community": 4,
-      "community_name": "ui.jsx",
+      "community": 43,
+      "community_name": "Rifle.jsx",
       "norm_label": "row"
     },
     {
@@ -8084,8 +8084,8 @@
       "source_location": "L13",
       "_origin": "ast",
       "id": "src_components_admin_panels_tvremote_tabintro_tabintro",
-      "community": 4,
-      "community_name": "ui.jsx",
+      "community": 43,
+      "community_name": "Rifle.jsx",
       "norm_label": "tabintro()"
     },
     {
@@ -8095,8 +8095,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "src_components_admin_panels_tvremote_tvremoteguide",
-      "community": 4,
-      "community_name": "ui.jsx",
+      "community": 43,
+      "community_name": "Rifle.jsx",
       "norm_label": "tvremoteguide.jsx"
     },
     {
@@ -8106,8 +8106,8 @@
       "source_location": "L9",
       "_origin": "ast",
       "id": "src_components_admin_panels_tvremote_tvremoteguide_block",
-      "community": 4,
-      "community_name": "ui.jsx",
+      "community": 43,
+      "community_name": "Rifle.jsx",
       "norm_label": "block()"
     },
     {
@@ -8117,8 +8117,8 @@
       "source_location": "L28",
       "_origin": "ast",
       "id": "src_components_admin_panels_tvremote_tvremoteguide_tvremoteguide",
-      "community": 4,
-      "community_name": "ui.jsx",
+      "community": 43,
+      "community_name": "Rifle.jsx",
       "norm_label": "tvremoteguide()"
     },
     {
@@ -8128,8 +8128,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "src_components_admin_panels_tvremote_tvremotepanel",
-      "community": 4,
-      "community_name": "ui.jsx",
+      "community": 43,
+      "community_name": "Rifle.jsx",
       "norm_label": "tvremotepanel.jsx"
     },
     {
@@ -8161,8 +8161,8 @@
       "source_location": "L36",
       "_origin": "ast",
       "id": "src_components_admin_panels_tvremote_tvremotepanel_base_tabs",
-      "community": 4,
-      "community_name": "ui.jsx",
+      "community": 43,
+      "community_name": "Rifle.jsx",
       "norm_label": "base_tabs"
     },
     {
@@ -8172,8 +8172,8 @@
       "source_location": "L44",
       "_origin": "ast",
       "id": "src_components_admin_panels_tvremote_tvremotepanel_range_tab",
-      "community": 4,
-      "community_name": "ui.jsx",
+      "community": 43,
+      "community_name": "Rifle.jsx",
       "norm_label": "range_tab"
     },
     {
@@ -8183,8 +8183,8 @@
       "source_location": "L45",
       "_origin": "ast",
       "id": "src_components_admin_panels_tvremote_tvremotepanel_range_layout_tab",
-      "community": 4,
-      "community_name": "ui.jsx",
+      "community": 43,
+      "community_name": "Rifle.jsx",
       "norm_label": "range_layout_tab"
     },
     {
@@ -8194,8 +8194,8 @@
       "source_location": "L46",
       "_origin": "ast",
       "id": "src_components_admin_panels_tvremote_tvremotepanel_range_notice_tabs",
-      "community": 4,
-      "community_name": "ui.jsx",
+      "community": 43,
+      "community_name": "Rifle.jsx",
       "norm_label": "range_notice_tabs"
     },
     {
@@ -8205,8 +8205,8 @@
       "source_location": "L54",
       "_origin": "ast",
       "id": "src_components_admin_panels_tvremote_tvremotepanel_default_range_config",
-      "community": 4,
-      "community_name": "ui.jsx",
+      "community": 43,
+      "community_name": "Rifle.jsx",
       "norm_label": "default_range_config"
     },
     {
@@ -8216,8 +8216,8 @@
       "source_location": "L68",
       "_origin": "ast",
       "id": "src_components_admin_panels_tvremote_tvremotepanel_widget_mode_labels",
-      "community": 4,
-      "community_name": "ui.jsx",
+      "community": 43,
+      "community_name": "Rifle.jsx",
       "norm_label": "widget_mode_labels"
     },
     {
@@ -8282,8 +8282,8 @@
       "source_location": "L9",
       "_origin": "ast",
       "id": "src_components_admin_panels_tvremote_tvremoteupdatemodal_tvremoteupdatemodal",
-      "community": 4,
-      "community_name": "ui.jsx",
+      "community": 43,
+      "community_name": "Rifle.jsx",
       "norm_label": "tvremoteupdatemodal()"
     },
     {
@@ -8304,8 +8304,8 @@
       "source_location": "L11",
       "_origin": "ast",
       "id": "src_components_admin_panels_tvremote_tvremotewalkthrough_tvremotewalkthrough",
-      "community": 4,
-      "community_name": "ui.jsx",
+      "community": 43,
+      "community_name": "Rifle.jsx",
       "norm_label": "tvremotewalkthrough()"
     },
     {
@@ -8315,8 +8315,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "src_components_admin_panels_tvremote_tvremotehelpcontent",
-      "community": 4,
-      "community_name": "ui.jsx",
+      "community": 43,
+      "community_name": "Rifle.jsx",
       "norm_label": "tvremotehelpcontent.js"
     },
     {
@@ -8326,8 +8326,8 @@
       "source_location": "L15",
       "_origin": "ast",
       "id": "src_components_admin_panels_tvremote_tvremotehelpcontent_tab_intro",
-      "community": 4,
-      "community_name": "ui.jsx",
+      "community": 43,
+      "community_name": "Rifle.jsx",
       "norm_label": "tab_intro"
     },
     {
@@ -8337,8 +8337,8 @@
       "source_location": "L90",
       "_origin": "ast",
       "id": "src_components_admin_panels_tvremote_tvremotehelpcontent_walkthrough",
-      "community": 4,
-      "community_name": "ui.jsx",
+      "community": 43,
+      "community_name": "Rifle.jsx",
       "norm_label": "walkthrough"
     },
     {
@@ -8348,8 +8348,8 @@
       "source_location": "L168",
       "_origin": "ast",
       "id": "src_components_admin_panels_tvremote_tvremotehelpcontent_guide_sections",
-      "community": 4,
-      "community_name": "ui.jsx",
+      "community": 43,
+      "community_name": "Rifle.jsx",
       "norm_label": "guide_sections"
     },
     {
@@ -8359,8 +8359,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "src_components_admin_shared_ui",
-      "community": 229,
-      "community_name": "rheaComp.js",
+      "community": 0,
+      "community_name": "react",
       "norm_label": "ui.jsx"
     },
     {
@@ -8370,8 +8370,8 @@
       "source_location": "L8",
       "_origin": "ast",
       "id": "src_components_admin_shared_ui_btn_sizes",
-      "community": 229,
-      "community_name": "rheaComp.js",
+      "community": 0,
+      "community_name": "react",
       "norm_label": "btn_sizes"
     },
     {
@@ -8381,8 +8381,8 @@
       "source_location": "L14",
       "_origin": "ast",
       "id": "src_components_admin_shared_ui_btn_variants",
-      "community": 229,
-      "community_name": "rheaComp.js",
+      "community": 0,
+      "community_name": "react",
       "norm_label": "btn_variants"
     },
     {
@@ -8425,8 +8425,8 @@
       "source_location": "L85",
       "_origin": "ast",
       "id": "src_components_admin_shared_ui_input",
-      "community": 229,
-      "community_name": "rheaComp.js",
+      "community": 304,
+      "community_name": "TEAMS",
       "norm_label": "input()"
     },
     {
@@ -8447,8 +8447,8 @@
       "source_location": "L144",
       "_origin": "ast",
       "id": "src_components_admin_shared_ui_common_email_domains",
-      "community": 229,
-      "community_name": "rheaComp.js",
+      "community": 0,
+      "community_name": "react",
       "norm_label": "common_email_domains"
     },
     {
@@ -8480,8 +8480,8 @@
       "source_location": "L264",
       "_origin": "ast",
       "id": "src_components_admin_shared_ui_status_pill_sizes",
-      "community": 229,
-      "community_name": "rheaComp.js",
+      "community": 0,
+      "community_name": "react",
       "norm_label": "status_pill_sizes"
     },
     {
@@ -8502,8 +8502,8 @@
       "source_location": "L317",
       "_origin": "ast",
       "id": "src_components_admin_shared_ui_toast",
-      "community": 229,
-      "community_name": "rheaComp.js",
+      "community": 0,
+      "community_name": "react",
       "norm_label": "toast()"
     },
     {
@@ -8513,8 +8513,8 @@
       "source_location": "L331",
       "_origin": "ast",
       "id": "src_components_admin_shared_ui_modal",
-      "community": 229,
-      "community_name": "rheaComp.js",
+      "community": 261,
+      "community_name": "getDeviceId",
       "norm_label": "modal()"
     },
     {
@@ -8612,8 +8612,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "src_components_ball_ballguestverify",
-      "community": 202,
-      "community_name": "TvRemotePanel.jsx",
+      "community": 291,
+      "community_name": "BallGuestVerify.jsx",
       "norm_label": "ballguestverify.jsx"
     },
     {
@@ -8623,19 +8623,19 @@
       "source_location": "L15",
       "_origin": "ast",
       "id": "src_components_ball_ballguestverify_ballguestverify",
-      "community": 202,
-      "community_name": "TvRemotePanel.jsx",
+      "community": 291,
+      "community_name": "BallGuestVerify.jsx",
       "norm_label": "ballguestverify()"
     },
     {
       "label": "Field()",
       "file_type": "code",
       "source_file": "src/components/ball/BallGuestVerify.jsx",
-      "source_location": "L134",
+      "source_location": "L138",
       "_origin": "ast",
       "id": "src_components_ball_ballguestverify_field",
-      "community": 202,
-      "community_name": "TvRemotePanel.jsx",
+      "community": 291,
+      "community_name": "BallGuestVerify.jsx",
       "norm_label": "field()"
     },
     {
@@ -8645,8 +8645,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "src_components_ball_balllanding",
-      "community": 202,
-      "community_name": "TvRemotePanel.jsx",
+      "community": 86,
+      "community_name": "PhotoLightbox.jsx",
       "norm_label": "balllanding.jsx"
     },
     {
@@ -8656,8 +8656,8 @@
       "source_location": "L16",
       "_origin": "ast",
       "id": "src_components_ball_balllanding_parsedate",
-      "community": 202,
-      "community_name": "TvRemotePanel.jsx",
+      "community": 86,
+      "community_name": "PhotoLightbox.jsx",
       "norm_label": "parsedate()"
     },
     {
@@ -8667,8 +8667,8 @@
       "source_location": "L19",
       "_origin": "ast",
       "id": "src_components_ball_balllanding_fmtfull",
-      "community": 202,
-      "community_name": "TvRemotePanel.jsx",
+      "community": 86,
+      "community_name": "PhotoLightbox.jsx",
       "norm_label": "fmtfull()"
     },
     {
@@ -8678,8 +8678,8 @@
       "source_location": "L22",
       "_origin": "ast",
       "id": "src_components_ball_balllanding_fmtshort",
-      "community": 202,
-      "community_name": "TvRemotePanel.jsx",
+      "community": 86,
+      "community_name": "PhotoLightbox.jsx",
       "norm_label": "fmtshort()"
     },
     {
@@ -8689,8 +8689,8 @@
       "source_location": "L25",
       "_origin": "ast",
       "id": "src_components_ball_balllanding_money",
-      "community": 202,
-      "community_name": "TvRemotePanel.jsx",
+      "community": 86,
+      "community_name": "PhotoLightbox.jsx",
       "norm_label": "money()"
     },
     {
@@ -8700,119 +8700,163 @@
       "source_location": "L29",
       "_origin": "ast",
       "id": "src_components_ball_balllanding_balllanding",
-      "community": 202,
-      "community_name": "TvRemotePanel.jsx",
+      "community": 86,
+      "community_name": "PhotoLightbox.jsx",
       "norm_label": "balllanding()"
     },
     {
       "label": "hero",
       "file_type": "code",
       "source_file": "src/components/ball/BallLanding.jsx",
-      "source_location": "L197",
+      "source_location": "L196",
       "_origin": "ast",
       "id": "src_components_ball_balllanding_hero",
-      "community": 202,
-      "community_name": "TvRemotePanel.jsx",
+      "community": 86,
+      "community_name": "PhotoLightbox.jsx",
       "norm_label": "hero"
     },
     {
       "label": "rule",
       "file_type": "code",
       "source_file": "src/components/ball/BallLanding.jsx",
-      "source_location": "L201",
+      "source_location": "L200",
       "_origin": "ast",
       "id": "src_components_ball_balllanding_rule",
-      "community": 202,
-      "community_name": "TvRemotePanel.jsx",
+      "community": 86,
+      "community_name": "PhotoLightbox.jsx",
       "norm_label": "rule"
     },
     {
       "label": "lede",
       "file_type": "code",
       "source_file": "src/components/ball/BallLanding.jsx",
-      "source_location": "L202",
+      "source_location": "L201",
       "_origin": "ast",
       "id": "src_components_ball_balllanding_lede",
-      "community": 202,
-      "community_name": "TvRemotePanel.jsx",
+      "community": 86,
+      "community_name": "PhotoLightbox.jsx",
       "norm_label": "lede"
     },
     {
       "label": "datePlate",
       "file_type": "code",
       "source_file": "src/components/ball/BallLanding.jsx",
-      "source_location": "L203",
+      "source_location": "L202",
       "_origin": "ast",
       "id": "src_components_ball_balllanding_dateplate",
-      "community": 202,
-      "community_name": "TvRemotePanel.jsx",
+      "community": 86,
+      "community_name": "PhotoLightbox.jsx",
       "norm_label": "dateplate"
     },
     {
       "label": "deadlinePill",
       "file_type": "code",
       "source_file": "src/components/ball/BallLanding.jsx",
-      "source_location": "L206",
+      "source_location": "L205",
       "_origin": "ast",
       "id": "src_components_ball_balllanding_deadlinepill",
-      "community": 202,
-      "community_name": "TvRemotePanel.jsx",
+      "community": 86,
+      "community_name": "PhotoLightbox.jsx",
       "norm_label": "deadlinepill"
     },
     {
       "label": "grid3",
       "file_type": "code",
       "source_file": "src/components/ball/BallLanding.jsx",
-      "source_location": "L210",
+      "source_location": "L209",
       "_origin": "ast",
       "id": "src_components_ball_balllanding_grid3",
-      "community": 202,
-      "community_name": "TvRemotePanel.jsx",
+      "community": 86,
+      "community_name": "PhotoLightbox.jsx",
       "norm_label": "grid3"
     },
     {
       "label": "cellSub",
       "file_type": "code",
       "source_file": "src/components/ball/BallLanding.jsx",
-      "source_location": "L211",
+      "source_location": "L210",
       "_origin": "ast",
       "id": "src_components_ball_balllanding_cellsub",
-      "community": 202,
-      "community_name": "TvRemotePanel.jsx",
+      "community": 86,
+      "community_name": "PhotoLightbox.jsx",
       "norm_label": "cellsub"
     },
     {
       "label": "Cell()",
       "file_type": "code",
       "source_file": "src/components/ball/BallLanding.jsx",
-      "source_location": "L213",
+      "source_location": "L212",
       "_origin": "ast",
       "id": "src_components_ball_balllanding_cell",
-      "community": 202,
-      "community_name": "TvRemotePanel.jsx",
+      "community": 86,
+      "community_name": "PhotoLightbox.jsx",
       "norm_label": "cell()"
     },
     {
       "label": "Stub()",
       "file_type": "code",
       "source_file": "src/components/ball/BallLanding.jsx",
-      "source_location": "L223",
+      "source_location": "L222",
       "_origin": "ast",
       "id": "src_components_ball_balllanding_stub",
-      "community": 202,
-      "community_name": "TvRemotePanel.jsx",
+      "community": 86,
+      "community_name": "PhotoLightbox.jsx",
       "norm_label": "stub()"
     },
     {
       "label": "Corners()",
       "file_type": "code",
       "source_file": "src/components/ball/BallLanding.jsx",
-      "source_location": "L239",
+      "source_location": "L238",
       "_origin": "ast",
       "id": "src_components_ball_balllanding_corners",
-      "community": 202,
-      "community_name": "TvRemotePanel.jsx",
+      "community": 86,
+      "community_name": "PhotoLightbox.jsx",
       "norm_label": "corners()"
+    },
+    {
+      "label": "DressCodeDetails.jsx",
+      "file_type": "code",
+      "source_file": "src/components/ball/DressCodeDetails.jsx",
+      "source_location": "L1",
+      "_origin": "ast",
+      "id": "src_components_ball_dresscodedetails",
+      "community": 268,
+      "community_name": "DressCodeDetails.jsx",
+      "norm_label": "dresscodedetails.jsx"
+    },
+    {
+      "label": "List()",
+      "file_type": "code",
+      "source_file": "src/components/ball/DressCodeDetails.jsx",
+      "source_location": "L17",
+      "_origin": "ast",
+      "id": "src_components_ball_dresscodedetails_list",
+      "community": 268,
+      "community_name": "DressCodeDetails.jsx",
+      "norm_label": "list()"
+    },
+    {
+      "label": "Block()",
+      "file_type": "code",
+      "source_file": "src/components/ball/DressCodeDetails.jsx",
+      "source_location": "L30",
+      "_origin": "ast",
+      "id": "src_components_ball_dresscodedetails_block",
+      "community": 268,
+      "community_name": "DressCodeDetails.jsx",
+      "norm_label": "block()"
+    },
+    {
+      "label": "DressCodeDetails()",
+      "file_type": "code",
+      "source_file": "src/components/ball/DressCodeDetails.jsx",
+      "source_location": "L40",
+      "_origin": "ast",
+      "id": "src_components_ball_dresscodedetails_dresscodedetails",
+      "community": 291,
+      "community_name": "BallGuestVerify.jsx",
+      "norm_label": "dresscodedetails()"
     },
     {
       "label": "BallAttirePortal.jsx",
@@ -8876,8 +8920,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "src_components_ball_ballui",
-      "community": 202,
-      "community_name": "TvRemotePanel.jsx",
+      "community": 291,
+      "community_name": "BallGuestVerify.jsx",
       "norm_label": "ballui.jsx"
     },
     {
@@ -8887,8 +8931,8 @@
       "source_location": "L7",
       "_origin": "ast",
       "id": "src_components_ball_ballui_spinner",
-      "community": 202,
-      "community_name": "TvRemotePanel.jsx",
+      "community": 291,
+      "community_name": "BallGuestVerify.jsx",
       "norm_label": "spinner()"
     },
     {
@@ -8898,8 +8942,8 @@
       "source_location": "L11",
       "_origin": "ast",
       "id": "src_components_ball_ballui_skeleton",
-      "community": 202,
-      "community_name": "TvRemotePanel.jsx",
+      "community": 291,
+      "community_name": "BallGuestVerify.jsx",
       "norm_label": "skeleton()"
     },
     {
@@ -8909,8 +8953,8 @@
       "source_location": "L16",
       "_origin": "ast",
       "id": "src_components_ball_ballui_fadeup",
-      "community": 202,
-      "community_name": "TvRemotePanel.jsx",
+      "community": 291,
+      "community_name": "BallGuestVerify.jsx",
       "norm_label": "fadeup()"
     },
     {
@@ -8920,8 +8964,8 @@
       "source_location": "L26",
       "_origin": "ast",
       "id": "src_components_ball_ballui_factsskeleton",
-      "community": 202,
-      "community_name": "TvRemotePanel.jsx",
+      "community": 291,
+      "community_name": "BallGuestVerify.jsx",
       "norm_label": "factsskeleton()"
     },
     {
@@ -9063,8 +9107,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "src_components_ball_signup_ballsignupwizard",
-      "community": 202,
-      "community_name": "TvRemotePanel.jsx",
+      "community": 269,
+      "community_name": "BallSignupWizard.jsx",
       "norm_label": "ballsignupwizard.jsx"
     },
     {
@@ -9074,8 +9118,8 @@
       "source_location": "L11",
       "_origin": "ast",
       "id": "src_components_ball_signup_ballsignupwizard_step_labels",
-      "community": 202,
-      "community_name": "TvRemotePanel.jsx",
+      "community": 269,
+      "community_name": "BallSignupWizard.jsx",
       "norm_label": "step_labels"
     },
     {
@@ -9085,8 +9129,8 @@
       "source_location": "L12",
       "_origin": "ast",
       "id": "src_components_ball_signup_ballsignupwizard_step_help",
-      "community": 202,
-      "community_name": "TvRemotePanel.jsx",
+      "community": 269,
+      "community_name": "BallSignupWizard.jsx",
       "norm_label": "step_help"
     },
     {
@@ -9096,8 +9140,8 @@
       "source_location": "L19",
       "_origin": "ast",
       "id": "src_components_ball_signup_ballsignupwizard_fmtshort",
-      "community": 202,
-      "community_name": "TvRemotePanel.jsx",
+      "community": 269,
+      "community_name": "BallSignupWizard.jsx",
       "norm_label": "fmtshort()"
     },
     {
@@ -9107,8 +9151,8 @@
       "source_location": "L24",
       "_origin": "ast",
       "id": "src_components_ball_signup_ballsignupwizard_emptyguest",
-      "community": 202,
-      "community_name": "TvRemotePanel.jsx",
+      "community": 269,
+      "community_name": "BallSignupWizard.jsx",
       "norm_label": "emptyguest()"
     },
     {
@@ -9118,8 +9162,8 @@
       "source_location": "L36",
       "_origin": "ast",
       "id": "src_components_ball_signup_ballsignupwizard_ballsignupwizard",
-      "community": 202,
-      "community_name": "TvRemotePanel.jsx",
+      "community": 269,
+      "community_name": "BallSignupWizard.jsx",
       "norm_label": "ballsignupwizard()"
     },
     {
@@ -9129,8 +9173,8 @@
       "source_location": "L171",
       "_origin": "ast",
       "id": "src_components_ball_signup_ballsignupwizard_shell",
-      "community": 202,
-      "community_name": "TvRemotePanel.jsx",
+      "community": 269,
+      "community_name": "BallSignupWizard.jsx",
       "norm_label": "shell()"
     },
     {
@@ -9140,8 +9184,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "src_components_ball_signup_signupconfirmation",
-      "community": 202,
-      "community_name": "TvRemotePanel.jsx",
+      "community": 43,
+      "community_name": "Rifle.jsx",
       "norm_label": "signupconfirmation.jsx"
     },
     {
@@ -9151,8 +9195,8 @@
       "source_location": "L8",
       "_origin": "ast",
       "id": "src_components_ball_signup_signupconfirmation_money",
-      "community": 202,
-      "community_name": "TvRemotePanel.jsx",
+      "community": 269,
+      "community_name": "BallSignupWizard.jsx",
       "norm_label": "money()"
     },
     {
@@ -9162,8 +9206,8 @@
       "source_location": "L14",
       "_origin": "ast",
       "id": "src_components_ball_signup_signupconfirmation_signupconfirmation",
-      "community": 202,
-      "community_name": "TvRemotePanel.jsx",
+      "community": 269,
+      "community_name": "BallSignupWizard.jsx",
       "norm_label": "signupconfirmation()"
     },
     {
@@ -9173,8 +9217,8 @@
       "source_location": "L79",
       "_origin": "ast",
       "id": "src_components_ball_signup_signupconfirmation_para",
-      "community": 202,
-      "community_name": "TvRemotePanel.jsx",
+      "community": 43,
+      "community_name": "Rifle.jsx",
       "norm_label": "para"
     },
     {
@@ -9195,8 +9239,8 @@
       "source_location": "L12",
       "_origin": "ast",
       "id": "src_components_ball_signup_stepcadetdetails_stepcadetdetails",
-      "community": 202,
-      "community_name": "TvRemotePanel.jsx",
+      "community": 269,
+      "community_name": "BallSignupWizard.jsx",
       "norm_label": "stepcadetdetails()"
     },
     {
@@ -9228,8 +9272,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "src_components_ball_signup_stepdocumentation",
-      "community": 202,
-      "community_name": "TvRemotePanel.jsx",
+      "community": 300,
+      "community_name": "StepDocumentation.jsx",
       "norm_label": "stepdocumentation.jsx"
     },
     {
@@ -9239,8 +9283,8 @@
       "source_location": "L13",
       "_origin": "ast",
       "id": "src_components_ball_signup_stepdocumentation_money",
-      "community": 202,
-      "community_name": "TvRemotePanel.jsx",
+      "community": 300,
+      "community_name": "StepDocumentation.jsx",
       "norm_label": "money()"
     },
     {
@@ -9250,41 +9294,41 @@
       "source_location": "L17",
       "_origin": "ast",
       "id": "src_components_ball_signup_stepdocumentation_stepdocumentation",
-      "community": 202,
-      "community_name": "TvRemotePanel.jsx",
+      "community": 300,
+      "community_name": "StepDocumentation.jsx",
       "norm_label": "stepdocumentation()"
     },
     {
       "label": "p",
       "file_type": "code",
       "source_file": "src/components/ball/signup/StepDocumentation.jsx",
-      "source_location": "L168",
+      "source_location": "L156",
       "_origin": "ast",
       "id": "src_components_ball_signup_stepdocumentation_p",
-      "community": 202,
-      "community_name": "TvRemotePanel.jsx",
+      "community": 300,
+      "community_name": "StepDocumentation.jsx",
       "norm_label": "p"
     },
     {
       "label": "linkBtn",
       "file_type": "code",
       "source_file": "src/components/ball/signup/StepDocumentation.jsx",
-      "source_location": "L169",
+      "source_location": "L157",
       "_origin": "ast",
       "id": "src_components_ball_signup_stepdocumentation_linkbtn",
-      "community": 202,
-      "community_name": "TvRemotePanel.jsx",
+      "community": 300,
+      "community_name": "StepDocumentation.jsx",
       "norm_label": "linkbtn"
     },
     {
       "label": "Section()",
       "file_type": "code",
       "source_file": "src/components/ball/signup/StepDocumentation.jsx",
-      "source_location": "L171",
+      "source_location": "L159",
       "_origin": "ast",
       "id": "src_components_ball_signup_stepdocumentation_section",
-      "community": 202,
-      "community_name": "TvRemotePanel.jsx",
+      "community": 300,
+      "community_name": "StepDocumentation.jsx",
       "norm_label": "section()"
     },
     {
@@ -9302,7 +9346,7 @@
       "label": "money()",
       "file_type": "code",
       "source_file": "src/components/ball/signup/StepGuestInfo.jsx",
-      "source_location": "L26",
+      "source_location": "L29",
       "_origin": "ast",
       "id": "src_components_ball_signup_stepguestinfo_money",
       "community": 202,
@@ -9313,7 +9357,7 @@
       "label": "StepGuestInfo()",
       "file_type": "code",
       "source_file": "src/components/ball/signup/StepGuestInfo.jsx",
-      "source_location": "L30",
+      "source_location": "L33",
       "_origin": "ast",
       "id": "src_components_ball_signup_stepguestinfo_stepguestinfo",
       "community": 202,
@@ -9324,7 +9368,7 @@
       "label": "emptyGuestKeepFlag()",
       "file_type": "code",
       "source_file": "src/components/ball/signup/StepGuestInfo.jsx",
-      "source_location": "L313",
+      "source_location": "L325",
       "_origin": "ast",
       "id": "src_components_ball_signup_stepguestinfo_emptyguestkeepflag",
       "community": 202,
@@ -9536,8 +9580,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "src_components_creed_confettiburst",
-      "community": 326,
-      "community_name": "CreedLeaderboardPanel.jsx",
+      "community": 181,
+      "community_name": "TvRangeSlideshowScreen.jsx",
       "norm_label": "confettiburst.jsx"
     },
     {
@@ -9547,8 +9591,8 @@
       "source_location": "L3",
       "_origin": "ast",
       "id": "src_components_creed_confettiburst_colors",
-      "community": 326,
-      "community_name": "CreedLeaderboardPanel.jsx",
+      "community": 181,
+      "community_name": "TvRangeSlideshowScreen.jsx",
       "norm_label": "colors"
     },
     {
@@ -9558,8 +9602,8 @@
       "source_location": "L10",
       "_origin": "ast",
       "id": "src_components_creed_confettiburst_confettiburst",
-      "community": 326,
-      "community_name": "CreedLeaderboardPanel.jsx",
+      "community": 181,
+      "community_name": "TvRangeSlideshowScreen.jsx",
       "norm_label": "confettiburst()"
     },
     {
@@ -9569,8 +9613,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "src_components_creed_creedhub",
-      "community": 86,
-      "community_name": "PhotoLightbox.jsx",
+      "community": 181,
+      "community_name": "TvRangeSlideshowScreen.jsx",
       "norm_label": "creedhub.jsx"
     },
     {
@@ -9580,8 +9624,8 @@
       "source_location": "L12",
       "_origin": "ast",
       "id": "src_components_creed_creedhub_games",
-      "community": 86,
-      "community_name": "PhotoLightbox.jsx",
+      "community": 181,
+      "community_name": "TvRangeSlideshowScreen.jsx",
       "norm_label": "games"
     },
     {
@@ -9591,8 +9635,8 @@
       "source_location": "L35",
       "_origin": "ast",
       "id": "src_components_creed_creedhub_creedhub",
-      "community": 86,
-      "community_name": "PhotoLightbox.jsx",
+      "community": 181,
+      "community_name": "TvRangeSlideshowScreen.jsx",
       "norm_label": "creedhub()"
     },
     {
@@ -9602,8 +9646,8 @@
       "source_location": "L121",
       "_origin": "ast",
       "id": "src_components_creed_creedhub_creedreference",
-      "community": 86,
-      "community_name": "PhotoLightbox.jsx",
+      "community": 181,
+      "community_name": "TvRangeSlideshowScreen.jsx",
       "norm_label": "creedreference()"
     },
     {
@@ -9613,8 +9657,8 @@
       "source_location": "L150",
       "_origin": "ast",
       "id": "src_components_creed_creedhub_gamecard",
-      "community": 86,
-      "community_name": "PhotoLightbox.jsx",
+      "community": 181,
+      "community_name": "TvRangeSlideshowScreen.jsx",
       "norm_label": "gamecard()"
     },
     {
@@ -9624,8 +9668,8 @@
       "source_location": "L177",
       "_origin": "ast",
       "id": "src_components_creed_creedhub_masterybadge",
-      "community": 86,
-      "community_name": "PhotoLightbox.jsx",
+      "community": 181,
+      "community_name": "TvRangeSlideshowScreen.jsx",
       "norm_label": "masterybadge()"
     },
     {
@@ -9635,8 +9679,8 @@
       "source_location": "L187",
       "_origin": "ast",
       "id": "src_components_creed_creedhub_recordline",
-      "community": 86,
-      "community_name": "PhotoLightbox.jsx",
+      "community": 181,
+      "community_name": "TvRangeSlideshowScreen.jsx",
       "norm_label": "recordline()"
     },
     {
@@ -9646,8 +9690,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "src_components_creed_creedleaderboardpanel",
-      "community": 326,
-      "community_name": "CreedLeaderboardPanel.jsx",
+      "community": 181,
+      "community_name": "TvRangeSlideshowScreen.jsx",
       "norm_label": "creedleaderboardpanel.jsx"
     },
     {
@@ -9657,8 +9701,8 @@
       "source_location": "L12",
       "_origin": "ast",
       "id": "src_components_creed_creedleaderboardpanel_agefrombirthdate",
-      "community": 326,
-      "community_name": "CreedLeaderboardPanel.jsx",
+      "community": 181,
+      "community_name": "TvRangeSlideshowScreen.jsx",
       "norm_label": "agefrombirthdate()"
     },
     {
@@ -9668,8 +9712,8 @@
       "source_location": "L26",
       "_origin": "ast",
       "id": "src_components_creed_creedleaderboardpanel_perfectscorepanel",
-      "community": 326,
-      "community_name": "CreedLeaderboardPanel.jsx",
+      "community": 181,
+      "community_name": "TvRangeSlideshowScreen.jsx",
       "norm_label": "perfectscorepanel()"
     },
     {
@@ -9679,8 +9723,8 @@
       "source_location": "L146",
       "_origin": "ast",
       "id": "src_components_creed_creedleaderboardpanel_creedleaderboardboard",
-      "community": 326,
-      "community_name": "CreedLeaderboardPanel.jsx",
+      "community": 181,
+      "community_name": "TvRangeSlideshowScreen.jsx",
       "norm_label": "creedleaderboardboard()"
     },
     {
@@ -9811,8 +9855,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "src_components_creed_recallgame",
-      "community": 314,
-      "community_name": "useTvRemoteOnboarding.js",
+      "community": 181,
+      "community_name": "TvRangeSlideshowScreen.jsx",
       "norm_label": "recallgame.jsx"
     },
     {
@@ -9822,8 +9866,8 @@
       "source_location": "L10",
       "_origin": "ast",
       "id": "src_components_creed_recallgame_cleanmatch",
-      "community": 314,
-      "community_name": "useTvRemoteOnboarding.js",
+      "community": 181,
+      "community_name": "TvRangeSlideshowScreen.jsx",
       "norm_label": "cleanmatch()"
     },
     {
@@ -9833,8 +9877,8 @@
       "source_location": "L14",
       "_origin": "ast",
       "id": "src_components_creed_recallgame_hintfor",
-      "community": 314,
-      "community_name": "useTvRemoteOnboarding.js",
+      "community": 181,
+      "community_name": "TvRangeSlideshowScreen.jsx",
       "norm_label": "hintfor()"
     },
     {
@@ -9844,8 +9888,8 @@
       "source_location": "L19",
       "_origin": "ast",
       "id": "src_components_creed_recallgame_recallgame",
-      "community": 314,
-      "community_name": "useTvRemoteOnboarding.js",
+      "community": 181,
+      "community_name": "TvRangeSlideshowScreen.jsx",
       "norm_label": "recallgame()"
     },
     {
@@ -9943,8 +9987,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "src_components_creed_speedgame",
-      "community": 314,
-      "community_name": "useTvRemoteOnboarding.js",
+      "community": 181,
+      "community_name": "TvRangeSlideshowScreen.jsx",
       "norm_label": "speedgame.jsx"
     },
     {
@@ -9954,8 +9998,8 @@
       "source_location": "L8",
       "_origin": "ast",
       "id": "src_components_creed_speedgame_cleanmatch",
-      "community": 314,
-      "community_name": "useTvRemoteOnboarding.js",
+      "community": 181,
+      "community_name": "TvRangeSlideshowScreen.jsx",
       "norm_label": "cleanmatch()"
     },
     {
@@ -9965,8 +10009,8 @@
       "source_location": "L12",
       "_origin": "ast",
       "id": "src_components_creed_speedgame_speedgame",
-      "community": 314,
-      "community_name": "useTvRemoteOnboarding.js",
+      "community": 181,
+      "community_name": "TvRangeSlideshowScreen.jsx",
       "norm_label": "speedgame()"
     },
     {
@@ -10097,8 +10141,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "src_components_raiders_compgallery",
-      "community": 12,
-      "community_name": "blocks.js",
+      "community": 239,
+      "community_name": "expo-application",
       "norm_label": "compgallery.jsx"
     },
     {
@@ -10108,8 +10152,8 @@
       "source_location": "L11",
       "_origin": "ast",
       "id": "src_components_raiders_compgallery_p",
-      "community": 12,
-      "community_name": "blocks.js",
+      "community": 239,
+      "community_name": "expo-application",
       "norm_label": "p"
     },
     {
@@ -10119,8 +10163,8 @@
       "source_location": "L25",
       "_origin": "ast",
       "id": "src_components_raiders_compgallery_brackets",
-      "community": 12,
-      "community_name": "blocks.js",
+      "community": 239,
+      "community_name": "expo-application",
       "norm_label": "brackets()"
     },
     {
@@ -10130,8 +10174,8 @@
       "source_location": "L42",
       "_origin": "ast",
       "id": "src_components_raiders_compgallery_lightbox",
-      "community": 12,
-      "community_name": "blocks.js",
+      "community": 239,
+      "community_name": "expo-application",
       "norm_label": "lightbox()"
     },
     {
@@ -10141,8 +10185,8 @@
       "source_location": "L113",
       "_origin": "ast",
       "id": "src_components_raiders_compgallery_navarrow",
-      "community": 12,
-      "community_name": "blocks.js",
+      "community": 239,
+      "community_name": "expo-application",
       "norm_label": "navarrow()"
     },
     {
@@ -10152,8 +10196,8 @@
       "source_location": "L122",
       "_origin": "ast",
       "id": "src_components_raiders_compgallery_photogrid",
-      "community": 12,
-      "community_name": "blocks.js",
+      "community": 239,
+      "community_name": "expo-application",
       "norm_label": "photogrid()"
     },
     {
@@ -10163,8 +10207,8 @@
       "source_location": "L148",
       "_origin": "ast",
       "id": "src_components_raiders_compgallery_comingsoon",
-      "community": 12,
-      "community_name": "blocks.js",
+      "community": 239,
+      "community_name": "expo-application",
       "norm_label": "comingsoon()"
     },
     {
@@ -10174,8 +10218,8 @@
       "source_location": "L170",
       "_origin": "ast",
       "id": "src_components_raiders_compgallery_topnotice",
-      "community": 12,
-      "community_name": "blocks.js",
+      "community": 239,
+      "community_name": "expo-application",
       "norm_label": "topnotice()"
     },
     {
@@ -10185,8 +10229,8 @@
       "source_location": "L186",
       "_origin": "ast",
       "id": "src_components_raiders_compgallery_eventcard",
-      "community": 12,
-      "community_name": "blocks.js",
+      "community": 239,
+      "community_name": "expo-application",
       "norm_label": "eventcard()"
     },
     {
@@ -10196,8 +10240,8 @@
       "source_location": "L241",
       "_origin": "ast",
       "id": "src_components_raiders_compgallery_eventdetail",
-      "community": 12,
-      "community_name": "blocks.js",
+      "community": 239,
+      "community_name": "expo-application",
       "norm_label": "eventdetail()"
     },
     {
@@ -10207,8 +10251,8 @@
       "source_location": "L277",
       "_origin": "ast",
       "id": "src_components_raiders_compgallery_sectionrule",
-      "community": 12,
-      "community_name": "blocks.js",
+      "community": 239,
+      "community_name": "expo-application",
       "norm_label": "sectionrule()"
     },
     {
@@ -10218,8 +10262,8 @@
       "source_location": "L286",
       "_origin": "ast",
       "id": "src_components_raiders_compgallery_backbtn",
-      "community": 12,
-      "community_name": "blocks.js",
+      "community": 239,
+      "community_name": "expo-application",
       "norm_label": "backbtn"
     },
     {
@@ -10339,8 +10383,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "src_components_raidertv_raidertv",
-      "community": 20,
-      "community_name": "Companies.jsx",
+      "community": 44,
+      "community_name": "imageResize.js",
       "norm_label": "raidertv.jsx"
     },
     {
@@ -10372,8 +10416,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "src_components_raidertv_useqrdataurl",
-      "community": 20,
-      "community_name": "Companies.jsx",
+      "community": 44,
+      "community_name": "imageResize.js",
       "norm_label": "useqrdataurl.js"
     },
     {
@@ -10383,8 +10427,8 @@
       "source_location": "L6",
       "_origin": "ast",
       "id": "src_components_raidertv_useqrdataurl_useqrdataurl",
-      "community": 20,
-      "community_name": "Companies.jsx",
+      "community": 44,
+      "community_name": "imageResize.js",
       "norm_label": "useqrdataurl()"
     },
     {
@@ -10647,8 +10691,8 @@
       "source_location": "L26",
       "_origin": "ast",
       "id": "src_components_rhea_lukepwa_lukepwaroute",
-      "community": 264,
-      "community_name": "RaiderPolls.jsx",
+      "community": 250,
+      "community_name": "FaqSection.jsx",
       "norm_label": "lukepwaroute()"
     },
     {
@@ -10691,8 +10735,8 @@
       "source_location": "L432",
       "_origin": "ast",
       "id": "src_components_rhea_lukepwa_installstrip",
-      "community": 73,
-      "community_name": "imageResize.js",
+      "community": 250,
+      "community_name": "FaqSection.jsx",
       "norm_label": "installstrip()"
     },
     {
@@ -11032,8 +11076,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "src_components_rhea_rheaonboarding",
-      "community": 73,
-      "community_name": "imageResize.js",
+      "community": 250,
+      "community_name": "FaqSection.jsx",
       "norm_label": "rheaonboarding.jsx"
     },
     {
@@ -11043,8 +11087,8 @@
       "source_location": "L8",
       "_origin": "ast",
       "id": "src_components_rhea_rheaonboarding_haptic",
-      "community": 73,
-      "community_name": "imageResize.js",
+      "community": 250,
+      "community_name": "FaqSection.jsx",
       "norm_label": "haptic()"
     },
     {
@@ -11054,8 +11098,8 @@
       "source_location": "L15",
       "_origin": "ast",
       "id": "src_components_rhea_rheaonboarding_sequence",
-      "community": 73,
-      "community_name": "imageResize.js",
+      "community": 250,
+      "community_name": "FaqSection.jsx",
       "norm_label": "sequence()"
     },
     {
@@ -11065,8 +11109,8 @@
       "source_location": "L22",
       "_origin": "ast",
       "id": "src_components_rhea_rheaonboarding_dotstepsof",
-      "community": 73,
-      "community_name": "imageResize.js",
+      "community": 250,
+      "community_name": "FaqSection.jsx",
       "norm_label": "dotstepsof()"
     },
     {
@@ -11076,8 +11120,8 @@
       "source_location": "L24",
       "_origin": "ast",
       "id": "src_components_rhea_rheaonboarding_flavor",
-      "community": 73,
-      "community_name": "imageResize.js",
+      "community": 250,
+      "community_name": "FaqSection.jsx",
       "norm_label": "flavor()"
     },
     {
@@ -11087,8 +11131,8 @@
       "source_location": "L51",
       "_origin": "ast",
       "id": "src_components_rhea_rheaonboarding_rheaonboarding",
-      "community": 73,
-      "community_name": "imageResize.js",
+      "community": 250,
+      "community_name": "FaqSection.jsx",
       "norm_label": "rheaonboarding()"
     },
     {
@@ -11098,8 +11142,8 @@
       "source_location": "L344",
       "_origin": "ast",
       "id": "src_components_rhea_rheaonboarding_choice",
-      "community": 73,
-      "community_name": "imageResize.js",
+      "community": 250,
+      "community_name": "FaqSection.jsx",
       "norm_label": "choice()"
     },
     {
@@ -11109,8 +11153,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "src_components_rhea_pwa",
-      "community": 264,
-      "community_name": "RaiderPolls.jsx",
+      "community": 250,
+      "community_name": "FaqSection.jsx",
       "norm_label": "pwa.js"
     },
     {
@@ -11120,8 +11164,8 @@
       "source_location": "L10",
       "_origin": "ast",
       "id": "src_components_rhea_pwa_headtags",
-      "community": 264,
-      "community_name": "RaiderPolls.jsx",
+      "community": 250,
+      "community_name": "FaqSection.jsx",
       "norm_label": "headtags()"
     },
     {
@@ -11131,8 +11175,8 @@
       "source_location": "L23",
       "_origin": "ast",
       "id": "src_components_rhea_pwa_registerpwa",
-      "community": 264,
-      "community_name": "RaiderPolls.jsx",
+      "community": 250,
+      "community_name": "FaqSection.jsx",
       "norm_label": "registerpwa()"
     },
     {
@@ -11142,8 +11186,8 @@
       "source_location": "L46",
       "_origin": "ast",
       "id": "src_components_rhea_pwa_installpwahooks",
-      "community": 264,
-      "community_name": "RaiderPolls.jsx",
+      "community": 250,
+      "community_name": "FaqSection.jsx",
       "norm_label": "installpwahooks()"
     },
     {
@@ -11153,8 +11197,8 @@
       "source_location": "L57",
       "_origin": "ast",
       "id": "src_components_rhea_pwa_installrheapwahooks",
-      "community": 264,
-      "community_name": "RaiderPolls.jsx",
+      "community": 250,
+      "community_name": "FaqSection.jsx",
       "norm_label": "installrheapwahooks()"
     },
     {
@@ -11175,8 +11219,8 @@
       "source_location": "L75",
       "_origin": "ast",
       "id": "src_components_rhea_pwa_isios",
-      "community": 73,
-      "community_name": "imageResize.js",
+      "community": 250,
+      "community_name": "FaqSection.jsx",
       "norm_label": "isios()"
     },
     {
@@ -11186,8 +11230,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "src_components_rhea_usepwaupdate",
-      "community": 250,
-      "community_name": "FaqSection.jsx",
+      "community": 252,
+      "community_name": "TvRangeKiosk.jsx",
       "norm_label": "usepwaupdate.jsx"
     },
     {
@@ -11197,8 +11241,8 @@
       "source_location": "L16",
       "_origin": "ast",
       "id": "src_components_rhea_usepwaupdate_usepwaupdate",
-      "community": 250,
-      "community_name": "FaqSection.jsx",
+      "community": 252,
+      "community_name": "TvRangeKiosk.jsx",
       "norm_label": "usepwaupdate()"
     },
     {
@@ -11208,8 +11252,8 @@
       "source_location": "L63",
       "_origin": "ast",
       "id": "src_components_rhea_usepwaupdate_pwaupdatebar",
-      "community": 250,
-      "community_name": "FaqSection.jsx",
+      "community": 252,
+      "community_name": "TvRangeKiosk.jsx",
       "norm_label": "pwaupdatebar()"
     },
     {
@@ -11373,7 +11417,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "src_components_team_teampagemobile",
-      "community": 197,
+      "community": 10,
       "community_name": "emailRender.js",
       "norm_label": "teampagemobile.jsx"
     },
@@ -11384,7 +11428,7 @@
       "source_location": "L5",
       "_origin": "ast",
       "id": "src_components_team_teampagemobile_p",
-      "community": 197,
+      "community": 10,
       "community_name": "emailRender.js",
       "norm_label": "p"
     },
@@ -11406,8 +11450,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "src_components_tv_raiderparentwelcome",
-      "community": 239,
-      "community_name": "expo-application",
+      "community": 20,
+      "community_name": "Companies.jsx",
       "norm_label": "raiderparentwelcome.jsx"
     },
     {
@@ -11417,8 +11461,8 @@
       "source_location": "L18",
       "_origin": "ast",
       "id": "src_components_tv_raiderparentwelcome_useqrdataurl",
-      "community": 239,
-      "community_name": "expo-application",
+      "community": 77,
+      "community_name": "PeoplePanel.jsx",
       "norm_label": "useqrdataurl()"
     },
     {
@@ -11428,8 +11472,8 @@
       "source_location": "L34",
       "_origin": "ast",
       "id": "src_components_tv_raiderparentwelcome_useclock",
-      "community": 239,
-      "community_name": "expo-application",
+      "community": 77,
+      "community_name": "PeoplePanel.jsx",
       "norm_label": "useclock()"
     },
     {
@@ -11439,8 +11483,8 @@
       "source_location": "L43",
       "_origin": "ast",
       "id": "src_components_tv_raiderparentwelcome_initials",
-      "community": 239,
-      "community_name": "expo-application",
+      "community": 20,
+      "community_name": "Companies.jsx",
       "norm_label": "initials()"
     },
     {
@@ -11450,8 +11494,8 @@
       "source_location": "L47",
       "_origin": "ast",
       "id": "src_components_tv_raiderparentwelcome_qrcard",
-      "community": 239,
-      "community_name": "expo-application",
+      "community": 20,
+      "community_name": "Companies.jsx",
       "norm_label": "qrcard()"
     },
     {
@@ -11461,8 +11505,8 @@
       "source_location": "L70",
       "_origin": "ast",
       "id": "src_components_tv_raiderparentwelcome_commandercard",
-      "community": 239,
-      "community_name": "expo-application",
+      "community": 20,
+      "community_name": "Companies.jsx",
       "norm_label": "commandercard()"
     },
     {
@@ -11472,8 +11516,8 @@
       "source_location": "L103",
       "_origin": "ast",
       "id": "src_components_tv_raiderparentwelcome_raiderparentwelcome",
-      "community": 239,
-      "community_name": "expo-application",
+      "community": 77,
+      "community_name": "PeoplePanel.jsx",
       "norm_label": "raiderparentwelcome()"
     },
     {
@@ -11615,8 +11659,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "src_components_tv_tvcongratsscreen",
-      "community": 273,
-      "community_name": "RaiderParentWelcome.jsx",
+      "community": 4,
+      "community_name": "ui.jsx",
       "norm_label": "tvcongratsscreen.jsx"
     },
     {
@@ -11626,8 +11670,8 @@
       "source_location": "L13",
       "_origin": "ast",
       "id": "src_components_tv_tvcongratsscreen_tier_badge",
-      "community": 273,
-      "community_name": "RaiderParentWelcome.jsx",
+      "community": 4,
+      "community_name": "ui.jsx",
       "norm_label": "tier_badge"
     },
     {
@@ -11637,8 +11681,8 @@
       "source_location": "L19",
       "_origin": "ast",
       "id": "src_components_tv_tvcongratsscreen_congratsstyles",
-      "community": 273,
-      "community_name": "RaiderParentWelcome.jsx",
+      "community": 4,
+      "community_name": "ui.jsx",
       "norm_label": "congratsstyles()"
     },
     {
@@ -11648,8 +11692,8 @@
       "source_location": "L34",
       "_origin": "ast",
       "id": "src_components_tv_tvcongratsscreen_placementbadge",
-      "community": 273,
-      "community_name": "RaiderParentWelcome.jsx",
+      "community": 4,
+      "community_name": "ui.jsx",
       "norm_label": "placementbadge()"
     },
     {
@@ -11659,8 +11703,8 @@
       "source_location": "L50",
       "_origin": "ast",
       "id": "src_components_tv_tvcongratsscreen_trophyrow",
-      "community": 273,
-      "community_name": "RaiderParentWelcome.jsx",
+      "community": 4,
+      "community_name": "ui.jsx",
       "norm_label": "trophyrow()"
     },
     {
@@ -11670,8 +11714,8 @@
       "source_location": "L79",
       "_origin": "ast",
       "id": "src_components_tv_tvcongratsscreen_tvcongratsscreen",
-      "community": 273,
-      "community_name": "RaiderParentWelcome.jsx",
+      "community": 4,
+      "community_name": "ui.jsx",
       "norm_label": "tvcongratsscreen()"
     },
     {
@@ -11681,8 +11725,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "src_components_tv_tvcountdownband",
-      "community": 299,
-      "community_name": "RaiderParentWelcome.jsx",
+      "community": 10,
+      "community_name": "emailRender.js",
       "norm_label": "tvcountdownband.jsx"
     },
     {
@@ -11692,8 +11736,8 @@
       "source_location": "L9",
       "_origin": "ast",
       "id": "src_components_tv_tvcountdownband_targetdate",
-      "community": 299,
-      "community_name": "RaiderParentWelcome.jsx",
+      "community": 10,
+      "community_name": "emailRender.js",
       "norm_label": "targetdate()"
     },
     {
@@ -11703,8 +11747,8 @@
       "source_location": "L13",
       "_origin": "ast",
       "id": "src_components_tv_tvcountdownband_segment",
-      "community": 299,
-      "community_name": "RaiderParentWelcome.jsx",
+      "community": 10,
+      "community_name": "emailRender.js",
       "norm_label": "segment()"
     },
     {
@@ -11714,8 +11758,8 @@
       "source_location": "L29",
       "_origin": "ast",
       "id": "src_components_tv_tvcountdownband_colon",
-      "community": 299,
-      "community_name": "RaiderParentWelcome.jsx",
+      "community": 10,
+      "community_name": "emailRender.js",
       "norm_label": "colon()"
     },
     {
@@ -11725,8 +11769,8 @@
       "source_location": "L45",
       "_origin": "ast",
       "id": "src_components_tv_tvcountdownband_tvcountdownband",
-      "community": 299,
-      "community_name": "RaiderParentWelcome.jsx",
+      "community": 10,
+      "community_name": "emailRender.js",
       "norm_label": "tvcountdownband()"
     },
     {
@@ -11758,8 +11802,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "src_components_tv_tvemergencyoverlay",
-      "community": 321,
-      "community_name": "TvHistoryPanel.jsx",
+      "community": 267,
+      "community_name": "RecallGame",
       "norm_label": "tvemergencyoverlay.jsx"
     },
     {
@@ -11769,8 +11813,8 @@
       "source_location": "L3",
       "_origin": "ast",
       "id": "src_components_tv_tvemergencyoverlay_text_size",
-      "community": 321,
-      "community_name": "TvHistoryPanel.jsx",
+      "community": 267,
+      "community_name": "RecallGame",
       "norm_label": "text_size"
     },
     {
@@ -11780,8 +11824,8 @@
       "source_location": "L19",
       "_origin": "ast",
       "id": "src_components_tv_tvemergencyoverlay_tvemergencyoverlay",
-      "community": 321,
-      "community_name": "TvHistoryPanel.jsx",
+      "community": 267,
+      "community_name": "RecallGame",
       "norm_label": "tvemergencyoverlay()"
     },
     {
@@ -11846,8 +11890,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "src_components_tv_tvinstrumentdivider",
-      "community": 321,
-      "community_name": "TvHistoryPanel.jsx",
+      "community": 267,
+      "community_name": "RecallGame",
       "norm_label": "tvinstrumentdivider.jsx"
     },
     {
@@ -11857,8 +11901,8 @@
       "source_location": "L9",
       "_origin": "ast",
       "id": "src_components_tv_tvinstrumentdivider_tvinstrumentdivider",
-      "community": 321,
-      "community_name": "TvHistoryPanel.jsx",
+      "community": 267,
+      "community_name": "RecallGame",
       "norm_label": "tvinstrumentdivider()"
     },
     {
@@ -11890,8 +11934,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "src_components_tv_tvphotocarousel",
-      "community": 321,
-      "community_name": "TvHistoryPanel.jsx",
+      "community": 267,
+      "community_name": "RecallGame",
       "norm_label": "tvphotocarousel.jsx"
     },
     {
@@ -11901,8 +11945,8 @@
       "source_location": "L9",
       "_origin": "ast",
       "id": "src_components_tv_tvphotocarousel_carouselstyles",
-      "community": 321,
-      "community_name": "TvHistoryPanel.jsx",
+      "community": 267,
+      "community_name": "RecallGame",
       "norm_label": "carouselstyles()"
     },
     {
@@ -11912,8 +11956,8 @@
       "source_location": "L23",
       "_origin": "ast",
       "id": "src_components_tv_tvphotocarousel_slideimage",
-      "community": 321,
-      "community_name": "TvHistoryPanel.jsx",
+      "community": 267,
+      "community_name": "RecallGame",
       "norm_label": "slideimage()"
     },
     {
@@ -11923,8 +11967,8 @@
       "source_location": "L68",
       "_origin": "ast",
       "id": "src_components_tv_tvphotocarousel_tvphotocarousel",
-      "community": 321,
-      "community_name": "TvHistoryPanel.jsx",
+      "community": 267,
+      "community_name": "RecallGame",
       "norm_label": "tvphotocarousel()"
     },
     {
@@ -12066,8 +12110,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "src_components_tv_tvrefreshnotice",
-      "community": 43,
-      "community_name": "Rifle.jsx",
+      "community": 44,
+      "community_name": "imageResize.js",
       "norm_label": "tvrefreshnotice.jsx"
     },
     {
@@ -12077,8 +12121,8 @@
       "source_location": "L9",
       "_origin": "ast",
       "id": "src_components_tv_tvrefreshnotice_tvrefreshnotice",
-      "community": 20,
-      "community_name": "Companies.jsx",
+      "community": 44,
+      "community_name": "imageResize.js",
       "norm_label": "tvrefreshnotice()"
     },
     {
@@ -12088,8 +12132,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "src_components_tv_tvshoutoutspanel",
-      "community": 43,
-      "community_name": "Rifle.jsx",
+      "community": 267,
+      "community_name": "RecallGame",
       "norm_label": "tvshoutoutspanel.jsx"
     },
     {
@@ -12099,8 +12143,8 @@
       "source_location": "L17",
       "_origin": "ast",
       "id": "src_components_tv_tvshoutoutspanel_isstale",
-      "community": 321,
-      "community_name": "TvHistoryPanel.jsx",
+      "community": 267,
+      "community_name": "RecallGame",
       "norm_label": "isstale()"
     },
     {
@@ -12110,8 +12154,8 @@
       "source_location": "L22",
       "_origin": "ast",
       "id": "src_components_tv_tvshoutoutspanel_panelstyles",
-      "community": 43,
-      "community_name": "Rifle.jsx",
+      "community": 267,
+      "community_name": "RecallGame",
       "norm_label": "panelstyles()"
     },
     {
@@ -12121,8 +12165,8 @@
       "source_location": "L32",
       "_origin": "ast",
       "id": "src_components_tv_tvshoutoutspanel_rotationdots",
-      "community": 43,
-      "community_name": "Rifle.jsx",
+      "community": 267,
+      "community_name": "RecallGame",
       "norm_label": "rotationdots()"
     },
     {
@@ -12132,8 +12176,8 @@
       "source_location": "L56",
       "_origin": "ast",
       "id": "src_components_tv_tvshoutoutspanel_tvshoutoutspanel",
-      "community": 321,
-      "community_name": "TvHistoryPanel.jsx",
+      "community": 267,
+      "community_name": "RecallGame",
       "norm_label": "tvshoutoutspanel()"
     },
     {
@@ -12143,8 +12187,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "src_components_tv_tvstandardlayout",
-      "community": 321,
-      "community_name": "TvHistoryPanel.jsx",
+      "community": 267,
+      "community_name": "RecallGame",
       "norm_label": "tvstandardlayout.jsx"
     },
     {
@@ -12154,8 +12198,8 @@
       "source_location": "L35",
       "_origin": "ast",
       "id": "src_components_tv_tvstandardlayout_tvstandardlayout",
-      "community": 321,
-      "community_name": "TvHistoryPanel.jsx",
+      "community": 267,
+      "community_name": "RecallGame",
       "norm_label": "tvstandardlayout()"
     },
     {
@@ -12242,8 +12286,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "src_components_tv_tvweatherpanel",
-      "community": 321,
-      "community_name": "TvHistoryPanel.jsx",
+      "community": 267,
+      "community_name": "RecallGame",
       "norm_label": "tvweatherpanel.jsx"
     },
     {
@@ -12253,8 +12297,8 @@
       "source_location": "L4",
       "_origin": "ast",
       "id": "src_components_tv_tvweatherpanel_hourlabel",
-      "community": 321,
-      "community_name": "TvHistoryPanel.jsx",
+      "community": 267,
+      "community_name": "RecallGame",
       "norm_label": "hourlabel()"
     },
     {
@@ -12264,8 +12308,8 @@
       "source_location": "L13",
       "_origin": "ast",
       "id": "src_components_tv_tvweatherpanel_conditionkey",
-      "community": 321,
-      "community_name": "TvHistoryPanel.jsx",
+      "community": 267,
+      "community_name": "RecallGame",
       "norm_label": "conditionkey()"
     },
     {
@@ -12275,8 +12319,8 @@
       "source_location": "L24",
       "_origin": "ast",
       "id": "src_components_tv_tvweatherpanel_minutesago",
-      "community": 321,
-      "community_name": "TvHistoryPanel.jsx",
+      "community": 267,
+      "community_name": "RecallGame",
       "norm_label": "minutesago()"
     },
     {
@@ -12286,8 +12330,8 @@
       "source_location": "L29",
       "_origin": "ast",
       "id": "src_components_tv_tvweatherpanel_iconstyles",
-      "community": 321,
-      "community_name": "TvHistoryPanel.jsx",
+      "community": 267,
+      "community_name": "RecallGame",
       "norm_label": "iconstyles()"
     },
     {
@@ -12297,8 +12341,8 @@
       "source_location": "L49",
       "_origin": "ast",
       "id": "src_components_tv_tvweatherpanel_weathericon",
-      "community": 321,
-      "community_name": "TvHistoryPanel.jsx",
+      "community": 267,
+      "community_name": "RecallGame",
       "norm_label": "weathericon()"
     },
     {
@@ -12308,8 +12352,8 @@
       "source_location": "L129",
       "_origin": "ast",
       "id": "src_components_tv_tvweatherpanel_tvweatherpanel",
-      "community": 321,
-      "community_name": "TvHistoryPanel.jsx",
+      "community": 267,
+      "community_name": "RecallGame",
       "norm_label": "tvweatherpanel()"
     },
     {
@@ -12363,8 +12407,8 @@
       "source_location": "L4",
       "_origin": "ast",
       "id": "src_components_tv_control_center_stepfeaturedteams_stepfeaturedteams",
-      "community": 4,
-      "community_name": "ui.jsx",
+      "community": 43,
+      "community_name": "Rifle.jsx",
       "norm_label": "stepfeaturedteams()"
     },
     {
@@ -12374,8 +12418,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "src_components_tv_control_center_stepphotosource",
-      "community": 4,
-      "community_name": "ui.jsx",
+      "community": 304,
+      "community_name": "TEAMS",
       "norm_label": "stepphotosource.jsx"
     },
     {
@@ -12385,8 +12429,8 @@
       "source_location": "L6",
       "_origin": "ast",
       "id": "src_components_tv_control_center_stepphotosource_modebutton",
-      "community": 4,
-      "community_name": "ui.jsx",
+      "community": 304,
+      "community_name": "TEAMS",
       "norm_label": "modebutton()"
     },
     {
@@ -12396,8 +12440,8 @@
       "source_location": "L22",
       "_origin": "ast",
       "id": "src_components_tv_control_center_stepphotosource_stepphotosource",
-      "community": 4,
-      "community_name": "ui.jsx",
+      "community": 304,
+      "community_name": "TEAMS",
       "norm_label": "stepphotosource()"
     },
     {
@@ -12451,8 +12495,8 @@
       "source_location": "L173",
       "_origin": "ast",
       "id": "src_components_tv_control_center_steprangenotices_steprangenotices",
-      "community": 275,
-      "community_name": "ConversationList.jsx",
+      "community": 329,
+      "community_name": "StepRangeNotices.jsx",
       "norm_label": "steprangenotices()"
     },
     {
@@ -12737,8 +12781,8 @@
       "source_location": "L16",
       "_origin": "ast",
       "id": "src_components_tv_control_center_stepshoutout_stepshoutout",
-      "community": 4,
-      "community_name": "ui.jsx",
+      "community": 43,
+      "community_name": "Rifle.jsx",
       "norm_label": "stepshoutout()"
     },
     {
@@ -12814,8 +12858,8 @@
       "source_location": "L11",
       "_origin": "ast",
       "id": "src_components_tv_range_packetsduebanner_packetsduebanner",
-      "community": 267,
-      "community_name": "RecallGame",
+      "community": 43,
+      "community_name": "Rifle.jsx",
       "norm_label": "packetsduebanner()"
     },
     {
@@ -12825,8 +12869,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "src_components_tv_range_tvrangecompanywelcomescreen",
-      "community": 267,
-      "community_name": "RecallGame",
+      "community": 43,
+      "community_name": "Rifle.jsx",
       "norm_label": "tvrangecompanywelcomescreen.jsx"
     },
     {
@@ -12836,8 +12880,8 @@
       "source_location": "L10",
       "_origin": "ast",
       "id": "src_components_tv_range_tvrangecompanywelcomescreen_welcomestyles",
-      "community": 267,
-      "community_name": "RecallGame",
+      "community": 43,
+      "community_name": "Rifle.jsx",
       "norm_label": "welcomestyles()"
     },
     {
@@ -13507,8 +13551,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "src_components_tv_range_slides_slidephotoofday",
-      "community": 321,
-      "community_name": "TvHistoryPanel.jsx",
+      "community": 267,
+      "community_name": "RecallGame",
       "norm_label": "slidephotoofday.jsx"
     },
     {
@@ -13518,8 +13562,8 @@
       "source_location": "L9",
       "_origin": "ast",
       "id": "src_components_tv_range_slides_slidephotoofday_slidephotoofday",
-      "community": 321,
-      "community_name": "TvHistoryPanel.jsx",
+      "community": 267,
+      "community_name": "RecallGame",
       "norm_label": "slidephotoofday()"
     },
     {
@@ -13529,8 +13573,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "src_components_tv_range_slides_slideraidercongrats",
-      "community": 273,
-      "community_name": "RaiderParentWelcome.jsx",
+      "community": 4,
+      "community_name": "ui.jsx",
       "norm_label": "slideraidercongrats.jsx"
     },
     {
@@ -13540,8 +13584,8 @@
       "source_location": "L9",
       "_origin": "ast",
       "id": "src_components_tv_range_slides_slideraidercongrats_slideraidercongrats",
-      "community": 273,
-      "community_name": "RaiderParentWelcome.jsx",
+      "community": 4,
+      "community_name": "ui.jsx",
       "norm_label": "slideraidercongrats()"
     },
     {
@@ -13661,8 +13705,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "src_components_tv_range_slides_slideupcomingevents",
-      "community": 10,
-      "community_name": "emailRender.js",
+      "community": 43,
+      "community_name": "Rifle.jsx",
       "norm_label": "slideupcomingevents.jsx"
     },
     {
@@ -13694,8 +13738,8 @@
       "source_location": "L44",
       "_origin": "ast",
       "id": "src_components_tv_range_slides_slideupcomingevents_slideupcomingevents",
-      "community": 10,
-      "community_name": "emailRender.js",
+      "community": 9,
+      "community_name": "App.jsx",
       "norm_label": "slideupcomingevents()"
     },
     {
@@ -13782,8 +13826,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "src_data_creed",
-      "community": 314,
-      "community_name": "useTvRemoteOnboarding.js",
+      "community": 181,
+      "community_name": "TvRangeSlideshowScreen.jsx",
       "norm_label": "creed.js"
     },
     {
@@ -13804,8 +13848,8 @@
       "source_location": "L15",
       "_origin": "ast",
       "id": "src_data_creed_creed_full_text",
-      "community": 314,
-      "community_name": "useTvRemoteOnboarding.js",
+      "community": 181,
+      "community_name": "TvRangeSlideshowScreen.jsx",
       "norm_label": "creed_full_text"
     },
     {
@@ -13815,8 +13859,8 @@
       "source_location": "L19",
       "_origin": "ast",
       "id": "src_data_creed_tokenizeline",
-      "community": 314,
-      "community_name": "useTvRemoteOnboarding.js",
+      "community": 181,
+      "community_name": "TvRangeSlideshowScreen.jsx",
       "norm_label": "tokenizeline()"
     },
     {
@@ -13837,8 +13881,8 @@
       "source_location": "L33",
       "_origin": "ast",
       "id": "src_data_creed_creed_word_count",
-      "community": 314,
-      "community_name": "useTvRemoteOnboarding.js",
+      "community": 181,
+      "community_name": "TvRangeSlideshowScreen.jsx",
       "norm_label": "creed_word_count"
     },
     {
@@ -13848,8 +13892,8 @@
       "source_location": "L39",
       "_origin": "ast",
       "id": "src_data_creed_creed_lines_with_global",
-      "community": 314,
-      "community_name": "useTvRemoteOnboarding.js",
+      "community": 181,
+      "community_name": "TvRangeSlideshowScreen.jsx",
       "norm_label": "creed_lines_with_global"
     },
     {
@@ -13859,8 +13903,8 @@
       "source_location": "L44",
       "_origin": "ast",
       "id": "src_data_creed_creed_flat_words",
-      "community": 314,
-      "community_name": "useTvRemoteOnboarding.js",
+      "community": 181,
+      "community_name": "TvRangeSlideshowScreen.jsx",
       "norm_label": "creed_flat_words"
     },
     {
@@ -13870,8 +13914,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "src_data_tvremotechangelog",
-      "community": 4,
-      "community_name": "ui.jsx",
+      "community": 20,
+      "community_name": "Companies.jsx",
       "norm_label": "tvremotechangelog.js"
     },
     {
@@ -13881,8 +13925,8 @@
       "source_location": "L21",
       "_origin": "ast",
       "id": "src_data_tvremotechangelog_tv_remote_changelog",
-      "community": 4,
-      "community_name": "ui.jsx",
+      "community": 20,
+      "community_name": "Companies.jsx",
       "norm_label": "tv_remote_changelog"
     },
     {
@@ -13892,8 +13936,8 @@
       "source_location": "L37",
       "_origin": "ast",
       "id": "src_data_tvremotechangelog_tv_remote_latest_version",
-      "community": 4,
-      "community_name": "ui.jsx",
+      "community": 20,
+      "community_name": "Companies.jsx",
       "norm_label": "tv_remote_latest_version"
     },
     {
@@ -13903,8 +13947,8 @@
       "source_location": "L44",
       "_origin": "ast",
       "id": "src_data_tvremotechangelog_changelogsince",
-      "community": 4,
-      "community_name": "ui.jsx",
+      "community": 43,
+      "community_name": "Rifle.jsx",
       "norm_label": "changelogsince()"
     },
     {
@@ -14145,8 +14189,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "src_hooks_useraidertvstate",
-      "community": 20,
-      "community_name": "Companies.jsx",
+      "community": 44,
+      "community_name": "imageResize.js",
       "norm_label": "useraidertvstate.js"
     },
     {
@@ -14167,8 +14211,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "src_hooks_useraidervideos",
-      "community": 20,
-      "community_name": "Companies.jsx",
+      "community": 44,
+      "community_name": "imageResize.js",
       "norm_label": "useraidervideos.js"
     },
     {
@@ -14222,8 +14266,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "src_hooks_userhealikes",
-      "community": 187,
-      "community_name": "resizeForUpload",
+      "community": 83,
+      "community_name": "RaiderPolls.jsx",
       "norm_label": "userhealikes.js"
     },
     {
@@ -14233,8 +14277,8 @@
       "source_location": "L16",
       "_origin": "ast",
       "id": "src_hooks_userhealikes_userhealikes",
-      "community": 187,
-      "community_name": "resizeForUpload",
+      "community": 83,
+      "community_name": "RaiderPolls.jsx",
       "norm_label": "userhealikes()"
     },
     {
@@ -14255,8 +14299,8 @@
       "source_location": "L23",
       "_origin": "ast",
       "id": "src_hooks_userheaphotos_userheaphotos",
-      "community": 250,
-      "community_name": "FaqSection.jsx",
+      "community": 4,
+      "community_name": "ui.jsx",
       "norm_label": "userheaphotos()"
     },
     {
@@ -14299,8 +14343,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "src_hooks_usetvcarouselphotos",
-      "community": 321,
-      "community_name": "TvHistoryPanel.jsx",
+      "community": 267,
+      "community_name": "RecallGame",
       "norm_label": "usetvcarouselphotos.js"
     },
     {
@@ -14310,8 +14354,8 @@
       "source_location": "L24",
       "_origin": "ast",
       "id": "src_hooks_usetvcarouselphotos_usetvcarouselphotos",
-      "community": 321,
-      "community_name": "TvHistoryPanel.jsx",
+      "community": 267,
+      "community_name": "RecallGame",
       "norm_label": "usetvcarouselphotos()"
     },
     {
@@ -14343,8 +14387,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "src_hooks_usetvdailysettings",
-      "community": 4,
-      "community_name": "ui.jsx",
+      "community": 83,
+      "community_name": "RaiderPolls.jsx",
       "norm_label": "usetvdailysettings.js"
     },
     {
@@ -14365,8 +14409,8 @@
       "source_location": "L69",
       "_origin": "ast",
       "id": "src_hooks_usetvdailysettings_updatetvdailysettings",
-      "community": 4,
-      "community_name": "ui.jsx",
+      "community": 83,
+      "community_name": "RaiderPolls.jsx",
       "norm_label": "updatetvdailysettings()"
     },
     {
@@ -14376,8 +14420,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "src_hooks_usetveventoptions",
-      "community": 4,
-      "community_name": "ui.jsx",
+      "community": 304,
+      "community_name": "TEAMS",
       "norm_label": "usetveventoptions.js"
     },
     {
@@ -14387,8 +14431,8 @@
       "source_location": "L6",
       "_origin": "ast",
       "id": "src_hooks_usetveventoptions_todayny",
-      "community": 4,
-      "community_name": "ui.jsx",
+      "community": 304,
+      "community_name": "TEAMS",
       "norm_label": "todayny()"
     },
     {
@@ -14398,8 +14442,8 @@
       "source_location": "L11",
       "_origin": "ast",
       "id": "src_hooks_usetveventoptions_usetveventoptions",
-      "community": 4,
-      "community_name": "ui.jsx",
+      "community": 304,
+      "community_name": "TEAMS",
       "norm_label": "usetveventoptions()"
     },
     {
@@ -14442,8 +14486,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "src_hooks_usetvnotices",
-      "community": 275,
-      "community_name": "ConversationList.jsx",
+      "community": 3,
+      "community_name": "PhotoUploader.jsx",
       "norm_label": "usetvnotices.js"
     },
     {
@@ -14453,8 +14497,8 @@
       "source_location": "L12",
       "_origin": "ast",
       "id": "src_hooks_usetvnotices_usetvnotices",
-      "community": 275,
-      "community_name": "ConversationList.jsx",
+      "community": 3,
+      "community_name": "PhotoUploader.jsx",
       "norm_label": "usetvnotices()"
     },
     {
@@ -14464,8 +14508,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "src_hooks_usetvrefreshnotice",
-      "community": 20,
-      "community_name": "Companies.jsx",
+      "community": 44,
+      "community_name": "imageResize.js",
       "norm_label": "usetvrefreshnotice.js"
     },
     {
@@ -14475,8 +14519,8 @@
       "source_location": "L11",
       "_origin": "ast",
       "id": "src_hooks_usetvrefreshnotice_assetsignature",
-      "community": 20,
-      "community_name": "Companies.jsx",
+      "community": 44,
+      "community_name": "imageResize.js",
       "norm_label": "assetsignature()"
     },
     {
@@ -14486,8 +14530,8 @@
       "source_location": "L16",
       "_origin": "ast",
       "id": "src_hooks_usetvrefreshnotice_usetvrefreshnotice",
-      "community": 20,
-      "community_name": "Companies.jsx",
+      "community": 44,
+      "community_name": "imageResize.js",
       "norm_label": "usetvrefreshnotice()"
     },
     {
@@ -14497,8 +14541,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "src_hooks_usetvremoteonboarding",
-      "community": 4,
-      "community_name": "ui.jsx",
+      "community": 20,
+      "community_name": "Companies.jsx",
       "norm_label": "usetvremoteonboarding.js"
     },
     {
@@ -14508,8 +14552,8 @@
       "source_location": "L21",
       "_origin": "ast",
       "id": "src_hooks_usetvremoteonboarding_usetvremoteonboarding",
-      "community": 4,
-      "community_name": "ui.jsx",
+      "community": 20,
+      "community_name": "Companies.jsx",
       "norm_label": "usetvremoteonboarding()"
     },
     {
@@ -14552,8 +14596,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "src_hooks_useweather",
-      "community": 321,
-      "community_name": "TvHistoryPanel.jsx",
+      "community": 267,
+      "community_name": "RecallGame",
       "norm_label": "useweather.js"
     },
     {
@@ -14563,8 +14607,8 @@
       "source_location": "L11",
       "_origin": "ast",
       "id": "src_hooks_useweather_nws_headers",
-      "community": 321,
-      "community_name": "TvHistoryPanel.jsx",
+      "community": 267,
+      "community_name": "RecallGame",
       "norm_label": "nws_headers"
     },
     {
@@ -14574,8 +14618,8 @@
       "source_location": "L13",
       "_origin": "ast",
       "id": "src_hooks_useweather_fetchjson",
-      "community": 321,
-      "community_name": "TvHistoryPanel.jsx",
+      "community": 267,
+      "community_name": "RecallGame",
       "norm_label": "fetchjson()"
     },
     {
@@ -14585,8 +14629,8 @@
       "source_location": "L25",
       "_origin": "ast",
       "id": "src_hooks_useweather_useweather",
-      "community": 321,
-      "community_name": "TvHistoryPanel.jsx",
+      "community": 267,
+      "community_name": "RecallGame",
       "norm_label": "useweather()"
     },
     {
@@ -14640,8 +14684,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "src_lib_ballapi",
-      "community": 202,
-      "community_name": "TvRemotePanel.jsx",
+      "community": 299,
+      "community_name": "RaiderParentWelcome.jsx",
       "norm_label": "ballapi.js"
     },
     {
@@ -14651,8 +14695,8 @@
       "source_location": "L14",
       "_origin": "ast",
       "id": "src_lib_ballapi_invokeerror",
-      "community": 202,
-      "community_name": "TvRemotePanel.jsx",
+      "community": 299,
+      "community_name": "RaiderParentWelcome.jsx",
       "norm_label": "invokeerror()"
     },
     {
@@ -14662,8 +14706,8 @@
       "source_location": "L23",
       "_origin": "ast",
       "id": "src_lib_ballapi_lookupcadet",
-      "community": 202,
-      "community_name": "TvRemotePanel.jsx",
+      "community": 299,
+      "community_name": "RaiderParentWelcome.jsx",
       "norm_label": "lookupcadet()"
     },
     {
@@ -14673,8 +14717,8 @@
       "source_location": "L29",
       "_origin": "ast",
       "id": "src_lib_ballapi_searchroster",
-      "community": 202,
-      "community_name": "TvRemotePanel.jsx",
+      "community": 299,
+      "community_name": "RaiderParentWelcome.jsx",
       "norm_label": "searchroster()"
     },
     {
@@ -14684,8 +14728,8 @@
       "source_location": "L35",
       "_origin": "ast",
       "id": "src_lib_ballapi_resolverostercadet",
-      "community": 202,
-      "community_name": "TvRemotePanel.jsx",
+      "community": 299,
+      "community_name": "RaiderParentWelcome.jsx",
       "norm_label": "resolverostercadet()"
     },
     {
@@ -14695,8 +14739,8 @@
       "source_location": "L41",
       "_origin": "ast",
       "id": "src_lib_ballapi_submitsignup",
-      "community": 202,
-      "community_name": "TvRemotePanel.jsx",
+      "community": 299,
+      "community_name": "RaiderParentWelcome.jsx",
       "norm_label": "submitsignup()"
     },
     {
@@ -14706,8 +14750,8 @@
       "source_location": "L47",
       "_origin": "ast",
       "id": "src_lib_ballapi_guestverify",
-      "community": 202,
-      "community_name": "TvRemotePanel.jsx",
+      "community": 299,
+      "community_name": "RaiderParentWelcome.jsx",
       "norm_label": "guestverify()"
     },
     {
@@ -14717,8 +14761,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "src_lib_ballapprovers",
-      "community": 202,
-      "community_name": "TvRemotePanel.jsx",
+      "community": 268,
+      "community_name": "DressCodeDetails.jsx",
       "norm_label": "ballapprovers.js"
     },
     {
@@ -14728,8 +14772,8 @@
       "source_location": "L8",
       "_origin": "ast",
       "id": "src_lib_ballapprovers_dress_approvers",
-      "community": 202,
-      "community_name": "TvRemotePanel.jsx",
+      "community": 268,
+      "community_name": "DressCodeDetails.jsx",
       "norm_label": "dress_approvers"
     },
     {
@@ -14739,9 +14783,75 @@
       "source_location": "L14",
       "_origin": "ast",
       "id": "src_lib_ballapprovers_weston",
-      "community": 202,
-      "community_name": "TvRemotePanel.jsx",
+      "community": 268,
+      "community_name": "DressCodeDetails.jsx",
       "norm_label": "weston"
+    },
+    {
+      "label": "ballDressCode.js",
+      "file_type": "code",
+      "source_file": "src/lib/ballDressCode.js",
+      "source_location": "L1",
+      "_origin": "ast",
+      "id": "src_lib_balldresscode",
+      "community": 268,
+      "community_name": "DressCodeDetails.jsx",
+      "norm_label": "balldresscode.js"
+    },
+    {
+      "label": "FEMALE_AVOID",
+      "file_type": "code",
+      "source_file": "src/lib/ballDressCode.js",
+      "source_location": "L9",
+      "_origin": "ast",
+      "id": "src_lib_balldresscode_female_avoid",
+      "community": 268,
+      "community_name": "DressCodeDetails.jsx",
+      "norm_label": "female_avoid"
+    },
+    {
+      "label": "FEMALE_WEAR",
+      "file_type": "code",
+      "source_file": "src/lib/ballDressCode.js",
+      "source_location": "L21",
+      "_origin": "ast",
+      "id": "src_lib_balldresscode_female_wear",
+      "community": 268,
+      "community_name": "DressCodeDetails.jsx",
+      "norm_label": "female_wear"
+    },
+    {
+      "label": "MALE_AVOID",
+      "file_type": "code",
+      "source_file": "src/lib/ballDressCode.js",
+      "source_location": "L28",
+      "_origin": "ast",
+      "id": "src_lib_balldresscode_male_avoid",
+      "community": 268,
+      "community_name": "DressCodeDetails.jsx",
+      "norm_label": "male_avoid"
+    },
+    {
+      "label": "MALE_WEAR",
+      "file_type": "code",
+      "source_file": "src/lib/ballDressCode.js",
+      "source_location": "L35",
+      "_origin": "ast",
+      "id": "src_lib_balldresscode_male_wear",
+      "community": 268,
+      "community_name": "DressCodeDetails.jsx",
+      "norm_label": "male_wear"
+    },
+    {
+      "label": "DRESS_APPROVAL_RULES",
+      "file_type": "code",
+      "source_file": "src/lib/ballDressCode.js",
+      "source_location": "L42",
+      "_origin": "ast",
+      "id": "src_lib_balldresscode_dress_approval_rules",
+      "community": 268,
+      "community_name": "DressCodeDetails.jsx",
+      "norm_label": "dress_approval_rules"
     },
     {
       "label": "bellSchedules.js",
@@ -14893,8 +15003,8 @@
       "source_location": "L185",
       "_origin": "ast",
       "id": "src_lib_bellschedules_dayprogress",
-      "community": 275,
-      "community_name": "ConversationList.jsx",
+      "community": 267,
+      "community_name": "RecallGame",
       "norm_label": "dayprogress()"
     },
     {
@@ -14904,8 +15014,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "src_lib_calendar",
-      "community": 332,
-      "community_name": "calendar.js",
+      "community": 272,
+      "community_name": "Messages.jsx",
       "norm_label": "calendar.js"
     },
     {
@@ -14915,8 +15025,8 @@
       "source_location": "L5",
       "_origin": "ast",
       "id": "src_lib_calendar_event_categories",
-      "community": 332,
-      "community_name": "calendar.js",
+      "community": 24,
+      "community_name": "FaqSection.jsx",
       "norm_label": "event_categories"
     },
     {
@@ -14926,8 +15036,8 @@
       "source_location": "L20",
       "_origin": "ast",
       "id": "src_lib_calendar_category_color",
-      "community": 332,
-      "community_name": "calendar.js",
+      "community": 272,
+      "community_name": "Messages.jsx",
       "norm_label": "category_color"
     },
     {
@@ -14937,8 +15047,8 @@
       "source_location": "L21",
       "_origin": "ast",
       "id": "src_lib_calendar_categorycolor",
-      "community": 272,
-      "community_name": "Messages.jsx",
+      "community": 241,
+      "community_name": "TvCongratsScreen.jsx",
       "norm_label": "categorycolor()"
     },
     {
@@ -14948,8 +15058,8 @@
       "source_location": "L25",
       "_origin": "ast",
       "id": "src_lib_calendar_uniform_types",
-      "community": 332,
-      "community_name": "calendar.js",
+      "community": 272,
+      "community_name": "Messages.jsx",
       "norm_label": "uniform_types"
     },
     {
@@ -14959,8 +15069,8 @@
       "source_location": "L31",
       "_origin": "ast",
       "id": "src_lib_calendar_default_poc",
-      "community": 332,
-      "community_name": "calendar.js",
+      "community": 24,
+      "community_name": "FaqSection.jsx",
       "norm_label": "default_poc"
     },
     {
@@ -14992,8 +15102,8 @@
       "source_location": "L53",
       "_origin": "ast",
       "id": "src_lib_calendar_event_teams",
-      "community": 332,
-      "community_name": "calendar.js",
+      "community": 272,
+      "community_name": "Messages.jsx",
       "norm_label": "event_teams"
     },
     {
@@ -15036,8 +15146,8 @@
       "source_location": "L66",
       "_origin": "ast",
       "id": "src_lib_calendar_weekday_short",
-      "community": 332,
-      "community_name": "calendar.js",
+      "community": 272,
+      "community_name": "Messages.jsx",
       "norm_label": "weekday_short"
     },
     {
@@ -15267,8 +15377,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "src_lib_congratsseen",
-      "community": 273,
-      "community_name": "RaiderParentWelcome.jsx",
+      "community": 4,
+      "community_name": "ui.jsx",
       "norm_label": "congratsseen.js"
     },
     {
@@ -15278,8 +15388,8 @@
       "source_location": "L7",
       "_origin": "ast",
       "id": "src_lib_congratsseen_hasseencongrats",
-      "community": 273,
-      "community_name": "RaiderParentWelcome.jsx",
+      "community": 4,
+      "community_name": "ui.jsx",
       "norm_label": "hasseencongrats()"
     },
     {
@@ -15289,8 +15399,8 @@
       "source_location": "L15",
       "_origin": "ast",
       "id": "src_lib_congratsseen_markcongratsseen",
-      "community": 273,
-      "community_name": "RaiderParentWelcome.jsx",
+      "community": 4,
+      "community_name": "ui.jsx",
       "norm_label": "markcongratsseen()"
     },
     {
@@ -15366,8 +15476,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "src_lib_creedleaderboard",
-      "community": 326,
-      "community_name": "CreedLeaderboardPanel.jsx",
+      "community": 181,
+      "community_name": "TvRangeSlideshowScreen.jsx",
       "norm_label": "creedleaderboard.js"
     },
     {
@@ -15377,8 +15487,8 @@
       "source_location": "L8",
       "_origin": "ast",
       "id": "src_lib_creedleaderboard_companies",
-      "community": 326,
-      "community_name": "CreedLeaderboardPanel.jsx",
+      "community": 181,
+      "community_name": "TvRangeSlideshowScreen.jsx",
       "norm_label": "companies"
     },
     {
@@ -15388,8 +15498,8 @@
       "source_location": "L19",
       "_origin": "ast",
       "id": "src_lib_creedleaderboard_verifycreedeligibility",
-      "community": 326,
-      "community_name": "CreedLeaderboardPanel.jsx",
+      "community": 181,
+      "community_name": "TvRangeSlideshowScreen.jsx",
       "norm_label": "verifycreedeligibility()"
     },
     {
@@ -15399,8 +15509,8 @@
       "source_location": "L34",
       "_origin": "ast",
       "id": "src_lib_creedleaderboard_submitleaderboardentry",
-      "community": 326,
-      "community_name": "CreedLeaderboardPanel.jsx",
+      "community": 181,
+      "community_name": "TvRangeSlideshowScreen.jsx",
       "norm_label": "submitleaderboardentry()"
     },
     {
@@ -15410,8 +15520,8 @@
       "source_location": "L50",
       "_origin": "ast",
       "id": "src_lib_creedleaderboard_fetchleaderboard",
-      "community": 326,
-      "community_name": "CreedLeaderboardPanel.jsx",
+      "community": 181,
+      "community_name": "TvRangeSlideshowScreen.jsx",
       "norm_label": "fetchleaderboard()"
     },
     {
@@ -15421,8 +15531,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "src_lib_creedprogress",
-      "community": 86,
-      "community_name": "PhotoLightbox.jsx",
+      "community": 181,
+      "community_name": "TvRangeSlideshowScreen.jsx",
       "norm_label": "creedprogress.js"
     },
     {
@@ -15432,8 +15542,8 @@
       "source_location": "L5",
       "_origin": "ast",
       "id": "src_lib_creedprogress_default_progress",
-      "community": 86,
-      "community_name": "PhotoLightbox.jsx",
+      "community": 181,
+      "community_name": "TvRangeSlideshowScreen.jsx",
       "norm_label": "default_progress"
     },
     {
@@ -15443,8 +15553,8 @@
       "source_location": "L13",
       "_origin": "ast",
       "id": "src_lib_creedprogress_deepclone",
-      "community": 86,
-      "community_name": "PhotoLightbox.jsx",
+      "community": 181,
+      "community_name": "TvRangeSlideshowScreen.jsx",
       "norm_label": "deepclone()"
     },
     {
@@ -15454,8 +15564,8 @@
       "source_location": "L17",
       "_origin": "ast",
       "id": "src_lib_creedprogress_load",
-      "community": 86,
-      "community_name": "PhotoLightbox.jsx",
+      "community": 181,
+      "community_name": "TvRangeSlideshowScreen.jsx",
       "norm_label": "load()"
     },
     {
@@ -15465,8 +15575,8 @@
       "source_location": "L28",
       "_origin": "ast",
       "id": "src_lib_creedprogress_save",
-      "community": 314,
-      "community_name": "useTvRemoteOnboarding.js",
+      "community": 181,
+      "community_name": "TvRangeSlideshowScreen.jsx",
       "norm_label": "save()"
     },
     {
@@ -15476,8 +15586,8 @@
       "source_location": "L36",
       "_origin": "ast",
       "id": "src_lib_creedprogress_getprogress",
-      "community": 86,
-      "community_name": "PhotoLightbox.jsx",
+      "community": 181,
+      "community_name": "TvRangeSlideshowScreen.jsx",
       "norm_label": "getprogress()"
     },
     {
@@ -15487,8 +15597,8 @@
       "source_location": "L43",
       "_origin": "ast",
       "id": "src_lib_creedprogress_recordresult",
-      "community": 314,
-      "community_name": "useTvRemoteOnboarding.js",
+      "community": 181,
+      "community_name": "TvRangeSlideshowScreen.jsx",
       "norm_label": "recordresult()"
     },
     {
@@ -15498,8 +15608,8 @@
       "source_location": "L57",
       "_origin": "ast",
       "id": "src_lib_creedprogress_masterylevel",
-      "community": 86,
-      "community_name": "PhotoLightbox.jsx",
+      "community": 181,
+      "community_name": "TvRangeSlideshowScreen.jsx",
       "norm_label": "masterylevel()"
     },
     {
@@ -15520,8 +15630,8 @@
       "source_location": "L19",
       "_origin": "ast",
       "id": "src_lib_emailaudience_audience_groups",
-      "community": 0,
-      "community_name": "react",
+      "community": 43,
+      "community_name": "Rifle.jsx",
       "norm_label": "audience_groups"
     },
     {
@@ -16301,8 +16411,8 @@
       "source_location": "L26",
       "_origin": "ast",
       "id": "src_lib_rheacomp_allowed_types",
-      "community": 254,
-      "community_name": "TvPhotoCarousel.jsx",
+      "community": 187,
+      "community_name": "resizeForUpload",
       "norm_label": "allowed_types"
     },
     {
@@ -16312,8 +16422,8 @@
       "source_location": "L28",
       "_origin": "ast",
       "id": "src_lib_rheacomp_isallowedimage",
-      "community": 254,
-      "community_name": "TvPhotoCarousel.jsx",
+      "community": 187,
+      "community_name": "resizeForUpload",
       "norm_label": "isallowedimage()"
     },
     {
@@ -16345,8 +16455,8 @@
       "source_location": "L52",
       "_origin": "ast",
       "id": "src_lib_rheacomp_uploadrheaphoto",
-      "community": 252,
-      "community_name": "TvRangeKiosk.jsx",
+      "community": 254,
+      "community_name": "TvPhotoCarousel.jsx",
       "norm_label": "uploadrheaphoto()"
     },
     {
@@ -16389,8 +16499,8 @@
       "source_location": "L113",
       "_origin": "ast",
       "id": "src_lib_rheacomp_markonboardedrhea",
-      "community": 73,
-      "community_name": "imageResize.js",
+      "community": 187,
+      "community_name": "resizeForUpload",
       "norm_label": "markonboardedrhea()"
     },
     {
@@ -16422,8 +16532,8 @@
       "source_location": "L135",
       "_origin": "ast",
       "id": "src_lib_rheacomp_fetchmylikes",
-      "community": 187,
-      "community_name": "resizeForUpload",
+      "community": 83,
+      "community_name": "RaiderPolls.jsx",
       "norm_label": "fetchmylikes()"
     },
     {
@@ -16433,8 +16543,8 @@
       "source_location": "L146",
       "_origin": "ast",
       "id": "src_lib_rheacomp_setlike",
-      "community": 187,
-      "community_name": "resizeForUpload",
+      "community": 83,
+      "community_name": "RaiderPolls.jsx",
       "norm_label": "setlike()"
     },
     {
@@ -16554,8 +16664,8 @@
       "source_location": "L4",
       "_origin": "ast",
       "id": "src_lib_teams_teams",
-      "community": 11,
-      "community_name": "blocks.js",
+      "community": 261,
+      "community_name": "getDeviceId",
       "norm_label": "teams"
     },
     {
@@ -16609,8 +16719,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "src_lib_tvcongratsdata",
-      "community": 273,
-      "community_name": "RaiderParentWelcome.jsx",
+      "community": 4,
+      "community_name": "ui.jsx",
       "norm_label": "tvcongratsdata.js"
     },
     {
@@ -16620,8 +16730,8 @@
       "source_location": "L6",
       "_origin": "ast",
       "id": "src_lib_tvcongratsdata_congrats_meet",
-      "community": 273,
-      "community_name": "RaiderParentWelcome.jsx",
+      "community": 4,
+      "community_name": "ui.jsx",
       "norm_label": "congrats_meet"
     },
     {
@@ -16631,8 +16741,8 @@
       "source_location": "L13",
       "_origin": "ast",
       "id": "src_lib_tvcongratsdata_congrats_trophies",
-      "community": 273,
-      "community_name": "RaiderParentWelcome.jsx",
+      "community": 4,
+      "community_name": "ui.jsx",
       "norm_label": "congrats_trophies"
     },
     {
@@ -16642,8 +16752,8 @@
       "source_location": "L21",
       "_origin": "ast",
       "id": "src_lib_tvcongratsdata_congrats_photos",
-      "community": 273,
-      "community_name": "RaiderParentWelcome.jsx",
+      "community": 4,
+      "community_name": "ui.jsx",
       "norm_label": "congrats_photos"
     },
     {
@@ -16653,8 +16763,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "src_lib_tvdailyphotos",
-      "community": 4,
-      "community_name": "ui.jsx",
+      "community": 304,
+      "community_name": "TEAMS",
       "norm_label": "tvdailyphotos.js"
     },
     {
@@ -16664,8 +16774,8 @@
       "source_location": "L8",
       "_origin": "ast",
       "id": "src_lib_tvdailyphotos_uploadtvdailyphoto",
-      "community": 4,
-      "community_name": "ui.jsx",
+      "community": 304,
+      "community_name": "TEAMS",
       "norm_label": "uploadtvdailyphoto()"
     },
     {
@@ -16675,8 +16785,8 @@
       "source_location": "L19",
       "_origin": "ast",
       "id": "src_lib_tvdailyphotos_deletetvdailyphoto",
-      "community": 4,
-      "community_name": "ui.jsx",
+      "community": 304,
+      "community_name": "TEAMS",
       "norm_label": "deletetvdailyphoto()"
     },
     {
@@ -16774,8 +16884,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "src_lib_tvphotos",
-      "community": 321,
-      "community_name": "TvHistoryPanel.jsx",
+      "community": 267,
+      "community_name": "RecallGame",
       "norm_label": "tvphotos.js"
     },
     {
@@ -16785,8 +16895,8 @@
       "source_location": "L4",
       "_origin": "ast",
       "id": "src_lib_tvphotos_tv_photos",
-      "community": 321,
-      "community_name": "TvHistoryPanel.jsx",
+      "community": 267,
+      "community_name": "RecallGame",
       "norm_label": "tv_photos"
     },
     {
@@ -29281,8 +29391,8 @@
       "source_location": "L13",
       "_origin": "ast",
       "id": "src_lib_raidercompgallery_comp_event_title",
-      "community": 12,
-      "community_name": "blocks.js",
+      "community": 239,
+      "community_name": "expo-application",
       "norm_label": "comp_event_title"
     }
   ],
@@ -32666,7 +32776,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "src/App.jsx",
-      "source_location": "L76",
+      "source_location": "L77",
       "weight": 1.0,
       "_origin": "ast",
       "source": "src_app",
@@ -32677,7 +32787,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "src/App.jsx",
-      "source_location": "L69",
+      "source_location": "L70",
       "weight": 1.0,
       "_origin": "ast",
       "source": "src_app",
@@ -32688,7 +32798,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "src/App.jsx",
-      "source_location": "L58",
+      "source_location": "L59",
       "weight": 1.0,
       "_origin": "ast",
       "source": "src_app",
@@ -32700,7 +32810,7 @@
       "context": "import",
       "confidence": "EXTRACTED",
       "source_file": "src/App.jsx",
-      "source_location": "L28",
+      "source_location": "L32",
       "weight": 1.0,
       "_origin": "ast",
       "source": "src_app",
@@ -32712,7 +32822,7 @@
       "context": "import",
       "confidence": "EXTRACTED",
       "source_file": "src/App.jsx",
-      "source_location": "L28",
+      "source_location": "L32",
       "weight": 1.0,
       "_origin": "ast",
       "source": "src_app",
@@ -32724,7 +32834,7 @@
       "context": "import",
       "confidence": "EXTRACTED",
       "source_file": "src/App.jsx",
-      "source_location": "L31",
+      "source_location": "L35",
       "weight": 1.0,
       "_origin": "ast",
       "source": "src_app",
@@ -32736,7 +32846,7 @@
       "context": "import",
       "confidence": "EXTRACTED",
       "source_file": "src/App.jsx",
-      "source_location": "L31",
+      "source_location": "L35",
       "weight": 1.0,
       "_origin": "ast",
       "source": "src_app",
@@ -32748,7 +32858,7 @@
       "context": "import",
       "confidence": "EXTRACTED",
       "source_file": "src/App.jsx",
-      "source_location": "L51",
+      "source_location": "L52",
       "weight": 1.0,
       "_origin": "ast",
       "source": "src_app",
@@ -32760,7 +32870,7 @@
       "context": "import",
       "confidence": "EXTRACTED",
       "source_file": "src/App.jsx",
-      "source_location": "L51",
+      "source_location": "L52",
       "weight": 1.0,
       "_origin": "ast",
       "source": "src_app",
@@ -32772,7 +32882,7 @@
       "context": "import",
       "confidence": "EXTRACTED",
       "source_file": "src/App.jsx",
-      "source_location": "L48",
+      "source_location": "L49",
       "weight": 1.0,
       "_origin": "ast",
       "source": "src_app",
@@ -32784,7 +32894,7 @@
       "context": "import",
       "confidence": "EXTRACTED",
       "source_file": "src/App.jsx",
-      "source_location": "L48",
+      "source_location": "L49",
       "weight": 1.0,
       "_origin": "ast",
       "source": "src_app",
@@ -32796,7 +32906,31 @@
       "context": "import",
       "confidence": "EXTRACTED",
       "source_file": "src/App.jsx",
-      "source_location": "L50",
+      "source_location": "L47",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "src_app",
+      "target": "src_components_ball_balllanding",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "src/App.jsx",
+      "source_location": "L47",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "src_app",
+      "target": "src_components_ball_balllanding_balllanding",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "src/App.jsx",
+      "source_location": "L51",
       "weight": 1.0,
       "_origin": "ast",
       "source": "src_app",
@@ -32808,7 +32942,7 @@
       "context": "import",
       "confidence": "EXTRACTED",
       "source_file": "src/App.jsx",
-      "source_location": "L50",
+      "source_location": "L51",
       "weight": 1.0,
       "_origin": "ast",
       "source": "src_app",
@@ -32820,7 +32954,7 @@
       "context": "import",
       "confidence": "EXTRACTED",
       "source_file": "src/App.jsx",
-      "source_location": "L49",
+      "source_location": "L50",
       "weight": 1.0,
       "_origin": "ast",
       "source": "src_app",
@@ -32832,7 +32966,7 @@
       "context": "import",
       "confidence": "EXTRACTED",
       "source_file": "src/App.jsx",
-      "source_location": "L49",
+      "source_location": "L50",
       "weight": 1.0,
       "_origin": "ast",
       "source": "src_app",
@@ -32844,7 +32978,31 @@
       "context": "import",
       "confidence": "EXTRACTED",
       "source_file": "src/App.jsx",
-      "source_location": "L30",
+      "source_location": "L48",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "src_app",
+      "target": "src_components_ball_signup_ballsignupwizard",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "src/App.jsx",
+      "source_location": "L48",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "src_app",
+      "target": "src_components_ball_signup_ballsignupwizard_ballsignupwizard",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "src/App.jsx",
+      "source_location": "L34",
       "weight": 1.0,
       "_origin": "ast",
       "source": "src_app",
@@ -32856,7 +33014,7 @@
       "context": "import",
       "confidence": "EXTRACTED",
       "source_file": "src/App.jsx",
-      "source_location": "L30",
+      "source_location": "L34",
       "weight": 1.0,
       "_origin": "ast",
       "source": "src_app",
@@ -32868,7 +33026,7 @@
       "context": "import",
       "confidence": "EXTRACTED",
       "source_file": "src/App.jsx",
-      "source_location": "L7",
+      "source_location": "L11",
       "weight": 1.0,
       "_origin": "ast",
       "source": "src_app",
@@ -32880,7 +33038,7 @@
       "context": "import",
       "confidence": "EXTRACTED",
       "source_file": "src/App.jsx",
-      "source_location": "L7",
+      "source_location": "L11",
       "weight": 1.0,
       "_origin": "ast",
       "source": "src_app",
@@ -32892,7 +33050,7 @@
       "context": "import",
       "confidence": "EXTRACTED",
       "source_file": "src/App.jsx",
-      "source_location": "L17",
+      "source_location": "L21",
       "weight": 1.0,
       "_origin": "ast",
       "source": "src_app",
@@ -32904,7 +33062,7 @@
       "context": "import",
       "confidence": "EXTRACTED",
       "source_file": "src/App.jsx",
-      "source_location": "L17",
+      "source_location": "L21",
       "weight": 1.0,
       "_origin": "ast",
       "source": "src_app",
@@ -32916,7 +33074,7 @@
       "context": "import",
       "confidence": "EXTRACTED",
       "source_file": "src/App.jsx",
-      "source_location": "L29",
+      "source_location": "L33",
       "weight": 1.0,
       "_origin": "ast",
       "source": "src_app",
@@ -32928,7 +33086,7 @@
       "context": "import",
       "confidence": "EXTRACTED",
       "source_file": "src/App.jsx",
-      "source_location": "L29",
+      "source_location": "L33",
       "weight": 1.0,
       "_origin": "ast",
       "source": "src_app",
@@ -32940,7 +33098,7 @@
       "context": "import",
       "confidence": "EXTRACTED",
       "source_file": "src/App.jsx",
-      "source_location": "L27",
+      "source_location": "L31",
       "weight": 1.0,
       "_origin": "ast",
       "source": "src_app",
@@ -32952,7 +33110,7 @@
       "context": "import",
       "confidence": "EXTRACTED",
       "source_file": "src/App.jsx",
-      "source_location": "L27",
+      "source_location": "L31",
       "weight": 1.0,
       "_origin": "ast",
       "source": "src_app",
@@ -32964,55 +33122,7 @@
       "context": "import",
       "confidence": "EXTRACTED",
       "source_file": "src/App.jsx",
-      "source_location": "L5",
-      "weight": 1.0,
-      "_origin": "ast",
-      "source": "src_app",
-      "target": "src_components_compphotoband",
-      "confidence_score": 1.0
-    },
-    {
-      "relation": "imports",
-      "context": "import",
-      "confidence": "EXTRACTED",
-      "source_file": "src/App.jsx",
-      "source_location": "L5",
-      "weight": 1.0,
-      "_origin": "ast",
-      "source": "src_app",
-      "target": "src_components_compphotoband_compphotoband",
-      "confidence_score": 1.0
-    },
-    {
-      "relation": "imports_from",
-      "context": "import",
-      "confidence": "EXTRACTED",
-      "source_file": "src/App.jsx",
-      "source_location": "L37",
-      "weight": 1.0,
-      "_origin": "ast",
-      "source": "src_app",
-      "target": "src_components_compphotovote",
-      "confidence_score": 1.0
-    },
-    {
-      "relation": "imports",
-      "context": "import",
-      "confidence": "EXTRACTED",
-      "source_file": "src/App.jsx",
-      "source_location": "L37",
-      "weight": 1.0,
-      "_origin": "ast",
-      "source": "src_app",
-      "target": "src_components_compphotovote_compphotovote",
-      "confidence_score": 1.0
-    },
-    {
-      "relation": "imports_from",
-      "context": "import",
-      "confidence": "EXTRACTED",
-      "source_file": "src/App.jsx",
-      "source_location": "L36",
+      "source_location": "L40",
       "weight": 1.0,
       "_origin": "ast",
       "source": "src_app",
@@ -33024,7 +33134,7 @@
       "context": "import",
       "confidence": "EXTRACTED",
       "source_file": "src/App.jsx",
-      "source_location": "L36",
+      "source_location": "L40",
       "weight": 1.0,
       "_origin": "ast",
       "source": "src_app",
@@ -33036,7 +33146,7 @@
       "context": "import",
       "confidence": "EXTRACTED",
       "source_file": "src/App.jsx",
-      "source_location": "L18",
+      "source_location": "L22",
       "weight": 1.0,
       "_origin": "ast",
       "source": "src_app",
@@ -33048,7 +33158,7 @@
       "context": "import",
       "confidence": "EXTRACTED",
       "source_file": "src/App.jsx",
-      "source_location": "L18",
+      "source_location": "L22",
       "weight": 1.0,
       "_origin": "ast",
       "source": "src_app",
@@ -33060,7 +33170,7 @@
       "context": "import",
       "confidence": "EXTRACTED",
       "source_file": "src/App.jsx",
-      "source_location": "L38",
+      "source_location": "L44",
       "weight": 1.0,
       "_origin": "ast",
       "source": "src_app",
@@ -33072,7 +33182,7 @@
       "context": "import",
       "confidence": "EXTRACTED",
       "source_file": "src/App.jsx",
-      "source_location": "L38",
+      "source_location": "L44",
       "weight": 1.0,
       "_origin": "ast",
       "source": "src_app",
@@ -33084,7 +33194,7 @@
       "context": "import",
       "confidence": "EXTRACTED",
       "source_file": "src/App.jsx",
-      "source_location": "L39",
+      "source_location": "L45",
       "weight": 1.0,
       "_origin": "ast",
       "source": "src_app",
@@ -33096,7 +33206,7 @@
       "context": "import",
       "confidence": "EXTRACTED",
       "source_file": "src/App.jsx",
-      "source_location": "L39",
+      "source_location": "L45",
       "weight": 1.0,
       "_origin": "ast",
       "source": "src_app",
@@ -33108,7 +33218,7 @@
       "context": "import",
       "confidence": "EXTRACTED",
       "source_file": "src/App.jsx",
-      "source_location": "L25",
+      "source_location": "L29",
       "weight": 1.0,
       "_origin": "ast",
       "source": "src_app",
@@ -33120,7 +33230,7 @@
       "context": "import",
       "confidence": "EXTRACTED",
       "source_file": "src/App.jsx",
-      "source_location": "L25",
+      "source_location": "L29",
       "weight": 1.0,
       "_origin": "ast",
       "source": "src_app",
@@ -33132,7 +33242,7 @@
       "context": "import",
       "confidence": "EXTRACTED",
       "source_file": "src/App.jsx",
-      "source_location": "L8",
+      "source_location": "L12",
       "weight": 1.0,
       "_origin": "ast",
       "source": "src_app",
@@ -33144,7 +33254,7 @@
       "context": "import",
       "confidence": "EXTRACTED",
       "source_file": "src/App.jsx",
-      "source_location": "L8",
+      "source_location": "L12",
       "weight": 1.0,
       "_origin": "ast",
       "source": "src_app",
@@ -33156,7 +33266,7 @@
       "context": "import",
       "confidence": "EXTRACTED",
       "source_file": "src/App.jsx",
-      "source_location": "L15",
+      "source_location": "L19",
       "weight": 1.0,
       "_origin": "ast",
       "source": "src_app",
@@ -33168,7 +33278,7 @@
       "context": "import",
       "confidence": "EXTRACTED",
       "source_file": "src/App.jsx",
-      "source_location": "L15",
+      "source_location": "L19",
       "weight": 1.0,
       "_origin": "ast",
       "source": "src_app",
@@ -33204,7 +33314,7 @@
       "context": "import",
       "confidence": "EXTRACTED",
       "source_file": "src/App.jsx",
-      "source_location": "L14",
+      "source_location": "L18",
       "weight": 1.0,
       "_origin": "ast",
       "source": "src_app",
@@ -33216,7 +33326,7 @@
       "context": "import",
       "confidence": "EXTRACTED",
       "source_file": "src/App.jsx",
-      "source_location": "L14",
+      "source_location": "L18",
       "weight": 1.0,
       "_origin": "ast",
       "source": "src_app",
@@ -33228,7 +33338,7 @@
       "context": "import",
       "confidence": "EXTRACTED",
       "source_file": "src/App.jsx",
-      "source_location": "L40",
+      "source_location": "L46",
       "weight": 1.0,
       "_origin": "ast",
       "source": "src_app",
@@ -33240,7 +33350,7 @@
       "context": "import",
       "confidence": "EXTRACTED",
       "source_file": "src/App.jsx",
-      "source_location": "L40",
+      "source_location": "L46",
       "weight": 1.0,
       "_origin": "ast",
       "source": "src_app",
@@ -33252,7 +33362,7 @@
       "context": "import",
       "confidence": "EXTRACTED",
       "source_file": "src/App.jsx",
-      "source_location": "L21",
+      "source_location": "L25",
       "weight": 1.0,
       "_origin": "ast",
       "source": "src_app",
@@ -33264,7 +33374,7 @@
       "context": "import",
       "confidence": "EXTRACTED",
       "source_file": "src/App.jsx",
-      "source_location": "L21",
+      "source_location": "L25",
       "weight": 1.0,
       "_origin": "ast",
       "source": "src_app",
@@ -33276,7 +33386,7 @@
       "context": "import",
       "confidence": "EXTRACTED",
       "source_file": "src/App.jsx",
-      "source_location": "L9",
+      "source_location": "L13",
       "weight": 1.0,
       "_origin": "ast",
       "source": "src_app",
@@ -33288,7 +33398,7 @@
       "context": "import",
       "confidence": "EXTRACTED",
       "source_file": "src/App.jsx",
-      "source_location": "L9",
+      "source_location": "L13",
       "weight": 1.0,
       "_origin": "ast",
       "source": "src_app",
@@ -33300,7 +33410,7 @@
       "context": "import",
       "confidence": "EXTRACTED",
       "source_file": "src/App.jsx",
-      "source_location": "L19",
+      "source_location": "L23",
       "weight": 1.0,
       "_origin": "ast",
       "source": "src_app",
@@ -33312,7 +33422,7 @@
       "context": "import",
       "confidence": "EXTRACTED",
       "source_file": "src/App.jsx",
-      "source_location": "L20",
+      "source_location": "L24",
       "weight": 1.0,
       "_origin": "ast",
       "source": "src_app",
@@ -33324,7 +33434,7 @@
       "context": "import",
       "confidence": "EXTRACTED",
       "source_file": "src/App.jsx",
-      "source_location": "L20",
+      "source_location": "L24",
       "weight": 1.0,
       "_origin": "ast",
       "source": "src_app",
@@ -33336,7 +33446,7 @@
       "context": "import",
       "confidence": "EXTRACTED",
       "source_file": "src/App.jsx",
-      "source_location": "L19",
+      "source_location": "L23",
       "weight": 1.0,
       "_origin": "ast",
       "source": "src_app",
@@ -33348,7 +33458,7 @@
       "context": "import",
       "confidence": "EXTRACTED",
       "source_file": "src/App.jsx",
-      "source_location": "L22",
+      "source_location": "L26",
       "weight": 1.0,
       "_origin": "ast",
       "source": "src_app",
@@ -33360,7 +33470,7 @@
       "context": "import",
       "confidence": "EXTRACTED",
       "source_file": "src/App.jsx",
-      "source_location": "L22",
+      "source_location": "L26",
       "weight": 1.0,
       "_origin": "ast",
       "source": "src_app",
@@ -33372,7 +33482,7 @@
       "context": "import",
       "confidence": "EXTRACTED",
       "source_file": "src/App.jsx",
-      "source_location": "L56",
+      "source_location": "L57",
       "weight": 1.0,
       "_origin": "ast",
       "source": "src_app",
@@ -33384,7 +33494,7 @@
       "context": "import",
       "confidence": "EXTRACTED",
       "source_file": "src/App.jsx",
-      "source_location": "L56",
+      "source_location": "L57",
       "weight": 1.0,
       "_origin": "ast",
       "source": "src_app",
@@ -33396,7 +33506,7 @@
       "context": "import",
       "confidence": "EXTRACTED",
       "source_file": "src/App.jsx",
-      "source_location": "L55",
+      "source_location": "L56",
       "weight": 1.0,
       "_origin": "ast",
       "source": "src_app",
@@ -33408,7 +33518,7 @@
       "context": "import",
       "confidence": "EXTRACTED",
       "source_file": "src/App.jsx",
-      "source_location": "L55",
+      "source_location": "L56",
       "weight": 1.0,
       "_origin": "ast",
       "source": "src_app",
@@ -33420,7 +33530,7 @@
       "context": "import",
       "confidence": "EXTRACTED",
       "source_file": "src/App.jsx",
-      "source_location": "L32",
+      "source_location": "L36",
       "weight": 1.0,
       "_origin": "ast",
       "source": "src_app",
@@ -33432,7 +33542,7 @@
       "context": "import",
       "confidence": "EXTRACTED",
       "source_file": "src/App.jsx",
-      "source_location": "L32",
+      "source_location": "L36",
       "weight": 1.0,
       "_origin": "ast",
       "source": "src_app",
@@ -33444,7 +33554,7 @@
       "context": "import",
       "confidence": "EXTRACTED",
       "source_file": "src/App.jsx",
-      "source_location": "L54",
+      "source_location": "L55",
       "weight": 1.0,
       "_origin": "ast",
       "source": "src_app",
@@ -33456,7 +33566,7 @@
       "context": "import",
       "confidence": "EXTRACTED",
       "source_file": "src/App.jsx",
-      "source_location": "L54",
+      "source_location": "L55",
       "weight": 1.0,
       "_origin": "ast",
       "source": "src_app",
@@ -33468,7 +33578,7 @@
       "context": "import",
       "confidence": "EXTRACTED",
       "source_file": "src/App.jsx",
-      "source_location": "L53",
+      "source_location": "L54",
       "weight": 1.0,
       "_origin": "ast",
       "source": "src_app",
@@ -33480,7 +33590,7 @@
       "context": "import",
       "confidence": "EXTRACTED",
       "source_file": "src/App.jsx",
-      "source_location": "L53",
+      "source_location": "L54",
       "weight": 1.0,
       "_origin": "ast",
       "source": "src_app",
@@ -33492,7 +33602,7 @@
       "context": "import",
       "confidence": "EXTRACTED",
       "source_file": "src/App.jsx",
-      "source_location": "L52",
+      "source_location": "L53",
       "weight": 1.0,
       "_origin": "ast",
       "source": "src_app",
@@ -33504,7 +33614,7 @@
       "context": "import",
       "confidence": "EXTRACTED",
       "source_file": "src/App.jsx",
-      "source_location": "L52",
+      "source_location": "L53",
       "weight": 1.0,
       "_origin": "ast",
       "source": "src_app",
@@ -33516,7 +33626,7 @@
       "context": "import",
       "confidence": "EXTRACTED",
       "source_file": "src/App.jsx",
-      "source_location": "L23",
+      "source_location": "L27",
       "weight": 1.0,
       "_origin": "ast",
       "source": "src_app",
@@ -33528,7 +33638,7 @@
       "context": "import",
       "confidence": "EXTRACTED",
       "source_file": "src/App.jsx",
-      "source_location": "L23",
+      "source_location": "L27",
       "weight": 1.0,
       "_origin": "ast",
       "source": "src_app",
@@ -33540,7 +33650,7 @@
       "context": "import",
       "confidence": "EXTRACTED",
       "source_file": "src/App.jsx",
-      "source_location": "L24",
+      "source_location": "L28",
       "weight": 1.0,
       "_origin": "ast",
       "source": "src_app",
@@ -33552,7 +33662,7 @@
       "context": "import",
       "confidence": "EXTRACTED",
       "source_file": "src/App.jsx",
-      "source_location": "L24",
+      "source_location": "L28",
       "weight": 1.0,
       "_origin": "ast",
       "source": "src_app",
@@ -33564,7 +33674,7 @@
       "context": "import",
       "confidence": "EXTRACTED",
       "source_file": "src/App.jsx",
-      "source_location": "L26",
+      "source_location": "L30",
       "weight": 1.0,
       "_origin": "ast",
       "source": "src_app",
@@ -33576,7 +33686,7 @@
       "context": "import",
       "confidence": "EXTRACTED",
       "source_file": "src/App.jsx",
-      "source_location": "L26",
+      "source_location": "L30",
       "weight": 1.0,
       "_origin": "ast",
       "source": "src_app",
@@ -33588,7 +33698,7 @@
       "context": "import",
       "confidence": "EXTRACTED",
       "source_file": "src/App.jsx",
-      "source_location": "L6",
+      "source_location": "L10",
       "weight": 1.0,
       "_origin": "ast",
       "source": "src_app",
@@ -33600,7 +33710,7 @@
       "context": "import",
       "confidence": "EXTRACTED",
       "source_file": "src/App.jsx",
-      "source_location": "L6",
+      "source_location": "L10",
       "weight": 1.0,
       "_origin": "ast",
       "source": "src_app",
@@ -33612,7 +33722,7 @@
       "context": "import",
       "confidence": "EXTRACTED",
       "source_file": "src/App.jsx",
-      "source_location": "L16",
+      "source_location": "L20",
       "weight": 1.0,
       "_origin": "ast",
       "source": "src_app",
@@ -33624,7 +33734,7 @@
       "context": "import",
       "confidence": "EXTRACTED",
       "source_file": "src/App.jsx",
-      "source_location": "L16",
+      "source_location": "L20",
       "weight": 1.0,
       "_origin": "ast",
       "source": "src_app",
@@ -33660,7 +33770,7 @@
       "context": "import",
       "confidence": "EXTRACTED",
       "source_file": "src/App.jsx",
-      "source_location": "L35",
+      "source_location": "L39",
       "weight": 1.0,
       "_origin": "ast",
       "source": "src_app",
@@ -33672,7 +33782,7 @@
       "context": "import",
       "confidence": "EXTRACTED",
       "source_file": "src/App.jsx",
-      "source_location": "L35",
+      "source_location": "L39",
       "weight": 1.0,
       "_origin": "ast",
       "source": "src_app",
@@ -33684,7 +33794,7 @@
       "context": "import",
       "confidence": "EXTRACTED",
       "source_file": "src/App.jsx",
-      "source_location": "L33",
+      "source_location": "L37",
       "weight": 1.0,
       "_origin": "ast",
       "source": "src_app",
@@ -33696,7 +33806,7 @@
       "context": "import",
       "confidence": "EXTRACTED",
       "source_file": "src/App.jsx",
-      "source_location": "L33",
+      "source_location": "L37",
       "weight": 1.0,
       "_origin": "ast",
       "source": "src_app",
@@ -33708,7 +33818,7 @@
       "context": "import",
       "confidence": "EXTRACTED",
       "source_file": "src/App.jsx",
-      "source_location": "L34",
+      "source_location": "L38",
       "weight": 1.0,
       "_origin": "ast",
       "source": "src_app",
@@ -33720,7 +33830,7 @@
       "context": "import",
       "confidence": "EXTRACTED",
       "source_file": "src/App.jsx",
-      "source_location": "L34",
+      "source_location": "L38",
       "weight": 1.0,
       "_origin": "ast",
       "source": "src_app",
@@ -35435,7 +35545,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "src/components/CongratsPopup.jsx",
-      "source_location": "L7",
+      "source_location": "L6",
       "weight": 1.0,
       "_origin": "ast",
       "source": "src_components_congratspopup",
@@ -35447,7 +35557,7 @@
       "context": "import",
       "confidence": "EXTRACTED",
       "source_file": "src/components/CongratsPopup.jsx",
-      "source_location": "L3",
+      "source_location": "L2",
       "weight": 1.0,
       "_origin": "ast",
       "source": "src_components_congratspopup",
@@ -35459,7 +35569,7 @@
       "context": "import",
       "confidence": "EXTRACTED",
       "source_file": "src/components/CongratsPopup.jsx",
-      "source_location": "L3",
+      "source_location": "L2",
       "weight": 1.0,
       "_origin": "ast",
       "source": "src_components_congratspopup",
@@ -35471,7 +35581,7 @@
       "context": "import",
       "confidence": "EXTRACTED",
       "source_file": "src/components/CongratsPopup.jsx",
-      "source_location": "L3",
+      "source_location": "L2",
       "weight": 1.0,
       "_origin": "ast",
       "source": "src_components_congratspopup",
@@ -35483,7 +35593,7 @@
       "context": "import",
       "confidence": "EXTRACTED",
       "source_file": "src/components/CongratsPopup.jsx",
-      "source_location": "L5",
+      "source_location": "L4",
       "weight": 1.0,
       "_origin": "ast",
       "source": "src_components_congratspopup",
@@ -35495,7 +35605,7 @@
       "context": "import",
       "confidence": "EXTRACTED",
       "source_file": "src/components/CongratsPopup.jsx",
-      "source_location": "L4",
+      "source_location": "L3",
       "weight": 1.0,
       "_origin": "ast",
       "source": "src_components_congratspopup",
@@ -35507,7 +35617,7 @@
       "context": "import",
       "confidence": "EXTRACTED",
       "source_file": "src/components/CongratsPopup.jsx",
-      "source_location": "L4",
+      "source_location": "L3",
       "weight": 1.0,
       "_origin": "ast",
       "source": "src_components_congratspopup",
@@ -35519,7 +35629,7 @@
       "context": "import",
       "confidence": "EXTRACTED",
       "source_file": "src/components/CongratsPopup.jsx",
-      "source_location": "L4",
+      "source_location": "L3",
       "weight": 1.0,
       "_origin": "ast",
       "source": "src_components_congratspopup",
@@ -35532,7 +35642,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "src/components/CongratsPopup.jsx",
-      "source_location": "L26",
+      "source_location": "L25",
       "weight": 1.0,
       "_origin": "ast",
       "source": "src_components_congratspopup_congratspopup",
@@ -55777,7 +55887,7 @@
       "context": "import",
       "confidence": "EXTRACTED",
       "source_file": "src/components/ball/BallGuestVerify.jsx",
-      "source_location": "L6",
+      "source_location": "L5",
       "weight": 1.0,
       "_origin": "ast",
       "source": "src_components_ball_ballguestverify",
@@ -55805,6 +55915,18 @@
       "weight": 1.0,
       "_origin": "ast",
       "source": "src_components_ball_ballui",
+      "target": "src_components_admin_theme",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "src/components/ball/DressCodeDetails.jsx",
+      "source_location": "L1",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "src_components_ball_dresscodedetails",
       "target": "src_components_admin_theme",
       "confidence_score": 1.0
     },
@@ -56449,7 +56571,7 @@
       "context": "import",
       "confidence": "EXTRACTED",
       "source_file": "src/components/ball/BallGuestVerify.jsx",
-      "source_location": "L6",
+      "source_location": "L5",
       "weight": 1.0,
       "_origin": "ast",
       "source": "src_components_ball_ballguestverify",
@@ -56477,6 +56599,18 @@
       "weight": 1.0,
       "_origin": "ast",
       "source": "src_components_ball_ballui",
+      "target": "src_components_admin_theme_p",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "src/components/ball/DressCodeDetails.jsx",
+      "source_location": "L1",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "src_components_ball_dresscodedetails",
       "target": "src_components_admin_theme_p",
       "confidence_score": 1.0
     },
@@ -58379,7 +58513,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "src/components/ball/BallGuestVerify.jsx",
-      "source_location": "L134",
+      "source_location": "L138",
       "weight": 1.0,
       "_origin": "ast",
       "source": "src_components_ball_ballguestverify",
@@ -58391,7 +58525,7 @@
       "context": "import",
       "confidence": "EXTRACTED",
       "source_file": "src/components/ball/BallGuestVerify.jsx",
-      "source_location": "L8",
+      "source_location": "L7",
       "weight": 1.0,
       "_origin": "ast",
       "source": "src_components_ball_ballguestverify",
@@ -58403,7 +58537,7 @@
       "context": "import",
       "confidence": "EXTRACTED",
       "source_file": "src/components/ball/BallGuestVerify.jsx",
-      "source_location": "L8",
+      "source_location": "L7",
       "weight": 1.0,
       "_origin": "ast",
       "source": "src_components_ball_ballguestverify",
@@ -58415,7 +58549,7 @@
       "context": "import",
       "confidence": "EXTRACTED",
       "source_file": "src/components/ball/BallGuestVerify.jsx",
-      "source_location": "L8",
+      "source_location": "L7",
       "weight": 1.0,
       "_origin": "ast",
       "source": "src_components_ball_ballguestverify",
@@ -58427,11 +58561,35 @@
       "context": "import",
       "confidence": "EXTRACTED",
       "source_file": "src/components/ball/BallGuestVerify.jsx",
-      "source_location": "L8",
+      "source_location": "L7",
       "weight": 1.0,
       "_origin": "ast",
       "source": "src_components_ball_ballguestverify",
       "target": "src_components_ball_ballui_spinner",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "src/components/ball/BallGuestVerify.jsx",
+      "source_location": "L8",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "src_components_ball_ballguestverify",
+      "target": "src_components_ball_dresscodedetails",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "src/components/ball/BallGuestVerify.jsx",
+      "source_location": "L8",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "src_components_ball_ballguestverify",
+      "target": "src_components_ball_dresscodedetails_dresscodedetails",
       "confidence_score": 1.0
     },
     {
@@ -58456,42 +58614,6 @@
       "_origin": "ast",
       "source": "src_components_ball_ballguestverify",
       "target": "src_lib_ballapi_guestverify",
-      "confidence_score": 1.0
-    },
-    {
-      "relation": "imports_from",
-      "context": "import",
-      "confidence": "EXTRACTED",
-      "source_file": "src/components/ball/BallGuestVerify.jsx",
-      "source_location": "L5",
-      "weight": 1.0,
-      "_origin": "ast",
-      "source": "src_components_ball_ballguestverify",
-      "target": "src_lib_ballapprovers",
-      "confidence_score": 1.0
-    },
-    {
-      "relation": "imports",
-      "context": "import",
-      "confidence": "EXTRACTED",
-      "source_file": "src/components/ball/BallGuestVerify.jsx",
-      "source_location": "L5",
-      "weight": 1.0,
-      "_origin": "ast",
-      "source": "src_components_ball_ballguestverify",
-      "target": "src_lib_ballapprovers_dress_approvers",
-      "confidence_score": 1.0
-    },
-    {
-      "relation": "imports",
-      "context": "import",
-      "confidence": "EXTRACTED",
-      "source_file": "src/components/ball/BallGuestVerify.jsx",
-      "source_location": "L5",
-      "weight": 1.0,
-      "_origin": "ast",
-      "source": "src_components_ball_ballguestverify",
-      "target": "src_lib_ballapprovers_weston",
       "confidence_score": 1.0
     },
     {
@@ -58533,7 +58655,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "src/components/ball/BallLanding.jsx",
-      "source_location": "L213",
+      "source_location": "L212",
       "weight": 1.0,
       "_origin": "ast",
       "source": "src_components_ball_balllanding",
@@ -58544,7 +58666,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "src/components/ball/BallLanding.jsx",
-      "source_location": "L211",
+      "source_location": "L210",
       "weight": 1.0,
       "_origin": "ast",
       "source": "src_components_ball_balllanding",
@@ -58555,7 +58677,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "src/components/ball/BallLanding.jsx",
-      "source_location": "L239",
+      "source_location": "L238",
       "weight": 1.0,
       "_origin": "ast",
       "source": "src_components_ball_balllanding",
@@ -58566,7 +58688,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "src/components/ball/BallLanding.jsx",
-      "source_location": "L203",
+      "source_location": "L202",
       "weight": 1.0,
       "_origin": "ast",
       "source": "src_components_ball_balllanding",
@@ -58577,7 +58699,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "src/components/ball/BallLanding.jsx",
-      "source_location": "L206",
+      "source_location": "L205",
       "weight": 1.0,
       "_origin": "ast",
       "source": "src_components_ball_balllanding",
@@ -58610,7 +58732,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "src/components/ball/BallLanding.jsx",
-      "source_location": "L210",
+      "source_location": "L209",
       "weight": 1.0,
       "_origin": "ast",
       "source": "src_components_ball_balllanding",
@@ -58621,7 +58743,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "src/components/ball/BallLanding.jsx",
-      "source_location": "L197",
+      "source_location": "L196",
       "weight": 1.0,
       "_origin": "ast",
       "source": "src_components_ball_balllanding",
@@ -58632,7 +58754,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "src/components/ball/BallLanding.jsx",
-      "source_location": "L202",
+      "source_location": "L201",
       "weight": 1.0,
       "_origin": "ast",
       "source": "src_components_ball_balllanding",
@@ -58665,7 +58787,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "src/components/ball/BallLanding.jsx",
-      "source_location": "L201",
+      "source_location": "L200",
       "weight": 1.0,
       "_origin": "ast",
       "source": "src_components_ball_balllanding",
@@ -58676,7 +58798,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "src/components/ball/BallLanding.jsx",
-      "source_location": "L223",
+      "source_location": "L222",
       "weight": 1.0,
       "_origin": "ast",
       "source": "src_components_ball_balllanding",
@@ -58784,11 +58906,176 @@
       "context": "call",
       "confidence": "EXTRACTED",
       "source_file": "src/components/ball/BallLanding.jsx",
-      "source_location": "L143",
+      "source_location": "L142",
       "weight": 1.0,
       "_origin": "ast",
       "source": "src_components_ball_balllanding_balllanding",
       "target": "src_components_ball_balllanding_money",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src/components/ball/DressCodeDetails.jsx",
+      "source_location": "L30",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "src_components_ball_dresscodedetails",
+      "target": "src_components_ball_dresscodedetails_block",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src/components/ball/DressCodeDetails.jsx",
+      "source_location": "L40",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "src_components_ball_dresscodedetails",
+      "target": "src_components_ball_dresscodedetails_dresscodedetails",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src/components/ball/DressCodeDetails.jsx",
+      "source_location": "L17",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "src_components_ball_dresscodedetails",
+      "target": "src_components_ball_dresscodedetails_list",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "src/components/ball/DressCodeDetails.jsx",
+      "source_location": "L2",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "src_components_ball_dresscodedetails",
+      "target": "src_lib_ballapprovers",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "src/components/ball/DressCodeDetails.jsx",
+      "source_location": "L2",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "src_components_ball_dresscodedetails",
+      "target": "src_lib_ballapprovers_dress_approvers",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "src/components/ball/DressCodeDetails.jsx",
+      "source_location": "L2",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "src_components_ball_dresscodedetails",
+      "target": "src_lib_ballapprovers_weston",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "src/components/ball/DressCodeDetails.jsx",
+      "source_location": "L3",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "src_components_ball_dresscodedetails",
+      "target": "src_lib_balldresscode",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "src/components/ball/DressCodeDetails.jsx",
+      "source_location": "L3",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "src_components_ball_dresscodedetails",
+      "target": "src_lib_balldresscode_dress_approval_rules",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "src/components/ball/DressCodeDetails.jsx",
+      "source_location": "L3",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "src_components_ball_dresscodedetails",
+      "target": "src_lib_balldresscode_female_avoid",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "src/components/ball/DressCodeDetails.jsx",
+      "source_location": "L3",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "src_components_ball_dresscodedetails",
+      "target": "src_lib_balldresscode_female_wear",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "src/components/ball/DressCodeDetails.jsx",
+      "source_location": "L3",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "src_components_ball_dresscodedetails",
+      "target": "src_lib_balldresscode_male_avoid",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "src/components/ball/DressCodeDetails.jsx",
+      "source_location": "L3",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "src_components_ball_dresscodedetails",
+      "target": "src_lib_balldresscode_male_wear",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "src/components/ball/signup/StepDocumentation.jsx",
+      "source_location": "L6",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "src_components_ball_signup_stepdocumentation",
+      "target": "src_components_ball_dresscodedetails",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "src/components/ball/signup/StepDocumentation.jsx",
+      "source_location": "L6",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "src_components_ball_signup_stepdocumentation",
+      "target": "src_components_ball_dresscodedetails_dresscodedetails",
       "confidence_score": 1.0
     },
     {
@@ -59728,7 +60015,7 @@
       "context": "import",
       "confidence": "EXTRACTED",
       "source_file": "src/components/ball/signup/StepDocumentation.jsx",
-      "source_location": "L6",
+      "source_location": "L5",
       "weight": 1.0,
       "_origin": "ast",
       "source": "src_components_ball_signup_stepdocumentation",
@@ -59740,7 +60027,7 @@
       "context": "import",
       "confidence": "EXTRACTED",
       "source_file": "src/components/ball/signup/StepDocumentation.jsx",
-      "source_location": "L6",
+      "source_location": "L5",
       "weight": 1.0,
       "_origin": "ast",
       "source": "src_components_ball_signup_stepdocumentation",
@@ -59752,7 +60039,7 @@
       "context": "import",
       "confidence": "EXTRACTED",
       "source_file": "src/components/ball/signup/StepDocumentation.jsx",
-      "source_location": "L6",
+      "source_location": "L5",
       "weight": 1.0,
       "_origin": "ast",
       "source": "src_components_ball_signup_stepdocumentation",
@@ -59763,7 +60050,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "src/components/ball/signup/StepDocumentation.jsx",
-      "source_location": "L169",
+      "source_location": "L157",
       "weight": 1.0,
       "_origin": "ast",
       "source": "src_components_ball_signup_stepdocumentation",
@@ -59785,7 +60072,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "src/components/ball/signup/StepDocumentation.jsx",
-      "source_location": "L168",
+      "source_location": "L156",
       "weight": 1.0,
       "_origin": "ast",
       "source": "src_components_ball_signup_stepdocumentation",
@@ -59796,7 +60083,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "src/components/ball/signup/StepDocumentation.jsx",
-      "source_location": "L171",
+      "source_location": "L159",
       "weight": 1.0,
       "_origin": "ast",
       "source": "src_components_ball_signup_stepdocumentation",
@@ -59836,42 +60123,6 @@
       "_origin": "ast",
       "source": "src_components_ball_signup_stepdocumentation",
       "target": "src_lib_ballapi_submitsignup",
-      "confidence_score": 1.0
-    },
-    {
-      "relation": "imports_from",
-      "context": "import",
-      "confidence": "EXTRACTED",
-      "source_file": "src/components/ball/signup/StepDocumentation.jsx",
-      "source_location": "L5",
-      "weight": 1.0,
-      "_origin": "ast",
-      "source": "src_components_ball_signup_stepdocumentation",
-      "target": "src_lib_ballapprovers",
-      "confidence_score": 1.0
-    },
-    {
-      "relation": "imports",
-      "context": "import",
-      "confidence": "EXTRACTED",
-      "source_file": "src/components/ball/signup/StepDocumentation.jsx",
-      "source_location": "L5",
-      "weight": 1.0,
-      "_origin": "ast",
-      "source": "src_components_ball_signup_stepdocumentation",
-      "target": "src_lib_ballapprovers_dress_approvers",
-      "confidence_score": 1.0
-    },
-    {
-      "relation": "imports",
-      "context": "import",
-      "confidence": "EXTRACTED",
-      "source_file": "src/components/ball/signup/StepDocumentation.jsx",
-      "source_location": "L5",
-      "weight": 1.0,
-      "_origin": "ast",
-      "source": "src_components_ball_signup_stepdocumentation",
-      "target": "src_lib_ballapprovers_weston",
       "confidence_score": 1.0
     },
     {
@@ -59986,7 +60237,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "src/components/ball/signup/StepGuestInfo.jsx",
-      "source_location": "L313",
+      "source_location": "L325",
       "weight": 1.0,
       "_origin": "ast",
       "source": "src_components_ball_signup_stepguestinfo",
@@ -59997,7 +60248,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "src/components/ball/signup/StepGuestInfo.jsx",
-      "source_location": "L26",
+      "source_location": "L29",
       "weight": 1.0,
       "_origin": "ast",
       "source": "src_components_ball_signup_stepguestinfo",
@@ -60008,7 +60259,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "src/components/ball/signup/StepGuestInfo.jsx",
-      "source_location": "L30",
+      "source_location": "L33",
       "weight": 1.0,
       "_origin": "ast",
       "source": "src_components_ball_signup_stepguestinfo",
@@ -60104,7 +60355,7 @@
       "context": "call",
       "confidence": "EXTRACTED",
       "source_file": "src/components/ball/signup/StepGuestInfo.jsx",
-      "source_location": "L134",
+      "source_location": "L137",
       "weight": 1.0,
       "_origin": "ast",
       "source": "src_components_ball_signup_stepguestinfo_stepguestinfo",
@@ -60117,7 +60368,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "src/components/ball/signup/StepGuestInfo.jsx",
-      "source_location": "L59",
+      "source_location": "L62",
       "weight": 1.0,
       "_origin": "ast",
       "source": "src_components_ball_signup_stepguestinfo_stepguestinfo",
@@ -60129,7 +60380,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "src/components/ball/signup/StepGuestInfo.jsx",
-      "source_location": "L108",
+      "source_location": "L111",
       "weight": 1.0,
       "_origin": "ast",
       "source": "src_components_ball_signup_stepguestinfo_stepguestinfo",
@@ -74028,6 +74279,61 @@
       "_origin": "ast",
       "source": "src_lib_ballapprovers",
       "target": "src_lib_ballapprovers_weston",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src/lib/ballDressCode.js",
+      "source_location": "L42",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "src_lib_balldresscode",
+      "target": "src_lib_balldresscode_dress_approval_rules",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src/lib/ballDressCode.js",
+      "source_location": "L9",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "src_lib_balldresscode",
+      "target": "src_lib_balldresscode_female_avoid",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src/lib/ballDressCode.js",
+      "source_location": "L21",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "src_lib_balldresscode",
+      "target": "src_lib_balldresscode_female_wear",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src/lib/ballDressCode.js",
+      "source_location": "L28",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "src_lib_balldresscode",
+      "target": "src_lib_balldresscode_male_avoid",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src/lib/ballDressCode.js",
+      "source_location": "L35",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "src_lib_balldresscode",
+      "target": "src_lib_balldresscode_male_wear",
       "confidence_score": 1.0
     },
     {
@@ -92433,5 +92739,5 @@
     }
   ],
   "hyperedges": [],
-  "built_at_commit": "b34939f0fe6dfad8a5d68808a37e25c51141871f"
+  "built_at_commit": "5321dad9eebe0ab4884afa82183212a75b76aae9"
 }

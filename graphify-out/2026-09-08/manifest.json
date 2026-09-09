@@ -25,8 +25,8 @@
     "semantic_hash": "c1ee9ce6a4fe04105dbf8e619390df5e"
   },
   "src/App.jsx": {
-    "mtime": 1788877291.5637507,
-    "ast_hash": "47526b9aa44e2f7f1ac6238c75df1a53",
+    "mtime": 1788912593.2105463,
+    "ast_hash": "b10c8cb53ca27bd0207d23d75e0c8962",
     "semantic_hash": ""
   },
   "src/components/About.jsx": {
@@ -120,8 +120,8 @@
     "semantic_hash": ""
   },
   "src/components/TopNav.jsx": {
-    "mtime": 1788877295.5353453,
-    "ast_hash": "236882abb2190c4154170ececc679505",
+    "mtime": 1788912610.3292859,
+    "ast_hash": "52c7d8a93551b675e70418997a621ac8",
     "semantic_hash": ""
   },
   "src/components/VerifiedTooltip.jsx": {
@@ -1995,13 +1995,13 @@
     "semantic_hash": ""
   },
   "src/components/ball/BallGuestVerify.jsx": {
-    "mtime": 1788471739.4107983,
-    "ast_hash": "8bbf71423b17743af802d53922c763bb",
+    "mtime": 1788912833.0035515,
+    "ast_hash": "80724275d439764f6683b79a5ac7043d",
     "semantic_hash": ""
   },
   "src/components/ball/BallLanding.jsx": {
-    "mtime": 1788428940.8027225,
-    "ast_hash": "3c51a2633c1f76e1b0c1c8fcf6961e18",
+    "mtime": 1788912881.993592,
+    "ast_hash": "de07cda91a32d139b8d2ce015b4925bc",
     "semantic_hash": ""
   },
   "src/components/ball/dress/BallDressLogin.jsx": {
@@ -2040,13 +2040,13 @@
     "semantic_hash": ""
   },
   "src/components/ball/signup/StepDocumentation.jsx": {
-    "mtime": 1788472466.1358895,
-    "ast_hash": "1e60b8315edd038384ad3a8093fe5c52",
+    "mtime": 1788912875.9444551,
+    "ast_hash": "a1b1f07fa87c9616238a295d81f23cdb",
     "semantic_hash": ""
   },
   "src/components/ball/signup/StepGuestInfo.jsx": {
-    "mtime": 1788471633.4616811,
-    "ast_hash": "f786dddbed5e444ab473e5ec798a7df9",
+    "mtime": 1788912660.7350984,
+    "ast_hash": "c7c95dd2448a97904e995960d90759cb",
     "semantic_hash": ""
   },
   "src/components/ball/signup/formUi.jsx": {
@@ -2370,8 +2370,8 @@
     "semantic_hash": ""
   },
   "src/components/CongratsPopup.jsx": {
-    "mtime": 1788169050.4835985,
-    "ast_hash": "d98eb1cd675dcd9eec0da0fe204e47e5",
+    "mtime": 1788912642.566497,
+    "ast_hash": "30ac72c97343c51e46501a3ede97a6a4",
     "semantic_hash": ""
   },
   "src/components/admin/panels/photos/CompPhotoBallot.jsx": {
@@ -2657,6 +2657,16 @@
   "src/hooks/useStayAwake.js": {
     "mtime": 1788862837.7023416,
     "ast_hash": "72ca1434c9e86318b36239751fbbd976",
+    "semantic_hash": ""
+  },
+  "src/components/ball/DressCodeDetails.jsx": {
+    "mtime": 1788912850.5498672,
+    "ast_hash": "d699d592a86e850454f65179d05211d0",
+    "semantic_hash": ""
+  },
+  "src/lib/ballDressCode.js": {
+    "mtime": 1788912783.4017909,
+    "ast_hash": "6463633a7f6c2d589e5428286e777d2b",
     "semantic_hash": ""
   }
 }

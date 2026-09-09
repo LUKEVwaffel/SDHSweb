@@ -3,11 +3,11 @@ import { supabase as SB } from '../lib/supabaseClient';
 import { getDeviceId } from '../lib/fingerprint';
 import posthog from '../lib/posthog';
 import {
-  CAMPAIGN_ID, INTRO, RAIDER_TEAMS, PHONE_TYPES, PILL_QUESTIONS, TEXT_QUESTIONS,
+  CAMPAIGN_ID, INTRO, RAIDER_TEAMS, PHONE_TYPES, QUESTIONS, TEXT_QUESTIONS,
 } from '../lib/opticSurveyQuestions';
 
 // Public, no-login, phone-first post-competition parent survey for OPTIC.
-// Self-contained route (own chrome, no TopNav/Footer — same bypass as
+// Self-contained route (own chrome, no TopNav/Footer, same bypass as
 // /feedback and /review) reached at /survey, meant to be opened from a
 // group-text link or QR after a comp.
 //
@@ -36,7 +36,7 @@ function markSubmitted() {
 function emptyForm() {
   return {
     submitter_name: '', raider_team: '', phone_type: '',
-    ...Object.fromEntries(PILL_QUESTIONS.map((q) => [q.id, ''])),
+    ...Object.fromEntries(QUESTIONS.map((q) => [q.id, ''])),
     ...Object.fromEntries(TEXT_QUESTIONS.map((q) => [q.id, ''])),
   };
 }
@@ -62,8 +62,8 @@ export default function OpticSurvey() {
     setErrMsg('');
     const fp = await getDeviceId().catch(() => null);
 
-    const pillCols = Object.fromEntries(
-      PILL_QUESTIONS.map((q) => [q.id, form[q.id] || null]),
+    const mcCols = Object.fromEntries(
+      QUESTIONS.map((q) => [q.id, form[q.id] || null]),
     );
     const textCols = Object.fromEntries(
       TEXT_QUESTIONS.map((q) => [q.id, form[q.id].trim() || null]),
@@ -74,14 +74,14 @@ export default function OpticSurvey() {
       submitter_name: form.submitter_name.trim() || null,
       raider_team: form.raider_team || null,
       phone_type: form.phone_type,
-      ...pillCols,
+      ...mcCols,
       ...textCols,
       submitter_fp: fp,
     });
 
     if (error) {
       setState('err');
-      setErrMsg('Could not send — please try again in a minute.');
+      setErrMsg('Could not send. Please try again in a minute.');
       return;
     }
     posthog.capture('optic_survey_submitted', {
@@ -96,12 +96,12 @@ export default function OpticSurvey() {
       <Shell>
         <Centered>
           <div style={{ fontSize: 34, marginBottom: 14 }}>✓</div>
-          <div style={{ fontFamily: 'Oswald, sans-serif', fontSize: 20, color: P.cream, fontWeight: 600, marginBottom: 8 }}>
+          <div style={{ fontFamily: 'Oswald, sans-serif', fontSize: 'clamp(17px, 5vw, 20px)', color: P.cream, fontWeight: 600, marginBottom: 8 }}>
             Sent. Thank you.
           </div>
           <div style={{ fontFamily: 'Inter, sans-serif', fontSize: 13, color: P.mute, maxWidth: 380, lineHeight: 1.6 }}>
-            Every answer gets read. This is exactly what turns OPTIC from a one-day
-            beta into something we run at every Raider comp. Watch the Raider page mid next week for the full set of photos.
+            Every answer gets read. This is what decides whether OPTIC comes back
+            for the Raider competitions coming up.
           </div>
         </Centered>
       </Shell>
@@ -115,8 +115,8 @@ export default function OpticSurvey() {
           <div style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: 10, color: P.gold, letterSpacing: '0.2em', marginBottom: 10 }}>
             OPTIC SURVEY
           </div>
-          <div style={{ fontFamily: 'Oswald, sans-serif', fontSize: 20, color: P.cream, fontWeight: 600, marginBottom: 8 }}>
-            You already sent this — thank you.
+          <div style={{ fontFamily: 'Oswald, sans-serif', fontSize: 'clamp(17px, 5vw, 20px)', color: P.cream, fontWeight: 600, marginBottom: 8 }}>
+            You already sent this. Thank you.
           </div>
           <div style={{ fontFamily: 'Inter, sans-serif', fontSize: 13, color: P.mute, maxWidth: 360, lineHeight: 1.6, marginBottom: 20 }}>
             Got more to add, or filling this out for a second phone? You can send another response.
@@ -132,11 +132,11 @@ export default function OpticSurvey() {
   if (phase === 'intro') {
     return (
       <Shell>
-        <div style={{ maxWidth: 620, margin: '0 auto', padding: '48px 20px 60px' }}>
+        <div style={{ maxWidth: 620, margin: '0 auto', padding: '44px 18px 56px' }}>
           <div style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: 10, color: P.gold, letterSpacing: '0.24em', marginBottom: 14 }}>
             {INTRO.kicker}
           </div>
-          <h1 style={{ fontFamily: 'Oswald, sans-serif', fontSize: 30, color: P.cream, fontWeight: 600, letterSpacing: '0.01em', margin: '0 0 20px', lineHeight: 1.15 }}>
+          <h1 style={{ fontFamily: 'Oswald, sans-serif', fontSize: 'clamp(22px, 6.5vw, 30px)', color: P.cream, fontWeight: 600, letterSpacing: '0.01em', margin: '0 0 20px', lineHeight: 1.15 }}>
             {INTRO.title}
           </h1>
           {INTRO.paragraphs.map((para, i) => (
@@ -161,12 +161,12 @@ export default function OpticSurvey() {
         <div style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: 10, color: P.gold, letterSpacing: '0.2em', marginBottom: 6 }}>
           OPTIC SURVEY
         </div>
-        <div style={{ fontFamily: 'Oswald, sans-serif', fontSize: 22, color: P.cream, fontWeight: 600, letterSpacing: '0.01em' }}>
+        <div style={{ fontFamily: 'Oswald, sans-serif', fontSize: 'clamp(18px, 5.5vw, 22px)', color: P.cream, fontWeight: 600, letterSpacing: '0.01em' }}>
           How did it actually go?
         </div>
         <div style={{ fontFamily: 'Inter, sans-serif', fontSize: 13, color: P.mute, marginTop: 10, lineHeight: 1.6 }}>
-          Tap your answers. The written boxes are where the useful stuff is — a full sentence
-          beats one word every time. Nothing here is graded.
+          Just tap your answers. The written boxes at the end are optional, so add
+          detail only if you feel like it. Nothing here is graded.
         </div>
 
         <form onSubmit={submit} style={{ marginTop: 26 }}>
@@ -184,7 +184,7 @@ export default function OpticSurvey() {
 
           <div style={{ height: 1, background: P.hair, margin: '30px 0' }} />
 
-          {PILL_QUESTIONS.map((q) => (
+          {QUESTIONS.map((q) => (
             <Field key={q.id} label={q.prompt}>
               <Pills options={q.options} value={form[q.id]} onChange={(v) => set(q.id, v)} />
             </Field>
@@ -192,14 +192,22 @@ export default function OpticSurvey() {
 
           <div style={{ height: 1, background: P.hair, margin: '30px 0' }} />
 
+          <div style={{ fontFamily: 'Oswald, sans-serif', fontSize: 16, color: P.cream, fontWeight: 600, marginBottom: 6 }}>
+            Optional written answers
+          </div>
+          <div style={{ fontFamily: 'Inter, sans-serif', fontSize: 12.5, color: P.mute, lineHeight: 1.6, marginBottom: 22 }}>
+            None of these are required. Skip every one of them and your survey still
+            counts. They are just here if you want to say more than the taps allow.
+          </div>
+
           {TEXT_QUESTIONS.map((q) => (
-            <Field key={q.id} label={q.label}>
+            <Field key={q.id} label={`${q.label} (optional)`}>
               {q.example && (
                 <div style={{ fontFamily: 'Inter, sans-serif', fontSize: 11.5, color: P.faint, fontStyle: 'italic', marginBottom: 8, lineHeight: 1.55 }}>
                   Good answer looks like: {q.example}
                 </div>
               )}
-              <TextInput multiline value={form[q.id]} onChange={(v) => set(q.id, v)} placeholder="Type your answer…" />
+              <TextInput multiline value={form[q.id]} onChange={(v) => set(q.id, v)} placeholder="Optional, leave blank to skip" />
             </Field>
           ))}
 
@@ -294,8 +302,11 @@ function Pills({ options, value, onChange }) {
               background: active ? P.gold : 'transparent',
               border: `1px solid ${active ? P.gold : P.hair}`,
               color: active ? P.ink : P.mute,
-              fontFamily: 'Inter, sans-serif', fontSize: 12.5, fontWeight: active ? 600 : 400,
-              padding: '9px 15px', cursor: 'pointer', transition: 'all 0.15s',
+              fontFamily: 'Inter, sans-serif', fontSize: 13, fontWeight: active ? 600 : 400,
+              padding: '11px 16px', minHeight: 44, lineHeight: 1.3,
+              display: 'inline-flex', alignItems: 'center', textAlign: 'left',
+              maxWidth: '100%', whiteSpace: 'normal', overflowWrap: 'anywhere',
+              cursor: 'pointer', transition: 'all 0.15s', WebkitTapHighlightColor: 'transparent',
             }}
           >
             {opt.label}

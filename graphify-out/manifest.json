@@ -2320,18 +2320,18 @@
     "semantic_hash": ""
   },
   "src/components/OpticSurvey.jsx": {
-    "mtime": 1788050333.6323295,
-    "ast_hash": "de7367bbe80f7bad43076e584f434233",
+    "mtime": 1788914013.9660044,
+    "ast_hash": "fd9e500e779718d29c59205ce9b5f3f8",
     "semantic_hash": ""
   },
   "src/lib/opticSurveyQuestions.js": {
-    "mtime": 1788050284.7849321,
-    "ast_hash": "32ec0fde2acad968f47c4368c2768948",
+    "mtime": 1788913816.4915795,
+    "ast_hash": "fecb3be993ba47228622a49de6a77b72",
     "semantic_hash": ""
   },
   "supabase/optic_survey.sql": {
-    "mtime": 1788050357.4978213,
-    "ast_hash": "9e9cd67758822c8819ad6dc217a7fded",
+    "mtime": 1788913843.4137273,
+    "ast_hash": "34641798ee6296553f7eef196aebe547",
     "semantic_hash": ""
   },
   "src/components/tv/TvCongratsScreen.jsx": {
