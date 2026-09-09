@@ -9,7 +9,7 @@ function money(n) {
   return n == null ? null : `$${Number(n).toFixed(Number.isInteger(Number(n)) ? 0 : 2)}`;
 }
 
-const REDIRECT_SECONDS = 12;
+const REDIRECT_SECONDS = 45;
 
 export default function SignupConfirmation({ cadetName, hasGuest, guestName, guestType, notificationEmail, result }) {
   const formRequired = result ? result.field_trip_form_required !== false : true;
@@ -18,12 +18,17 @@ export default function SignupConfirmation({ cadetName, hasGuest, guestName, gue
   const friendAmount = money(result?.friend_amount_due);
   const friendMethod = result?.friend_payment_method;
 
+  // Only auto-redirect when a confirmation email is on its way — a phone-only
+  // signer has no other copy of what they owe / what to bring, so leave them
+  // on this screen. When it does run, it's cancellable.
+  const [redirecting, setRedirecting] = useState(Boolean(notificationEmail));
   const [count, setCount] = useState(REDIRECT_SECONDS);
   useEffect(() => {
+    if (!redirecting) return undefined;
     const tick = setInterval(() => setCount((c) => c - 1), 1000);
     const go = setTimeout(() => { window.location.href = '/'; }, REDIRECT_SECONDS * 1000);
     return () => { clearInterval(tick); clearTimeout(go); };
-  }, []);
+  }, [redirecting]);
 
   return (
     <div style={{ border: `1px solid ${P.gold}`, background: P.navy, padding: 28 }}>
@@ -39,7 +44,7 @@ export default function SignupConfirmation({ cadetName, hasGuest, guestName, gue
         Thanks, {cadetName}. Your Military Ball signup is in.{' '}
         {notificationEmail
           ? `A confirmation email is on its way to ${notificationEmail}.`
-          : 'No email was given, so watch for word from 1SG Kaz or Chief.'}
+          : 'No email was given — screenshot this screen now so you have the payment and next-step details, and watch for word from 1SG Kaz or Chief.'}
       </p>
       <p className="ball-fade-up ball-d1" style={para}>
         {hasGuest
@@ -68,9 +73,19 @@ export default function SignupConfirmation({ cadetName, hasGuest, guestName, gue
         >
           RETURN TO HOME →
         </a>
-        <span style={{ fontFamily: mono, fontSize: 11, color: P.mute }}>
-          Taking you back in {count > 0 ? count : 0}s…
-        </span>
+        {redirecting && (
+          <>
+            <button
+              onClick={() => setRedirecting(false)}
+              style={{ fontFamily: mono, fontSize: 11, letterSpacing: '0.06em', color: P.mute, background: 'none', border: `1px solid ${P.hair}`, padding: '9px 14px', cursor: 'pointer' }}
+            >
+              STAY ON THIS PAGE
+            </button>
+            <span style={{ fontFamily: mono, fontSize: 11, color: P.mute }}>
+              Taking you back in {count > 0 ? count : 0}s…
+            </span>
+          </>
+        )}
       </div>
     </div>
   );

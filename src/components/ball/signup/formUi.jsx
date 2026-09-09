@@ -21,7 +21,7 @@ export function TextInput({ className, style, ...rest }) {
       className={mergeClass('ball-input', className)}
       style={{
         width: '100%', boxSizing: 'border-box', background: P.navy, border: `1px solid ${P.hair}`,
-        color: P.cream, fontFamily: mono, fontSize: 14, padding: '11px 12px', outline: 'none',
+        color: P.cream, fontFamily: mono, fontSize: 16, padding: '12px 12px', outline: 'none',
         ...(style || {}),
       }}
     />
@@ -35,7 +35,7 @@ export function TextArea({ className, style, ...rest }) {
       className={mergeClass('ball-input', className)}
       style={{
         width: '100%', boxSizing: 'border-box', background: P.navy, border: `1px solid ${P.hair}`,
-        color: P.cream, fontFamily: mono, fontSize: 14, padding: '11px 12px', outline: 'none', resize: 'vertical',
+        color: P.cream, fontFamily: mono, fontSize: 16, padding: '12px 12px', outline: 'none', resize: 'vertical',
         ...(style || {}),
       }}
     />
@@ -82,24 +82,44 @@ export function Field({ label, children }) {
   );
 }
 
-export function Radio({ options, value, onChange }) {
+// Segmented control that behaves as a real radio group for keyboard + screen
+// reader users: role="radiogroup"/"radio", aria-checked, and a roving tabindex
+// so Arrow keys move (and select) between options, Tab moves past the group.
+export function Radio({ options, value, onChange, ariaLabel }) {
+  function onKeyDown(e, idx) {
+    const keys = ['ArrowRight', 'ArrowDown', 'ArrowLeft', 'ArrowUp'];
+    if (!keys.includes(e.key)) return;
+    e.preventDefault();
+    const dir = e.key === 'ArrowRight' || e.key === 'ArrowDown' ? 1 : -1;
+    const next = (idx + dir + options.length) % options.length;
+    onChange(options[next].value);
+  }
+  const activeIdx = options.findIndex((o) => o.value === value);
   return (
-    <div style={{ display: 'flex', gap: 8 }}>
-      {options.map((o) => (
-        <button
-          key={o.value}
-          type="button"
-          onClick={() => onChange(o.value)}
-          style={{
-            flex: 1, cursor: 'pointer', fontFamily: mono, fontSize: 12, letterSpacing: '0.06em',
-            padding: '11px 8px', border: `1px solid ${value === o.value ? P.gold : P.hair}`,
-            background: value === o.value ? P.gold : 'transparent', color: value === o.value ? P.ink : P.mute,
-            transition: `background 0.15s ${ease}, border-color 0.15s ${ease}, color 0.15s ${ease}`,
-          }}
-        >
-          {o.label}
-        </button>
-      ))}
+    <div role="radiogroup" aria-label={ariaLabel} style={{ display: 'flex', gap: 8 }}>
+      {options.map((o, idx) => {
+        const selected = value === o.value;
+        return (
+          <button
+            key={o.value}
+            type="button"
+            role="radio"
+            aria-checked={selected}
+            tabIndex={selected || (activeIdx === -1 && idx === 0) ? 0 : -1}
+            onClick={() => onChange(o.value)}
+            onKeyDown={(e) => onKeyDown(e, idx)}
+            style={{
+              flex: 1, cursor: 'pointer', fontFamily: mono, fontSize: 12, letterSpacing: '0.06em',
+              padding: '13px 10px', minHeight: 46, lineHeight: 1.3,
+              border: `1px solid ${selected ? P.gold : P.hair}`,
+              background: selected ? P.gold : 'transparent', color: selected ? P.ink : P.mute,
+              transition: `background 0.15s ${ease}, border-color 0.15s ${ease}, color 0.15s ${ease}`,
+            }}
+          >
+            {o.label}
+          </button>
+        );
+      })}
     </div>
   );
 }

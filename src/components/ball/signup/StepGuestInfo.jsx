@@ -5,6 +5,7 @@ import { searchRoster, resolveRosterCadet } from '../../../lib/ballApi';
 import { Field, TextInput, Btn, Radio, ErrorText } from './formUi';
 import { Spinner } from '../ballUi';
 import { isSchoolEmail } from '../../../lib/schoolEmail';
+import { blankGuestFields } from './guestShape';
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
@@ -30,11 +31,12 @@ function money(n) {
   return n == null ? null : `$${Number(n).toFixed(Number.isInteger(Number(n)) ? 0 : 2)}`;
 }
 
-export default function StepGuestInfo({ signupToken, value, onChange, onBack, onNext }) {
+export default function StepGuestInfo({ signupToken, value, onChange, onBack, onNext, onSessionExpired }) {
   const [query, setQuery] = useState(value.is_sdhs_jrotc ? value.name : '');
   const [results, setResults] = useState([]);
   const [searching, setSearching] = useState(false);
   const [err, setErr] = useState('');
+  const [sessionDead, setSessionDead] = useState(false);
   const [priceCadet, setPriceCadet] = useState(null);
   const [priceCouple, setPriceCouple] = useState(null);
   const debounceRef = useRef(null);
@@ -61,16 +63,29 @@ export default function StepGuestInfo({ signupToken, value, onChange, onBack, on
       setSearching(true);
       const { data, error } = await searchRoster(signupToken, query.trim());
       setSearching(false);
-      if (!error) setResults(data);
+      if (error) { handleRosterError(error); return; }
+      setResults(data);
     }, 300);
     return () => clearTimeout(debounceRef.current);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [query, hasGuest, inProgramDate, value.sdhs_matched_cadet_id]);
 
+  // A dead signup token surfaces here as an "expired" error on the roster
+  // search or resolve call. Show a real "start over" button (same as Step 4)
+  // instead of a dead-end "go back and re-verify" message.
+  function handleRosterError(error) {
+    if (/expired|invalid or expired/i.test(error)) {
+      setSessionDead(true);
+      setErr('Your signup session expired. Start over from Step 1 — it only takes a moment.');
+    } else {
+      setErr(error);
+    }
+  }
+
   async function pickCadet(row) {
     setErr('');
     const { data, error } = await resolveRosterCadet(signupToken, row.cadet_id);
-    if (error) { setErr('Session expired. Go back and re-verify.'); return; }
+    if (error) { handleRosterError(error); return; }
     onChange({ ...value, name: data.name, age: data.age ?? '', sdhs_matched_cadet_id: row.cadet_id });
     setQuery(data.name);
     setResults([]);
@@ -82,7 +97,7 @@ export default function StepGuestInfo({ signupToken, value, onChange, onBack, on
   }
 
   function setBringingGuest(v) {
-    onChange(v ? { ...value, bringing_guest: true } : { ...emptyGuestKeepFlag(), bringing_guest: false });
+    onChange(v ? { ...value, bringing_guest: true } : { ...blankGuestFields(), bringing_guest: false });
   }
 
   function setGuestType(t) {
@@ -255,9 +270,14 @@ export default function StepGuestInfo({ signupToken, value, onChange, onBack, on
             </>
           ) : null}
 
-          {(isFriend || (isDate && !value.is_sdhs_jrotc)) && (
-            <Field label={`${isFriend ? "FRIEND" : "DATE"}'S AGE`}>
+          {(isDate || isFriend) && (
+            <Field label={`${isFriend ? 'FRIEND' : 'DATE'}'S AGE`}>
               <TextInput type="number" min="1" max="99" inputMode="numeric" value={value.age} onChange={set('age')} placeholder="Their age" />
+              {inProgramDate && (
+                <div style={{ fontFamily: mono, fontSize: 11, color: P.mute, marginTop: 6, lineHeight: 1.6 }}>
+                  Filled from the roster when we have their birthdate on file. If it&apos;s blank, type their age in.
+                </div>
+              )}
             </Field>
           )}
 
@@ -313,19 +333,22 @@ export default function StepGuestInfo({ signupToken, value, onChange, onBack, on
       )}
 
       <ErrorText>{err}</ErrorText>
+      {sessionDead && onSessionExpired && (
+        <div style={{ marginTop: 8 }}>
+          <button
+            onClick={onSessionExpired}
+            style={{ background: 'none', border: `1px solid ${P.gold}`, color: P.gold, fontFamily: mono, fontSize: 12, padding: '8px 14px', cursor: 'pointer' }}
+          >
+            START OVER FROM STEP 1
+          </button>
+        </div>
+      )}
 
-      <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: 24 }}>
-        <button onClick={onBack} style={{ background: 'none', border: 'none', color: P.mute, fontFamily: mono, fontSize: 12, cursor: 'pointer' }}>‹ BACK</button>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: 24 }}>
+        <button onClick={onBack} className="ball-nav-back">‹ BACK</button>
         <Btn onClick={onNext} disabled={!canContinue}>CONTINUE →</Btn>
       </div>
     </div>
   );
 }
 
-function emptyGuestKeepFlag() {
-  return {
-    guest_type: null, name: '', age: '', gender: '', is_sdhs_jrotc: false, sdhs_matched_cadet_id: null,
-    goes_to_sdhs: null, other_jrotc: false, other_jrotc_school: '', school_attended: '',
-    poc_name: '', poc_email: '', poc_phone: '', personal_email: '', phone: '', friend_payment_method: '',
-  };
-}

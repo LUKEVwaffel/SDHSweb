@@ -49,10 +49,11 @@ export default function StepCadetVerify({ onVerified }) {
             </div>
           </div>
         )}
-        <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: 20 }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: 20 }}>
           <button
             onClick={() => setMatch(null)}
-            style={{ background: 'none', border: 'none', color: P.mute, fontFamily: mono, fontSize: 12, cursor: 'pointer', textDecoration: 'underline' }}
+            className="ball-nav-back"
+            style={{ textDecoration: 'underline' }}
           >
             Not you?
           </button>
@@ -75,7 +76,7 @@ export default function StepCadetVerify({ onVerified }) {
           placeholder="jsmith123"
           style={{ borderRight: 'none' }}
         />
-        <div style={{ background: P.deep, border: `1px solid ${P.hair}`, borderLeft: 'none', color: P.mute, fontFamily: mono, fontSize: 14, padding: '11px 12px', whiteSpace: 'nowrap' }}>
+        <div className="ball-verify-suffix" style={{ background: P.deep, border: `1px solid ${P.hair}`, borderLeft: 'none', color: P.mute, fontFamily: mono, fontSize: 16, padding: '12px 12px', whiteSpace: 'nowrap', display: 'flex', alignItems: 'center' }}>
           {SCHOOL_DOMAIN}
         </div>
       </div>

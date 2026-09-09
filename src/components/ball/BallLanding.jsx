@@ -48,8 +48,14 @@ export default function BallLanding() {
   const menu = Array.isArray(config?.dinner_menu) ? config.dinner_menu : [];
   const eventDate = parseDate(config?.ball_date);
   const deadlineDate = parseDate(config?.signup_deadline);
-  const daysLeft = deadlineDate ? Math.ceil((deadlineDate.getTime() - Date.now()) / MS_DAY) : null;
-  const closed = daysLeft != null && daysLeft < 0;
+  // "Closed" is decided on the calendar day in the event's zone (US Central),
+  // deadline day itself still open — matching the wizard and the server so all
+  // three agree on the last day regardless of the visitor's own timezone.
+  const todayCentral = new Date().toLocaleDateString('en-CA', { timeZone: 'America/Chicago' });
+  const closed = config?.signup_deadline ? todayCentral > config.signup_deadline : false;
+  const daysLeft = config?.signup_deadline
+    ? Math.round((Date.parse(`${config.signup_deadline}T00:00:00`) - Date.parse(`${todayCentral}T00:00:00`)) / MS_DAY)
+    : null;
 
   const mon = eventDate ? eventDate.toLocaleDateString('en-US', { month: 'short' }).toUpperCase() : '';
   const day = eventDate ? eventDate.getDate() : '';
@@ -90,7 +96,7 @@ export default function BallLanding() {
                   <span className="ball-dot" style={{ background: closed ? P.mute : P.gold }} />
                   {closed
                     ? <span>REGISTRATION CLOSED</span>
-                    : <span>REGISTRATION CLOSES {fmtShort(deadlineDate)}{daysLeft != null && daysLeft <= 45 ? ` · ${daysLeft} DAY${daysLeft === 1 ? '' : 'S'} LEFT` : ''}</span>}
+                    : <span>REGISTRATION CLOSES {fmtShort(deadlineDate)}{daysLeft === 0 ? ' · LAST DAY' : daysLeft != null && daysLeft > 0 && daysLeft <= 45 ? ` · ${daysLeft} DAY${daysLeft === 1 ? '' : 'S'} LEFT` : ''}</span>}
                 </div>
               </FadeUp>
 

@@ -6,6 +6,11 @@ import { P, mono, oswald } from '../admin/theme';
 import './ball.css';
 import { FadeUp, Skeleton, Spinner } from './ballUi';
 import DressCodeDetails from './DressCodeDetails';
+import { DRESS_APPROVERS, WESTON } from '../../lib/ballApprovers';
+
+function fmtShort(d) {
+  return d ? new Date(`${d}T00:00:00`).toLocaleDateString(undefined, { month: 'long', day: 'numeric' }) : null;
+}
 
 // Standalone route (own chrome, bypasses TopNav/Footer — same treatment as
 // /feedback/:eventId in App.jsx), reached only via the unique tokenized link
@@ -24,10 +29,13 @@ export default function BallGuestVerify() {
 
   useEffect(() => {
     SB.from('ball_config')
-      .select('dress_code_text')
+      .select('dress_code_text, ball_date')
       .maybeSingle()
       .then(({ data }) => setConfig(data || null));
   }, []);
+
+  const ballDateText = fmtShort(config?.ball_date);
+  const byWhen = ballDateText ? `well before the ball on ${ballDateText}` : 'as soon as you can';
 
   async function submit() {
     if ((phone || '').replace(/\D/g, '').length < 10) { setErr('Please enter your phone number.'); return; }
@@ -68,13 +76,19 @@ export default function BallGuestVerify() {
             </div>
 
             <div style={{ border: `1px solid ${P.hair}`, background: P.navy, padding: 20, marginTop: 14 }}>
-              <div style={{ fontFamily: mono, fontSize: 11, color: P.gold, letterSpacing: '0.14em', marginBottom: 10 }}>ONE STEP LEFT — VERIFY YOUR DRESS</div>
+              <div style={{ fontFamily: mono, fontSize: 11, color: P.gold, letterSpacing: '0.14em', marginBottom: 10 }}>ONE STEP LEFT — VERIFY YOUR ATTIRE</div>
               <p style={{ fontFamily: mono, fontSize: 13, color: P.mute, lineHeight: 1.6 }}>
-                Your attire still has to be checked off. Text a photo of what you plan to wear to the approver listed
-                above{' '}<strong style={{ color: P.cream }}>by October 25th</strong>.
+                Your attire still has to be checked off. Text a photo of what you plan to wear to the right approver
+                below{' '}<strong style={{ color: P.cream }}>{byWhen}</strong>.
               </p>
+              <div style={{ marginTop: 10, fontFamily: mono, fontSize: 13, color: P.cream, lineHeight: 1.9 }}>
+                {DRESS_APPROVERS.map((a) => (
+                  <div key={a.name}>{a.name} — {a.phone} <span style={{ color: P.mute }}>(a formal dress)</span></div>
+                ))}
+                <div>{WESTON.name} — {WESTON.phone} <span style={{ color: P.mute }}>(a suit or Class A)</span></div>
+              </div>
               <p style={{ fontFamily: mono, fontSize: 13, color: P.mute, lineHeight: 1.6, marginTop: 10 }}>
-                If your dress isn't verified by October 25th, a dress verifier will personally call you at the phone
+                If your attire isn&apos;t verified in time, a verifier will personally call you at the phone
                 number you provided.
               </p>
             </div>

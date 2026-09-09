@@ -161,6 +161,40 @@
   box-shadow: 0 0 0 3px rgba(201, 169, 97, 0.22);
 }
 
+/* ── wizard nav / touch targets ──────────────────────────────────────── */
+.ball-nav-back {
+  background: none;
+  border: none;
+  color: var(--ball-cream);
+  opacity: 0.58;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 12px;
+  letter-spacing: 0.06em;
+  cursor: pointer;
+  padding: 12px 10px;
+  margin-left: -10px;
+  min-height: 44px;
+  transition: opacity 0.15s var(--ball-ease);
+}
+.ball-nav-back:hover { opacity: 1; }
+
+.ball-stepper-active {
+  display: none;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px;
+  letter-spacing: 0.14em;
+  color: var(--ball-gold);
+  margin: -22px 0 26px;
+}
+
+@media (max-width: 640px) {
+  .ball-shell { padding-left: 18px !important; padding-right: 18px !important; }
+  .ball-stepper { gap: 4px !important; margin-bottom: 12px !important; }
+  .ball-stepper-label { display: none; }
+  .ball-stepper-active { display: block; }
+  .ball-verify-suffix { font-size: 13px !important; padding: 13px 9px !important; letter-spacing: 0 !important; }
+}
+
 /* ── gallery ─────────────────────────────────────────────────────────── */
 .ball-gallery-img {
   width: 100%;

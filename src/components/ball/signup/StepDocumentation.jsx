@@ -145,8 +145,8 @@ export default function StepDocumentation({ signupToken, cadetGender, cadetDetai
         </div>
       )}
 
-      <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: 24 }}>
-        <button onClick={onBack} style={{ background: 'none', border: 'none', color: P.mute, fontFamily: mono, fontSize: 12, cursor: 'pointer' }}>‹ BACK</button>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: 24 }}>
+        <button onClick={onBack} className="ball-nav-back">‹ BACK</button>
         <Btn onClick={submit} busy={busy}>{busy ? 'SUBMITTING' : 'SUBMIT SIGNUP →'}</Btn>
       </div>
     </div>

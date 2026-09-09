@@ -345,6 +345,26 @@ Deno.serve(async (req) => {
           return json({ error: "that email belongs to a program member — they must register on their own, not as a friend" }, 400);
         }
       }
+
+      // A cadet can't list themselves as their own in-program date.
+      if (isSdhsJrotc && sdhsMatchedCadetId && sdhsMatchedCadetId === cadet.id) {
+        return json({ error: "you can't list yourself as your own date" }, 400);
+      }
+
+      // One guest, one cadet: reject a personal email already attached to
+      // another signup's guest (someone trying to attend with two cadets, or a
+      // double-submit that slipped past the client).
+      if (personalEmail) {
+        const { data: dupeGuest } = await svc
+          .from("ball_guests")
+          .select("id")
+          .ilike("personal_email", personalEmail)
+          .limit(1)
+          .maybeSingle();
+        if (dupeGuest) {
+          return json({ error: "that guest is already on another cadet's signup — each guest can attend with only one cadet" }, 409);
+        }
+      }
     }
 
     // Pricing snapshot (item 2/3): date → couple rate covers both; friend or
