@@ -1995,13 +1995,13 @@
     "semantic_hash": ""
   },
   "src/components/ball/BallGuestVerify.jsx": {
-    "mtime": 1788912833.0035515,
-    "ast_hash": "80724275d439764f6683b79a5ac7043d",
+    "mtime": 1788945468.2240677,
+    "ast_hash": "dbc5ed733421bae1ff89f6276d34c800",
     "semantic_hash": ""
   },
   "src/components/ball/BallLanding.jsx": {
-    "mtime": 1788912881.993592,
-    "ast_hash": "de07cda91a32d139b8d2ce015b4925bc",
+    "mtime": 1788945483.8089712,
+    "ast_hash": "c995cbd94c5251be5b8bb48c9e5acefe",
     "semantic_hash": ""
   },
   "src/components/ball/dress/BallDressLogin.jsx": {
@@ -2020,13 +2020,13 @@
     "semantic_hash": ""
   },
   "src/components/ball/signup/BallSignupWizard.jsx": {
-    "mtime": 1788915671.4842997,
-    "ast_hash": "c014075293d2343dfaa9a4f452928974",
+    "mtime": 1788945344.218867,
+    "ast_hash": "8a3f4e7a4600945d04ed35ab0ceb61e3",
     "semantic_hash": ""
   },
   "src/components/ball/signup/SignupConfirmation.jsx": {
-    "mtime": 1788472495.2971027,
-    "ast_hash": "80372872c3b7c20398f39329dbf771be",
+    "mtime": 1788945433.5979598,
+    "ast_hash": "f208d098c0fd6e6cc7f746c8cf73d005",
     "semantic_hash": ""
   },
   "src/components/ball/signup/StepCadetDetails.jsx": {
@@ -2045,13 +2045,13 @@
     "semantic_hash": ""
   },
   "src/components/ball/signup/StepGuestInfo.jsx": {
-    "mtime": 1788915681.6163607,
-    "ast_hash": "58009d7653a2b6bc6cb47b46ee5e8026",
+    "mtime": 1788945409.65422,
+    "ast_hash": "f273139dd51e46f0ddb32c094582c785",
     "semantic_hash": ""
   },
   "src/components/ball/signup/formUi.jsx": {
-    "mtime": 1788915660.1196585,
-    "ast_hash": "044d4ae7444f6156380ce416cb701792",
+    "mtime": 1788945446.0416653,
+    "ast_hash": "3b48b0e54bd45818089f014d9759ee3d",
     "semantic_hash": ""
   },
   "src/lib/ballApi.js": {
@@ -2095,8 +2095,8 @@
     "semantic_hash": ""
   },
   "supabase/functions/ball-submit-signup/index.ts": {
-    "mtime": 1788513742.5932114,
-    "ast_hash": "c8e67f5c4aefe012fd88f9f19aec0186",
+    "mtime": 1788945495.261157,
+    "ast_hash": "2b3685dd237f12875aa6930f5d87683b",
     "semantic_hash": ""
   },
   "supabase/functions/notify-ball-status-update/index.ts": {
@@ -2672,6 +2672,11 @@
   "src/components/admin/panels/OpticSurveyPanel.jsx": {
     "mtime": 1788915038.3670933,
     "ast_hash": "77eb09a13aca5c9205c0486f2306ad6d",
+    "semantic_hash": ""
+  },
+  "src/components/ball/signup/guestShape.js": {
+    "mtime": 1788945305.429271,
+    "ast_hash": "d860a056df7f1f830b6f41a14b258c57",
     "semantic_hash": ""
   }
 }
