@@ -20,7 +20,7 @@ export const INTRO = {
   title: 'Thank you, and a quick question.',
   paragraphs: [
     'Everything this program does traces back to Raider families. The early mornings, the drives, the gear, the fundraisers, the years of showing up. Thank you.',
-    'A while back we tried OPTIC at the Rhea County Raider Competition: one shared photo feed that every parent could upload to and pull pictures from. It ran as a beta. It has been a while since then, and we want to know whether it is worth bringing back for the competitions coming up this season.',
+    'We ran OPTIC as a beta at the Rhea County Raider Competition: one shared photo feed every parent could upload to and pull pictures from. That was the whole test. We will not run it again unless it is worth it, so we need to know whether we should.',
     'This is quick and every question is a tap. Tell us how it went for you, whether you would use it again, and what would make it better.',
   ],
   meta: 'About one minute. Every question is multiple choice. Only the first question and your phone type are required, everything else is optional.',
