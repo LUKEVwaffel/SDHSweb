@@ -20,7 +20,8 @@ import {
 const P = {
   ink: '#06101F', navy: '#142847', deep: '#0A1628',
   gold: '#C9A961', bright: '#E8C77A', cream: '#F4ECD8',
-  mute: 'rgba(244,236,216,0.55)', faint: 'rgba(244,236,216,0.4)',
+  // Bumped for readability on the dark background, especially on phones.
+  mute: 'rgba(244,236,216,0.82)', faint: 'rgba(244,236,216,0.66)',
   hair: 'rgba(201,169,97,0.22)', green: '#27AE60', red: '#C0392B',
 };
 
@@ -99,7 +100,7 @@ export default function OpticSurvey() {
           <div style={{ fontFamily: 'Oswald, sans-serif', fontSize: 'clamp(17px, 5vw, 20px)', color: P.cream, fontWeight: 600, marginBottom: 8 }}>
             Sent. Thank you.
           </div>
-          <div style={{ fontFamily: 'Inter, sans-serif', fontSize: 13, color: P.mute, maxWidth: 380, lineHeight: 1.6 }}>
+          <div style={{ fontFamily: 'Inter, sans-serif', fontSize: 14, color: P.cream, maxWidth: 380, lineHeight: 1.65 }}>
             Every answer gets read. This is what decides whether OPTIC comes back
             for the Raider competitions coming up.
           </div>
@@ -118,7 +119,7 @@ export default function OpticSurvey() {
           <div style={{ fontFamily: 'Oswald, sans-serif', fontSize: 'clamp(17px, 5vw, 20px)', color: P.cream, fontWeight: 600, marginBottom: 8 }}>
             You already sent this. Thank you.
           </div>
-          <div style={{ fontFamily: 'Inter, sans-serif', fontSize: 13, color: P.mute, maxWidth: 360, lineHeight: 1.6, marginBottom: 20 }}>
+          <div style={{ fontFamily: 'Inter, sans-serif', fontSize: 14, color: P.cream, maxWidth: 360, lineHeight: 1.65, marginBottom: 20 }}>
             Got more to add, or filling this out for a second phone? You can send another response.
           </div>
           <button type="button" onClick={() => { setForm(emptyForm()); setPhase('form'); }} style={ghostBtn}>
@@ -140,11 +141,11 @@ export default function OpticSurvey() {
             {INTRO.title}
           </h1>
           {INTRO.paragraphs.map((para, i) => (
-            <p key={i} style={{ fontFamily: 'Inter, sans-serif', fontSize: 14.5, color: i === 0 ? P.cream : P.mute, lineHeight: 1.7, margin: '0 0 16px' }}>
+            <p key={i} style={{ fontFamily: 'Inter, sans-serif', fontSize: 15.5, color: P.cream, lineHeight: 1.75, margin: '0 0 16px' }}>
               {para}
             </p>
           ))}
-          <div style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: 11, color: P.faint, letterSpacing: '0.04em', lineHeight: 1.6, margin: '26px 0 24px', paddingLeft: 14, borderLeft: `2px solid ${P.hair}` }}>
+          <div style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: 12.5, color: P.mute, letterSpacing: '0.02em', lineHeight: 1.65, margin: '26px 0 24px', paddingLeft: 14, borderLeft: `2px solid ${P.hair}` }}>
             {INTRO.meta}
           </div>
           <button type="button" onClick={() => setPhase('form')} style={goldBtn}>
@@ -164,7 +165,7 @@ export default function OpticSurvey() {
         <div style={{ fontFamily: 'Oswald, sans-serif', fontSize: 'clamp(18px, 5.5vw, 22px)', color: P.cream, fontWeight: 600, letterSpacing: '0.01em' }}>
           How did it actually go?
         </div>
-        <div style={{ fontFamily: 'Inter, sans-serif', fontSize: 13, color: P.mute, marginTop: 10, lineHeight: 1.6 }}>
+        <div style={{ fontFamily: 'Inter, sans-serif', fontSize: 13.5, color: P.cream, marginTop: 10, lineHeight: 1.65 }}>
           Just tap your answers. The written boxes at the end are optional, so add
           detail only if you feel like it. Nothing here is graded.
         </div>
@@ -195,7 +196,7 @@ export default function OpticSurvey() {
           <div style={{ fontFamily: 'Oswald, sans-serif', fontSize: 16, color: P.cream, fontWeight: 600, marginBottom: 6 }}>
             Optional written answers
           </div>
-          <div style={{ fontFamily: 'Inter, sans-serif', fontSize: 12.5, color: P.mute, lineHeight: 1.6, marginBottom: 22 }}>
+          <div style={{ fontFamily: 'Inter, sans-serif', fontSize: 13.5, color: P.cream, lineHeight: 1.65, marginBottom: 22 }}>
             None of these are required. Skip every one of them and your survey still
             counts. They are just here if you want to say more than the taps allow.
           </div>
@@ -203,7 +204,7 @@ export default function OpticSurvey() {
           {TEXT_QUESTIONS.map((q) => (
             <Field key={q.id} label={`${q.label} (optional)`}>
               {q.example && (
-                <div style={{ fontFamily: 'Inter, sans-serif', fontSize: 11.5, color: P.faint, fontStyle: 'italic', marginBottom: 8, lineHeight: 1.55 }}>
+                <div style={{ fontFamily: 'Inter, sans-serif', fontSize: 12.5, color: P.mute, fontStyle: 'italic', marginBottom: 8, lineHeight: 1.6 }}>
                   Good answer looks like: {q.example}
                 </div>
               )}
@@ -234,7 +235,7 @@ export default function OpticSurvey() {
             {state === 'busy' ? 'SENDING…' : 'SEND FEEDBACK →'}
           </button>
           {!canSubmit && (
-            <div style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: 10, color: P.faint, letterSpacing: '0.06em', marginTop: 10, textAlign: 'center' }}>
+            <div style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: 11, color: P.mute, letterSpacing: '0.04em', marginTop: 10, textAlign: 'center', lineHeight: 1.5 }}>
               The first question and your phone type are required. Everything else is optional.
             </div>
           )}
@@ -256,7 +257,15 @@ const ghostBtn = {
 };
 
 function Shell({ children }) {
-  return <div style={{ minHeight: '100vh', background: P.ink, fontFamily: 'Inter, sans-serif' }}>{children}</div>;
+  return (
+    <div style={{ minHeight: '100vh', background: P.ink, fontFamily: 'Inter, sans-serif' }}>
+      <style>{`
+        .optic-survey input::placeholder,
+        .optic-survey textarea::placeholder { color: rgba(244,236,216,0.5); }
+      `}</style>
+      <div className="optic-survey">{children}</div>
+    </div>
+  );
 }
 
 function Centered({ children }) {
@@ -278,8 +287,9 @@ function Field({ label, children }) {
 
 function TextInput({ value, onChange, multiline, placeholder }) {
   const style = {
-    width: '100%', background: P.deep, border: `1px solid ${P.hair}`, color: P.cream,
-    fontFamily: 'Inter, sans-serif', fontSize: 13.5, padding: '11px 13px', outline: 'none',
+    // 16px keeps iOS Safari from zooming in when the field is focused.
+    width: '100%', background: P.deep, border: `1px solid rgba(201,169,97,0.4)`, color: P.cream,
+    fontFamily: 'Inter, sans-serif', fontSize: 16, padding: '12px 13px', outline: 'none',
     boxSizing: 'border-box', resize: 'vertical',
   };
   if (multiline) {
@@ -300,9 +310,9 @@ function Pills({ options, value, onChange }) {
             onClick={() => onChange(opt.value)}
             style={{
               background: active ? P.gold : 'transparent',
-              border: `1px solid ${active ? P.gold : P.hair}`,
-              color: active ? P.ink : P.mute,
-              fontFamily: 'Inter, sans-serif', fontSize: 13, fontWeight: active ? 600 : 400,
+              border: `1px solid ${active ? P.gold : 'rgba(201,169,97,0.45)'}`,
+              color: active ? P.ink : P.cream,
+              fontFamily: 'Inter, sans-serif', fontSize: 13.5, fontWeight: active ? 600 : 400,
               padding: '11px 16px', minHeight: 44, lineHeight: 1.3,
               display: 'inline-flex', alignItems: 'center', textAlign: 'left',
               maxWidth: '100%', whiteSpace: 'normal', overflowWrap: 'anywhere',
