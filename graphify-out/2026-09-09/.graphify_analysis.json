@@ -1,0 +1,725 @@
+{
+  "communities": {
+    "0": [
+      "ref_react",
+      "src_components_admin_lib_winnercard",
+      "src_components_admin_lib_winnercard_downloadwinnercard",
+      "src_components_admin_loginscreen",
+      "src_components_admin_nav_topbar",
+      "src_components_admin_panels_advanced_accountspanel",
+      "src_components_admin_panels_advanced_accountspanel_accountspanel",
+      "src_components_admin_panels_advanced_accountspanel_methoddot",
+      "src_components_admin_panels_advanced_accountspanel_slug",
+      "src_components_admin_panels_advanced_advancedpanel",
+      "src_components_admin_panels_advanced_advancedpanel_advancedpanel",
+      "src_components_admin_panels_advanced_advancedpanel_subtabs",
+      "src_components_admin_panels_advanced_designtokenspanel",
+      "src_components_admin_panels_advanced_designtokenspanel_designtokenspanel",
+      "src_components_admin_panels_advanced_emailhistorypanel",
+      "src_components_admin_panels_advanced_emailhistorypanel_emailhistorypanel",
+      "src_components_admin_panels_advanced_emailhistorypanel_fmtdate",
+      "src_components_admin_panels_advanced_emailhistorypanel_status_color",
+      "src_components_admin_panels_advanced_emailhistorypanel_step",
+      "src_components_admin_panels_advanced_healthpanel",
+      "src_components_admin_panels_advanced_healthpanel_healthpanel",
+      "src_components_admin_panels_advanced_healthpanel_storage_checks",
+      "src_components_admin_panels_advanced_healthpanel_table_checks",
+      "src_components_admin_panels_advanced_historypanel",
+      "src_components_admin_panels_advanced_historypanel_historypanel",
+      "src_components_admin_panels_advanced_quickactionspanel",
+      "src_components_admin_panels_advanced_quickactionspanel_quickactionspanel",
+      "src_components_admin_panels_advanced_registrypanel",
+      "src_components_admin_panels_advanced_registrypanel_elementregistry",
+      "src_components_admin_panels_advanced_registrypanel_pageregistry",
+      "src_components_admin_panels_advanced_registrypanel_registrypanel",
+      "src_components_admin_panels_advanced_registrypanel_widgetlibrary",
+      "src_components_admin_panels_advanced_settingspanel",
+      "src_components_admin_panels_advanced_settingspanel_settingspanel",
+      "src_components_admin_panels_email_builder_blockfields",
+      "src_components_admin_panels_email_builder_emailbuilder",
+      "src_components_admin_panels_email_emailpanel",
+      "src_components_admin_panels_email_messages",
+      "src_components_admin_panels_email_messages_messages",
+      "src_components_admin_panels_email_messages_signers",
+      "src_components_admin_panels_email_messages_status_meta",
+      "src_components_admin_panels_email_subscribers",
+      "src_components_admin_panels_email_subscribers_subscribers",
+      "src_components_admin_panels_people_consentsection",
+      "src_components_admin_panels_people_consentsection_companies",
+      "src_components_admin_panels_people_consentsection_statuses",
+      "src_components_admin_panels_photos_photospanel",
+      "src_components_admin_panels_photos_photospanel_voting_teams",
+      "src_components_admin_panels_photos_photosubmissions",
+      "src_components_admin_panels_photos_photosubmissions_filters",
+      "src_components_admin_panels_photos_photosubmissions_photosubmissions",
+      "src_components_admin_panels_photos_photosubmissions_team_color",
+      "src_components_admin_panels_photos_photosubmissions_thumbpath",
+      "src_components_admin_panels_photos_pollhelpers",
+      "src_components_admin_panels_photos_pollhelpers_defaultcloses",
+      "src_components_admin_panels_photos_pollhelpers_rcats",
+      "src_components_admin_panels_photos_raidergallery",
+      "src_components_admin_panels_photos_raidergallery_raidergallery",
+      "src_components_admin_panels_photos_raiderpolls",
+      "src_components_admin_panels_photos_raiderpolls_raiderpolls",
+      "src_components_admin_shared_ui",
+      "src_components_admin_shared_ui_btn",
+      "src_components_admin_shared_ui_btn_sizes",
+      "src_components_admin_shared_ui_btn_variants",
+      "src_components_admin_shared_ui_card",
+      "src_components_admin_shared_ui_emptystate",
+      "src_components_admin_shared_ui_input",
+      "src_components_admin_shared_ui_label",
+      "src_components_admin_shared_ui_panelheader",
+      "src_components_admin_theme",
+      "src_components_admin_theme_fs",
+      "src_components_admin_theme_p",
+      "src_components_admin_theme_radius",
+      "src_components_admin_theme_shadow",
+      "src_components_admin_theme_sp",
+      "src_lib_supabaseclient",
+      "src_lib_supabaseclient_supabase"
+    ],
+    "1": [
+      "src_components_photouploader",
+      "src_components_photouploader_battalion_opt",
+      "src_components_photouploader_brackets",
+      "src_components_photouploader_btnghost",
+      "src_components_photouploader_btngold",
+      "src_components_photouploader_getoption",
+      "src_components_photouploader_inputstyle",
+      "src_components_photouploader_label",
+      "src_components_photouploader_p",
+      "src_components_photouploader_panel",
+      "src_components_photouploader_photouploader",
+      "src_components_photouploader_selectstyle",
+      "src_components_photouploader_upload_options",
+      "src_components_raidervoting",
+      "src_components_raidervoting_cats",
+      "src_components_raidervoting_centered",
+      "src_components_raidervoting_fmtcountdown",
+      "src_components_raidervoting_ghostbtn",
+      "src_components_raidervoting_loadingstyle",
+      "src_components_raidervoting_p",
+      "src_components_raidervoting_raidervoting",
+      "src_components_raidervoting_statlabel",
+      "src_components_rifle",
+      "src_components_rifle_brackets",
+      "src_components_rifle_commandercard",
+      "src_components_rifle_eventcalendar",
+      "src_components_rifle_p",
+      "src_components_rifle_pagebg",
+      "src_components_rifle_rifle",
+      "src_components_rifle_riflestyles",
+      "src_components_rifle_scoreboard",
+      "src_components_rifle_season",
+      "src_components_rifle_seasonpill",
+      "src_components_rifle_sectionlabel",
+      "src_components_submithub",
+      "src_components_submithub_backbtn",
+      "src_components_submithub_p",
+      "src_components_submithub_submithub",
+      "src_components_teamgallery",
+      "src_components_teamgallery_ghostbtn",
+      "src_components_teamgallery_loadingstyle",
+      "src_components_teamgallery_p",
+      "src_components_teamgallery_teamgallery",
+      "src_lib_fingerprint",
+      "src_lib_fingerprint_getdeviceid",
+      "src_lib_fingerprint_localnonce",
+      "src_lib_imageresize",
+      "src_lib_imageresize_drawscaled",
+      "src_lib_imageresize_loadimage",
+      "src_lib_imageresize_resizeforupload",
+      "src_lib_imageresize_toblob",
+      "src_lib_teams",
+      "src_lib_teams_getteam",
+      "src_lib_teams_isvotingteam",
+      "src_lib_teams_team_ids",
+      "src_lib_teams_teams"
+    ],
+    "2": [
+      "autoprefixer",
+      "dnd_kit_core",
+      "dnd_kit_sortable",
+      "dnd_kit_utilities",
+      "fingerprintjs_fingerprintjs",
+      "oxlint",
+      "package",
+      "package_dependencies",
+      "package_dependencies_dnd_kit_core",
+      "package_dependencies_dnd_kit_sortable",
+      "package_dependencies_dnd_kit_utilities",
+      "package_dependencies_fingerprintjs_fingerprintjs",
+      "package_dependencies_react",
+      "package_dependencies_react_dom",
+      "package_dependencies_supabase_supabase_js",
+      "package_devdependencies",
+      "package_devdependencies_autoprefixer",
+      "package_devdependencies_oxlint",
+      "package_devdependencies_postcss",
+      "package_devdependencies_tailwindcss",
+      "package_devdependencies_tailwindcss_postcss",
+      "package_devdependencies_types_react",
+      "package_devdependencies_types_react_dom",
+      "package_devdependencies_vite",
+      "package_devdependencies_vitejs_plugin_react",
+      "package_name",
+      "package_private",
+      "package_scripts",
+      "package_scripts_build",
+      "package_scripts_dev",
+      "package_scripts_lint",
+      "package_scripts_preview",
+      "package_type",
+      "package_version",
+      "postcss",
+      "react",
+      "react_dom",
+      "supabase_supabase_js",
+      "tailwindcss",
+      "tailwindcss_postcss",
+      "types_react",
+      "types_react_dom",
+      "vite",
+      "vitejs_plugin_react"
+    ],
+    "3": [
+      "src_components_admin_dashboard",
+      "src_components_admin_dashboard_dashboard",
+      "src_components_admin_dashboard_role_sections",
+      "src_components_admin_dashboard_section_label",
+      "src_components_admin_index",
+      "src_components_admin_index_admin",
+      "src_components_admin_loginscreen_loginscreen",
+      "src_components_admin_nav_sidebar",
+      "src_components_admin_nav_sidebar_nav_groups",
+      "src_components_admin_nav_sidebar_navitem",
+      "src_components_admin_nav_sidebar_sidebar",
+      "src_components_admin_nav_statusbar",
+      "src_components_admin_nav_statusbar_statusbar",
+      "src_components_admin_nav_topbar_topbar",
+      "src_components_admin_panels_email_emailpanel_emailpanel",
+      "src_components_admin_panels_mediapanel",
+      "src_components_admin_panels_mediapanel_buckets",
+      "src_components_admin_panels_mediapanel_ext",
+      "src_components_admin_panels_mediapanel_isimage",
+      "src_components_admin_panels_mediapanel_ispdf",
+      "src_components_admin_panels_mediapanel_mediapanel",
+      "src_components_admin_panels_mediapanel_minibtn",
+      "src_components_admin_panels_overviewpanel",
+      "src_components_admin_panels_overviewpanel_actioncard",
+      "src_components_admin_panels_overviewpanel_admin_names",
+      "src_components_admin_panels_overviewpanel_displayname",
+      "src_components_admin_panels_overviewpanel_overviewpanel",
+      "src_components_admin_panels_overviewpanel_safecount",
+      "src_components_admin_panels_overviewpanel_safelist",
+      "src_components_admin_panels_overviewpanel_statchip",
+      "src_components_admin_panels_overviewpanel_useclock",
+      "src_components_admin_panels_photos_photospanel_photospanel"
+    ],
+    "4": [
+      "src_components_admin_panels_eventspanel",
+      "src_components_admin_panels_eventspanel_category_options",
+      "src_components_admin_panels_eventspanel_emptyform",
+      "src_components_admin_panels_eventspanel_eventspanel",
+      "src_components_admin_panels_eventspanel_missingcore",
+      "src_components_admin_panels_eventspanel_selectstyle",
+      "src_components_bulletin",
+      "src_components_bulletin_bulletin",
+      "src_components_bulletin_cat",
+      "src_components_bulletin_eventrow",
+      "src_components_bulletin_groupbymonth",
+      "src_components_bulletin_mon3",
+      "src_components_bulletin_monthpanel",
+      "src_components_bulletin_months",
+      "src_components_bulletin_p",
+      "src_lib_calendar",
+      "src_lib_calendar_category_color",
+      "src_lib_calendar_categorycolor",
+      "src_lib_calendar_event_categories",
+      "src_lib_calendar_event_teams",
+      "src_lib_calendar_groupbymonth",
+      "src_lib_calendar_mon3",
+      "src_lib_calendar_months",
+      "src_lib_calendar_teamlabel",
+      "src_lib_calendar_tocalendaritem"
+    ],
+    "5": [
+      "src_components_battalioncommand",
+      "src_components_battalioncommand_activate",
+      "src_components_battalioncommand_battalioncommand",
+      "src_components_battalioncommand_board_math",
+      "src_components_battalioncommand_boardcolor",
+      "src_components_battalioncommand_brackets",
+      "src_components_battalioncommand_commandcard",
+      "src_components_battalioncommand_commandreticle",
+      "src_components_battalioncommand_compassrose",
+      "src_components_battalioncommand_connectors",
+      "src_components_battalioncommand_edgerulers",
+      "src_components_battalioncommand_guidon",
+      "src_components_battalioncommand_herostyles",
+      "src_components_battalioncommand_mathscatter",
+      "src_components_battalioncommand_p",
+      "src_components_battalioncommand_photopending",
+      "src_components_battalioncommand_sectionbg",
+      "src_components_battalioncommand_smudges",
+      "src_components_battalioncommand_tacticalmap",
+      "src_components_battalioncommand_unitsymbols",
+      "src_components_battalioncommand_usflag"
+    ],
+    "6": [
+      "src_components_raiders",
+      "src_components_raiders_brackets",
+      "src_components_raiders_cat_label",
+      "src_components_raiders_commandercard",
+      "src_components_raiders_divider",
+      "src_components_raiders_eventcalendar",
+      "src_components_raiders_fmtdate",
+      "src_components_raiders_initials",
+      "src_components_raiders_navbtn",
+      "src_components_raiders_p",
+      "src_components_raiders_pagebg",
+      "src_components_raiders_photowinners",
+      "src_components_raiders_raiders",
+      "src_components_raiders_raiderstyles",
+      "src_components_raiders_sectionlabel",
+      "src_components_raiders_statssection"
+    ],
+    "7": [
+      "supabase_photo_hub_v2",
+      "supabase_photo_hub_v2_photos_rate_limit_trg",
+      "supabase_photo_hub_v2_public_cast_vote",
+      "supabase_photo_hub_v2_public_close_due_polls",
+      "supabase_photo_hub_v2_public_finalize_poll",
+      "supabase_photo_hub_v2_public_gallery",
+      "supabase_photo_hub_v2_public_open_poll",
+      "supabase_photo_hub_v2_public_photo_bulletin",
+      "supabase_photo_hub_v2_public_photos",
+      "supabase_photo_hub_v2_public_photos_rate_limit",
+      "supabase_photo_hub_v2_public_polls",
+      "supabase_photo_hub_v2_public_reset_photo_votes",
+      "supabase_photo_hub_v2_public_votes"
+    ],
+    "8": [
+      "supabase_raider_photo_hub",
+      "supabase_raider_photo_hub_public_cast_raider_vote",
+      "supabase_raider_photo_hub_public_close_due_raider_polls",
+      "supabase_raider_photo_hub_public_finalize_raider_poll",
+      "supabase_raider_photo_hub_public_open_raider_poll",
+      "supabase_raider_photo_hub_public_raider_bulletin",
+      "supabase_raider_photo_hub_public_raider_gallery",
+      "supabase_raider_photo_hub_public_raider_photos",
+      "supabase_raider_photo_hub_public_raider_photos_rate_limit",
+      "supabase_raider_photo_hub_public_raider_polls",
+      "supabase_raider_photo_hub_public_raider_votes",
+      "supabase_raider_photo_hub_public_reset_raider_photo_votes",
+      "supabase_raider_photo_hub_raider_photos_rate_limit_trg"
+    ],
+    "9": [
+      "src_app",
+      "src_app_app",
+      "src_app_hashtostate",
+      "src_app_statetohash",
+      "src_app_tabs",
+      "src_components_hero",
+      "src_components_hero_hero",
+      "src_components_hero_p",
+      "src_components_homenewsletterband",
+      "src_components_homenewsletterband_homenewsletterband",
+      "src_components_homenewsletterband_p",
+      "src_main"
+    ],
+    "10": [
+      "src_components_admin_panels_email_builder_blockfields_blockfields",
+      "src_components_admin_panels_email_builder_emailbuilder_emailbuilder",
+      "src_components_admin_panels_email_emailrender",
+      "src_components_admin_panels_email_emailrender_blockhtml",
+      "src_components_admin_panels_email_emailrender_blockstohtml",
+      "src_components_admin_panels_email_emailrender_blockstotext",
+      "src_components_admin_panels_email_emailrender_c",
+      "src_components_admin_panels_email_emailrender_collectattachments",
+      "src_components_admin_panels_email_emailrender_escapehtml",
+      "src_components_admin_panels_email_emailrender_fmtbytes",
+      "src_components_admin_panels_email_emailrender_safeurl"
+    ],
+    "11": [
+      "src_components_staff",
+      "src_components_staff_activate",
+      "src_components_staff_brackets",
+      "src_components_staff_cardstyles",
+      "src_components_staff_p",
+      "src_components_staff_pagebackground",
+      "src_components_staff_photopending",
+      "src_components_staff_s_sections",
+      "src_components_staff_sectionheader",
+      "src_components_staff_staff",
+      "src_components_staff_staffcard"
+    ],
+    "12": [
+      "src_components_admin_panels_email_builder_blocks",
+      "src_components_admin_panels_email_builder_blocks_block_types",
+      "src_components_admin_panels_email_builder_blocks_blocklabel",
+      "src_components_admin_panels_email_builder_blocks_by_type",
+      "src_components_admin_panels_email_builder_blocks_makeblock",
+      "src_components_admin_panels_email_builder_blocks_newid",
+      "src_components_admin_panels_email_builder_blocks_starterblocks",
+      "src_components_admin_panels_email_builder_emailbuilder_arrowstyle",
+      "src_components_admin_panels_email_builder_emailbuilder_sortableblock",
+      "src_components_admin_panels_email_messages_rowtoblocks"
+    ],
+    "13": [
+      "src_components_about",
+      "src_components_about_about",
+      "src_components_about_core_values",
+      "src_components_about_p",
+      "src_components_about_statbox",
+      "src_components_about_teams",
+      "src_components_verifiedtooltip",
+      "src_components_verifiedtooltip_p",
+      "src_components_verifiedtooltip_verifiedtooltip"
+    ],
+    "14": [
+      "src_components_admin_panels_people_consentsection_consentsection",
+      "src_components_admin_panels_people_peoplepanel",
+      "src_components_admin_panels_people_peoplepanel_consent_meta",
+      "src_components_admin_panels_people_peoplepanel_groupbysection",
+      "src_components_admin_panels_people_peoplepanel_normname",
+      "src_components_admin_panels_people_peoplepanel_peoplepanel",
+      "src_components_admin_panels_people_peoplepanel_section_label",
+      "src_components_admin_panels_people_peoplepanel_section_order",
+      "src_components_admin_panels_people_peoplepanel_selectstyle"
+    ],
+    "15": [
+      "oxlintrc",
+      "oxlintrc_plugins",
+      "oxlintrc_rules",
+      "oxlintrc_rules_react_only_export_components",
+      "oxlintrc_rules_react_rules_of_hooks",
+      "oxlintrc_schema",
+      "ref_oxc",
+      "ref_warn"
+    ],
+    "16": [
+      "src_components_topnav",
+      "src_components_topnav_dropdownmenu",
+      "src_components_topnav_nav_items",
+      "src_components_topnav_navitem",
+      "src_components_topnav_p",
+      "src_components_topnav_topnav",
+      "src_components_topnav_usflag"
+    ],
+    "17": [
+      "supabase_admin_roles",
+      "supabase_admin_roles_public_admin_role",
+      "supabase_admin_roles_public_admin_roles",
+      "supabase_admin_roles_public_events",
+      "supabase_admin_roles_public_is_admin",
+      "supabase_admin_roles_public_is_s5",
+      "supabase_admin_roles_public_is_s6"
+    ],
+    "18": [
+      "src_components_cadetmanual",
+      "src_components_cadetmanual_all_chapters",
+      "src_components_cadetmanual_cadetmanual",
+      "src_components_cadetmanual_chaptercard",
+      "src_components_cadetmanual_p",
+      "src_components_cadetmanual_units"
+    ],
+    "19": [
+      "src_components_footer",
+      "src_components_footer_cols",
+      "src_components_footer_footer",
+      "src_components_footer_footerlink",
+      "src_components_footer_nav_map",
+      "src_components_footer_p"
+    ],
+    "20": [
+      "src_components_companies",
+      "src_components_companies_cadetcard",
+      "src_components_companies_companies",
+      "src_components_companies_p",
+      "src_components_companies_role_order"
+    ],
+    "21": [
+      "supabase_functions_send_email_index",
+      "supabase_functions_send_email_index_block",
+      "supabase_functions_send_email_index_chunk",
+      "supabase_functions_send_email_index_cors",
+      "supabase_functions_send_email_index_json"
+    ],
+    "22": [
+      "src_components_admin_panels_email_emailprint",
+      "src_components_admin_panels_email_emailprint_escapehtml",
+      "src_components_admin_panels_email_emailprint_officialletter",
+      "src_components_admin_panels_email_emailprint_printemailmessage"
+    ],
+    "23": [
+      "src_components_commandprofile",
+      "src_components_commandprofile_commandprofile",
+      "src_components_commandprofile_p",
+      "src_components_commandprofile_role_labels"
+    ],
+    "24": [
+      "src_components_tabgrid",
+      "src_components_tabgrid_items",
+      "src_components_tabgrid_p",
+      "src_components_tabgrid_tabgrid"
+    ],
+    "25": [
+      "supabase_auth_rls",
+      "supabase_auth_rls_public_drop_all_policies",
+      "supabase_auth_rls_public_email_subscribers",
+      "supabase_auth_rls_public_photos"
+    ],
+    "26": [
+      "src_components_pictures",
+      "src_components_pictures_p",
+      "src_components_pictures_pictures"
+    ],
+    "27": [
+      "src_components_tabplaceholder",
+      "src_components_tabplaceholder_p",
+      "src_components_tabplaceholder_tabplaceholder"
+    ],
+    "28": [
+      "supabase_email_system",
+      "supabase_email_system_public_email_messages",
+      "supabase_email_system_public_email_subscribers"
+    ],
+    "29": [
+      "supabase_raiders_calendar_stats",
+      "supabase_raiders_calendar_stats_public_events",
+      "supabase_raiders_calendar_stats_public_team_stats"
+    ],
+    "30": [
+      "supabase_account_picker",
+      "supabase_account_picker_public_admin_roles"
+    ],
+    "31": [
+      "supabase_cadet_consent",
+      "supabase_cadet_consent_public_cadet_consent"
+    ],
+    "32": [
+      "supabase_cadet_consent_contact",
+      "supabase_cadet_consent_contact_public_cadet_consent"
+    ],
+    "33": [
+      "supabase_email_builder",
+      "supabase_email_builder_public_email_messages"
+    ],
+    "34": [
+      "supabase_email_review",
+      "supabase_email_review_public_email_reviewers"
+    ],
+    "35": [
+      "supabase_events_calendar",
+      "supabase_events_calendar_public_events"
+    ],
+    "36": [
+      "supabase_personnel_email",
+      "supabase_personnel_email_public_personnel"
+    ],
+    "37": [
+      "supabase_photos_battalion",
+      "supabase_photos_battalion_public_photos"
+    ],
+    "38": [
+      "postcss_config"
+    ],
+    "39": [
+      "supabase_retire_event_photos"
+    ],
+    "40": [
+      "vite_config"
+    ]
+  },
+  "cohesion": {
+    "0": 0.10560492139439508,
+    "1": 0.053246753246753244,
+    "2": 0.045454545454545456,
+    "3": 0.08870967741935484,
+    "4": 0.14,
+    "5": 0.10952380952380952,
+    "6": 0.14166666666666666,
+    "7": 0.28205128205128205,
+    "8": 0.2692307692307692,
+    "9": 0.25757575757575757,
+    "10": 0.3090909090909091,
+    "11": 0.2,
+    "12": 0.24444444444444444,
+    "13": 0.25,
+    "14": 0.3055555555555556,
+    "15": 0.25,
+    "16": 0.2857142857142857,
+    "17": 0.3333333333333333,
+    "18": 0.4,
+    "19": 0.3333333333333333,
+    "20": 0.5,
+    "21": 0.4,
+    "22": 0.8333333333333334,
+    "23": 0.5,
+    "24": 0.5,
+    "25": 0.5,
+    "26": 0.6666666666666666,
+    "27": 0.6666666666666666,
+    "28": 0.6666666666666666,
+    "29": 0.6666666666666666,
+    "30": 1.0,
+    "31": 1.0,
+    "32": 1.0,
+    "33": 1.0,
+    "34": 1.0,
+    "35": 1.0,
+    "36": 1.0,
+    "37": 1.0,
+    "38": 1.0,
+    "39": 1.0,
+    "40": 1.0
+  },
+  "gods": [
+    {
+      "id": "ref_react",
+      "label": "react",
+      "degree": 50
+    },
+    {
+      "id": "src_lib_supabaseclient_supabase",
+      "label": "supabase",
+      "degree": 33
+    },
+    {
+      "id": "src_components_admin_theme_p",
+      "label": "P",
+      "degree": 30
+    },
+    {
+      "id": "src_components_admin_shared_ui_btn",
+      "label": "Btn()",
+      "degree": 22
+    },
+    {
+      "id": "src_components_admin_theme_sp",
+      "label": "sp",
+      "degree": 21
+    },
+    {
+      "id": "src_components_admin_theme_fs",
+      "label": "fs",
+      "degree": 19
+    },
+    {
+      "id": "src_components_admin_shared_ui_panelheader",
+      "label": "PanelHeader()",
+      "degree": 18
+    },
+    {
+      "id": "src_components_admin_shared_ui_card",
+      "label": "Card()",
+      "degree": 16
+    },
+    {
+      "id": "src_components_admin_shared_ui_label",
+      "label": "Label()",
+      "degree": 16
+    },
+    {
+      "id": "src_components_admin_shared_ui_input",
+      "label": "Input()",
+      "degree": 12
+    }
+  ],
+  "surprises": [
+    {
+      "source": "Bulletin()",
+      "target": "toCalendarItem()",
+      "source_files": [
+        "src/components/Bulletin.jsx",
+        "src/lib/calendar.js"
+      ],
+      "confidence": "INFERRED",
+      "relation": "indirect_call",
+      "why": "inferred connection - not explicitly stated in source"
+    },
+    {
+      "source": "EventsPanel()",
+      "target": "toCalendarItem()",
+      "source_files": [
+        "src/components/admin/panels/EventsPanel.jsx",
+        "src/lib/calendar.js"
+      ],
+      "confidence": "INFERRED",
+      "relation": "indirect_call",
+      "why": "inferred connection - not explicitly stated in source"
+    },
+    {
+      "source": "PhotoUploader()",
+      "target": "getDeviceId()",
+      "source_files": [
+        "src/components/PhotoUploader.jsx",
+        "src/lib/fingerprint.js"
+      ],
+      "confidence": "EXTRACTED",
+      "relation": "calls",
+      "why": "cross-file semantic connection"
+    },
+    {
+      "source": "RaiderVoting()",
+      "target": "getDeviceId()",
+      "source_files": [
+        "src/components/RaiderVoting.jsx",
+        "src/lib/fingerprint.js"
+      ],
+      "confidence": "EXTRACTED",
+      "relation": "calls",
+      "why": "cross-file semantic connection"
+    },
+    {
+      "source": "SubmitHub()",
+      "target": "getTeam()",
+      "source_files": [
+        "src/components/SubmitHub.jsx",
+        "src/lib/teams.js"
+      ],
+      "confidence": "EXTRACTED",
+      "relation": "calls",
+      "why": "cross-file semantic connection"
+    }
+  ],
+  "questions": [
+    {
+      "type": "bridge_node",
+      "question": "Why does `react` connect `react` to `PhotoUploader.jsx`, `Dashboard.jsx`, `EventsPanel.jsx`, `BattalionCommand.jsx`, `Raiders.jsx`, `App.jsx`, `Staff.jsx`, `About.jsx`, `PeoplePanel.jsx`, `.oxlintrc.json`, `TopNav.jsx`, `CadetManual.jsx`, `Footer.jsx`, `Companies.jsx`, `CommandProfile.jsx`, `TabGrid.jsx`, `Pictures.jsx`?",
+      "why": "High betweenness centrality (0.240) - this node is a cross-community bridge."
+    },
+    {
+      "type": "bridge_node",
+      "question": "Why does `supabase` connect `react` to `PhotoUploader.jsx`, `Dashboard.jsx`, `EventsPanel.jsx`, `BattalionCommand.jsx`, `Raiders.jsx`, `App.jsx`, `Staff.jsx`, `About.jsx`, `PeoplePanel.jsx`, `Companies.jsx`, `CommandProfile.jsx`, `Pictures.jsx`?",
+      "why": "High betweenness centrality (0.064) - this node is a cross-community bridge."
+    },
+    {
+      "type": "bridge_node",
+      "question": "Why does `plugins` connect `.oxlintrc.json` to `react`?",
+      "why": "High betweenness centrality (0.023) - this node is a cross-community bridge."
+    },
+    {
+      "type": "isolated_nodes",
+      "question": "What connects `$schema`, `oxc`, `react/rules-of-hooks` to the rest of the system?",
+      "why": "125 weakly-connected nodes found - possible documentation gaps or missing edges."
+    },
+    {
+      "type": "low_cohesion",
+      "question": "Should `react` be split into smaller, more focused modules?",
+      "why": "Cohesion score 0.10560492139439508 - nodes in this community are weakly interconnected."
+    },
+    {
+      "type": "low_cohesion",
+      "question": "Should `PhotoUploader.jsx` be split into smaller, more focused modules?",
+      "why": "Cohesion score 0.053246753246753244 - nodes in this community are weakly interconnected."
+    },
+    {
+      "type": "low_cohesion",
+      "question": "Should `devDependencies` be split into smaller, more focused modules?",
+      "why": "Cohesion score 0.045454545454545456 - nodes in this community are weakly interconnected."
+    }
+  ]
+}
