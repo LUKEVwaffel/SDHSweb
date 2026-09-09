@@ -107,11 +107,11 @@ Deno.serve(async (req) => {
     const formAttach = needsForm ? fieldTripAttachment(cfg ?? null) : [];
     const formHtml = needsForm
       ? (cfg?.field_trip_form_pdf_url
-        ? `<p style="margin:0 0 10px;"><strong style="color:#F4ECD8;">You attend Soddy Daisy High School</strong>, so a signed field trip permission form is also required. It is attached to this email &mdash; print it, sign it (physical signature only), and return it to Chief or 1SG.</p>`
+        ? `<p style="margin:0 0 10px;"><strong style="color:#F4ECD8;">You attend Soddy Daisy High School</strong>, so a signed field trip permission form is also required. It is attached to this email &mdash; print it, sign it (physical signature only), and return it to Chief.</p>`
         : `<p style="margin:0 0 10px;"><strong style="color:#F4ECD8;">You attend Soddy Daisy High School</strong>, so a signed field trip permission form is also required. It will be sent separately &mdash; or pick one up from Chief's desk.</p>`)
       : "";
     const formText = needsForm
-      ? `\n\nYou attend Soddy Daisy High School, so a signed field trip permission form is also required${cfg?.field_trip_form_pdf_url ? " (attached to this email)" : " — it will be sent separately or picked up from Chief's desk"}. Physical signature only; return it to Chief or 1SG.`
+      ? `\n\nYou attend Soddy Daisy High School, so a signed field trip permission form is also required${cfg?.field_trip_form_pdf_url ? " (attached to this email)" : " — it will be sent separately or picked up from Chief's desk"}. Physical signature only; return it to Chief.`
       : "";
 
     const tGuest = await loadBallTemplate(svc, "guest_invitation");

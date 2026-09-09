@@ -60,7 +60,7 @@ Deno.serve(async (req) => {
     if (signup.cadet_allergy_email) contactBits.push(`email ${escapeHtml(signup.cadet_allergy_email)}`);
     const contact = contactBits.length
       ? contactBits.join(" &middot; ")
-      : "no phone or email on file — reach them through 1SG Kaz / Chief";
+      : "no phone or email on file — reach them through Chief";
     const vars = { cadet_name: cadet, dispatch_url: link ? escapeHtml(link) : "", contact };
     const defaultIntro = "{{cadet_name}} flagged a food allergy on their Military Ball signup.\n\nReach them: {{contact}}. Call or text is fastest.";
     const closing = pick(t, "closing_html", "", vars);

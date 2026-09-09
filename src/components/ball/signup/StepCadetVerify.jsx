@@ -23,7 +23,7 @@ export default function StepCadetVerify({ onVerified }) {
     const { data, error } = await lookupCadet(username.trim());
     setBusy(false);
     if (error) {
-      setErr("We couldn't find a cadet with that email. Double-check it, or see 1SG Kaz or Chief if the roster needs updating.");
+      setErr("We couldn't find a cadet with that email. Double-check it, or see Chief if the roster needs updating.");
       return;
     }
     setMatch(data);

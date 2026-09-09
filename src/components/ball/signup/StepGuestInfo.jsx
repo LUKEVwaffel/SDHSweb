@@ -325,7 +325,7 @@ export default function StepGuestInfo({ signupToken, value, onChange, onBack, on
                 ]}
               />
               <div style={{ fontFamily: mono, fontSize: 11, color: P.mute, marginTop: 6 }}>
-                For 1SG Kaz / Chief's reference. This amount is NOT added to your own total.
+                For Chief's reference. This amount is NOT added to your own total.
               </div>
             </Field>
           )}

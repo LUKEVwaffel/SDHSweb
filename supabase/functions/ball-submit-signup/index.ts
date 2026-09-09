@@ -112,14 +112,14 @@ async function sendCadetConfirmation(to: string, info: ConfirmInfo): Promise<voi
   if (info.fieldTripFormRequired) {
     todo.push(
       formAttach.length
-        ? "Print and sign the <strong>field trip permission form</strong> attached to this email (physical signature only) and return it to 1SG Kaz or Chief."
-        : "Submit your <strong>signed field trip permission form</strong> (physical signature only) to 1SG Kaz or Chief.",
+        ? "Print and sign the <strong>field trip permission form</strong> attached to this email (physical signature only) and return it to Chief."
+        : "Submit your <strong>signed field trip permission form</strong> (physical signature only) to Chief.",
     );
   }
   todo.push(
     amount
-      ? `Render payment of <strong>${amount}</strong> in full, by cash or check, to 1SG Kaz or Chief.`
-      : "Render payment <strong>in full</strong>, by cash or check, to 1SG Kaz or Chief.",
+      ? `Render payment of <strong>${amount}</strong> in full, by cash or check, to Chief.`
+      : "Render payment <strong>in full</strong>, by cash or check, to Chief.",
   );
   if (info.guestType === "friend" && info.friendName) {
     const fa = money(info.friendAmountDue);
@@ -419,7 +419,7 @@ Deno.serve(async (req) => {
       // The unique(lower(cadet_school_email)) index rejects a second signup for
       // the same cadet — surface it as a clear 409, not a generic 500.
       if (signupErr?.code === "23505") {
-        return json({ error: "You already have a Ball signup on file. See 1SG Kaz or Chief to change it." }, 409);
+        return json({ error: "You already have a Ball signup on file. See Chief to change it." }, 409);
       }
       return json({ error: "internal error" }, 500);
     }
@@ -545,11 +545,11 @@ Deno.serve(async (req) => {
       const guestFormAttach = guestIsSdhsStudent ? fieldTripAttachment(cfg ?? null) : [];
       const guestFormHtml = guestIsSdhsStudent
         ? (cfg?.field_trip_form_pdf_url
-          ? `<p style="margin:0 0 10px;"><strong style="color:#F4ECD8;">You attend Soddy Daisy High School</strong>, so a signed field trip permission form is also required. It is attached to this email &mdash; print it, sign it (physical signature only), and return it to Chief or 1SG.</p>`
+          ? `<p style="margin:0 0 10px;"><strong style="color:#F4ECD8;">You attend Soddy Daisy High School</strong>, so a signed field trip permission form is also required. It is attached to this email &mdash; print it, sign it (physical signature only), and return it to Chief.</p>`
           : `<p style="margin:0 0 10px;"><strong style="color:#F4ECD8;">You attend Soddy Daisy High School</strong>, so a signed field trip permission form is also required. It will be sent separately &mdash; or pick one up from Chief's desk.</p>`)
         : "";
       const guestFormText = guestIsSdhsStudent
-        ? `\n\nYou attend Soddy Daisy High School, so a signed field trip permission form is also required${cfg?.field_trip_form_pdf_url ? " (attached to this email)" : " — it will be sent separately or picked up from Chief's desk"}. Physical signature only; return it to Chief or 1SG.`
+        ? `\n\nYou attend Soddy Daisy High School, so a signed field trip permission form is also required${cfg?.field_trip_form_pdf_url ? " (attached to this email)" : " — it will be sent separately or picked up from Chief's desk"}. Physical signature only; return it to Chief.`
         : "";
       // S-6 prose overrides. This email is NOT gated by `enabled` — the guest
       // cannot confirm without the link, so it always sends.

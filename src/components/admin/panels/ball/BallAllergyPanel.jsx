@@ -8,7 +8,7 @@ import { Btn, Input, Label, PanelHeader } from '../../shared/ui';
 // directly — PHONE FIRST (tap-to-call / tap-to-text, faster), email as a
 // fallback (send-allergy-email, its own narrow path, NOT the 3-reviewer
 // pipeline). Any of call / text / email / in-person then "Mark contacted".
-// A cadet with neither phone nor email is reached via 1SG Kaz / Chief.
+// A cadet with neither phone nor email is reached via Chief.
 function esc(s) {
   return String(s ?? '')
     .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
@@ -205,7 +205,7 @@ function Row({ row, open, onToggle, onDone }) {
             </div>
           ) : !hasPhone && (
             <div style={{ marginTop: sp[3], border: `1px solid ${P.red}`, background: 'rgba(192,57,43,0.08)', padding: sp[3], fontFamily: mono, fontSize: 12, color: P.cream, lineHeight: 1.6 }}>
-              No phone or email on file for this cadet. Reach them through <strong>1SG Kaz / Chief</strong> or their guardian, then mark contacted below.
+              No phone or email on file for this cadet. Reach them through <strong>Chief</strong> or their guardian, then mark contacted below.
             </div>
           )}
 

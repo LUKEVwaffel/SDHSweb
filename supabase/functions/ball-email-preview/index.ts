@@ -83,8 +83,8 @@ function build(key: string, t: BallTemplate | null, origin: string): { subject: 
         particulars: SAMPLE_PARTICULARS,
         listTitle: "What Remains",
         listItems: [
-          "Print and sign the <strong>field trip permission form</strong> attached to this email and return it to 1SG Kaz or Chief.",
-          "Render payment of <strong>$50</strong> in full, by cash or check, to 1SG Kaz or Chief.",
+          "Print and sign the <strong>field trip permission form</strong> attached to this email and return it to Chief.",
+          "Render payment of <strong>$50</strong> in full, by cash or check, to Chief.",
           "Obtain <strong>dress approval</strong>: text a photograph of your attire to one of the approvers listed on the registration page.",
         ],
         noticeHtml: pick(t, "notice_html", "All items above must be completed on or before <strong>{{deadline}}</strong>.", vars) || undefined,

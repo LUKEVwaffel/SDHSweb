@@ -113,7 +113,7 @@ export default function BallSignupWizard() {
             REGISTRATION CLOSED
           </div>
           The signup deadline ({fmtShort(deadline)}) has passed. No new Military Ball signups can be
-          taken. See 1SG Kaz or Chief with any questions.
+          taken. See Chief with any questions.
         </div>
       </Shell>
     );

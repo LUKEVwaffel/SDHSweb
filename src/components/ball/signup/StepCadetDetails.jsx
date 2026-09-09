@@ -68,7 +68,7 @@ export default function StepCadetDetails({ cadet, value, onChange, onBack, onNex
         <Field label="YOUR PHONE NUMBER (required)">
           <TextInput type="tel" inputMode="tel" value={value.phone || ''} onChange={set('phone')} placeholder="(423) 555-0123" />
           <div style={{ fontFamily: mono, fontSize: 11, color: P.mute, marginTop: 6, lineHeight: 1.6 }}>
-            Your own cell — the fastest way for 1SG Kaz / Chief{value.has_allergy === true ? ' and S-5' : ''} to reach you (call or text) about payment, your field trip form{value.has_allergy === true ? ', or food options for your allergy' : ''}.
+            Your own cell — the fastest way for Chief{value.has_allergy === true ? ' and S-5' : ''} to reach you (call or text) about payment, your field trip form{value.has_allergy === true ? ', or food options for your allergy' : ''}.
           </div>
           {phoneBad && (
             <div style={{ fontFamily: mono, fontSize: 11, color: P.red, marginTop: 4 }}>Enter a full phone number (at least 10 digits).</div>
@@ -98,7 +98,7 @@ export default function StepCadetDetails({ cadet, value, onChange, onBack, onNex
 
       {noPhone && !emailOk && (emailEntered || value.gender) && (
         <div style={{ fontFamily: mono, fontSize: 11, color: P.gold, lineHeight: 1.6, marginBottom: 12 }}>
-          Enter a valid personal email. No phone and no email? Sign up in person with 1SG Kaz or Chief.
+          Enter a valid personal email. No phone and no email? Sign up in person with Chief.
         </div>
       )}
 

@@ -97,7 +97,7 @@ export default function StepDocumentation({ signupToken, cadetGender, cadetDetai
             {' '}This is not included in your total above.
           </p>
         )}
-        <p style={p}>Cash or check only, paid in full. No partial payments. Give it directly to 1SG Kaz or Chief.</p>
+        <p style={p}>Cash or check only, paid in full. No partial payments. Give it directly to Chief.</p>
       </Section>
 
       <Section title="FIELD TRIP PERMISSION FORM">
@@ -132,7 +132,7 @@ export default function StepDocumentation({ signupToken, cadetGender, cadetDetai
       <ErrorText>{err}</ErrorText>
       {err && !sessionDead && (
         <p style={{ ...p, color: P.mute, marginTop: 4 }}>
-          Your answers are still here — fix the issue above and press submit again. If it keeps failing, screenshot this and send it to 1SG Kaz or Chief.
+          Your answers are still here — fix the issue above and press submit again. If it keeps failing, screenshot this and send it to Chief.
         </p>
       )}
       {sessionDead && (

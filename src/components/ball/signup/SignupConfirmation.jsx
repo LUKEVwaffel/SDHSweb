@@ -44,7 +44,7 @@ export default function SignupConfirmation({ cadetName, hasGuest, guestName, gue
         Thanks, {cadetName}. Your Military Ball signup is in.{' '}
         {notificationEmail
           ? `A confirmation email is on its way to ${notificationEmail}.`
-          : 'No email was given — screenshot this screen now so you have the payment and next-step details, and watch for word from 1SG Kaz or Chief.'}
+          : 'No email was given — screenshot this screen now so you have the payment and next-step details, and watch for word from Chief.'}
       </p>
       <p className="ball-fade-up ball-d1" style={para}>
         {hasGuest
@@ -52,7 +52,7 @@ export default function SignupConfirmation({ cadetName, hasGuest, guestName, gue
           : "You're not bringing a guest, so nothing else is pending on that front — you're fully verified."}
       </p>
       <p className="ball-fade-up ball-d2" style={para}>
-        Next: bring {formRequired ? 'your signed field trip form and ' : ''}your payment{amount ? ` of ${amount}` : ''} (cash or check, in full) directly to 1SG Kaz or Chief.
+        Next: bring {formRequired ? 'your signed field trip form and ' : ''}your payment{amount ? ` of ${amount}` : ''} (cash or check, in full) directly to Chief.
       </p>
       {isFriend && (
         <p className="ball-fade-up ball-d2" style={para}>
