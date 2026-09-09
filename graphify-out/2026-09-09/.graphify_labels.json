@@ -261,6 +261,7 @@
   "259": "cadet_consent_commander_company_fix.sql",
   "260": "personnel_add_hayden_ogle_jv_raider.sql",
   "261": "getDeviceId",
+  "262": "expo-localization",
   "263": "RaiderCompetitionResults.jsx",
   "264": "RaiderPolls.jsx",
   "265": "CheckinSurvey.jsx",
@@ -294,7 +295,6 @@
   "294": "OpticPromoBand.jsx",
   "295": "expo-device",
   "297": "heic2any",
-  "298": "EventSpotlightBand.jsx",
   "301": "TvRefreshNotice",
   "302": "raider_tv.sql",
   "303": "emailAudience.js",
@@ -312,9 +312,7 @@
   "317": "ball_guard_service_role_fix.sql",
   "318": "FillBlankGame.jsx",
   "319": "ball_signups_wipe.sql",
-  "320": "TvRefreshNotice.jsx",
   "321": "TvHistoryPanel.jsx",
-  "322": "emailAudience.js",
   "323": "event_feedback_opens_at.sql",
   "324": "rafting_photos.sql",
   "325": "FillBlankGame",
@@ -324,6 +322,5 @@
   "329": "StepRangeSchedule.jsx",
   "331": "posthog-react-native",
   "332": "RaiderParentWelcome.jsx",
-  "335": "RaiderCarousel.jsx",
   "338": "@dnd-kit/utilities"
 }
