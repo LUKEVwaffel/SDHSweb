@@ -19,6 +19,15 @@ const PHOTO_MS = 8000;        // past-ball gallery frames
 const MAX_GALLERY_SLIDES = 6; // cap so the loop stays a reasonable length
 const RELOAD_MS = 15 * 60 * 1000; // pick up config edits without a manual refresh
 
+// Fallback dinner menu — shown when ball_config.dinner_menu is still empty so
+// the dinner slide always has content. Replace by populating dinner_menu in
+// ball_config (that path takes over automatically and also feeds /ball).
+const FALLBACK_MENU = [
+  { section: 'Appetizers', items: ['Veggie Spring Rolls', 'Crispy Green Beans', 'Pork Dumplings', 'Crab Wontons'] },
+  { section: 'Entrées', items: ['Veggie Lo Mein', 'Kung Pao Chicken', "Chang's Spicy Chicken (GF)", 'Orange Chicken'] },
+];
+const ALLERGY_NOTE = 'Allergies and dietary needs are accommodated — note them on the signup form.';
+
 function parseDate(d) {
   return d ? new Date(`${d}T00:00:00`) : null;
 }
@@ -154,25 +163,40 @@ export default function BallTv() {
       });
     }
 
-    if (detailsReady && (config?.dinner_caterer || menu.length > 0)) {
+    if (detailsReady) {
+      // Prefer staff-entered rows; otherwise fall back to the known menu so the
+      // slide is never blank. Both render as titled sections.
+      const sections = menu.length > 0
+        ? [{ section: 'Menu', items: menu.map((m) => (m.note ? `${m.item} · ${m.note}` : m.item)) }]
+        : FALLBACK_MENU;
       deck.push({
         key: 'dinner',
         ms: SLIDE_MS,
         render: () => (
           <>
-            <div style={eyebrow}>Dinner · Catered by</div>
-            <div style={{ fontFamily: oswald, fontWeight: 500, fontSize: 'clamp(2.2rem,5.4vw,4.8rem)', color: P.cream, marginBottom: menu.length ? '0.6em' : 0 }}>
-              {config.dinner_caterer || 'Caterer TBA'}
-            </div>
-            {menu.length > 0 && (
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(320px, 40vw), 1fr))', gap: '0 3vw', maxWidth: '68vw' }}>
-                {menu.slice(0, 8).map((m, i) => (
-                  <div key={i} style={{ fontFamily: mono, fontSize: 'clamp(14px,1.5vw,22px)', color: P.cream, padding: '0.7em 0', borderBottom: `1px solid ${P.hair}` }}>
-                    {m.item}{m.note && <span style={{ color: P.mute }}> · {m.note}</span>}
-                  </div>
-                ))}
+            <div style={eyebrow}>Dinner{config?.dinner_caterer ? ' · Catered by' : ''}</div>
+            {config?.dinner_caterer && (
+              <div style={{ fontFamily: oswald, fontWeight: 500, fontSize: 'clamp(1.8rem,4vw,3.4rem)', color: P.cream, marginBottom: '0.6em' }}>
+                {config.dinner_caterer}
               </div>
             )}
+            <div style={{ display: 'flex', gap: '4vw', flexWrap: 'wrap', justifyContent: 'center', maxWidth: '78vw' }}>
+              {sections.map((sec) => (
+                <div key={sec.section} style={{ textAlign: 'left', minWidth: 'min(340px, 40vw)' }}>
+                  <div style={{ fontFamily: mono, fontSize: 'clamp(11px,1.1vw,16px)', color: P.gold, letterSpacing: '0.24em', textTransform: 'uppercase', paddingBottom: '0.4em', borderBottom: `1px solid ${P.hairStrong}`, marginBottom: '0.2em' }}>
+                    {sec.section}
+                  </div>
+                  {sec.items.map((it, i) => (
+                    <div key={i} style={{ fontFamily: oswald, fontSize: 'clamp(15px,1.6vw,25px)', color: P.cream, padding: '0.3em 0', borderBottom: `1px solid ${P.hair}` }}>
+                      {it}
+                    </div>
+                  ))}
+                </div>
+              ))}
+            </div>
+            <div style={{ fontFamily: mono, fontSize: 'clamp(11px,1.15vw,16px)', color: P.bright, letterSpacing: '0.06em', marginTop: '1.4vh', maxWidth: '52ch', lineHeight: 1.55 }}>
+              {ALLERGY_NOTE}
+            </div>
           </>
         ),
       });
