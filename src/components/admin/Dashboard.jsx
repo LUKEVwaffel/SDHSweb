@@ -19,6 +19,7 @@ import RaiderTvPanel from './panels/raidertv/RaiderTvPanel';
 import BetaFeaturesPanel from './panels/beta/BetaFeaturesPanel';
 import RaftingPanel from './panels/rafting/RaftingPanel';
 import CheckinPanel from './panels/CheckinPanel';
+import OpticSurveyPanel from './panels/OpticSurveyPanel';
 import EventFeedbackPanel from './panels/feedback/EventFeedbackPanel';
 import BallPanel from './panels/ball/BallPanel';
 import BallAllergyPanel from './panels/ball/BallAllergyPanel';
@@ -37,6 +38,7 @@ const SECTION_LABEL = {
   media: 'MEDIA', advanced: 'ADVANCED', account: 'MY ACCOUNT', messages: 'MESSAGES',
   tvremote: 'TV REMOTE', beta: 'BETA FEATURES', rafting: 'RAFTING TRIP', checkin: 'SITE CHECK-IN',
   feedback: 'EVENT FEEDBACK', ball: 'MILITARY BALL', ballallergy: 'BALL ALLERGIES', raidertv: 'RAIDER TV',
+  opticsurvey: 'OPTIC SURVEY',
 };
 
 // Which sections each role may see. s5 is scoped to the battalion calendar
@@ -85,7 +87,7 @@ const ROLE_SECTIONS = {
 
 export default function Dashboard({ onLogout, adminId, role = 's6' }) {
   const isLuke = (adminId || '').toLowerCase() === LUKE_EMAIL;
-  const allowed = [...(ROLE_SECTIONS[role] || ROLE_SECTIONS.s6), ...(isLuke ? ['checkin', 'aars'] : [])];
+  const allowed = [...(ROLE_SECTIONS[role] || ROLE_SECTIONS.s6), ...(isLuke ? ['checkin', 'aars', 'opticsurvey'] : [])];
   // S-5 has full events parity with S-6 (every team) — see
   // supabase/events_s5_full_access.sql for the matching RLS grant.
   const allowedTeams = undefined;
@@ -124,6 +126,7 @@ export default function Dashboard({ onLogout, adminId, role = 's6' }) {
           {section === 'beta'     && <BetaFeaturesPanel adminId={adminId} />}
           {section === 'rafting'  && <RaftingPanel adminId={adminId} />}
           {section === 'checkin'  && isLuke && <CheckinPanel />}
+          {section === 'opticsurvey' && isLuke && <OpticSurveyPanel />}
           {section === 'feedback' && <EventFeedbackPanel />}
           {section === 'ball'     && <BallPanel />}
           {section === 'ballallergy' && <BallAllergyPanel />}
