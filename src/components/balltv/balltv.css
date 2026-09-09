@@ -1,0 +1,139 @@
+/* /balltv — hallway-TV promo loop for the Military Ball. Self-contained:
+   this file owns every animation so it never couples to ball.css. All motion
+   is disabled under prefers-reduced-motion (the loop still advances, it just
+   cuts instead of dissolves). */
+
+.btv-root {
+  position: fixed;
+  inset: 0;
+  overflow: hidden;
+  background: #06101F;
+  color: #F4ECD8;
+  cursor: none;
+  font-family: Inter, sans-serif;
+}
+
+/* faint engraved grid, vignetted toward the edges — matches /raidertv idle */
+.btv-grid {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  opacity: 0.35;
+  background-image:
+    linear-gradient(rgba(201, 169, 97, 0.22) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(201, 169, 97, 0.22) 1px, transparent 1px);
+  background-size: 72px 72px;
+  mask-image: radial-gradient(ellipse 78% 74% at 50% 46%, #000 0%, transparent 82%);
+  -webkit-mask-image: radial-gradient(ellipse 78% 74% at 50% 46%, #000 0%, transparent 82%);
+}
+
+/* slide stage sits above the grid, below the persistent rails */
+.btv-stage {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 14vh 8vw 22vh;
+}
+
+.btv-slide {
+  position: absolute;
+  inset: 14vh 8vw 22vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  animation: btv-slide-in 0.9s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+@keyframes btv-slide-in {
+  from { opacity: 0; transform: translateY(26px); }
+  to   { opacity: 1; transform: none; }
+}
+
+/* full-bleed gallery slide — photo escapes the stage padding */
+.btv-photo-slide {
+  position: absolute;
+  inset: 0;
+  animation: btv-fade-in 1s ease both;
+}
+
+@keyframes btv-fade-in {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+.btv-photo {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  animation: btv-kenburns 12s ease-out both;
+}
+
+@keyframes btv-kenburns {
+  from { transform: scale(1.06) translate3d(0, 0, 0); }
+  to   { transform: scale(1.16) translate3d(-1.5%, -2%, 0); }
+}
+
+.btv-photo-scrim {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(180deg, rgba(6, 16, 31, 0.55) 0%, transparent 34%, transparent 52%, rgba(6, 16, 31, 0.92) 100%);
+}
+
+/* progress ticks — one per slide, pinned to the very top */
+.btv-ticks {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  display: flex;
+  gap: 6px;
+  padding: 12px 14px;
+  z-index: 4;
+}
+.btv-tick {
+  flex: 1;
+  height: 3px;
+  border-radius: 999px;
+  background: rgba(244, 236, 216, 0.16);
+  overflow: hidden;
+}
+.btv-tick > span {
+  display: block;
+  height: 100%;
+  width: 100%;
+  background: #C9A961;
+  transform: scaleX(0);
+  transform-origin: left;
+}
+.btv-tick.is-active > span {
+  animation: btv-fill linear both;
+}
+.btv-tick.is-done > span {
+  transform: scaleX(1);
+}
+@keyframes btv-fill {
+  from { transform: scaleX(0); }
+  to   { transform: scaleX(1); }
+}
+
+.btv-pulse {
+  animation: btv-pulse 2.4s ease-in-out infinite;
+}
+@keyframes btv-pulse {
+  0%, 100% { opacity: 1; }
+  50%      { opacity: 0.45; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .btv-slide,
+  .btv-photo-slide { animation: btv-fade-in 0.001s linear both; }
+  .btv-photo { animation: none; transform: scale(1.08); }
+  .btv-tick.is-active > span { animation: none; transform: scaleX(1); }
+  .btv-pulse { animation: none; }
+}

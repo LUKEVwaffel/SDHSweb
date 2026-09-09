@@ -56,6 +56,7 @@ import LukeUploadRoute from './components/rhea/LukeUpload';
 import LukePwaRoute from './components/rhea/LukePwa';
 import RaiderTv from './components/raidertv/RaiderTv';
 import RaiderRemote from './components/raidertv/RaiderRemote';
+import BallTv from './components/balltv/BallTv';
 
 const TABS = [
   { id: 'cadet-manual', label: 'Cadet Manual',  short: 'MANUAL' },
@@ -97,6 +98,9 @@ export default function App() {
   // /raiderremote is the phone that drives it. Self-contained anon routes.
   if (location.pathname === '/raidertv') return <RaiderTv />;
   if (location.pathname === '/raiderremote') return <RaiderRemote />;
+  // /balltv — hallway-TV promo loop for the Military Ball. Read-only slideshow,
+  // no remote; reads ball_config + ball_gallery like /ball.
+  if (location.pathname === '/balltv') return <BallTv />;
   if (location.pathname === '/raiderparent') return <RaiderParentWelcome />;
   if (location.pathname === '/feedback') return <EventFeedbackPicker />;
   if (location.pathname.startsWith('/feedback/')) return <EventFeedbackForm />;
