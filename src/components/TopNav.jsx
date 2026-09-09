@@ -55,12 +55,12 @@ const NAV_ITEMS = [
     ],
   },
   { id: 'about', label: 'ABOUT' },
-  // Military Ball hidden from public view 2026-09-08 — restore this entry (and
-  // the /ball routes in App.jsx) to bring it back:
-  //   { id: 'ball', label: 'MILITARY BALL' },
+  { id: 'ball', label: 'MILITARY BALL' },
   // OPTIC photo-network link — dormant between competitions, restore next comp:
   //   { id: 'submit', label: 'OPTIC', highlight: true, sub: 'Battalion photo network — upload photos' },
-  { id: 'vote', label: 'VOTE', highlight: true, sub: 'Pick the Picture of the Comp' },
+  // "Picture of the Comp" vote taken down 2026-09-08 — restore this entry (and
+  // the /vote route + home band in App.jsx) for the next competition:
+  //   { id: 'vote', label: 'VOTE', highlight: true, sub: 'Pick the Picture of the Comp' },
 ];
 
 // Flattened for the mobile drawer — dropdown children become their own rows,

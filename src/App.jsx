@@ -2,7 +2,11 @@ import { useEffect } from 'react';
 import { Routes, Route, Navigate, useParams, useLocation } from 'react-router-dom';
 import TopNav from './components/TopNav';
 import Hero from './components/Hero';
-import CompPhotoBand from './components/CompPhotoBand';
+// "Picture of the Comp" vote taken down 2026-09-08 — home band, /vote route and
+// the TopNav 'vote' entry removed. Files kept on disk (CompPhotoBand,
+// CompPhotoVote, useCompPhotoPoll, DISPATCH CompPhotoBallot) so a future comp
+// can restore it by re-adding this import + the band + the /vote route.
+// import CompPhotoBand from './components/CompPhotoBand';
 import TabGrid from './components/TabGrid';
 import Bulletin from './components/Bulletin';
 import EventSpotlightBand from './components/EventSpotlightBand';
@@ -34,17 +38,14 @@ import TvKiosk from './components/tv/TvKiosk';
 import TvRangeKiosk from './components/tv/TvRangeKiosk';
 import RaiderParentWelcome from './components/tv/RaiderParentWelcome';
 import CongratsPopup from './components/CongratsPopup';
-import CompPhotoVote from './components/CompPhotoVote';
+// "Picture of the Comp" vote taken down 2026-09-08 — see the CompPhotoBand note
+// up top. Restore this import + the /vote route below to bring it back.
+// import CompPhotoVote from './components/CompPhotoVote';
 import EventFeedbackForm from './components/EventFeedbackForm';
 import EventFeedbackPicker from './components/EventFeedbackPicker';
 import OpticSurvey from './components/OpticSurvey';
-// Military Ball hidden from public view 2026-09-08 — /ball + /ball/signup
-// redirect home and the TopNav entry is commented out. Re-enable by restoring
-// these two imports, their <Route>s below, and the TopNav 'ball' item. The
-// staff portals (/ball/ops, /ball/dress, /ball/attire) and guest links
-// (/ball/guest/*) stay live and keep their imports.
-// import BallLanding from './components/ball/BallLanding';
-// import BallSignupWizard from './components/ball/signup/BallSignupWizard';
+import BallLanding from './components/ball/BallLanding';
+import BallSignupWizard from './components/ball/signup/BallSignupWizard';
 import BallGuestVerify from './components/ball/BallGuestVerify';
 import BallOpsPortal from './components/ball/ops/BallOpsPortal';
 import BallDressPortal from './components/ball/dress/BallDressPortal';
@@ -98,7 +99,8 @@ export default function App() {
   if (location.pathname === '/raiderparent') return <RaiderParentWelcome />;
   if (location.pathname === '/feedback') return <EventFeedbackPicker />;
   if (location.pathname.startsWith('/feedback/')) return <EventFeedbackForm />;
-  if (location.pathname === '/vote') return <CompPhotoVote />;
+  // "Picture of the Comp" vote taken down 2026-09-08 — restore CompPhotoVote to bring it back.
+  // if (location.pathname === '/vote') return <CompPhotoVote />;
   if (location.pathname === '/survey') return <OpticSurvey />;
   if (location.pathname.startsWith('/ball/guest/')) return <BallGuestVerify />;
   if (location.pathname === '/ball/ops' || location.pathname.startsWith('/ball/ops/')) return <BallOpsPortal />;
@@ -114,7 +116,7 @@ export default function App() {
         <Route path="/" element={(
           <>
             <Hero />
-            <CompPhotoBand />
+            {/* "Picture of the Comp" vote band taken down 2026-09-08 — restore <CompPhotoBand /> to bring it back. */}
             <RaftingPhotoBand />
             {/* Disabled via SPOTLIGHT_BAND_ENABLED — kept mounted so re-enabling is a one-flag flip. */}
             <EventSpotlightBand />
@@ -138,9 +140,8 @@ export default function App() {
         <Route path="/companies" element={<Companies />} />
         <Route path="/company/:id" element={<Companies />} />
         <Route path="/about" element={<About />} />
-        {/* Military Ball hidden from public 2026-09-08 — see import block up top. */}
-        <Route path="/ball" element={<Navigate to="/" replace />} />
-        <Route path="/ball/signup" element={<Navigate to="/" replace />} />
+        <Route path="/ball" element={<BallLanding />} />
+        <Route path="/ball/signup" element={<BallSignupWizard />} />
         <Route path="/profile/:id" element={<CommandProfile />} />
         <Route path="/:tabId" element={<TabRoute />} />
         <Route path="*" element={<Navigate to="/" replace />} />

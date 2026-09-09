@@ -128,9 +128,8 @@ export default function BallLanding() {
                 {config.event_time_text && <span style={cellSub}>{config.event_time_text}</span>}
               </Cell>
               <Cell label="DRESS">
-                {config.dress_code_text
-                  ? <span style={{ fontSize: 13, lineHeight: 1.5 }}>{config.dress_code_text}</span>
-                  : <>Cadets: full Class A<span style={cellSub}>Guests: formal (dress, or suit &amp; tie)</span></>}
+                Formal
+                <span style={cellSub}>Females: long formal dress, approved. Males: black-and-white suit or Class A. Full code on the signup form.</span>
               </Cell>
               <Cell label="DEADLINE">
                 {fmtShort(deadlineDate)}

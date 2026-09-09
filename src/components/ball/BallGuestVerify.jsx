@@ -2,10 +2,10 @@ import { useState, useEffect } from 'react';
 import { useLocation } from 'react-router-dom';
 import { supabase as SB } from '../../lib/supabaseClient';
 import { guestVerify } from '../../lib/ballApi';
-import { DRESS_APPROVERS, WESTON } from '../../lib/ballApprovers';
 import { P, mono, oswald } from '../admin/theme';
 import './ball.css';
 import { FadeUp, Skeleton, Spinner } from './ballUi';
+import DressCodeDetails from './DressCodeDetails';
 
 // Standalone route (own chrome, bypasses TopNav/Footer — same treatment as
 // /feedback/:eventId in App.jsx), reached only via the unique tokenized link
@@ -51,18 +51,34 @@ export default function BallGuestVerify() {
         </FadeUp>
 
         {(state === 'done' || state === 'already') && (
-          <div className="ball-scale-in" style={{ border: `1px solid ${P.gold}`, background: P.navy, padding: 24 }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 8 }}>
-              <svg className="ball-check" width="26" height="26" viewBox="0 0 60 60" fill="none" aria-hidden="true">
-                <circle cx="30" cy="30" r="26" stroke={P.gold} strokeWidth="3" />
-                <path d="M18 31l9 9 16-19" stroke={P.gold} strokeWidth="4" strokeLinecap="square" />
-              </svg>
-              <div style={{ fontFamily: mono, fontSize: 12, color: P.gold }}>YOU'RE VERIFIED</div>
+          <>
+            <div className="ball-scale-in" style={{ border: `1px solid ${P.gold}`, background: P.navy, padding: 24 }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 8 }}>
+                <svg className="ball-check" width="26" height="26" viewBox="0 0 60 60" fill="none" aria-hidden="true">
+                  <circle cx="30" cy="30" r="26" stroke={P.gold} strokeWidth="3" />
+                  <path d="M18 31l9 9 16-19" stroke={P.gold} strokeWidth="4" strokeLinecap="square" />
+                </svg>
+                <div style={{ fontFamily: mono, fontSize: 12, color: P.gold }}>YOU'RE VERIFIED</div>
+              </div>
+              <p style={{ fontFamily: mono, fontSize: 13, color: P.mute }}>
+                {state === 'already'
+                  ? "You've already completed this step. Your spot for the Military Ball is confirmed."
+                  : 'Your info is submitted. Your spot for the Military Ball is confirmed.'}
+              </p>
             </div>
-            <p style={{ fontFamily: mono, fontSize: 13, color: P.mute }}>
-              {state === 'already' ? "You've already completed this step." : 'Your info is submitted. See you at the ball!'}
-            </p>
-          </div>
+
+            <div style={{ border: `1px solid ${P.hair}`, background: P.navy, padding: 20, marginTop: 14 }}>
+              <div style={{ fontFamily: mono, fontSize: 11, color: P.gold, letterSpacing: '0.14em', marginBottom: 10 }}>ONE STEP LEFT — VERIFY YOUR DRESS</div>
+              <p style={{ fontFamily: mono, fontSize: 13, color: P.mute, lineHeight: 1.6 }}>
+                Your attire still has to be checked off. Text a photo of what you plan to wear to the approver listed
+                above{' '}<strong style={{ color: P.cream }}>by October 25th</strong>.
+              </p>
+              <p style={{ fontFamily: mono, fontSize: 13, color: P.mute, lineHeight: 1.6, marginTop: 10 }}>
+                If your dress isn't verified by October 25th, a dress verifier will personally call you at the phone
+                number you provided.
+              </p>
+            </div>
+          </>
         )}
 
         {state !== 'done' && state !== 'already' && (
@@ -85,27 +101,15 @@ export default function BallGuestVerify() {
               />
             </Field>
 
-            <div style={{ border: `1px solid ${P.hair}`, background: P.navy, padding: 20, marginBottom: 18 }}>
+            <div style={{ marginBottom: 18 }}>
               <div style={{ fontFamily: mono, fontSize: 11, color: P.gold, letterSpacing: '0.14em', marginBottom: 10 }}>ATTIRE</div>
               {config === undefined ? (
-                <>
+                <div style={{ border: `1px solid ${P.hair}`, background: P.navy, padding: 20 }}>
                   <Skeleton height={12} style={{ marginBottom: 8 }} />
                   <Skeleton width="80%" height={12} />
-                </>
+                </div>
               ) : (
-                <>
-                  <p style={{ fontFamily: mono, fontSize: 13, color: P.mute, lineHeight: 1.6 }}>{config?.dress_code_text || 'Formal / semi-formal. Details from S-6.'}</p>
-                  <p style={{ fontFamily: mono, fontSize: 12, color: P.mute, lineHeight: 1.6, marginTop: 10 }}>
-                    <strong style={{ color: P.cream }}>Wearing a dress?</strong> Text a photo of it to one of these approvers:
-                  </p>
-                  {DRESS_APPROVERS.map((a) => (
-                    <div key={a.name} style={{ fontFamily: mono, fontSize: 13, padding: '5px 0' }}>{a.name} · {a.phone}</div>
-                  ))}
-                  <p style={{ fontFamily: mono, fontSize: 12, color: P.mute, lineHeight: 1.6, marginTop: 10 }}>
-                    <strong style={{ color: P.cream }}>Male guest?</strong> You're not in uniform, so text a photo of your outfit to{' '}
-                    {WESTON.name} at {WESTON.phone} for approval.
-                  </p>
-                </>
+                <DressCodeDetails note={config?.dress_code_text} />
               )}
             </div>
 

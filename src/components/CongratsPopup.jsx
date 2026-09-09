@@ -1,5 +1,4 @@
 import { useEffect, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
 import { hasSeenCongrats, markCongratsSeen } from '../lib/congratsSeen';
 import { CONGRATS_MEET, CONGRATS_TROPHIES } from '../lib/tvCongratsData';
 import posthog from '../lib/posthog';
@@ -15,10 +14,10 @@ const SHOW_DELAY_MS = 2600;
 
 // First-open takeover celebrating the Rhea County meet result. Replaces the
 // OPTIC launch popup (dormant between comps). Fires once per device (see
-// congratsSeen.js) a few seconds after first load. Primary CTA drops the
-// visitor onto the /vote ballot for the Picture of the Comp.
+// congratsSeen.js) a few seconds after first load. The "Picture of the Comp"
+// vote CTA was removed 2026-09-08 when the vote was taken down — the popup is
+// now a straight results celebration with a single dismiss.
 export default function CongratsPopup() {
-  const navigate = useNavigate();
   const [visible, setVisible] = useState(false);
   const [open, setOpen] = useState(false);
 
@@ -36,13 +35,6 @@ export default function CongratsPopup() {
     markCongratsSeen();
     setOpen(false);
     setTimeout(() => setVisible(false), 300);
-  }
-
-  function goVote() {
-    posthog.capture('congrats_popup_cta_clicked');
-    markCongratsSeen();
-    setOpen(false);
-    navigate('/vote');
   }
 
   useEffect(() => {
@@ -156,7 +148,7 @@ export default function CongratsPopup() {
           <div className="cg-row" style={{ '--d': '0.55s', display: 'flex', flexWrap: 'wrap', gap: 12, alignItems: 'center' }}>
             <button
               type="button"
-              onClick={goVote}
+              onClick={() => { posthog.capture('congrats_popup_dismissed'); close(); }}
               style={{
                 background: P.gold, color: P.ink, border: 'none', cursor: 'pointer',
                 fontFamily: "'JetBrains Mono', monospace", fontSize: 12, letterSpacing: '0.16em', fontWeight: 700,
@@ -164,15 +156,7 @@ export default function CongratsPopup() {
               }}
               onMouseEnter={(e) => { e.currentTarget.style.background = P.bright; e.currentTarget.style.boxShadow = '0 12px 30px -12px rgba(201,169,97,0.8)'; }}
               onMouseLeave={(e) => { e.currentTarget.style.background = P.gold; e.currentTarget.style.boxShadow = 'none'; }}
-            >VOTE FOR THE PICTURE OF THE COMP →</button>
-            <button
-              type="button"
-              onClick={close}
-              style={{
-                background: 'none', border: 'none', cursor: 'pointer',
-                fontFamily: 'Inter, sans-serif', fontSize: 12.5, color: P.faint, textDecoration: 'underline',
-              }}
-            >Maybe later</button>
+            >GO RAIDERS →</button>
           </div>
         </div>
       </div>

@@ -2,8 +2,8 @@ import { useState, useEffect } from 'react';
 import { P, mono } from '../../admin/theme';
 import { supabase as SB } from '../../../lib/supabaseClient';
 import { submitSignup } from '../../../lib/ballApi';
-import { DRESS_APPROVERS, WESTON } from '../../../lib/ballApprovers';
 import { Btn, ErrorText } from './formUi';
+import DressCodeDetails from '../DressCodeDetails';
 
 // Step 4 — documentation / info + final submit. Shows what the host owes
 // (couple rate for a date, own rate for solo or a friend + a separate line
@@ -118,27 +118,15 @@ export default function StepDocumentation({ signupToken, cadetGender, cadetDetai
         )}
       </Section>
 
-      {isFemale ? (
-        <Section title="DRESS APPROVAL">
-          <p style={p}>{config?.dress_code_text || 'Dress code details will be provided by S-6.'}</p>
-          <p style={p}>Text a photo of your dress to one of the approvers below for approval:</p>
-          {DRESS_APPROVERS.map((a, i) => (
-            <div key={a.name} style={{ fontFamily: mono, fontSize: 13, padding: '6px 0', borderBottom: i < DRESS_APPROVERS.length - 1 ? `1px solid ${P.hair}` : 'none' }}>
-              {a.name} · {a.phone}
-            </div>
-          ))}
-        </Section>
-      ) : (
-        <Section title="UNIFORM">
-          <p style={p}>
-            Full Class A uniform, the JROTC-issued set, not personally owned. This is a fixed requirement, so there's no
-            photo-approval step.
-          </p>
-          <p style={p}>
-            Questions about your Class A? Contact {WESTON.name} at {WESTON.phone}.
-          </p>
-        </Section>
-      )}
+      <Section title="DRESS CODE">
+        <p style={p}>
+          {isFemale
+            ? 'Your dress must be approved before the ball — text a photo of the front and back, worn, to Aubrey or Kylie.'
+            : 'Black-and-white suit with a bowtie, or full Class A with a white shirt and bowtie.'}
+          {' '}The full code, for you and for your guest, is below.
+        </p>
+        <DressCodeDetails note={config?.dress_code_text} />
+      </Section>
 
       <ErrorText>{err}</ErrorText>
       {err && !sessionDead && (

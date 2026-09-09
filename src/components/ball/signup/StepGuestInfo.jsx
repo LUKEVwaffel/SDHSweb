@@ -23,6 +23,9 @@ const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 // The manual-entry block (name / "goes to Soddy Daisy?" / school / POC) is
 // shared by every non-roster guest (manual dates and all friends). "Goes to
 // Soddy Daisy?" just auto-fills the school and hides the other-school fields.
+// POC = the GUEST's own point of contact (their parent/guardian or a
+// responsible adult for them) — people kept reading it as "parent of a cadet",
+// so the labels + the callout above the fields spell out whose adult it is.
 function money(n) {
   return n == null ? null : `$${Number(n).toFixed(Number.isInteger(Number(n)) ? 0 : 2)}`;
 }
@@ -231,13 +234,22 @@ export default function StepGuestInfo({ signupToken, value, onChange, onBack, on
                 </>
               )}
 
-              <Field label="PARENT/GUARDIAN (POC) NAME">
-                <TextInput value={value.poc_name} onChange={set('poc_name')} />
+              <div style={{ border: `1px solid ${P.hair}`, background: P.navy, padding: '12px 14px', margin: '0 0 14px', fontFamily: mono, fontSize: 11, color: P.mute, lineHeight: 1.7 }}>
+                <div style={{ color: P.gold, letterSpacing: '0.14em', marginBottom: 6 }}>
+                  {isFriend ? "YOUR FRIEND'S" : "YOUR DATE'S"} POINT OF CONTACT (POC)
+                </div>
+                This is a responsible adult for <strong style={{ color: P.cream }}>your {isFriend ? 'friend' : 'date'}</strong> — normally
+                their own parent or guardian, or, if your {isFriend ? 'friend' : 'date'} is an adult, another adult we can reach about them.
+                It is <strong style={{ color: P.cream }}>not</strong> a parent of a cadet, not your parent, and not you.
+              </div>
+
+              <Field label={`${isFriend ? "FRIEND'S" : "DATE'S"} POC — FULL NAME`}>
+                <TextInput value={value.poc_name} onChange={set('poc_name')} placeholder="Their parent / guardian / responsible adult" />
               </Field>
-              <Field label="POC EMAIL">
+              <Field label={`${isFriend ? "FRIEND'S" : "DATE'S"} POC — EMAIL`}>
                 <TextInput type="email" value={value.poc_email} onChange={set('poc_email')} />
               </Field>
-              <Field label="POC PHONE">
+              <Field label={`${isFriend ? "FRIEND'S" : "DATE'S"} POC — PHONE`}>
                 <TextInput type="tel" value={value.poc_phone} onChange={set('poc_phone')} />
               </Field>
             </>
