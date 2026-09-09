@@ -10,6 +10,7 @@ export const FEMALE_AVOID = [
   'Two-piece dresses',
   'Mesh panels or a bare midriff',
   'Low-cut necklines / visible cleavage',
+  'No plunge on the chest — meaning no deep V, scoop, or keyhole neckline that dips more than about two inches below the collarbone or shows any cleavage. The neckline must sit at or above the top of the bust.',
   'Strapless dresses',
   'Boots, sandals, or tennis shoes',
   'A slit above mid-thigh',
