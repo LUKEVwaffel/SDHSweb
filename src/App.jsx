@@ -45,6 +45,7 @@ import EventFeedbackForm from './components/EventFeedbackForm';
 import EventFeedbackPicker from './components/EventFeedbackPicker';
 import OpticSurvey from './components/OpticSurvey';
 import BallLanding from './components/ball/BallLanding';
+import BallSignupPopup from './components/ball/BallSignupPopup';
 import BallSignupWizard from './components/ball/signup/BallSignupWizard';
 import BallGuestVerify from './components/ball/BallGuestVerify';
 import BallOpsPortal from './components/ball/ops/BallOpsPortal';
@@ -115,6 +116,8 @@ export default function App() {
       <Routes>
         <Route path="/" element={(
           <>
+            {/* Homepage-only takeover — mounted here, never on a standalone route. */}
+            <BallSignupPopup />
             <Hero />
             {/* "Picture of the Comp" vote band taken down 2026-09-08 — restore <CompPhotoBand /> to bring it back. */}
             <RaftingPhotoBand />
