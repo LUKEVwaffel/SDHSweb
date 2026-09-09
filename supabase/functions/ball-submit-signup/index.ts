@@ -23,6 +23,7 @@ import { ballEmailShell } from "../_shared/ballEmail.ts";
 import type { BallEmailParticular } from "../_shared/ballEmail.ts";
 import { loadBallTemplate, isDisabled, pick, paras } from "../_shared/ballTemplate.ts";
 import type { BallTemplate } from "../_shared/ballTemplate.ts";
+import { attireLineHtml, attireLineText } from "../_shared/ballApprovers.ts";
 
 function required(v: unknown): string {
   return typeof v === "string" ? v.trim() : "";
@@ -576,6 +577,7 @@ Deno.serve(async (req) => {
         cta: { label: "Confirm Your Attendance", url: escapeHtml(link) },
         noticeHtml: pick(tGuest, "notice_html", "", gVars) || undefined,
         closingHtml: `${guestClosing}
+<p style="margin:0 0 10px;">${attireLineHtml(guestGender)}</p>
 ${guestFormHtml}<p style="margin:0;font-size:12px;color:#8A8266;">If the button does not work, use this link:<br />${escapeHtml(link)}</p>`,
         siteUrl: `${origin}/ball`,
       });
@@ -599,7 +601,9 @@ ${cfg?.ball_date ? `\nDate:  ${fmtLongDate(cfg.ball_date)}` : ""}${cfg?.event_ti
 Confirm your attendance here:
 ${link}
 
-This step confirms any food allergies and your review of the attire requirements. The registration is not complete until it is done.${guestFormText}`,
+This step confirms any food allergies and your review of the attire requirements. The registration is not complete until it is done.
+
+${attireLineText(guestGender)}${guestFormText}`,
         }),
       }).catch((e) => console.error("ball-submit-signup guest email send", e));
     } else {

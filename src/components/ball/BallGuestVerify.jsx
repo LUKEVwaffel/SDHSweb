@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useLocation } from 'react-router-dom';
 import { supabase as SB } from '../../lib/supabaseClient';
-import { guestVerify } from '../../lib/ballApi';
+import { guestVerify, guestPeek } from '../../lib/ballApi';
 import { P, mono, oswald } from '../admin/theme';
 import './ball.css';
 import { FadeUp, Skeleton, Spinner } from './ballUi';
@@ -26,6 +26,7 @@ export default function BallGuestVerify() {
   const [accepted, setAccepted] = useState(false);
   const [state, setState] = useState('form'); // form | busy | done | already | err
   const [err, setErr] = useState('');
+  const [guestGender, setGuestGender] = useState(null); // 'male' | 'female' | null (unknown → show both)
 
   useEffect(() => {
     SB.from('ball_config')
@@ -33,6 +34,18 @@ export default function BallGuestVerify() {
       .maybeSingle()
       .then(({ data }) => setConfig(data || null));
   }, []);
+
+  useEffect(() => {
+    if (!token) return;
+    guestPeek(token).then(({ data }) => {
+      const g = data?.gender;
+      setGuestGender(g === 'male' || g === 'female' ? g : null);
+    });
+  }, [token]);
+
+  // Scope the dress code + approver contacts to this guest. Unknown gender
+  // (peek failed) → show both sides rather than hide anything.
+  const only = guestGender === 'male' ? 'male' : guestGender === 'female' ? 'female' : undefined;
 
   const ballDateText = fmtShort(config?.ball_date);
   const byWhen = ballDateText ? `well before the ball on ${ballDateText}` : 'as soon as you can';
@@ -82,10 +95,12 @@ export default function BallGuestVerify() {
                 below{' '}<strong style={{ color: P.cream }}>{byWhen}</strong>.
               </p>
               <div style={{ marginTop: 10, fontFamily: mono, fontSize: 13, color: P.cream, lineHeight: 1.9 }}>
-                {DRESS_APPROVERS.map((a) => (
+                {only !== 'male' && DRESS_APPROVERS.map((a) => (
                   <div key={a.name}>{a.name} — {a.phone} <span style={{ color: P.mute }}>(a formal dress)</span></div>
                 ))}
-                <div>{WESTON.name} — {WESTON.phone} <span style={{ color: P.mute }}>(a suit or Class A)</span></div>
+                {only !== 'female' && (
+                  <div>{WESTON.name} — {WESTON.phone} <span style={{ color: P.mute }}>(a suit or Class A)</span></div>
+                )}
               </div>
               <p style={{ fontFamily: mono, fontSize: 13, color: P.mute, lineHeight: 1.6, marginTop: 10 }}>
                 If your attire isn&apos;t verified in time, a verifier will personally call you at the phone
@@ -123,7 +138,7 @@ export default function BallGuestVerify() {
                   <Skeleton width="80%" height={12} />
                 </div>
               ) : (
-                <DressCodeDetails note={config?.dress_code_text} />
+                <DressCodeDetails only={only} note={config?.dress_code_text} />
               )}
             </div>
 

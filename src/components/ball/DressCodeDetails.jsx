@@ -53,7 +53,9 @@ export default function DressCodeDetails({ note, only }) {
             {DRESS_APPROVERS.map((a) => (
               <div key={a.name}>{a.name} — {a.phone} <span style={{ color: P.mute }}>(females)</span></div>
             ))}
-            <div>{WESTON.name} — {WESTON.phone} <span style={{ color: P.mute }}>(males)</span></div>
+            {only !== 'female' && (
+              <div>{WESTON.name} — {WESTON.phone} <span style={{ color: P.mute }}>(males)</span></div>
+            )}
           </div>
         </div>
       ) : (

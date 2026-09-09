@@ -44,6 +44,14 @@ export async function submitSignup(signupToken, payload) {
   return { data };
 }
 
+// Read-only: guest gender + name for the verify page, so the dress code shown
+// there can be scoped to this guest. Never mutates.
+export async function guestPeek(token) {
+  const { data, error } = await SB.functions.invoke('ball-guest-verify', { body: { token, peek: true } });
+  if (error || data?.error) return { error: await invokeError(data, error, 'Lookup failed.') };
+  return { data };
+}
+
 export async function guestVerify(token, { allergies, accepted_dress_code, phone }) {
   const { data, error } = await SB.functions.invoke('ball-guest-verify', {
     body: { token, allergies, accepted_dress_code, phone },

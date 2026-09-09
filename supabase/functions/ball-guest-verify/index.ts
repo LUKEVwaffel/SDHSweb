@@ -18,10 +18,26 @@ Deno.serve(async (req) => {
   if (req.method !== "POST") return json({ error: "method not allowed" }, 405);
 
   try {
-    const { token, allergies, accepted_dress_code, phone } = await req.json().catch(() => ({}));
+    const { token, allergies, accepted_dress_code, phone, peek } = await req.json().catch(() => ({}));
     const tok = String(token || "").trim();
     const phoneClean = String(phone || "").trim();
     if (!tok) return json({ error: "invalid" }, 400);
+
+    // peek: read-only context for the verify page (no mutation). Lets the page
+    // scope the dress code + approver contacts to THIS guest's gender so a male
+    // guest never sees the female rules and vice versa.
+    if (peek === true) {
+      const svcPeek = serviceClient();
+      const { data: g } = await svcPeek
+        .from("ball_guests")
+        .select("gender, name, verified_at, ball_signups(cadet_name)")
+        .eq("verification_token", tok)
+        .maybeSingle();
+      if (!g) return json({ error: "not_found" }, 404);
+      const host = (g as { ball_signups?: { cadet_name?: string } }).ball_signups?.cadet_name ?? null;
+      return json({ ok: true, gender: g.gender ?? null, name: g.name ?? null, cadet_name: host, verified: !!g.verified_at });
+    }
+
     if (!accepted_dress_code) return json({ error: "must accept the dress code" }, 400);
     if (phoneClean.replace(/\D/g, "").length < 10) return json({ error: "a phone number is required" }, 400);
 

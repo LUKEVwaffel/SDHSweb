@@ -23,6 +23,7 @@ import { serviceClient, getCaller } from "../_shared/supabase.ts";
 import { ballEmailShell } from "../_shared/ballEmail.ts";
 import type { BallEmailParticular } from "../_shared/ballEmail.ts";
 import { loadBallTemplate, pick, paras } from "../_shared/ballTemplate.ts";
+import { attireLineHtml, attireLineText } from "../_shared/ballApprovers.ts";
 
 function fmtLongDate(d: string): string {
   return new Date(`${d}T00:00:00`).toLocaleDateString("en-US", {
@@ -82,7 +83,7 @@ Deno.serve(async (req) => {
 
     const { data: guest, error: gErr } = await svc
       .from("ball_guests")
-      .select("name, personal_email, verification_token, is_sdhs_jrotc, school_attended, verified_at")
+      .select("name, gender, personal_email, verification_token, is_sdhs_jrotc, school_attended, verified_at")
       .eq("signup_id", signup_id)
       .maybeSingle();
     if (gErr) { console.error("ball-resend-guest-invite guest lookup", gErr); return json({ error: "internal error" }, 500); }
@@ -139,6 +140,7 @@ Deno.serve(async (req) => {
       cta: { label: "Confirm Your Attendance", url: escapeHtml(link) },
       noticeHtml: pick(tGuest, "notice_html", "", gVars) || undefined,
       closingHtml: `${guestClosing}
+<p style="margin:0 0 10px;">${attireLineHtml(guest.gender)}</p>
 ${formHtml}<p style="margin:0;font-size:12px;color:#8A8266;">If the button does not work, use this link:<br />${escapeHtml(link)}</p>`,
       siteUrl: `${origin}/ball`,
     });
@@ -163,7 +165,9 @@ ${cfg?.ball_date ? `\nDate:  ${fmtLongDate(cfg.ball_date)}` : ""}${cfg?.event_ti
 Confirm your attendance here:
 ${link}
 
-This step confirms any food allergies and your review of the attire requirements. The registration is not complete until it is done.${formText}`,
+This step confirms any food allergies and your review of the attire requirements. The registration is not complete until it is done.
+
+${attireLineText(guest.gender)}${formText}`,
       }),
     });
 
