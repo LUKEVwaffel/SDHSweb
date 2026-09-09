@@ -60,7 +60,7 @@ export const QUESTIONS = [
   },
   {
     id: 'used_it',
-    prompt: 'How much did you use OPTIC that day?',
+    prompt: 'How much did you end up using OPTIC?',
     options: [
       { value: 'a_lot', label: 'A lot' },
       { value: 'a_little', label: 'A little' },
