@@ -2000,8 +2000,8 @@
     "semantic_hash": ""
   },
   "src/components/ball/BallLanding.jsx": {
-    "mtime": 1789039705.157199,
-    "ast_hash": "a636874347cb0c016fc4c71e99e5d70c",
+    "mtime": 1788957337.1978853,
+    "ast_hash": "53991c427e3f578fc1753dfd3718bc8c",
     "semantic_hash": ""
   },
   "src/components/ball/dress/BallDressLogin.jsx": {
@@ -2015,8 +2015,8 @@
     "semantic_hash": ""
   },
   "src/components/ball/ops/BallOpsPortal.jsx": {
-    "mtime": 1789039531.5933785,
-    "ast_hash": "d2ce0364ea2b134e0294b49745d2d7a5",
+    "mtime": 1788472428.5843334,
+    "ast_hash": "54a62af4a6502d8b03a3e81916078a00",
     "semantic_hash": ""
   },
   "src/components/ball/signup/BallSignupWizard.jsx": {
@@ -2700,18 +2700,8 @@
     "semantic_hash": ""
   },
   "src/components/balltv/BallTv.jsx": {
-    "mtime": 1789039689.643685,
-    "ast_hash": "024ba833372fad0da81ce15705d247d7",
-    "semantic_hash": ""
-  },
-  "src/lib/ballMenu.js": {
-    "mtime": 1789039679.51345,
-    "ast_hash": "7e9f067c8cb618ad96304eab1feb3f69",
-    "semantic_hash": ""
-  },
-  "supabase/ball_ops_poc_fields.sql": {
-    "mtime": 1789039508.7460942,
-    "ast_hash": "6fd028a7e089e93d086403385ef9488c",
+    "mtime": 1788963055.3834205,
+    "ast_hash": "dd38663d7c464275bf07c37b3f90921b",
     "semantic_hash": ""
   }
 }
