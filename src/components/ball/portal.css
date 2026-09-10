@@ -161,6 +161,41 @@
 
 .bp-by { font-family: 'JetBrains Mono', monospace; font-size: 10px; color: var(--rv-faint); margin-top: 5px; }
 
+/* Guest POC + contact block — Kaz/Chief chase down cash + forms from here. */
+.bp-contact {
+  margin-top: 9px;
+  padding-top: 9px;
+  border-top: 1px dashed var(--rv-border);
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.bp-contact-line {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 4px 10px;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px;
+  color: var(--rv-mute);
+  line-height: 1.5;
+}
+.bp-contact-label {
+  font-size: 9.5px;
+  letter-spacing: 0.09em;
+  text-transform: uppercase;
+  color: var(--rv-faint);
+  flex-shrink: 0;
+}
+.bp-contact-val { color: var(--rv-ink); }
+.bp-contact-link {
+  color: var(--rv-accent);
+  text-decoration: none;
+  border-bottom: 1px solid transparent;
+  transition: border-color 0.15s var(--rv-ease);
+}
+.bp-contact-link:hover { border-bottom-color: var(--rv-accent); }
+
 .bp-empty {
   text-align: center;
   color: var(--rv-faint);

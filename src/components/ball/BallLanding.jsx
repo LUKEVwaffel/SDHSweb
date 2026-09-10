@@ -5,6 +5,7 @@ import { P, mono, oswald } from '../admin/theme';
 import './ball.css';
 import { FadeUp, Skeleton } from './ballUi';
 import { openBallDressCodePdf } from '../../lib/ballDressCodePdf';
+import { FALLBACK_MENU, ALLERGY_NOTE } from '../../lib/ballMenu';
 
 // Step 0 — public landing. Ceremonial / editorial treatment: a date monolith,
 // an engraved invitation frame, a detail grid, and perforated price stubs —
@@ -164,7 +165,7 @@ export default function BallLanding() {
             {/* DINNER */}
             <FadeUp delay={4} style={{ border: `1px solid ${P.hair}`, background: P.navy, padding: '24px 28px', marginTop: 14 }}>
               <div style={{ fontFamily: mono, fontSize: 10, color: P.gold, letterSpacing: '0.34em', marginBottom: 8 }}>DINNER · CATERED BY</div>
-              <div style={{ fontFamily: oswald, fontWeight: 500, fontSize: 24, color: P.cream, marginBottom: menu.length ? 16 : 6 }}>
+              <div style={{ fontFamily: oswald, fontWeight: 500, fontSize: 24, color: P.cream, marginBottom: 16 }}>
                 {config.dinner_caterer || 'Caterer TBA'}
               </div>
               {menu.length > 0 ? (
@@ -176,8 +177,24 @@ export default function BallLanding() {
                   ))}
                 </div>
               ) : (
-                <div style={{ fontFamily: mono, fontSize: 12, color: P.mute }}>Full menu announced soon.</div>
+                FALLBACK_MENU.map((group) => (
+                  <div key={group.section} style={{ marginBottom: 14 }}>
+                    <div style={{ fontFamily: mono, fontSize: 10, color: P.gold, letterSpacing: '0.28em', marginBottom: 6 }}>
+                      {group.section.toUpperCase()}
+                    </div>
+                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(220px, 1fr))', gap: '2px 24px' }}>
+                      {group.items.map((item) => (
+                        <div key={item} style={{ fontFamily: mono, fontSize: 13, color: P.cream, padding: '7px 0', borderBottom: `1px solid ${P.hair}` }}>
+                          {item}
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                ))
               )}
+              <div style={{ fontFamily: mono, fontSize: 11, color: P.mute, marginTop: 12, lineHeight: 1.5 }}>
+                {ALLERGY_NOTE}
+              </div>
             </FadeUp>
 
             {/* CTA */}

@@ -2,6 +2,7 @@ import { useState, useEffect, useMemo, useRef } from 'react';
 import { supabase as SB } from '../../lib/supabaseClient';
 import { P, mono, oswald, fraunces } from '../admin/theme.js';
 import { useQrDataUrl } from '../raidertv/useQrDataUrl.js';
+import { FALLBACK_MENU, ALLERGY_NOTE } from '../../lib/ballMenu.js';
 import './balltv.css';
 
 // /balltv — the hallway-TV promo loop for the Military Ball. Read-only, no
@@ -18,15 +19,6 @@ const SLIDE_MS = 10000;       // hero / venue / details / dinner
 const PHOTO_MS = 8000;        // past-ball gallery frames
 const MAX_GALLERY_SLIDES = 6; // cap so the loop stays a reasonable length
 const RELOAD_MS = 15 * 60 * 1000; // pick up config edits without a manual refresh
-
-// Fallback dinner menu — shown when ball_config.dinner_menu is still empty so
-// the dinner slide always has content. Replace by populating dinner_menu in
-// ball_config (that path takes over automatically and also feeds /ball).
-const FALLBACK_MENU = [
-  { section: 'Appetizers', items: ['Veggie Spring Rolls', 'Crispy Green Beans', 'Pork Dumplings', 'Crab Wontons'] },
-  { section: 'Entrées', items: ['Veggie Lo Mein', 'Kung Pao Chicken', "Chang's Spicy Chicken (GF)", 'Orange Chicken'] },
-];
-const ALLERGY_NOTE = 'Allergies and dietary needs are accommodated — note them on the signup form.';
 
 function parseDate(d) {
   return d ? new Date(`${d}T00:00:00`) : null;

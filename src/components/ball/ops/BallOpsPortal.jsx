@@ -94,7 +94,10 @@ export default function BallOpsPortal() {
     const match = (r) => {
       if (!term) return true;
       const g = guestsBySignup[r.id];
-      return (r.cadet_name || '').toLowerCase().includes(term) || (g?.name || '').toLowerCase().includes(term);
+      return [
+        r.cadet_name, r.notification_email, r.cadet_school_email,
+        g?.name, g?.poc_name, g?.poc_phone, g?.poc_email, g?.personal_email,
+      ].some((v) => (v || '').toLowerCase().includes(term));
     };
     const v = rows.filter(match);
     return {
@@ -150,7 +153,7 @@ export default function BallOpsPortal() {
       )}
 
       {rows.length > 6 && (
-        <input className="bp-search" placeholder="Search by cadet or guest name…" value={q} onChange={(e) => setQ(e.target.value)} />
+        <input className="bp-search" placeholder="Search by cadet, guest, or POC name / phone / email…" value={q} onChange={(e) => setQ(e.target.value)} />
       )}
 
       {rows.length === 0 ? (
@@ -182,8 +185,22 @@ function Section({ title, hide, children }) {
   );
 }
 
+function ContactLine({ label, name, phone, email }) {
+  if (!name && !phone && !email) return null;
+  return (
+    <div className="bp-contact-line">
+      <span className="bp-contact-label">{label}</span>
+      {name && <span className="bp-contact-val">{name}</span>}
+      {phone && <a className="bp-contact-val bp-contact-link" href={`tel:${phone.replace(/[^\d+]/g, '')}`}>{phone}</a>}
+      {email && <a className="bp-contact-val bp-contact-link" href={`mailto:${email}`}>{email}</a>}
+    </div>
+  );
+}
+
 function OpsRow({ r, guest, busy, onToggle, state }) {
   const friend = guest?.guest_type === 'friend';
+  const hasContact = guest?.poc_name || guest?.poc_phone || guest?.poc_email
+    || guest?.personal_email || r.notification_email;
   return (
     <div className={`bp-row is-${state}`}>
       <div className="bp-row-main">
@@ -205,6 +222,23 @@ function OpsRow({ r, guest, busy, onToggle, state }) {
           )}
           {!r.field_trip_form_required && <span className="bp-fact">no field trip form</span>}
         </div>
+
+        {hasContact && (
+          <div className="bp-contact">
+            <ContactLine
+              label="Guest POC"
+              name={guest?.poc_name}
+              phone={guest?.poc_phone}
+              email={guest?.poc_email}
+            />
+            {guest?.personal_email && (
+              <ContactLine label={`${guest?.name || 'Guest'} email`} email={guest.personal_email} />
+            )}
+            {r.notification_email && (
+              <ContactLine label="Cadet contact" email={r.notification_email} />
+            )}
+          </div>
+        )}
       </div>
 
       {state !== 'wait' && (
