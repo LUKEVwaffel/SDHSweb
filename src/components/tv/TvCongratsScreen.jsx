@@ -1,8 +1,8 @@
 import { P, mono, oswald, fraunces, inter, fs, sp, ease } from '../admin/theme.js';
 import { CONGRATS_MEET, CONGRATS_TROPHIES, CONGRATS_PHOTOS } from '../../lib/tvCongratsData.js';
 import { useCompPhotoPoll } from '../../hooks/useCompPhotoPoll.js';
-import { useRheaPhotos } from '../../hooks/useRheaPhotos.js';
-import { feedChip } from '../../lib/rheaComp.js';
+import { useOpticPhotos } from '../../hooks/useOpticPhotos.js';
+import { feedChip } from '../../lib/opticComp.js';
 import TvPhotoCarousel from './TvPhotoCarousel.jsx';
 
 // Full-screen /tv takeover celebrating a meet result. Left column = the
@@ -81,13 +81,13 @@ export default function TvCongratsScreen() {
   // carousel. Until then the screen is unchanged (winner === null).
   const { winner } = useCompPhotoPoll();
 
-  // Right column now pulls the whole OPTIC feed for the Rhea comp — every
+  // Right column now pulls the whole OPTIC feed for the comp — every
   // published photo, Luke's AND the parents', not just the hardcoded
   // CONGRATS_PHOTOS placeholders. 'public' scope = visibility public + status
-  // live, the same set the /rhea (OPTIC) feed shows. Live-synced, so a new
+  // live, the same set the /optic feed shows. Live-synced, so a new
   // parent upload appears on the kiosk without a reload. Falls back to
   // CONGRATS_PHOTOS only while the feed is genuinely empty.
-  const { photos: opticRows } = useRheaPhotos({ scope: 'public' });
+  const { photos: opticRows } = useOpticPhotos({ scope: 'public' });
   const opticPhotos = opticRows.map((row, i) => ({
     src: row.photo_url,
     alt: row.uploader_name ? `OPTIC — ${row.uploader_name}` : `OPTIC photo ${i + 1}`,

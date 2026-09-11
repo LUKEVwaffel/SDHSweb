@@ -51,9 +51,9 @@ import BallGuestVerify from './components/ball/BallGuestVerify';
 import BallOpsPortal from './components/ball/ops/BallOpsPortal';
 import BallDressPortal from './components/ball/dress/BallDressPortal';
 import BallAttirePortal from './components/ball/attire/BallAttirePortal';
-import Rhea from './components/rhea/Rhea';
-import LukeUploadRoute from './components/rhea/LukeUpload';
-import LukePwaRoute from './components/rhea/LukePwa';
+import Optic from './components/optic/Optic';
+import LukeUploadRoute from './components/optic/LukeUpload';
+import LukePwaRoute from './components/optic/LukePwa';
 import RaiderTv from './components/raidertv/RaiderTv';
 import RaiderRemote from './components/raidertv/RaiderRemote';
 import BallTv from './components/balltv/BallTv';
@@ -87,9 +87,12 @@ export default function App() {
   // — bypass TopNav/Footer entirely, same as the old hash early-return.
   if (location.pathname === '/admin' || location.pathname.startsWith('/admin/')) return <Admin />;
   if (location.pathname === '/review' || location.pathname.startsWith('/review/')) return <ReviewPortal />;
-  // Rhea County Raider Comp photo system — three self-contained surfaces,
-  // each its own auth/chrome, same early-return pattern as /admin.
-  if (location.pathname === '/rhea') return <Rhea />;
+  // OPTIC comp photo system — three self-contained surfaces, each its own
+  // auth/chrome, same early-return pattern as /admin. /rhea is the pre-2.0
+  // route name; kept as a redirect for one comp so old installed-PWA links
+  // and bookmarks still land in the app.
+  if (location.pathname === '/rhea') return <Navigate to="/optic" replace />;
+  if (location.pathname === '/optic') return <Optic />;
   if (location.pathname === '/lukeupload') return <LukeUploadRoute />;
   if (location.pathname === '/lukepwa' || location.pathname.startsWith('/lukepwa/')) return <LukePwaRoute />;
   if (location.pathname === '/tv') return <TvKiosk />;

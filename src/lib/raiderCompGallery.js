@@ -1,4 +1,4 @@
-import { RHEA_EVENT_ID, RHEA_EVENT_TITLE } from './rheaComp';
+import { OPTIC_EVENT_ID, OPTIC_EVENT_TITLE } from './opticComp';
 
 // ── "View Competition" gallery - shared constants (display-only) ────────────
 // Public surface: /raiders/comp (components/raiders/CompGallery.jsx), linked
@@ -9,11 +9,11 @@ import { RHEA_EVENT_ID, RHEA_EVENT_TITLE } from './rheaComp';
 // (photos.source = 'luke'). Parent uploads are intentionally excluded. No new
 // tables, no schema change, no uploader - that's a later step.
 
-export const COMP_EVENT_ID = RHEA_EVENT_ID;
-export const COMP_EVENT_TITLE = RHEA_EVENT_TITLE;
+export const COMP_EVENT_ID = OPTIC_EVENT_ID;
+export const COMP_EVENT_TITLE = OPTIC_EVENT_TITLE;
 
 // Canonical order (chronological - the way the day actually ran) + blurb for
-// every Rhea County event. Matched to the raider_sub_events rows by normalised
+// every comp event. Matched to the raider_sub_events rows by normalised
 // name or leading phrase, so Luke's real labels ("CCR", "Tire Stacker (Both
 // Team)") still line up. `hasVideo` = run footage exists for this event (drops
 // later). A bucket not listed here still shows; it just sorts after these.

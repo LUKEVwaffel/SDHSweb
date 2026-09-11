@@ -1,8 +1,8 @@
-/* Service worker for /rhea — the public event viewer. Scope is /rhea, so it
+/* Service worker for /optic — the public event viewer. Scope is /optic, so it
  * never touches the rest of the site. Caches the app shell so an installed
  * launch renders instantly on venue wifi. Photo requests and Supabase calls
  * always go to the network (never stale). */
-const CACHE = 'rhea-shell-v3';
+const CACHE = 'optic-shell-v1';
 
 self.addEventListener('install', () => { self.skipWaiting(); });
 
@@ -37,7 +37,7 @@ self.addEventListener('fetch', (event) => {
         const cached = await caches.match(request);
         if (cached) return cached;
         if (request.mode === 'navigate') {
-          const shell = await caches.match('/rhea');
+          const shell = await caches.match('/optic');
           if (shell) return shell;
         }
         throw err;

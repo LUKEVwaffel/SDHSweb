@@ -1,16 +1,16 @@
 import { supabase as SB } from './supabaseClient';
-import { RHEA_EVENT_ID, RHEA_EVENT_TITLE } from './rheaComp';
+import { OPTIC_EVENT_ID, OPTIC_EVENT_TITLE } from './opticComp';
 
 // ── "Picture of the Comp" single-winner vote — shared data helpers ─────────
 // Public ballot at /vote (components/CompPhotoVote.jsx), managed in DISPATCH
 // (admin/panels/photos/CompPhotoBallot.jsx). Backed by supabase/comp_photo_vote.sql:
 //   comp_photo_polls / comp_photo_candidates / comp_photo_votes
-// One poll for the Rhea County comp; Luke picks ~15 finalist photos, the
+// One poll for the comp; Luke picks ~15 finalist photos, the
 // public picks one (name required), the winner is declared in DISPATCH and
 // then shows on the home page + the /tv congrats screen.
 
-export const COMP_POLL_EVENT_ID = RHEA_EVENT_ID;
-export const COMP_POLL_EVENT_TITLE = RHEA_EVENT_TITLE;
+export const COMP_POLL_EVENT_ID = OPTIC_EVENT_ID;
+export const COMP_POLL_EVENT_TITLE = OPTIC_EVENT_TITLE;
 
 /** localStorage key for "this device already voted", scoped to the poll id so
  *  a fresh poll next comp re-opens voting on every device. */

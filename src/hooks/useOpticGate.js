@@ -3,8 +3,8 @@ import { supabase as SB } from '../lib/supabaseClient';
 
 const GATE_ID = 'default';
 // Fallback when the row can't be read (migration not run yet / offline): stay
-// LOCKED with this target so the countdown still renders. 8:00 AM Aug 29 2026 ET.
-const FALLBACK_OPENS_AT = '2026-08-29T08:00:00-04:00';
+// LOCKED with this target so the countdown still renders. 7:00 AM Sep 12 2026 ET.
+const FALLBACK_OPENS_AT = '2026-09-12T07:00:00-04:00';
 
 // Tri-state kill switch. `mode` is authoritative:
 //   'closed' -> feed locked, always (wins over the clock AND over is_open)
@@ -18,14 +18,15 @@ function resolveMode(row) {
 }
 
 /**
- * Beta gate for /rhea. Reads the single `rhea_gate` row and stays live on it
- * via realtime, plus a 1 Hz local tick so the derived `open` flips exactly
+ * Beta gate for /optic. Reads the single `rhea_gate` row (table name predates
+ * the de-Rhea rename; not worth a migration to rename it) and stays live on
+ * it via realtime, plus a 1 Hz local tick so the derived `open` flips exactly
  * when the countdown reaches the scheduled time , no reload needed. A `mode`
  * change (Luke hitting LOCK / FORCE OPEN / AUTO in /lukepwa) arrives on the
  * same realtime channel and closes or opens the feed for anyone already
  * viewing it.
  */
-export function useRheaGate() {
+export function useOpticGate() {
   const [row, setRow] = useState(null);
   const [loading, setLoading] = useState(true);
   const [, tick] = useState(0);
@@ -43,7 +44,7 @@ export function useRheaGate() {
     };
     load();
 
-    const channel = SB.channel('rhea-gate')
+    const channel = SB.channel('optic-gate')
       .on(
         'postgres_changes',
         { event: '*', schema: 'public', table: 'rhea_gate', filter: `id=eq.${GATE_ID}` },
@@ -64,7 +65,7 @@ export function useRheaGate() {
   const mode = resolveMode(row);
   // Legacy early-unlock lever: `is_open = true` still forces the feed open even
   // with no `mode` column yet, so `update rhea_gate set is_open=true` opens
-  // /rhea before opens_at without the migration. A force-close (`mode='closed'`)
+  // /optic before opens_at without the migration. A force-close (`mode='closed'`)
   // still wins over it.
   const forcedOpenLegacy = row?.is_open === true;
   const open = !!row && (

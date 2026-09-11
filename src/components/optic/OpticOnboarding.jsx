@@ -1,10 +1,10 @@
 import { useState, useEffect, useCallback } from 'react';
 import posthog from '../../lib/posthog';
-import { markOnboardedRhea } from '../../lib/rheaComp';
+import { markOnboardedOptic } from '../../lib/opticComp';
 import { isIos } from './pwa';
-import './rhea-onboard.css';
+import './optic-onboard.css';
 
-const ROLE_KEY = 'rhea_role';
+const ROLE_KEY = 'optic_role';
 const haptic = (p) => { try { navigator.vibrate?.(p); } catch { /* unsupported */ } };
 
 // Step graph. Everyone opens on a plain-language "what is this" panel so the
@@ -44,11 +44,11 @@ function flavor(a) {
 }
 
 /**
- * First-run flow for /rhea. Shown until the visitor finishes it (or opts to
+ * First-run flow for /optic. Shown until the visitor finishes it (or opts to
  * continue in the browser). Ends on an install screen that strongly steers
  * toward adding the PWA , with an honest, visible way past it.
  */
-export default function RheaOnboarding({ onDone }) {
+export default function OpticOnboarding({ onDone }) {
   const [step, setStep] = useState('welcome');
   const [answers, setAnswers] = useState({ role: null, intent: null });
   const [pending, setPending] = useState(null); // choice id flashing before advance
@@ -91,9 +91,9 @@ export default function RheaOnboarding({ onDone }) {
   }
 
   function record(installed) {
-    markOnboardedRhea();
+    markOnboardedOptic();
     try { if (answers.role) localStorage.setItem(ROLE_KEY, answers.role); } catch { /* private mode */ }
-    posthog.capture('rhea_onboarded', {
+    posthog.capture('optic_onboarded', {
       role: answers.role || 'unknown',
       intent: answers.intent || null,
       installed: !!installed,
@@ -159,11 +159,11 @@ export default function RheaOnboarding({ onDone }) {
 
           {step === 'welcome' && (
             <>
-              <div className="rob-kicker">RHEA COUNTY RAIDER COMPETITION</div>
+              <div className="rob-kicker">SDHS JROTC · OPTIC</div>
               <h1 className="rob-h">The whole day, <span className="accent">as it happens.</span></h1>
               <p className="rob-sub">
-                This is OPTIC, a beta photo feed we&apos;re running just for the Rhea County
-                Raider Competition. Families and cadets post from the stands and the sideline,
+                This is OPTIC, a beta photo feed we&apos;re running just for this
+                competition. Families and cadets post from the stands and the sideline,
                 and everyone sees it live. Nothing to sign into, nothing to download yet.
                 We may ask you for quick feedback after the event.
               </p>
@@ -181,7 +181,7 @@ export default function RheaOnboarding({ onDone }) {
 
           {step === 'role' && (
             <>
-              <div className="rob-kicker">RHEA COUNTY RAIDER COMPETITION</div>
+              <div className="rob-kicker">SDHS JROTC · OPTIC</div>
               <h1 className="rob-h">Who is holding <span className="accent">the phone?</span></h1>
               <p className="rob-sub">Quick setup so the feed shows you the right thing. Ten seconds, tops.</p>
               <div className="rob-choices">

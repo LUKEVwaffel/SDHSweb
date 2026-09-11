@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { supabase as SB } from '../lib/supabaseClient';
-import { RHEA_EVENT_ID } from '../lib/rheaComp';
+import { OPTIC_EVENT_ID } from '../lib/opticComp';
 
 const P = {
   ink: '#06101F', navy: '#142847', deep: '#0A1628',
@@ -11,7 +11,7 @@ const P = {
 const mono = "'JetBrains Mono', monospace";
 
 const AUTOPLAY_MS = 5000;
-// How many Rhea County comp frames the hero carousel pulls. It's a hero strip,
+// How many comp frames the hero carousel pulls. It's a hero strip,
 // not the full gallery (that's /raiders/comp), so cap it — earliest-tagged
 // photos first so the run reads in order.
 const MAX_SLIDES = 16;
@@ -60,7 +60,7 @@ function Slide({ slide }) {
   );
 }
 
-// Rhea County Raider Competition hero strip. Pulls Luke's own tagged comp
+// comp hero strip. Pulls Luke's own tagged comp
 // photos straight from Supabase (same filter as the /raiders/comp gallery:
 // source='luke', status='live', tagged to a sub-event) so it stays current as
 // more get tagged in /lukepwa — no static files to manage.
@@ -74,7 +74,7 @@ export default function RaiderCarousel() {
     let alive = true;
     SB.from('photos')
       .select('id, photo_url, thumb_url')
-      .eq('event_id', RHEA_EVENT_ID)
+      .eq('event_id', OPTIC_EVENT_ID)
       .eq('source', 'luke')
       .eq('status', 'live')
       .not('sub_event_id', 'is', null)
@@ -84,7 +84,7 @@ export default function RaiderCarousel() {
         if (!alive) return;
         setSlides((data || []).map((p, i) => ({
           src: p.photo_url || p.thumb_url,
-          alt: `Rhea County Raider Competition photo ${i + 1}`,
+          alt: `comp photo ${i + 1}`,
         })));
       });
     return () => { alive = false; };
@@ -123,7 +123,7 @@ export default function RaiderCarousel() {
       <CarouselStyles />
       <div
         role="region"
-        aria-label="Rhea County Raider Competition photo carousel"
+        aria-label="comp photo carousel"
         style={{
           position: 'relative', width: '100%', aspectRatio: '21 / 9',
           minHeight: 260,

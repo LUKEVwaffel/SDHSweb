@@ -1,38 +1,40 @@
 import { useState, useRef, useCallback, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { getDeviceId } from '../../lib/fingerprint';
-import { useRheaPhotos } from '../../hooks/useRheaPhotos';
-import { useRheaLikes } from '../../hooks/useRheaLikes';
-import { useRheaGate } from '../../hooks/useRheaGate';
+import { useOpticPhotos } from '../../hooks/useOpticPhotos';
+import { useOpticLikes } from '../../hooks/useOpticLikes';
+import { useOpticGate } from '../../hooks/useOpticGate';
+import { useOpticConfig } from '../../hooks/useOpticConfig';
 import {
-  uploadRheaPhoto, isAllowedImage, RHEA_ACCEPT_ATTR, REJECT_MESSAGE,
+  uploadOpticPhoto, isAllowedImage, OPTIC_ACCEPT_ATTR, REJECT_MESSAGE,
   feedAttribution, feedChip, downloadPhoto,
-  hasOnboardedRhea, hasWalkthroughRhea, markWalkthroughRhea,
-} from '../../lib/rheaComp';
+  hasOnboardedOptic, hasWalkthroughOptic, markWalkthroughOptic,
+} from '../../lib/opticComp';
+import { readTakenAt } from '../../lib/opticExif';
 import { isHeic, convertHeicToJpeg } from '../../lib/heicConvert';
-import { installRheaPwaHooks, isStandalone } from './pwa';
+import { installOpticPwaHooks, isStandalone } from './pwa';
 import { usePwaUpdate, PwaUpdateBar } from './usePwaUpdate';
-import RheaOnboarding from './RheaOnboarding';
+import OpticOnboarding from './OpticOnboarding';
 import posthog from '../../lib/posthog';
-import './rhea.css';
+import './optic.css';
 
 let uid = 0;
 const nextId = () => `u${Date.now()}_${uid++}`;
 
-// ── /rhea , public parent upload + live feed. Hardcoded to one event. Zero
-// navigation: landing on the link IS the flow. Mobile-first (parents in the
-// stands on phones). Parent photos go live immediately (visibility='public',
-// no staging), and the feed below streams every public photo (parent + Luke's
-// published) in realtime. Front-of-house, so this surface carries the full
-// polish: layered navy, a Shorts-style vertical photo reel, likes, and a
-// first-launch walkthrough for people who installed the app.
-export default function Rhea() {
-  const [onboarded, setOnboarded] = useState(() => isStandalone() || hasOnboardedRhea());
+// ── /optic , public parent upload + live feed. Zero navigation: landing on
+// the link IS the flow. Mobile-first (parents in the stands on phones).
+// Parent photos go live immediately (visibility='public', no staging), and
+// the feed below streams every public photo (parent + Luke's published) in
+// realtime. Front-of-house, so this surface carries the full polish: layered
+// navy, a Shorts-style vertical photo reel, likes, and a first-launch
+// walkthrough for people who installed the app.
+export default function Optic() {
+  const [onboarded, setOnboarded] = useState(() => isStandalone() || hasOnboardedOptic());
 
-  useEffect(() => { installRheaPwaHooks(); }, []);
+  useEffect(() => { installOpticPwaHooks(); }, []);
 
-  if (!onboarded) return <RheaOnboarding onDone={() => setOnboarded(true)} />;
-  return <RheaApp />;
+  if (!onboarded) return <OpticOnboarding onDone={() => setOnboarded(true)} />;
+  return <OpticApp />;
 }
 
 function OpticGlyph({ className }) {
@@ -47,12 +49,13 @@ function OpticGlyph({ className }) {
   );
 }
 
-function RheaApp() {
-  const gate = useRheaGate();
-  const { photos, loading, error } = useRheaPhotos({ scope: 'public', enabled: gate.open });
-  const likes = useRheaLikes(photos);
+function OpticApp() {
+  const config = useOpticConfig();
+  const gate = useOpticGate();
+  const { photos, loading, error } = useOpticPhotos({ eventId: config.eventId, scope: 'public', enabled: gate.open });
+  const likes = useOpticLikes(photos);
   const [reel, setReel] = useState(null); // index into photos, or null
-  const [walk, setWalk] = useState(() => isStandalone() && !hasWalkthroughRhea());
+  const [walk, setWalk] = useState(() => isStandalone() && !hasWalkthroughOptic());
   const updateReady = usePwaUpdate();
 
   const showWalk = walk && gate.open;
@@ -65,10 +68,10 @@ function RheaApp() {
         {gate.loading ? (
           <div className="rhea-wrap"><div className="rhea-feed-msg">LOADING…</div></div>
         ) : !gate.open ? (
-          <RheaLocked opensAt={gate.opensAt} />
+          <OpticLocked opensAt={gate.opensAt} />
         ) : (
           <div className="rhea-wrap">
-            <UploadCard />
+            <UploadCard eventId={config.eventId} />
             <Feed
               photos={photos}
               loading={loading}
@@ -91,7 +94,7 @@ function RheaApp() {
       )}
 
       {showWalk && (
-        <Walkthrough onClose={() => { markWalkthroughRhea(); setWalk(false); }} />
+        <Walkthrough onClose={() => { markWalkthroughOptic(); setWalk(false); }} />
       )}
 
       <PwaUpdateBar show={updateReady} />
@@ -104,7 +107,7 @@ function BetaBanner() {
     <div className="rhea-beta" role="note">
       <span className="rhea-beta-tag">BETA</span>
       <span>
-        OPTIC is a test run for the Rhea County Raider Competition. We may ask you
+        OPTIC is a test run for the SDHS JROTC comp. We may ask you
         for quick feedback afterward.
       </span>
     </div>
@@ -112,8 +115,8 @@ function BetaBanner() {
 }
 
 // Countdown hold shown until the gate opens (scheduled time or Luke's manual
-// override). uses a local 1 Hz tick; useRheaGate flips `open` when it lands.
-function RheaLocked({ opensAt }) {
+// override). uses a local 1 Hz tick; useOpticGate flips `open` when it lands.
+function OpticLocked({ opensAt }) {
   const [now, setNow] = useState(() => Date.now());
   useEffect(() => {
     const t = setInterval(() => setNow(Date.now()), 1000);
@@ -137,7 +140,7 @@ function RheaLocked({ opensAt }) {
 
   return (
     <div className="rhea-lock">
-      <span className="rhea-lock-badge">BETA · RHEA COUNTY</span>
+      <span className="rhea-lock-badge">BETA · SDHS JROTC</span>
       <OpticGlyph className="rhea-lock-glyph" />
       {paused ? (
         <>
@@ -185,7 +188,7 @@ function Header({ onHelp }) {
         <OpticGlyph className="rhea-glyph" />
         <div>
           <div className="rhea-kick">SDHS JROTC · OPTIC</div>
-          <div className="rhea-title">RHEA COUNTY RAIDER COMP</div>
+          <div className="rhea-title">SPRING HILL RAIDER CHALLENGE</div>
         </div>
         <div className="rhea-hdr-right">
           <button className="rhea-help" onClick={onHelp} aria-label="Show walkthrough">?</button>
@@ -196,8 +199,8 @@ function Header({ onHelp }) {
   );
 }
 
-function UploadCard() {
-  const [items, setItems] = useState([]); // {id,file,previewUrl,status,error}
+function UploadCard({ eventId }) {
+  const [items, setItems] = useState([]); // {id,file,previewUrl,takenAt,status,error}
   const [name, setName] = useState('');
   const [rejected, setRejected] = useState([]);
   const [busy, setBusy] = useState(false);
@@ -225,11 +228,11 @@ function UploadCard() {
             ? { ...x, file: jpeg, previewUrl, status: 'pending', error: null }
             : x));
         });
-        posthog.capture('rhea_heic_converted');
+        posthog.capture('optic_heic_converted');
       } catch {
         setItems((q) => q.filter((x) => x.id !== id));
         setRejected((r) => (r.includes(file.name) ? r : [...r, file.name || 'HEIC photo']));
-        posthog.capture('rhea_heic_convert_failed');
+        posthog.capture('optic_heic_convert_failed');
       }
     }
   }, []);
@@ -243,16 +246,26 @@ function UploadCard() {
     setRejected(bad.map((f) => f.name));
 
     const nativeItems = native.map((file) => ({
-      id: nextId(), file, previewUrl: URL.createObjectURL(file), status: 'pending', error: null,
+      id: nextId(), file, previewUrl: URL.createObjectURL(file), takenAt: null, status: 'pending', error: null,
     }));
     const heicItems = heic.map((file) => ({
-      id: nextId(), file, previewUrl: null, status: 'converting', error: null,
+      id: nextId(), file, previewUrl: null, takenAt: null, status: 'converting', error: null,
     }));
 
     if (nativeItems.length || heicItems.length) {
       setItems((q) => [...q, ...nativeItems, ...heicItems]);
     }
     if (heicItems.length) processHeic(heicItems);
+
+    // EXIF must come off the ORIGINAL file — resize/HEIC-convert strip it.
+    // Read for every picked file (native + heic) in parallel; a slow/missing
+    // EXIF read never blocks the upload, it just leaves taken_at null.
+    [...nativeItems, ...heicItems].forEach(({ id, file }) => {
+      readTakenAt(file).then((takenAt) => {
+        if (!takenAt) return;
+        setItems((q) => q.map((x) => (x.id === id ? { ...x, takenAt } : x)));
+      });
+    });
   }, [processHeic]);
 
   async function send() {
@@ -264,7 +277,9 @@ function UploadCard() {
     for (const it of targets) {
       setItems((q) => q.map((x) => (x.id === it.id ? { ...x, status: 'uploading', error: null } : x)));
       try {
-        await uploadRheaPhoto(it.file, { source: 'parent', uploaderName: name, deviceFp });
+        await uploadOpticPhoto(it.file, {
+          source: 'parent', uploaderName: name, deviceFp, eventId, takenAt: it.takenAt,
+        });
         ok += 1;
         setItems((q) => q.map((x) => (x.id === it.id ? { ...x, status: 'done' } : x)));
       } catch (err) {
@@ -272,7 +287,7 @@ function UploadCard() {
       }
     }
     setBusy(false);
-    if (ok > 0) posthog.capture('rhea_parent_upload', { photo_count: ok });
+    if (ok > 0) posthog.capture('optic_parent_upload', { photo_count: ok });
   }
 
   function reset() {
@@ -295,7 +310,7 @@ function UploadCard() {
       </div>
 
       <div className="rhea-card-body">
-        <input ref={inputRef} type="file" accept={RHEA_ACCEPT_ATTR} multiple style={{ display: 'none' }}
+        <input ref={inputRef} type="file" accept={OPTIC_ACCEPT_ATTR} multiple style={{ display: 'none' }}
           onChange={(e) => { addFiles(e.target.files); e.target.value = ''; }} />
 
         <div
@@ -509,8 +524,8 @@ function Reel({ photos, index, likes, onIndex, onClose }) {
     const who = feedAttribution(photo);
     try {
       if (navigator.share) {
-        await navigator.share({ title: 'Rhea County Raider Comp', text: `Photo by ${who}`, url });
-        posthog.capture('rhea_photo_share', { photo_id: photo.id });
+        await navigator.share({ title: 'OPTIC', text: `Photo by ${who}`, url });
+        posthog.capture('optic_photo_share', { photo_id: photo.id });
         return;
       }
     } catch { /* cancelled / unsupported */ }
@@ -559,7 +574,7 @@ function Reel({ photos, index, likes, onIndex, onClose }) {
                 </button>
                 <button
                   className="rhea-rail-btn"
-                  onClick={(e) => { e.stopPropagation(); downloadPhoto(p.photo_url, `rhea_${p.id}.jpg`); }}
+                  onClick={(e) => { e.stopPropagation(); downloadPhoto(p.photo_url, `optic_${p.id}.jpg`); }}
                   aria-label="Save"
                 >
                   <span className="rhea-rail-ico">⬇</span><span>SAVE</span>
@@ -616,7 +631,7 @@ function Walkthrough({ onClose }) {
 
   function next() {
     try { navigator.vibrate?.(10); } catch { /* unsupported */ }
-    if (last) { posthog.capture('rhea_walkthrough_done'); onClose(); }
+    if (last) { posthog.capture('optic_walkthrough_done'); onClose(); }
     else setI(i + 1);
   }
 
@@ -631,7 +646,7 @@ function Walkthrough({ onClose }) {
           <div className="rhea-wt-dots" aria-hidden="true">
             {WALK_STEPS.map((_, n) => <span key={n} className="rhea-wt-dot" data-on={n === i} />)}
           </div>
-          {!last && <button className="rhea-wt-skip" onClick={() => { posthog.capture('rhea_walkthrough_skip'); onClose(); }}>Skip</button>}
+          {!last && <button className="rhea-wt-skip" onClick={() => { posthog.capture('optic_walkthrough_skip'); onClose(); }}>Skip</button>}
           <button className="rhea-wt-next" onClick={next}>{last ? 'GOT IT' : 'NEXT'}</button>
         </div>
       </div>

@@ -1,12 +1,14 @@
 import { useState, useRef, useCallback, useEffect } from 'react';
 import AdminGate, { GATE_P as P, GATE_MONO as mono, GATE_INTER as inter } from './AdminGate';
 import {
-  uploadRheaPhoto, isAllowedImage, ACCEPT_ATTR, RHEA_EVENT_TITLE,
-} from '../../lib/rheaComp';
+  uploadOpticPhoto, isAllowedImage, ACCEPT_ATTR, OPTIC_EVENT_TITLE,
+} from '../../lib/opticComp';
+import { readTakenAt } from '../../lib/opticExif';
+import { useOpticConfig } from '../../hooks/useOpticConfig';
 
 const oswald = 'Oswald, sans-serif';
 
-// ── /lukeupload — the fastest possible SD-card dump off Luke's laptop ──────
+// ── /lukeupload — OPTIC's fastest possible SD-card dump off Luke's laptop ──
 // One drop zone. No event picker, no tagging, no team selector, no nav. Every
 // file lands as source='luke', visibility='staged'; all tagging happens later
 // in /lukepwa. Once the batch summary says "N/N uploaded", Luke is done here.
@@ -22,7 +24,8 @@ let uid = 0;
 const nextId = () => `f${Date.now()}_${uid++}`;
 
 function LukeUpload() {
-  const [items, setItems] = useState([]); // {id,file,previewUrl,status:pending|uploading|done|failed,error}
+  const { eventId } = useOpticConfig();
+  const [items, setItems] = useState([]); // {id,file,previewUrl,takenAt,status:pending|uploading|done|failed,error}
   const [rejected, setRejected] = useState([]);
   const [running, setRunning] = useState(false);
   const [dragOver, setDragOver] = useState(false);
@@ -43,13 +46,18 @@ function LukeUpload() {
     if (bad.length) setRejected((r) => [...r, ...bad.map((f) => f.name)]);
     if (ok.length) {
       setBatchDone(false);
-      setItems((q) => [
-        ...q,
-        ...ok.map((file) => ({
-          id: nextId(), file, previewUrl: URL.createObjectURL(file),
-          status: 'pending', error: null,
-        })),
-      ]);
+      const newItems = ok.map((file) => ({
+        id: nextId(), file, previewUrl: URL.createObjectURL(file), takenAt: null,
+        status: 'pending', error: null,
+      }));
+      setItems((q) => [...q, ...newItems]);
+      // EXIF off the original file, before it ever gets resized for upload.
+      newItems.forEach(({ id, file }) => {
+        readTakenAt(file).then((takenAt) => {
+          if (!takenAt) return;
+          setItems((q) => q.map((x) => (x.id === id ? { ...x, takenAt } : x)));
+        });
+      });
     }
   }, []);
 
@@ -68,7 +76,7 @@ function LukeUpload() {
       const item = itemsRef.current.find((it) => it.id === id);
       if (!item) continue;
       try {
-        await uploadRheaPhoto(item.file, { source: 'luke' });
+        await uploadOpticPhoto(item.file, { source: 'luke', eventId, takenAt: item.takenAt });
         setItems((q) => q.map((it) => (it.id === id ? { ...it, status: 'done' } : it)));
       } catch (err) {
         setItems((q) => q.map((it) => (
@@ -101,7 +109,7 @@ function LukeUpload() {
           SD CARD DUMP
         </h1>
         <div style={{ fontFamily: inter, fontSize: 13, color: P.mute }}>
-          {RHEA_EVENT_TITLE} · photos land staged, tag them later in the phone app.
+          {OPTIC_EVENT_TITLE} · photos land staged, tag them later in the phone app.
         </div>
 
         {/* Drop zone */}

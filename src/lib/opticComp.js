@@ -2,11 +2,15 @@ import { supabase as SB } from './supabaseClient';
 import { resizeForUpload } from './imageResize';
 import { adminDisplayName } from './admins';
 
-// ── Rhea County Raider Competition , one hardcoded real event ───────────────
-// events row confirmed: date 2026-08-29, status 'posted', team 'raiders',
-// 07:00-17:00. The whole feature is scoped to this id; there is no picker.
-export const RHEA_EVENT_ID = 'e8a305fe-86cf-4092-a580-5865423271b9';
-export const RHEA_EVENT_TITLE = 'Rhea County Raider Competition';
+// ── OPTIC 2.0 — comp photo pipeline. Which event this targets is no longer a
+// hardcoded id: useOpticConfig() reads it from optic_config.active_event_id so
+// swapping to the next comp is a DB row, not a code change. OPTIC_EVENT_ID
+// below is only the pre-config fallback (and what legacy dormant surfaces —
+// RaiderCarousel, TvCongratsScreen, compPhotoVote, raiderCompGallery — still
+// import directly; those aren't part of the live feed and stay pinned to this
+// one comp until they're revisited).
+export const OPTIC_EVENT_ID = 'e8a305fe-86cf-4092-a580-5865423271b9';
+export const OPTIC_EVENT_TITLE = 'Spring Hill HS Raider Challenge';
 
 const BUCKET = 'team-photos';
 // photos.team MUST stay 'raiders' , the photos_require_posted_event trigger
@@ -17,11 +21,11 @@ const PHOTO_TEAM = 'raiders';
 // path currently mishandles .CR2 and can leave partial rows. Restricting the
 // input sidesteps RAW entirely for tonight rather than fixing decode.
 export const ACCEPT_ATTR = 'image/jpeg,image/png';
-// /rhea only: also let iPhone parents pick HEIC/HEIF straight from the camera
+// /optic only: also let iPhone parents pick HEIC/HEIF straight from the camera
 // roll. Those are converted to JPEG in the browser (see lib/heicConvert.js)
 // before they hit the upload pipeline. Extensions are listed alongside the
 // MIME types because iOS often reports HEIC files with no usable type.
-export const RHEA_ACCEPT_ATTR =
+export const OPTIC_ACCEPT_ATTR =
   'image/jpeg,image/png,image/heic,image/heif,.jpg,.jpeg,.png,.heic,.heif';
 const ALLOWED_TYPES = new Set(['image/jpeg', 'image/png']);
 
@@ -47,12 +51,21 @@ export const raiderTeamLabel = (t) => RAIDER_TEAM_LABEL[t] || null;
  * @param {string} [opts.uploaderName]  free-text attribution (optional both paths)
  * @param {string|null} [opts.deviceFp] device fingerprint , parent path only,
  *        left null for Luke so his 50+ dump is never rate-limited
+ * @param {string} [opts.eventId]  target event, from useOpticConfig() — falls
+ *        back to OPTIC_EVENT_ID when the config row isn't loaded yet
+ * @param {string|null} [opts.takenAt]  ISO capture time read from EXIF before
+ *        resize/HEIC-convert strips it (see lib/opticExif.js). null when the
+ *        file carries no EXIF.
+ * @param {'male'|'coed'|'both'|null} [opts.raiderTeam]  parent-picked team tag
  * @returns {Promise<object>} the inserted photos row
  */
-export async function uploadRheaPhoto(file, { source, uploaderName = '', deviceFp = null }) {
+export async function uploadOpticPhoto(file, {
+  source, uploaderName = '', deviceFp = null, eventId = OPTIC_EVENT_ID,
+  takenAt = null, raiderTeam = null,
+}) {
   const { full, thumb } = await resizeForUpload(file); // throws on RAW / unreadable
   const stamp = `${Date.now()}_${Math.random().toString(36).slice(2, 8)}`;
-  const base = `${PHOTO_TEAM}/${RHEA_EVENT_ID}/${stamp}`;
+  const base = `${PHOTO_TEAM}/${eventId}/${stamp}`;
 
   const up1 = await SB.storage.from(BUCKET).upload(`${base}.jpg`, full, { contentType: 'image/jpeg' });
   if (up1.error) throw up1.error;
@@ -64,7 +77,7 @@ export async function uploadRheaPhoto(file, { source, uploaderName = '', deviceF
 
   const { data, error } = await SB.from('photos').insert({
     team: PHOTO_TEAM,
-    event_id: RHEA_EVENT_ID,
+    event_id: eventId,
     storage_path: `${base}.jpg`,
     photo_url: photoUrl,
     thumb_url: thumbUrl,
@@ -73,6 +86,8 @@ export async function uploadRheaPhoto(file, { source, uploaderName = '', deviceF
     source,
     visibility: source === 'luke' ? 'staged' : 'public',
     upload_status: 'done',
+    taken_at: takenAt || null,
+    ...(raiderTeam ? { raider_team: raiderTeam } : {}),
   }).select('*, raider_sub_events(name, team)').single();
   if (error) throw error;
   return data;
@@ -101,27 +116,27 @@ export function feedChip(photo) {
   return sub || team || null;
 }
 
-const RHEA_ONBOARDED_KEY = 'rhea_onboarded';
-const RHEA_WALKTHROUGH_KEY = 'rhea_walkthrough';
+const OPTIC_ONBOARDED_KEY = 'optic_onboarded_v2';
+const OPTIC_WALKTHROUGH_KEY = 'optic_walkthrough_v2';
 
-/** True once the visitor finished (or skipped) the /rhea first-run flow here. */
-export function hasOnboardedRhea() {
-  try { return localStorage.getItem(RHEA_ONBOARDED_KEY) === '1'; } catch { return false; }
+/** True once the visitor finished (or skipped) the /optic first-run flow here. */
+export function hasOnboardedOptic() {
+  try { return localStorage.getItem(OPTIC_ONBOARDED_KEY) === '1'; } catch { return false; }
 }
 
-/** Mark the /rhea first-run flow done on this device. */
-export function markOnboardedRhea() {
-  try { localStorage.setItem(RHEA_ONBOARDED_KEY, '1'); } catch { /* private mode */ }
+/** Mark the /optic first-run flow done on this device. */
+export function markOnboardedOptic() {
+  try { localStorage.setItem(OPTIC_ONBOARDED_KEY, '1'); } catch { /* private mode */ }
 }
 
 /** True once the in-app walkthrough (post-install tour) has run on this device. */
-export function hasWalkthroughRhea() {
-  try { return localStorage.getItem(RHEA_WALKTHROUGH_KEY) === '1'; } catch { return false; }
+export function hasWalkthroughOptic() {
+  try { return localStorage.getItem(OPTIC_WALKTHROUGH_KEY) === '1'; } catch { return false; }
 }
 
 /** Mark the in-app walkthrough seen on this device. */
-export function markWalkthroughRhea() {
-  try { localStorage.setItem(RHEA_WALKTHROUGH_KEY, '1'); } catch { /* private mode */ }
+export function markWalkthroughOptic() {
+  try { localStorage.setItem(OPTIC_WALKTHROUGH_KEY, '1'); } catch { /* private mode */ }
 }
 
 // ── likes ─────────────────────────────────────────────────────────────────
@@ -163,6 +178,8 @@ export async function setLike(photoId, deviceFp, liked) {
 /**
  * Force a real download (Save) of a cross-origin storage image. A plain
  * <a download> is ignored cross-origin and just opens the file in a tab.
+ * Desktop/Android path only — iOS has no reliable cross-origin blob download,
+ * see lib/opticSave.js for the Web Share / long-press fallback used in Reel.
  */
 export async function downloadPhoto(url, filename) {
   try {

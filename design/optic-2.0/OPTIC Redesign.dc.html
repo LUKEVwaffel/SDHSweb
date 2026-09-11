@@ -1,0 +1,463 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Oswald:wght@500;600;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@500;600&display=swap" rel="stylesheet">
+<style>
+  body { margin: 0; }
+  @keyframes op-fade { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: translateY(0); } }
+  @keyframes op-pop { from { opacity: 0; transform: scale(0.92); } to { opacity: 1; transform: scale(1); } }
+  [data-optic-scroll] { scrollbar-width: none; }
+  [data-optic-scroll]::-webkit-scrollbar { display: none; width: 0; height: 0; }
+</style>
+</helmet>
+
+<div style="min-height:100vh; background:linear-gradient(180deg,#0b1526,#050b14); display:flex; flex-direction:column; align-items:center; gap:22px; padding:36px 16px 60px; font-family:Inter,sans-serif;">
+
+  <div style="display:flex; gap:6px; background:rgba(255,255,255,0.05); border:1px solid rgba(255,255,255,0.08); border-radius:11px; padding:4px;">
+    <button onClick="{{ goLocked }}" style="{{ tabStyleLocked }}">LOCKED</button>
+    <button onClick="{{ goOnboarding }}" style="{{ tabStyleOnboarding }}">ONBOARDING</button>
+    <button onClick="{{ goFeed }}" style="{{ tabStyleFeed }}">FEED</button>
+    <button onClick="{{ openReelDemo }}" style="{{ tabStyleReel }}">REEL</button>
+  </div>
+
+  <x-import component-from-global-scope="IOSDevice" from="./ios-frame.jsx" dark="{{ true }}" hint-size="402,874">
+    <div ref="{{ feedScrollRef }}" onScroll="{{ onFeedScroll }}" data-optic-scroll="true" style="height:100%; overflow-y:auto; position:relative; background:#06101F; color:#F4ECD8; font-family:Inter,sans-serif; -webkit-overflow-scrolling:touch;">
+
+      <sc-if value="{{ isLocked }}" hint-placeholder-val="{{ true }}">
+        <div style="min-height:100%; display:flex; flex-direction:column; align-items:center; text-align:center; padding:76px 26px 60px; background:radial-gradient(120% 60% at 50% -10%,#1D3A63,rgba(29,58,99,0) 55%),#06101F;">
+          <span style="font-family:'JetBrains Mono',monospace; font-size:9px; letter-spacing:0.22em; color:#C9A961; border:1px solid rgba(201,169,97,0.35); border-radius:999px; padding:6px 12px;">BETA · RHEA COUNTY</span>
+          <svg width="56" height="56" viewBox="0 0 56 56" style="margin:26px 0 4px;">
+            <circle cx="28" cy="28" r="24" fill="none" stroke="#C9A961" stroke-width="2.5"></circle>
+            <circle cx="28" cy="28" r="8" fill="#C9A961"></circle>
+          </svg>
+          <h1 style="font-family:Oswald,sans-serif; font-weight:600; font-size:28px; line-height:1.12; color:#F4ECD8; margin:16px 0 0;">The feed opens <span style="color:#C9A961;">Saturday, 9:00 AM</span>.</h1>
+          <p style="font-family:Inter,sans-serif; font-size:14px; line-height:1.6; color:rgba(244,236,216,0.62); margin:14px 0 0; max-width:32ch;">Uploads and the live feed unlock at go time. You're on the list, nothing else to do.</p>
+          <div style="display:flex; gap:6px; margin-top:28px; padding:16px 18px; border:1px solid rgba(201,169,97,0.16); border-radius:14px; background:#0A1628;">
+            <sc-for list="{{ countdown }}" as="unit" hint-placeholder-count="4">
+              <div style="display:flex; flex-direction:column; align-items:center; min-width:42px;">
+                <b style="font-family:Oswald,sans-serif; font-weight:600; font-size:28px; color:#F4ECD8; font-variant-numeric:tabular-nums;">{{ unit.value }}</b>
+                <i style="font-family:'JetBrains Mono',monospace; font-style:normal; font-size:7.5px; letter-spacing:0.16em; color:rgba(244,236,216,0.4); margin-top:5px;">{{ unit.label }}</i>
+              </div>
+            </sc-for>
+          </div>
+          <p style="font-family:Inter,sans-serif; font-size:12px; line-height:1.5; color:rgba(244,236,216,0.4); margin:22px 0 0; max-width:28ch;">Add OPTIC to your home screen now so it's one tap when the feed opens.</p>
+        </div>
+      </sc-if>
+
+      <sc-if value="{{ isOnboarding }}" hint-placeholder-val="{{ false }}">
+        <div style="min-height:100%; display:flex; flex-direction:column; padding:64px 22px 30px; background:#06101F;">
+          <div style="display:flex; align-items:center; justify-content:space-between;">
+            <span style="font-family:'JetBrains Mono',monospace; font-size:8.5px; letter-spacing:0.24em; color:#C9A961;">SDHS JROTC · OPTIC</span>
+            <div style="display:flex; gap:5px;">
+              <sc-for list="{{ obDots }}" as="d" hint-placeholder-count="2">
+                <span style="{{ d.style }}"></span>
+              </sc-for>
+            </div>
+          </div>
+
+          <div style="flex:1; display:flex; flex-direction:column; justify-content:center; margin-top:20px; animation:op-fade 320ms ease both;">
+            <sc-if value="{{ obWelcome }}" hint-placeholder-val="{{ true }}">
+              <div style="font-family:'JetBrains Mono',monospace; font-size:9px; letter-spacing:0.2em; color:#C9A961;">RHEA COUNTY RAIDER COMPETITION</div>
+              <h1 style="font-family:Oswald,sans-serif; font-weight:600; font-size:30px; line-height:1.1; color:#F4ECD8; margin:12px 0 0;">The whole day, <span style="color:#C9A961;">as it happens.</span></h1>
+              <p style="font-family:Inter,sans-serif; font-size:14px; line-height:1.6; color:rgba(244,236,216,0.62); margin:14px 0 0;">Families and cadets post from the stands and everyone sees it live. Nothing to sign into.</p>
+            </sc-if>
+            <sc-if value="{{ obRole }}" hint-placeholder-val="{{ false }}">
+              <h1 style="font-family:Oswald,sans-serif; font-weight:600; font-size:26px; line-height:1.12; color:#F4ECD8; margin:0;">Who's holding <span style="color:#C9A961;">the phone?</span></h1>
+              <p style="font-family:Inter,sans-serif; font-size:13.5px; color:rgba(244,236,216,0.62); margin:10px 0 20px;">Ten seconds, tops.</p>
+              <div style="display:flex; flex-direction:column; gap:10px;">
+                <button onClick="{{ obChooseCadet }}" style="display:flex; align-items:center; gap:12px; text-align:left; border:1px solid rgba(201,169,97,0.35); background:#142847; border-radius:12px; padding:16px; color:#F4ECD8; cursor:pointer;">
+                  <span style="font-size:18px; color:#C9A961;">&#9670;</span>
+                  <span><span style="display:block; font-family:Oswald,sans-serif; font-size:14px; letter-spacing:0.04em;">A CADET</span><span style="display:block; font-size:12px; color:rgba(244,236,216,0.5); margin-top:2px;">On the team or in the program</span></span>
+                </button>
+                <button onClick="{{ obChooseFamily }}" style="display:flex; align-items:center; gap:12px; text-align:left; border:1px solid rgba(201,169,97,0.35); background:#142847; border-radius:12px; padding:16px; color:#F4ECD8; cursor:pointer;">
+                  <span style="font-size:18px; color:#C9A961;">&#9671;</span>
+                  <span><span style="display:block; font-family:Oswald,sans-serif; font-size:14px; letter-spacing:0.04em;">FAMILY</span><span style="display:block; font-size:12px; color:rgba(244,236,216,0.5); margin-top:2px;">Parent, sibling, here to cheer</span></span>
+                </button>
+              </div>
+            </sc-if>
+            <sc-if value="{{ obInstall }}" hint-placeholder-val="{{ false }}">
+              <div style="width:64px; height:64px; border-radius:16px; background:linear-gradient(180deg,#E8C77A,#C9A961); display:flex; align-items:center; justify-content:center; margin:0 auto 18px;">
+                <svg width="30" height="30" viewBox="0 0 56 56"><circle cx="28" cy="28" r="20" fill="none" stroke="#06101F" stroke-width="3"></circle><circle cx="28" cy="28" r="6" fill="#06101F"></circle></svg>
+              </div>
+              <h1 style="font-family:Oswald,sans-serif; font-weight:600; font-size:24px; line-height:1.15; color:#F4ECD8; margin:0; text-align:center;">Put OPTIC on <span style="color:#C9A961;">your home screen.</span></h1>
+              <p style="font-family:Inter,sans-serif; font-size:13.5px; line-height:1.6; color:rgba(244,236,216,0.62); margin:12px 0 0; text-align:center;">One tap, no browser tab, no login. The feed runs live all day.</p>
+            </sc-if>
+          </div>
+
+          <div style="display:flex; align-items:center; gap:14px; margin-top:18px;">
+            <sc-if value="{{ obShowSkip }}" hint-placeholder-val="{{ true }}">
+              <button onClick="{{ goFeed }}" style="background:none; border:none; color:rgba(244,236,216,0.4); font-family:'JetBrains Mono',monospace; font-size:10px; letter-spacing:0.12em; cursor:pointer;">Skip</button>
+            </sc-if>
+            <sc-if value="{{ obShowPrimary }}" hint-placeholder-val="{{ true }}">
+              <button onClick="{{ obPrimary }}" style="margin-left:auto; border:none; cursor:pointer; border-radius:11px; background:linear-gradient(180deg,#E8C77A,#C9A961); color:#06101F; font-family:'JetBrains Mono',monospace; font-size:11px; letter-spacing:0.14em; font-weight:700; padding:14px 22px;">{{ obPrimaryLabel }}</button>
+            </sc-if>
+          </div>
+        </div>
+      </sc-if>
+
+      <sc-if value="{{ isFeed }}" hint-placeholder-val="{{ false }}">
+        <div style="min-height:100%; position:relative;">
+          <div style="position:sticky; top:0; z-index:5; background:rgba(10,22,40,0.9); backdrop-filter:blur(14px); border-bottom:1px solid rgba(201,169,97,0.14); padding-top:56px;">
+            <div style="display:flex; align-items:center; gap:10px; padding:6px 16px 12px;">
+              <svg width="22" height="22" viewBox="0 0 56 56"><circle cx="28" cy="28" r="22" fill="none" stroke="#C9A961" stroke-width="2.5"></circle><circle cx="28" cy="28" r="7" fill="#C9A961"></circle></svg>
+              <div>
+                <div style="font-family:'JetBrains Mono',monospace; font-size:7px; letter-spacing:0.22em; color:#C9A961;">SDHS JROTC · OPTIC</div>
+                <div style="font-family:Oswald,sans-serif; font-weight:600; font-size:14px; letter-spacing:0.03em; color:#F4ECD8;">RHEA COUNTY RAIDER COMP</div>
+              </div>
+              <button onClick="{{ goOnboarding }}" style="margin-left:auto; width:24px; height:24px; border-radius:50%; border:1px solid rgba(201,169,97,0.35); background:none; color:#C9A961; font-family:'JetBrains Mono',monospace; font-size:11px; cursor:pointer; flex:none;">?</button>
+            </div>
+            <div style="position:relative;">
+              <div data-optic-scroll="true" style="display:flex; gap:7px; overflow-x:auto; padding:0 16px 12px;">
+                <sc-for list="{{ filterChips }}" as="chip" hint-placeholder-count="4">
+                  <button onClick="{{ chip.onClick }}" style="{{ chip.style }}">{{ chip.text }}</button>
+                </sc-for>
+                <span style="flex:none; width:2px;"></span>
+              </div>
+              <div style="position:absolute; top:0; right:0; bottom:12px; width:22px; background:linear-gradient(90deg,rgba(10,22,40,0),rgba(10,22,40,0.95)); pointer-events:none;"></div>
+            </div>
+
+            <sc-if value="{{ showNewPill }}" hint-placeholder-val="{{ false }}">
+              <div style="display:flex; justify-content:center; padding-bottom:10px;">
+                <button onClick="{{ flushQueued }}" style="animation:op-pop 220ms ease both; display:flex; align-items:center; gap:6px; border:none; cursor:pointer; border-radius:999px; background:#C9A961; color:#06101F; font-family:'JetBrains Mono',monospace; font-size:10.5px; letter-spacing:0.08em; font-weight:700; padding:8px 16px; box-shadow:0 6px 18px -4px rgba(0,0,0,0.6);">{{ queuedLabel }} &uarr;</button>
+              </div>
+            </sc-if>
+          </div>
+
+          <div style="padding:16px 14px 110px;">
+            <div style="display:flex; align-items:baseline; gap:8px; margin-bottom:12px;">
+              <span style="font-family:Oswald,sans-serif; font-weight:600; font-size:13px; letter-spacing:0.1em; color:#F4ECD8;">LIVE FEED</span>
+              <span style="margin-left:auto; font-family:'JetBrains Mono',monospace; font-size:8.5px; color:rgba(244,236,216,0.4); letter-spacing:0.1em;">{{ feedCountLabel }}</span>
+            </div>
+
+            <sc-if value="{{ hasHero }}" hint-placeholder-val="{{ false }}">
+              <figure style="margin:0 0 12px; border-radius:16px; overflow:hidden; border:1px solid rgba(201,169,97,0.16); background:#0A1628; animation:op-fade 320ms ease both;">
+                <button onClick="{{ hero.onOpen }}" style="display:block; width:100%; border:none; padding:0; cursor:pointer; position:relative;">
+                  <div style="{{ hero.imgStyle }}">
+                    <span style="font-family:'JetBrains Mono',monospace; font-size:9.5px; letter-spacing:0.14em; color:rgba(244,236,216,0.5);">PHOTO — {{ hero.name }}</span>
+                  </div>
+                  <span onClick="{{ hero.onLike }}" style="{{ hero.likeStyle }}">{{ hero.heartLabel }}</span>
+                  <span style="{{ hero.chipStyleAbs }}">{{ hero.teamLabel }}</span>
+                </button>
+                <figcaption style="display:flex; align-items:center; gap:8px; padding:11px 13px;">
+                  <span style="font-size:13px; color:#F4ECD8;">{{ hero.name }}</span>
+                  <span style="margin-left:auto; font-family:'JetBrains Mono',monospace; font-size:8px; color:rgba(244,236,216,0.4); letter-spacing:0.06em;">{{ hero.time }}</span>
+                </figcaption>
+              </figure>
+            </sc-if>
+
+            <div style="display:grid; grid-template-columns:1fr 1fr; gap:8px;">
+              <sc-for list="{{ gridItems }}" as="photo" hint-placeholder-count="4">
+                <figure style="margin:0; border-radius:12px; overflow:hidden; border:1px solid rgba(201,169,97,0.14); background:#0A1628; animation:op-fade 320ms ease both;">
+                  <button onClick="{{ photo.onOpen }}" style="display:block; width:100%; border:none; padding:0; cursor:pointer; position:relative;">
+                    <div style="{{ photo.imgStyle }}">
+                      <span style="font-family:'JetBrains Mono',monospace; font-size:7.5px; letter-spacing:0.1em; color:rgba(244,236,216,0.5);">PHOTO</span>
+                    </div>
+                    <span onClick="{{ photo.onLike }}" style="{{ photo.likeStyle }}">{{ photo.heartLabel }}</span>
+                  </button>
+                  <figcaption style="display:flex; align-items:center; gap:5px; padding:7px 9px;">
+                    <span style="font-size:10.5px; color:#F4ECD8; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">{{ photo.name }}</span>
+                    <span style="{{ photo.chipStyle }}">{{ photo.teamLabel }}</span>
+                  </figcaption>
+                </figure>
+              </sc-for>
+            </div>
+          </div>
+
+          <button onClick="{{ toggleUpload }}" style="position:absolute; right:16px; bottom:26px; z-index:8; width:52px; height:52px; border-radius:50%; border:none; cursor:pointer; background:linear-gradient(180deg,#E8C77A,#C9A961); color:#06101F; font-size:26px; line-height:1; display:flex; align-items:center; justify-content:center; box-shadow:0 14px 28px -10px rgba(0,0,0,0.6);">+</button>
+
+          <sc-if value="{{ uploadOpen }}" hint-placeholder-val="{{ false }}">
+            <div onClick="{{ toggleUpload }}" style="position:absolute; inset:0; z-index:9; background:rgba(3,8,16,0.6); display:flex; align-items:flex-end;">
+              <div onClick="{{ stop }}" style="width:100%; background:linear-gradient(180deg,#142847,#0A1628); border-top:1px solid rgba(201,169,97,0.3); border-radius:18px 18px 0 0; padding:20px 18px calc(30px + env(safe-area-inset-bottom));">
+                <div style="font-family:'JetBrains Mono',monospace; font-size:8.5px; letter-spacing:0.2em; color:#C9A961;">ADD YOUR PHOTOS</div>
+                <div style="border:1.5px dashed rgba(201,169,97,0.3); border-radius:12px; text-align:center; padding:26px 12px; margin-top:12px;">
+                  <div style="width:38px; height:38px; margin:0 auto; border-radius:50%; border:1px solid rgba(201,169,97,0.4); display:flex; align-items:center; justify-content:center; color:#C9A961; font-size:19px;">+</div>
+                  <div style="font-family:Oswald,sans-serif; font-size:13px; letter-spacing:0.04em; color:#F4ECD8; margin-top:8px;">TAP TO CHOOSE PHOTOS</div>
+                  <div style="font-family:'JetBrains Mono',monospace; font-size:8px; color:rgba(244,236,216,0.4); letter-spacing:0.1em; margin-top:6px;">JPG / PNG · SEVERAL AT ONCE</div>
+                </div>
+              </div>
+            </div>
+          </sc-if>
+        </div>
+      </sc-if>
+
+      <sc-if value="{{ reelOpen }}" hint-placeholder-val="{{ false }}">
+        <div style="position:absolute; inset:0; z-index:40; background:#030810;">
+          <div style="position:absolute; top:0; left:0; right:0; z-index:3; display:flex; align-items:center; gap:10px; padding:56px 16px 20px; background:linear-gradient(180deg,rgba(3,8,16,0.7),transparent);">
+            <span style="font-family:'JetBrains Mono',monospace; font-size:10px; color:rgba(244,236,216,0.75); letter-spacing:0.1em;">{{ reelPos }}</span>
+            <button onClick="{{ closeReel }}" style="margin-left:auto; width:32px; height:32px; border-radius:50%; border:1px solid rgba(201,169,97,0.35); background:rgba(6,16,31,0.6); color:#F4ECD8; cursor:pointer;">✕</button>
+          </div>
+
+          <div style="height:100%; position:relative;">
+            <div style="{{ reelImgStyle }}">
+              <span style="font-family:'JetBrains Mono',monospace; font-size:11px; letter-spacing:0.14em; color:rgba(244,236,216,0.55);">PHOTO — {{ reelName }}</span>
+            </div>
+
+            <div style="position:absolute; right:12px; bottom:64px; z-index:3; display:flex; flex-direction:column; gap:16px; align-items:center;">
+              <button onClick="{{ reelLike }}" style="display:flex; flex-direction:column; align-items:center; gap:4px; border:none; background:none; cursor:pointer; color:#F4ECD8;">
+                <span style="{{ reelLikeIconStyle }}">{{ reelHeart }}</span>
+                <span style="font-family:'JetBrains Mono',monospace; font-size:9px;">{{ reelLikeLabel }}</span>
+              </button>
+              <button style="display:flex; flex-direction:column; align-items:center; gap:4px; border:none; background:none; cursor:pointer; color:#F4ECD8;">
+                <span style="width:42px; height:42px; border-radius:50%; border:1px solid rgba(201,169,97,0.35); background:rgba(6,16,31,0.5); display:flex; align-items:center; justify-content:center; font-size:17px;">⤴</span>
+                <span style="font-family:'JetBrains Mono',monospace; font-size:9px;">SHARE</span>
+              </button>
+              <button style="display:flex; flex-direction:column; align-items:center; gap:4px; border:none; background:none; cursor:pointer; color:#F4ECD8;">
+                <span style="width:42px; height:42px; border-radius:50%; border:1px solid rgba(201,169,97,0.35); background:rgba(6,16,31,0.5); display:flex; align-items:center; justify-content:center; font-size:17px;">⬇</span>
+                <span style="font-family:'JetBrains Mono',monospace; font-size:9px;">SAVE</span>
+              </button>
+            </div>
+
+            <div style="position:absolute; left:16px; right:78px; bottom:60px; z-index:3;">
+              <div style="font-size:14px; color:#F4ECD8;">{{ reelName }}</div>
+              <div style="display:flex; gap:8px; margin-top:6px; align-items:center;">
+                <span style="{{ reelChipStyle }}">{{ reelTeamLabel }}</span>
+                <span style="font-family:'JetBrains Mono',monospace; font-size:8.5px; color:rgba(244,236,216,0.5);">{{ reelTime }}</span>
+              </div>
+            </div>
+
+            <button onClick="{{ reelPrev }}" style="{{ reelPrevBtnStyle }}">︿</button>
+            <button onClick="{{ reelNext }}" style="{{ reelNextBtnStyle }}">﹀</button>
+          </div>
+        </div>
+      </sc-if>
+    </div>
+  </x-import>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script>
+const TEAM_META = {
+  male: { label: 'MALE', color: '#C9A961' },
+  coed: { label: 'COED', color: 'oklch(76% 0.1 205)' },
+  unassigned: { label: 'UNASSIGNED', color: 'rgba(244,236,216,0.55)' },
+};
+
+const NAMES = [
+  ['M. Alvarez', 'male'], ['Family: Coleman', 'coed'], ['T. Brooks', 'male'],
+  ['S. Whitfield', 'coed'], ['Family: Nguyen', 'unassigned'], ['R. Patel', 'male'],
+  ['Family: Owens', 'coed'], ['D. Kim', 'male'], ['Family: Ruiz', 'unassigned'],
+];
+const TIMES = ['2:14 PM', '2:09 PM', '1:58 PM', '1:52 PM', '1:41 PM', '1:33 PM', '1:20 PM', '1:12 PM', '12:58 PM'];
+
+function makePhotos() {
+  return NAMES.map((n, i) => ({
+    id: 'p' + i, name: n[0], team: n[1], time: TIMES[i],
+    aspect: i % 2 === 0 ? '4 / 3' : '3 / 4', liked: false, likeCount: [3, 0, 7, 1, 0, 12, 2, 0, 5][i],
+  }));
+}
+
+class Component extends DCLogic {
+  state = {
+    screen: 'locked',
+    obStep: 'welcome',
+    role: null,
+    filter: 'all',
+    photos: makePhotos(),
+    queued: [
+      { id: 'q1', name: 'Family: Draper', team: 'coed', time: '2:22 PM', aspect: '4 / 3', liked: false, likeCount: 0 },
+      { id: 'q2', name: 'J. Ferris', team: 'male', time: '2:20 PM', aspect: '3 / 4', liked: false, likeCount: 1 },
+    ],
+    pastTop: true,
+    reelOpen: false,
+    reelIndex: 0,
+    uploadOpen: false,
+  };
+
+  feedScrollRef = React.createRef();
+
+  componentDidMount() {
+    this._queueTimer = setTimeout(() => {
+      if (this.state.screen === 'feed' && this.state.pastTop) this.flushQueued();
+    }, 3200);
+  }
+
+  componentWillUnmount() { clearTimeout(this._queueTimer); }
+
+  goLocked = () => this.setState({ screen: 'locked', reelOpen: false });
+  goOnboarding = () => this.setState({ screen: 'onboarding', obStep: 'welcome', reelOpen: false });
+  goFeed = () => this.setState({ screen: 'feed', reelOpen: false });
+  openReelDemo = () => this.setState({ screen: 'feed', reelOpen: true, reelIndex: 0 });
+
+  obChooseCadet = () => { this.setState({ role: 'cadet' }); setTimeout(() => this.setState({ obStep: 'install' }), 180); };
+  obChooseFamily = () => { this.setState({ role: 'family' }); setTimeout(() => this.setState({ obStep: 'install' }), 180); };
+  obPrimary = () => {
+    if (this.state.obStep === 'welcome') this.setState({ obStep: 'role' });
+    else this.goFeed();
+  };
+
+  setFilter = (f) => this.setState({ filter: f });
+  toggleUpload = () => this.setState((s) => ({ uploadOpen: !s.uploadOpen }));
+  stop = (e) => e.stopPropagation();
+
+  onFeedScroll = (e) => {
+    const top = e.target.scrollTop < 12;
+    if (top !== this.state.pastTop) this.setState({ pastTop: top });
+    if (top && this.state.queued.length > 0) this.flushQueued();
+  };
+
+  flushQueued = () => {
+    if (!this.state.queued.length) return;
+    this.setState((s) => ({ photos: [...s.queued, ...s.photos], queued: [] }));
+    const el = this.feedScrollRef.current;
+    if (el) el.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
+  toggleLike = (id) => this.setState((s) => ({
+    photos: s.photos.map((p) => (p.id === id ? { ...p, liked: !p.liked, likeCount: p.likeCount + (p.liked ? -1 : 1) } : p)),
+  }));
+
+  openReel = (visibleIndex) => this.setState({ reelOpen: true, reelIndex: visibleIndex });
+  closeReel = () => this.setState({ reelOpen: false });
+  reelNext = () => this.setState((s) => ({ reelIndex: Math.min(s.reelIndex + 1, this.visiblePhotos(s).length - 1) }));
+  reelPrev = () => this.setState((s) => ({ reelIndex: Math.max(s.reelIndex - 1, 0) }));
+  reelLike = () => {
+    const p = this.visiblePhotos(this.state)[this.state.reelIndex];
+    if (p) this.toggleLike(p.id);
+  };
+
+  visiblePhotos(s) {
+    if (s.filter === 'all') return s.photos;
+    return s.photos.filter((p) => p.team === s.filter);
+  }
+
+  imgStyle(p, mode) {
+    const hue = p.team === 'male' ? '45deg' : p.team === 'coed' ? '200deg' : '0deg';
+    const bg = 'background:repeating-linear-gradient(' + hue + ',rgba(201,169,97,0.10) 0 10px,rgba(6,16,31,0.4) 10px 20px);';
+    const base = bg + ' box-sizing:border-box; display:flex; align-items:center; justify-content:center; text-align:center; padding:8px;';
+    if (mode === 'grid') return 'aspect-ratio:1/1; width:100%; ' + base;
+    if (mode === 'reel') return 'position:absolute; inset:0; ' + base;
+    return 'aspect-ratio:' + p.aspect + '; width:100%; ' + base;
+  }
+
+  heartLabel(p) {
+    const heart = p.liked ? '\u2665' : '\u2661';
+    return p.likeCount > 0 ? heart + ' ' + p.likeCount : heart;
+  }
+
+  renderVals() {
+    const s = this.state;
+    const tabBtn = (active) => 'border:none; cursor:pointer; border-radius:8px; padding:8px 14px; font-family:\'JetBrains Mono\',monospace; font-size:10px; letter-spacing:0.1em; font-weight:600; background:' + (active ? '#C9A961' : 'transparent') + '; color:' + (active ? '#06101F' : 'rgba(244,236,216,0.6)') + ';';
+
+    const counts = { all: s.photos.length, male: 0, coed: 0, unassigned: 0 };
+    s.photos.forEach((p) => { counts[p.team] += 1; });
+
+    const chipDef = [
+      { id: 'all', label: 'ALL' },
+      { id: 'male', label: TEAM_META.male.label },
+      { id: 'coed', label: TEAM_META.coed.label },
+      { id: 'unassigned', label: TEAM_META.unassigned.label },
+    ];
+    const filterChips = chipDef.map((c) => {
+      const active = s.filter === c.id;
+      const color = c.id === 'all' ? '#C9A961' : TEAM_META[c.id].color;
+      return {
+        text: c.label + ' \u00b7 ' + counts[c.id],
+        onClick: () => this.setFilter(c.id),
+        style: 'flex:none; border-radius:999px; padding:7px 13px; cursor:pointer; font-family:\'JetBrains Mono\',monospace; font-size:10px; letter-spacing:0.06em; white-space:nowrap; border:1px solid ' + (active ? color : 'rgba(201,169,97,0.22)') + '; background:' + (active ? color : 'transparent') + '; color:' + (active ? '#06101F' : 'rgba(244,236,216,0.65)') + ';',
+      };
+    });
+
+    const visible = this.visiblePhotos(s);
+    const likeStyleOf = (p, size) => 'position:absolute; left:' + size + 'px; bottom:' + size + 'px; display:flex; align-items:center; gap:5px; border:1px solid rgba(201,169,97,0.3); border-radius:999px; padding:' + (size === 10 ? '6px 11px' : '4px 8px') + '; background:rgba(6,16,31,0.6); color:' + (p.liked ? '#ff5a7a' : '#F4ECD8') + '; font-family:\'JetBrains Mono\',monospace; font-size:' + (size === 10 ? '11px' : '9.5px') + ';';
+    const chipStyleOf = (meta) => 'font-family:\'JetBrains Mono\',monospace; font-size:7.5px; letter-spacing:0.06em; color:' + meta.color + '; border:1px solid rgba(201,169,97,0.2); border-radius:5px; padding:2px 6px; flex:none;';
+
+    const heroPhoto = visible[0];
+    const hasHero = !!heroPhoto;
+    const hero = heroPhoto ? {
+      name: heroPhoto.name, time: heroPhoto.time,
+      teamLabel: TEAM_META[heroPhoto.team].label,
+      heartLabel: this.heartLabel(heroPhoto),
+      imgStyle: this.imgStyle(heroPhoto),
+      onOpen: () => this.openReel(0),
+      onLike: (e) => { e.stopPropagation(); this.toggleLike(heroPhoto.id); },
+      likeStyle: likeStyleOf(heroPhoto, 10),
+      chipStyleAbs: chipStyleOf(TEAM_META[heroPhoto.team]).replace('flex:none;', '') + ' position:absolute; left:10px; top:10px;',
+    } : null;
+
+    const gridItems = visible.slice(1).map((p) => {
+      const meta = TEAM_META[p.team];
+      return {
+        name: p.name,
+        teamLabel: meta.label,
+        heartLabel: this.heartLabel(p),
+        imgStyle: this.imgStyle(p, 'grid'),
+        onOpen: () => this.openReel(visible.indexOf(p)),
+        onLike: (e) => { e.stopPropagation(); this.toggleLike(p.id); },
+        likeStyle: likeStyleOf(p, 7),
+        chipStyle: chipStyleOf(meta),
+      };
+    });
+
+    const reelList = visible;
+    const rp = reelList[Math.min(s.reelIndex, Math.max(reelList.length - 1, 0))];
+    const rMeta = rp ? TEAM_META[rp.team] : TEAM_META.unassigned;
+
+    const dotStyle = (on) => 'width:6px; height:6px; border-radius:50%; background:' + (on ? '#C9A961' : 'rgba(201,169,97,0.25)') + ';';
+    const obDotOrder = ['role', 'install'];
+
+    return {
+      isLocked: s.screen === 'locked',
+      isOnboarding: s.screen === 'onboarding',
+      isFeed: s.screen === 'feed',
+      goLocked: this.goLocked, goOnboarding: this.goOnboarding, goFeed: this.goFeed, openReelDemo: this.openReelDemo,
+      tabStyleLocked: tabBtn(s.screen === 'locked'),
+      tabStyleOnboarding: tabBtn(s.screen === 'onboarding'),
+      tabStyleFeed: tabBtn(s.screen === 'feed' && !s.reelOpen),
+      tabStyleReel: tabBtn(s.reelOpen),
+      feedScrollRef: this.feedScrollRef,
+      onFeedScroll: this.onFeedScroll,
+
+      countdown: [
+        { value: '02', label: 'DAYS' }, { value: '14', label: 'HRS' },
+        { value: '32', label: 'MIN' }, { value: '08', label: 'SEC' },
+      ],
+
+      obStep: s.obStep,
+      obWelcome: s.obStep === 'welcome',
+      obRole: s.obStep === 'role',
+      obInstall: s.obStep === 'install',
+      obChooseCadet: this.obChooseCadet,
+      obChooseFamily: this.obChooseFamily,
+      obShowSkip: s.obStep !== 'install',
+      obShowPrimary: s.obStep !== 'role',
+      obPrimaryLabel: s.obStep === 'welcome' ? 'START' : 'ADD TO HOME SCREEN',
+      obPrimary: this.obPrimary,
+      obDots: obDotOrder.map((step) => ({ style: dotStyle(s.obStep === step) })),
+
+      filterChips,
+      feedCountLabel: visible.length + ' PHOTO' + (visible.length === 1 ? '' : 'S'),
+      hasHero, hero, gridItems,
+      showNewPill: s.screen === 'feed' && !s.reelOpen && !s.pastTop && s.queued.length > 0,
+      queuedLabel: s.queued.length + ' NEW',
+      flushQueued: this.flushQueued,
+      uploadOpen: s.uploadOpen,
+      toggleUpload: this.toggleUpload,
+      stop: this.stop,
+
+      reelOpen: s.reelOpen,
+      reelPos: reelList.length ? (s.reelIndex + 1) + ' / ' + reelList.length : '0 / 0',
+      reelName: rp ? rp.name : '',
+      reelTime: rp ? rp.time : '',
+      reelTeamLabel: rMeta.label,
+      reelChipStyle: 'font-family:\'JetBrains Mono\',monospace; font-size:8.5px; letter-spacing:0.08em; color:' + rMeta.color + '; border:1px solid rgba(201,169,97,0.25); border-radius:5px; padding:3px 8px;',
+      reelImgStyle: rp ? this.imgStyle(rp, 'reel') : 'width:1px;height:1px;',
+      reelHeart: rp && rp.liked ? '\u2665' : '\u2661',
+      reelLikeLabel: rp && rp.likeCount > 0 ? String(rp.likeCount) : 'LIKE',
+      reelLikeIconStyle: 'width:42px; height:42px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:19px; border:1px solid ' + (rp && rp.liked ? '#ff5a7a' : 'rgba(201,169,97,0.35)') + '; background:' + (rp && rp.liked ? 'rgba(255,90,122,0.15)' : 'rgba(6,16,31,0.5)') + '; color:' + (rp && rp.liked ? '#ff5a7a' : '#F4ECD8') + ';',
+      reelLike: this.reelLike, closeReel: this.closeReel,
+      reelPrev: this.reelPrev, reelNext: this.reelNext,
+      reelPrevBtnStyle: 'position:absolute; left:8px; top:50%; transform:translateY(-90px); width:34px; height:34px; border-radius:50%; border:1px solid rgba(201,169,97,0.3); background:rgba(6,16,31,0.5); color:#F4ECD8; cursor:pointer; display:' + (s.reelIndex > 0 ? 'flex' : 'none') + '; align-items:center; justify-content:center;',
+      reelNextBtnStyle: 'position:absolute; left:8px; top:50%; transform:translateY(60px); width:34px; height:34px; border-radius:50%; border:1px solid rgba(201,169,97,0.3); background:rgba(6,16,31,0.5); color:#F4ECD8; cursor:pointer; display:' + (s.reelIndex < reelList.length - 1 ? 'flex' : 'none') + '; align-items:center; justify-content:center;',
+    };
+  }
+}
+</script>
+</body>
+</html>

@@ -1,7 +1,7 @@
 // Hand-rolled PWA wiring (no vite-plugin-pwa, zero build-config change). The
 // manifest + apple meta tags are injected on mount rather than living in
 // index.html, because this is a single-index SPA and each installable route
-// (/lukepwa for Luke, /rhea for the public viewer) must advertise ITS OWN app
+// (/lukepwa for Luke, /optic for the public viewer) must advertise ITS OWN app
 // identity — only while that route is mounted.
 
 const THEME = '#06101F';
@@ -49,17 +49,17 @@ export function installPwaHooks() {
     manifest: '/lukepwa.webmanifest',
     swUrl: '/lukepwa-sw.js',
     scope: '/lukepwa',
-    appleTitle: 'OPTIC Rhea',
+    appleTitle: 'OPTIC Console',
   });
 }
 
-/** Wire /rhea as the installable public event viewer. */
-export function installRheaPwaHooks() {
+/** Wire /optic as the installable public event viewer. */
+export function installOpticPwaHooks() {
   registerPwa({
-    ns: 'rhea',
-    manifest: '/rhea.webmanifest',
-    swUrl: '/rhea-sw.js',
-    scope: '/rhea',
+    ns: 'optic',
+    manifest: '/optic.webmanifest',
+    swUrl: '/optic-sw.js',
+    scope: '/optic',
     appleTitle: 'OPTIC',
   });
 }

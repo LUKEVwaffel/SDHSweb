@@ -1,8 +1,9 @@
 import { useState, useEffect, useRef, useMemo, useCallback } from 'react';
 import { supabase as SB } from '../../lib/supabaseClient';
 import AdminGate from './AdminGate';
-import { useRheaPhotos, useRheaSubEvents } from '../../hooks/useRheaPhotos';
-import { RHEA_EVENT_ID, RHEA_EVENT_TITLE, raiderTeamLabel } from '../../lib/rheaComp';
+import { useOpticPhotos, useOpticSubEvents } from '../../hooks/useOpticPhotos';
+import { useOpticConfig } from '../../hooks/useOpticConfig';
+import { OPTIC_EVENT_TITLE, raiderTeamLabel } from '../../lib/opticComp';
 import { installPwaHooks, isStandalone, isIos } from './pwa';
 import { usePwaUpdate, PwaUpdateBar } from './usePwaUpdate';
 import './lukepwa.css';
@@ -13,7 +14,7 @@ const TEAMS = [
   { id: 'both', label: 'BOTH' },
 ];
 const TABS = ['tag', 'parents', 'subs'];
-const PARENT_SEEN_KEY = 'rhea_pwa_parent_seen';
+const PARENT_SEEN_KEY = 'optic_pwa_parent_seen';
 
 // Android gives real haptics; iOS Safari ignores vibrate() harmlessly. Cheap
 // win for how physical the console feels on a phone.
@@ -26,15 +27,16 @@ const haptic = (p) => { try { navigator.vibrate?.(p); } catch { /* unsupported *
 export default function LukePwaRoute() {
   useEffect(() => { installPwaHooks(); }, []);
   return (
-    <AdminGate label="RHEA COMP · CURATION">
+    <AdminGate label="OPTIC · CURATION">
       <LukePwa />
     </AdminGate>
   );
 }
 
 function LukePwa() {
-  const { photos, loading, error, refresh } = useRheaPhotos({ scope: 'all' });
-  const { subEvents, refresh: refreshSubs } = useRheaSubEvents();
+  const { eventId } = useOpticConfig();
+  const { photos, loading, error, refresh } = useOpticPhotos({ eventId, scope: 'all' });
+  const { subEvents, refresh: refreshSubs } = useOpticSubEvents({ eventId });
 
   const [tab, setTab] = useState('tag');
   const [filter, setFilter] = useState('all'); // all | untagged | staged | live | sub:<id>
@@ -255,7 +257,7 @@ function LukePwa() {
       <header className="lp-head">
         <div>
           <div className="lp-kicker">DISPATCH · OPTIC</div>
-          <div className="lp-title">{RHEA_EVENT_TITLE.toUpperCase()}</div>
+          <div className="lp-title">{OPTIC_EVENT_TITLE.toUpperCase()}</div>
         </div>
         <div className="lp-sync">
           <span className="lp-dot" data-stale={!!error} />
@@ -384,6 +386,7 @@ function LukePwa() {
       {!loading && tab === 'subs' && (
         <div className="lp-panel" key="subs">
           <SubEvents
+            eventId={eventId}
             subEvents={subEvents}
             counts={subCounts}
             emailRef={email}
@@ -553,11 +556,20 @@ function ParentGrid({ photos, pulseIds, sel, onToggleSel, onHideToggle, onDelete
   );
 }
 
-function SubEvents({ subEvents, counts, emailRef, refreshSubs, setActionErr, onJump }) {
+// Crude v1 schedule capture (real editor is a fast-follow): each sub-event
+// row gets START / END stamp buttons Luke taps as a team actually begins and
+// finishes that station — the MOI matrix has no pre-set clock times, teams
+// rotate through 5 side-by-side stations as graders call them ready, so
+// tap-to-stamp on the day beats typing a datetime-local mid-rotation. Once a
+// window is stamped, RE-TAG runs optic_retag_photos and copies sub_event_id +
+// raider_team onto every one of Luke's photos whose taken_at falls inside it.
+function SubEvents({ eventId, subEvents, counts, emailRef, refreshSubs, setActionErr, onJump }) {
   const [name, setName] = useState('');
   const [team, setTeam] = useState('both');
   const [busy, setBusy] = useState(false);
   const [freshId, setFreshId] = useState(null);
+  const [retagging, setRetagging] = useState(false);
+  const [retagMsg, setRetagMsg] = useState('');
 
   async function create() {
     const n = name.trim();
@@ -565,13 +577,38 @@ function SubEvents({ subEvents, counts, emailRef, refreshSubs, setActionErr, onJ
     setBusy(true); setActionErr('');
     haptic(14);
     const { data, error } = await SB.from('raider_sub_events')
-      .insert({ event_id: RHEA_EVENT_ID, name: n, team, created_by: emailRef.current || null })
+      .insert({ event_id: eventId, name: n, team, created_by: emailRef.current || null })
       .select().single();
     setBusy(false);
     if (error) { setActionErr(error.message || 'Could not create sub-event.'); haptic([8, 40, 8]); return; }
     setName(''); setTeam('both');
     if (data?.id) { setFreshId(data.id); setTimeout(() => setFreshId(null), 950); }
     refreshSubs();
+  }
+
+  async function stamp(id, field) {
+    haptic(10);
+    const { error } = await SB.from('raider_sub_events')
+      .update({ [field]: new Date().toISOString() }).eq('id', id);
+    if (error) { setActionErr(error.message || 'Could not stamp time.'); return; }
+    refreshSubs();
+  }
+
+  async function clearWindow(id) {
+    haptic(10);
+    await SB.from('raider_sub_events').update({ starts_at: null, ends_at: null }).eq('id', id);
+    refreshSubs();
+  }
+
+  async function retag() {
+    setRetagging(true); setRetagMsg(''); setActionErr('');
+    haptic(16);
+    const { data, error } = await SB.rpc('optic_retag_photos', { p_event_id: eventId });
+    setRetagging(false);
+    if (error) { setActionErr(error.message || 'Re-tag failed.'); haptic([8, 40, 8]); return; }
+    const row = Array.isArray(data) ? data[0] : data;
+    setRetagMsg(`${row?.tagged ?? 0} TAGGED · ${row?.dead ?? 0} DEAD TIME`);
+    haptic([10, 30, 10]);
   }
 
   return (
@@ -581,7 +618,7 @@ function SubEvents({ subEvents, counts, emailRef, refreshSubs, setActionErr, onJ
           className="lp-input"
           value={name}
           onChange={(e) => setName(e.target.value)}
-          placeholder="New sub-event  ·  e.g. Rope Bridge"
+          placeholder="New sub-event  ·  e.g. Rope Bridge — Team 3"
           onKeyDown={(e) => { if (e.key === 'Enter') create(); }}
         />
         <div className="lp-seg" role="group" aria-label="Team">
@@ -601,7 +638,14 @@ function SubEvents({ subEvents, counts, emailRef, refreshSubs, setActionErr, onJ
         </button>
       </div>
 
-      <div style={{ padding: '4px 14px 24px', display: 'flex', flexDirection: 'column', gap: 8 }}>
+      <div style={{ padding: '10px 14px 0', display: 'flex', alignItems: 'center', gap: 10, flexWrap: 'wrap' }}>
+        <button className="lp-btn lp-btn--ghost lp-btn--sm" onClick={retag} disabled={retagging}>
+          {retagging ? 'RE-TAGGING…' : 'RE-TAG PHOTOS FROM SCHEDULE'}
+        </button>
+        {retagMsg && <span style={{ fontFamily: 'var(--mono)', fontSize: 10, letterSpacing: '0.08em', color: 'var(--gold)' }}>{retagMsg}</span>}
+      </div>
+
+      <div style={{ padding: '10px 14px 24px', display: 'flex', flexDirection: 'column', gap: 8 }}>
         {subEvents.length === 0 && (
           <Empty k="NO SUB-EVENTS">
             Create the first one above, then tag photos to it from the Tagging tab.
@@ -609,17 +653,30 @@ function SubEvents({ subEvents, counts, emailRef, refreshSubs, setActionErr, onJ
         )}
         {subEvents.map((s) => {
           const n = counts[s.id] || 0;
+          const running = !!s.starts_at && !s.ends_at;
+          const windowed = !!s.starts_at && !!s.ends_at;
           return (
-            <button
-              key={s.id}
-              className="lp-row press"
-              data-fresh={s.id === freshId}
-              onClick={() => onJump(s.id)}
-            >
-              <span className="lp-row-name">{s.name}</span>
-              <span className="lp-row-n">{n} PHOTO{n === 1 ? '' : 'S'} ›</span>
-              <span className="lp-row-team">{s.team.toUpperCase()}</span>
-            </button>
+            <div key={s.id} className="lp-row" data-fresh={s.id === freshId} style={{ flexWrap: 'wrap', gap: 8 }}>
+              <button className="press" style={{ all: 'unset', cursor: 'pointer', display: 'flex', flex: 1, minWidth: 0, gap: 8, alignItems: 'center' }} onClick={() => onJump(s.id)}>
+                <span className="lp-row-name">{s.name}</span>
+                <span className="lp-row-n">{n} PHOTO{n === 1 ? '' : 'S'} ›</span>
+                <span className="lp-row-team">{s.team.toUpperCase()}</span>
+              </button>
+              <span style={{ fontFamily: 'var(--mono)', fontSize: 9, letterSpacing: '0.06em', color: running ? 'var(--gold)' : windowed ? 'var(--mute)' : 'var(--faint)' }}>
+                {running ? 'RUNNING…' : windowed
+                  ? `${new Date(s.starts_at).toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' })}–${new Date(s.ends_at).toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' })}`
+                  : 'NO TIME SET'}
+              </span>
+              {!s.starts_at && (
+                <button className="lp-btn lp-btn--ghost lp-btn--sm" onClick={() => stamp(s.id, 'starts_at')}>START</button>
+              )}
+              {running && (
+                <button className="lp-btn lp-btn--sm" onClick={() => stamp(s.id, 'ends_at')}>END</button>
+              )}
+              {windowed && (
+                <button className="lp-btn lp-btn--ghost lp-btn--sm" onClick={() => clearWindow(s.id)}>CLEAR TIME</button>
+              )}
+            </div>
           );
         })}
       </div>
@@ -672,11 +729,12 @@ function toLocalInput(ts) {
   return new Date(d.getTime() - d.getTimezoneOffset() * 60000).toISOString().slice(0, 16);
 }
 
-// Beta gate control. Reads/writes the single rhea_gate row (admin-only via
-// RLS; this whole surface is behind AdminGate). Tri-state kill switch in
-// `mode`: FORCE OPEN / AUTO (countdown) / LOCK (force closed). LOCK wins over
-// the clock and takes effect immediately for anyone already on /rhea (the
-// change rides the same realtime channel useRheaGate listens on). "SET TIME"
+// Beta gate control. Reads/writes the single rhea_gate row (table name
+// predates the de-Rhea rename; admin-only via RLS, this whole surface is
+// behind AdminGate). Tri-state kill switch in `mode`: FORCE OPEN / AUTO
+// (countdown) / LOCK (force closed). LOCK wins over the clock and takes
+// effect immediately for anyone already on /optic (the change rides the same
+// realtime channel useOpticGate listens on). "SET TIME"
 // reschedules the countdown and drops back to AUTO.
 function GateControl() {
   const [row, setRow] = useState(null);

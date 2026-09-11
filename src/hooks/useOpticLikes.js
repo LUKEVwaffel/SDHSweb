@@ -1,9 +1,9 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { getDeviceId } from '../lib/fingerprint';
-import { fetchMyLikes, setLike } from '../lib/rheaComp';
+import { fetchMyLikes, setLike } from '../lib/opticComp';
 
 /**
- * Device-scoped like state for the /rhea feed.
+ * Device-scoped like state for the /optic feed.
  *
  * The authoritative count lives on `photo.like_count` (a DB trigger keeps it
  * current and the photos realtime subscription streams the change to every
@@ -13,7 +13,7 @@ import { fetchMyLikes, setLike } from '../lib/rheaComp';
  *
  * @param {Array<{id:string, like_count?:number}>} photos  current feed list
  */
-export function useRheaLikes(photos) {
+export function useOpticLikes(photos) {
   const [liked, setLiked] = useState(() => new Set());   // photo ids liked here
   const [pending, setPending] = useState(() => new Map()); // id -> count nudge (+1 / -1)
   const fpRef = useRef(null);

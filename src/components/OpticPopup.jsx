@@ -47,7 +47,7 @@ export default function OpticPopup() {
     posthog.capture('optic_popup_cta_clicked');
     markOpticSeen();
     setOpen(false);
-    navigate('/rhea');
+    navigate('/optic');
   }
 
   useEffect(() => {
@@ -63,7 +63,7 @@ export default function OpticPopup() {
     <div
       role="dialog"
       aria-modal="true"
-      aria-label="OPTIC beta app — live at the Rhea County Raider Competition"
+      aria-label="OPTIC beta app — live at the competition"
       onClick={close}
       style={{
         position: 'fixed', inset: 0, zIndex: 9500,
@@ -139,7 +139,7 @@ export default function OpticPopup() {
             fontFamily: "'JetBrains Mono', monospace", fontSize: 10, letterSpacing: '0.34em',
             color: P.gold, display: 'flex', alignItems: 'center', gap: 10,
           }}>
-            <span className="optic-blink">●</span> BETA · RHEA COUNTY RAIDER COMP
+            <span className="optic-blink">●</span> BETA · LIVE AT THE COMP
           </div>
 
           <div className="optic-row optic-wordmark" style={{ '--d': '0.12s',
@@ -157,7 +157,7 @@ export default function OpticPopup() {
             fontFamily: 'Inter, sans-serif', fontSize: 15.5, lineHeight: 1.65,
             color: P.mute, maxWidth: 460, margin: '0 0 22px',
           }}>
-            At the <strong style={{ color: P.gold }}>Rhea County Raider Competition</strong>? Add the
+            At the comp <strong style={{ color: P.gold }}>right now</strong>? Add the
             free OPTIC beta app to your phone and shoot straight from the stands. Every photo goes
             live to one shared feed so <strong style={{ color: P.gold }}>every parent there</strong> sees
             the whole day — not just their own team.
