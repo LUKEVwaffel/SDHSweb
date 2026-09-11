@@ -576,10 +576,13 @@ function SubEvents({ eventId, subEvents, counts, emailRef, refreshSubs, setActio
   const [freshId, setFreshId] = useState(null);
   const [retagging, setRetagging] = useState(false);
   const [retagMsg, setRetagMsg] = useState('');
+  const [sending, setSending] = useState(false);
+  const [sendMsg, setSendMsg] = useState('');
 
   async function create() {
     const n = name.trim();
     if (!n || busy) return;
+    if (!eventId) { setActionErr('No active event set — set optic_config.active_event_id first.'); return; }
     setBusy(true); setActionErr('');
     haptic(14);
     const { data, error } = await SB.from('raider_sub_events')
@@ -607,6 +610,7 @@ function SubEvents({ eventId, subEvents, counts, emailRef, refreshSubs, setActio
   }
 
   async function retag() {
+    if (!eventId) { setActionErr('No active event set — set optic_config.active_event_id first.'); return; }
     setRetagging(true); setRetagMsg(''); setActionErr('');
     haptic(16);
     const { data, error } = await SB.rpc('optic_retag_photos', { p_event_id: eventId });
@@ -614,6 +618,23 @@ function SubEvents({ eventId, subEvents, counts, emailRef, refreshSubs, setActio
     if (error) { setActionErr(error.message || 'Re-tag failed.'); haptic([8, 40, 8]); return; }
     const row = Array.isArray(data) ? data[0] : data;
     setRetagMsg(`${row?.tagged ?? 0} TAGGED · ${row?.dead ?? 0} DEAD TIME`);
+    haptic([10, 30, 10]);
+  }
+
+  // Batch push — one tap after RE-TAG, never per-photo (see BUILD_PLAN slice
+  // 9). Requires optic_push.sql + the optic-send-push edge fn deployed with
+  // VAPID secrets set; a clean "not configured" error here just means that
+  // hasn't happened yet, not that anything is broken.
+  async function sendAlert() {
+    if (!eventId) { setActionErr('No active event set — set optic_config.active_event_id first.'); return; }
+    setSending(true); setSendMsg(''); setActionErr('');
+    haptic(16);
+    const { data, error } = await SB.functions.invoke('optic-send-push', {
+      body: { event_id: eventId, title: 'OPTIC', body: 'New photos are up from the comp.' },
+    });
+    setSending(false);
+    if (error) { setActionErr(error.message || 'Send failed — is optic-send-push deployed with VAPID secrets set?'); haptic([8, 40, 8]); return; }
+    setSendMsg(`SENT TO ${data?.sent ?? 0} DEVICE${data?.sent === 1 ? '' : 'S'}${data?.failed ? ` · ${data.failed} FAILED` : ''}`);
     haptic([10, 30, 10]);
   }
 
@@ -639,16 +660,23 @@ function SubEvents({ eventId, subEvents, counts, emailRef, refreshSubs, setActio
             </button>
           ))}
         </div>
-        <button className="lp-btn" onClick={create} disabled={busy || !name.trim()}>
+        <button className="lp-btn" onClick={create} disabled={busy || !name.trim() || !eventId}>
           {busy ? 'CREATING…' : 'CREATE SUB-EVENT'}
         </button>
       </div>
 
       <div style={{ padding: '10px 14px 0', display: 'flex', alignItems: 'center', gap: 10, flexWrap: 'wrap' }}>
-        <button className="lp-btn lp-btn--ghost lp-btn--sm" onClick={retag} disabled={retagging}>
+        <button className="lp-btn lp-btn--ghost lp-btn--sm" onClick={retag} disabled={retagging || !eventId}>
           {retagging ? 'RE-TAGGING…' : 'RE-TAG PHOTOS FROM SCHEDULE'}
         </button>
         {retagMsg && <span style={{ fontFamily: 'var(--mono)', fontSize: 10, letterSpacing: '0.08em', color: 'var(--gold)' }}>{retagMsg}</span>}
+      </div>
+
+      <div style={{ padding: '8px 14px 0', display: 'flex', alignItems: 'center', gap: 10, flexWrap: 'wrap' }}>
+        <button className="lp-btn lp-btn--sm" onClick={sendAlert} disabled={sending || !eventId}>
+          {sending ? 'SENDING…' : 'SEND ALERT — NEW PHOTOS'}
+        </button>
+        {sendMsg && <span style={{ fontFamily: 'var(--mono)', fontSize: 10, letterSpacing: '0.08em', color: 'var(--gold)' }}>{sendMsg}</span>}
       </div>
 
       <div style={{ padding: '10px 14px 24px', display: 'flex', flexDirection: 'column', gap: 8 }}>

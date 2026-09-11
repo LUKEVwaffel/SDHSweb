@@ -216,17 +216,15 @@ export default function OpticOnboarding({ onDone }) {
 
           {step === 'reinstall' && (
             <>
-              <div className="rob-kicker">OPTIC 2.0 · BUILT FROM YOUR FEEDBACK</div>
+              <div className="rob-kicker">OPTIC 2.0</div>
               <h1 className="rob-h">First: <span className="accent">delete the old icon.</span></h1>
               <p className="rob-sub">
-                We read every response from the OPTIC survey and rebuilt it —
-                team filters, the upload cap that ate photos mid-batch is gone,
-                and photos now sort by when they were actually taken. But it&apos;s
-                a rebuild, not an update: the OPTIC icon already on your home
-                screen won&apos;t pick up any of it on its own.
+                Rebuilt after the last comp based on the survey — team filters,
+                no more upload cap, photos sorted by when they were actually
+                taken. But it&apos;s a rebuild, not an update, so the old OPTIC
+                icon on your home screen won&apos;t catch up on its own.
               </p>
               <div className="rob-vis">
-                <span className="rob-vis-glyph">🗑</span>
                 <span className="rob-vis-txt">
                   DELETE THE OLD ICON NOW · YOU&apos;LL ADD THE NEW ONE AT THE END OF THIS
                 </span>

@@ -1,7 +1,10 @@
 // Once-per-device gate for the OPTIC launch popup. Bump the version suffix to
 // re-surface it to every device (e.g. a major OPTIC feature drop). Dismissing
 // or clicking through only silences the current version.
-const LS_KEY = 'tb_optic_popup_seen_v1';
+// v2 — bumped for OPTIC 2.0 (Spring Hill): anyone who dismissed the v1 popup
+// last comp gets it again, since it now points at a different app (/optic,
+// not /submit) with different messaging.
+const LS_KEY = 'tb_optic_popup_seen_v2';
 
 export function hasSeenOptic() {
   try {

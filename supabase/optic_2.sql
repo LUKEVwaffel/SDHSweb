@@ -165,9 +165,12 @@ grant execute on function public.optic_retag_photos(uuid) to authenticated;
 --   select * from public.optic_config;                                    -- 1 row
 --   select * from public.optic_retag_photos('<event-uuid>');              -- tagged / dead
 --
--- Gate reset (run day-of, separate — the gate lives in rhea_gate.sql):
+-- Gate reset — the gate lives in rhea_gate.sql. Run this NOW, not day-of: the
+-- row was left over from the last comp with mode='open' (force-open wins over
+-- opens_at/is_open regardless of the clock — confirmed live 2026-09-11, this
+-- is why /optic currently shows an open feed instead of the countdown).
 --   update public.rhea_gate
---      set opens_at = '2026-09-12 08:00:00-04', is_open = false
+--      set mode = 'auto', opens_at = '2026-09-12 08:00:00-04', is_open = false
 --    where id = 'default';
 --
 -- Point OPTIC at the real Spring Hill event (id confirmed against the events

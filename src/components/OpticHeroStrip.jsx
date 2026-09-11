@@ -9,14 +9,15 @@ const P = {
 
 // Sits directly under the hero on the home page — a high-visibility launch
 // bar for OPTIC. The full pitch lives lower in OpticPromoBand; this is the
-// "you can't miss it" announcement, wired straight to the /submit uploader.
+// "you can't miss it" announcement, wired straight to the comp app at /optic
+// (NOT /submit — that's an unrelated generic upload hub with no OPTIC tie-in).
 export default function OpticHeroStrip() {
   const navigate = useNavigate();
 
   return (
     <section
       className="optic-strip"
-      onClick={() => navigate('/submit')}
+      onClick={() => navigate('/optic')}
       style={{
         cursor: 'pointer', position: 'relative', overflow: 'hidden',
         background: `linear-gradient(90deg, ${P.deep} 0%, ${P.navy} 50%, ${P.deep} 100%)`,
@@ -47,7 +48,7 @@ export default function OpticHeroStrip() {
           fontFamily: 'Inter, sans-serif', fontSize: 13.5, color: P.mute,
           flex: 1, minWidth: 200, lineHeight: 1.5,
         }}>
-          The battalion photo network is live — upload from your phone, seen by everyone.
+          Live at the Spring Hill Raider Challenge — upload from your phone, seen by every family there.
         </span>
 
         <span className="optic-strip-cta" style={{

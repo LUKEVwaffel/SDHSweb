@@ -45,3 +45,36 @@ self.addEventListener('fetch', (event) => {
     })(),
   );
 });
+
+// ── web push ──────────────────────────────────────────────────────────────
+// Payload sent by supabase/functions/optic-send-push: { title, body, url }.
+// A malformed/empty payload still shows a generic notification rather than
+// silently doing nothing (a push with no visible notification gets browsers
+// to revoke permission after enough occurrences).
+self.addEventListener('push', (event) => {
+  let data = { title: 'OPTIC', body: 'New photos are up.', url: '/optic' };
+  try { if (event.data) data = { ...data, ...event.data.json() }; } catch { /* plain text payload */ }
+
+  event.waitUntil(
+    self.registration.showNotification(data.title, {
+      body: data.body,
+      icon: '/optic-icon-192.png',
+      badge: '/optic-icon-192.png',
+      data: { url: data.url || '/optic' },
+      tag: 'optic-photos', // collapses rapid-fire sends into one notification
+    }),
+  );
+});
+
+self.addEventListener('notificationclick', (event) => {
+  event.notification.close();
+  const url = event.notification.data?.url || '/optic';
+  event.waitUntil(
+    (async () => {
+      const clientsList = await self.clients.matchAll({ type: 'window', includeUncontrolled: true });
+      const existing = clientsList.find((c) => c.url.includes('/optic'));
+      if (existing) return existing.focus();
+      return self.clients.openWindow(url);
+    })(),
+  );
+});

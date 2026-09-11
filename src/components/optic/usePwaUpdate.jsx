@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 
 // Detect when a newer build has been deployed while the installed PWA is
-// running. The service workers (rhea-sw.js / lukepwa-sw.js) already call
+// running. The service workers (optic-sw.js / lukepwa-sw.js) already call
 // skipWaiting() + clients.claim(), and their fetch handler is network-first,
 // so a plain reload always pulls the fresh, content-hashed bundle. All this
 // hook does is notice the new version and let the UI offer a one-tap reload

@@ -1,6 +1,8 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { hasSeenOptic, markOpticSeen } from '../lib/opticSeen';
+import { hasSeenCongrats } from '../lib/congratsSeen';
+import { hasSeenBallSignupPopup } from '../lib/ballSignupPopupSeen';
 import posthog from '../lib/posthog';
 
 const P = {
@@ -19,16 +21,27 @@ const FEATURES = [
 ];
 
 // Full-screen launch takeover for OPTIC — the Official Photo Tracking & Image
-// Collection network. Replaces the old check-in survey popup. Fires once per
-// device (see opticSeen.js), a few seconds after first load. Primary CTA drops
-// the visitor straight into the /submit uploader.
+// Collection network. Fires once per device (see opticSeen.js), a few seconds
+// after first load. Primary CTA drops the visitor straight into /optic.
+//
+// Two other full-screen home-page takeovers exist (CongratsPopup, always;
+// BallSignupPopup, once hasSeenCongrats() is true) and neither re-checks
+// mid-session — each is a one-shot mount-time gate, same idiom
+// BallSignupPopup itself uses against CongratsPopup ("don't stack on top of
+// the results popup — let that one go first"). This follows the identical
+// pattern rather than polling: bail entirely (not retry) unless BOTH have
+// already been dismissed in a previous visit, so Optic can only ever render
+// alone. Trade-off: on a visitor's very first-ever page load it defers to
+// next visit instead of stacking — same trade-off Ball already accepts.
 export default function OpticPopup() {
   const navigate = useNavigate();
   const [visible, setVisible] = useState(false);
   const [open, setOpen] = useState(false);
 
   useEffect(() => {
-    if (hasSeenOptic()) return;
+    if (hasSeenOptic()) return undefined;
+    if (!hasSeenCongrats() || !hasSeenBallSignupPopup()) return undefined;
+
     const t = setTimeout(() => {
       setVisible(true);
       requestAnimationFrame(() => setOpen(true));
@@ -151,7 +164,7 @@ export default function OpticPopup() {
           <div className="optic-row" style={{ '--d': '0.18s',
             fontFamily: "'JetBrains Mono', monospace", fontSize: 10.5, letterSpacing: '0.2em',
             color: P.mute, marginBottom: 20,
-          }}>THE BATTALION PHOTO APP · NOW IN BETA</div>
+          }}>SPRING HILL RAIDER CHALLENGE · BETA</div>
 
           <p className="optic-row" style={{ '--d': '0.24s',
             fontFamily: 'Inter, sans-serif', fontSize: 15.5, lineHeight: 1.65,

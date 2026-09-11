@@ -11,6 +11,7 @@ import {
   hasOnboardedOptic, hasWalkthroughOptic, markWalkthroughOptic,
 } from '../../lib/opticComp';
 import { readTakenAt } from '../../lib/opticExif';
+import { pushSupported, hasDecidedPush, markPushDecided, subscribeToPush } from '../../lib/opticPush';
 import { isHeic, convertHeicToJpeg } from '../../lib/heicConvert';
 import { installOpticPwaHooks, isStandalone, isIos } from './pwa';
 import { usePwaUpdate, PwaUpdateBar } from './usePwaUpdate';
@@ -85,6 +86,9 @@ function OpticApp() {
       <div className="rhea-shell">
         <Header onHelp={() => setWalk(true)} />
         <BetaBanner />
+        <div className="rhea-wrap" style={{ paddingBottom: 0 }}>
+          <NotificationCard eventId={config.eventId} />
+        </div>
         {gate.loading ? (
           <div className="rhea-wrap"><div className="rhea-feed-msg">LOADING…</div></div>
         ) : !gate.open ? (
@@ -137,6 +141,67 @@ function BetaBanner() {
   );
 }
 
+// Asks once, stays out of the way after that. pushSupported() is already
+// false on iOS Safari until the page is added to the home screen, so this
+// naturally only shows where it can actually work — no extra platform check.
+function NotificationCard({ eventId }) {
+  const [state, setState] = useState(() => (hasDecidedPush() ? 'done' : 'idle')); // idle | asking | done
+  const [err, setErr] = useState('');
+
+  if (!pushSupported() || state === 'done') return null;
+
+  async function turnOn() {
+    setState('asking');
+    setErr('');
+    try {
+      await subscribeToPush(eventId);
+      setState('done');
+      posthog.capture('optic_push_subscribed');
+    } catch (e) {
+      setErr(e?.message || 'Could not turn that on — try again.');
+      setState('idle');
+    }
+  }
+
+  function dismiss() {
+    markPushDecided('dismissed');
+    setState('done');
+  }
+
+  return (
+    <div className="rhea-card2">
+      <div className="rhea-card2-kick">PHOTO ALERTS</div>
+      <p className="rhea-card2-p">
+        Turn these on and your phone tells you when new photos land — you
+        don&apos;t have to keep checking.
+      </p>
+      {err && <p className="rhea-card2-err">{err}</p>}
+      <div className="rhea-card2-row">
+        <button className="rhea-btn" style={{ flex: 1 }} onClick={turnOn} disabled={state === 'asking'}>
+          {state === 'asking' ? 'ASKING…' : 'TURN ON ALERTS'}
+        </button>
+        <button className="rhea-btn rhea-btn--ghost" onClick={dismiss}>NOT NOW</button>
+      </div>
+    </div>
+  );
+}
+
+// Everyone already standalone (old /rhea shortcut) hits this the moment the
+// gate loads — it's the one thing on this screen that's actually actionable
+// today, so it renders above the countdown, not below it.
+function ReinstallNotice() {
+  return (
+    <div className="rhea-card2" data-tone="alert">
+      <div className="rhea-card2-kick">HAD OPTIC BEFORE?</div>
+      <p className="rhea-card2-p">
+        This is a rebuild, not an update — the icon already on your home
+        screen won&apos;t pull the new version on its own. Delete it, then{' '}
+        {isIos() ? 'add this page to your home screen again from the share menu' : 'reinstall from your browser menu'}.
+      </p>
+    </div>
+  );
+}
+
 // Countdown hold shown until the gate opens (scheduled time or Luke's manual
 // override). uses a local 1 Hz tick; useOpticGate flips `open` when it lands.
 function OpticLocked({ opensAt }) {
@@ -176,11 +241,6 @@ function OpticLocked({ opensAt }) {
       ) : (
         <>
           <h1 className="rhea-lock-h">The feed opens <span className="accent">{when}</span>.</h1>
-          <p className="rhea-lock-p">
-            Uploads and the live feed are locked until go time. You&apos;re on the
-            list, nothing to do but be there. This is a one-event beta, so expect a
-            short feedback ask after the competition.
-          </p>
 
           <div className="rhea-cd" role="timer" aria-label="Time until the feed opens">
             {days > 0 && (
@@ -192,37 +252,29 @@ function OpticLocked({ opensAt }) {
             <span className="rhea-cd-sep">:</span>
             <span className="rhea-cd-unit"><b>{pad(secs)}</b><i>sec</i></span>
           </div>
-        </>
-      )}
 
-      {!paused && <WhatsNew />}
-
-      {!paused && (
-        isStandalone() ? (
-          <div className="rhea-lock-reinstall">
-            <div className="rhea-lock-reinstall-t">HAD OPTIC BEFORE?</div>
-            <p className="rhea-lock-hint">
-              This is a rebuilt app, not an update — the icon already on your
-              home screen won&apos;t get the new version on its own.
-              Delete the old <b style={{ color: 'var(--cream)' }}>OPTIC</b> icon,
-              then {isIos() ? 'tap the share icon below and Add to Home Screen again' : 'use your browser menu to install this one again'}.
-              Takes ten seconds, and you only have to do it once.
-            </p>
-          </div>
-        ) : (
-          <p className="rhea-lock-hint">
-            Add OPTIC to your home screen now so it&apos;s one tap when the feed opens.
+          <p className="rhea-lock-p">
+            Nothing to do until then — uploads and the feed both unlock at once.
           </p>
-        )
+
+          {isStandalone() && <ReinstallNotice />}
+          <WhatsNew />
+
+          {!isStandalone() && (
+            <p className="rhea-lock-hint">
+              Add OPTIC to your home screen now so it&apos;s one tap when the feed opens.
+            </p>
+          )}
+        </>
       )}
     </div>
   );
 }
 
 const NEW_FEATURES = [
-  ['◈', 'Filter the feed by team — Male or Coed, the #1 thing you asked for'],
-  ['⬆', 'The upload cap that ate people’s photos mid-batch is gone'],
-  ['🕐', 'Photos sort by when they were actually taken, not when they finished uploading'],
+  'Filter by team — Male or Coed',
+  'The upload cap that killed people’s batches mid-upload is gone',
+  'Photos sort by when they were actually taken, not when they finished uploading',
 ];
 
 // Reveal panel on the locked/countdown screen — this is the surface almost
@@ -232,18 +284,13 @@ const NEW_FEATURES = [
 // buried in onboarding.
 function WhatsNew() {
   return (
-    <div className="rhea-whatsnew">
-      <div className="rhea-whatsnew-kick">OPTIC 2.0 · BUILT FROM YOUR FEEDBACK</div>
-      <p className="rhea-whatsnew-p">
-        We read every response from the OPTIC survey. Here&apos;s what changed:
+    <div className="rhea-card2">
+      <div className="rhea-card2-kick">OPTIC 2.0</div>
+      <p className="rhea-card2-p">
+        Rebuilt after the last comp based on what people said in the survey.
       </p>
-      <ul className="rhea-whatsnew-list">
-        {NEW_FEATURES.map(([icon, text]) => (
-          <li key={text}>
-            <span className="rhea-whatsnew-ico" aria-hidden="true">{icon}</span>
-            <span>{text}</span>
-          </li>
-        ))}
+      <ul className="rhea-card2-list">
+        {NEW_FEATURES.map((text) => <li key={text}>{text}</li>)}
       </ul>
     </div>
   );

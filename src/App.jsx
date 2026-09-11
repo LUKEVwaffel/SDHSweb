@@ -11,10 +11,9 @@ import TabGrid from './components/TabGrid';
 import Bulletin from './components/Bulletin';
 import EventSpotlightBand from './components/EventSpotlightBand';
 import RaftingPhotoBand from './components/RaftingPhotoBand';
-// OPTIC campaign — dormant between competitions, restore next comp:
-//   import OpticHeroStrip from './components/OpticHeroStrip';
-//   import OpticPromoBand from './components/OpticPromoBand';
-//   import OpticPopup from './components/OpticPopup';
+import OpticHeroStrip from './components/OpticHeroStrip';
+import OpticPromoBand from './components/OpticPromoBand';
+import OpticPopup from './components/OpticPopup';
 import HomeNewsletterBand from './components/HomeNewsletterBand';
 import Footer from './components/Footer';
 import TabPlaceholder from './components/TabPlaceholder';
@@ -123,9 +122,13 @@ export default function App() {
       <Routes>
         <Route path="/" element={(
           <>
-            {/* Homepage-only takeover — mounted here, never on a standalone route. */}
+            {/* Homepage-only takeovers — mounted here, never on a standalone route.
+                OpticPopup defers to BallSignupPopup so the two full-screen
+                takeovers never stack (see OpticPopup.jsx). */}
             <BallSignupPopup />
+            <OpticPopup />
             <Hero />
+            <OpticHeroStrip />
             {/* "Picture of the Comp" vote band taken down 2026-09-08 — restore <CompPhotoBand /> to bring it back. */}
             <RaftingPhotoBand />
             {/* Disabled via SPOTLIGHT_BAND_ENABLED — kept mounted so re-enabling is a one-flag flip. */}
@@ -133,6 +136,7 @@ export default function App() {
             <BattalionCommand />
             <TabGrid />
             <Bulletin />
+            <OpticPromoBand />
             <HomeNewsletterBand />
           </>
         )} />

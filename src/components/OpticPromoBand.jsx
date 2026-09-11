@@ -9,8 +9,9 @@ const P = {
 
 // Home-page photo-upload promo — introduces the OPTIC brand name. Sits
 // between the calendar teaser (Bulletin) and the newsletter band: "here's
-// what's next" naturally leads into "here's how photos from what already
-// happened get seen by everyone." Links straight to /submit — no form here.
+// what's next" naturally leads into "here's how photos from the comp get
+// seen by everyone." Links straight to /optic — NOT /submit, an unrelated
+// generic upload hub with no OPTIC tie-in.
 export default function OpticPromoBand() {
   const navigate = useNavigate();
 
@@ -40,14 +41,14 @@ export default function OpticPromoBand() {
             color: P.cream, fontFamily: 'Oswald, sans-serif', fontWeight: 700,
             fontSize: 'clamp(34px, 5vw, 52px)', letterSpacing: '0.03em',
             lineHeight: 0.98, margin: '0 0 18px',
-          }}>SEEN BY THE<br />WHOLE BATTALION</h2>
+          }}>LIVE AT<br />SPRING HILL</h2>
           <p style={{
             color: P.mute, fontFamily: 'Inter, sans-serif', fontSize: 16,
             lineHeight: 1.7, maxWidth: 480, margin: 0,
           }}>
-            Every practice, competition, and formation now feeds <strong style={{ color: P.gold }}>OPTIC</strong>,
-            the Official Photo Tracking &amp; Image Collection system. Upload from your phone in
-            seconds and it's visible to the whole battalion, not just your team.
+            The Raider Challenge feeds <strong style={{ color: P.gold }}>OPTIC</strong>,
+            our comp photo feed. Upload from your phone in seconds and every family
+            at the comp sees it, live.
           </p>
           <div style={{
             display: 'flex', gap: 20, marginTop: 26, flexWrap: 'wrap',
@@ -55,7 +56,7 @@ export default function OpticPromoBand() {
             letterSpacing: '0.16em', color: P.faint,
           }}>
             <span>◦ PARENTS &amp; CADETS</span>
-            <span>◦ EVERY SPECIALTY TEAM</span>
+            <span>◦ EVERY TEAM AT THE COMP</span>
             <span>◦ SECONDS TO UPLOAD</span>
           </div>
         </div>
@@ -73,8 +74,8 @@ export default function OpticPromoBand() {
           <div style={{
             fontFamily: "'JetBrains Mono', monospace", fontSize: 9, color: P.mute,
             letterSpacing: '0.18em', margin: '10px 0 24px',
-          }}>OFFICIAL PHOTO TRACKING &amp; IMAGE COLLECTION</div>
-          <button onClick={() => navigate('/submit')} style={{
+          }}>SPRING HILL RAIDER CHALLENGE · BETA</div>
+          <button onClick={() => navigate('/optic')} style={{
             background: P.gold, color: P.ink, border: 'none', cursor: 'pointer', width: '100%',
             fontFamily: "'JetBrains Mono', monospace", fontSize: 12, letterSpacing: '0.18em',
             fontWeight: 700, padding: '15px', transition: 'background 0.15s, transform 0.1s',
