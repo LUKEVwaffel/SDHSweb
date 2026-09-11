@@ -1,5 +1,6 @@
 import { useNowTicker } from '../../hooks/useNowTicker.js';
 import { useTvDailySettings } from '../../hooks/useTvDailySettings.js';
+import { useTvNotices } from '../../hooks/useTvNotices.js';
 import { useStayAwake } from '../../hooks/useStayAwake.js';
 import { getRangePhase } from '../../lib/tvRangeSchedule.js';
 import { resolveBellSchedule } from '../../lib/bellSchedules.js';
@@ -11,10 +12,20 @@ import TvRangeStaffScheduleScreen from './range/TvRangeStaffScheduleScreen.jsx';
 import TvRangeOffHoursScreen from './range/TvRangeOffHoursScreen.jsx';
 import TvRangePeriodEndingScreen from './range/TvRangePeriodEndingScreen.jsx';
 import TvRangeRotationLayout from './range/TvRangeRotationLayout.jsx';
+import TvRangeSlideshowScreen from './range/TvRangeSlideshowScreen.jsx';
 import TvRaftingScreen from './TvRaftingScreen.jsx';
 import TvPreviewBadge from './TvPreviewBadge.jsx';
 import TvRefreshNotice from './TvRefreshNotice.jsx';
 import TvRangeClock from './TvRangeClock.jsx';
+
+// 2026-09-11 only: rotation shows the Never Forget slide + Ball announcements
+// only (no rafting takeover, no full rotation deck). Flip to false to
+// restore normal rotation (RANGE_TAKEOVER_MODE below).
+const SEPT_11_ROTATION_OVERRIDE = true;
+const SEPT_11_SLIDES = [
+  { id: 'sept11-never-forget', type: 'neverForget', durationSec: 15, config: {} },
+  { id: 'sept11-announcements', type: 'announcements', durationSec: 15, config: {} },
+];
 
 /**
  * Range — /tv/range. Unlike Outside (TvKiosk.jsx, a single fixed layout),
@@ -46,6 +57,7 @@ const RANGE_TAKEOVER_MODE = true;
 export default function TvRangeKiosk() {
   const now = useNowTicker();
   const { settings } = useTvDailySettings('range');
+  const { notices } = useTvNotices('range');
   useStayAwake();
 
   const scheduleKey = resolveBellSchedule(settings, now);
@@ -77,9 +89,20 @@ export default function TvRangeKiosk() {
       break;
     case 'rotation':
     default:
-      phaseContent = RANGE_TAKEOVER_MODE
-        ? <TvRaftingScreen />
-        : <TvRangeRotationLayout settings={settings} config={config} />;
+      phaseContent = SEPT_11_ROTATION_OVERRIDE
+        ? (
+          <TvRangeSlideshowScreen
+            slides={SEPT_11_SLIDES}
+            announcements={notices.filter((n) => n.category === 'announcement')}
+            staffNotes={[]}
+            events={[]}
+            settings={settings}
+            rangeConfig={config}
+          />
+        )
+        : RANGE_TAKEOVER_MODE
+          ? <TvRaftingScreen />
+          : <TvRangeRotationLayout settings={settings} config={config} />;
   }
 
   return (

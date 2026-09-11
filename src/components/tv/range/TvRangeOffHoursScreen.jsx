@@ -1,6 +1,23 @@
 import { formatHHMM } from '../../../lib/bellSchedules.js';
+import { P, mono, fraunces, fs, sp } from '../../admin/theme.js';
 import TvRangeScreenBase from './TvRangeScreenBase.jsx';
 import TvRangeCountdown from './TvRangeCountdown.jsx';
+
+// 2026-09-11 only: 9/11 tribute banner on the "Good morning" screen.
+function NeverForgetBanner() {
+  return (
+    <div style={{
+      display: 'flex', alignItems: 'center', gap: sp[3],
+      padding: `${sp[2]}px ${sp[5]}px`, border: `1px solid ${P.hairStrong}`,
+      borderRadius: 999, background: 'rgba(192,57,43,0.08)',
+    }}>
+      <span style={{ fontFamily: fraunces, fontWeight: 800, fontStyle: 'italic', color: P.cream, fontSize: fs.xl }}>
+        Never Forget
+      </span>
+      <span style={{ fontFamily: mono, fontSize: fs.sm, color: P.gold, letterSpacing: '0.18em' }}>9.11.2001</span>
+    </div>
+  );
+}
 
 // Item 2: inside the last 15 minutes before 1st period, the static "good
 // morning" screen becomes a live countdown to the first bell — derived from
@@ -22,6 +39,7 @@ export default function TvRangeOffHoursScreen({ stage, bell, now }) {
         sub={!inCountdownWindow && bell?.next ? `1st Period starts at ${formatHHMM(bell.next.start)}.` : null}
       >
         {inCountdownWindow && <TvRangeCountdown kicker="1ST PERIOD STARTS IN" target={bell.next.start} now={now} />}
+        <NeverForgetBanner />
       </TvRangeScreenBase>
     );
   }

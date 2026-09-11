@@ -75,6 +75,21 @@ export default function TvRangeCompanyWelcomeScreen({ config, company }) {
 
         <PacketsDueBanner company={company} className="tv-welcome-block" />
 
+        {/* 2026-09-11 only: 9/11 tribute banner on the intro screen. */}
+        <div
+          className="tv-welcome-block"
+          style={{
+            display: 'flex', alignItems: 'center', gap: sp[3],
+            padding: `${sp[2]}px ${sp[5]}px`, border: `1px solid ${P.hairStrong}`,
+            borderRadius: 999, background: 'rgba(192,57,43,0.08)',
+          }}
+        >
+          <span style={{ fontFamily: fraunces, fontWeight: 800, fontStyle: 'italic', color: P.cream, fontSize: fs.xl }}>
+            Never Forget
+          </span>
+          <span style={{ fontFamily: mono, fontSize: fs.sm, color: P.gold, letterSpacing: '0.18em' }}>9.11.2001</span>
+        </div>
+
         {customBlocks.length > 0 && (
           <div style={{ display: 'flex', flexDirection: 'column', gap: sp[3], maxWidth: '70vw' }}>
             {customBlocks.map((block, i) => (

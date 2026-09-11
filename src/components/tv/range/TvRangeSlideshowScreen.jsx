@@ -9,9 +9,11 @@ import SlidePhotoOfDay from './slides/SlidePhotoOfDay.jsx';
 import SlideRaiderPractice from './slides/SlideRaiderPractice.jsx';
 import SlidePacketsDue from './slides/SlidePacketsDue.jsx';
 import SlideRaiderCongrats from './slides/SlideRaiderCongrats.jsx';
+import SlideNeverForget from './slides/SlideNeverForget.jsx';
 import { resolveSlideType } from './slides/slideRegistry.js';
 
 const SLIDE_COMPONENTS = {
+  neverForget: SlideNeverForget,
   announcements: SlideAnnouncements,
   announcementSingle: SlideAnnouncementSingle,
   uniformCountdown: SlideUniformCountdown,
