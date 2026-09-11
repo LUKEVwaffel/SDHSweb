@@ -18,9 +18,11 @@ export default function BallDressPortal() {
   const [phase, setPhase] = useState('checking');
   const [errorMsg, setErrorMsg] = useState('');
   const [loginNotice, setLoginNotice] = useState('');
+  const [email, setEmail] = useState('');
   const [cadets, setCadets] = useState([]);
   const [guests, setGuests] = useState([]);
   const [busyId, setBusyId] = useState(null);
+  const [bulkBusy, setBulkBusy] = useState(false);
   const [q, setQ] = useState('');
 
   const loadAll = useCallback(async () => {
@@ -39,10 +41,28 @@ export default function BallDressPortal() {
     if (!session) { setPhase('login'); return; }
     const { data: staff } = await SB.rpc('is_ball_dress');
     if (!staff) { setLoginNotice('That account is not an active dress approver.'); setPhase('login'); return; }
+    setEmail(session.user.email);
     await loadAll();
   }, [loadAll]);
 
   useEffect(() => { verifyAndLoad(); }, [verifyAndLoad]);
+
+  // Live refresh: another approver's change (or the guest-verify flow) shows
+  // up here without a manual reload.
+  useEffect(() => {
+    if (phase !== 'ready') return undefined;
+    const channel = SB.channel('ball-dress-portal')
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'ball_signups' }, loadAll)
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'ball_guests' }, loadAll)
+      .subscribe();
+    return () => { SB.removeChannel(channel); };
+  }, [phase, loadAll]);
+
+  async function signOut() {
+    await SB.auth.signOut();
+    setCadets([]); setGuests([]); setEmail('');
+    setPhase('login');
+  }
 
   async function toggle(item) {
     setBusyId(item.id);
@@ -63,12 +83,29 @@ export default function BallDressPortal() {
     ];
     const term = q.trim().toLowerCase();
     const v = term ? items.filter((x) => (x.name || '').toLowerCase().includes(term)) : items;
+    const byName = (a, b) => (a.name || '').localeCompare(b.name || '');
     return {
-      pending: v.filter((x) => !x.dress_approved),
-      approved: v.filter((x) => x.dress_approved),
+      pending: v.filter((x) => !x.dress_approved).sort(byName),
+      approved: v.filter((x) => x.dress_approved).sort(byName),
       total: items.length,
     };
   }, [cadets, guests, q]);
+
+  async function approveAllPending() {
+    if (!pending.length) return;
+    const ok = window.confirm(`Mark all ${pending.length} pending as approved?`);
+    if (!ok) return;
+    setBulkBusy(true);
+    const { data: { session } } = await SB.auth.getSession();
+    const cadetIds = pending.filter((x) => x.kind === 'cadet').map((x) => x.id);
+    const guestIds = pending.filter((x) => x.kind === 'guest').map((x) => x.id);
+    await Promise.all([
+      cadetIds.length ? SB.from('ball_signups').update({ dress_approved: true, dress_approved_by: session.user.email }).in('id', cadetIds) : null,
+      guestIds.length ? SB.from('ball_guests').update({ dress_approved: true, dress_approved_by: session.user.email }).in('id', guestIds) : null,
+    ]);
+    await loadAll();
+    setBulkBusy(false);
+  }
 
   const shell = (children) => (
     <div className="rv">
@@ -85,6 +122,11 @@ export default function BallDressPortal() {
 
   return shell(
     <div>
+      <div className="bp-session">
+        <span className="bp-session-email">{email}</span>
+        <button className="bp-signout" onClick={signOut}>Sign out</button>
+      </div>
+
       <div className="bp-head">
         <h1 className="bp-title">Dress Approvals</h1>
         <button className="bp-refresh" onClick={loadAll}>Refresh</button>
@@ -103,7 +145,7 @@ export default function BallDressPortal() {
         <div className="bp-empty">No one needs dress approval yet.</div>
       ) : (
         <>
-          <Section title={`To approve · ${pending.length}`} hide={!pending.length}>
+          <Section title={`To approve · ${pending.length}`} hide={!pending.length} action={pending.length > 1 ? { label: bulkBusy ? 'Approving…' : 'Approve all', onClick: approveAllPending, disabled: bulkBusy } : null}>
             {pending.map((x) => <DressRow key={`${x.kind}-${x.id}`} x={x} busy={busyId === x.id} onToggle={toggle} state="alert" />)}
           </Section>
           <Section title={`Approved · ${approved.length}`} hide={!approved.length}>
@@ -115,11 +157,16 @@ export default function BallDressPortal() {
   );
 }
 
-function Section({ title, hide, children }) {
+function Section({ title, hide, children, action }) {
   if (hide) return null;
   return (
     <div className="bp-section">
-      <div className="bp-section-head">{title}</div>
+      <div className="bp-section-head">
+        {title}
+        {action && (
+          <button className="bp-bulk" disabled={action.disabled} onClick={action.onClick}>{action.label}</button>
+        )}
+      </div>
       {children}
     </div>
   );

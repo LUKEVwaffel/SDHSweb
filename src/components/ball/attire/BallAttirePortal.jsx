@@ -19,8 +19,10 @@ export default function BallAttirePortal() {
   const [phase, setPhase] = useState('checking');
   const [errorMsg, setErrorMsg] = useState('');
   const [loginNotice, setLoginNotice] = useState('');
+  const [email, setEmail] = useState('');
   const [rows, setRows] = useState([]);
   const [busyId, setBusyId] = useState(null);
+  const [bulkBusy, setBulkBusy] = useState(false);
   const [q, setQ] = useState('');
 
   const loadAll = useCallback(async () => {
@@ -35,10 +37,27 @@ export default function BallAttirePortal() {
     if (!session) { setPhase('login'); return; }
     const { data: ok } = await SB.rpc('is_ball_attire');
     if (!ok) { setLoginNotice('That account is not the male-guest attire approver.'); setPhase('login'); return; }
+    setEmail(session.user.email);
     await loadAll();
   }, [loadAll]);
 
   useEffect(() => { verifyAndLoad(); }, [verifyAndLoad]);
+
+  // Live refresh: a new male guest, or a change from the dress portal, shows
+  // up without a manual reload.
+  useEffect(() => {
+    if (phase !== 'ready') return undefined;
+    const channel = SB.channel('ball-attire-portal')
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'ball_guests' }, loadAll)
+      .subscribe();
+    return () => { SB.removeChannel(channel); };
+  }, [phase, loadAll]);
+
+  async function signOut() {
+    await SB.auth.signOut();
+    setRows([]); setEmail('');
+    setPhase('login');
+  }
 
   async function toggle(row) {
     setBusyId(row.id);
@@ -56,8 +75,22 @@ export default function BallAttirePortal() {
     const v = term
       ? rows.filter((r) => (r.guest_name || '').toLowerCase().includes(term) || (r.cadet_name || '').toLowerCase().includes(term))
       : rows;
-    return { pending: v.filter((r) => !r.dress_approved), approved: v.filter((r) => r.dress_approved) };
+    const byName = (a, b) => (a.guest_name || '').localeCompare(b.guest_name || '');
+    return { pending: v.filter((r) => !r.dress_approved).sort(byName), approved: v.filter((r) => r.dress_approved).sort(byName) };
   }, [rows, q]);
+
+  async function approveAllPending() {
+    if (!pending.length) return;
+    const ok = window.confirm(`Mark all ${pending.length} pending as approved?`);
+    if (!ok) return;
+    setBulkBusy(true);
+    const { data: { session } } = await SB.auth.getSession();
+    await SB.from('ball_guests').update({
+      dress_approved: true, dress_approved_by: session.user.email,
+    }).in('id', pending.map((r) => r.id));
+    await loadAll();
+    setBulkBusy(false);
+  }
 
   const shell = (children) => (
     <div className="rv">
@@ -74,6 +107,11 @@ export default function BallAttirePortal() {
 
   return shell(
     <div>
+      <div className="bp-session">
+        <span className="bp-session-email">{email}</span>
+        <button className="bp-signout" onClick={signOut}>Sign out</button>
+      </div>
+
       <div className="bp-head">
         <h1 className="bp-title">Male-Guest Attire</h1>
         <button className="bp-refresh" onClick={loadAll}>Refresh</button>
@@ -92,7 +130,7 @@ export default function BallAttirePortal() {
         <div className="bp-empty">No male guests to review yet.</div>
       ) : (
         <>
-          <Section title={`To approve · ${pending.length}`} hide={!pending.length}>
+          <Section title={`To approve · ${pending.length}`} hide={!pending.length} action={pending.length > 1 ? { label: bulkBusy ? 'Approving…' : 'Approve all', onClick: approveAllPending, disabled: bulkBusy } : null}>
             {pending.map((r) => <AttireRow key={r.id} r={r} busy={busyId === r.id} onToggle={toggle} state="alert" />)}
           </Section>
           <Section title={`Approved · ${approved.length}`} hide={!approved.length}>
@@ -104,11 +142,16 @@ export default function BallAttirePortal() {
   );
 }
 
-function Section({ title, hide, children }) {
+function Section({ title, hide, children, action }) {
   if (hide) return null;
   return (
     <div className="bp-section">
-      <div className="bp-section-head">{title}</div>
+      <div className="bp-section-head">
+        {title}
+        {action && (
+          <button className="bp-bulk" disabled={action.disabled} onClick={action.onClick}>{action.label}</button>
+        )}
+      </div>
       {children}
     </div>
   );

@@ -4,6 +4,41 @@
    list / row / toggle / section shapes the ball queues need. Non-technical
    adult users, often on a phone: big tap targets, obvious state, no jargon. */
 
+.bp-session {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 14px;
+  padding-bottom: 12px;
+  border-bottom: 1px dashed var(--rv-border);
+}
+.bp-session-email {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px;
+  letter-spacing: 0.03em;
+  color: var(--rv-faint);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.bp-signout {
+  appearance: none;
+  flex-shrink: 0;
+  background: transparent;
+  border: 1px solid var(--rv-border);
+  border-radius: 999px;
+  padding: 5px 13px;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10.5px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--rv-faint);
+  cursor: pointer;
+  transition: color 0.15s var(--rv-ease), border-color 0.15s var(--rv-ease);
+}
+.bp-signout:hover { color: var(--rv-accent); border-color: var(--rv-accent); }
+
 .bp-head {
   display: flex;
   align-items: flex-end;
@@ -86,7 +121,25 @@
   align-items: center;
   gap: 10px;
 }
-.bp-section-head::after { content: ''; flex: 1; height: 1px; background: var(--rv-border); }
+.bp-section-head::after { content: ''; flex: 1; height: 1px; background: var(--rv-border); order: 1; }
+.bp-bulk {
+  appearance: none;
+  order: 2;
+  background: transparent;
+  border: 1px solid var(--rv-accent);
+  border-radius: 999px;
+  padding: 5px 12px;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.05em;
+  text-transform: none;
+  color: var(--rv-accent);
+  cursor: pointer;
+  transition: color 0.15s var(--rv-ease), background 0.15s var(--rv-ease);
+}
+.bp-bulk:hover:not(:disabled) { background: var(--rv-accent); color: #fff; }
+.bp-bulk:disabled { opacity: 0.55; cursor: default; }
 
 .bp-row {
   background: var(--rv-surface);
