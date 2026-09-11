@@ -71,6 +71,8 @@
 }
 .bp-refresh:hover { color: var(--rv-ink); border-color: var(--rv-ink); }
 
+.bp-head-actions { display: flex; gap: 8px; flex-wrap: wrap; }
+
 .bp-stats {
   display: flex;
   gap: 8px;
@@ -213,6 +215,47 @@
 .bp-toggle:disabled { opacity: 0.5; cursor: default; }
 
 .bp-by { font-family: 'JetBrains Mono', monospace; font-size: 10px; color: var(--rv-faint); margin-top: 5px; }
+
+/* Inline confirm strip — replaces the toggle buttons in place instead of a
+   blocking window.confirm(), so the row (and the rest of the page) stays
+   interactive while the admin decides. */
+.bp-confirm {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  flex-shrink: 0;
+  animation: rv-rise 0.16s var(--rv-ease) both;
+}
+.bp-confirm-msg {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11.5px;
+  color: var(--rv-ink);
+  line-height: 1.4;
+}
+.bp-confirm-yes,
+.bp-confirm-no {
+  appearance: none;
+  border-radius: 999px;
+  padding: 9px 16px;
+  min-height: 42px;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: box-shadow 0.15s var(--rv-ease), color 0.15s var(--rv-ease), border-color 0.15s var(--rv-ease);
+}
+.bp-confirm-yes { border: 1px solid var(--rv-green); background: var(--rv-green); color: #fff; }
+.bp-confirm-yes:hover:not(:disabled) { box-shadow: 0 4px 14px rgba(31, 111, 74, 0.28); }
+.bp-confirm-yes.is-revoke { border-color: var(--rv-accent); background: var(--rv-accent); }
+.bp-confirm-yes.is-revoke:hover:not(:disabled) { box-shadow: 0 4px 14px rgba(180, 90, 40, 0.28); }
+.bp-confirm-yes:disabled, .bp-confirm-no:disabled { opacity: 0.6; cursor: default; }
+.bp-confirm-no { border: 1px solid var(--rv-border-strong); background: transparent; color: var(--rv-mute); }
+.bp-confirm-no:hover:not(:disabled) { color: var(--rv-ink); border-color: var(--rv-ink); }
 
 /* Guest POC + contact block — Kaz/Chief chase down cash + forms from here. */
 .bp-contact {

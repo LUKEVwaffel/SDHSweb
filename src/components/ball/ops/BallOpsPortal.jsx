@@ -8,6 +8,44 @@ function money(n) {
   return n == null ? null : `$${Number(n).toFixed(Number.isInteger(Number(n)) ? 0 : 2)}`;
 }
 
+function csvCell(v) {
+  if (v == null) return '';
+  const s = String(v);
+  return /[",\n]/.test(s) ? `"${s.replace(/"/g, '""')}"` : s;
+}
+
+// Kaz runs everything through a spreadsheet — dump the full ops queue as CSV.
+function exportCsv(rows, guestsBySignup) {
+  const headers = [
+    'Cadet', 'LET', 'Company', 'Status', 'Guest', 'Guest Type', 'Guest Age',
+    'Host Owes', 'Friend Owes', 'Friend Payment Method',
+    'Cash Received', 'Field Trip Form Required', 'Field Trip Form Received',
+    'Guest POC Name', 'Guest POC Phone', 'Guest POC Email', 'Guest Personal Email', 'Cadet Contact Email',
+  ];
+  const lines = [headers.join(',')];
+  rows.forEach((r) => {
+    const g = guestsBySignup[r.id];
+    lines.push([
+      r.cadet_name, r.cadet_let_level, r.cadet_company, r.status,
+      g?.name, g?.guest_type, g?.age,
+      r.amount_due, g?.friend_amount_due, g?.friend_payment_method,
+      r.cash_received ? 'Yes' : 'No',
+      r.field_trip_form_required ? 'Yes' : 'No',
+      r.field_trip_form_received ? 'Yes' : 'No',
+      g?.poc_name, g?.poc_phone, g?.poc_email, g?.personal_email, r.notification_email,
+    ].map(csvCell).join(','));
+  });
+  const blob = new Blob([lines.join('\r\n')], { type: 'text/csv;charset=utf-8;' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `ball-ops-${new Date().toISOString().slice(0, 10)}.csv`;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+}
+
 // Ball Ops portal — Kaz/Chief payment + field trip form tracking. Reuses the
 // EXISTING reviewer PIN/password login wholesale (ReviewLogin.jsx, same
 // email_reviewers population + reviewer-pin-login edge fn as the email review
@@ -25,6 +63,7 @@ export default function BallOpsPortal() {
   const [rows, setRows] = useState([]);
   const [guestsBySignup, setGuestsBySignup] = useState({});
   const [busyId, setBusyId] = useState(null);
+  const [confirmTarget, setConfirmTarget] = useState(null); // { id, field }
   const [q, setQ] = useState('');
   const [flash, setFlash] = useState(null); // { tone: 'ok' | 'err', msg }
 
@@ -75,17 +114,20 @@ export default function BallOpsPortal() {
     setPhase('login');
   }
 
-  async function toggle(row, field, guest) {
+  function requestToggle(row, field) {
+    setConfirmTarget({ id: row.id, field });
+  }
+
+  function cancelToggle() {
+    setConfirmTarget(null);
+  }
+
+  async function applyToggle(row, field, guest) {
     const label = field === 'cash_received' ? 'cash payment' : 'field trip form';
     const turningOn = !row[field];
     const who = `${row.cadet_name}${guest?.name ? ` (+ ${guest.name})` : ''}`;
-    const ok = window.confirm(
-      turningOn
-        ? `Mark ${label} RECEIVED for ${who}?`
-        : `REVOKE ${label} for ${who}? It will show as not received again.`,
-    );
-    if (!ok) return;
 
+    setConfirmTarget(null);
     setBusyId(row.id);
     setFlash(null);
     const { error } = await SB.from('ball_signups').update({ [field]: turningOn }).eq('id', row.id);
@@ -147,7 +189,10 @@ export default function BallOpsPortal() {
       </div>
       <div className="bp-head">
         <h1 className="bp-title">Ball Payments</h1>
-        <button className="bp-refresh" onClick={loadAll}>Refresh</button>
+        <div className="bp-head-actions">
+          <button className="bp-refresh" onClick={() => exportCsv(rows, guestsBySignup)}>Export CSV</button>
+          <button className="bp-refresh" onClick={loadAll}>Refresh</button>
+        </div>
       </div>
 
       <div className="bp-stats">
@@ -181,13 +226,31 @@ export default function BallOpsPortal() {
       ) : (
         <>
           <Section title={`Needs action · ${needsAction.length}`} hide={!needsAction.length}>
-            {needsAction.map((r) => <OpsRow key={r.id} r={r} guest={guestsBySignup[r.id]} busy={busyId === r.id} onToggle={toggle} state="alert" />)}
+            {needsAction.map((r) => (
+              <OpsRow
+                key={r.id} r={r} guest={guestsBySignup[r.id]} busy={busyId === r.id}
+                confirming={confirmTarget?.id === r.id ? confirmTarget.field : null}
+                onRequestToggle={requestToggle} onConfirm={applyToggle} onCancel={cancelToggle} state="alert"
+              />
+            ))}
           </Section>
           <Section title={`Awaiting guest · ${awaiting.length}`} hide={!awaiting.length}>
-            {awaiting.map((r) => <OpsRow key={r.id} r={r} guest={guestsBySignup[r.id]} busy={busyId === r.id} onToggle={toggle} state="wait" />)}
+            {awaiting.map((r) => (
+              <OpsRow
+                key={r.id} r={r} guest={guestsBySignup[r.id]} busy={busyId === r.id}
+                confirming={confirmTarget?.id === r.id ? confirmTarget.field : null}
+                onRequestToggle={requestToggle} onConfirm={applyToggle} onCancel={cancelToggle} state="wait"
+              />
+            ))}
           </Section>
           <Section title={`Settled · ${done.length}`} hide={!done.length}>
-            {done.map((r) => <OpsRow key={r.id} r={r} guest={guestsBySignup[r.id]} busy={busyId === r.id} onToggle={toggle} state="done" />)}
+            {done.map((r) => (
+              <OpsRow
+                key={r.id} r={r} guest={guestsBySignup[r.id]} busy={busyId === r.id}
+                confirming={confirmTarget?.id === r.id ? confirmTarget.field : null}
+                onRequestToggle={requestToggle} onConfirm={applyToggle} onCancel={cancelToggle} state="done"
+              />
+            ))}
           </Section>
         </>
       )}
@@ -217,10 +280,15 @@ function ContactLine({ label, name, phone, email }) {
   );
 }
 
-function OpsRow({ r, guest, busy, onToggle, state }) {
+function OpsRow({ r, guest, busy, confirming, onRequestToggle, onConfirm, onCancel, state }) {
   const friend = guest?.guest_type === 'friend';
   const hasContact = guest?.poc_name || guest?.poc_phone || guest?.poc_email
     || guest?.personal_email || r.notification_email;
+
+  const confirmLabel = confirming === 'cash_received' ? 'cash payment' : 'field trip form';
+  const confirmTurningOn = confirming ? !r[confirming] : false;
+  const who = `${r.cadet_name}${guest?.name ? ` (+ ${guest.name})` : ''}`;
+
   return (
     <div className={`bp-row is-${state}`}>
       <div className="bp-row-main">
@@ -262,26 +330,42 @@ function OpsRow({ r, guest, busy, onToggle, state }) {
       </div>
 
       {state !== 'wait' && (
-        <div className="bp-actions">
-          <button
-            className={`bp-toggle ${r.cash_received ? 'is-on' : ''}`}
-            disabled={busy}
-            title={r.cash_received ? 'Click to revoke cash received' : 'Click to mark cash received'}
-            onClick={() => onToggle(r, 'cash_received', guest)}
-          >
-            {r.cash_received ? '✓ Cash — revoke' : 'Cash received'}
-          </button>
-          {r.field_trip_form_required && (
+        confirming ? (
+          <div className="bp-confirm">
+            <span className="bp-confirm-msg">
+              {confirmTurningOn ? `Mark ${confirmLabel} received for ${who}?` : `Revoke ${confirmLabel} for ${who}?`}
+            </span>
             <button
-              className={`bp-toggle ${r.field_trip_form_received ? 'is-on' : ''}`}
+              className={`bp-confirm-yes ${confirmTurningOn ? '' : 'is-revoke'}`}
               disabled={busy}
-              title={r.field_trip_form_received ? 'Click to revoke form received' : 'Click to mark form received'}
-              onClick={() => onToggle(r, 'field_trip_form_received', guest)}
+              onClick={() => onConfirm(r, confirming, guest)}
             >
-              {r.field_trip_form_received ? '✓ Form — revoke' : 'Form received'}
+              {busy ? 'Saving…' : confirmTurningOn ? 'Confirm' : 'Revoke'}
             </button>
-          )}
-        </div>
+            <button className="bp-confirm-no" disabled={busy} onClick={onCancel}>Cancel</button>
+          </div>
+        ) : (
+          <div className="bp-actions">
+            <button
+              className={`bp-toggle ${r.cash_received ? 'is-on' : ''}`}
+              disabled={busy}
+              title={r.cash_received ? 'Click to revoke cash received' : 'Click to mark cash received'}
+              onClick={() => onRequestToggle(r, 'cash_received')}
+            >
+              {r.cash_received ? '✓ Cash — revoke' : 'Cash received'}
+            </button>
+            {r.field_trip_form_required && (
+              <button
+                className={`bp-toggle ${r.field_trip_form_received ? 'is-on' : ''}`}
+                disabled={busy}
+                title={r.field_trip_form_received ? 'Click to revoke form received' : 'Click to mark form received'}
+                onClick={() => onRequestToggle(r, 'field_trip_form_received')}
+              >
+                {r.field_trip_form_received ? '✓ Form — revoke' : 'Form received'}
+              </button>
+            )}
+          </div>
+        )
       )}
     </div>
   );
