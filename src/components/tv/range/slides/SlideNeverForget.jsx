@@ -15,7 +15,7 @@ export default function SlideNeverForget() {
       <img
         src="/images/tv/never-forget-911.png"
         alt="Never Forget — September 11, 2001"
-        style={{ width: '100%', height: '100%', objectFit: 'contain' }}
+        style={{ width: '100%', height: '100%', objectFit: 'cover' }}
       />
     </div>
   );
