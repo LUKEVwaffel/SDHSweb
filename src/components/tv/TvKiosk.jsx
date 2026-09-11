@@ -3,6 +3,7 @@ import { useTvDailySettings } from '../../hooks/useTvDailySettings.js';
 import { useStayAwake } from '../../hooks/useStayAwake.js';
 import TvStandardLayout from './TvStandardLayout.jsx';
 import TvRaftingScreen from './TvRaftingScreen.jsx';
+import SlideNeverForget from './range/slides/SlideNeverForget.jsx';
 import TvPreviewBadge from './TvPreviewBadge.jsx';
 import TvRefreshNotice from './TvRefreshNotice.jsx';
 
@@ -11,6 +12,11 @@ import TvRefreshNotice from './TvRefreshNotice.jsx';
 // to restore TvStandardLayout. `settings`/`now` stay wired so the revert is a
 // one-line change.
 const TAKEOVER_MODE = true;
+
+// 2026-09-11 only: /tv shows the Never Forget tribute graphic instead of the
+// rafting takeover. Same SlideNeverForget component Range uses in rotation.
+// Flip to false (or delete) to restore the rafting takeover.
+const SEPT_11_OUTSIDE_OVERRIDE = true;
 
 /**
  * Outside — the original public kiosk, mounted at /tv. Thin per-screen
@@ -31,7 +37,9 @@ export default function TvKiosk() {
 
   return (
     <>
-      {TAKEOVER_MODE ? (
+      {SEPT_11_OUTSIDE_OVERRIDE ? (
+        <SlideNeverForget />
+      ) : TAKEOVER_MODE ? (
         <TvRaftingScreen />
       ) : (
         <TvStandardLayout settings={settings} now={now} />
