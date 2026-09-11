@@ -58,6 +58,23 @@ export default function BallOpsPortal() {
 
   useEffect(() => { verifyAndLoad(); }, [verifyAndLoad]);
 
+  // Live refresh: Kaz/Chief share this queue, so a payment marked by the
+  // other reviewer (or a fresh signup landing) shows up without Refresh.
+  useEffect(() => {
+    if (phase !== 'ready') return undefined;
+    const channel = SB.channel('ball-ops-portal')
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'ball_signups' }, loadAll)
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'ball_guests' }, loadAll)
+      .subscribe();
+    return () => { SB.removeChannel(channel); };
+  }, [phase, loadAll]);
+
+  async function signOut() {
+    await SB.auth.signOut();
+    setRows([]); setGuestsBySignup({});
+    setPhase('login');
+  }
+
   async function toggle(row, field, guest) {
     const label = field === 'cash_received' ? 'cash payment' : 'field trip form';
     const turningOn = !row[field];
@@ -124,7 +141,10 @@ export default function BallOpsPortal() {
 
   return shell(
     <div>
-      <button className="rv-link" onClick={() => { window.location.href = '/review'; }}>&lsaquo; Switch portal</button>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+        <button className="rv-link" style={{ margin: 0 }} onClick={() => { window.location.href = '/review'; }}>&lsaquo; Switch portal</button>
+        <button className="rv-link" style={{ margin: 0 }} onClick={signOut}>Sign out</button>
+      </div>
       <div className="bp-head">
         <h1 className="bp-title">Ball Payments</h1>
         <button className="bp-refresh" onClick={loadAll}>Refresh</button>

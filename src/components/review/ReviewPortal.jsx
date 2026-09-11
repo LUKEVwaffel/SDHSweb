@@ -33,14 +33,17 @@ function fmtDate(v) {
 }
 
 // Post-login chooser: the reviewers use one account for two jobs.
-function PortalPicker({ name, onEmail, onBall }) {
+function PortalPicker({ name, onEmail, onBall, onSignOut }) {
   const card = {
     display: 'block', width: '100%', textAlign: 'left', cursor: 'pointer',
     padding: '20px 22px', marginBottom: 12,
   };
   return (
     <div>
-      <h1 className="rv-h1" style={{ fontSize: 22, margin: '4px 0 6px' }}>Hi {name}</h1>
+      <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: 12 }}>
+        <h1 className="rv-h1" style={{ fontSize: 22, margin: '4px 0 6px' }}>Hi {name}</h1>
+        <button className="rv-link" style={{ marginTop: 6 }} onClick={onSignOut}>Sign out</button>
+      </div>
       <p className="rv-sub" style={{ marginBottom: 22 }}>Which one are you here for?</p>
       <button className="rv-row" style={card} onClick={onEmail}>
         <div className="rv-row-title">Email Review</div>
@@ -84,6 +87,7 @@ export default function ReviewPortal() {
   const [shake, setShake] = useState(false);
   const [resultFlash, setResultFlash] = useState(null); // 'approve' | 'deny' | null
   const [deletedNotice, setDeletedNotice] = useState(false);
+  const [q, setQ] = useState('');
   const shakeTimer = useRef(null);
 
   const loadAll = useCallback(async () => {
@@ -138,6 +142,25 @@ export default function ReviewPortal() {
     setPhase('checking');
     await loadAll();
   }
+
+  async function signOut() {
+    await SB.auth.signOut();
+    setPortal(null);
+    setOpen(null);
+    setRows([]); setSentRows([]); setHistoryRows([]);
+    setPhase('login');
+  }
+
+  // Live refresh: a fellow reviewer deciding a shared-queue draft, or a new
+  // submit-for-review, shows up without hitting Refresh. Scoped to the
+  // 'email' portal only — Ball Ops has its own realtime hookup.
+  useEffect(() => {
+    if (phase !== 'ready' || portal !== 'email') return undefined;
+    const channel = SB.channel('email-review-portal')
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'email_messages' }, loadAll)
+      .subscribe();
+    return () => { SB.removeChannel(channel); };
+  }, [phase, portal, loadAll]);
 
   useEffect(() => {
     const draft = searchParams.get('draft');
@@ -276,6 +299,7 @@ export default function ReviewPortal() {
       name={reviewerName}
       onEmail={() => setPortal('email')}
       onBall={() => { window.location.href = '/ball/ops'; }}
+      onSignOut={signOut}
     />
   );
 
@@ -355,6 +379,10 @@ export default function ReviewPortal() {
   const myRows = rows.filter((r) => !r.assigned_reviewer_email || r.assigned_reviewer_email.toLowerCase() === reviewerEmail);
   const otherRows = rows.filter((r) => r.assigned_reviewer_email && r.assigned_reviewer_email.toLowerCase() !== reviewerEmail);
 
+  const term = q.trim().toLowerCase();
+  const filteredSent = term ? sentRows.filter((r) => (r.subject || '').toLowerCase().includes(term)) : sentRows;
+  const filteredHistory = term ? historyRows.filter((h) => (h.subject || '').toLowerCase().includes(term)) : historyRows;
+
   const tabs = [
     { id: 'pending', label: 'Pending', count: myRows.length },
     { id: 'sent', label: 'Sent', count: sentRows.length },
@@ -388,6 +416,7 @@ export default function ReviewPortal() {
         <div style={{ display: 'flex', gap: 14, marginTop: 6 }}>
           <button className="rv-link" onClick={() => { setPortal(null); navigate('/review'); }}>Switch portal</button>
           <button className="rv-link" onClick={() => setShowSettings(true)}>Settings</button>
+          <button className="rv-link" onClick={signOut}>Sign out</button>
         </div>
       </div>
       <p className="rv-sub" style={{ marginBottom: 22 }}>
@@ -406,7 +435,7 @@ export default function ReviewPortal() {
           <button
             key={t.id}
             className={`rv-tab${tab === t.id ? ' is-active' : ''}`}
-            onClick={() => navigate(tabPath(t.id))}
+            onClick={() => { setQ(''); navigate(tabPath(t.id)); }}
           >
             {t.label}<span className="rv-tab-count">{t.count}</span>
           </button>
@@ -454,11 +483,16 @@ export default function ReviewPortal() {
 
       {tab === 'sent' && (
         <div className="rv-tabpanel" key="sent">
+          {sentRows.length > 6 && (
+            <input className="rv-search" placeholder="Search by subject…" value={q} onChange={(e) => setQ(e.target.value)} />
+          )}
           {sentRows.length === 0 ? (
             <div className="rv-card rv-empty">Nothing approved or sent yet.</div>
+          ) : filteredSent.length === 0 ? (
+            <div className="rv-card rv-empty">No sent messages match "{q}".</div>
           ) : (
             <div className="rv-list">
-              {sentRows.map((r) => (
+              {filteredSent.map((r) => (
                 <button key={r.id} className="rv-row" onClick={() => openSent(r)}>
                   <div className="rv-row-title">{r.subject}</div>
                   <div className="rv-row-meta">
@@ -475,11 +509,16 @@ export default function ReviewPortal() {
 
       {tab === 'history' && (
         <div className="rv-tabpanel" key="history">
+          {historyRows.length > 6 && (
+            <input className="rv-search" placeholder="Search by subject…" value={q} onChange={(e) => setQ(e.target.value)} />
+          )}
           {historyRows.length === 0 ? (
             <div className="rv-card rv-empty">You haven't reviewed anything yet.</div>
+          ) : filteredHistory.length === 0 ? (
+            <div className="rv-card rv-empty">No history matches "{q}".</div>
           ) : (
             <div className="rv-list">
-              {historyRows.map((h) => (
+              {filteredHistory.map((h) => (
                 <div key={h.id} className="rv-card" style={{ padding: '14px 18px' }}>
                   <div style={{ display: 'flex', alignItems: 'center', gap: 10, justifyContent: 'space-between' }}>
                     <div className="rv-row-title" style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>

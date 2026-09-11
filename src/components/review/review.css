@@ -305,6 +305,25 @@
   border-color: var(--rv-red);
 }
 
+.rv-search {
+  width: 100%;
+  box-sizing: border-box;
+  border: 1px solid var(--rv-border-strong);
+  border-radius: 10px;
+  padding: 11px 14px;
+  font-size: 14px;
+  font-family: inherit;
+  color: var(--rv-ink);
+  background: #fffefb;
+  margin-bottom: 16px;
+  transition: border-color 0.15s var(--rv-ease), box-shadow 0.15s var(--rv-ease);
+}
+.rv-search:focus {
+  outline: none;
+  border-color: var(--rv-accent);
+  box-shadow: 0 0 0 3px var(--rv-accent-soft);
+}
+
 .rv-flash {
   color: var(--rv-red);
   font-size: 13px;
