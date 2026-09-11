@@ -2,7 +2,7 @@ import { P, mono, oswald, fraunces, inter, fs, sp, ease } from '../admin/theme.j
 import { CONGRATS_MEET, CONGRATS_TROPHIES, CONGRATS_PHOTOS } from '../../lib/tvCongratsData.js';
 import { useCompPhotoPoll } from '../../hooks/useCompPhotoPoll.js';
 import { useOpticPhotos } from '../../hooks/useOpticPhotos.js';
-import { feedChip } from '../../lib/opticComp.js';
+import { feedChip, OPTIC_EVENT_ID } from '../../lib/opticComp.js';
 import TvPhotoCarousel from './TvPhotoCarousel.jsx';
 
 // Full-screen /tv takeover celebrating a meet result. Left column = the
@@ -81,13 +81,14 @@ export default function TvCongratsScreen() {
   // carousel. Until then the screen is unchanged (winner === null).
   const { winner } = useCompPhotoPoll();
 
-  // Right column now pulls the whole OPTIC feed for the comp — every
-  // published photo, Luke's AND the parents', not just the hardcoded
-  // CONGRATS_PHOTOS placeholders. 'public' scope = visibility public + status
-  // live, the same set the /optic feed shows. Live-synced, so a new
-  // parent upload appears on the kiosk without a reload. Falls back to
-  // CONGRATS_PHOTOS only while the feed is genuinely empty.
-  const { photos: opticRows } = useOpticPhotos({ scope: 'public' });
+  // Right column pulls the archived OPTIC feed for the Rhea County comp this
+  // screen is celebrating — every published photo from THAT event, Luke's AND
+  // the parents', not just the hardcoded CONGRATS_PHOTOS placeholders. Pinned
+  // to OPTIC_EVENT_ID (not useOpticConfig's live active_event_id) on purpose:
+  // this screen's subject is a specific past result, so it must never follow
+  // the feed over to whichever comp OPTIC is pointed at today. Falls back to
+  // CONGRATS_PHOTOS only while genuinely empty.
+  const { photos: opticRows } = useOpticPhotos({ eventId: OPTIC_EVENT_ID, scope: 'public' });
   const opticPhotos = opticRows.map((row, i) => ({
     src: row.photo_url,
     alt: row.uploader_name ? `OPTIC — ${row.uploader_name}` : `OPTIC photo ${i + 1}`,

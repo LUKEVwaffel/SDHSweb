@@ -7,19 +7,26 @@ import './optic-onboard.css';
 const ROLE_KEY = 'optic_role';
 const haptic = (p) => { try { navigator.vibrate?.(p); } catch { /* unsupported */ } };
 
-// Step graph. Everyone opens on a plain-language "what is this" panel so the
-// first question never lands cold. Cadets get an extra "competing vs viewing"
-// step; everyone reaches the install screen last. `done` is a terminal
-// hand-off screen shown only after a successful install , it is not part of
-// the numbered sequence.
-function sequence(role) {
-  return role === 'cadet'
-    ? ['welcome', 'role', 'intent', 'about1', 'about2', 'install']
-    : ['welcome', 'role', 'about1', 'about2', 'install'];
+// Step graph. Everyone opens on a plain-language "what is this" panel, then
+// a "used OPTIC before?" fork — most people already have last comp's app on
+// their home screen, and a `returning: true` answer inserts a one-screen
+// "delete the old icon" notice (`reinstall`) they'd otherwise never see if
+// they end up installing fresh from here. Cadets get an extra "competing vs
+// viewing" step; everyone reaches the install screen last. `done` is a
+// terminal hand-off screen shown only after a successful install , it is not
+// part of the numbered sequence.
+function sequence(role, returning) {
+  const base = role === 'cadet'
+    ? ['welcome', 'returning', 'role', 'intent', 'about1', 'about2', 'install']
+    : ['welcome', 'returning', 'role', 'about1', 'about2', 'install'];
+  if (returning !== true) return base;
+  const i = base.indexOf('returning');
+  return [...base.slice(0, i + 1), 'reinstall', ...base.slice(i + 1)];
 }
 // Steps that carry a progress dot (welcome is a soft intro, install/done are
 // terminal, so none of them count toward "how far along am I").
-const dotStepsOf = (role) => sequence(role).filter((s) => s !== 'welcome' && s !== 'install');
+const dotStepsOf = (role, returning) => sequence(role, returning)
+  .filter((s) => s !== 'welcome' && s !== 'install');
 
 function flavor(a) {
   if (a.role === 'cadet' && a.intent === 'competing') {
@@ -50,7 +57,7 @@ function flavor(a) {
  */
 export default function OpticOnboarding({ onDone }) {
   const [step, setStep] = useState('welcome');
-  const [answers, setAnswers] = useState({ role: null, intent: null });
+  const [answers, setAnswers] = useState({ role: null, intent: null, returning: null });
   const [pending, setPending] = useState(null); // choice id flashing before advance
   const [back, setBack] = useState(false);
   const [installPrompt, setInstallPrompt] = useState(null);
@@ -61,9 +68,9 @@ export default function OpticOnboarding({ onDone }) {
     return () => window.removeEventListener('beforeinstallprompt', h);
   }, []);
 
-  const seq = sequence(answers.role);
+  const seq = sequence(answers.role, answers.returning);
   const idx = seq.indexOf(step);
-  const dotSteps = dotStepsOf(answers.role);
+  const dotSteps = dotStepsOf(answers.role, answers.returning);
   const dotIdx = dotSteps.indexOf(step);
 
   const goNext = useCallback((next) => {
@@ -72,12 +79,12 @@ export default function OpticOnboarding({ onDone }) {
   }, []);
 
   const goBack = useCallback(() => {
-    const s = sequence(answers.role);
+    const s = sequence(answers.role, answers.returning);
     const i = s.indexOf(step);
     if (i <= 0) return;
     setBack(true);
     setStep(s[i - 1]);
-  }, [answers.role, step]);
+  }, [answers.role, answers.returning, step]);
 
   function choose(key, value, nextStep) {
     haptic(12);
@@ -96,6 +103,7 @@ export default function OpticOnboarding({ onDone }) {
     posthog.capture('optic_onboarded', {
       role: answers.role || 'unknown',
       intent: answers.intent || null,
+      returning: answers.returning,
       installed: !!installed,
     });
   }
@@ -123,7 +131,7 @@ export default function OpticOnboarding({ onDone }) {
     window.addEventListener('appinstalled', h);
     return () => window.removeEventListener('appinstalled', h);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [answers.role, answers.intent]);
+  }, [answers.role, answers.intent, answers.returning]);
 
   async function doInstall() {
     if (!installPrompt) return;
@@ -176,6 +184,53 @@ export default function OpticOnboarding({ onDone }) {
               <p className="rob-sub" style={{ fontSize: 13, marginTop: 16 }}>
                 First, one quick question so the feed opens to the right place.
               </p>
+            </>
+          )}
+
+          {step === 'returning' && (
+            <>
+              <div className="rob-kicker">ONE MORE THING</div>
+              <h1 className="rob-h">Used OPTIC <span className="accent">at the last comp?</span></h1>
+              <p className="rob-sub">
+                OPTIC 2.0 is a rebuild, not an update — we&apos;ll tell you what
+                that means for your home screen if so.
+              </p>
+              <div className="rob-choices">
+                <Choice
+                  sel={pending === true}
+                  onClick={() => choose('returning', true, 'reinstall')}
+                  title="YES, I HAD IT BEFORE"
+                  desc="Used it at a past comp"
+                  icon="↻"
+                />
+                <Choice
+                  sel={pending === false}
+                  onClick={() => choose('returning', false, 'role')}
+                  title="NO, FIRST TIME"
+                  desc="Never used OPTIC"
+                  icon="✦"
+                />
+              </div>
+            </>
+          )}
+
+          {step === 'reinstall' && (
+            <>
+              <div className="rob-kicker">OPTIC 2.0 · BUILT FROM YOUR FEEDBACK</div>
+              <h1 className="rob-h">First: <span className="accent">delete the old icon.</span></h1>
+              <p className="rob-sub">
+                We read every response from the OPTIC survey and rebuilt it —
+                team filters, the upload cap that ate photos mid-batch is gone,
+                and photos now sort by when they were actually taken. But it&apos;s
+                a rebuild, not an update: the OPTIC icon already on your home
+                screen won&apos;t pick up any of it on its own.
+              </p>
+              <div className="rob-vis">
+                <span className="rob-vis-glyph">🗑</span>
+                <span className="rob-vis-txt">
+                  DELETE THE OLD ICON NOW · YOU&apos;LL ADD THE NEW ONE AT THE END OF THIS
+                </span>
+              </div>
             </>
           )}
 
@@ -308,8 +363,8 @@ export default function OpticOnboarding({ onDone }) {
             <button
               className="rob-cta"
               onClick={() => goNext(seq[idx + 1])}
-              disabled={step === 'role' || step === 'intent'}
-              style={{ display: step === 'role' || step === 'intent' ? 'none' : 'block' }}
+              disabled={step === 'role' || step === 'intent' || step === 'returning'}
+              style={{ display: step === 'role' || step === 'intent' || step === 'returning' ? 'none' : 'block' }}
             >
               CONTINUE
             </button>

@@ -3,8 +3,10 @@ import { supabase as SB } from '../lib/supabaseClient';
 
 const GATE_ID = 'default';
 // Fallback when the row can't be read (migration not run yet / offline): stay
-// LOCKED with this target so the countdown still renders. 7:00 AM Sep 12 2026 ET.
-const FALLBACK_OPENS_AT = '2026-09-12T07:00:00-04:00';
+// LOCKED with this target so the countdown still renders. 8:00 AM Sep 12 2026 ET
+// (Luke's call — later than the 0700 check-in on the MOI, so the feed doesn't
+// open mid check-in/briefing).
+const FALLBACK_OPENS_AT = '2026-09-12T08:00:00-04:00';
 
 // Tri-state kill switch. `mode` is authoritative:
 //   'closed' -> feed locked, always (wins over the clock AND over is_open)

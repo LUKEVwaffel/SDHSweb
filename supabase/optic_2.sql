@@ -167,7 +167,15 @@ grant execute on function public.optic_retag_photos(uuid) to authenticated;
 --
 -- Gate reset (run day-of, separate — the gate lives in rhea_gate.sql):
 --   update public.rhea_gate
---      set opens_at = '2026-09-12 07:00:00-04', is_open = false
+--      set opens_at = '2026-09-12 08:00:00-04', is_open = false
 --    where id = 'default';
---   update public.optic_config set active_event_id = '<this comp''s events.id>' where id = 'default';
+--
+-- Point OPTIC at the real Spring Hill event (id confirmed against the events
+-- table 2026-09-11 — "Spring Hill Raider Competition", date 2026-09-12, team
+-- 'raiders', status 'posted'). Nothing before this line touches old Rhea
+-- County photos: they keep their own event_id and stay in `photos` untouched,
+-- they just stop being what the live feed shows once this points elsewhere.
+--   update public.optic_config
+--      set active_event_id = 'fa96f288-3b72-484b-bca3-e69c2f5d0ca3'
+--    where id = 'default';
 -- ============================================================================

@@ -1,6 +1,5 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { supabase as SB } from '../lib/supabaseClient';
-import { OPTIC_EVENT_ID } from '../lib/opticComp';
 
 const SELECT = '*, raider_sub_events(name, team)';
 const FALLBACK_POLL_MS = 60_000; // socket can silently drop over a 12h day
@@ -21,18 +20,22 @@ const capturedAt = (p) => new Date(p.taken_at || p.created_at).getTime();
  * "coalesce, then order by that" through the query builder cleanly here.
  *
  * @param {object} opts
- * @param {string} [opts.eventId]  from useOpticConfig() — which event's feed
+ * @param {string} opts.eventId  from useOpticConfig() (live feed) or an
+ *        archival OPTIC_EVENT_ID (a specific past comp's gallery/highlight
+ *        surface) — always explicit, never defaulted, so a missing config
+ *        can't silently pull up the wrong comp's photos.
  * @param {'public'|'all'} [opts.scope]  'public' = the /optic feed
  *        (visibility public + status live). 'all' = /lukepwa (everything,
  *        including staged and hidden).
  * @param {boolean} [opts.enabled]  gate the subscription (e.g. until auth).
  */
-export function useOpticPhotos({ eventId = OPTIC_EVENT_ID, scope = 'public', enabled = true } = {}) {
+export function useOpticPhotos({ eventId, scope = 'public', enabled = true } = {}) {
   const [photos, setPhotos] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const timerRef = useRef(null);
   const aliveRef = useRef(true);
+  const active = enabled && !!eventId;
 
   const load = useCallback(async () => {
     let q = SB.from('photos').select(SELECT).eq('event_id', eventId);
@@ -51,7 +54,7 @@ export function useOpticPhotos({ eventId = OPTIC_EVENT_ID, scope = 'public', ena
 
   useEffect(() => {
     aliveRef.current = true;
-    if (!enabled) { setLoading(false); return () => { aliveRef.current = false; }; }
+    if (!active) { setPhotos([]); setLoading(false); return () => { aliveRef.current = false; }; }
 
     setLoading(true);
     load();
@@ -72,7 +75,7 @@ export function useOpticPhotos({ eventId = OPTIC_EVENT_ID, scope = 'public', ena
       clearInterval(pollId);
       SB.removeChannel(channel);
     };
-  }, [eventId, scope, enabled, load, scheduleLoad]);
+  }, [eventId, scope, active, load, scheduleLoad]);
 
   return { photos, loading, error, refresh: load };
 }
@@ -81,10 +84,11 @@ export function useOpticPhotos({ eventId = OPTIC_EVENT_ID, scope = 'public', ena
  * Live sub-event list for the comp (realtime on raider_sub_events). Powers the
  * quick-select tagging list in /lukepwa.
  */
-export function useOpticSubEvents({ eventId = OPTIC_EVENT_ID, enabled = true } = {}) {
+export function useOpticSubEvents({ eventId, enabled = true } = {}) {
   const [subEvents, setSubEvents] = useState([]);
   const [loading, setLoading] = useState(true);
   const aliveRef = useRef(true);
+  const active = enabled && !!eventId;
 
   const load = useCallback(async () => {
     const { data } = await SB.from('raider_sub_events')
@@ -97,7 +101,7 @@ export function useOpticSubEvents({ eventId = OPTIC_EVENT_ID, enabled = true } =
 
   useEffect(() => {
     aliveRef.current = true;
-    if (!enabled) { setLoading(false); return () => { aliveRef.current = false; }; }
+    if (!active) { setSubEvents([]); setLoading(false); return () => { aliveRef.current = false; }; }
     load();
     const channel = SB.channel(`optic-sub-events-${eventId}`)
       .on(
@@ -107,7 +111,7 @@ export function useOpticSubEvents({ eventId = OPTIC_EVENT_ID, enabled = true } =
       )
       .subscribe();
     return () => { aliveRef.current = false; SB.removeChannel(channel); };
-  }, [eventId, enabled, load]);
+  }, [eventId, active, load]);
 
   return { subEvents, loading, refresh: load };
 }

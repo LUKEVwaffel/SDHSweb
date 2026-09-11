@@ -112,6 +112,16 @@ function LukeUpload() {
           {OPTIC_EVENT_TITLE} · photos land staged, tag them later in the phone app.
         </div>
 
+        {!eventId && (
+          <div style={{
+            marginTop: 16, border: `1px solid ${P.red}`, background: 'rgba(192,57,43,0.08)',
+            padding: '10px 12px', fontFamily: mono, fontSize: 11, color: '#E8A79E', letterSpacing: '0.04em',
+          }}>
+            NO ACTIVE EVENT SET — set optic_config.active_event_id before dumping.
+            Uploads are blocked so nothing lands on the wrong comp.
+          </div>
+        )}
+
         {/* Drop zone */}
         <input ref={inputRef} type="file" accept={ACCEPT_ATTR} multiple style={{ display: 'none' }}
           onChange={(e) => { addFiles(e.target.files); e.target.value = ''; }} />

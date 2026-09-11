@@ -267,6 +267,12 @@ function LukePwa() {
 
       {!isStandalone() && <InstallStrip />}
 
+      {!eventId && (
+        <div className="lp-banner">
+          NO ACTIVE EVENT — set optic_config.active_event_id or nothing here is live. Old comps stay untouched.
+        </div>
+      )}
+
       <GateControl />
 
       <nav className="lp-tabs">

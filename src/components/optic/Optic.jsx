@@ -1,4 +1,4 @@
-import { useState, useRef, useCallback, useEffect } from 'react';
+import { useState, useRef, useCallback, useEffect, useMemo } from 'react';
 import { Link } from 'react-router-dom';
 import { getDeviceId } from '../../lib/fingerprint';
 import { useOpticPhotos } from '../../hooks/useOpticPhotos';
@@ -12,7 +12,7 @@ import {
 } from '../../lib/opticComp';
 import { readTakenAt } from '../../lib/opticExif';
 import { isHeic, convertHeicToJpeg } from '../../lib/heicConvert';
-import { installOpticPwaHooks, isStandalone } from './pwa';
+import { installOpticPwaHooks, isStandalone, isIos } from './pwa';
 import { usePwaUpdate, PwaUpdateBar } from './usePwaUpdate';
 import OpticOnboarding from './OpticOnboarding';
 import posthog from '../../lib/posthog';
@@ -49,16 +49,36 @@ function OpticGlyph({ className }) {
   );
 }
 
+const TEAM_FILTERS = [
+  { id: 'all', label: 'ALL' },
+  { id: 'male', label: 'MALE' },
+  { id: 'coed', label: 'COED' },
+];
+
 function OpticApp() {
   const config = useOpticConfig();
   const gate = useOpticGate();
   const { photos, loading, error } = useOpticPhotos({ eventId: config.eventId, scope: 'public', enabled: gate.open });
   const likes = useOpticLikes(photos);
-  const [reel, setReel] = useState(null); // index into photos, or null
+  const [reel, setReel] = useState(null); // index into visiblePhotos, or null
+  const [teamFilter, setTeamFilter] = useState('all');
   const [walk, setWalk] = useState(() => isStandalone() && !hasWalkthroughOptic());
   const updateReady = usePwaUpdate();
 
   const showWalk = walk && gate.open;
+
+  // 'both' (Luke's untagged-team-but-tagged-event shots) shows under either
+  // team filter — it's the #1 ask from the OPTIC survey, so it stays simple:
+  // ALL / MALE / COED, no UNASSIGNED bucket yet.
+  const teamCounts = useMemo(() => ({
+    all: photos.length,
+    male: photos.filter((p) => p.raider_team === 'male' || p.raider_team === 'both').length,
+    coed: photos.filter((p) => p.raider_team === 'coed' || p.raider_team === 'both').length,
+  }), [photos]);
+  const visiblePhotos = useMemo(() => {
+    if (teamFilter === 'all') return photos;
+    return photos.filter((p) => p.raider_team === teamFilter || p.raider_team === 'both');
+  }, [photos, teamFilter]);
 
   return (
     <div className="rhea">
@@ -73,19 +93,22 @@ function OpticApp() {
           <div className="rhea-wrap">
             <UploadCard eventId={config.eventId} />
             <Feed
-              photos={photos}
+              photos={visiblePhotos}
               loading={loading}
               error={error}
               likes={likes}
               onOpen={(i) => setReel(i)}
+              filter={teamFilter}
+              onFilterChange={setTeamFilter}
+              counts={teamCounts}
             />
           </div>
         )}
       </div>
 
-      {gate.open && reel !== null && photos[reel] && (
+      {gate.open && reel !== null && visiblePhotos[reel] && (
         <Reel
-          photos={photos}
+          photos={visiblePhotos}
           index={reel}
           likes={likes}
           onIndex={setReel}
@@ -172,11 +195,56 @@ function OpticLocked({ opensAt }) {
         </>
       )}
 
-      {!paused && !isStandalone() && (
-        <p className="rhea-lock-hint">
-          Add OPTIC to your home screen now so it&apos;s one tap when the feed opens.
-        </p>
+      {!paused && <WhatsNew />}
+
+      {!paused && (
+        isStandalone() ? (
+          <div className="rhea-lock-reinstall">
+            <div className="rhea-lock-reinstall-t">HAD OPTIC BEFORE?</div>
+            <p className="rhea-lock-hint">
+              This is a rebuilt app, not an update — the icon already on your
+              home screen won&apos;t get the new version on its own.
+              Delete the old <b style={{ color: 'var(--cream)' }}>OPTIC</b> icon,
+              then {isIos() ? 'tap the share icon below and Add to Home Screen again' : 'use your browser menu to install this one again'}.
+              Takes ten seconds, and you only have to do it once.
+            </p>
+          </div>
+        ) : (
+          <p className="rhea-lock-hint">
+            Add OPTIC to your home screen now so it&apos;s one tap when the feed opens.
+          </p>
+        )
       )}
+    </div>
+  );
+}
+
+const NEW_FEATURES = [
+  ['◈', 'Filter the feed by team — Male or Coed, the #1 thing you asked for'],
+  ['⬆', 'The upload cap that ate people’s photos mid-batch is gone'],
+  ['🕐', 'Photos sort by when they were actually taken, not when they finished uploading'],
+];
+
+// Reveal panel on the locked/countdown screen — this is the surface almost
+// everyone actually sees between the SQL landing and Saturday, including
+// everyone with the old app already on their home screen (isStandalone()
+// skips onboarding entirely), so the "we heard you" moment lives here, not
+// buried in onboarding.
+function WhatsNew() {
+  return (
+    <div className="rhea-whatsnew">
+      <div className="rhea-whatsnew-kick">OPTIC 2.0 · BUILT FROM YOUR FEEDBACK</div>
+      <p className="rhea-whatsnew-p">
+        We read every response from the OPTIC survey. Here&apos;s what changed:
+      </p>
+      <ul className="rhea-whatsnew-list">
+        {NEW_FEATURES.map(([icon, text]) => (
+          <li key={text}>
+            <span className="rhea-whatsnew-ico" aria-hidden="true">{icon}</span>
+            <span>{text}</span>
+          </li>
+        ))}
+      </ul>
     </div>
   );
 }
@@ -300,6 +368,19 @@ function UploadCard({ eventId }) {
   const converting = items.filter((it) => it.status === 'converting');
   const allDone = items.length > 0 && pending.length === 0 && converting.length === 0 && !busy;
 
+  if (!eventId) {
+    return (
+      <section className="rhea-card">
+        <div className="rhea-card-head">
+          <div className="rhea-eyebrow">ADD YOUR PHOTOS</div>
+          <div className="rhea-card-sub">
+            Uploads aren&apos;t open yet — check back shortly.
+          </div>
+        </div>
+      </section>
+    );
+  }
+
   return (
     <section className="rhea-card">
       <div className="rhea-card-head">
@@ -388,7 +469,7 @@ function UploadCard({ eventId }) {
   );
 }
 
-function Feed({ photos, loading, error, likes, onOpen }) {
+function Feed({ photos, loading, error, likes, onOpen, filter, onFilterChange, counts }) {
   return (
     <section>
       <div className="rhea-live">
@@ -397,6 +478,20 @@ function Feed({ photos, loading, error, likes, onOpen }) {
         <span className="rhea-live-count">
           {photos.length} PHOTO{photos.length === 1 ? '' : 'S'}
         </span>
+      </div>
+
+      <div className="rhea-fchips" role="group" aria-label="Filter by team">
+        {TEAM_FILTERS.map((t) => (
+          <button
+            key={t.id}
+            className="rhea-fchip"
+            data-on={filter === t.id}
+            aria-pressed={filter === t.id}
+            onClick={() => onFilterChange(t.id)}
+          >
+            {t.label}<span className="rhea-fchip-n">{counts[t.id] ?? 0}</span>
+          </button>
+        ))}
       </div>
 
       {loading && (
@@ -415,7 +510,9 @@ function Feed({ photos, loading, error, likes, onOpen }) {
       )}
 
       {!loading && !error && photos.length === 0 && (
-        <div className="rhea-empty">No photos yet. Be the first, add one above.</div>
+        <div className="rhea-empty">
+          {filter === 'all' ? 'No photos yet. Be the first, add one above.' : 'No photos tagged to this team yet.'}
+        </div>
       )}
 
       {!loading && photos.length > 0 && (

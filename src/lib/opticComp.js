@@ -52,7 +52,8 @@ export const raiderTeamLabel = (t) => RAIDER_TEAM_LABEL[t] || null;
  * @param {string|null} [opts.deviceFp] device fingerprint , parent path only,
  *        left null for Luke so his 50+ dump is never rate-limited
  * @param {string} [opts.eventId]  target event, from useOpticConfig() — falls
- *        back to OPTIC_EVENT_ID when the config row isn't loaded yet
+ *        (from useOpticConfig()). Required — no fallback to OPTIC_EVENT_ID:
+ *        this must never silently reattach a new photo to a past comp.
  * @param {string|null} [opts.takenAt]  ISO capture time read from EXIF before
  *        resize/HEIC-convert strips it (see lib/opticExif.js). null when the
  *        file carries no EXIF.
@@ -60,9 +61,10 @@ export const raiderTeamLabel = (t) => RAIDER_TEAM_LABEL[t] || null;
  * @returns {Promise<object>} the inserted photos row
  */
 export async function uploadOpticPhoto(file, {
-  source, uploaderName = '', deviceFp = null, eventId = OPTIC_EVENT_ID,
+  source, uploaderName = '', deviceFp = null, eventId,
   takenAt = null, raiderTeam = null,
 }) {
+  if (!eventId) throw new Error('No active event set — optic_config.active_event_id is missing.');
   const { full, thumb } = await resizeForUpload(file); // throws on RAW / unreadable
   const stamp = `${Date.now()}_${Math.random().toString(36).slice(2, 8)}`;
   const base = `${PHOTO_TEAM}/${eventId}/${stamp}`;

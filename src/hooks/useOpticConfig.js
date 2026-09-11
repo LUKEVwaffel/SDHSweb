@@ -1,14 +1,17 @@
 import { useState, useEffect, useRef } from 'react';
 import { supabase as SB } from '../lib/supabaseClient';
-import { OPTIC_EVENT_ID } from '../lib/opticComp';
 
 const CONFIG_ID = 'default';
 
 /**
  * Live `optic_config` row — which event the /optic feed + retag target, and
- * the camera clock offset. Falls back to the hardcoded OPTIC_EVENT_ID (and
- * offset 0) until the row loads or if optic_2.sql hasn't been run yet, so the
- * feed never hard-fails on a missing config table.
+ * the camera clock offset. `eventId` is null until the row loads AND
+ * active_event_id is actually set — deliberately NOT the old hardcoded
+ * OPTIC_EVENT_ID (Rhea County comp). Every past comp's photos stay in
+ * `photos` forever with their own event_id; the live feed/upload surfaces
+ * must only ever show/write to whatever optic_config points at right now, so
+ * an unset or unreachable config means "show nothing" instead of silently
+ * reattaching this comp's activity to last comp's event.
  */
 export function useOpticConfig() {
   const [row, setRow] = useState(null);
@@ -39,7 +42,7 @@ export function useOpticConfig() {
   }, []);
 
   return {
-    eventId: row?.active_event_id || OPTIC_EVENT_ID,
+    eventId: row?.active_event_id || null,
     cameraOffsetSeconds: row?.camera_offset_seconds ?? 0,
     loading,
   };
