@@ -8,14 +8,14 @@ import posthog from '../lib/posthog';
 const P = {
   ink: '#06101F', navy: '#142847', deep: '#0A1628',
   gold: '#C9A961', bright: '#E8C77A', cream: '#F4ECD8',
-  mute: 'rgba(244,236,216,0.62)', faint: 'rgba(244,236,216,0.4)',
+  mute: 'rgba(244,236,216,0.82)', faint: 'rgba(244,236,216,0.58)',
   hair: 'rgba(201,169,97,0.28)',
 };
 
 const SHOW_DELAY_MS = 3200;
 
 const FEATURES = [
-  ['APP', 'Free beta app — add it to your phone home screen in seconds'],
+  ['APP', 'Free beta app, add it to your phone home screen in seconds'],
   ['LIVE', 'Shoot from the stands, the whole feed updates live'],
   ['ALL', 'Every parent at the comp sees every photo, not just their team'],
 ];
@@ -76,7 +76,7 @@ export default function OpticPopup() {
     <div
       role="dialog"
       aria-modal="true"
-      aria-label="OPTIC beta app — live at the competition"
+      aria-label="OPTIC beta app, live at the competition"
       onClick={close}
       style={{
         position: 'fixed', inset: 0, zIndex: 9500,
@@ -173,7 +173,7 @@ export default function OpticPopup() {
             At the comp <strong style={{ color: P.gold }}>right now</strong>? Add the
             free OPTIC beta app to your phone and shoot straight from the stands. Every photo goes
             live to one shared feed so <strong style={{ color: P.gold }}>every parent there</strong> sees
-            the whole day — not just their own team.
+            the whole day, not just their own team.
           </p>
 
           <div style={{ display: 'grid', gap: 10, marginBottom: 28 }}>

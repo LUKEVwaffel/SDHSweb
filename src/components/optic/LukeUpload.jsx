@@ -5,13 +5,16 @@ import {
 } from '../../lib/opticComp';
 import { readTakenAt } from '../../lib/opticExif';
 import { useOpticConfig } from '../../hooks/useOpticConfig';
+import { useOpticSubEvents } from '../../hooks/useOpticPhotos';
 
 const oswald = 'Oswald, sans-serif';
 
 // ── /lukeupload — OPTIC's fastest possible SD-card dump off Luke's laptop ──
-// One drop zone. No event picker, no tagging, no team selector, no nav. Every
-// file lands as source='luke', visibility='staged'; all tagging happens later
-// in /lukepwa. Once the batch summary says "N/N uploaded", Luke is done here.
+// Pick the current station once (or leave it "TAG LATER"), then every file
+// dropped after that lands already tagged with that sub-event + team, so a
+// batch doesn't need a separate hunt-and-tag pass in /lukepwa. Files land
+// visibility='staged' (still reviewed before going live) unless PUBLISH
+// IMMEDIATELY is switched on for this batch.
 export default function LukeUploadRoute() {
   return (
     <AdminGate label="SD CARD DUMP">
@@ -25,12 +28,16 @@ const nextId = () => `f${Date.now()}_${uid++}`;
 
 function LukeUpload() {
   const { eventId } = useOpticConfig();
+  const { subEvents } = useOpticSubEvents({ eventId });
+  const [stationId, setStationId] = useState(null); // null = tag later
+  const [publishNow, setPublishNow] = useState(false);
   const [items, setItems] = useState([]); // {id,file,previewUrl,takenAt,status:pending|uploading|done|failed,error}
   const [rejected, setRejected] = useState([]);
   const [running, setRunning] = useState(false);
   const [dragOver, setDragOver] = useState(false);
   const [batchDone, setBatchDone] = useState(false);
   const inputRef = useRef(null);
+  const station = subEvents.find((s) => s.id === stationId) || null;
 
   // Mirror of `items` so the async upload loop reads fresh File objects
   // without re-closing over stale state.
@@ -76,7 +83,11 @@ function LukeUpload() {
       const item = itemsRef.current.find((it) => it.id === id);
       if (!item) continue;
       try {
-        await uploadOpticPhoto(item.file, { source: 'luke', eventId, takenAt: item.takenAt });
+        await uploadOpticPhoto(item.file, {
+          source: 'luke', eventId, takenAt: item.takenAt,
+          subEventId: station?.id ?? null, raiderTeam: station?.team ?? null,
+          publish: publishNow,
+        });
         setItems((q) => q.map((it) => (it.id === id ? { ...it, status: 'done' } : it)));
       } catch (err) {
         setItems((q) => q.map((it) => (
@@ -109,7 +120,7 @@ function LukeUpload() {
           SD CARD DUMP
         </h1>
         <div style={{ fontFamily: inter, fontSize: 13, color: P.mute }}>
-          {OPTIC_EVENT_TITLE} · photos land staged, tag them later in the phone app.
+          {OPTIC_EVENT_TITLE}. Pick a station below, then drop the whole batch.
         </div>
 
         {!eventId && (
@@ -117,8 +128,44 @@ function LukeUpload() {
             marginTop: 16, border: `1px solid ${P.red}`, background: 'rgba(192,57,43,0.08)',
             padding: '10px 12px', fontFamily: mono, fontSize: 11, color: '#E8A79E', letterSpacing: '0.04em',
           }}>
-            NO ACTIVE EVENT SET — set optic_config.active_event_id before dumping.
+            NO ACTIVE EVENT SET. Set optic_config.active_event_id before dumping.
             Uploads are blocked so nothing lands on the wrong comp.
+          </div>
+        )}
+
+        {/* Current station: tag every photo in this batch at upload time, so
+            it doesn't need a separate find-and-tag pass in /lukepwa after. */}
+        {eventId && (
+          <div style={{ marginTop: 20 }}>
+            <div style={{ fontFamily: mono, fontSize: 9, letterSpacing: '0.2em', color: P.gold, marginBottom: 8 }}>
+              CURRENT STATION, TAGS THIS WHOLE BATCH
+            </div>
+            <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+              <button
+                onClick={() => setStationId(null)}
+                style={stationId === null ? chipOn : chipOff}
+              >TAG LATER</button>
+              {subEvents.map((s) => (
+                <button
+                  key={s.id}
+                  onClick={() => setStationId(s.id)}
+                  style={stationId === s.id ? chipOn : chipOff}
+                >{s.name.toUpperCase()} · {s.team.toUpperCase()}</button>
+              ))}
+            </div>
+            {subEvents.length === 0 && (
+              <div style={{ fontFamily: inter, fontSize: 12, color: P.mute, marginTop: 6 }}>
+                No stations created yet. Add one in the phone app&apos;s EVENTS tab, or leave this on
+                TAG LATER and sort it out afterward.
+              </div>
+            )}
+            <label style={{
+              display: 'flex', alignItems: 'center', gap: 8, marginTop: 12,
+              fontFamily: inter, fontSize: 12.5, color: P.mute, cursor: 'pointer',
+            }}>
+              <input type="checkbox" checked={publishNow} onChange={(e) => setPublishNow(e.target.checked)} />
+              Publish this batch immediately, skip the staged review step
+            </label>
           </div>
         )}
 
@@ -150,7 +197,7 @@ function LukeUpload() {
             marginTop: 12, border: `1px solid ${P.red}`, background: 'rgba(192,57,43,0.08)',
             padding: '10px 12px', fontFamily: mono, fontSize: 10, color: '#E8A79E', lineHeight: 1.5,
           }}>
-            SKIPPED {rejected.length} FILE{rejected.length === 1 ? '' : 'S'} — NOT JPG/PNG:
+            SKIPPED {rejected.length} FILE{rejected.length === 1 ? '' : 'S'}, NOT JPG/PNG:
             <div style={{ color: P.mute, marginTop: 4, wordBreak: 'break-all' }}>{rejected.join(', ')}</div>
           </div>
         )}
@@ -182,8 +229,8 @@ function LukeUpload() {
             color: failed.length ? '#E8A79E' : P.bright,
           }}>
             {failed.length
-              ? `${done.length}/${items.length} UPLOADED · ${failed.length} FAILED — RETRY ABOVE`
-              : `${done.length}/${items.length} UPLOADED SUCCESSFULLY — DONE ON THIS LAPTOP`}
+              ? `${done.length}/${items.length} UPLOADED, ${failed.length} FAILED. RETRY ABOVE`
+              : `${done.length}/${items.length} UPLOADED${station ? ` · TAGGED ${station.name.toUpperCase()}` : ''}${publishNow ? ' · LIVE NOW' : ' · STAGED FOR REVIEW'}`}
           </div>
         )}
 
@@ -236,3 +283,9 @@ const ghostBtn = {
   background: 'transparent', border: `1px solid ${P.hair}`, color: P.mute, cursor: 'pointer',
   fontFamily: mono, fontSize: 10, letterSpacing: '0.16em', padding: '11px 16px',
 };
+const chipBase = {
+  cursor: 'pointer', fontFamily: mono, fontSize: 10, letterSpacing: '0.1em',
+  padding: '8px 12px', borderRadius: 999,
+};
+const chipOn = { ...chipBase, background: P.gold, color: P.ink, border: `1px solid ${P.gold}`, fontWeight: 600 };
+const chipOff = { ...chipBase, background: 'transparent', color: P.mute, border: `1px solid ${P.hair}` };

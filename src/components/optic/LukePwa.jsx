@@ -269,7 +269,7 @@ function LukePwa() {
 
       {!eventId && (
         <div className="lp-banner">
-          NO ACTIVE EVENT — set optic_config.active_event_id or nothing here is live. Old comps stay untouched.
+          NO ACTIVE EVENT. Set optic_config.active_event_id or nothing here is live. Old comps stay untouched.
         </div>
       )}
 
@@ -578,11 +578,12 @@ function SubEvents({ eventId, subEvents, counts, emailRef, refreshSubs, setActio
   const [retagMsg, setRetagMsg] = useState('');
   const [sending, setSending] = useState(false);
   const [sendMsg, setSendMsg] = useState('');
+  const [alertText, setAlertText] = useState('');
 
   async function create() {
     const n = name.trim();
     if (!n || busy) return;
-    if (!eventId) { setActionErr('No active event set — set optic_config.active_event_id first.'); return; }
+    if (!eventId) { setActionErr('No active event set. Set optic_config.active_event_id first.'); return; }
     setBusy(true); setActionErr('');
     haptic(14);
     const { data, error } = await SB.from('raider_sub_events')
@@ -610,7 +611,7 @@ function SubEvents({ eventId, subEvents, counts, emailRef, refreshSubs, setActio
   }
 
   async function retag() {
-    if (!eventId) { setActionErr('No active event set — set optic_config.active_event_id first.'); return; }
+    if (!eventId) { setActionErr('No active event set. Set optic_config.active_event_id first.'); return; }
     setRetagging(true); setRetagMsg(''); setActionErr('');
     haptic(16);
     const { data, error } = await SB.rpc('optic_retag_photos', { p_event_id: eventId });
@@ -621,20 +622,28 @@ function SubEvents({ eventId, subEvents, counts, emailRef, refreshSubs, setActio
     haptic([10, 30, 10]);
   }
 
-  // Batch push — one tap after RE-TAG, never per-photo (see BUILD_PLAN slice
-  // 9). Requires optic_push.sql + the optic-send-push edge fn deployed with
-  // VAPID secrets set; a clean "not configured" error here just means that
-  // hasn't happened yet, not that anything is broken.
+  // Batch push, one tap, never per-photo (see BUILD_PLAN slice 9). Custom
+  // message so this doubles as net control ("CCR over by the water jugs in
+  // 10 min"), not just a photo-alert ping. Empty box falls back to the
+  // default photo-alert text. Requires optic_push.sql + the optic-send-push
+  // edge fn deployed with VAPID secrets set; a clean "send failed" error here
+  // just means that hasn't happened yet, not that anything is broken.
   async function sendAlert() {
-    if (!eventId) { setActionErr('No active event set — set optic_config.active_event_id first.'); return; }
+    if (!eventId) { setActionErr('No active event set. Set optic_config.active_event_id first.'); return; }
     setSending(true); setSendMsg(''); setActionErr('');
     haptic(16);
+    const text = alertText.trim();
     const { data, error } = await SB.functions.invoke('optic-send-push', {
-      body: { event_id: eventId, title: 'OPTIC', body: 'New photos are up from the comp.' },
+      body: {
+        event_id: eventId,
+        title: 'OPTIC',
+        body: text || 'New photos are up from the comp.',
+      },
     });
     setSending(false);
-    if (error) { setActionErr(error.message || 'Send failed — is optic-send-push deployed with VAPID secrets set?'); haptic([8, 40, 8]); return; }
+    if (error) { setActionErr(error.message || 'Send failed. Is optic-send-push deployed with VAPID secrets set?'); haptic([8, 40, 8]); return; }
     setSendMsg(`SENT TO ${data?.sent ?? 0} DEVICE${data?.sent === 1 ? '' : 'S'}${data?.failed ? ` · ${data.failed} FAILED` : ''}`);
+    setAlertText('');
     haptic([10, 30, 10]);
   }
 
@@ -645,7 +654,7 @@ function SubEvents({ eventId, subEvents, counts, emailRef, refreshSubs, setActio
           className="lp-input"
           value={name}
           onChange={(e) => setName(e.target.value)}
-          placeholder="New sub-event  ·  e.g. Rope Bridge — Team 3"
+          placeholder="New sub-event, e.g. Rope Bridge, Team 3"
           onKeyDown={(e) => { if (e.key === 'Enter') create(); }}
         />
         <div className="lp-seg" role="group" aria-label="Team">
@@ -672,11 +681,25 @@ function SubEvents({ eventId, subEvents, counts, emailRef, refreshSubs, setActio
         {retagMsg && <span style={{ fontFamily: 'var(--mono)', fontSize: 10, letterSpacing: '0.08em', color: 'var(--gold)' }}>{retagMsg}</span>}
       </div>
 
-      <div style={{ padding: '8px 14px 0', display: 'flex', alignItems: 'center', gap: 10, flexWrap: 'wrap' }}>
-        <button className="lp-btn lp-btn--sm" onClick={sendAlert} disabled={sending || !eventId}>
-          {sending ? 'SENDING…' : 'SEND ALERT — NEW PHOTOS'}
-        </button>
-        {sendMsg && <span style={{ fontFamily: 'var(--mono)', fontSize: 10, letterSpacing: '0.08em', color: 'var(--gold)' }}>{sendMsg}</span>}
+      <div style={{ padding: '12px 14px 0' }}>
+        <div style={{ fontFamily: 'var(--mono)', fontSize: 9, letterSpacing: '0.1em', color: 'var(--faint)', marginBottom: 6 }}>
+          NET CONTROL, MESSAGE EVERYONE SUBSCRIBED (BLANK = &quot;NEW PHOTOS ARE UP&quot;)
+        </div>
+        <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+          <input
+            className="lp-input"
+            style={{ flex: '1 1 220px' }}
+            value={alertText}
+            onChange={(e) => setAlertText(e.target.value)}
+            placeholder='e.g. "CCR over by the water jugs in 10 min"'
+            maxLength={160}
+            onKeyDown={(e) => { if (e.key === 'Enter') sendAlert(); }}
+          />
+          <button className="lp-btn lp-btn--sm" onClick={sendAlert} disabled={sending || !eventId}>
+            {sending ? 'SENDING…' : 'SEND ALERT'}
+          </button>
+        </div>
+        {sendMsg && <div style={{ marginTop: 6, fontFamily: 'var(--mono)', fontSize: 10, letterSpacing: '0.08em', color: 'var(--gold)' }}>{sendMsg}</div>}
       </div>
 
       <div style={{ padding: '10px 14px 24px', display: 'flex', flexDirection: 'column', gap: 8 }}>

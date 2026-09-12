@@ -10,8 +10,8 @@
   --gold: #C9A961;
   --gold-bright: #E8C77A;
   --cream: #F4ECD8;
-  --mute: rgba(244, 236, 216, 0.62);
-  --faint: rgba(244, 236, 216, 0.40);
+  --mute: rgba(244, 236, 216, 0.82);
+  --faint: rgba(244, 236, 216, 0.58);
   --hair: rgba(201, 169, 97, 0.22);
   --hair-strong: rgba(201, 169, 97, 0.5);
   --ease-out: cubic-bezier(0.23, 1, 0.32, 1);

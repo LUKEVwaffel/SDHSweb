@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 const P = {
   ink: '#06101F', navy: '#142847', deep: '#0A1628',
   gold: '#C9A961', bright: '#E8C77A', cream: '#F4ECD8',
-  mute: 'rgba(244,236,216,0.6)', faint: 'rgba(244,236,216,0.4)',
+  mute: 'rgba(244,236,216,0.82)', faint: 'rgba(244,236,216,0.58)',
   hairline: 'rgba(201,169,97,0.25)',
 };
 

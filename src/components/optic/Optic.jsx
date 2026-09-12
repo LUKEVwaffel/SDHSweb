@@ -86,15 +86,13 @@ function OpticApp() {
       <div className="rhea-shell">
         <Header onHelp={() => setWalk(true)} />
         <BetaBanner />
-        <div className="rhea-wrap" style={{ paddingBottom: 0 }}>
-          <NotificationCard eventId={config.eventId} />
-        </div>
         {gate.loading ? (
           <div className="rhea-wrap"><div className="rhea-feed-msg">LOADING…</div></div>
         ) : !gate.open ? (
-          <OpticLocked opensAt={gate.opensAt} />
+          <OpticLocked opensAt={gate.opensAt} eventId={config.eventId} />
         ) : (
           <div className="rhea-wrap">
+            <NotificationCard eventId={config.eventId} />
             <UploadCard eventId={config.eventId} />
             <Feed
               photos={visiblePhotos}
@@ -158,7 +156,7 @@ function NotificationCard({ eventId }) {
       setState('done');
       posthog.capture('optic_push_subscribed');
     } catch (e) {
-      setErr(e?.message || 'Could not turn that on — try again.');
+      setErr(e?.message || 'Could not turn that on. Try again.');
       setState('idle');
     }
   }
@@ -172,7 +170,7 @@ function NotificationCard({ eventId }) {
     <div className="rhea-card2">
       <div className="rhea-card2-kick">PHOTO ALERTS</div>
       <p className="rhea-card2-p">
-        Turn these on and your phone tells you when new photos land — you
+        Turn these on and your phone tells you when new photos land. You
         don&apos;t have to keep checking.
       </p>
       {err && <p className="rhea-card2-err">{err}</p>}
@@ -188,14 +186,15 @@ function NotificationCard({ eventId }) {
 
 // Everyone already standalone (old /rhea shortcut) hits this the moment the
 // gate loads — it's the one thing on this screen that's actually actionable
-// today, so it renders above the countdown, not below it.
+// today, so it's the first card, above the feedback reveal.
 function ReinstallNotice() {
   return (
     <div className="rhea-card2" data-tone="alert">
       <div className="rhea-card2-kick">HAD OPTIC BEFORE?</div>
       <p className="rhea-card2-p">
-        This is a rebuild, not an update — the icon already on your home
-        screen won&apos;t pull the new version on its own. Delete it, then{' '}
+        This is a rebuild, not an update. The app already on your home
+        screen won&apos;t pull the new version on its own. Fully delete it,
+        not just remove it from your home screen, then{' '}
         {isIos() ? 'add this page to your home screen again from the share menu' : 'reinstall from your browser menu'}.
       </p>
     </div>
@@ -204,7 +203,7 @@ function ReinstallNotice() {
 
 // Countdown hold shown until the gate opens (scheduled time or Luke's manual
 // override). uses a local 1 Hz tick; useOpticGate flips `open` when it lands.
-function OpticLocked({ opensAt }) {
+function OpticLocked({ opensAt, eventId }) {
   const [now, setNow] = useState(() => Date.now());
   useEffect(() => {
     const t = setInterval(() => setNow(Date.now()), 1000);
@@ -228,13 +227,12 @@ function OpticLocked({ opensAt }) {
 
   return (
     <div className="rhea-lock">
-      <span className="rhea-lock-badge">BETA · SDHS JROTC</span>
       <OpticGlyph className="rhea-lock-glyph" />
       {paused ? (
         <>
           <h1 className="rhea-lock-h">The feed is <span className="accent">paused</span>.</h1>
           <p className="rhea-lock-p">
-            Photos are on hold for a moment. Keep this page open , it comes back
+            Photos are on hold for a moment. Keep this page open, it comes back
             on its own the second it reopens, no refresh needed.
           </p>
         </>
@@ -254,11 +252,14 @@ function OpticLocked({ opensAt }) {
           </div>
 
           <p className="rhea-lock-p">
-            Nothing to do until then — uploads and the feed both unlock at once.
+            Nothing to do until then. Uploads and the feed both unlock at once.
           </p>
 
-          {isStandalone() && <ReinstallNotice />}
-          <WhatsNew />
+          <div className="rhea-lock-cards">
+            {isStandalone() && <ReinstallNotice />}
+            <NotificationCard eventId={eventId} />
+            <WhatsNew />
+          </div>
 
           {!isStandalone() && (
             <p className="rhea-lock-hint">
@@ -272,7 +273,7 @@ function OpticLocked({ opensAt }) {
 }
 
 const NEW_FEATURES = [
-  'Filter by team — Male or Coed',
+  'Filter by team, Male or Coed',
   'The upload cap that killed people’s batches mid-upload is gone',
   'Photos sort by when they were actually taken, not when they finished uploading',
 ];
@@ -421,7 +422,7 @@ function UploadCard({ eventId }) {
         <div className="rhea-card-head">
           <div className="rhea-eyebrow">ADD YOUR PHOTOS</div>
           <div className="rhea-card-sub">
-            Uploads aren&apos;t open yet — check back shortly.
+            Uploads aren&apos;t open yet. Check back shortly.
           </div>
         </div>
       </section>

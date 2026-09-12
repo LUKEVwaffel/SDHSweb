@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 const P = {
   ink: '#06101F', navy: '#142847', deep: '#0A1628',
   gold: '#C9A961', bright: '#E8C77A', cream: '#F4ECD8',
-  mute: 'rgba(244,236,216,0.6)', faint: 'rgba(244,236,216,0.4)',
+  mute: 'rgba(244,236,216,0.82)', faint: 'rgba(244,236,216,0.58)',
   hair: 'rgba(201,169,97,0.25)',
 };
 
@@ -48,7 +48,7 @@ export default function OpticHeroStrip() {
           fontFamily: 'Inter, sans-serif', fontSize: 13.5, color: P.mute,
           flex: 1, minWidth: 200, lineHeight: 1.5,
         }}>
-          Live at the Spring Hill Raider Challenge — upload from your phone, seen by every family there.
+          Live at the Spring Hill Raider Challenge. Upload from your phone, seen by every family there.
         </span>
 
         <span className="optic-strip-cta" style={{

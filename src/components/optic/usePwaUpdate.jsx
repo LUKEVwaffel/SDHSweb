@@ -78,7 +78,7 @@ export function PwaUpdateBar({ show }) {
       }}
     >
       <span aria-hidden="true">↻</span>
-      UPDATE AVAILABLE — TAP TO REFRESH
+      UPDATE AVAILABLE, TAP TO REFRESH
     </button>
   );
 }

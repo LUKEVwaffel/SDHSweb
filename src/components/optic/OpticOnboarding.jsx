@@ -192,7 +192,7 @@ export default function OpticOnboarding({ onDone }) {
               <div className="rob-kicker">ONE MORE THING</div>
               <h1 className="rob-h">Used OPTIC <span className="accent">at the last comp?</span></h1>
               <p className="rob-sub">
-                OPTIC 2.0 is a rebuild, not an update — we&apos;ll tell you what
+                OPTIC 2.0 is a rebuild, not an update. We&apos;ll tell you what
                 that means for your home screen if so.
               </p>
               <div className="rob-choices">
@@ -217,16 +217,18 @@ export default function OpticOnboarding({ onDone }) {
           {step === 'reinstall' && (
             <>
               <div className="rob-kicker">OPTIC 2.0</div>
-              <h1 className="rob-h">First: <span className="accent">delete the old icon.</span></h1>
+              <h1 className="rob-h">Welcome to <span className="accent">OPTIC 2.0.</span></h1>
+              <p className="rob-sub" style={{ color: 'var(--cream)' }}>Made better by you.</p>
               <p className="rob-sub">
-                Rebuilt after the last comp based on the survey — team filters,
+                Rebuilt after the last comp based on the survey, team filters,
                 no more upload cap, photos sorted by when they were actually
-                taken. But it&apos;s a rebuild, not an update, so the old OPTIC
-                icon on your home screen won&apos;t catch up on its own.
+                taken. It&apos;s a rebuild, not an update, so the old OPTIC app
+                on your home screen won&apos;t catch up on its own.
               </p>
               <div className="rob-vis">
                 <span className="rob-vis-txt">
-                  DELETE THE OLD ICON NOW · YOU&apos;LL ADD THE NEW ONE AT THE END OF THIS
+                  FULLY DELETE THE OLD OPTIC APP NOW, NOT JUST THE HOME SCREEN ICON.
+                  YOU&apos;LL INSTALL THE NEW ONE AT THE END OF THIS
                 </span>
               </div>
             </>

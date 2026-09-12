@@ -51,20 +51,27 @@ export const raiderTeamLabel = (t) => RAIDER_TEAM_LABEL[t] || null;
  * @param {string} [opts.uploaderName]  free-text attribution (optional both paths)
  * @param {string|null} [opts.deviceFp] device fingerprint , parent path only,
  *        left null for Luke so his 50+ dump is never rate-limited
- * @param {string} [opts.eventId]  target event, from useOpticConfig() — falls
- *        (from useOpticConfig()). Required — no fallback to OPTIC_EVENT_ID:
- *        this must never silently reattach a new photo to a past comp.
+ * @param {string} opts.eventId  target event, from useOpticConfig(). Required,
+ *        no fallback to OPTIC_EVENT_ID: this must never silently reattach a
+ *        new photo to a past comp.
  * @param {string|null} [opts.takenAt]  ISO capture time read from EXIF before
  *        resize/HEIC-convert strips it (see lib/opticExif.js). null when the
  *        file carries no EXIF.
- * @param {'male'|'coed'|'both'|null} [opts.raiderTeam]  parent-picked team tag
+ * @param {'male'|'coed'|'both'|null} [opts.raiderTeam]  team tag, picked by a
+ *        parent or by Luke from the "current station" selector in LukeUpload
+ * @param {string|null} [opts.subEventId]  sub-event to tag at upload time
+ *        (Luke's "current station" picker), so a batch doesn't need a
+ *        separate LukePwa tagging pass afterward
+ * @param {boolean} [opts.publish]  Luke-only: true skips the staged review
+ *        step and publishes straight to the live feed. Ignored for parent
+ *        uploads, which are always public immediately regardless.
  * @returns {Promise<object>} the inserted photos row
  */
 export async function uploadOpticPhoto(file, {
   source, uploaderName = '', deviceFp = null, eventId,
-  takenAt = null, raiderTeam = null,
+  takenAt = null, raiderTeam = null, subEventId = null, publish = false,
 }) {
-  if (!eventId) throw new Error('No active event set — optic_config.active_event_id is missing.');
+  if (!eventId) throw new Error('No active event set. optic_config.active_event_id is missing.');
   const { full, thumb } = await resizeForUpload(file); // throws on RAW / unreadable
   const stamp = `${Date.now()}_${Math.random().toString(36).slice(2, 8)}`;
   const base = `${PHOTO_TEAM}/${eventId}/${stamp}`;
@@ -86,10 +93,11 @@ export async function uploadOpticPhoto(file, {
     uploader_name: uploaderName.trim() || null,
     uploader_fp: source === 'luke' ? null : deviceFp,
     source,
-    visibility: source === 'luke' ? 'staged' : 'public',
+    visibility: source === 'luke' ? (publish ? 'public' : 'staged') : 'public',
     upload_status: 'done',
     taken_at: takenAt || null,
     ...(raiderTeam ? { raider_team: raiderTeam } : {}),
+    ...(subEventId ? { sub_event_id: subEventId } : {}),
   }).select('*, raider_sub_events(name, team)').single();
   if (error) throw error;
   return data;
