@@ -1,7 +1,7 @@
 {
-  "name": "OPTIC — Rhea County Raider Comp",
-  "short_name": "OPTIC Rhea",
-  "description": "Photo curation for the Rhea County Raider Competition.",
+  "name": "OPTIC Console",
+  "short_name": "OPTIC Console",
+  "description": "Photo curation console for the SDHS JROTC comp.",
   "id": "/lukepwa",
   "start_url": "/lukepwa",
   "scope": "/lukepwa",

@@ -70,7 +70,8 @@ function OpticApp() {
 
   // 'both' (Luke's untagged-team-but-tagged-event shots) shows under either
   // team filter — it's the #1 ask from the OPTIC survey, so it stays simple:
-  // ALL / MALE / COED, no UNASSIGNED bucket yet.
+  // ALL / MALE / COED, no UNASSIGNED bucket yet. No separate FEMALE filter,
+  // SDHS fields two teams this comp (Male, Coed), no standalone Female team.
   const teamCounts = useMemo(() => ({
     all: photos.length,
     male: photos.filter((p) => p.raider_team === 'male' || p.raider_team === 'both').length,
@@ -130,11 +131,13 @@ function OpticApp() {
 function BetaBanner() {
   return (
     <div className="rhea-beta" role="note">
-      <span className="rhea-beta-tag">BETA</span>
-      <span>
-        OPTIC is a test run for the SDHS JROTC comp. We may ask you
-        for quick feedback afterward.
-      </span>
+      <div className="rhea-beta-in">
+        <span className="rhea-beta-tag">BETA</span>
+        <span className="rhea-beta-txt">
+          OPTIC is a test run for the SDHS JROTC comp. We may ask you
+          for quick feedback afterward.
+        </span>
+      </div>
     </div>
   );
 }
