@@ -16,6 +16,7 @@ import { isHeic, convertHeicToJpeg } from '../../lib/heicConvert';
 import { installOpticPwaHooks, isStandalone, isIos } from './pwa';
 import { usePwaUpdate, PwaUpdateBar } from './usePwaUpdate';
 import OpticOnboarding from './OpticOnboarding';
+import RemembrancePopup from '../RemembrancePopup';
 import posthog from '../../lib/posthog';
 import './optic.css';
 
@@ -84,6 +85,7 @@ function OpticApp() {
 
   return (
     <div className="rhea">
+      {gate.open && <RemembrancePopup />}
       <div className="rhea-shell">
         <Header onHelp={() => setWalk(true)} />
         <BetaBanner />
@@ -624,6 +626,83 @@ function Reel({ photos, index, likes, onIndex, onClose }) {
   const curRef = useRef(index);
   const [burstKey, setBurstKey] = useState(0);
   const lastTap = useRef(0);
+  const [zoom, setZoom] = useState({ scale: 1, x: 0, y: 0 });
+  const zoomRef = useRef(zoom);
+  const pinchRef = useRef({ active: false, startDist: 0, startScale: 1 });
+  const panRef = useRef({ active: false, startX: 0, startY: 0, baseX: 0, baseY: 0 });
+
+  useEffect(() => { zoomRef.current = zoom; }, [zoom]);
+  // Reset zoom whenever the current slide changes so the next photo always opens flat.
+  useEffect(() => { setZoom({ scale: 1, x: 0, y: 0 }); }, [cur]);
+
+  // Two-finger pinch-to-zoom on the current photo, with single-finger pan
+  // once zoomed. Native `scroll-snap-type: y mandatory` on .rhea-reel would
+  // otherwise treat a pinch as a scroll gesture and flip to the next/prev
+  // photo — cadets' #1 complaint. touchmove must be a non-passive listener
+  // to preventDefault the snap-scroll during an active pinch or zoomed pan.
+  useEffect(() => {
+    const el = reelRef.current;
+    if (!el) return undefined;
+
+    function dist(t0, t1) {
+      return Math.hypot(t0.clientX - t1.clientX, t0.clientY - t1.clientY);
+    }
+    function clampScale(s) {
+      return Math.min(4, Math.max(1, s));
+    }
+
+    function onTouchStart(e) {
+      if (e.touches.length === 2) {
+        pinchRef.current = {
+          active: true,
+          startDist: dist(e.touches[0], e.touches[1]),
+          startScale: zoomRef.current.scale,
+        };
+        panRef.current.active = false;
+      } else if (e.touches.length === 1 && zoomRef.current.scale > 1.02) {
+        panRef.current = {
+          active: true,
+          startX: e.touches[0].clientX,
+          startY: e.touches[0].clientY,
+          baseX: zoomRef.current.x,
+          baseY: zoomRef.current.y,
+        };
+      }
+    }
+
+    function onTouchMove(e) {
+      if (e.touches.length === 2 && pinchRef.current.active) {
+        e.preventDefault();
+        const d = dist(e.touches[0], e.touches[1]);
+        const scale = clampScale(pinchRef.current.startScale * (d / pinchRef.current.startDist));
+        setZoom((z) => ({ ...z, scale }));
+      } else if (e.touches.length === 1 && panRef.current.active) {
+        e.preventDefault();
+        const dx = e.touches[0].clientX - panRef.current.startX;
+        const dy = e.touches[0].clientY - panRef.current.startY;
+        setZoom((z) => ({ ...z, x: panRef.current.baseX + dx, y: panRef.current.baseY + dy }));
+      }
+    }
+
+    function onTouchEnd(e) {
+      if (e.touches.length < 2) pinchRef.current.active = false;
+      if (e.touches.length < 1) {
+        panRef.current.active = false;
+        setZoom((z) => (z.scale <= 1.02 ? { scale: 1, x: 0, y: 0 } : z));
+      }
+    }
+
+    el.addEventListener('touchstart', onTouchStart, { passive: true });
+    el.addEventListener('touchmove', onTouchMove, { passive: false });
+    el.addEventListener('touchend', onTouchEnd, { passive: true });
+    el.addEventListener('touchcancel', onTouchEnd, { passive: true });
+    return () => {
+      el.removeEventListener('touchstart', onTouchStart);
+      el.removeEventListener('touchmove', onTouchMove);
+      el.removeEventListener('touchend', onTouchEnd);
+      el.removeEventListener('touchcancel', onTouchEnd);
+    };
+  }, []);
 
   // Jump to the tapped photo on open + lock the page behind.
   useEffect(() => {
@@ -687,18 +766,32 @@ function Reel({ photos, index, likes, onIndex, onClose }) {
         <button className="rhea-lb-close" onClick={onClose} aria-label="Close">✕</button>
       </div>
 
-      <div className="rhea-reel" ref={reelRef} onScroll={onScroll}>
+      <div
+        className="rhea-reel"
+        ref={reelRef}
+        onScroll={onScroll}
+        style={zoom.scale > 1.02 ? { overflowY: 'hidden' } : undefined}
+      >
         {photos.map((p, i) => {
           const near = Math.abs(i - cur) <= 2;
           const who = feedAttribution(p);
           const chip = feedChip(p);
           const isLiked = likes.isLiked(p.id);
+          const isCur = i === cur;
           return (
             <div className="rhea-page" key={p.id} onClick={() => onPageTap(p)}>
               {near && (
                 <>
                   <div className="rhea-page-bg" style={{ backgroundImage: `url(${p.photo_url})` }} />
-                  <img className="rhea-page-img" src={p.photo_url} alt="" draggable="false" />
+                  <img
+                    className="rhea-page-img"
+                    src={p.photo_url}
+                    alt=""
+                    draggable="false"
+                    style={isCur && zoom.scale !== 1
+                      ? { transform: `translate(${zoom.x}px, ${zoom.y}px) scale(${zoom.scale})` }
+                      : undefined}
+                  />
                 </>
               )}
 
