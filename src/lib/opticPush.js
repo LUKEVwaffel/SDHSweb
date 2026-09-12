@@ -56,15 +56,32 @@ export async function subscribeToPush(eventId) {
 
   const json = sub.toJSON();
   const deviceFp = await getDeviceId();
-  const { error } = await SB.from('push_subscriptions').upsert({
+  const row = {
     endpoint: json.endpoint,
     p256dh: json.keys.p256dh,
     auth: json.keys.auth,
     device_fp: deviceFp,
     event_id: eventId,
     user_agent: navigator.userAgent,
-  }, { onConflict: 'endpoint' });
-  if (error) throw error;
+  };
+
+  // Plain insert, falling back to an explicit update on conflict — NOT
+  // .upsert()/ON CONFLICT DO UPDATE. Confirmed live against this project:
+  // a bare insert and a bare update against this table each work fine under
+  // RLS, but PostgREST's single-statement upsert (resolution=merge-
+  // duplicates) reliably 42501s ("new row violates row-level security
+  // policy") on the same table even with matching insert + update policies
+  // in place — some interaction between RLS policy evaluation and the
+  // INSERT..ON CONFLICT DO UPDATE path on this hosted instance, not a missing
+  // policy. Re-subscribing (same endpoint) is the only case this repeats for,
+  // so two plain requests costs nothing meaningful here.
+  const { error: insertErr } = await SB.from('push_subscriptions').insert(row);
+  if (insertErr) {
+    if (insertErr.code !== '23505') throw insertErr; // not a duplicate-endpoint conflict
+    const { error: updateErr } = await SB.from('push_subscriptions')
+      .update(row).eq('endpoint', row.endpoint);
+    if (updateErr) throw updateErr;
+  }
 
   markPushDecided('granted');
   return 'granted';

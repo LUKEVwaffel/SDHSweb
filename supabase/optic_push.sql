@@ -28,18 +28,31 @@ create index if not exists push_subscriptions_event_idx on public.push_subscript
 alter table public.push_subscriptions enable row level security;
 
 drop policy if exists push_subscriptions_insert on public.push_subscriptions;
+drop policy if exists push_subscriptions_update on public.push_subscriptions;
 drop policy if exists push_subscriptions_delete_own on public.push_subscriptions;
 drop policy if exists push_subscriptions_admin_read on public.push_subscriptions;
 
 -- Anyone can subscribe — same trust level as posting a parent photo (no login).
 create policy push_subscriptions_insert on public.push_subscriptions
-  for insert with check (true);
+  for insert to public with check (true);
+
+-- Re-subscribing (same endpoint) needs an UPDATE policy too — but the client
+-- deliberately does NOT use .upsert()/ON CONFLICT DO UPDATE (see
+-- lib/opticPush.js): confirmed live on this project that a single-statement
+-- upsert reliably 42501s ("new row violates row-level security policy") on
+-- this table even with matching insert + update policies in place — some
+-- interaction between RLS evaluation and INSERT..ON CONFLICT DO UPDATE on
+-- this hosted instance, not a missing policy. The client does a plain insert,
+-- and on a 23505 (duplicate endpoint) falls back to a plain update instead —
+-- both verified working individually. This policy backs that fallback path.
+create policy push_subscriptions_update on public.push_subscriptions
+  for update to public using (true) with check (true);
 
 -- Unsubscribe. RLS cannot see the caller's device_fp (no auth) — same trust
 -- model as rhea_photo_likes_delete, the client always scopes its own delete
 -- to `.eq('device_fp', fp)`.
 create policy push_subscriptions_delete_own on public.push_subscriptions
-  for delete using (true);
+  for delete to public using (true);
 
 create policy push_subscriptions_admin_read on public.push_subscriptions
   for select to authenticated using (public.is_admin());
