@@ -612,7 +612,7 @@ function FeedItem({ photo, pos, liked, likeCount, onLike, onOpen }) {
         <span className="rhea-who" data-luke={isLuke}>{who}</span>
         {chip && <span className="rhea-chip">{chip}</span>}
         <time className="rhea-time">
-          {new Date(photo.created_at).toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' })}
+          {new Date(photo.taken_at || photo.created_at).toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' })}
         </time>
       </figcaption>
     </figure>
@@ -827,7 +827,7 @@ function Reel({ photos, index, likes, onIndex, onClose }) {
                 <div className="rhea-page-line">
                   {chip && <span className="rhea-chip">{chip}</span>}
                   <span className="rhea-time">
-                    {new Date(p.created_at).toLocaleString([], { month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' })}
+                    {new Date(p.taken_at || p.created_at).toLocaleString([], { month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' })}
                   </span>
                 </div>
               </div>

@@ -121,7 +121,7 @@ export default function RemembrancePopup() {
             fontFamily: 'Inter, sans-serif', fontSize: 14.5, lineHeight: 1.7,
             color: P.mute, maxWidth: 460, margin: '0 auto 14px',
           }}>
-            We remember the nearly 3,000 lives lost on September 11th, 2001 — and we
+            We remember the nearly 3,000 lives lost on September 11th, 2001, and we
             honor every service member who answered the call in the years since to
             defend the freedoms we hold today.
           </p>
@@ -130,7 +130,7 @@ export default function RemembrancePopup() {
             fontFamily: 'Inter, sans-serif', fontSize: 14.5, lineHeight: 1.7,
             color: P.mute, maxWidth: 460, margin: '0 auto 26px',
           }}>
-            To every veteran and every family who sacrificed for this country — thank
+            To every veteran and every family who sacrificed for this country, thank
             you. Our nation is stronger, safer, and freer because of you.
           </p>
 
