@@ -5,13 +5,55 @@
 // the browser uninstalled or the user cleared data) are deleted so the table
 // stays clean without a separate sweep job.
 //
+// Self-contained (no ../_shared imports) so this can be pasted directly into
+// the Supabase Dashboard's function editor if the local CLI's bundler is
+// unavailable — see supabase/functions/README_DEPLOY.md.
+//
 // Deploy WITH jwt (default) — this is an authenticated admin action, unlike
 // the pre-auth ball-* notify functions:
 //   supabase functions deploy optic-send-push
 //   supabase secrets set VAPID_PUBLIC_KEY=... VAPID_PRIVATE_KEY=... VAPID_SUBJECT=mailto:you@example.com
 import webpush from "npm:web-push@3";
-import { json, preflight } from "../_shared/http.ts";
-import { getCaller, serviceClient } from "../_shared/supabase.ts";
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+
+const cors = {
+  "Access-Control-Allow-Origin": "*",
+  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
+  "Access-Control-Allow-Methods": "POST, OPTIONS",
+};
+const json = (body: unknown, status = 200) =>
+  new Response(JSON.stringify(body), { status, headers: { ...cors, "Content-Type": "application/json" } });
+const preflight = () => new Response("ok", { headers: cors });
+
+function serviceClient() {
+  return createClient(
+    Deno.env.get("SUPABASE_URL")!,
+    Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!,
+    { auth: { persistSession: false, autoRefreshToken: false } },
+  );
+}
+
+// Same shape as _shared/supabase.ts's getCaller: identifies the signed-in
+// caller from the Authorization bearer token and checks admin_roles. Fails
+// closed (null) on any missing token, invalid session, or lookup error.
+async function getCaller(req: Request): Promise<{ email: string; role: string | null } | null> {
+  const authHeader = req.headers.get("Authorization");
+  if (!authHeader) return null;
+
+  const scoped = createClient(
+    Deno.env.get("SUPABASE_URL")!,
+    Deno.env.get("SUPABASE_ANON_KEY")!,
+    { global: { headers: { Authorization: authHeader } }, auth: { persistSession: false } },
+  );
+  const { data: { user } } = await scoped.auth.getUser();
+  const email = user?.email?.toLowerCase();
+  if (!email) return null;
+
+  const svc = serviceClient();
+  const { data, error } = await svc.from("admin_roles").select("role").eq("email", email).maybeSingle();
+  if (error) { console.error("optic-send-push admin_roles lookup", error); return null; }
+  return { email, role: data?.role ?? null };
+}
 
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return preflight();
