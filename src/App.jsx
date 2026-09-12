@@ -13,7 +13,7 @@ import EventSpotlightBand from './components/EventSpotlightBand';
 import RaftingPhotoBand from './components/RaftingPhotoBand';
 import OpticHeroStrip from './components/OpticHeroStrip';
 import OpticPromoBand from './components/OpticPromoBand';
-import OpticPopup from './components/OpticPopup';
+// import OpticPopup from './components/OpticPopup'; — see BallSignupPopup note above.
 import HomeNewsletterBand from './components/HomeNewsletterBand';
 import Footer from './components/Footer';
 import TabPlaceholder from './components/TabPlaceholder';
@@ -44,7 +44,12 @@ import EventFeedbackForm from './components/EventFeedbackForm';
 import EventFeedbackPicker from './components/EventFeedbackPicker';
 import OpticSurvey from './components/OpticSurvey';
 import BallLanding from './components/ball/BallLanding';
-import BallSignupPopup from './components/ball/BallSignupPopup';
+// BallSignupPopup + OpticPopup suppressed 2026-09-12 so the Spring Hill
+// Raider Congrats popup (CongratsPopup, always-on) is the only homepage
+// takeover for now instead of queuing behind two more nag popups. Files kept
+// on disk; re-add these imports + their <Route>-sibling renders below to
+// bring them back.
+// import BallSignupPopup from './components/ball/BallSignupPopup';
 import BallSignupWizard from './components/ball/signup/BallSignupWizard';
 import BallGuestVerify from './components/ball/BallGuestVerify';
 import BallOpsPortal from './components/ball/ops/BallOpsPortal';
@@ -123,10 +128,8 @@ export default function App() {
         <Route path="/" element={(
           <>
             {/* Homepage-only takeovers — mounted here, never on a standalone route.
-                OpticPopup defers to BallSignupPopup so the two full-screen
-                takeovers never stack (see OpticPopup.jsx). */}
-            <BallSignupPopup />
-            <OpticPopup />
+                BallSignupPopup + OpticPopup suppressed for now (see imports
+                above) so CongratsPopup is the only one that fires. */}
             <Hero />
             <OpticHeroStrip />
             {/* "Picture of the Comp" vote band taken down 2026-09-08 — restore <CompPhotoBand /> to bring it back. */}

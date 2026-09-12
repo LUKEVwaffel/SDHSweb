@@ -2,7 +2,7 @@
 // (src/components/CongratsPopup.jsx). Bump the version suffix to re-surface it
 // to every device after the next competition. Dismissing or clicking through
 // only silences the current version.
-const LS_KEY = 'tb_congrats_popup_seen_v1';
+const LS_KEY = 'tb_congrats_popup_seen_v2';
 
 export function hasSeenCongrats() {
   try {

@@ -3,7 +3,7 @@ import { useTvDailySettings } from '../../hooks/useTvDailySettings.js';
 import { useStayAwake } from '../../hooks/useStayAwake.js';
 import TvStandardLayout from './TvStandardLayout.jsx';
 import TvRaftingScreen from './TvRaftingScreen.jsx';
-import SlideNeverForget from './range/slides/SlideNeverForget.jsx';
+import TvCongratsScreen from './TvCongratsScreen.jsx';
 import TvPreviewBadge from './TvPreviewBadge.jsx';
 import TvRefreshNotice from './TvRefreshNotice.jsx';
 
@@ -13,10 +13,11 @@ import TvRefreshNotice from './TvRefreshNotice.jsx';
 // one-line change.
 const TAKEOVER_MODE = true;
 
-// 2026-09-11 only: /tv shows the Never Forget tribute graphic instead of the
-// rafting takeover. Same SlideNeverForget component Range uses in rotation.
-// Flip to false (or delete) to restore the rafting takeover.
-const SEPT_11_OUTSIDE_OVERRIDE = true;
+// Spring Hill comp (2026-09-12) result takeover: /tv shows the Raider Team
+// Congrats board instead of the rafting takeover. 9/11's Never Forget
+// override lived here through 09-11; that's done for the year, replaced with
+// this. Flip to false (or delete) to restore the rafting takeover.
+const RAIDER_CONGRATS_OUTSIDE_OVERRIDE = true;
 
 /**
  * Outside — the original public kiosk, mounted at /tv. Thin per-screen
@@ -37,8 +38,8 @@ export default function TvKiosk() {
 
   return (
     <>
-      {SEPT_11_OUTSIDE_OVERRIDE ? (
-        <SlideNeverForget />
+      {RAIDER_CONGRATS_OUTSIDE_OVERRIDE ? (
+        <TvCongratsScreen />
       ) : TAKEOVER_MODE ? (
         <TvRaftingScreen />
       ) : (

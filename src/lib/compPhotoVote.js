@@ -33,6 +33,7 @@ export async function fetchCompPoll() {
   const { data: poll, error: pollErr } = await SB
     .from('comp_photo_polls')
     .select('*')
+    .eq('event_id', COMP_POLL_EVENT_ID)
     .order('created_at', { ascending: false })
     .limit(1)
     .maybeSingle();

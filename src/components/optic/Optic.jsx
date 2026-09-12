@@ -20,7 +20,6 @@ import {
 } from './pwa';
 import { usePwaUpdate, PwaUpdateBar } from './usePwaUpdate';
 import OpticOnboarding from './OpticOnboarding';
-import RemembrancePopup from '../RemembrancePopup';
 import posthog from '../../lib/posthog';
 import './optic.css';
 
@@ -89,7 +88,6 @@ function OpticApp() {
 
   return (
     <div className="rhea">
-      {gate.open && <RemembrancePopup />}
       <div className="rhea-shell">
         <Header onHelp={() => setWalk(true)} />
         <BetaBanner />

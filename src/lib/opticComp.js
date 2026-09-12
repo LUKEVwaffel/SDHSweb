@@ -8,9 +8,11 @@ import { adminDisplayName } from './admins';
 // below is only the pre-config fallback (and what legacy dormant surfaces —
 // RaiderCarousel, TvCongratsScreen, compPhotoVote, raiderCompGallery — still
 // import directly; those aren't part of the live feed and stay pinned to this
-// one comp until they're revisited).
-export const OPTIC_EVENT_ID = 'e8a305fe-86cf-4092-a580-5865423271b9';
-export const OPTIC_EVENT_TITLE = 'Spring Hill HS Raider Challenge';
+// one comp until they're revisited). Bumped 2026-09-12 from Rhea County ->
+// Spring Hill; was previously left pointed at Rhea County's id with a stale
+// "Spring Hill" title comment — that mismatch is fixed now, id and title match.
+export const OPTIC_EVENT_ID = 'fa96f288-3b72-484b-bca3-e69c2f5d0ca3';
+export const OPTIC_EVENT_TITLE = 'Spring Hill Raider Competition';
 
 const BUCKET = 'team-photos';
 // photos.team MUST stay 'raiders' , the photos_require_posted_event trigger

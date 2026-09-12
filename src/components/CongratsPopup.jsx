@@ -124,6 +124,7 @@ export default function CongratsPopup() {
           }}>
             {CONGRATS_MEET.kicker} at {CONGRATS_MEET.label}. To every cadet who competed and every
             family in the stands — thank you.
+            {CONGRATS_MEET.note && <><br />{CONGRATS_MEET.note}.</>}
           </p>
 
           <div style={{ display: 'grid', gap: 8, marginBottom: 26 }}>

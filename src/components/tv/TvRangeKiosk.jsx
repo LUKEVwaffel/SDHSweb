@@ -18,13 +18,15 @@ import TvPreviewBadge from './TvPreviewBadge.jsx';
 import TvRefreshNotice from './TvRefreshNotice.jsx';
 import TvRangeClock from './TvRangeClock.jsx';
 
-// 2026-09-11 only: rotation shows the Never Forget slide + Ball announcements
-// only (no rafting takeover, no full rotation deck). Flip to false to
-// restore normal rotation (RANGE_TAKEOVER_MODE below).
-const SEPT_11_ROTATION_OVERRIDE = true;
-const SEPT_11_SLIDES = [
-  { id: 'sept11-never-forget', type: 'neverForget', durationSec: 15, config: {} },
-  { id: 'sept11-announcements', type: 'announcements', durationSec: 15, config: {} },
+// Spring Hill comp (2026-09-12) result takeover: rotation shows the Raider
+// Team Congrats slide + Ball announcements only (no rafting takeover, no full
+// rotation deck). 9/11's Never Forget override lived here through 09-11;
+// that's done for the year, replaced with this. Flip to false to restore
+// normal rotation (RANGE_TAKEOVER_MODE below).
+const RAIDER_CONGRATS_ROTATION_OVERRIDE = true;
+const RAIDER_CONGRATS_SLIDES = [
+  { id: 'raider-congrats', type: 'raiderCongrats', durationSec: 30, config: {} },
+  { id: 'raider-congrats-announcements', type: 'announcements', durationSec: 15, config: {} },
 ];
 
 /**
@@ -89,10 +91,10 @@ export default function TvRangeKiosk() {
       break;
     case 'rotation':
     default:
-      phaseContent = SEPT_11_ROTATION_OVERRIDE
+      phaseContent = RAIDER_CONGRATS_ROTATION_OVERRIDE
         ? (
           <TvRangeSlideshowScreen
-            slides={SEPT_11_SLIDES}
+            slides={RAIDER_CONGRATS_SLIDES}
             announcements={notices.filter((n) => n.category === 'announcement')}
             staffNotes={[]}
             events={[]}

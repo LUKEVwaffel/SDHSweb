@@ -4,8 +4,9 @@ import { P, mono, oswald, fs, sp } from '../../theme';
 import { Btn, Card, Label, PanelHeader, EmptyState } from '../../shared/ui';
 import { COMP_POLL_EVENT_ID, COMP_POLL_EVENT_TITLE } from '../../../../lib/compPhotoVote';
 
-// DISPATCH → Photos → PICTURE OF THE COMP. Luke sifts his Rhea County comp set
-// and marks up to 15 finalists for the public /vote ballot, then opens voting
+// DISPATCH → Photos → PICTURE OF THE COMP. Luke sifts his comp set (whichever
+// event COMP_POLL_EVENT_ID/opticComp.js points at) and marks up to 15
+// finalists for the public /vote ballot, then opens voting
 // with a close time (default: this Friday 20:00), watches the tally, and
 // declares the winner (which publishes it to the home band + /tv congrats).
 //
@@ -62,7 +63,8 @@ export default function CompPhotoBallot() {
 
   const load = useCallback(async () => {
     const [{ data: pollRow }, { data: photos }] = await Promise.all([
-      SB.from('comp_photo_polls').select('*').order('created_at', { ascending: false }).limit(1).maybeSingle(),
+      SB.from('comp_photo_polls').select('*').eq('event_id', COMP_POLL_EVENT_ID)
+        .order('created_at', { ascending: false }).limit(1).maybeSingle(),
       SB.from('photos')
         .select('id, photo_url, thumb_url, uploader_name, created_at, raider_team, sub_event_id, raider_sub_events(name)')
         .eq('event_id', COMP_POLL_EVENT_ID)

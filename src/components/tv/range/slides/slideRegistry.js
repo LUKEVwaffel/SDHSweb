@@ -69,7 +69,7 @@ export const SLIDE_TYPES = {
   },
   raiderCongrats: {
     label: 'Raider Team Congrats',
-    blurb: 'Full-screen Rhea County podium takeover with the live OPTIC photo carousel — the same board /tv shows.',
+    blurb: 'Full-screen comp podium takeover with the live OPTIC photo carousel — the same board /tv shows.',
     defaultDurationSec: 30,
     defaultConfig: {},
   },

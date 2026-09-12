@@ -16,9 +16,9 @@ const SEASON = {
   // standings) and would miss event-level podiums like the Co-Ed CCR win. Keep
   // these in sync with the meet log below.
   summary: [
-    { label: 'MEETS', value: '1' },
-    { label: 'TROPHIES', value: '5', sub: 'podium placements' },
-    { label: 'FIRST-PLACE FINISHES', value: '1', sub: 'CCR · Co-Ed' },
+    { label: 'MEETS', value: '2' },
+    { label: 'TROPHIES', value: '9', sub: 'podium placements' },
+    { label: 'FIRST-PLACE FINISHES', value: '2', sub: 'CCR · Co-Ed / OC · Co-Ed' },
     { label: 'BEST DIVISION FINISH', value: '2nd', sub: 'Male · overall' },
   ],
   // Add one object per meet as results come in:
@@ -30,6 +30,19 @@ const SEASON = {
   //     events: [{ name: 'One-Rope Bridge', result: '3:42', note: '1st' }, ...],
   //   }
   meets: [
+    {
+      name: 'Spring Hill Raider Competition',
+      date: 'Sep 12, 2026',
+      location: 'Spring Hill, TN',
+      teams: [
+        { team: 'MALE', place: '3rd' }, // Overall Male Division
+      ],
+      events: [
+        { name: 'Obstacle Course · Co-Ed', result: '1st' },
+        { name: 'One Rope Bridge · Male', result: '2nd' },
+        { name: 'Physical Team Test (PTT) · Male', result: '3rd' },
+      ],
+    },
     {
       name: 'Rhea County Raider Competition',
       date: 'Aug 29, 2026',

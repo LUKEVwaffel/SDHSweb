@@ -81,8 +81,8 @@ export default function TvCongratsScreen() {
   // carousel. Until then the screen is unchanged (winner === null).
   const { winner } = useCompPhotoPoll();
 
-  // Right column pulls the archived OPTIC feed for the Rhea County comp this
-  // screen is celebrating — every published photo from THAT event, Luke's AND
+  // Right column pulls the archived OPTIC feed for the comp this screen is
+  // celebrating — every published photo from THAT event, Luke's AND
   // the parents', not just the hardcoded CONGRATS_PHOTOS placeholders. Pinned
   // to OPTIC_EVENT_ID (not useOpticConfig's live active_event_id) on purpose:
   // this screen's subject is a specific past result, so it must never follow
@@ -159,6 +159,15 @@ export default function TvCongratsScreen() {
           }}>
             {CONGRATS_MEET.label} · {CONGRATS_MEET.date}
           </div>
+
+          {CONGRATS_MEET.note && (
+            <div className="congrats-rise" style={{
+              marginTop: sp[2], animationDelay: '180ms',
+              fontFamily: inter, fontSize: fs.sm, color: P.mute, fontStyle: 'italic',
+            }}>
+              {CONGRATS_MEET.note}
+            </div>
+          )}
 
           <div style={{ marginTop: sp[10], borderBottom: `1px solid ${P.hair}` }}>
             {CONGRATS_TROPHIES.map((trophy, i) => (
