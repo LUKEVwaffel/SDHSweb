@@ -149,6 +149,18 @@ export function markWalkthroughOptic() {
   try { localStorage.setItem(OPTIC_WALKTHROUGH_KEY, '1'); } catch { /* private mode */ }
 }
 
+const OPTIC_INSTALL_DISMISSED_KEY = 'optic_install_dismissed';
+
+/** True once the visitor has dismissed the "add to home screen" nudge in the feed. */
+export function hasInstallDismissedOptic() {
+  try { return localStorage.getItem(OPTIC_INSTALL_DISMISSED_KEY) === '1'; } catch { return false; }
+}
+
+/** Mark the "add to home screen" nudge dismissed on this device. */
+export function markInstallDismissedOptic() {
+  try { localStorage.setItem(OPTIC_INSTALL_DISMISSED_KEY, '1'); } catch { /* private mode */ }
+}
+
 // ── likes ─────────────────────────────────────────────────────────────────
 // One like per photo per device. `deviceFp` is the same FingerprintJS +
 // localStorage-nonce string used for upload rate-limiting. The visible count

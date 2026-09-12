@@ -9,11 +9,15 @@ import {
   uploadOpticPhoto, isAllowedImage, OPTIC_ACCEPT_ATTR, REJECT_MESSAGE,
   feedAttribution, feedChip, downloadPhoto,
   hasOnboardedOptic, hasWalkthroughOptic, markWalkthroughOptic,
+  hasInstallDismissedOptic, markInstallDismissedOptic,
 } from '../../lib/opticComp';
 import { readTakenAt } from '../../lib/opticExif';
 import { pushSupported, hasDecidedPush, markPushDecided, subscribeToPush } from '../../lib/opticPush';
 import { isHeic, convertHeicToJpeg } from '../../lib/heicConvert';
-import { installOpticPwaHooks, isStandalone, isIos } from './pwa';
+import {
+  installOpticPwaHooks, isStandalone, isIos,
+  hasInstallPrompt, onInstallPromptChange, promptInstall,
+} from './pwa';
 import { usePwaUpdate, PwaUpdateBar } from './usePwaUpdate';
 import OpticOnboarding from './OpticOnboarding';
 import RemembrancePopup from '../RemembrancePopup';
@@ -95,6 +99,7 @@ function OpticApp() {
           <OpticLocked opensAt={gate.opensAt} eventId={config.eventId} />
         ) : (
           <div className="rhea-wrap">
+            <InstallNudge />
             <NotificationCard eventId={config.eventId} />
             <UploadCard eventId={config.eventId} />
             <Feed
@@ -140,6 +145,61 @@ function BetaBanner() {
           for quick feedback afterward.
         </span>
       </div>
+    </div>
+  );
+}
+
+// Catches the people who skipped or breezed through onboarding without
+// installing. This matters beyond the home-screen icon itself: push alerts
+// (NotificationCard below) need `PushManager`, which iOS Safari only exposes
+// once the page is standalone, and most visitors never install — so without
+// this nudge they silently never get offered alerts at all. Lives in the
+// main feed (not just the locked/countdown screen) since that's where an
+// already-onboarded-but-not-installed visitor actually spends their time.
+function InstallNudge() {
+  const [dismissed, setDismissed] = useState(hasInstallDismissedOptic);
+  const [canPrompt, setCanPrompt] = useState(hasInstallPrompt);
+
+  useEffect(() => onInstallPromptChange((e) => setCanPrompt(!!e)), []);
+
+  if (isStandalone() || dismissed) return null;
+
+  function dismiss() {
+    markInstallDismissedOptic();
+    setDismissed(true);
+  }
+
+  async function install() {
+    const outcome = await promptInstall();
+    if (outcome === 'accepted') dismiss();
+  }
+
+  return (
+    <div className="rhea-card2" data-tone="alert">
+      <div className="rhea-card2-kick">GET THE APP</div>
+      <p className="rhea-card2-p">
+        You&apos;re viewing this in the browser. Add OPTIC to your home screen
+        for the full-screen app and photo alerts — browser tabs can&apos;t
+        send those.
+      </p>
+      {isIos() ? (
+        <p className="rhea-card2-p" style={{ marginTop: -4 }}>
+          Tap the ⬆ <b>Share</b> button in your browser bar, then{' '}
+          <b>Add to Home Screen</b>.
+        </p>
+      ) : (
+        <div className="rhea-card2-row">
+          {canPrompt && (
+            <button className="rhea-btn" style={{ flex: 1 }} onClick={install}>ADD TO HOME SCREEN</button>
+          )}
+          <button className="rhea-btn rhea-btn--ghost" onClick={dismiss}>NOT NOW</button>
+        </div>
+      )}
+      {isIos() && (
+        <div className="rhea-card2-row">
+          <button className="rhea-btn rhea-btn--ghost" onClick={dismiss}>NOT NOW</button>
+        </div>
+      )}
     </div>
   );
 }
@@ -711,6 +771,27 @@ function Reel({ photos, index, likes, onIndex, onClose }) {
     const prev = document.body.style.overflow;
     document.body.style.overflow = 'hidden';
     return () => { document.body.style.overflow = prev; };
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+
+  // A PWA has no browser chrome, so a "swipe back" gesture (iOS edge swipe /
+  // Android back gesture) has nothing to navigate to except the OS — the OS
+  // reads that as "leave the app". Push a throwaway history entry the instant
+  // the reel opens so that gesture just pops it (closing the reel) instead of
+  // kicking the visitor out. If the reel closes some other way (X button,
+  // Escape, swiping past the last photo), consume that entry ourselves so a
+  // *later* real back gesture doesn't land on a dead pushState.
+  useEffect(() => {
+    let closedByPop = false;
+    window.history.pushState({ opticReel: true }, '');
+    function onPopState() {
+      closedByPop = true;
+      onClose();
+    }
+    window.addEventListener('popstate', onPopState);
+    return () => {
+      window.removeEventListener('popstate', onPopState);
+      if (!closedByPop) window.history.back();
+    };
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   useEffect(() => {

@@ -75,3 +75,45 @@ export function isStandalone() {
 export function isIos() {
   return /iphone|ipad|ipod/i.test(window.navigator.userAgent) && !window.MSStream;
 }
+
+// ── shared install-prompt capture ───────────────────────────────────────
+// `beforeinstallprompt` fires once, early, and only ever hands you the event
+// once — OpticOnboarding listens for it locally, but if the visitor skips
+// onboarding before Chrome fires it (or comes back later, already onboarded)
+// nobody is left listening. This module-scope singleton captures it once on
+// page load and keeps it around so any component mounted later — like an
+// install nudge shown in the main feed — can still trigger the native prompt.
+let deferredInstallPrompt = null;
+const installPromptListeners = new Set();
+
+if (typeof window !== 'undefined') {
+  window.addEventListener('beforeinstallprompt', (e) => {
+    e.preventDefault();
+    deferredInstallPrompt = e;
+    installPromptListeners.forEach((cb) => cb(e));
+  });
+  window.addEventListener('appinstalled', () => {
+    deferredInstallPrompt = null;
+    installPromptListeners.forEach((cb) => cb(null));
+  });
+}
+
+/** True once the browser has offered an installable-app prompt we can trigger on demand. */
+export function hasInstallPrompt() {
+  return !!deferredInstallPrompt;
+}
+
+/** Subscribe to install-prompt availability changes. Returns an unsubscribe fn. */
+export function onInstallPromptChange(cb) {
+  installPromptListeners.add(cb);
+  return () => installPromptListeners.delete(cb);
+}
+
+/** Trigger the captured native install prompt. Returns 'accepted' | 'dismissed' | null. */
+export async function promptInstall() {
+  if (!deferredInstallPrompt) return null;
+  deferredInstallPrompt.prompt();
+  const { outcome } = await deferredInstallPrompt.userChoice;
+  if (outcome === 'accepted') deferredInstallPrompt = null;
+  return outcome;
+}
