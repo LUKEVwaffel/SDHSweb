@@ -8,6 +8,22 @@ function money(n) {
   return n == null ? null : `$${Number(n).toFixed(Number.isInteger(Number(n)) ? 0 : 2)}`;
 }
 
+// Small status pill — same tone language as BallOverviewTab's chip() (own
+// copy here since these are two separate portals, kept self-contained).
+function chip(tone) {
+  const map = {
+    green: ['var(--rv-green)', 'var(--rv-green-soft)'],
+    accent: ['var(--rv-accent)', 'var(--rv-accent-soft)'],
+    mute: ['var(--rv-faint)', 'transparent'],
+  };
+  const [c, bg] = map[tone] || map.mute;
+  return {
+    fontFamily: "'JetBrains Mono', monospace", fontSize: 10, letterSpacing: '0.06em',
+    textTransform: 'uppercase', padding: '3px 9px', borderRadius: 999, color: c,
+    background: bg, border: `1px solid ${c}`, whiteSpace: 'nowrap',
+  };
+}
+
 function csvCell(v) {
   if (v == null) return '';
   const s = String(v);
@@ -82,6 +98,7 @@ export default function BallOpsPortal() {
   const [confirmTarget, setConfirmTarget] = useState(null); // { id, field }
   const [q, setQ] = useState('');
   const [flash, setFlash] = useState(null); // { tone: 'ok' | 'err', msg }
+  const [openId, setOpenId] = useState(null); // signup id currently drilled into, or null for the lookup list
 
   useEffect(() => {
     if (!flash || flash.tone === 'err') return undefined;
@@ -126,7 +143,7 @@ export default function BallOpsPortal() {
 
   async function signOut() {
     await SB.auth.signOut();
-    setRows([]); setGuestsBySignup({});
+    setRows([]); setGuestsBySignup({}); setOpenId(null); setConfirmTarget(null);
     setPhase('login');
   }
 
@@ -216,78 +233,85 @@ export default function BallOpsPortal() {
   const totalVerified = rows.filter((r) => r.status === 'fully_verified').length;
   const totalGuests = rows.filter((r) => guestsBySignup[r.id]).length;
 
+  // Detail mode: a person clicked from the lookup list. Options (the toggle
+  // buttons) live only here — the list itself stays compact.
+  const openRow = openId ? rows.find((r) => r.id === openId) : null;
+  function openPerson(id) { setConfirmTarget(null); setOpenId(id); }
+  function backToList() { setConfirmTarget(null); setOpenId(null); }
+
   return shell(
     <div>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
         <button className="rv-link" style={{ margin: 0 }} onClick={() => { window.location.href = '/review'; }}>&lsaquo; Switch portal</button>
         <button className="rv-link" style={{ margin: 0 }} onClick={signOut}>Sign out</button>
       </div>
-      <div className="bp-head">
-        <h1 className="bp-title">Ball Payments</h1>
-        <div className="bp-head-actions">
-          <button className="bp-refresh" onClick={() => exportCsv(rows, guestsBySignup)}>Export CSV</button>
-          <button className="bp-refresh" onClick={loadAll}>Refresh</button>
-        </div>
-      </div>
 
-      <div className="bp-stats">
-        <span className={`bp-stat ${needsAction.length ? 'is-alert' : ''}`}><b>{needsAction.length}</b> need action</span>
-        <span className="bp-stat"><b>{awaiting.length}</b> awaiting guest</span>
-        <span className={`bp-stat ${done.length === totalVerified && totalVerified > 0 ? 'is-done' : ''}`}><b>{done.length}</b> settled</span>
-        <span className="bp-stat"><b>{totalGuests}</b> guests</span>
-      </div>
-
-      {flash && (
-        <div
-          role="status"
-          style={{
-            display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12,
-            border: `1px solid ${flash.tone === 'err' ? 'var(--rv-red)' : 'var(--rv-green)'}`,
-            background: flash.tone === 'err' ? 'var(--rv-red-soft)' : 'var(--rv-green-soft)',
-            color: flash.tone === 'err' ? 'var(--rv-red)' : 'var(--rv-green)',
-            borderRadius: 'var(--rv-radius)', padding: '10px 14px', fontSize: 13, marginBottom: 18,
-          }}
-        >
-          <span>{flash.msg}</span>
-          <button className="rv-link" style={{ margin: 0, color: 'inherit' }} onClick={() => setFlash(null)}>Dismiss</button>
-        </div>
-      )}
-
-      {rows.length > 6 && (
-        <input className="bp-search" placeholder="Search by cadet, guest, or POC name / phone / email…" value={q} onChange={(e) => setQ(e.target.value)} />
-      )}
-
-      {rows.length === 0 ? (
-        <div className="bp-empty">No signups yet.</div>
+      {openRow ? (
+        <PersonDetail
+          r={openRow} guest={guestsBySignup[openRow.id]} busy={busyId === openRow.id}
+          confirming={confirmTarget?.id === openRow.id ? confirmTarget.field : null}
+          onRequestToggle={requestToggle} onConfirm={applyToggle} onCancel={cancelToggle}
+          onBack={backToList}
+        />
       ) : (
         <>
-          <Section title={`Needs action · ${needsAction.length}`} hide={!needsAction.length}>
-            {needsAction.map((r) => (
-              <OpsRow
-                key={r.id} r={r} guest={guestsBySignup[r.id]} busy={busyId === r.id}
-                confirming={confirmTarget?.id === r.id ? confirmTarget.field : null}
-                onRequestToggle={requestToggle} onConfirm={applyToggle} onCancel={cancelToggle} state="alert"
-              />
-            ))}
-          </Section>
-          <Section title={`Awaiting guest · ${awaiting.length}`} hide={!awaiting.length}>
-            {awaiting.map((r) => (
-              <OpsRow
-                key={r.id} r={r} guest={guestsBySignup[r.id]} busy={busyId === r.id}
-                confirming={confirmTarget?.id === r.id ? confirmTarget.field : null}
-                onRequestToggle={requestToggle} onConfirm={applyToggle} onCancel={cancelToggle} state="wait"
-              />
-            ))}
-          </Section>
-          <Section title={`Settled · ${done.length}`} hide={!done.length}>
-            {done.map((r) => (
-              <OpsRow
-                key={r.id} r={r} guest={guestsBySignup[r.id]} busy={busyId === r.id}
-                confirming={confirmTarget?.id === r.id ? confirmTarget.field : null}
-                onRequestToggle={requestToggle} onConfirm={applyToggle} onCancel={cancelToggle} state="done"
-              />
-            ))}
-          </Section>
+          <div className="bp-head">
+            <h1 className="bp-title">Ball Payments</h1>
+            <div className="bp-head-actions">
+              <button className="bp-refresh" onClick={() => exportCsv(rows, guestsBySignup)}>Export CSV</button>
+              <button className="bp-refresh" onClick={loadAll}>Refresh</button>
+            </div>
+          </div>
+
+          <div className="bp-stats">
+            <span className={`bp-stat ${needsAction.length ? 'is-alert' : ''}`}><b>{needsAction.length}</b> need action</span>
+            <span className="bp-stat"><b>{awaiting.length}</b> awaiting guest</span>
+            <span className={`bp-stat ${done.length === totalVerified && totalVerified > 0 ? 'is-done' : ''}`}><b>{done.length}</b> settled</span>
+            <span className="bp-stat"><b>{totalGuests}</b> guests</span>
+          </div>
+
+          {flash && (
+            <div
+              role="status"
+              style={{
+                display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12,
+                border: `1px solid ${flash.tone === 'err' ? 'var(--rv-red)' : 'var(--rv-green)'}`,
+                background: flash.tone === 'err' ? 'var(--rv-red-soft)' : 'var(--rv-green-soft)',
+                color: flash.tone === 'err' ? 'var(--rv-red)' : 'var(--rv-green)',
+                borderRadius: 'var(--rv-radius)', padding: '10px 14px', fontSize: 13, marginBottom: 18,
+              }}
+            >
+              <span>{flash.msg}</span>
+              <button className="rv-link" style={{ margin: 0, color: 'inherit' }} onClick={() => setFlash(null)}>Dismiss</button>
+            </div>
+          )}
+
+          <input className="bp-search" placeholder="Look up a cadet, guest, or POC by name, phone, or email…" value={q} onChange={(e) => setQ(e.target.value)} />
+
+          {rows.length === 0 ? (
+            <div className="bp-empty">No signups yet.</div>
+          ) : (
+            <>
+              <Section title={`Needs action · ${needsAction.length}`} hide={!needsAction.length}>
+                {needsAction.map((r) => (
+                  <LookupRow key={r.id} r={r} guest={guestsBySignup[r.id]} onOpen={openPerson} tone="alert" />
+                ))}
+              </Section>
+              <Section title={`Awaiting guest · ${awaiting.length}`} hide={!awaiting.length}>
+                {awaiting.map((r) => (
+                  <LookupRow key={r.id} r={r} guest={guestsBySignup[r.id]} onOpen={openPerson} tone="wait" />
+                ))}
+              </Section>
+              <Section title={`Settled · ${done.length}`} hide={!done.length}>
+                {done.map((r) => (
+                  <LookupRow key={r.id} r={r} guest={guestsBySignup[r.id]} onOpen={openPerson} tone="done" />
+                ))}
+              </Section>
+              {!needsAction.length && !awaiting.length && !done.length && (
+                <div className="bp-empty">No one matches "{q}".</div>
+              )}
+            </>
+          )}
         </>
       )}
     </div>
@@ -304,6 +328,36 @@ function Section({ title, hide, children }) {
   );
 }
 
+// Compact, click-to-open row — no action buttons here on purpose. Status at
+// a glance via chips; the options live one tap away in PersonDetail.
+function LookupRow({ r, guest, onOpen, tone }) {
+  const friendPaysOwnCash = guest?.guest_type === 'friend' && guest?.friend_payment_method === 'self_pays';
+  const cashDone = r.cash_received && (!friendPaysOwnCash || guest.friend_cash_received);
+  const guestNeedsOwnForm = r.field_trip_form_required && !!guest;
+  const formDone = !r.field_trip_form_required || (r.field_trip_form_received && (!guestNeedsOwnForm || guest.field_trip_form_received));
+  const awaitingGuest = r.status === 'guest_pending';
+
+  return (
+    <button type="button" className={`bp-row bp-row-btn is-${tone}`} onClick={() => onOpen(r.id)}>
+      <div className="bp-row-main">
+        <div>
+          <span className="bp-name">{r.cadet_name}</span>
+          {guest?.guest_type && <span className="bp-tag">{guest.guest_type}</span>}
+        </div>
+        <div className="bp-meta">
+          LET {r.cadet_let_level || '--'} · {(r.cadet_company || '').toUpperCase()}
+          {guest?.name ? ` · guest ${guest.name}` : ''}
+        </div>
+      </div>
+      <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap', justifyContent: 'flex-end', flexShrink: 0 }}>
+        {awaitingGuest && <span style={chip('mute')}>awaiting guest</span>}
+        <span style={chip(cashDone ? 'green' : 'accent')}>{cashDone ? 'paid' : `owes ${money(r.amount_due) || '?'}`}</span>
+        {r.field_trip_form_required && <span style={chip(formDone ? 'green' : 'accent')}>{formDone ? 'form in' : 'form out'}</span>}
+      </div>
+    </button>
+  );
+}
+
 function ContactLine({ label, name, phone, email }) {
   if (!name && !phone && !email) return null;
   return (
@@ -316,10 +370,13 @@ function ContactLine({ label, name, phone, email }) {
   );
 }
 
-function OpsRow({ r, guest, busy, confirming, onRequestToggle, onConfirm, onCancel, state }) {
+// Drill-down: look-up-a-person, click, get options. Everything actionable
+// lives here instead of cluttering every row in the list.
+function PersonDetail({ r, guest, busy, confirming, onRequestToggle, onConfirm, onCancel, onBack }) {
   const friend = guest?.guest_type === 'friend';
   const friendPaysOwnCash = friend && guest?.friend_payment_method === 'self_pays';
   const guestNeedsOwnForm = r.field_trip_form_required && !!guest;
+  const awaitingGuest = r.status === 'guest_pending';
   const hasContact = guest?.poc_name || guest?.poc_phone || guest?.poc_email
     || guest?.personal_email || r.notification_email;
 
@@ -330,17 +387,19 @@ function OpsRow({ r, guest, busy, confirming, onRequestToggle, onConfirm, onCanc
   const who = confirmOnGuest ? (guest?.name || 'guest') : `${r.cadet_name}${guest?.name ? ` (+ ${guest.name})` : ''}`;
 
   return (
-    <div className={`bp-row is-${state}`}>
-      <div className="bp-row-main">
-        <div>
-          <span className="bp-name">{r.cadet_name}</span>
-          {guest?.guest_type && <span className="bp-tag">{guest.guest_type}</span>}
+    <div>
+      <button type="button" className="rv-back" onClick={onBack}>&lsaquo; Back to list</button>
+      <div className="rv-panel" style={{ padding: '22px 24px' }}>
+        <div style={{ fontSize: 19, fontWeight: 600, color: 'var(--rv-ink)' }}>
+          {r.cadet_name}
+          {guest?.name && <span style={{ color: 'var(--rv-mute)', fontWeight: 400 }}> + {guest.name}</span>}
         </div>
-        <div className="bp-meta">
+        <div className="bp-meta" style={{ marginTop: 4 }}>
           LET {r.cadet_let_level || '--'} · {(r.cadet_company || '').toUpperCase()}
-          {guest?.name ? ` · guest ${guest.name}${guest.age != null ? ` (${guest.age})` : ''}` : ''}
+          {guest?.guest_type ? ` · ${guest.guest_type} guest${guest.age != null ? ` (${guest.age})` : ''}` : ''}
         </div>
-        <div className="bp-facts">
+
+        <div className="bp-facts" style={{ marginTop: 12 }}>
           <span className="bp-fact">Host owes <b>{money(r.amount_due) || 'TBD'}</b></span>
           {friend && (
             <span className="bp-fact">
@@ -354,12 +413,7 @@ function OpsRow({ r, guest, busy, confirming, onRequestToggle, onConfirm, onCanc
 
         {hasContact && (
           <div className="bp-contact">
-            <ContactLine
-              label="Guest POC"
-              name={guest?.poc_name}
-              phone={guest?.poc_phone}
-              email={guest?.poc_email}
-            />
+            <ContactLine label="Guest POC" name={guest?.poc_name} phone={guest?.poc_phone} email={guest?.poc_email} />
             {guest?.personal_email && (
               <ContactLine label={`${guest?.name || 'Guest'} email`} email={guest.personal_email} />
             )}
@@ -368,68 +422,70 @@ function OpsRow({ r, guest, busy, confirming, onRequestToggle, onConfirm, onCanc
             )}
           </div>
         )}
-      </div>
 
-      {state !== 'wait' && (
-        confirming ? (
-          <div className="bp-confirm">
-            <span className="bp-confirm-msg">
-              {confirmTurningOn ? `Mark ${confirmTarget.label} received for ${who}?` : `Revoke ${confirmTarget.label} for ${who}?`}
-            </span>
-            <button
-              className={`bp-confirm-yes ${confirmTurningOn ? '' : 'is-revoke'}`}
-              disabled={busy}
-              onClick={() => onConfirm(r, confirming, guest)}
-            >
-              {busy ? 'Saving…' : confirmTurningOn ? 'Confirm' : 'Revoke'}
-            </button>
-            <button className="bp-confirm-no" disabled={busy} onClick={onCancel}>Cancel</button>
-          </div>
-        ) : (
-          <div className="bp-actions">
-            <button
-              className={`bp-toggle ${r.cash_received ? 'is-on' : ''}`}
-              disabled={busy}
-              title={r.cash_received ? 'Click to revoke cash received' : 'Click to mark cash received'}
-              onClick={() => onRequestToggle(r, 'cash_received')}
-            >
-              {r.cash_received ? '✓ Cash — revoke' : 'Cash received'}
-            </button>
-            {friendPaysOwnCash && (
+        <div style={{ marginTop: 20, paddingTop: 18, borderTop: '1px dashed var(--rv-border)' }}>
+          <div className="bp-section-head" style={{ marginBottom: 12 }}>Options</div>
+
+          {awaitingGuest ? (
+            <p className="rv-sub" style={{ margin: 0, fontSize: 13 }}>
+              Waiting on the guest to finish their part — nothing to record yet.
+            </p>
+          ) : confirming ? (
+            <div className="bp-confirm" style={{ justifyContent: 'flex-start' }}>
+              <span className="bp-confirm-msg">
+                {confirmTurningOn ? `Mark ${confirmTarget.label} received for ${who}?` : `Revoke ${confirmTarget.label} for ${who}?`}
+              </span>
               <button
-                className={`bp-toggle ${guest.friend_cash_received ? 'is-on' : ''}`}
+                className={`bp-confirm-yes ${confirmTurningOn ? '' : 'is-revoke'}`}
                 disabled={busy}
-                title={guest.friend_cash_received ? "Click to revoke guest's cash received" : "Click to mark guest's cash received"}
-                onClick={() => onRequestToggle(r, 'friend_cash_received')}
+                onClick={() => onConfirm(r, confirming, guest)}
               >
-                {guest.friend_cash_received ? '✓ Guest cash — revoke' : 'Guest cash received'}
+                {busy ? 'Saving…' : confirmTurningOn ? 'Confirm' : 'Revoke'}
               </button>
-            )}
-            {r.field_trip_form_required && (
+              <button className="bp-confirm-no" disabled={busy} onClick={onCancel}>Cancel</button>
+            </div>
+          ) : (
+            <div className="bp-options">
               <button
-                className={`bp-toggle ${r.field_trip_form_received ? 'is-on' : ''}`}
+                className={`bp-toggle ${r.cash_received ? 'is-on' : ''}`}
                 disabled={busy}
-                title={r.field_trip_form_received ? 'Click to revoke — HOST form only' : 'Click to mark received — HOST form only'}
-                onClick={() => onRequestToggle(r, 'field_trip_form_received')}
+                onClick={() => onRequestToggle(r, 'cash_received')}
               >
-                {r.field_trip_form_received
-                  ? `✓ ${guestNeedsOwnForm ? 'Host form' : 'Field trip form'} — revoke`
-                  : `${guestNeedsOwnForm ? 'Host form' : 'Field trip form'} received`}
+                {r.cash_received ? '✓ Cash received — tap to revoke' : 'Mark cash received'}
               </button>
-            )}
-            {guestNeedsOwnForm && (
-              <button
-                className={`bp-toggle ${guest.field_trip_form_received ? 'is-on' : ''}`}
-                disabled={busy}
-                title={guest.field_trip_form_received ? "Click to revoke — GUEST's form only" : "Click to mark received — GUEST's form only"}
-                onClick={() => onRequestToggle(r, 'guest_field_trip_form_received')}
-              >
-                {guest.field_trip_form_received ? '✓ Guest form — revoke' : 'Guest form received'}
-              </button>
-            )}
-          </div>
-        )
-      )}
+              {friendPaysOwnCash && (
+                <button
+                  className={`bp-toggle ${guest.friend_cash_received ? 'is-on' : ''}`}
+                  disabled={busy}
+                  onClick={() => onRequestToggle(r, 'friend_cash_received')}
+                >
+                  {guest.friend_cash_received ? "✓ Guest's cash received — tap to revoke" : "Mark guest's cash received"}
+                </button>
+              )}
+              {r.field_trip_form_required && (
+                <button
+                  className={`bp-toggle ${r.field_trip_form_received ? 'is-on' : ''}`}
+                  disabled={busy}
+                  onClick={() => onRequestToggle(r, 'field_trip_form_received')}
+                >
+                  {r.field_trip_form_received
+                    ? `✓ ${guestNeedsOwnForm ? 'Host form' : 'Field trip form'} received — tap to revoke`
+                    : `Mark ${guestNeedsOwnForm ? 'host form' : 'field trip form'} received`}
+                </button>
+              )}
+              {guestNeedsOwnForm && (
+                <button
+                  className={`bp-toggle ${guest.field_trip_form_received ? 'is-on' : ''}`}
+                  disabled={busy}
+                  onClick={() => onRequestToggle(r, 'guest_field_trip_form_received')}
+                >
+                  {guest.field_trip_form_received ? "✓ Guest's form received — tap to revoke" : "Mark guest's form received"}
+                </button>
+              )}
+            </div>
+          )}
+        </div>
+      </div>
     </div>
   );
 }

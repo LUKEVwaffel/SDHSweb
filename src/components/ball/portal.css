@@ -163,6 +163,19 @@
 .bp-row.is-wait { border-left-color: var(--rv-faint); }
 .bp-row.is-alert { border-left-color: var(--rv-accent); }
 
+/* Lookup-list row — a plain <button> reset onto the .bp-row shell, no inline
+   actions. Click opens PersonDetail, where the options actually live. */
+.bp-row-btn {
+  appearance: none;
+  width: 100%;
+  border: 1px solid var(--rv-border);
+  border-left: 3px solid var(--rv-border);
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+.bp-row-btn.bp-row { padding: 12px 14px 12px 15px; }
+
 .bp-row-main { min-width: 0; }
 .bp-name { font-size: 15px; font-weight: 600; color: var(--rv-ink); }
 .bp-tag {
@@ -191,6 +204,12 @@
 .bp-fact b { color: var(--rv-ink); font-weight: 700; }
 
 .bp-actions { display: flex; gap: 8px; flex-shrink: 0; flex-wrap: wrap; justify-content: flex-end; }
+
+/* PersonDetail's options list — one full-width tap target per row instead of
+   a wrapped button cluster. This is what used to live inline on every list
+   row (the actual source of the "too big" clutter with 4 toggles per card). */
+.bp-options { display: flex; flex-direction: column; gap: 10px; }
+.bp-options .bp-toggle { width: 100%; text-align: center; }
 
 .bp-toggle {
   appearance: none;
