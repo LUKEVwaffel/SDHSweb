@@ -8,12 +8,14 @@ function byLine(email) {
   return email ? email.split('@')[0] : '';
 }
 
-// Dress approval portal — female cadets + female guests in one queue, tagged
-// which is which (approval happens over text, off-platform; the verifiers
-// just need to know who they're texting). Reads ball_signups_dress_view /
-// ball_guests_dress_view (RLS-scoped: no payment, no POC, no allergies).
-// Write is a direct column-guarded UPDATE. Pending first; approved collapses
-// into a dimmed section with who signed off.
+// Dress approval portal — female cadets + female guests + female VIP guests
+// (visiting XO/BC, past King/Queen — see ball_vip_signup.sql) in one queue,
+// tagged which is which (approval happens over text, off-platform; the
+// verifiers just need to know who they're texting). Reads
+// ball_signups_dress_view / ball_guests_dress_view / ball_vip_signups_dress_view
+// (RLS-scoped: no payment, no POC, no allergies). Write is a direct
+// column-guarded UPDATE. Pending first; approved collapses into a dimmed
+// section with who signed off.
 export default function BallDressPortal() {
   const [phase, setPhase] = useState('checking');
   const [errorMsg, setErrorMsg] = useState('');
@@ -21,18 +23,21 @@ export default function BallDressPortal() {
   const [email, setEmail] = useState('');
   const [cadets, setCadets] = useState([]);
   const [guests, setGuests] = useState([]);
+  const [vips, setVips] = useState([]);
   const [busyId, setBusyId] = useState(null);
   const [bulkBusy, setBulkBusy] = useState(false);
   const [q, setQ] = useState('');
 
   const loadAll = useCallback(async () => {
-    const [{ data: c, error: cErr }, { data: g, error: gErr }] = await Promise.all([
+    const [{ data: c, error: cErr }, { data: g, error: gErr }, { data: v, error: vErr }] = await Promise.all([
       SB.from('ball_signups_dress_view').select('*').eq('cadet_gender', 'female'),
       SB.from('ball_guests_dress_view').select('*').eq('gender', 'female'),
+      SB.from('ball_vip_signups_dress_view').select('*').eq('gender', 'female'),
     ]);
-    if (cErr || gErr) { setPhase('error'); setErrorMsg((cErr || gErr).message); return; }
+    if (cErr || gErr || vErr) { setPhase('error'); setErrorMsg((cErr || gErr || vErr).message); return; }
     setCadets(c || []);
     setGuests(g || []);
+    setVips(v || []);
     setPhase('ready');
   }, []);
 
@@ -54,13 +59,14 @@ export default function BallDressPortal() {
     const channel = SB.channel('ball-dress-portal')
       .on('postgres_changes', { event: '*', schema: 'public', table: 'ball_signups' }, loadAll)
       .on('postgres_changes', { event: '*', schema: 'public', table: 'ball_guests' }, loadAll)
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'ball_vip_signups' }, loadAll)
       .subscribe();
     return () => { SB.removeChannel(channel); };
   }, [phase, loadAll]);
 
   async function signOut() {
     await SB.auth.signOut();
-    setCadets([]); setGuests([]); setEmail('');
+    setCadets([]); setGuests([]); setVips([]); setEmail('');
     setPhase('login');
   }
 
@@ -68,7 +74,7 @@ export default function BallDressPortal() {
     setBusyId(item.id);
     const { data: { session } } = await SB.auth.getSession();
     const approving = !item.dress_approved;
-    const table = item.kind === 'cadet' ? 'ball_signups' : 'ball_guests';
+    const table = item.kind === 'cadet' ? 'ball_signups' : item.kind === 'guest' ? 'ball_guests' : 'ball_vip_signups';
     await SB.from(table).update({
       dress_approved: approving, dress_approved_by: approving ? session.user.email : null,
     }).eq('id', item.id);
@@ -80,6 +86,7 @@ export default function BallDressPortal() {
     const items = [
       ...cadets.map((c) => ({ ...c, kind: 'cadet', name: c.cadet_name })),
       ...guests.map((g) => ({ ...g, kind: 'guest' })),
+      ...vips.map((v) => ({ ...v, kind: 'vip' })),
     ];
     const term = q.trim().toLowerCase();
     const v = term ? items.filter((x) => (x.name || '').toLowerCase().includes(term)) : items;
@@ -89,7 +96,7 @@ export default function BallDressPortal() {
       approved: v.filter((x) => x.dress_approved).sort(byName),
       total: items.length,
     };
-  }, [cadets, guests, q]);
+  }, [cadets, guests, vips, q]);
 
   async function approveAllPending() {
     if (!pending.length) return;
@@ -99,9 +106,11 @@ export default function BallDressPortal() {
     const { data: { session } } = await SB.auth.getSession();
     const cadetIds = pending.filter((x) => x.kind === 'cadet').map((x) => x.id);
     const guestIds = pending.filter((x) => x.kind === 'guest').map((x) => x.id);
+    const vipIds = pending.filter((x) => x.kind === 'vip').map((x) => x.id);
     await Promise.all([
       cadetIds.length ? SB.from('ball_signups').update({ dress_approved: true, dress_approved_by: session.user.email }).in('id', cadetIds) : null,
       guestIds.length ? SB.from('ball_guests').update({ dress_approved: true, dress_approved_by: session.user.email }).in('id', guestIds) : null,
+      vipIds.length ? SB.from('ball_vip_signups').update({ dress_approved: true, dress_approved_by: session.user.email }).in('id', vipIds) : null,
     ]);
     await loadAll();
     setBulkBusy(false);
@@ -182,6 +191,9 @@ function DressRow({ x, busy, onToggle, state }) {
         </div>
         {x.kind === 'cadet' && (
           <div className="bp-meta">LET {x.cadet_let_level || '--'} · {(x.cadet_company || '').toUpperCase()}</div>
+        )}
+        {x.kind === 'vip' && (
+          <div className="bp-meta">{x.role === 'past_king_queen' ? 'Past King/Queen' : 'Visiting XO/BC'} · {x.home_school}</div>
         )}
         {x.dress_approved && x.dress_approved_by && (
           <div className="bp-by">signed off by {byLine(x.dress_approved_by)}</div>

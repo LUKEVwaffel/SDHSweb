@@ -70,7 +70,9 @@ Deno.serve(async (req) => {
     if (isSchoolEmail(personalEmail)) {
       return json({ error: "use a personal email, not a school one" }, 400);
     }
-    if (!dressCodeAccepted) {
+    // Only female attendees have a dress code to acknowledge — a male VIP
+    // wears his own unit's Class A, nothing submitted here.
+    if (gender === "female" && !dressCodeAccepted) {
       return json({ error: "you must acknowledge the dress code" }, 400);
     }
 
@@ -84,7 +86,7 @@ Deno.serve(async (req) => {
       allergy_detail: allergyDetail,
       personal_email: personalEmail,
       phone,
-      dress_code_accepted_at: new Date().toISOString(),
+      dress_code_accepted_at: gender === "female" ? new Date().toISOString() : null,
     });
     if (insertErr) {
       console.error("ball-submit-vip-signup insert", insertErr);

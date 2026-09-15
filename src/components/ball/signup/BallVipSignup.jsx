@@ -50,10 +50,13 @@ export default function BallVipSignup() {
     ? new Date().toLocaleDateString('en-CA', { timeZone: 'America/Chicago' }) > deadline.signup_deadline
     : false;
 
+  // Only a female VIP has a dress code to acknowledge — a male VIP wears his
+  // own unit's Class A, nothing to submit or approve here.
+  const isFemale = form.gender === 'female';
   const canSubmit = form.name.trim() && form.role && form.home_school.trim()
     && form.age && Number(form.age) > 0 && form.gender
     && form.has_allergy !== null && (form.has_allergy === false || form.allergy_detail.trim())
-    && emailOk && form.dress_code_accepted;
+    && emailOk && (!isFemale || form.dress_code_accepted);
 
   async function submit() {
     setBusy(true);
@@ -179,18 +182,31 @@ export default function BallVipSignup() {
                 <TextInput type="tel" inputMode="tel" value={form.phone} onChange={set('phone')} placeholder="(423) 555-0123" />
               </Field>
 
-              <div style={{ fontFamily: mono, fontSize: 11, color: P.gold, letterSpacing: '0.14em', margin: '28px 0 10px' }}>DRESS CODE</div>
-              <DressCodeDetails only={form.gender || undefined} simple note={deadline?.dress_code_text} />
+              {form.gender === 'male' && (
+                <div style={{ border: `1px solid ${P.hair}`, background: P.navy, padding: 18, margin: '28px 0 18px' }}>
+                  <div style={{ fontFamily: mono, fontSize: 11, color: P.gold, letterSpacing: '0.16em', marginBottom: 8 }}>ATTIRE</div>
+                  <div style={{ fontFamily: mono, fontSize: 13, color: P.mute, lineHeight: 1.65 }}>
+                    Wear your own JROTC unit&apos;s Class A uniform. Nothing else required — no dress code, no approval step.
+                  </div>
+                </div>
+              )}
 
-              <label style={{ display: 'flex', alignItems: 'flex-start', gap: 8, fontFamily: mono, fontSize: 12, color: P.mute, margin: '18px 0', cursor: 'pointer', lineHeight: 1.6 }}>
-                <input
-                  type="checkbox"
-                  checked={form.dress_code_accepted}
-                  onChange={(e) => setForm({ ...form, dress_code_accepted: e.target.checked })}
-                  style={{ marginTop: 2 }}
-                />
-                I&apos;ve read the dress code above and will follow it.
-              </label>
+              {form.gender === 'female' && (
+                <>
+                  <div style={{ fontFamily: mono, fontSize: 11, color: P.gold, letterSpacing: '0.14em', margin: '28px 0 10px' }}>DRESS CODE</div>
+                  <DressCodeDetails only="female" simple note={deadline?.dress_code_text} />
+
+                  <label style={{ display: 'flex', alignItems: 'flex-start', gap: 8, fontFamily: mono, fontSize: 12, color: P.mute, margin: '18px 0', cursor: 'pointer', lineHeight: 1.6 }}>
+                    <input
+                      type="checkbox"
+                      checked={form.dress_code_accepted}
+                      onChange={(e) => setForm({ ...form, dress_code_accepted: e.target.checked })}
+                      style={{ marginTop: 2 }}
+                    />
+                    I&apos;ve read the dress code above, will follow it, and will send a photo of my dress to an approver before the ball.
+                  </label>
+                </>
+              )}
 
               <ErrorText>{err}</ErrorText>
 

@@ -31,6 +31,7 @@ export default function BallVipList() {
       </div>
       <p className="rv-sub" style={{ fontSize: 12, marginBottom: 10 }}>
         Self-reported via /ball/vip &mdash; visiting XO/BC and past King/Queen. Comped, no payment tracked here.
+        Female dress approval is handled at /ball/dress, same queue as cadets/guests.
       </p>
       {err && <div className="rv-flash">{err}</div>}
       <div className="rv-list">
@@ -50,6 +51,7 @@ export default function BallVipList() {
               <div style={{ color: 'var(--rv-faint)', fontSize: 12 }}>
                 {r.age ?? '—'} &middot; {r.gender || '—'}
                 {r.has_allergy ? ` · allergy: ${r.allergy_detail || 'yes'}` : ''}
+                {r.gender === 'female' ? ` · ${r.dress_approved ? 'dress approved' : 'dress pending'}` : ''}
               </div>
             </div>
             <div style={{ fontSize: 12, color: 'var(--rv-faint)', marginTop: 4 }}>

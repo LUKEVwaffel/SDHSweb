@@ -14,11 +14,14 @@ import { openBallDressCodePdf } from '../../lib/ballDressCodePdf';
 //   note   — optional extra line from ball_config.dress_code_text, shown last.
 //   only   — 'female' | 'male' to render just one side (wizard uniform vs
 //            dress sections). Omit to show both.
-//   simple — skip the photo dress-APPROVAL box (the "text a photo, then come
-//            back to this website" flow). That flow is tied to a cadet's or
-//            guest's own signup/token — there's nothing to "come back" to for
-//            a one-off signer like a VIP guest (BallVipSignup.jsx), so it
-//            would just be confusing. Shows a plain contact line instead.
+//   simple — swap the payment-gated DRESS APPROVAL box (its "after you pay,
+//            come back to this website and fill out the online form" line)
+//            for the same photo-to-approver instruction without the payment
+//            or online-form language — accurate for a one-off signer like a
+//            VIP guest (BallVipSignup.jsx) who never pays and has no
+//            signup/token to "come back" to. Still tells them their dress
+//            must be approved; approval itself is tracked staff-side in
+//            BallDressPortal.jsx same as everyone else.
 
 function List({ title, items, tone }) {
   return (
@@ -50,13 +53,24 @@ export default function DressCodeDetails({ note, only, simple }) {
       {only !== 'female' && <Block heading="MALES" avoid={MALE_AVOID} wear={MALE_WEAR} />}
 
       {simple ? (
-        <div style={{ border: `1px solid ${P.hair}`, background: P.navy, padding: 18, marginBottom: 14, fontFamily: mono, fontSize: 13, color: P.mute, lineHeight: 1.65 }}>
-          Questions about your attire? Message{' '}
-          {only !== 'male' && DRESS_APPROVERS.map((a, i) => (
-            <span key={a.name}>{i > 0 ? ' or ' : ''}{a.name} — {a.phone}</span>
-          ))}
-          {only !== 'female' && only !== 'male' ? ' (females), or ' : ''}
-          {only !== 'female' && <span>{WESTON.name} — {WESTON.phone}{only !== 'male' ? ' (males)' : ''}</span>}.
+        <div style={{ border: `1px solid ${P.hair}`, background: P.navy, padding: 18, marginBottom: 14 }}>
+          {only !== 'male' && (
+            <>
+              <div style={{ fontFamily: mono, fontSize: 11, color: P.gold, letterSpacing: '0.16em', marginBottom: 10 }}>DRESS APPROVAL</div>
+              <ul style={{ margin: '0 0 12px', paddingLeft: 18, fontFamily: mono, fontSize: 13, color: P.mute, lineHeight: 1.65 }}>
+                <li>Your dress must be approved before the ball, or you may be denied entry.</li>
+                <li>Send a photo of the front AND back of the dress while you are wearing it, directly to one of the approvers below.</li>
+              </ul>
+              <div style={{ fontFamily: mono, fontSize: 13, color: P.cream, lineHeight: 1.9 }}>
+                {DRESS_APPROVERS.map((a) => <div key={a.name}>{a.name} — {a.phone}</div>)}
+              </div>
+            </>
+          )}
+          {only !== 'female' && (
+            <div style={{ fontFamily: mono, fontSize: 13, color: P.mute, lineHeight: 1.65, marginTop: only !== 'male' ? 14 : 0 }}>
+              Questions about your suit or Class A? Message {WESTON.name} — {WESTON.phone}.
+            </div>
+          )}
         </div>
       ) : only !== 'male' ? (
         <div style={{ border: `1px solid ${P.hair}`, background: P.navy, padding: 18, marginBottom: 14 }}>
