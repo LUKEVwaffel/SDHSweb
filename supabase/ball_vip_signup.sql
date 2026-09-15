@@ -1,15 +1,17 @@
 -- Military Ball "VIP" signup — for the handful of attendees who cannot go
 -- through the normal cadet-verify flow (StepCadetVerify.jsx) because they
 -- have no SDHS roster record and no @students.hcde.org email at all:
--- visiting XO/BC from another Hamilton County JROTC unit, and past Ball
+-- visiting XO/BC/CSM from another Hamilton County JROTC unit, and past Ball
 -- King/Queen. No instructors — those go through Chief directly, off-system.
+-- Only a King/Queen may bring a date (ball_vip_dates below) — a visiting
+-- XO/BC/CSM attends solo.
 --
 -- Deliberately its OWN table, not a bent-shape row in ball_signups/ball_guests
 -- (see ball_signup.sql): those tables hard-require cadet_school_email and a
 -- signup_id FK respectively, and are guarded by column-guard triggers tuned
--- for the cadet/date/friend payment flow. A VIP owes nothing, brings no
--- date, and needs none of that — a flat table is simpler and can't interact
--- with the guest/payment guards by accident.
+-- for the cadet/date/friend payment flow. A VIP owes nothing and needs none
+-- of that — a flat table is simpler and can't interact with the
+-- guest/payment guards by accident.
 --
 -- No pre-approval list: names aren't known ahead of time, so entry is
 -- self-reported (honor system) via the public ball-submit-vip-signup edge
@@ -21,7 +23,7 @@
 create table if not exists public.ball_vip_signups (
   id                      uuid primary key default gen_random_uuid(),
   name                    text not null,
-  role                    text not null check (role in ('visiting_xo_bc', 'past_king_queen')),
+  role                    text not null check (role in ('visiting_leadership', 'past_king_queen')),
   home_school             text not null,
   age                     int,
   gender                  text,
@@ -96,3 +98,70 @@ with (security_barrier = true) as
   from public.ball_vip_signups
   where public.is_ball_dress();
 grant select on public.ball_vip_signups_dress_view to authenticated;
+
+
+-- ── ball_vip_dates — a King/Queen's date only ───────────────────────────────
+-- Only role='past_king_queen' may attach one (enforced server-side in
+-- ball-submit-vip-signup, not just in the UI). Unlike the VIP principal, a
+-- date is NOT JROTC leadership and gets no "wear your own Class A" free
+-- pass — a male date follows the normal male dress code, a female date needs
+-- the same photo dress approval as everyone else.
+create table if not exists public.ball_vip_dates (
+  id                 uuid primary key default gen_random_uuid(),
+  vip_signup_id      uuid not null unique references public.ball_vip_signups(id) on delete cascade,
+  name               text not null,
+  age                int,
+  gender             text,
+  personal_email     text,
+  phone              text,
+  dress_approved     boolean,
+  dress_approved_by  text,
+  created_at         timestamptz not null default now()
+);
+
+alter table public.ball_vip_dates enable row level security;
+
+drop policy if exists ball_vip_dates_all_s6 on public.ball_vip_dates;
+create policy ball_vip_dates_all_s6 on public.ball_vip_dates
+  for all to authenticated using (public.is_s6()) with check (public.is_s6());
+
+drop policy if exists ball_vip_dates_update_dress on public.ball_vip_dates;
+create policy ball_vip_dates_update_dress on public.ball_vip_dates
+  for update to authenticated
+  using (public.is_ball_dress()) with check (public.is_ball_dress());
+
+create or replace function public.ball_vip_dates_column_guard()
+returns trigger language plpgsql as $$
+begin
+  if public.is_s6() then
+    return new;
+  end if;
+
+  if public.is_ball_dress() then
+    if new.vip_signup_id  is distinct from old.vip_signup_id
+       or new.name        is distinct from old.name
+       or new.age         is distinct from old.age
+       or new.gender      is distinct from old.gender
+       or new.personal_email is distinct from old.personal_email
+       or new.phone       is distinct from old.phone
+    then
+      raise exception 'dress staff may only change dress_approved / dress_approved_by';
+    end if;
+    return new;
+  end if;
+
+  raise exception 'not authorized to update ball_vip_dates';
+end $$;
+
+drop trigger if exists ball_vip_dates_column_guard_trg on public.ball_vip_dates;
+create trigger ball_vip_dates_column_guard_trg
+  before update on public.ball_vip_dates
+  for each row execute function public.ball_vip_dates_column_guard();
+
+drop view if exists public.ball_vip_dates_dress_view;
+create view public.ball_vip_dates_dress_view
+with (security_barrier = true) as
+  select id, vip_signup_id, name, gender, dress_approved, dress_approved_by
+  from public.ball_vip_dates
+  where public.is_ball_dress();
+grant select on public.ball_vip_dates_dress_view to authenticated;

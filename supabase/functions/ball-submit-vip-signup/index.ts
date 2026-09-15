@@ -1,10 +1,13 @@
 // Edge function: ball-submit-vip-signup
 // PUBLIC, pre-auth. No signupToken, no roster lookup — this is the entry
 // point for attendees who can never pass ball-lookup-cadet: a visiting
-// XO/BC from another Hamilton County JROTC unit, or a past Ball King/Queen.
-// See ball_vip_signup.sql for why this is its own table instead of a bent
-// row in ball_signups/ball_guests. Comped — no amount_due, no field trip
-// form, no payment step.
+// XO/BC/CSM from another Hamilton County JROTC unit, or a past Ball
+// King/Queen. See ball_vip_signup.sql for why this is its own table instead
+// of a bent row in ball_signups/ball_guests. Comped — no amount_due, no
+// field trip form, no payment step.
+//
+// Only a King/Queen may bring a date (body.date) — enforced here, not just
+// in the client, since the client check is trivially bypassable.
 //
 // Deploy WITHOUT jwt verification:
 //   supabase functions deploy ball-submit-vip-signup --no-verify-jwt
@@ -23,7 +26,7 @@ function required(v: unknown): string {
   return typeof v === "string" ? v.trim() : "";
 }
 
-const ROLES = new Set(["visiting_xo_bc", "past_king_queen"]);
+const ROLES = new Set(["visiting_leadership", "past_king_queen"]);
 
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return preflight();
@@ -76,7 +79,28 @@ Deno.serve(async (req) => {
       return json({ error: "you must acknowledge the dress code" }, 400);
     }
 
-    const { error: insertErr } = await svc.from("ball_vip_signups").insert({
+    // Only a King/Queen may bring a date. body.date is silently ignored for
+    // any other role rather than erroring — the client never sends one for
+    // visiting_leadership, so a populated date there means a tampered
+    // request, and dropping it is simpler than surfacing that as a "bug".
+    const bringingDate = role === "past_king_queen" && body?.date != null;
+    const dateBody = bringingDate ? body.date : null;
+    const dateName = dateBody ? required(dateBody.name) : "";
+    const dateAge = dateBody ? Number(dateBody.age) : null;
+    const dateGender = dateBody ? required(dateBody.gender) : "";
+    const dateEmail = dateBody ? (required(dateBody.personal_email).toLowerCase() || null) : null;
+    const datePhone = dateBody ? (required(dateBody.phone) || null) : null;
+
+    if (bringingDate) {
+      if (!dateName || !Number.isFinite(dateAge) || (dateAge as number) <= 0 || (dateGender !== "male" && dateGender !== "female")) {
+        return json({ error: "your date's name, age, and gender are required" }, 400);
+      }
+      if (dateEmail && !EMAIL_RE.test(dateEmail)) {
+        return json({ error: "that date's email address looks invalid" }, 400);
+      }
+    }
+
+    const { data: signup, error: insertErr } = await svc.from("ball_vip_signups").insert({
       name,
       role,
       home_school: homeSchool,
@@ -87,10 +111,26 @@ Deno.serve(async (req) => {
       personal_email: personalEmail,
       phone,
       dress_code_accepted_at: gender === "female" ? new Date().toISOString() : null,
-    });
-    if (insertErr) {
+    }).select("id").single();
+    if (insertErr || !signup) {
       console.error("ball-submit-vip-signup insert", insertErr);
       return json({ error: "internal error" }, 500);
+    }
+
+    if (bringingDate) {
+      const { error: dateErr } = await svc.from("ball_vip_dates").insert({
+        vip_signup_id: signup.id,
+        name: dateName,
+        age: dateAge,
+        gender: dateGender,
+        personal_email: dateEmail,
+        phone: datePhone,
+      });
+      if (dateErr) {
+        console.error("ball-submit-vip-signup insert date", dateErr);
+        await svc.from("ball_vip_signups").delete().eq("id", signup.id); // roll back the orphaned signup row
+        return json({ error: "internal error" }, 500);
+      }
     }
 
     return json({ ok: true });

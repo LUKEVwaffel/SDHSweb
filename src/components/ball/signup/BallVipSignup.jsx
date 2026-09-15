@@ -9,7 +9,7 @@ import { isSchoolEmail } from '../../../lib/schoolEmail';
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 const ROLE_OPTIONS = [
-  { value: 'visiting_xo_bc', label: 'VISITING XO / BC — ANOTHER JROTC UNIT' },
+  { value: 'visiting_leadership', label: 'VISITING XO / BC / CSM — ANOTHER JROTC UNIT' },
   { value: 'past_king_queen', label: 'PAST BALL KING / QUEEN' },
 ];
 
@@ -20,15 +20,19 @@ function fmtShort(d) {
 
 // Standalone one-page signup for the small set of attendees who can never
 // pass the normal cadet-verify roster check (StepCadetVerify.jsx): visiting
-// XO/BC from another Hamilton County JROTC unit, or a past Ball King/Queen.
-// No date required, comped — no payment or field trip form section.
-// Instructors are NOT handled here; they go through Chief directly.
+// XO/BC/CSM from another Hamilton County JROTC unit, or a past Ball
+// King/Queen. Comped — no payment or field trip form section. Only a
+// King/Queen may bring a date (also enforced server-side — see
+// ball-submit-vip-signup). Instructors are NOT handled here; they go
+// through Chief directly.
 export default function BallVipSignup() {
   const [deadline, setDeadline] = useState(null);
   const [form, setForm] = useState({
     name: '', role: null, home_school: '', age: '', gender: null,
     has_allergy: null, allergy_detail: '', personal_email: '', phone: '',
     dress_code_accepted: false,
+    bringing_date: null,
+    date_name: '', date_age: '', date_gender: null, date_personal_email: '', date_phone: '',
   });
   const [busy, setBusy] = useState(false);
   const [err, setErr] = useState('');
@@ -46,17 +50,34 @@ export default function BallVipSignup() {
   const emailOk = EMAIL_RE.test(email) && !isSchoolEmail(email);
   const emailBad = emailEntered && !emailOk;
 
+  const dateEmail = form.date_personal_email.trim();
+  const dateEmailEntered = dateEmail.length > 0;
+  const dateEmailOk = !dateEmailEntered || (EMAIL_RE.test(dateEmail) && !isSchoolEmail(dateEmail));
+
   const closed = deadline?.signup_deadline
     ? new Date().toLocaleDateString('en-CA', { timeZone: 'America/Chicago' }) > deadline.signup_deadline
     : false;
 
+  // Only a King/Queen may bring a date — a visiting XO/BC/CSM attends solo.
+  const canBringDate = form.role === 'past_king_queen';
+  const bringingDate = canBringDate && form.bringing_date === true;
+
   // Only a female VIP has a dress code to acknowledge — a male VIP wears his
-  // own unit's Class A, nothing to submit or approve here.
+  // own unit's Class A, nothing to submit or approve here. A date is NOT
+  // JROTC leadership though, so a female date still needs approval too.
   const isFemale = form.gender === 'female';
+  const dateIsFemale = bringingDate && form.date_gender === 'female';
+  const needsDressAck = isFemale || dateIsFemale;
+
+  const dateOk = !bringingDate || (
+    form.date_name.trim() && form.date_age && Number(form.date_age) > 0 && form.date_gender && dateEmailOk
+  );
+
   const canSubmit = form.name.trim() && form.role && form.home_school.trim()
     && form.age && Number(form.age) > 0 && form.gender
     && form.has_allergy !== null && (form.has_allergy === false || form.allergy_detail.trim())
-    && emailOk && (!isFemale || form.dress_code_accepted);
+    && emailOk && (!needsDressAck || form.dress_code_accepted)
+    && (!canBringDate || form.bringing_date !== null) && dateOk;
 
   async function submit() {
     setBusy(true);
@@ -72,11 +93,24 @@ export default function BallVipSignup() {
       personal_email: email,
       phone: form.phone.trim() || null,
       dress_code_accepted: form.dress_code_accepted,
+      date: bringingDate ? {
+        name: form.date_name.trim(),
+        age: Number(form.date_age),
+        gender: form.date_gender,
+        personal_email: dateEmail || null,
+        phone: form.date_phone.trim() || null,
+      } : null,
     });
     setBusy(false);
     if (error) { setErr(error); return; }
     setSubmitted(true);
   }
+
+  const dressAckLabel = isFemale && dateIsFemale
+    ? "I've read the dress code above, for myself and my date, and we'll each send a photo of our dress to an approver before the ball."
+    : dateIsFemale
+      ? "I've read the dress code above and my date will send a photo of her dress to an approver before the ball."
+      : "I've read the dress code above, will follow it, and will send a photo of my dress to an approver before the ball.";
 
   return (
     <div className="ball-root">
@@ -88,7 +122,7 @@ export default function BallVipSignup() {
           Military Ball — Visiting Guest Signup
         </h1>
         <p className="ball-fade-up ball-d2" style={{ fontFamily: mono, fontSize: 12, color: P.mute, lineHeight: 1.7, margin: '0 0 20px', maxWidth: 470 }}>
-          For a visiting XO/BC from another Hamilton County JROTC unit, or a past Trojan Battalion Ball King or Queen.
+          For a visiting XO/BC/CSM from another Hamilton County JROTC unit, or a past Trojan Battalion Ball King or Queen.
           No ticket cost — you&apos;re a guest of the battalion. Not the right form?{' '}
           <a href="/ball/signup" style={{ color: P.gold }}>Cadet signup is here</a>. Instructors: see Chief directly.
         </p>
@@ -119,6 +153,7 @@ export default function BallVipSignup() {
               <div style={{ fontFamily: mono, fontSize: 12, color: P.gold, letterSpacing: '0.14em', marginBottom: 14 }}>YOU&apos;RE ON THE LIST</div>
               <p style={{ fontFamily: mono, fontSize: 13, color: P.mute, lineHeight: 1.7, margin: '0 0 10px' }}>
                 Thanks, {form.name}. You&apos;re registered as a guest of the battalion — no ticket cost, nothing to pay.
+                {bringingDate ? ` ${form.date_name || 'Your date'} is registered too.` : ''}
               </p>
               <p style={{ fontFamily: mono, fontSize: 13, color: P.mute, lineHeight: 1.7, margin: 0 }}>
                 Follow the dress code above and check in with Chief at the door. Questions before then, see Chief.
@@ -131,7 +166,12 @@ export default function BallVipSignup() {
               </Field>
 
               <Field label="WHO ARE YOU SIGNING UP AS?">
-                <Radio value={form.role} onChange={(v) => setForm({ ...form, role: v })} options={ROLE_OPTIONS} ariaLabel="Role" />
+                <Radio
+                  value={form.role}
+                  onChange={(v) => setForm({ ...form, role: v, bringing_date: v === 'past_king_queen' ? form.bringing_date : null })}
+                  options={ROLE_OPTIONS}
+                  ariaLabel="Role"
+                />
               </Field>
 
               <Field label="YOUR SCHOOL / JROTC UNIT">
@@ -182,18 +222,68 @@ export default function BallVipSignup() {
                 <TextInput type="tel" inputMode="tel" value={form.phone} onChange={set('phone')} placeholder="(423) 555-0123" />
               </Field>
 
-              {form.gender === 'male' && (
+              {canBringDate && (
+                <Field label="BRINGING A DATE?">
+                  <Radio
+                    value={form.bringing_date === true ? 'yes' : form.bringing_date === false ? 'no' : ''}
+                    onChange={(v) => setForm({ ...form, bringing_date: v === 'yes' })}
+                    options={[{ value: 'yes', label: 'YES' }, { value: 'no', label: 'NO' }]}
+                    ariaLabel="Bringing a date"
+                  />
+                  <div style={{ fontFamily: mono, fontSize: 11, color: P.mute, marginTop: 6, lineHeight: 1.6 }}>
+                    Only a King or Queen may bring a date — a visiting XO/BC/CSM attends solo.
+                  </div>
+                </Field>
+              )}
+
+              {bringingDate && (
+                <>
+                  <Field label="DATE'S NAME">
+                    <TextInput value={form.date_name} onChange={set('date_name')} placeholder="Your date's full name" />
+                  </Field>
+                  <Field label="DATE'S AGE">
+                    <TextInput type="number" min="1" max="99" inputMode="numeric" value={form.date_age} onChange={set('date_age')} placeholder="Their age" />
+                  </Field>
+                  <Field label="DATE'S GENDER">
+                    <Radio
+                      value={form.date_gender}
+                      onChange={(v) => setForm({ ...form, date_gender: v })}
+                      options={[{ value: 'male', label: 'MALE' }, { value: 'female', label: 'FEMALE' }]}
+                      ariaLabel="Date's gender"
+                    />
+                  </Field>
+                  <Field label="DATE'S EMAIL (OPTIONAL)">
+                    <TextInput type="email" value={form.date_personal_email} onChange={set('date_personal_email')} placeholder="their@email.com" />
+                    {!dateEmailOk && (
+                      <div style={{ fontFamily: mono, fontSize: 11, color: P.red, marginTop: 4 }}>
+                        {isSchoolEmail(dateEmail) ? 'Use a personal email, not a school one.' : 'Enter a valid email address.'}
+                      </div>
+                    )}
+                  </Field>
+                  <Field label="DATE'S PHONE (OPTIONAL)">
+                    <TextInput type="tel" inputMode="tel" value={form.date_phone} onChange={set('date_phone')} placeholder="(423) 555-0123" />
+                  </Field>
+                </>
+              )}
+
+              {form.gender === 'male' && !dateIsFemale && (
                 <div style={{ border: `1px solid ${P.hair}`, background: P.navy, padding: 18, margin: '28px 0 18px' }}>
                   <div style={{ fontFamily: mono, fontSize: 11, color: P.gold, letterSpacing: '0.16em', marginBottom: 8 }}>ATTIRE</div>
                   <div style={{ fontFamily: mono, fontSize: 13, color: P.mute, lineHeight: 1.65 }}>
-                    Wear your own JROTC unit&apos;s Class A uniform. Nothing else required — no dress code, no approval step.
+                    You&apos;ll wear your own JROTC unit&apos;s Class A uniform — nothing else required, no dress code, no approval step.
+                    {bringingDate ? " Your date's attire is below." : ''}
                   </div>
                 </div>
               )}
 
-              {form.gender === 'female' && (
+              {(isFemale || dateIsFemale) && (
                 <>
                   <div style={{ fontFamily: mono, fontSize: 11, color: P.gold, letterSpacing: '0.14em', margin: '28px 0 10px' }}>DRESS CODE</div>
+                  {form.gender === 'male' && (
+                    <div style={{ fontFamily: mono, fontSize: 12, color: P.mute, lineHeight: 1.6, marginBottom: 10 }}>
+                      You wear your own unit&apos;s Class A — the code below is for your date.
+                    </div>
+                  )}
                   <DressCodeDetails only="female" simple note={deadline?.dress_code_text} />
 
                   <label style={{ display: 'flex', alignItems: 'flex-start', gap: 8, fontFamily: mono, fontSize: 12, color: P.mute, margin: '18px 0', cursor: 'pointer', lineHeight: 1.6 }}>
@@ -203,9 +293,16 @@ export default function BallVipSignup() {
                       onChange={(e) => setForm({ ...form, dress_code_accepted: e.target.checked })}
                       style={{ marginTop: 2 }}
                     />
-                    I&apos;ve read the dress code above, will follow it, and will send a photo of my dress to an approver before the ball.
+                    {dressAckLabel}
                   </label>
                 </>
+              )}
+
+              {bringingDate && form.date_gender === 'male' && (
+                <div style={{ border: `1px solid ${P.hair}`, background: P.navy, padding: 18, margin: '18px 0' }}>
+                  <div style={{ fontFamily: mono, fontSize: 11, color: P.gold, letterSpacing: '0.16em', marginBottom: 8 }}>YOUR DATE&apos;S ATTIRE</div>
+                  <DressCodeDetails only="male" simple />
+                </div>
               )}
 
               <ErrorText>{err}</ErrorText>
