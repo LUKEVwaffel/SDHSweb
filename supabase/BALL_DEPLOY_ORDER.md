@@ -22,6 +22,9 @@ them **in this exact order**, top to bottom, and only deploy the edge functions
 |------|------|------------|
 | `reviewer_admin_pin_status.sql` | `reviewer_pin_status()` — S-6-gated read of each reviewer's PIN-set / lockout / must-change-password state, for the **REVIEW PORTAL ACCOUNTS** tab in the DISPATCH Ball panel | `email_review.sql`, `reviewer_pin.sql`, `admin_roles.sql` (all already live) |
 | `ball_ops_dress_views_fix.sql` | **fixes ops / dress portals showing 0 signups** — recreates the 4 `ball_*_ops_view` / `ball_*_dress_view` as SECURITY DEFINER (was `security_invoker=true`, which RLS blanked for non-s6 callers). Re-run any time; files 1–3 now carry the same non-invoker definition so a re-paste won't revert it. | files 1–3 |
+| `ball_guest_cash_split.sql` | `ball_guests.friend_cash_received` — separate cash toggle for a `self_pays` friend guest's own $35, distinct from the host's `cash_received`. Widens `ball_guests_ops_view`. **Must be followed by re-running `ball_guards.sql` (now v6)** — it adds the reviewer branch on `ball_guests_column_guard()` that lets ops flip this column. | `ball_guest_model.sql`, then `ball_guards.sql` v6 |
+| `ball_reminder_deadlines.sql` | `ball_config.payment_deadline` / `ball_config.dress_deadline` — S-6-editable dates (SETTINGS tab) feeding the manual reminder email's copy. Not enforced anywhere, purely reminder-copy input. | `ball_signup.sql` |
+| `ball_email_templates.sql` | (re-run) adds the `payment_reminder` template row for the new reminder blast. Safe to re-run — existing rows' prose is `on conflict` preserved, only label/description/placeholders refresh. | already deployed once; re-run for the new row |
 
 Run any time; order vs. the ball chain does not matter. The tab degrades
 gracefully (roster only, no PIN status) if this file has not been run yet.
@@ -44,13 +47,16 @@ supabase functions deploy ball-lookup-cadet        --no-verify-jwt
 supabase functions deploy ball-search-roster       --no-verify-jwt
 supabase functions deploy ball-submit-signup       --no-verify-jwt
 supabase functions deploy ball-guest-verify        --no-verify-jwt
-supabase functions deploy ball-dress-pin-login     --no-verify-jwt
+supabase functions deploy ball-dress-email-login   --no-verify-jwt
 supabase functions deploy ball-dress-set-pin
+# ball-dress-pin-login is superseded by ball-dress-email-login (email-only
+# attire login). Left on disk for rollback; no need to redeploy it.
 supabase functions deploy notify-ball-allergy      --no-verify-jwt
 supabase functions deploy notify-ball-status-update
 supabase functions deploy send-allergy-email
 supabase functions deploy admin-set-reviewer-pin
 supabase functions deploy admin-clear-reviewer-pin
+supabase functions deploy send-ball-reminders
 ```
 
 `admin-set-reviewer-pin` / `admin-clear-reviewer-pin` are S-6-only (checked via
@@ -58,6 +64,13 @@ supabase functions deploy admin-clear-reviewer-pin
 shared review-portal login (`email_reviewers` + `reviewer_credentials`) used by
 both `/review` and `/ball/ops`. They only need `email_review.sql` +
 `reviewer_pin.sql` live — not the ball SQL chain.
+
+`send-ball-reminders` is S-6-only (`getCaller`, `role === 's6'`), deploy
+**with** JWT verification (default). Manual trigger only — the "Send
+Reminders" button on the DISPATCH Ball Overview tab. Needs `amount_due` /
+`friend_cash_received` / `payment_deadline` / `dress_deadline` live (files 1–3,
+`ball_guest_cash_split.sql`, `ball_reminder_deadlines.sql`) and the
+`payment_reminder` row in `ball_email_templates.sql`.
 
 `ball-submit-signup` writes `cadet_has_allergy`, `cadet_allergy_email`,
 `amount_due`, `field_trip_form_required`, `guest_type`, `friend_*` and inserts

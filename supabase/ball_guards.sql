@@ -58,8 +58,12 @@ end $$;
 -- notify-ball-status-update, submit-signup rollback) write these tables with
 -- the service-role key and have no user JWT, so every is_*() helper was false
 -- and the guard raised. See ball_guard_service_role_fix.sql.
+-- v6 (2026-09-15): ball_guests_column_guard() gets a reviewer (ops) branch —
+-- Kaz/Chief may now flip friend_cash_received (the friend's own $35, tracked
+-- separately from the host's cash_received on ball_signups) ONLY. See
+-- ball_guest_cash_split.sql.
 create or replace function public.ball_guard_version()
-returns int language sql immutable as $$ select 5 $$;
+returns int language sql immutable as $$ select 6 $$;
 
 
 -- ── is_ball_dress() — female-dress approvers ONLY ──────────────────────────
@@ -187,6 +191,7 @@ end $$;
 
 -- ── ball_guests_column_guard() ──────────────────────────────────────────
 -- S-6                    → anything.
+-- Ops (reviewer)         → friend_cash_received ONLY.
 -- Dress OR attire staff  → dress_approved / dress_approved_by ONLY.
 -- anyone else            → denied.
 create or replace function public.ball_guests_column_guard()
@@ -197,6 +202,35 @@ begin
   end if;
 
   if public.is_s6() then
+    return new;
+  end if;
+
+  if public.is_reviewer() then
+    if new.signup_id              is distinct from old.signup_id
+       or new.name                is distinct from old.name
+       or new.age                 is distinct from old.age
+       or new.gender               is distinct from old.gender
+       or new.is_sdhs_jrotc        is distinct from old.is_sdhs_jrotc
+       or new.sdhs_matched_cadet_id is distinct from old.sdhs_matched_cadet_id
+       or new.other_jrotc          is distinct from old.other_jrotc
+       or new.other_jrotc_school   is distinct from old.other_jrotc_school
+       or new.school_attended      is distinct from old.school_attended
+       or new.poc_name             is distinct from old.poc_name
+       or new.poc_email            is distinct from old.poc_email
+       or new.poc_phone            is distinct from old.poc_phone
+       or new.personal_email       is distinct from old.personal_email
+       or new.verification_token   is distinct from old.verification_token
+       or new.allergies            is distinct from old.allergies
+       or new.dress_code_accepted_at is distinct from old.dress_code_accepted_at
+       or new.verified_at          is distinct from old.verified_at
+       or new.guest_type           is distinct from old.guest_type
+       or new.friend_payment_method is distinct from old.friend_payment_method
+       or new.friend_amount_due    is distinct from old.friend_amount_due
+       or new.dress_approved       is distinct from old.dress_approved
+       or new.dress_approved_by    is distinct from old.dress_approved_by
+    then
+      raise exception 'ops staff may only change friend_cash_received';
+    end if;
     return new;
   end if;
 
@@ -221,6 +255,7 @@ begin
        or new.guest_type           is distinct from old.guest_type
        or new.friend_payment_method is distinct from old.friend_payment_method
        or new.friend_amount_due    is distinct from old.friend_amount_due
+       or new.friend_cash_received is distinct from old.friend_cash_received
     then
       raise exception 'dress/attire staff may only change dress_approved / dress_approved_by';
     end if;
@@ -245,7 +280,7 @@ create trigger ball_guests_column_guard_trg
 
 -- ============================================================================
 -- VERIFY AFTER RUNNING:
---   select public.ball_guard_version();                                   -- 4
+--   select public.ball_guard_version();                                   -- 6
 --   select tgname from pg_trigger where tgrelid = 'public.ball_signups'::regclass; -- includes ball_signups_column_guard_trg
 --   -- as a seeded 'male_guest_attire' session:
 --   --   select public.is_ball_dress(), public.is_ball_attire();          -- f, t

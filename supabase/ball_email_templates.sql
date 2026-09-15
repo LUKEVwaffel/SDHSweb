@@ -96,6 +96,19 @@ Your registration for the Trojan Battalion Military Ball has been received and r
     ''
   ),
   (
+    'payment_reminder',
+    'Payment / form reminder (manual blast)',
+    'Sent to every fully-verified cadet who still owes cash and/or a field-trip form, ONLY when S-6 clicks "Send Reminders" on the Ball Overview tab — never automatic. {{what}} lists what remains for that cadet.',
+    '{{cadet_name}} {{what}} {{deadline}} {{dress_note}}',
+    'Military Ball: payment / form reminder',
+    'A Few Things Still Needed',
+    '{{cadet_name}},
+
+Your Military Ball registration is still missing the following:',
+    'Please turn this in by {{deadline}}.',
+    '{{dress_note}}'
+  ),
+  (
     'allergy_flag',
     'New allergy flag (S-5)',
     'Sent to every S-5 when a cadet submits a signup with a food allergy flagged. {{contact}} = the cadet''s phone and/or email, or a note that neither is on file.',

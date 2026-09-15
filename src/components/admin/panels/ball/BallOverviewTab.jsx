@@ -93,6 +93,8 @@ export default function BallOverviewTab() {
   const [err, setErr] = useState('');
   const [q, setQ] = useState('');
   const [openId, setOpenId] = useState(null);
+  const [reminderBusy, setReminderBusy] = useState(false);
+  const [reminderFlash, setReminderFlash] = useState(null); // { tone: 'ok' | 'err', msg }
 
   const load = useCallback(async () => {
     const [{ data: s, error: sErr }, { data: g, error: gErr }] = await Promise.all([
@@ -108,6 +110,35 @@ export default function BallOverviewTab() {
   }, []);
 
   useEffect(() => { load(); }, [load]);
+
+  // Manual blast — never automatic. Dry-run first so S-6 confirms a real
+  // headcount before anything sends (send-ball-reminders/index.ts).
+  async function sendReminders() {
+    setReminderBusy(true);
+    setReminderFlash(null);
+    const { data: dry, error: dryErr } = await SB.functions.invoke('send-ball-reminders', { body: { dry_run: true } });
+    if (dryErr || dry?.error) {
+      setReminderBusy(false);
+      setReminderFlash({ tone: 'err', msg: `Could not check candidates: ${dry?.error || dryErr.message}` });
+      return;
+    }
+    if (!dry.candidates) {
+      setReminderBusy(false);
+      setReminderFlash({ tone: 'ok', msg: 'Nobody is outstanding on cash or forms right now.' });
+      return;
+    }
+    if (!confirm(`Send a payment/form reminder to ${dry.candidates} cadet${dry.candidates === 1 ? '' : 's'} still outstanding? This emails them now.`)) {
+      setReminderBusy(false);
+      return;
+    }
+    const { data, error } = await SB.functions.invoke('send-ball-reminders', { body: {} });
+    setReminderBusy(false);
+    if (error || data?.error) {
+      setReminderFlash({ tone: 'err', msg: `Send failed: ${data?.error || error.message}` });
+      return;
+    }
+    setReminderFlash({ tone: 'ok', msg: `Sent ${data.sent} reminder${data.sent === 1 ? '' : 's'}${data.failed ? ` (${data.failed} failed)` : ''}.` });
+  }
 
   const { list, stats } = useMemo(() => {
     const rows = signups || [];
@@ -147,8 +178,29 @@ export default function BallOverviewTab() {
       <div className="rv-shell" style={SHELL}>
         <div className="bp-head">
           <h1 className="bp-title">Ball Signups</h1>
-          <button className="bp-refresh" onClick={load}>Refresh</button>
+          <div style={{ display: 'flex', gap: 8 }}>
+            <button className="bp-refresh" onClick={sendReminders} disabled={reminderBusy}>
+              {reminderBusy ? 'Working…' : 'Send Reminders'}
+            </button>
+            <button className="bp-refresh" onClick={load}>Refresh</button>
+          </div>
         </div>
+
+        {reminderFlash && (
+          <div
+            role="status"
+            style={{
+              display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12,
+              border: `1px solid ${reminderFlash.tone === 'err' ? 'var(--rv-red)' : 'var(--rv-green)'}`,
+              background: reminderFlash.tone === 'err' ? 'var(--rv-red-soft)' : 'var(--rv-green-soft)',
+              color: reminderFlash.tone === 'err' ? 'var(--rv-red)' : 'var(--rv-green)',
+              borderRadius: 'var(--rv-radius)', padding: '10px 14px', fontSize: 13, marginBottom: 14,
+            }}
+          >
+            <span>{reminderFlash.msg}</span>
+            <button className="rv-link" style={{ margin: 0, color: 'inherit' }} onClick={() => setReminderFlash(null)}>Dismiss</button>
+          </div>
+        )}
 
         <div className="bp-stats">
           <span className="bp-stat"><b>{stats.total}</b> signups</span>

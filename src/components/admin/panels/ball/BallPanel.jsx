@@ -20,8 +20,9 @@ const BUCKET = 'ball-assets';
 // S-6-only Ball admin panel. Settings tab covers the full public-landing +
 // wizard config surface (dates, venue, dinner + flat menu, split pricing,
 // dress approvers + code + PDF, Weston contact, gallery). Attire Staff
-// Accounts provisions the female-dress approvers' PINs AND Weston's
-// male-guest-attire PIN (see ball-dress-set-pin's role param).
+// Accounts provisions the female-dress approvers AND Weston's male-guest-
+// attire access — email-only login, no PIN (see ball-dress-set-pin's role
+// param).
 export default function BallPanel() {
   const [tab, setTab] = useState('overview');
   const [config, setConfig] = useState(null);
@@ -39,7 +40,7 @@ export default function BallPanel() {
       SB.from('ball_gallery').select('*').order('sort_order', { ascending: true }),
     ]);
     setConfig(cfg || {
-      ball_date: '', signup_deadline: '', event_time_text: '', venue_address: '', venue_phone: '',
+      ball_date: '', signup_deadline: '', payment_deadline: '', dress_deadline: '', event_time_text: '', venue_address: '', venue_phone: '',
       dinner_caterer: '', dinner_menu: [], price_cadet: '', price_couple: '',
       field_trip_form_pdf_url: '', dress_code_text: '',
     });
@@ -67,6 +68,8 @@ export default function BallPanel() {
     const { error } = await SB.from('ball_config').update({
       ball_date: config.ball_date || null,
       signup_deadline: config.signup_deadline || null,
+      payment_deadline: config.payment_deadline || null,
+      dress_deadline: config.dress_deadline || null,
       event_time_text: config.event_time_text || null,
       venue_address: config.venue_address || null,
       venue_phone: config.venue_phone || null,
@@ -145,6 +148,11 @@ export default function BallPanel() {
             <div><Label>EVENT TIME (text)</Label><Input value={config.event_time_text || ''} onChange={(e) => setField('event_time_text', e.target.value)} placeholder="5:00-9:00 PM" /></div>
           </div>
 
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: sp[3], marginBottom: sp[4] }}>
+            <div><Label>PAYMENT / FORM DEADLINE (used in reminder emails)</Label><Input type="date" value={config.payment_deadline || ''} onChange={(e) => setField('payment_deadline', e.target.value)} /></div>
+            <div><Label>DRESS APPROVAL DEADLINE (unapproved dresses get flagged)</Label><Input type="date" value={config.dress_deadline || ''} onChange={(e) => setField('dress_deadline', e.target.value)} /></div>
+          </div>
+
           <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr', gap: sp[3], marginBottom: sp[4] }}>
             <div><Label>VENUE ADDRESS</Label><Input value={config.venue_address || ''} onChange={(e) => setField('venue_address', e.target.value)} placeholder="1000 Alhambra Dr, Chattanooga, TN 37421" /></div>
             <div><Label>VENUE PHONE</Label><Input value={config.venue_phone || ''} onChange={(e) => setField('venue_phone', e.target.value)} placeholder="(423) 892-0223" /></div>
@@ -199,7 +207,7 @@ export default function BallPanel() {
             </div>
           </div>
           <div style={{ fontFamily: mono, fontSize: 11, color: P.mute, marginBottom: sp[4], lineHeight: 1.6 }}>
-            Names and numbers are hardcoded (src/lib/ballApprovers.js) — a change needs a deploy. This panel only provisions their portal PIN logins under "Attire Staff Accounts". New-signup email alerts go to whatever addresses are set on those accounts (female signup → female-dress staff, male-guest signup → Weston).
+            Names and numbers are hardcoded (src/lib/ballApprovers.js) — a change needs a deploy. This panel only provisions their email-only portal logins under "Attire Staff Accounts". New-signup email alerts go to whatever addresses are set on those accounts (female signup → female-dress staff, male-guest signup → Weston).
           </div>
 
           <Label>LAST YEAR'S PHOTOS</Label>

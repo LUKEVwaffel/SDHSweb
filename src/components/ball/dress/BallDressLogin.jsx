@@ -2,14 +2,13 @@ import { useState, useRef } from 'react';
 import { supabase as SB } from '../../../lib/supabaseClient';
 import '../../review/review.css';
 
-// PIN-only login for the 3 dress verifiers (new population — no password
-// account, S-6 provisions the PIN via ball-dress-set-pin). Same
-// email+PIN→verifyOtp flow as ReviewLogin's pin mode, just pointed at the
-// new ball-dress-pin-login edge fn and with no password fallback mode since
-// these accounts never get a password.
+// Email-only login for the dress + male-guest-attire approvers. No password,
+// no PIN — if the address is an active ball_dress_staff row, ball-dress-email-
+// login mints a session for it (role scoping still enforced server-side by
+// is_ball_dress() / is_ball_attire()). Shares the same email→verifyOtp shape
+// as the old PIN flow, minus the PIN.
 export default function BallDressLogin({ onSignedIn, notice, heading = 'Dress Approval' }) {
   const [email, setEmail] = useState('');
-  const [pin, setPin] = useState('');
   const [err, setErr] = useState('');
   const [busy, setBusy] = useState(false);
   const [shake, setShake] = useState(false);
@@ -22,51 +21,44 @@ export default function BallDressLogin({ onSignedIn, notice, heading = 'Dress Ap
     shakeTimer.current = setTimeout(() => setShake(false), 420);
   }
 
-  async function attemptPin(value) {
-    if (!email.trim()) { setErr('Enter your email first.'); return; }
+  async function attempt() {
+    const account = email.trim().toLowerCase();
+    if (!account.includes('@')) { setErr('Enter your email.'); return; }
     setBusy(true);
     setErr('');
-    const { data, error } = await SB.functions.invoke('ball-dress-pin-login', {
-      body: { email: email.trim(), pin: value },
+    const { data, error } = await SB.functions.invoke('ball-dress-email-login', {
+      body: { email: account },
     });
     if (error || data?.error) {
       setBusy(false);
-      setPin('');
-      if (data?.error === 'locked') fail(`Locked. Too many tries. Try again after ${new Date(data.until).toLocaleTimeString()}.`);
-      else fail(typeof data?.remaining === 'number' ? `Wrong PIN, ${data.remaining} left before lockout.` : 'Incorrect email or PIN.');
+      fail("That email isn't set up as an attire approver.");
       return;
     }
     const { error: otpErr } = await SB.auth.verifyOtp({ token_hash: data.token_hash, type: 'magiclink' });
     setBusy(false);
-    if (otpErr) { setPin(''); fail('Sign-in failed.'); return; }
+    if (otpErr) { fail('Sign-in failed.'); return; }
     onSignedIn();
   }
 
-  function onPinChange(v) {
-    const digits = v.replace(/\D/g, '').slice(0, 4);
-    setPin(digits);
-    setErr('');
-    if (digits.length === 4 && !busy) attemptPin(digits);
+  function onKeyDown(e) {
+    if (e.key === 'Enter' && !busy) attempt();
   }
 
   return (
     <div className={`rv-panel${shake ? ' rv-shake' : ''}`}>
       <h1 className="rv-h1" style={{ fontSize: 20, marginBottom: 6 }}>Sign in to {heading}</h1>
-      <p className="rv-sub" style={{ marginTop: 0, marginBottom: 22, fontSize: 14 }}>{notice || 'Enter your email and 4-digit PIN.'}</p>
+      <p className="rv-sub" style={{ marginTop: 0, marginBottom: 22, fontSize: 14 }}>{notice || 'Enter the email you were set up with.'}</p>
       <label className="rv-label">Email</label>
       <input
         type="email" value={email} autoFocus autoComplete="username"
         onChange={(e) => { setEmail(e.target.value); setErr(''); }}
+        onKeyDown={onKeyDown}
         className="rv-textarea" style={{ marginBottom: 16 }}
       />
-      <label className="rv-label">4-digit PIN</label>
-      <input
-        type="password" inputMode="numeric" value={pin}
-        onChange={(e) => onPinChange(e.target.value)} disabled={busy}
-        className="rv-textarea"
-        style={{ marginBottom: 16, letterSpacing: '0.6em', textAlign: 'center', fontSize: 20 }}
-      />
-      {err && <div className="rv-flash" style={{ marginBottom: 16, marginTop: -4 }}>{err}</div>}
+      <button className="rv-btn primary" disabled={busy} onClick={attempt} style={{ width: '100%' }}>
+        {busy ? 'Signing in…' : 'Continue'}
+      </button>
+      {err && <div className="rv-flash" style={{ marginTop: 16 }}>{err}</div>}
     </div>
   );
 }

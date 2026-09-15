@@ -37,6 +37,10 @@ begin
     where table_schema = 'public' and table_name = 'ball_signups' and column_name = 'amount_due') then
     raise exception 'ball_ops_dress_views_fix.sql: run ball_guest_model.sql first (ball_signups.amount_due missing)';
   end if;
+  if not exists (select 1 from information_schema.columns
+    where table_schema = 'public' and table_name = 'ball_guests' and column_name = 'friend_cash_received') then
+    raise exception 'ball_ops_dress_views_fix.sql: run ball_guest_cash_split.sql first (ball_guests.friend_cash_received missing)';
+  end if;
 end $$;
 
 
@@ -51,11 +55,14 @@ with (security_barrier = true) as
   where public.is_reviewer();
 grant select on public.ball_signups_ops_view to authenticated;
 
+-- NB: friend_cash_received (ball_guest_cash_split.sql) is included below so a
+-- stray re-run of THIS file after that one can't silently drop the column
+-- from the view again.
 drop view if exists public.ball_guests_ops_view;
 create view public.ball_guests_ops_view
 with (security_barrier = true) as
   select id, signup_id, name, age, guest_type, is_sdhs_jrotc, school_attended,
-         friend_payment_method, friend_amount_due
+         friend_payment_method, friend_amount_due, friend_cash_received
   from public.ball_guests
   where public.is_reviewer();
 grant select on public.ball_guests_ops_view to authenticated;

@@ -19,7 +19,7 @@ function exportCsv(rows, guestsBySignup) {
   const headers = [
     'Cadet', 'LET', 'Company', 'Status', 'Guest', 'Guest Type', 'Guest Age',
     'Host Owes', 'Friend Owes', 'Friend Payment Method',
-    'Cash Received', 'Field Trip Form Required', 'Field Trip Form Received',
+    'Cash Received', 'Friend Cash Received', 'Field Trip Form Required', 'Field Trip Form Received',
     'Guest POC Name', 'Guest POC Phone', 'Guest POC Email', 'Guest Personal Email', 'Cadet Contact Email',
   ];
   const lines = [headers.join(',')];
@@ -30,6 +30,7 @@ function exportCsv(rows, guestsBySignup) {
       g?.name, g?.guest_type, g?.age,
       r.amount_due, g?.friend_amount_due, g?.friend_payment_method,
       r.cash_received ? 'Yes' : 'No',
+      g?.guest_type === 'friend' && g?.friend_payment_method === 'self_pays' ? (g?.friend_cash_received ? 'Yes' : 'No') : '',
       r.field_trip_form_required ? 'Yes' : 'No',
       r.field_trip_form_received ? 'Yes' : 'No',
       g?.poc_name, g?.poc_phone, g?.poc_email, g?.personal_email, r.notification_email,
@@ -122,15 +123,26 @@ export default function BallOpsPortal() {
     setConfirmTarget(null);
   }
 
+  // friend_cash_received lives on ball_guests (the friend's OWN $35, separate
+  // handoff from the host's cash_received on ball_signups) — everything else
+  // (cash_received, field_trip_form_received) lives on ball_signups.
+  const isGuestField = (field) => field === 'friend_cash_received';
+
   async function applyToggle(row, field, guest) {
-    const label = field === 'cash_received' ? 'cash payment' : 'field trip form';
-    const turningOn = !row[field];
-    const who = `${row.cadet_name}${guest?.name ? ` (+ ${guest.name})` : ''}`;
+    const onGuest = isGuestField(field);
+    const label = field === 'cash_received' ? 'cash payment'
+      : field === 'friend_cash_received' ? "guest's cash payment"
+      : 'field trip form';
+    const current = onGuest ? guest?.[field] : row[field];
+    const turningOn = !current;
+    const who = onGuest ? (guest?.name || 'guest') : `${row.cadet_name}${guest?.name ? ` (+ ${guest.name})` : ''}`;
 
     setConfirmTarget(null);
     setBusyId(row.id);
     setFlash(null);
-    const { error } = await SB.from('ball_signups').update({ [field]: turningOn }).eq('id', row.id);
+    const { error } = onGuest
+      ? await SB.from('ball_guests').update({ [field]: turningOn }).eq('id', guest.id)
+      : await SB.from('ball_signups').update({ [field]: turningOn }).eq('id', row.id);
     if (error) {
       setBusyId(null);
       setFlash({ tone: 'err', msg: `Could not update: ${error.message}` });
@@ -138,7 +150,9 @@ export default function BallOpsPortal() {
     }
     // Notification is fire-and-forget — a failed email must not block the flip.
     await SB.functions
-      .invoke('notify-ball-status-update', { body: { signup_id: row.id, field: field === 'cash_received' ? 'cash' : 'form' } })
+      .invoke('notify-ball-status-update', {
+        body: { signup_id: row.id, field: field === 'cash_received' ? 'cash' : field === 'friend_cash_received' ? 'friend_cash' : 'form' },
+      })
       .catch(() => {});
     await loadAll();
     setBusyId(null);
@@ -146,7 +160,17 @@ export default function BallOpsPortal() {
     setFlash({ tone: 'ok', msg: `${Label} ${turningOn ? 'marked received' : 'revoked'} for ${who}.` });
   }
 
-  const settled = (r) => r.cash_received && (!r.field_trip_form_required || r.field_trip_form_received);
+  // A self_pays friend owes their own $35 in a separate handoff — settled
+  // requires BOTH the host's cash_received AND the friend's own
+  // friend_cash_received. host_delivers (or any 'date' guest) is one handoff,
+  // covered by cash_received alone.
+  const needsFriendCash = (r, g) => g?.guest_type === 'friend' && g?.friend_payment_method === 'self_pays';
+  const settled = useCallback((r) => {
+    const g = guestsBySignup[r.id];
+    return r.cash_received
+      && (!needsFriendCash(r, g) || g.friend_cash_received)
+      && (!r.field_trip_form_required || r.field_trip_form_received);
+  }, [guestsBySignup]);
 
   const { needsAction, awaiting, done } = useMemo(() => {
     const term = q.trim().toLowerCase();
@@ -164,7 +188,7 @@ export default function BallOpsPortal() {
       awaiting: v.filter((r) => r.status === 'guest_pending'),
       done: v.filter((r) => r.status === 'fully_verified' && settled(r)),
     };
-  }, [rows, guestsBySignup, q]);
+  }, [rows, guestsBySignup, q, settled]);
 
   const shell = (children) => (
     <div className="rv">
@@ -180,6 +204,7 @@ export default function BallOpsPortal() {
   if (phase === 'error') return shell(<div className="rv-panel" style={{ borderColor: '#dcbdb6' }}><h1 className="rv-h1" style={{ fontSize: 20 }}>Something went wrong</h1><p className="rv-sub">{errorMsg}</p></div>);
 
   const totalVerified = rows.filter((r) => r.status === 'fully_verified').length;
+  const totalGuests = rows.filter((r) => guestsBySignup[r.id]).length;
 
   return shell(
     <div>
@@ -199,6 +224,7 @@ export default function BallOpsPortal() {
         <span className={`bp-stat ${needsAction.length ? 'is-alert' : ''}`}><b>{needsAction.length}</b> need action</span>
         <span className="bp-stat"><b>{awaiting.length}</b> awaiting guest</span>
         <span className={`bp-stat ${done.length === totalVerified && totalVerified > 0 ? 'is-done' : ''}`}><b>{done.length}</b> settled</span>
+        <span className="bp-stat"><b>{totalGuests}</b> guests</span>
       </div>
 
       {flash && (
@@ -282,12 +308,17 @@ function ContactLine({ label, name, phone, email }) {
 
 function OpsRow({ r, guest, busy, confirming, onRequestToggle, onConfirm, onCancel, state }) {
   const friend = guest?.guest_type === 'friend';
+  const friendPaysOwnCash = friend && guest?.friend_payment_method === 'self_pays';
   const hasContact = guest?.poc_name || guest?.poc_phone || guest?.poc_email
     || guest?.personal_email || r.notification_email;
 
-  const confirmLabel = confirming === 'cash_received' ? 'cash payment' : 'field trip form';
-  const confirmTurningOn = confirming ? !r[confirming] : false;
-  const who = `${r.cadet_name}${guest?.name ? ` (+ ${guest.name})` : ''}`;
+  const confirmLabel = confirming === 'cash_received' ? 'cash payment'
+    : confirming === 'friend_cash_received' ? "guest's cash payment"
+    : 'field trip form';
+  const confirmOnGuest = confirming === 'friend_cash_received';
+  const confirmCurrent = confirmOnGuest ? guest?.friend_cash_received : r[confirming];
+  const confirmTurningOn = confirming ? !confirmCurrent : false;
+  const who = confirmOnGuest ? (guest?.name || 'guest') : `${r.cadet_name}${guest?.name ? ` (+ ${guest.name})` : ''}`;
 
   return (
     <div className={`bp-row is-${state}`}>
@@ -354,6 +385,16 @@ function OpsRow({ r, guest, busy, confirming, onRequestToggle, onConfirm, onCanc
             >
               {r.cash_received ? '✓ Cash — revoke' : 'Cash received'}
             </button>
+            {friendPaysOwnCash && (
+              <button
+                className={`bp-toggle ${guest.friend_cash_received ? 'is-on' : ''}`}
+                disabled={busy}
+                title={guest.friend_cash_received ? "Click to revoke guest's cash received" : "Click to mark guest's cash received"}
+                onClick={() => onRequestToggle(r, 'friend_cash_received')}
+              >
+                {guest.friend_cash_received ? '✓ Guest cash — revoke' : 'Guest cash received'}
+              </button>
+            )}
             {r.field_trip_form_required && (
               <button
                 className={`bp-toggle ${r.field_trip_form_received ? 'is-on' : ''}`}
