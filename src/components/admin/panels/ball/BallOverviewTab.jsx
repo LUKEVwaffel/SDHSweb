@@ -158,8 +158,17 @@ export default function BallOverviewTab() {
         total: rows.length,
         verified: verified.length,
         awaiting: rows.filter((r) => r.status === 'guest_pending').length,
-        cashOut: verified.filter((r) => !r.cash_received).length,
-        formOut: verified.filter((r) => r.field_trip_form_required && !r.field_trip_form_received).length,
+        cashOut: verified.filter((r) => {
+          const g = guestBySignup[r.id];
+          const needsFriendCash = g?.guest_type === 'friend' && g.friend_payment_method === 'self_pays';
+          return !r.cash_received || (needsFriendCash && !g.friend_cash_received);
+        }).length,
+        formOut: verified.filter((r) => {
+          if (!r.field_trip_form_required) return false;
+          if (!r.field_trip_form_received) return true;
+          const g = guestBySignup[r.id];
+          return !!g && !g.field_trip_form_received;
+        }).length,
         allergies: rows.filter((r) => r.cadet_has_allergy).length,
       },
     };
@@ -245,9 +254,11 @@ export default function BallOverviewTab() {
 function SignupItem({ r, guest, open, onToggle, onChanged }) {
   const [editing, setEditing] = useState(false);
   const verified = r.status === 'fully_verified';
-  const cashDone = r.cash_received;
+  const needsFriendCash = guest?.guest_type === 'friend' && guest.friend_payment_method === 'self_pays';
+  const needsGuestForm = r.field_trip_form_required && !!guest;
+  const cashDone = r.cash_received && (!needsFriendCash || guest.friend_cash_received);
   const formNeeded = r.field_trip_form_required;
-  const formDone = !formNeeded || r.field_trip_form_received;
+  const formDone = !formNeeded || (r.field_trip_form_received && (!needsGuestForm || guest.field_trip_form_received));
   const settled = verified && cashDone && formDone;
 
   return (
@@ -282,8 +293,8 @@ function SignupItem({ r, guest, open, onToggle, onChanged }) {
               <Field label="Phone" value={r.cadet_phone} />
               <Field label="Age" value={r.cadet_age} />
               <Field label="Amount due" value={money(r.amount_due)} />
-              <Field label="Cash received" value={r.cash_received ? 'yes' : 'no'} />
-              <Field label="Field-trip form" value={!r.field_trip_form_required ? 'not required' : r.field_trip_form_received ? 'received' : 'outstanding'} />
+              <Field label="Cash received (host)" value={r.cash_received ? 'yes' : 'no'} />
+              <Field label="Field-trip form (host)" value={!r.field_trip_form_required ? 'not required' : r.field_trip_form_received ? 'received' : 'outstanding'} />
               <Field label="Dress approved" value={r.dress_approved == null ? 'n/a' : r.dress_approved ? `yes — ${r.dress_approved_by?.split('@')[0] || ''}` : 'no'} />
               <Field label="Allergy" value={!r.cadet_has_allergy ? 'none flagged' : `${r.allergy_status}${r.allergy_contacted_at ? ` ${fmt(r.allergy_contacted_at)}` : ''}`} />
               {r.cadet_has_allergy && <Field label="Allergy email" value={r.cadet_allergy_email} />}
@@ -305,6 +316,8 @@ function SignupItem({ r, guest, open, onToggle, onChanged }) {
                 {guest.other_jrotc && <Field label="Other JROTC" value={guest.other_jrotc_school || 'yes'} />}
                 {guest.guest_type === 'friend' && <Field label="Friend owes" value={money(guest.friend_amount_due)} />}
                 {guest.guest_type === 'friend' && <Field label="Friend pays via" value={guest.friend_payment_method === 'host_delivers' ? 'host brings it' : 'friend pays direct'} />}
+                {guest.guest_type === 'friend' && guest.friend_payment_method === 'self_pays' && <Field label="Guest cash received" value={guest.friend_cash_received ? 'yes' : 'no'} />}
+                {r.field_trip_form_required && <Field label="Field-trip form (guest)" value={guest.field_trip_form_received ? 'received' : 'outstanding'} />}
                 <Field label="POC" value={guest.poc_name} />
                 <Field label="POC email" value={guest.poc_email} />
                 <Field label="POC phone" value={guest.poc_phone} />
@@ -426,6 +439,8 @@ function EditForm({ r, guest, onDone }) {
     friend_amount_due: guest.friend_amount_due ?? '',
     friend_payment_method: guest.friend_payment_method || null,
     dress_approved: guest.dress_approved,
+    friend_cash_received: guest.friend_cash_received,
+    field_trip_form_received: guest.field_trip_form_received,
   } : null);
   const [busy, setBusy] = useState(false);
   const [err, setErr] = useState('');
@@ -469,6 +484,8 @@ function EditForm({ r, guest, onDone }) {
         poc_phone: g.poc_phone.trim() || null,
         friend_amount_due: g.guest_type === 'friend' ? numOrNull(g.friend_amount_due) : null,
         friend_payment_method: g.guest_type === 'friend' ? g.friend_payment_method : null,
+        friend_cash_received: g.guest_type === 'friend' ? !!g.friend_cash_received : false,
+        field_trip_form_received: !!g.field_trip_form_received,
         dress_approved: g.dress_approved,
       };
       ({ error: e2 } = await SB.from('ball_guests').update(gPatch).eq('id', guest.id));
@@ -495,7 +512,7 @@ function EditForm({ r, guest, onDone }) {
         </div>
         <div style={{ display: 'flex', flexWrap: 'wrap', gap: 16, marginTop: 12 }}>
           <ECheck label="Field trip form required" checked={s.field_trip_form_required} onChange={(v) => setSF('field_trip_form_required', v)} />
-          <ECheck label="Field trip form received" checked={s.field_trip_form_received} onChange={(v) => setSF('field_trip_form_received', v)} />
+          <ECheck label="Field trip form received (host)" checked={s.field_trip_form_received} onChange={(v) => setSF('field_trip_form_received', v)} />
           <ECheck label="Cash received" checked={s.cash_received} onChange={(v) => setSF('cash_received', v)} />
           <ECheck label="Dress approved" checked={s.dress_approved} onChange={(v) => setSF('dress_approved', v)} />
           <ECheck label="Has allergy" checked={s.cadet_has_allergy} onChange={(v) => setSF('cadet_has_allergy', v)} />
@@ -525,8 +542,12 @@ function EditForm({ r, guest, onDone }) {
             {g.guest_type === 'friend' && <EText label="Friend owes ($)" value={g.friend_amount_due} onChange={(v) => setGF('friend_amount_due', v)} inputMode="decimal" />}
             {g.guest_type === 'friend' && <ESelect label="Friend pays via" value={g.friend_payment_method} onChange={(v) => setGF('friend_payment_method', v)} options={FPAY_OPTS} />}
           </div>
-          <div style={{ marginTop: 12 }}>
+          <div style={{ display: 'flex', flexWrap: 'wrap', gap: 16, marginTop: 12 }}>
             <ECheck label="Guest dress approved" checked={g.dress_approved} onChange={(v) => setGF('dress_approved', v)} />
+            {g.guest_type === 'friend' && g.friend_payment_method === 'self_pays' && (
+              <ECheck label="Guest cash received" checked={g.friend_cash_received} onChange={(v) => setGF('friend_cash_received', v)} />
+            )}
+            <ECheck label="Field trip form received (guest)" checked={g.field_trip_form_received} onChange={(v) => setGF('field_trip_form_received', v)} />
           </div>
         </div>
       )}

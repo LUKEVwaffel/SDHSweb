@@ -14,12 +14,26 @@ function csvCell(v) {
   return /[",\n]/.test(s) ? `"${s.replace(/"/g, '""')}"` : s;
 }
 
+// Every toggle in this portal, keyed by a UI-facing field id, resolved to the
+// table/column it actually writes and the human label used in confirm/flash
+// copy. 'guest_field_trip_form_received' is a synthetic id — ball_guests and
+// ball_signups both have a real column named field_trip_form_received (the
+// host's own vs. the guest's own), so the UI key has to be distinct even
+// though the DB column name is the same on the guest side.
+const FIELD_TARGETS = {
+  cash_received: { table: 'ball_signups', column: 'cash_received', label: 'cash payment', notify: 'cash' },
+  field_trip_form_received: { table: 'ball_signups', column: 'field_trip_form_received', label: 'field trip form', notify: 'form' },
+  friend_cash_received: { table: 'ball_guests', column: 'friend_cash_received', label: "guest's cash payment", notify: 'friend_cash' },
+  guest_field_trip_form_received: { table: 'ball_guests', column: 'field_trip_form_received', label: "guest's field trip form", notify: 'guest_form' },
+};
+
 // Kaz runs everything through a spreadsheet — dump the full ops queue as CSV.
 function exportCsv(rows, guestsBySignup) {
   const headers = [
     'Cadet', 'LET', 'Company', 'Status', 'Guest', 'Guest Type', 'Guest Age',
     'Host Owes', 'Friend Owes', 'Friend Payment Method',
-    'Cash Received', 'Friend Cash Received', 'Field Trip Form Required', 'Field Trip Form Received',
+    'Cash Received', 'Friend Cash Received', 'Field Trip Form Required',
+    'Host Form Received', 'Guest Form Received',
     'Guest POC Name', 'Guest POC Phone', 'Guest POC Email', 'Guest Personal Email', 'Cadet Contact Email',
   ];
   const lines = [headers.join(',')];
@@ -33,6 +47,7 @@ function exportCsv(rows, guestsBySignup) {
       g?.guest_type === 'friend' && g?.friend_payment_method === 'self_pays' ? (g?.friend_cash_received ? 'Yes' : 'No') : '',
       r.field_trip_form_required ? 'Yes' : 'No',
       r.field_trip_form_received ? 'Yes' : 'No',
+      r.field_trip_form_required && g ? (g?.field_trip_form_received ? 'Yes' : 'No') : '',
       g?.poc_name, g?.poc_phone, g?.poc_email, g?.personal_email, r.notification_email,
     ].map(csvCell).join(','));
   });
@@ -123,17 +138,10 @@ export default function BallOpsPortal() {
     setConfirmTarget(null);
   }
 
-  // friend_cash_received lives on ball_guests (the friend's OWN $35, separate
-  // handoff from the host's cash_received on ball_signups) — everything else
-  // (cash_received, field_trip_form_received) lives on ball_signups.
-  const isGuestField = (field) => field === 'friend_cash_received';
-
   async function applyToggle(row, field, guest) {
-    const onGuest = isGuestField(field);
-    const label = field === 'cash_received' ? 'cash payment'
-      : field === 'friend_cash_received' ? "guest's cash payment"
-      : 'field trip form';
-    const current = onGuest ? guest?.[field] : row[field];
+    const target = FIELD_TARGETS[field];
+    const onGuest = target.table === 'ball_guests';
+    const current = onGuest ? guest?.[target.column] : row[target.column];
     const turningOn = !current;
     const who = onGuest ? (guest?.name || 'guest') : `${row.cadet_name}${guest?.name ? ` (+ ${guest.name})` : ''}`;
 
@@ -141,8 +149,8 @@ export default function BallOpsPortal() {
     setBusyId(row.id);
     setFlash(null);
     const { error } = onGuest
-      ? await SB.from('ball_guests').update({ [field]: turningOn }).eq('id', guest.id)
-      : await SB.from('ball_signups').update({ [field]: turningOn }).eq('id', row.id);
+      ? await SB.from('ball_guests').update({ [target.column]: turningOn }).eq('id', guest.id)
+      : await SB.from('ball_signups').update({ [target.column]: turningOn }).eq('id', row.id);
     if (error) {
       setBusyId(null);
       setFlash({ tone: 'err', msg: `Could not update: ${error.message}` });
@@ -150,26 +158,28 @@ export default function BallOpsPortal() {
     }
     // Notification is fire-and-forget — a failed email must not block the flip.
     await SB.functions
-      .invoke('notify-ball-status-update', {
-        body: { signup_id: row.id, field: field === 'cash_received' ? 'cash' : field === 'friend_cash_received' ? 'friend_cash' : 'form' },
-      })
+      .invoke('notify-ball-status-update', { body: { signup_id: row.id, field: target.notify } })
       .catch(() => {});
     await loadAll();
     setBusyId(null);
-    const Label = label.charAt(0).toUpperCase() + label.slice(1);
+    const Label = target.label.charAt(0).toUpperCase() + target.label.slice(1);
     setFlash({ tone: 'ok', msg: `${Label} ${turningOn ? 'marked received' : 'revoked'} for ${who}.` });
   }
 
   // A self_pays friend owes their own $35 in a separate handoff — settled
   // requires BOTH the host's cash_received AND the friend's own
   // friend_cash_received. host_delivers (or any 'date' guest) is one handoff,
-  // covered by cash_received alone.
+  // covered by cash_received alone. Same idea for the field trip form: when a
+  // guest exists and a form is required, BOTH the host's own
+  // field_trip_form_received AND the guest's own count toward settled.
   const needsFriendCash = (r, g) => g?.guest_type === 'friend' && g?.friend_payment_method === 'self_pays';
+  const needsGuestForm = (r, g) => r.field_trip_form_required && !!g;
   const settled = useCallback((r) => {
     const g = guestsBySignup[r.id];
     return r.cash_received
       && (!needsFriendCash(r, g) || g.friend_cash_received)
-      && (!r.field_trip_form_required || r.field_trip_form_received);
+      && (!r.field_trip_form_required || r.field_trip_form_received)
+      && (!needsGuestForm(r, g) || g.field_trip_form_received);
   }, [guestsBySignup]);
 
   const { needsAction, awaiting, done } = useMemo(() => {
@@ -309,14 +319,13 @@ function ContactLine({ label, name, phone, email }) {
 function OpsRow({ r, guest, busy, confirming, onRequestToggle, onConfirm, onCancel, state }) {
   const friend = guest?.guest_type === 'friend';
   const friendPaysOwnCash = friend && guest?.friend_payment_method === 'self_pays';
+  const guestNeedsOwnForm = r.field_trip_form_required && !!guest;
   const hasContact = guest?.poc_name || guest?.poc_phone || guest?.poc_email
     || guest?.personal_email || r.notification_email;
 
-  const confirmLabel = confirming === 'cash_received' ? 'cash payment'
-    : confirming === 'friend_cash_received' ? "guest's cash payment"
-    : 'field trip form';
-  const confirmOnGuest = confirming === 'friend_cash_received';
-  const confirmCurrent = confirmOnGuest ? guest?.friend_cash_received : r[confirming];
+  const confirmTarget = confirming ? FIELD_TARGETS[confirming] : null;
+  const confirmOnGuest = confirmTarget?.table === 'ball_guests';
+  const confirmCurrent = confirmTarget ? (confirmOnGuest ? guest?.[confirmTarget.column] : r[confirmTarget.column]) : false;
   const confirmTurningOn = confirming ? !confirmCurrent : false;
   const who = confirmOnGuest ? (guest?.name || 'guest') : `${r.cadet_name}${guest?.name ? ` (+ ${guest.name})` : ''}`;
 
@@ -340,6 +349,7 @@ function OpsRow({ r, guest, busy, confirming, onRequestToggle, onConfirm, onCanc
             </span>
           )}
           {!r.field_trip_form_required && <span className="bp-fact">no field trip form</span>}
+          {guestNeedsOwnForm && <span className="bp-fact">guest needs own field trip form too</span>}
         </div>
 
         {hasContact && (
@@ -364,7 +374,7 @@ function OpsRow({ r, guest, busy, confirming, onRequestToggle, onConfirm, onCanc
         confirming ? (
           <div className="bp-confirm">
             <span className="bp-confirm-msg">
-              {confirmTurningOn ? `Mark ${confirmLabel} received for ${who}?` : `Revoke ${confirmLabel} for ${who}?`}
+              {confirmTurningOn ? `Mark ${confirmTarget.label} received for ${who}?` : `Revoke ${confirmTarget.label} for ${who}?`}
             </span>
             <button
               className={`bp-confirm-yes ${confirmTurningOn ? '' : 'is-revoke'}`}
@@ -399,10 +409,22 @@ function OpsRow({ r, guest, busy, confirming, onRequestToggle, onConfirm, onCanc
               <button
                 className={`bp-toggle ${r.field_trip_form_received ? 'is-on' : ''}`}
                 disabled={busy}
-                title={r.field_trip_form_received ? 'Click to revoke form received' : 'Click to mark form received'}
+                title={r.field_trip_form_received ? 'Click to revoke — HOST form only' : 'Click to mark received — HOST form only'}
                 onClick={() => onRequestToggle(r, 'field_trip_form_received')}
               >
-                {r.field_trip_form_received ? '✓ Form — revoke' : 'Form received'}
+                {r.field_trip_form_received
+                  ? `✓ ${guestNeedsOwnForm ? 'Host form' : 'Field trip form'} — revoke`
+                  : `${guestNeedsOwnForm ? 'Host form' : 'Field trip form'} received`}
+              </button>
+            )}
+            {guestNeedsOwnForm && (
+              <button
+                className={`bp-toggle ${guest.field_trip_form_received ? 'is-on' : ''}`}
+                disabled={busy}
+                title={guest.field_trip_form_received ? "Click to revoke — GUEST's form only" : "Click to mark received — GUEST's form only"}
+                onClick={() => onRequestToggle(r, 'guest_field_trip_form_received')}
+              >
+                {guest.field_trip_form_received ? '✓ Guest form — revoke' : 'Guest form received'}
               </button>
             )}
           </div>

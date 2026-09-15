@@ -16,6 +16,7 @@ const FIELD_LABEL: Record<string, string> = {
   cash: "Cash/check payment has been marked received",
   form: "Your field trip permission form has been marked received",
   friend_cash: "Your guest's cash/check payment has been marked received",
+  guest_form: "Your guest's field trip permission form has been marked received",
 };
 
 Deno.serve(async (req) => {

@@ -49,6 +49,7 @@ interface GuestRow {
   friend_payment_method: string | null;
   friend_amount_due: number | null;
   friend_cash_received: boolean | null;
+  field_trip_form_received: boolean | null;
 }
 
 Deno.serve(async (req) => {
@@ -69,7 +70,7 @@ Deno.serve(async (req) => {
         .select("id, cadet_name, notification_email, amount_due, cash_received, field_trip_form_required, field_trip_form_received")
         .eq("status", "fully_verified"),
       svc.from("ball_guests")
-        .select("signup_id, name, guest_type, friend_payment_method, friend_amount_due, friend_cash_received"),
+        .select("signup_id, name, guest_type, friend_payment_method, friend_amount_due, friend_cash_received, field_trip_form_received"),
       svc.from("ball_config").select("payment_deadline, dress_deadline").maybeSingle(),
     ]);
     if (sErr || gErr) return json({ error: (sErr || gErr)?.message }, 500);
@@ -96,6 +97,12 @@ Deno.serve(async (req) => {
       if (guest?.guest_type === "friend" && guest.friend_payment_method === "self_pays" && !guest.friend_cash_received) {
         const fa = money(guest.friend_amount_due);
         todo.push(`Your friend <strong>${escapeHtml(guest.name || "")}</strong> still owes${fa ? ` <strong>${fa}</strong>` : ""} of their own, which they pay or deliver themselves.`);
+      }
+      // Guest's own field-trip form is tracked separately from the host's —
+      // a guest exists whenever field_trip_form_required is true and it's not
+      // purely the host's own requirement (see ball_guest_form_split.sql).
+      if (row.field_trip_form_required && guest && !guest.field_trip_form_received) {
+        todo.push(`<strong>${escapeHtml(guest.name || "Your guest")}</strong>'s own field trip permission form is also still needed.`);
       }
       if (todo.length) candidates.push({ row, guest, todo });
     }
