@@ -198,6 +198,7 @@
 }
 .bp-phone a { color: var(--rv-ink); text-decoration: none; }
 .bp-phone a:hover { text-decoration: underline; }
+.bp-unverified { color: var(--rv-accent); font-style: italic; }
 .bp-tag {
   font-family: 'JetBrains Mono', monospace;
   font-size: 9.5px;

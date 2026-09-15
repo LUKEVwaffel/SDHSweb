@@ -113,7 +113,7 @@ export default function BallDressPortal() {
     if (!ok) return;
     setBulkBusy(true);
     const { data: { session } } = await SB.auth.getSession();
-    const byKind = (k) => pending.filter((x) => x.kind === k).map((x) => x.id);
+    const byKind = (k) => pending.filter((x) => x.kind === k && !(k === 'guest' && !x.verified_at)).map((x) => x.id);
     await Promise.all(Object.entries(KIND_TABLE).map(([kind, table]) => {
       const ids = byKind(kind);
       return ids.length ? SB.from(table).update({ dress_approved: true, dress_approved_by: session.user.email }).in('id', ids) : null;
@@ -191,6 +191,7 @@ const KIND_TAG = { cadet: 'cadet', guest: 'guest', vip: 'vip', vipdate: 'vip dat
 
 function DressRow({ x, busy, onToggle, state }) {
   const [showPhone, setShowPhone] = useState(false);
+  const unverified = x.kind === 'guest' && !x.verified_at;
   return (
     <div className={`bp-row is-${state}`}>
       <div className="bp-row-main">
@@ -199,14 +200,14 @@ function DressRow({ x, busy, onToggle, state }) {
             type="button"
             className="bp-name bp-name-btn"
             onClick={() => setShowPhone((s) => !s)}
-            disabled={!x.phone}
-            title={x.phone ? 'Show phone number' : 'No phone on file'}
+            disabled={unverified || !x.phone}
+            title={unverified ? 'Guest has not verified yet' : x.phone ? 'Show phone number' : 'No phone on file'}
           >
             {x.name}
           </button>
           <span className="bp-tag">{KIND_TAG[x.kind] || x.kind}</span>
         </div>
-        {showPhone && (
+        {showPhone && !unverified && (
           <div className="bp-phone">
             {x.phone ? <a href={`tel:${x.phone}`}>{x.phone}</a> : 'No phone on file'}
           </div>
@@ -220,13 +221,16 @@ function DressRow({ x, busy, onToggle, state }) {
         {x.kind === 'vipdate' && (
           <div className="bp-meta">date of a past King/Queen</div>
         )}
+        {unverified && (
+          <div className="bp-meta bp-unverified">awaiting guest email verification</div>
+        )}
         {x.dress_approved && x.dress_approved_by && (
           <div className="bp-by">signed off by {byLine(x.dress_approved_by)}</div>
         )}
       </div>
       <div className="bp-actions">
-        <button className={`bp-toggle ${x.dress_approved ? 'is-on' : ''}`} disabled={busy} onClick={() => onToggle(x)}>
-          {x.dress_approved ? '✓ Approved' : 'Mark approved'}
+        <button className={`bp-toggle ${x.dress_approved ? 'is-on' : ''}`} disabled={busy || unverified} onClick={() => onToggle(x)}>
+          {unverified ? 'Not verified yet' : x.dress_approved ? '✓ Approved' : 'Mark approved'}
         </button>
       </div>
     </div>
