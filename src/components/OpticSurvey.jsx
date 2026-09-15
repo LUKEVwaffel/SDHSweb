@@ -101,8 +101,8 @@ export default function OpticSurvey() {
             Sent. Thank you.
           </div>
           <div style={{ fontFamily: 'Inter, sans-serif', fontSize: 14, color: P.cream, maxWidth: 380, lineHeight: 1.65 }}>
-            Every answer gets read. This is what decides whether OPTIC comes back
-            for the Raider competitions coming up.
+            Every answer gets read. This is what tells us exactly what to fix
+            before the next competition.
           </div>
         </Centered>
       </Shell>

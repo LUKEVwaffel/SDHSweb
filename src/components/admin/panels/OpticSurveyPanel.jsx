@@ -52,22 +52,26 @@ function QuestionBreakdown({ q, rows }) {
   );
 }
 
-// Headline: the whole point of this round is "should we run OPTIC again".
-function ReturnSummary({ rows }) {
+// Headline: this round exists to chase specific bugs (notifications, iPhone
+// save), so the top-line number is "how many people hit a real problem",
+// not a return-rate — that question was already answered by the prior round.
+function ProblemSummary({ rows }) {
   const total = rows.length;
   if (!total) return null;
-  const yes = rows.filter((r) => r.will_return === 'definitely' || r.will_return === 'probably').length;
-  const pct = Math.round((yes / total) * 100);
+  const withProblem = rows.filter((r) => r.biggest_problem && r.biggest_problem !== 'none').length;
+  const pct = Math.round((withProblem / total) * 100);
+  const notifBroken = rows.filter((r) => r.notif_experience === 'turned_on_no_alerts' || r.notif_experience === 'tried_couldnt').length;
+  const saveBroken = rows.filter((r) => r.save_photo === 'yes_failed').length;
   return (
     <Card style={{ marginBottom: sp[4], border: `1px solid ${P.gold}` }}>
       <div style={{ fontFamily: mono, fontSize: fs.micro, color: P.gold, letterSpacing: '0.1em', marginBottom: 6 }}>
-        WOULD BRING OPTIC BACK
+        REPORTED A PROBLEM
       </div>
       <div style={{ fontFamily: inter, fontSize: fs.xl, color: P.cream, fontWeight: 600 }}>
-        {yes} of {total} · {pct}%
+        {withProblem} of {total} · {pct}%
       </div>
       <div style={{ fontFamily: mono, fontSize: fs.micro, color: P.mute, marginTop: 4 }}>
-        answered “definitely” or “probably” on the last question
+        {notifBroken} hit broken notifications · {saveBroken} hit a failed save-to-photos
       </div>
     </Card>
   );
@@ -121,7 +125,7 @@ export default function OpticSurveyPanel() {
         <EmptyState icon="◎" title="NO RESPONSES YET" hint="Parent responses from the /survey page appear here." />
       ) : view === 'breakdown' ? (
         <div>
-          <ReturnSummary rows={rows} />
+          <ProblemSummary rows={rows} />
           {QUESTIONS.map((q) => <QuestionBreakdown key={q.id} q={q} rows={rows} />)}
         </div>
       ) : withComments.length === 0 ? (

@@ -84,6 +84,10 @@ export default function StepCadetVerify({ onVerified }) {
       <div style={{ marginTop: 20 }}>
         <Btn type="submit" busy={busy} disabled={!username.trim()}>{busy ? 'CHECKING' : 'FIND ME →'}</Btn>
       </div>
+      <div style={{ fontFamily: mono, fontSize: 11, color: P.mute, marginTop: 22, lineHeight: 1.6 }}>
+        Visiting XO/BC from another JROTC unit, or a past Ball King/Queen?{' '}
+        <a href="/ball/vip" style={{ color: P.gold }}>Sign up here instead</a>.
+      </div>
     </form>
   );
 }

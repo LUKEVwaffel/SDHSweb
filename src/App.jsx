@@ -11,8 +11,14 @@ import TabGrid from './components/TabGrid';
 import Bulletin from './components/Bulletin';
 import EventSpotlightBand from './components/EventSpotlightBand';
 import RaftingPhotoBand from './components/RaftingPhotoBand';
-import OpticHeroStrip from './components/OpticHeroStrip';
-import OpticPromoBand from './components/OpticPromoBand';
+// OPTIC homepage promo (hero strip + promo band + popup) taken down
+// 2026-09-15 — Spring Hill comp is over, feed is closing (rhea_gate ->
+// mode='closed'), and the next push is the post-comp problem survey, not
+// new-user discovery. Files kept on disk; re-add these imports + the two
+// render lines below (OpticHeroStrip in the '/' route, OpticPromoBand in
+// the '/' route) to bring it back for the next comp.
+// import OpticHeroStrip from './components/OpticHeroStrip';
+// import OpticPromoBand from './components/OpticPromoBand';
 // import OpticPopup from './components/OpticPopup'; — see BallSignupPopup note above.
 import HomeNewsletterBand from './components/HomeNewsletterBand';
 import Footer from './components/Footer';
@@ -51,6 +57,7 @@ import BallLanding from './components/ball/BallLanding';
 // bring them back.
 // import BallSignupPopup from './components/ball/BallSignupPopup';
 import BallSignupWizard from './components/ball/signup/BallSignupWizard';
+import BallVipSignup from './components/ball/signup/BallVipSignup';
 import BallGuestVerify from './components/ball/BallGuestVerify';
 import BallOpsPortal from './components/ball/ops/BallOpsPortal';
 import BallDressPortal from './components/ball/dress/BallDressPortal';
@@ -131,7 +138,7 @@ export default function App() {
                 BallSignupPopup + OpticPopup suppressed for now (see imports
                 above) so CongratsPopup is the only one that fires. */}
             <Hero />
-            <OpticHeroStrip />
+            {/* OpticHeroStrip taken down 2026-09-15, see import note above. */}
             {/* "Picture of the Comp" vote band taken down 2026-09-08 — restore <CompPhotoBand /> to bring it back. */}
             <RaftingPhotoBand />
             {/* Disabled via SPOTLIGHT_BAND_ENABLED — kept mounted so re-enabling is a one-flag flip. */}
@@ -139,7 +146,7 @@ export default function App() {
             <BattalionCommand />
             <TabGrid />
             <Bulletin />
-            <OpticPromoBand />
+            {/* OpticPromoBand taken down 2026-09-15, see import note above. */}
             <HomeNewsletterBand />
           </>
         )} />
@@ -159,6 +166,7 @@ export default function App() {
         <Route path="/about" element={<About />} />
         <Route path="/ball" element={<BallLanding />} />
         <Route path="/ball/signup" element={<BallSignupWizard />} />
+        <Route path="/ball/vip" element={<BallVipSignup />} />
         <Route path="/profile/:id" element={<CommandProfile />} />
         <Route path="/:tabId" element={<TabRoute />} />
         <Route path="*" element={<Navigate to="/" replace />} />

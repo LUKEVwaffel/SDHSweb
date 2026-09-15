@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback, useMemo } from 'react';
 import { supabase as SB } from '../../../../lib/supabaseClient';
 import '../../../review/review.css';
 import '../../../ball/portal.css';
+import BallVipList from './BallVipList';
 
 // S-6 full-visibility overview of the Military Ball. Deliberately built on the
 // warm-paper review/portal CSS (.rv / .bp-*), NOT the dark DISPATCH theme —
@@ -246,6 +247,8 @@ export default function BallOverviewTab() {
         <p className="rv-sub" style={{ fontSize: 12, marginTop: 18 }}>
           Open a row to edit any field or delete the signup (guest cascades). Routine flips also live at /ball/ops, /ball/dress, /ball/attire and the Ball Allergies panel.
         </p>
+
+        <BallVipList />
       </div>
     </div>
   );

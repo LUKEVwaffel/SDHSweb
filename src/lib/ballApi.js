@@ -44,6 +44,14 @@ export async function submitSignup(signupToken, payload) {
   return { data };
 }
 
+// VIP path (visiting XO/BC, past King/Queen) — no signupToken, no roster
+// lookup. See ball_vip_signup.sql for why this bypasses the whole cadet flow.
+export async function submitVipSignup(payload) {
+  const { data, error } = await SB.functions.invoke('ball-submit-vip-signup', { body: payload });
+  if (error || data?.error) return { error: await invokeError(data, error, 'Submit failed.') };
+  return { data };
+}
+
 // Read-only: guest gender + name for the verify page, so the dress code shown
 // there can be scoped to this guest. Never mutates.
 export async function guestPeek(token) {

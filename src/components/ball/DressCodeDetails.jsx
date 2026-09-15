@@ -14,6 +14,11 @@ import { openBallDressCodePdf } from '../../lib/ballDressCodePdf';
 //   note   — optional extra line from ball_config.dress_code_text, shown last.
 //   only   — 'female' | 'male' to render just one side (wizard uniform vs
 //            dress sections). Omit to show both.
+//   simple — skip the photo dress-APPROVAL box (the "text a photo, then come
+//            back to this website" flow). That flow is tied to a cadet's or
+//            guest's own signup/token — there's nothing to "come back" to for
+//            a one-off signer like a VIP guest (BallVipSignup.jsx), so it
+//            would just be confusing. Shows a plain contact line instead.
 
 function List({ title, items, tone }) {
   return (
@@ -38,13 +43,22 @@ function Block({ heading, avoid, wear }) {
   );
 }
 
-export default function DressCodeDetails({ note, only }) {
+export default function DressCodeDetails({ note, only, simple }) {
   return (
     <div>
       {only !== 'male' && <Block heading="FEMALES" avoid={FEMALE_AVOID} wear={FEMALE_WEAR} />}
       {only !== 'female' && <Block heading="MALES" avoid={MALE_AVOID} wear={MALE_WEAR} />}
 
-      {only !== 'male' ? (
+      {simple ? (
+        <div style={{ border: `1px solid ${P.hair}`, background: P.navy, padding: 18, marginBottom: 14, fontFamily: mono, fontSize: 13, color: P.mute, lineHeight: 1.65 }}>
+          Questions about your attire? Message{' '}
+          {only !== 'male' && DRESS_APPROVERS.map((a, i) => (
+            <span key={a.name}>{i > 0 ? ' or ' : ''}{a.name} — {a.phone}</span>
+          ))}
+          {only !== 'female' && only !== 'male' ? ' (females), or ' : ''}
+          {only !== 'female' && <span>{WESTON.name} — {WESTON.phone}{only !== 'male' ? ' (males)' : ''}</span>}.
+        </div>
+      ) : only !== 'male' ? (
         <div style={{ border: `1px solid ${P.hair}`, background: P.navy, padding: 18, marginBottom: 14 }}>
           <div style={{ fontFamily: mono, fontSize: 11, color: P.gold, letterSpacing: '0.16em', marginBottom: 10 }}>DRESS APPROVAL</div>
           <ul style={{ margin: 0, paddingLeft: 18, fontFamily: mono, fontSize: 13, color: P.mute, lineHeight: 1.65 }}>

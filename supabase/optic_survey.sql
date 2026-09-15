@@ -3,16 +3,21 @@
 -- Run in the Supabase SQL editor (idempotent).
 --
 -- Public no-login survey (src/components/OpticSurvey.jsx, slugs from
--- src/lib/opticSurveyQuestions.js) collecting parent feedback on the OPTIC
--- beta. Identity block (name/team/phone), eleven multiple choice questions,
--- four OPTIONAL free-text boxes. One row per submission in
--- public.optic_survey_responses.
+-- src/lib/opticSurveyQuestions.js) collecting parent feedback on OPTIC.
+-- One row per submission in public.optic_survey_responses, filtered by
+-- campaign_id per round.
 --
--- This DROPS AND RECREATES the table. Safe: the survey has never collected a
--- production row (0 rows as of 2026-09-08). The 2026-09 round reworked every
--- question to multiple choice and changed several option slugs, so the
--- categorical CHECK constraints had to move with them. If this table ever
--- holds real rows, switch to ALTER instead of the drop below.
+-- 2026-09-08 round: table created fresh (drop+recreate, safe at 0 rows then).
+-- 2026-09-15 round (Spring Hill, campaign optic-springhill-2026-09): the
+-- 2026-09-08 round collected 12 real rows before this one, so this file is
+-- now ALTER-only, never drop. This round is deliberately lighter (5
+-- questions + 1 text box, chasing the notifications + iPhone save bugs)
+-- and does not reuse used_it/install/upload/feed_value/trouble_area/
+-- best_part/top_change/notify/will_return/confusing/best_part_text/
+-- one_change — those columns stay on the table, unused by new rows, holding
+-- the prior round's data. New columns: notif_experience, biggest_problem,
+-- team_filter_useful. overall/save_photo/phone_type/raider_team/
+-- submitter_name/anything_else are reused as-is (same CHECKs still fit).
 --
 -- Access mirrors site_checkin.sql: anon insert allowed, device-fingerprint
 -- rate limit as a server-side backstop behind the client's once-per-device
@@ -25,9 +30,7 @@
 -- Keep both in sync if a question changes.
 -- ============================================================================
 
-drop table if exists public.optic_survey_responses cascade;
-
-create table public.optic_survey_responses (
+create table if not exists public.optic_survey_responses (
   id               uuid primary key default gen_random_uuid(),
   campaign_id      text not null,
 
@@ -59,7 +62,29 @@ create table public.optic_survey_responses (
   submitted_at     timestamptz not null default now()
 );
 
-create index optic_survey_campaign_idx on public.optic_survey_responses (campaign_id);
+-- 2026-09-15 Spring Hill round: new columns for the lighter question set.
+-- ADD COLUMN IF NOT EXISTS is idempotent; the CHECK is added separately so
+-- re-running this file does not error on an already-present constraint.
+alter table public.optic_survey_responses add column if not exists notif_experience text;
+alter table public.optic_survey_responses add column if not exists biggest_problem text;
+alter table public.optic_survey_responses add column if not exists team_filter_useful text;
+
+do $$ begin
+  alter table public.optic_survey_responses add constraint optic_survey_notif_experience_check
+    check (notif_experience is null or notif_experience in ('got_alerts','turned_on_no_alerts','tried_couldnt','never_saw_option','didnt_try'));
+exception when duplicate_object then null; end $$;
+
+do $$ begin
+  alter table public.optic_survey_responses add constraint optic_survey_biggest_problem_check
+    check (biggest_problem is null or biggest_problem in ('notifications','saving_photos','uploading','feed_empty_or_slow','install','none','other'));
+exception when duplicate_object then null; end $$;
+
+do $$ begin
+  alter table public.optic_survey_responses add constraint optic_survey_team_filter_useful_check
+    check (team_filter_useful is null or team_filter_useful in ('very','somewhat','not_really','didnt_notice'));
+exception when duplicate_object then null; end $$;
+
+create index if not exists optic_survey_campaign_idx on public.optic_survey_responses (campaign_id);
 
 alter table public.optic_survey_responses enable row level security;
 select public._drop_all_policies('optic_survey_responses');
@@ -94,7 +119,8 @@ create trigger optic_survey_rate_limit_trg before insert on public.optic_survey_
   for each row execute function public.optic_survey_rate_limit();
 
 -- ============================================================================
--- Verify: select * from public.optic_survey_responses order by submitted_at desc;
---         select overall, count(*) from public.optic_survey_responses group by overall;
---         select will_return, count(*) from public.optic_survey_responses group by will_return;
+-- Verify: select * from public.optic_survey_responses where campaign_id = 'optic-springhill-2026-09' order by submitted_at desc;
+--         select overall, count(*) from public.optic_survey_responses where campaign_id = 'optic-springhill-2026-09' group by overall;
+--         select notif_experience, count(*) from public.optic_survey_responses where campaign_id = 'optic-springhill-2026-09' group by notif_experience;
+--         select biggest_problem, count(*) from public.optic_survey_responses where campaign_id = 'optic-springhill-2026-09' group by biggest_problem;
 -- ============================================================================
