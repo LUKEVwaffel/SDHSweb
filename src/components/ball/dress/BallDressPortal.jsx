@@ -190,13 +190,27 @@ function Section({ title, hide, children, action }) {
 const KIND_TAG = { cadet: 'cadet', guest: 'guest', vip: 'vip', vipdate: 'vip date' };
 
 function DressRow({ x, busy, onToggle, state }) {
+  const [showPhone, setShowPhone] = useState(false);
   return (
     <div className={`bp-row is-${state}`}>
       <div className="bp-row-main">
         <div>
-          <span className="bp-name">{x.name}</span>
+          <button
+            type="button"
+            className="bp-name bp-name-btn"
+            onClick={() => setShowPhone((s) => !s)}
+            disabled={!x.phone}
+            title={x.phone ? 'Show phone number' : 'No phone on file'}
+          >
+            {x.name}
+          </button>
           <span className="bp-tag">{KIND_TAG[x.kind] || x.kind}</span>
         </div>
+        {showPhone && (
+          <div className="bp-phone">
+            {x.phone ? <a href={`tel:${x.phone}`}>{x.phone}</a> : 'No phone on file'}
+          </div>
+        )}
         {x.kind === 'cadet' && (
           <div className="bp-meta">LET {x.cadet_let_level || '--'} · {(x.cadet_company || '').toUpperCase()}</div>
         )}

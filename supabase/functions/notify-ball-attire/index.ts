@@ -25,7 +25,7 @@ Deno.serve(async (req) => {
 
     const { data: signup, error } = await svc
       .from("ball_signups")
-      .select("cadet_name, cadet_gender, cadet_let_level, cadet_company")
+      .select("cadet_name, cadet_gender, cadet_let_level, cadet_company, cadet_phone")
       .eq("id", signup_id)
       .maybeSingle();
     if (error) { console.error("notify-ball-attire lookup", error); return json({ error: "internal error" }, 500); }
@@ -33,7 +33,7 @@ Deno.serve(async (req) => {
 
     const { data: guest } = await svc
       .from("ball_guests")
-      .select("name, gender")
+      .select("name, gender, guest_phone")
       .eq("signup_id", signup_id)
       .maybeSingle();
 
@@ -70,9 +70,12 @@ Deno.serve(async (req) => {
       const label = isFemaleRole ? "female attire" : "male-guest attire";
       const portalPath = isFemaleRole ? "/ball/dress" : "/ball/attire";
       const portal = origin ? `${origin}${portalPath}` : null;
-      const who = isFemaleRole && signup.cadet_gender === "female"
+      const isFemaleCadet = isFemaleRole && signup.cadet_gender === "female";
+      const who = isFemaleCadet
         ? `Cadet ${signup.cadet_name}`
         : `${signup.cadet_name}'s guest ${guest?.name ?? ""}`.trim();
+      const phone = isFemaleCadet ? signup.cadet_phone : guest?.guest_phone;
+      const phoneLine = phone ? ` — ${phone}` : "";
 
       const res = await fetch("https://api.resend.com/emails", {
         method: "POST",
@@ -82,8 +85,8 @@ Deno.serve(async (req) => {
           bcc: BALL_NOTIFY_BCC,
           to,
           subject: `New Ball signup — ${label} approval needed`,
-          html: `<p><strong>${escapeHtml(who)}</strong>${meta ? ` (${escapeHtml(meta)})` : ""} just signed up for the Military Ball and needs ${escapeHtml(label)} approval.</p>${portal ? `<p><a href="${escapeHtml(portal)}">Open the approval portal</a></p>` : ""}`,
-          text: `${who}${meta ? ` (${meta})` : ""} just signed up for the Military Ball and needs ${label} approval.${portal ? `\n\n${portal}` : ""}`,
+          html: `<p><strong>${escapeHtml(who)}</strong>${escapeHtml(phoneLine)}${meta ? ` (${escapeHtml(meta)})` : ""} just signed up for the Military Ball and needs ${escapeHtml(label)} approval.</p>${portal ? `<p><a href="${escapeHtml(portal)}">Open the approval portal</a></p>` : ""}`,
+          text: `${who}${phoneLine}${meta ? ` (${meta})` : ""} just signed up for the Military Ball and needs ${label} approval.${portal ? `\n\n${portal}` : ""}`,
         }),
       });
       if (res.ok) notified += to.length;
