@@ -2,12 +2,17 @@ import { useState, useRef } from 'react';
 import { supabase as SB } from '../../../lib/supabaseClient';
 import '../../review/review.css';
 
-// Email-only login for the dress + male-guest-attire approvers. No password,
-// no PIN — if the address is an active ball_dress_staff row, ball-dress-email-
-// login mints a session for it (role scoping still enforced server-side by
-// is_ball_dress() / is_ball_attire()). Shares the same email→verifyOtp shape
-// as the old PIN flow, minus the PIN.
-export default function BallDressLogin({ onSignedIn, notice, heading = 'Dress Approval' }) {
+// Email-only login — no password, no PIN. If the address is an active row in
+// the backing table (ball_dress_staff by default; email_reviewers via the
+// `fn`/`deniedMessage` props for the Email Review / Ball Ops / Rifle Signups
+// reviewer portals — see ReviewPortal.jsx, BallOpsPortal.jsx,
+// RifleSignupsPortal.jsx), the edge function named by `fn` mints a session for
+// it (role scoping still enforced server-side by is_ball_dress()/
+// is_ball_attire()/is_reviewer()). Same email→verifyOtp shape everywhere.
+export default function BallDressLogin({
+  onSignedIn, notice, heading = 'Dress Approval',
+  fn = 'ball-dress-email-login', deniedMessage = "That email isn't set up as an attire approver.",
+}) {
   const [email, setEmail] = useState('');
   const [err, setErr] = useState('');
   const [busy, setBusy] = useState(false);
@@ -26,12 +31,12 @@ export default function BallDressLogin({ onSignedIn, notice, heading = 'Dress Ap
     if (!account.includes('@')) { setErr('Enter your email.'); return; }
     setBusy(true);
     setErr('');
-    const { data, error } = await SB.functions.invoke('ball-dress-email-login', {
+    const { data, error } = await SB.functions.invoke(fn, {
       body: { email: account },
     });
     if (error || data?.error) {
       setBusy(false);
-      fail("That email isn't set up as an attire approver.");
+      fail(deniedMessage);
       return;
     }
     const { error: otpErr } = await SB.auth.verifyOtp({ token_hash: data.token_hash, type: 'magiclink' });

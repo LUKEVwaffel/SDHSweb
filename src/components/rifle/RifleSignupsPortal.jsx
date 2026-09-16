@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import { supabase as SB } from '../../lib/supabaseClient';
-import ReviewLogin from '../review/ReviewLogin';
+import EmailOnlyLogin from '../ball/dress/BallDressLogin';
 import '../review/review.css';
 
 function fmtDate(v) {
@@ -32,7 +32,7 @@ function exportCsv(rows) {
 
 // Read-only reviewer view of rifle team interest signups — Kaz/Chief, same
 // email_reviewers account + login as the Email Review and Ball Ops portals
-// (see ReviewLogin.jsx, rifle_signup.sql for the RLS view this reads from).
+// (see EmailOnlyLogin/BallDressLogin.jsx, rifle_signup.sql for the RLS view this reads from).
 export default function RifleSignupsPortal() {
   const [phase, setPhase] = useState('checking');
   const [errorMsg, setErrorMsg] = useState('');
@@ -90,7 +90,15 @@ export default function RifleSignupsPortal() {
   );
 
   if (phase === 'checking') return shell(<p className="rv-sub"><span className="rv-dot" />Checking your session&hellip;</p>);
-  if (phase === 'login') return shell(<ReviewLogin notice={loginNotice} onSignedIn={verifyAndLoad} />);
+  if (phase === 'login') return shell(
+    <EmailOnlyLogin
+      notice={loginNotice}
+      onSignedIn={verifyAndLoad}
+      heading="Rifle Signups"
+      fn="reviewer-email-login"
+      deniedMessage="That account is not an active reviewer."
+    />
+  );
   if (phase === 'error') return shell(
     <div className="rv-panel" style={{ borderColor: '#dcbdb6' }}>
       <h1 className="rv-h1" style={{ fontSize: 20, color: 'var(--rv-red)' }}>Something went wrong</h1>

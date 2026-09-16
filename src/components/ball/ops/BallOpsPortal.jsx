@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback, useMemo } from 'react';
 import { supabase as SB } from '../../../lib/supabaseClient';
-import ReviewLogin from '../../review/ReviewLogin';
+import EmailOnlyLogin from '../dress/BallDressLogin';
 import '../../review/review.css';
 import '../portal.css';
 
@@ -79,9 +79,9 @@ function exportCsv(rows, guestsBySignup) {
 }
 
 // Ball Ops portal — Kaz/Chief payment + field trip form tracking. Reuses the
-// EXISTING reviewer PIN/password login wholesale (ReviewLogin.jsx, same
-// email_reviewers population + reviewer-pin-login edge fn as the email review
-// portal) — same people (Kaz + Chief), second surface. Reads through
+// EXISTING email-only login wholesale (EmailOnlyLogin/BallDressLogin.jsx, same
+// email_reviewers population + reviewer-email-login edge fn as the email
+// review portal) — same people (Kaz + Chief), second surface. Reads through
 // ball_signups_ops_view / ball_guests_ops_view (RLS-scoped, no dress fields,
 // no allergies). Writes go directly to the base table under the column-guard
 // trigger, then a fire-and-forget notify-ball-status-update.
@@ -227,7 +227,15 @@ export default function BallOpsPortal() {
   );
 
   if (phase === 'checking') return shell(<p className="rv-sub"><span className="rv-dot" />Checking your session&hellip;</p>);
-  if (phase === 'login') return shell(<ReviewLogin notice={loginNotice || 'Sign in to Ball Ops (same account as email review).'} onSignedIn={verifyAndLoad} />);
+  if (phase === 'login') return shell(
+    <EmailOnlyLogin
+      notice={loginNotice || 'Sign in to Ball Ops (same account as email review).'}
+      onSignedIn={verifyAndLoad}
+      heading="Ball Ops"
+      fn="reviewer-email-login"
+      deniedMessage="That account is not an active ops reviewer."
+    />
+  );
   if (phase === 'error') return shell(<div className="rv-panel" style={{ borderColor: '#dcbdb6' }}><h1 className="rv-h1" style={{ fontSize: 20 }}>Something went wrong</h1><p className="rv-sub">{errorMsg}</p></div>);
 
   const totalVerified = rows.filter((r) => r.status === 'fully_verified').length;

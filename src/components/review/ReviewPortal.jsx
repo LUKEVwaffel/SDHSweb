@@ -2,9 +2,8 @@ import { useState, useEffect, useCallback, useRef } from 'react';
 import { Navigate, useLocation, useNavigate, useSearchParams } from 'react-router-dom';
 import { FunctionsHttpError } from '@supabase/supabase-js';
 import { supabase as SB } from '../../lib/supabaseClient';
-import ReviewLogin from './ReviewLogin';
+import EmailOnlyLogin from '../ball/dress/BallDressLogin';
 import ForcePasswordChange from './ForcePasswordChange';
-import ReviewerPinControl from './ReviewerPinControl';
 import './review.css';
 
 // Reviewer portal — deliberately NOT the DISPATCH theme. This is a separate,
@@ -12,13 +11,14 @@ import './review.css';
 // self-explanatory light surface instead of matching the navy/gold admin
 // console — polished (real type/palette/motion, see review.css) but simple.
 //
-// Auth: each reviewer has their own Supabase Auth account (email + password,
-// same pattern as the admin accounts). The submit-for-review notification
-// email links here with /review?draft=<id> — a plain deep link, not an
-// auto-authenticating token. On mount we check for an existing session; if
-// none, ReviewLogin collects email+password via signInWithPassword. Either
-// way, the session is then checked against email_reviewers (the
-// authorization gate — active reviewer yes/no) before showing anything.
+// Auth: email-only, no password, no PIN (reviewer-email-login mints a real
+// GoTrue session for any active email_reviewers row — see EmailOnlyLogin,
+// which is BallDressLogin.jsx generalized for reuse here). The
+// submit-for-review notification email links here with /review?draft=<id> —
+// a plain deep link, not an auto-authenticating token. On mount we check for
+// an existing session; if none, EmailOnlyLogin runs. Either way, the session
+// is then checked against email_reviewers (the authorization gate — active
+// reviewer yes/no) before showing anything.
 //
 // Three tabs: Pending (actionable), Sent (read-only history, ALL reviewers
 // see ALL approved-or-sent messages per email_review_visibility.sql — count
@@ -70,8 +70,6 @@ export default function ReviewPortal() {
   const [loginNotice, setLoginNotice] = useState('');
   const [reviewerName, setReviewerName] = useState('');
   const [reviewerEmail, setReviewerEmail] = useState('');
-  const [showSettings, setShowSettings] = useState(false);
-  const [hasPin, setHasPin] = useState(false);
   // After login the reviewer picks which portal to use — Email Review (this
   // component) or Ball Payments (/ball/ops, same account). null = show the
   // picker; 'email' = show the review UI below. A ?draft deep link from a
@@ -132,11 +130,6 @@ export default function ReviewPortal() {
 
     setReviewerName(rev.display_name);
     setReviewerEmail(session.user.email.toLowerCase());
-
-    // reviewer_has_pin() only ever reads the caller's own JWT email (same
-    // safety shape as is_reviewer()) — safe to call before deciding anything.
-    const { data: pinFlag } = await SB.rpc('reviewer_has_pin');
-    setHasPin(!!pinFlag);
 
     if (rev.must_change_password) { setPhase('force-password'); return; }
     await loadAll();
@@ -284,7 +277,13 @@ export default function ReviewPortal() {
   if (phase === 'checking') return shell(<p className="rv-sub"><span className="rv-dot" />Checking your session&hellip;</p>);
 
   if (phase === 'login') return shell(
-    <ReviewLogin notice={loginNotice} onSignedIn={verifyReviewerAndLoad} />
+    <EmailOnlyLogin
+      notice={loginNotice}
+      onSignedIn={verifyReviewerAndLoad}
+      heading="DISPATCH Reviewer Portal"
+      fn="reviewer-email-login"
+      deniedMessage="That account is not an active reviewer."
+    />
   );
 
   if (phase === 'force-password') return shell(
@@ -400,27 +399,12 @@ export default function ReviewPortal() {
     : null;
   if (tab === null) return <Navigate to="/review" replace />;
 
-  if (showSettings) return shell(
-    <div>
-      <button className="rv-back" onClick={() => setShowSettings(false)}>&lsaquo; Back</button>
-      <div className="rv-panel">
-        <h1 className="rv-h1" style={{ fontSize: 20, marginBottom: 16 }}>Sign-in settings</h1>
-        <ReviewerPinControl
-          email={reviewerEmail}
-          hasPin={hasPin}
-          onChange={setHasPin}
-        />
-      </div>
-    </div>
-  );
-
   return shell(
     <div>
       <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: 12 }}>
         <h1 className="rv-h1" style={{ fontSize: 22, margin: '4px 0 4px' }}>Hi {reviewerName}</h1>
         <div style={{ display: 'flex', gap: 14, marginTop: 6 }}>
           <button className="rv-link" onClick={() => { setPortal(null); navigate('/review'); }}>Switch portal</button>
-          <button className="rv-link" onClick={() => setShowSettings(true)}>Settings</button>
           <button className="rv-link" onClick={signOut}>Sign out</button>
         </div>
       </div>
