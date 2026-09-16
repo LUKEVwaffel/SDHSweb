@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import TeamGallery from './TeamGallery';
 import RifleAnalysis from './RifleAnalysis';
 import useIsMobile from '../hooks/useIsMobile';
@@ -334,6 +334,35 @@ export default function Rifle() {
             <div style={{ width: 48, height: 1, background: P.hair, marginLeft: 4 }} />
           </div>
         </div>
+
+        {/* ── Signup banner — clearly marked call-to-action for new/JV cadets ── */}
+        <Link
+          to="/rifle/signup"
+          className="rf-clickable"
+          style={{
+            display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 16, flexWrap: 'wrap',
+            textDecoration: 'none', border: `1px solid ${P.gold}`, background: 'rgba(201,169,97,0.1)',
+            padding: '18px 22px', marginBottom: 72,
+          }}
+        >
+          <div>
+            <div style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: 11, color: P.gold, letterSpacing: '0.18em', marginBottom: 6 }}>
+              2026-27 SEASON · SIGNUPS OPEN
+            </div>
+            <div style={{ fontFamily: 'Oswald, sans-serif', fontWeight: 600, fontSize: 20, color: P.cream }}>
+              Interested in rifle? Sign up here.
+            </div>
+            <div style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: 11, color: P.mute, marginTop: 4 }}>
+              For new / JV cadets — returning varsity shooters don&apos;t need to sign up.
+            </div>
+          </div>
+          <div style={{
+            fontFamily: "'JetBrains Mono', monospace", fontSize: 13, letterSpacing: '0.1em', fontWeight: 700,
+            padding: '13px 26px', background: P.gold, color: P.ink, whiteSpace: 'nowrap',
+          }}>
+            SIGN UP →
+          </div>
+        </Link>
 
         {/* ── Commander ── */}
         <div style={{ marginBottom: 72 }}>

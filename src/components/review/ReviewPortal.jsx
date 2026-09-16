@@ -32,8 +32,8 @@ function fmtDate(v) {
   return v ? new Date(v).toLocaleString() : '—';
 }
 
-// Post-login chooser: the reviewers use one account for two jobs.
-function PortalPicker({ name, onEmail, onBall, onSignOut }) {
+// Post-login chooser: the reviewers use one account for three jobs.
+function PortalPicker({ name, onEmail, onBall, onRifle, onSignOut }) {
   const card = {
     display: 'block', width: '100%', textAlign: 'left', cursor: 'pointer',
     padding: '20px 22px', marginBottom: 12,
@@ -52,6 +52,10 @@ function PortalPicker({ name, onEmail, onBall, onSignOut }) {
       <button className="rv-row" style={card} onClick={onBall}>
         <div className="rv-row-title">Ball Payments</div>
         <div className="rv-row-meta">Mark cash and field-trip forms received for Military Ball signups.</div>
+      </button>
+      <button className="rv-row" style={card} onClick={onRifle}>
+        <div className="rv-row-title">Rifle Signups</div>
+        <div className="rv-row-meta">See who's signed up to try out for the rifle team.</div>
       </button>
     </div>
   );
@@ -299,6 +303,7 @@ export default function ReviewPortal() {
       name={reviewerName}
       onEmail={() => setPortal('email')}
       onBall={() => { window.location.href = '/ball/ops'; }}
+      onRifle={() => { window.location.href = '/rifle/signup-review'; }}
       onSignOut={signOut}
     />
   );

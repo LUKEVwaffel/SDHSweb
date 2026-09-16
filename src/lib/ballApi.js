@@ -1,24 +1,9 @@
-import { FunctionsHttpError } from '@supabase/supabase-js';
 import { supabase as SB } from './supabaseClient';
+import { invokeError } from './supabaseFnError';
 
 // Thin wrappers around the public Ball signup edge functions. All of these
 // run pre-auth (no Supabase session) — identity is proven by the signed
 // signupToken minted in lookupCadet, not by anything client-side.
-
-// supabase-js's functions.invoke() does NOT surface the edge function's JSON
-// error body on a non-2xx response: `data` is null and `error` is a
-// FunctionsHttpError whose .message is the fixed string "Edge Function
-// returned a non-2xx status code". The real { error: "..." } is on
-// error.context (an unread Response) — read it here so callers get the actual
-// reason instead of that opaque line.
-async function invokeError(data, error, fallback) {
-  if (data?.error) return data.error;
-  if (error instanceof FunctionsHttpError) {
-    const body = await error.context.json().catch(() => null);
-    if (body?.error) return body.error;
-  }
-  return error?.message || fallback;
-}
 
 export async function lookupCadet(username) {
   const { data, error } = await SB.functions.invoke('ball-lookup-cadet', { body: { username } });

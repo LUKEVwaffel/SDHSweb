@@ -30,6 +30,8 @@ import CompGallery from './components/raiders/CompGallery';
 import RaftingGallery from './components/rafting/RaftingGallery';
 import RaiderTeam from './components/RaiderTeam';
 import Rifle from './components/Rifle';
+import RifleSignup from './components/rifle/RifleSignup';
+import RifleSignupsPortal from './components/rifle/RifleSignupsPortal';
 import Staff from './components/Staff';
 import EventsPage from './components/EventsPage';
 import SubmitHub from './components/SubmitHub';
@@ -125,6 +127,7 @@ export default function App() {
   if (location.pathname === '/ball/ops' || location.pathname.startsWith('/ball/ops/')) return <BallOpsPortal />;
   if (location.pathname === '/ball/dress' || location.pathname.startsWith('/ball/dress/')) return <BallDressPortal />;
   if (location.pathname === '/ball/attire' || location.pathname.startsWith('/ball/attire/')) return <BallAttirePortal />;
+  if (location.pathname === '/rifle/signup-review' || location.pathname.startsWith('/rifle/signup-review/')) return <RifleSignupsPortal />;
 
   return (
     <div style={{ minHeight: '100vh', background: '#06101F', fontFamily: 'Inter, sans-serif' }}>
@@ -157,6 +160,7 @@ export default function App() {
         <Route path="/rafting" element={<RaftingGallery />} />
         <Route path="/raiderteam" element={<RaiderTeam />} />
         <Route path="/rifle" element={<Rifle />} />
+        <Route path="/rifle/signup" element={<RifleSignup />} />
         <Route path="/staff" element={<Staff />} />
         <Route path="/events" element={<EventsPage />} />
         <Route path="/pictures" element={<Navigate to="/events" replace />} />

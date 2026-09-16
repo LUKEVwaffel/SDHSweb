@@ -1,0 +1,137 @@
+import { useState, useEffect, useCallback } from 'react';
+import { supabase as SB } from '../../lib/supabaseClient';
+import ReviewLogin from '../review/ReviewLogin';
+import '../review/review.css';
+
+function fmtDate(v) {
+  return v ? new Date(v).toLocaleString() : '—';
+}
+
+function csvCell(v) {
+  if (v == null) return '';
+  const s = String(v);
+  return /[",\n]/.test(s) ? `"${s.replace(/"/g, '""')}"` : s;
+}
+
+function exportCsv(rows) {
+  const headers = ['School Email', 'Personal Email', 'Parent Email', 'Phone', 'Signed Up'];
+  const lines = [headers.join(',')];
+  rows.forEach((r) => {
+    lines.push([r.school_email, r.personal_email, r.parent_email, r.phone, fmtDate(r.created_at)].map(csvCell).join(','));
+  });
+  const blob = new Blob([lines.join('\r\n')], { type: 'text/csv;charset=utf-8;' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `rifle-signups-${new Date().toISOString().slice(0, 10)}.csv`;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+}
+
+// Read-only reviewer view of rifle team interest signups — Kaz/Chief, same
+// email_reviewers account + login as the Email Review and Ball Ops portals
+// (see ReviewLogin.jsx, rifle_signup.sql for the RLS view this reads from).
+export default function RifleSignupsPortal() {
+  const [phase, setPhase] = useState('checking');
+  const [errorMsg, setErrorMsg] = useState('');
+  const [loginNotice, setLoginNotice] = useState('');
+  const [rows, setRows] = useState([]);
+  const [q, setQ] = useState('');
+
+  const loadAll = useCallback(async () => {
+    const { data, error } = await SB.from('rifle_signups_review_view').select('*').order('created_at', { ascending: false });
+    if (error) { setPhase('error'); setErrorMsg(error.message); return; }
+    setRows(data || []);
+    setPhase('ready');
+  }, []);
+
+  const verifyAndLoad = useCallback(async () => {
+    const { data: { session } } = await SB.auth.getSession();
+    if (!session) { setPhase('login'); return; }
+    const { data: rev } = await SB.from('email_reviewers')
+      .select('email').eq('email', session.user.email.toLowerCase()).eq('active', true).maybeSingle();
+    if (!rev) { setLoginNotice('That account is not an active reviewer.'); setPhase('login'); return; }
+    await loadAll();
+  }, [loadAll]);
+
+  useEffect(() => { verifyAndLoad(); }, [verifyAndLoad]);
+
+  useEffect(() => {
+    if (phase !== 'ready') return undefined;
+    const channel = SB.channel('rifle-signups-portal')
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'rifle_signups' }, loadAll)
+      .subscribe();
+    return () => { SB.removeChannel(channel); };
+  }, [phase, loadAll]);
+
+  async function signOut() {
+    await SB.auth.signOut();
+    setRows([]);
+    setPhase('login');
+  }
+
+  const shell = (children) => (
+    <div className="rv">
+      <div className="rv-shell">
+        <div className="rv-eyebrow">Trojan Battalion &middot; Rifle Signups</div>
+        {children}
+      </div>
+    </div>
+  );
+
+  if (phase === 'checking') return shell(<p className="rv-sub"><span className="rv-dot" />Checking your session&hellip;</p>);
+  if (phase === 'login') return shell(<ReviewLogin notice={loginNotice} onSignedIn={verifyAndLoad} />);
+  if (phase === 'error') return shell(
+    <div className="rv-panel" style={{ borderColor: '#dcbdb6' }}>
+      <h1 className="rv-h1" style={{ fontSize: 20, color: 'var(--rv-red)' }}>Something went wrong</h1>
+      <p className="rv-sub" style={{ marginTop: 10 }}>{errorMsg}</p>
+    </div>
+  );
+
+  const term = q.trim().toLowerCase();
+  const filtered = term
+    ? rows.filter((r) => [r.school_email, r.personal_email, r.parent_email].some((v) => (v || '').toLowerCase().includes(term)))
+    : rows;
+
+  return shell(
+    <div>
+      <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: 12 }}>
+        <h1 className="rv-h1" style={{ fontSize: 22, margin: '4px 0 4px' }}>Rifle Signups</h1>
+        <div style={{ display: 'flex', gap: 14, marginTop: 6 }}>
+          <button className="rv-link" onClick={() => { window.location.href = '/review'; }}>Switch portal</button>
+          <button className="rv-link" onClick={signOut}>Sign out</button>
+        </div>
+      </div>
+      <p className="rv-sub" style={{ marginBottom: 22 }}>{rows.length} cadet{rows.length === 1 ? '' : 's'} signed up.</p>
+
+      {rows.length > 0 && (
+        <div style={{ display: 'flex', gap: 10, marginBottom: 14 }}>
+          {rows.length > 6 && (
+            <input className="rv-search" placeholder="Search by email…" value={q} onChange={(e) => setQ(e.target.value)} style={{ flex: 1 }} />
+          )}
+          <button className="rv-link" onClick={() => exportCsv(rows)}>Export CSV</button>
+        </div>
+      )}
+
+      {rows.length === 0 ? (
+        <div className="rv-card rv-empty">Nobody has signed up yet.</div>
+      ) : filtered.length === 0 ? (
+        <div className="rv-card rv-empty">No signups match "{q}".</div>
+      ) : (
+        <div className="rv-list">
+          {filtered.map((r) => (
+            <div key={r.id} className="rv-row" style={{ cursor: 'default' }}>
+              <div className="rv-row-title">{r.school_email}</div>
+              <div className="rv-row-meta">
+                Personal: {r.personal_email} &middot; Parent: {r.parent_email} &middot; {r.phone}
+              </div>
+              <div className="rv-row-meta">Signed up {fmtDate(r.created_at)}</div>
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}

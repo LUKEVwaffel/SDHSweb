@@ -1,0 +1,43 @@
+-- Rifle team interest signup — 2026-27 season. Public, pre-auth form at
+-- /rifle/signup for cadets who want to try out. A returning varsity shooter
+-- does NOT sign up here (copy on the form says so) — this is for new/JV
+-- interest only.
+--
+-- Deliberately just an identifier + contact info, nothing else: the cadet's
+-- name/age/grade/company already live in DISPATCH's own roster data, keyed
+-- off school_email, so there's no reason to make them retype it here. One
+-- signup per cadet (unique lower(school_email)).
+--
+-- Same posture as ball_vip_signups (see ball_vip_signup.sql): no anon RLS
+-- policy at all, writes go through the service-role edge function
+-- (rifle-submit-signup) only. Reads: S-6 gets everything, and the two email
+-- reviewers (Chief/SAI, Sgt Kaz — see email_review.sql's is_reviewer()) get a
+-- read-only view so Kaz can work the signup list from the same reviewer
+-- portal he already uses for email review / ball ops.
+create table if not exists public.rifle_signups (
+  id              uuid primary key default gen_random_uuid(),
+  school_email    text not null unique,
+  personal_email  text not null,
+  parent_email    text not null,
+  phone           text not null,
+  created_at      timestamptz not null default now()
+);
+
+alter table public.rifle_signups enable row level security;
+
+drop policy if exists rifle_signups_all_s6 on public.rifle_signups;
+create policy rifle_signups_all_s6 on public.rifle_signups
+  for all to authenticated using (public.is_s6()) with check (public.is_s6());
+revoke all on public.rifle_signups from anon;
+
+-- Read-only scoped view for the reviewer portal (RifleSignupsPortal.jsx) —
+-- same security_barrier SECURITY DEFINER shape as ball_vip_signups_dress_view:
+-- the WHERE clause is the entire access gate, since the base table carries no
+-- SELECT policy for a plain reviewer session at all.
+drop view if exists public.rifle_signups_review_view;
+create view public.rifle_signups_review_view
+with (security_barrier = true) as
+  select id, school_email, personal_email, parent_email, phone, created_at
+  from public.rifle_signups
+  where public.is_reviewer() or public.is_s6();
+grant select on public.rifle_signups_review_view to authenticated;
