@@ -4,6 +4,8 @@
 // JROTC datasheet — one packet) so the company can see its own progress at a
 // glance. Informational only — not collected back, nothing marked on it
 // changes DISPATCH.
+import { renderPrintableWindow } from './printWindow';
+
 const NAVY = '#142847';
 const GOLD = '#C9A961';
 
@@ -108,8 +110,5 @@ export function openConsentStatusPdf(rows, forms, companyLabel) {
     progress,
   });
 
-  win.document.write(html);
-  win.document.close();
-  win.focus();
-  setTimeout(() => win.print(), 350);
+  renderPrintableWindow(win, html);
 }

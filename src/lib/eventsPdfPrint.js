@@ -8,6 +8,7 @@
 // should look like an official letterhead document, not a website screenshot,
 // and shouldn't burn a page of navy ink per sheet.
 import { categoryColor, teamLabel, formatEventTime, MON3, MONTHS } from './calendar';
+import { renderPrintableWindow } from './printWindow';
 
 const NAVY = '#142847';
 const GOLD = '#C9A961';
@@ -164,8 +165,5 @@ export async function openEventsCalendarPdf(events, { team } = {}) {
     scopeLabel,
   });
 
-  win.document.write(html);
-  win.document.close();
-  win.focus();
-  setTimeout(() => win.print(), 350);
+  renderPrintableWindow(win, html);
 }

@@ -16,6 +16,8 @@ import {
   FEMALE_AVOID, FEMALE_WEAR, MALE_AVOID, MALE_WEAR, DRESS_APPROVAL_RULES,
 } from './ballDressCode';
 import { DRESS_APPROVERS, WESTON } from './ballApprovers';
+import { renderPrintableWindow } from './printWindow';
+import posthog from './posthog';
 
 const NAVY = '#142847';
 const GOLD = '#C9A961';
@@ -172,9 +174,10 @@ export function openBallDressCodePdf({ only, note } = {}) {
     siteUrl: `${window.location.origin}/ball`,
   });
 
-  win.document.write(html);
-  win.document.close();
-  win.focus();
-  // Give the new document a beat to lay out before the print dialog opens.
-  setTimeout(() => { try { win.print(); } catch { /* user can still use the button */ } }, 400);
+  const opened = renderPrintableWindow(win, html, {
+    printDelay: 400,
+    failMessage: 'Could not open the dress code on this device. Try a different browser, or read the dress code on the page.',
+  });
+  // Denominator for the SecurityError rate: how often the dress code PDF opens.
+  if (opened) posthog.capture('ball_dress_code_pdf_opened', { scope: scopeLabel || 'all' });
 }

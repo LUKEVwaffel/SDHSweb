@@ -3,6 +3,7 @@ import { supabase as SB } from '../../../../lib/supabaseClient';
 import { P, mono, oswald, inter, fs, sp, radius } from '../../theme';
 import { Btn, Card, Input, Label, PanelHeader, EmptyState } from '../../shared/ui';
 import posthog from '../../../../lib/posthog';
+import { renderPrintableWindow } from '../../../../lib/printWindow';
 
 // After Action Reports — usually tied to an event, but event_id is nullable
 // (standalone AARs supported). Two sources, one table (public.aars, see
@@ -226,7 +227,7 @@ export default function AarsPanel({ adminId, readOnly = false }) {
     const win = window.open('', '_blank');
     if (!win) { alert('Popup blocked, allow popups to print.'); return; }
     const eventLine = row.event_id ? (eventById[row.event_id]?.title || 'Linked event') : 'Standalone';
-    win.document.write(`<!doctype html><html><head><title>${escapeHtml(row.title)}</title><style>
+    const html = `<!doctype html><html><head><title>${escapeHtml(row.title)}</title><style>
       body{font-family:Georgia,serif;max-width:720px;margin:40px auto;padding:0 20px;color:#111;line-height:1.5}
       h1{font-size:22px;margin-bottom:2px} .meta{color:#555;font-size:13px;margin-bottom:28px}
       h2{font-size:15px;text-transform:uppercase;letter-spacing:0.06em;border-bottom:1px solid #ccc;padding-bottom:4px;margin-top:28px}
@@ -237,10 +238,8 @@ export default function AarsPanel({ adminId, readOnly = false }) {
       ${row.content_went_well ? `<h2>What Went Well</h2><p>${nl2br(row.content_went_well)}</p>` : ''}
       ${row.content_needs_improvement ? `<h2>What Needs Improvement</h2><p>${nl2br(row.content_needs_improvement)}</p>` : ''}
       <h2>Overall Summary</h2><p>${nl2br(row.content_summary)}</p>
-    </body></html>`);
-    win.document.close();
-    win.focus();
-    win.print();
+    </body></html>`;
+    renderPrintableWindow(win, html, { printDelay: 0 });
   }
 
   const filtered = rows
