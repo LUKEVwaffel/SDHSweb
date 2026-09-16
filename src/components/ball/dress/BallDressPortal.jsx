@@ -15,8 +15,9 @@ function byLine(email) {
 // the verifiers just need to know who they're texting). Reads
 // ball_signups_dress_view / ball_guests_dress_view / ball_vip_signups_dress_view
 // / ball_vip_dates_dress_view (RLS-scoped: no payment, no POC, no
-// allergies). Write is a direct column-guarded UPDATE. Pending first;
-// approved collapses into a dimmed section with who signed off.
+// allergies). Write is a direct column-guarded UPDATE. Approved sits
+// collapsed (names hidden) at the top in green; click to expand and see
+// who signed off. Pending is the open, actionable list below it.
 export default function BallDressPortal() {
   const [phase, setPhase] = useState('checking');
   const [errorMsg, setErrorMsg] = useState('');
@@ -29,6 +30,7 @@ export default function BallDressPortal() {
   const [busyId, setBusyId] = useState(null);
   const [bulkBusy, setBulkBusy] = useState(false);
   const [q, setQ] = useState('');
+  const [approvedOpen, setApprovedOpen] = useState(false);
 
   const loadAll = useCallback(async () => {
     const [{ data: c, error: cErr }, { data: g, error: gErr }, { data: v, error: vErr }, { data: vd, error: vdErr }] = await Promise.all([
@@ -160,11 +162,15 @@ export default function BallDressPortal() {
         <div className="bp-empty">No one needs dress approval yet.</div>
       ) : (
         <>
+          <ApprovedSection
+            approved={approved}
+            open={approvedOpen}
+            onToggleOpen={() => setApprovedOpen((o) => !o)}
+            busyId={busyId}
+            onToggleRow={toggle}
+          />
           <Section title={`To approve · ${pending.length}`} hide={!pending.length} action={pending.length > 1 ? { label: bulkBusy ? 'Approving…' : 'Approve all', onClick: approveAllPending, disabled: bulkBusy } : null}>
             {pending.map((x) => <DressRow key={`${x.kind}-${x.id}`} x={x} busy={busyId === x.id} onToggle={toggle} state="alert" />)}
-          </Section>
-          <Section title={`Approved · ${approved.length}`} hide={!approved.length}>
-            {approved.map((x) => <DressRow key={`${x.kind}-${x.id}`} x={x} busy={busyId === x.id} onToggle={toggle} state="done" />)}
           </Section>
         </>
       )}
@@ -187,6 +193,23 @@ function Section({ title, hide, children, action }) {
   );
 }
 
+// Collapsed by default so an approved attendee's name isn't sitting out on
+// screen — just a green count. Clicking it opens the full list.
+function ApprovedSection({ approved, open, onToggleOpen, busyId, onToggleRow }) {
+  if (!approved.length) return null;
+  return (
+    <div className="bp-section">
+      <button type="button" className="bp-section-head bp-section-head-btn is-done" onClick={onToggleOpen}>
+        <span>✓ Approved · {approved.length}</span>
+        <span className="bp-chevron">{open ? '▲ hide' : '▼ view all'}</span>
+      </button>
+      {open && approved.map((x) => (
+        <DressRow key={`${x.kind}-${x.id}`} x={x} busy={busyId === x.id} onToggle={onToggleRow} state="done" />
+      ))}
+    </div>
+  );
+}
+
 const KIND_TAG = { cadet: 'cadet', guest: 'guest', vip: 'vip', vipdate: 'vip date' };
 
 function DressRow({ x, busy, onToggle, state }) {
@@ -198,7 +221,7 @@ function DressRow({ x, busy, onToggle, state }) {
         <div>
           <button
             type="button"
-            className="bp-name bp-name-btn"
+            className={`bp-name bp-name-btn ${x.dress_approved ? 'is-approved' : ''}`}
             onClick={() => setShowPhone((s) => !s)}
             disabled={unverified || !x.phone}
             title={unverified ? 'Guest has not verified yet' : x.phone ? 'Show phone number' : 'No phone on file'}
