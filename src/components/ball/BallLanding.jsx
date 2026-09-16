@@ -37,7 +37,7 @@ export default function BallLanding() {
     (async () => {
       const [{ data: cfg }, { data: photos }] = await Promise.all([
         SB.from('ball_config')
-          .select('ball_date, event_time_text, venue_address, venue_phone, dinner_caterer, dinner_menu, price_cadet, price_couple, signup_deadline, dress_code_text')
+          .select('ball_date, event_time_text, venue_address, venue_phone, dinner_caterer, dinner_menu, price_cadet, price_couple, signup_deadline, dress_code_text, field_trip_form_pdf_url')
           .maybeSingle(),
         SB.from('ball_gallery').select('photo_url, caption').order('sort_order', { ascending: true }),
       ]);
@@ -154,6 +154,24 @@ export default function BallLanding() {
                 {fmtShort(deadlineDate)}
                 <span style={cellSub}>Sign up before this date</span>
               </Cell>
+              {config.field_trip_form_pdf_url && (
+                <Cell label="FIELD TRIP FORM">
+                  Required for SDHS students
+                  <span style={cellSub}>Must be physically signed. No electronic signatures.</span>
+                  <a
+                    href={config.field_trip_form_pdf_url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    style={{
+                      display: 'inline-block', marginTop: 10, cursor: 'pointer', background: 'transparent',
+                      border: `1px solid ${P.gold}`, color: P.gold, fontFamily: mono,
+                      fontSize: 10, letterSpacing: '0.1em', padding: '7px 10px', textDecoration: 'none',
+                    }}
+                  >
+                    ↓ DOWNLOAD FORM (PDF)
+                  </a>
+                </Cell>
+              )}
             </FadeUp>
 
             {/* PRICING — perforated stubs */}
