@@ -34,6 +34,14 @@ export default function RifleSignupsPanel() {
   const [rows, setRows] = useState([]);
   const [loading, setLoading] = useState(true);
   const [q, setQ] = useState('');
+  const [copied, setCopied] = useState(false);
+
+  async function copyPhones(list) {
+    const text = list.map((r) => r.phone).filter(Boolean).join('\n');
+    await navigator.clipboard.writeText(text).catch(() => {});
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
+  }
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -74,6 +82,7 @@ export default function RifleSignupsPanel() {
               fontFamily: mono, fontSize: fs.sm, padding: '9px 12px', outline: 'none',
             }}
           />
+          <Btn onClick={() => copyPhones(rows)} variant="ghost" size="sm">{copied ? 'COPIED!' : 'COPY PHONE NUMBERS'}</Btn>
           <Btn onClick={() => exportCsv(rows)} variant="ghost" size="sm">EXPORT CSV</Btn>
         </div>
       )}
@@ -88,9 +97,12 @@ export default function RifleSignupsPanel() {
         <div style={{ display: 'flex', flexDirection: 'column', gap: sp[3] }}>
           {filtered.map((r) => (
             <div key={r.id} style={{ background: P.deep, border: `1px solid ${P.hair}`, padding: '14px 18px' }}>
-              <div style={{ fontFamily: mono, fontSize: fs.sm, color: P.cream, letterSpacing: '0.02em' }}>{r.school_email}</div>
+              <div style={{ display: 'flex', alignItems: 'baseline', gap: 10, flexWrap: 'wrap' }}>
+                <div style={{ fontFamily: mono, fontSize: fs.sm, color: P.cream, letterSpacing: '0.02em' }}>{r.school_email}</div>
+                <div style={{ fontFamily: mono, fontSize: fs.sm, color: P.gold, fontWeight: 700, letterSpacing: '0.02em' }}>{r.phone}</div>
+              </div>
               <div style={{ fontFamily: mono, fontSize: fs.micro, color: P.mute, marginTop: 6, letterSpacing: '0.02em' }}>
-                Personal: {r.personal_email} &middot; Parent: {r.parent_email} &middot; {r.phone}
+                Personal: {r.personal_email} &middot; Parent: {r.parent_email}
               </div>
               <div style={{ fontFamily: mono, fontSize: fs.micro, color: P.mute, marginTop: 4, letterSpacing: '0.08em' }}>
                 Signed up {new Date(r.created_at).toLocaleString()}

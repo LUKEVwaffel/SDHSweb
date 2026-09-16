@@ -39,6 +39,14 @@ export default function RifleSignupsPortal() {
   const [loginNotice, setLoginNotice] = useState('');
   const [rows, setRows] = useState([]);
   const [q, setQ] = useState('');
+  const [copied, setCopied] = useState(false);
+
+  async function copyPhones(list) {
+    const text = list.map((r) => r.phone).filter(Boolean).join('\n');
+    await navigator.clipboard.writeText(text).catch(() => {});
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
+  }
 
   const loadAll = useCallback(async () => {
     const { data, error } = await SB.from('rifle_signups_review_view').select('*').order('created_at', { ascending: false });
@@ -111,6 +119,7 @@ export default function RifleSignupsPortal() {
           {rows.length > 6 && (
             <input className="rv-search" placeholder="Search by email…" value={q} onChange={(e) => setQ(e.target.value)} style={{ flex: 1 }} />
           )}
+          <button className="rv-link" onClick={() => copyPhones(rows)}>{copied ? 'Copied!' : 'Copy phone numbers'}</button>
           <button className="rv-link" onClick={() => exportCsv(rows)}>Export CSV</button>
         </div>
       )}
@@ -123,9 +132,12 @@ export default function RifleSignupsPortal() {
         <div className="rv-list">
           {filtered.map((r) => (
             <div key={r.id} className="rv-row" style={{ cursor: 'default' }}>
-              <div className="rv-row-title">{r.school_email}</div>
+              <div className="rv-row-title" style={{ display: 'flex', alignItems: 'baseline', gap: 10, flexWrap: 'wrap' }}>
+                {r.school_email}
+                <span style={{ fontWeight: 700, color: 'var(--rv-accent)' }}>{r.phone}</span>
+              </div>
               <div className="rv-row-meta">
-                Personal: {r.personal_email} &middot; Parent: {r.parent_email} &middot; {r.phone}
+                Personal: {r.personal_email} &middot; Parent: {r.parent_email}
               </div>
               <div className="rv-row-meta">Signed up {fmtDate(r.created_at)}</div>
             </div>

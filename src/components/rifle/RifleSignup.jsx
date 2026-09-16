@@ -9,6 +9,15 @@ const P = {
 const mono = "'JetBrains Mono', monospace";
 const oswald = 'Oswald, sans-serif';
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+const SCHOOL_DOMAIN = '@students.hcde.org';
+
+// A pasted full email still works — strip the domain back off so the field
+// always holds just the username portion, same pattern as the Ball signup's
+// StepCadetVerify.jsx.
+function stripSchoolDomain(v) {
+  const at = v.indexOf('@');
+  return at < 0 ? v : v.slice(0, at);
+}
 
 function Field({ label, children }) {
   return (
@@ -19,13 +28,14 @@ function Field({ label, children }) {
   );
 }
 
-function TextInput(props) {
+function TextInput({ style, ...rest }) {
   return (
     <input
-      {...props}
+      {...rest}
       style={{
         width: '100%', boxSizing: 'border-box', background: P.navy, border: `1px solid ${P.hair}`,
         color: P.cream, fontFamily: mono, fontSize: 16, padding: '12px 12px', outline: 'none',
+        ...style,
       }}
     />
   );
@@ -37,16 +47,16 @@ function TextInput(props) {
 // contact info the roster doesn't carry. Kaz/Chief see submissions in the
 // reviewer portal (RifleSignupsPortal.jsx via /review).
 export default function RifleSignup() {
-  const [form, setForm] = useState({ school_email: '', personal_email: '', parent_email: '', phone: '' });
+  const [form, setForm] = useState({ username: '', personal_email: '', parent_email: '', phone: '' });
   const [busy, setBusy] = useState(false);
   const [err, setErr] = useState('');
   const [submitted, setSubmitted] = useState(false);
 
   const set = (field) => (e) => setForm({ ...form, [field]: e.target.value });
 
-  const schoolEmail = form.school_email.trim();
-  const schoolEmailEntered = schoolEmail.length > 0;
-  const schoolEmailOk = EMAIL_RE.test(schoolEmail) && isSchoolEmail(schoolEmail);
+  const username = form.username.trim();
+  const schoolEmailOk = username.length > 0 && !/\s/.test(username);
+  const schoolEmail = `${username.toLowerCase()}${SCHOOL_DOMAIN}`;
 
   const personalEmail = form.personal_email.trim();
   const personalEmailEntered = personalEmail.length > 0;
@@ -105,12 +115,21 @@ export default function RifleSignup() {
         ) : (
           <div>
             <Field label="SCHOOL EMAIL">
-              <TextInput type="email" value={form.school_email} onChange={set('school_email')} placeholder="you@students.hcde.org" />
-              {schoolEmailEntered && !schoolEmailOk && (
-                <div style={{ fontFamily: mono, fontSize: 11, color: P.red, marginTop: 4 }}>
-                  Use your @students.hcde.org email.
+              <div style={{ display: 'flex', alignItems: 'stretch' }}>
+                <TextInput
+                  autoFocus
+                  value={form.username}
+                  onChange={(e) => setForm({ ...form, username: stripSchoolDomain(e.target.value) })}
+                  placeholder="jsmith123"
+                  style={{ borderRight: 'none' }}
+                />
+                <div style={{
+                  background: P.ink, border: `1px solid ${P.hair}`, borderLeft: 'none', color: P.mute,
+                  fontFamily: mono, fontSize: 16, padding: '12px 12px', whiteSpace: 'nowrap', display: 'flex', alignItems: 'center',
+                }}>
+                  {SCHOOL_DOMAIN}
                 </div>
-              )}
+              </div>
             </Field>
 
             <Field label="PERSONAL EMAIL">
@@ -129,7 +148,7 @@ export default function RifleSignup() {
               )}
             </Field>
 
-            <Field label="PHONE NUMBER">
+            <Field label="YOUR PERSONAL PHONE NUMBER">
               <TextInput type="tel" inputMode="tel" value={form.phone} onChange={set('phone')} placeholder="(423) 555-0123" />
             </Field>
 
