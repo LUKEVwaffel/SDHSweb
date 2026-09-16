@@ -14,6 +14,31 @@
 -- reviewers (Chief/SAI, Sgt Kaz — see email_review.sql's is_reviewer()) get a
 -- read-only view so Kaz can work the signup list from the same reviewer
 -- portal he already uses for email review / ball ops.
+--
+-- Defensive re-declare: admin_role()/is_s6() (admin_roles.sql) and
+-- is_reviewer() (email_review.sql) SHOULD already exist in prod — every ball/
+-- aars/email feature depends on them. CREATE OR REPLACE below is a safe no-op
+-- if they're already there with this exact body, and unblocks this file if
+-- this session's DB is somehow missing them.
+create or replace function public.admin_role()
+returns text language sql stable security definer set search_path = public as $$
+  select role from public.admin_roles
+  where lower(email) = lower(auth.jwt() ->> 'email') limit 1;
+$$;
+
+create or replace function public.is_s6()
+returns boolean language sql stable security definer set search_path = public as $$
+  select public.admin_role() = 's6';
+$$;
+
+create or replace function public.is_reviewer()
+returns boolean language sql stable security definer set search_path = public as $$
+  select exists (
+    select 1 from public.email_reviewers
+    where lower(email) = lower(auth.jwt() ->> 'email') and active
+  );
+$$;
+
 create table if not exists public.rifle_signups (
   id              uuid primary key default gen_random_uuid(),
   school_email    text not null unique,
