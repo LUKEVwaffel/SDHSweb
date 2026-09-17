@@ -3,6 +3,7 @@ import { supabase as SB } from '../../../../lib/supabaseClient';
 import '../../../review/review.css';
 import '../../../ball/portal.css';
 import BallVipList from './BallVipList';
+import { openBallGuestVerifyPdf } from '../../../../lib/ballGuestVerifyPdf';
 
 // S-6 full-visibility overview of the Military Ball. Deliberately built on the
 // warm-paper review/portal CSS (.rv / .bp-*), NOT the dark DISPATCH theme —
@@ -337,6 +338,9 @@ function SignupItem({ r, guest, open, onToggle, onChanged }) {
           <div style={{ display: 'flex', gap: 10, alignItems: 'center', flexWrap: 'wrap' }}>
             <button className="rv-btn ghost" onClick={() => setEditing(true)}>Edit info</button>
             {guest && <ResendGuestButton r={r} guest={guest} />}
+            {guest && !guest.verified_at && (
+              <button className="rv-btn ghost" onClick={() => openBallGuestVerifyPdf(r, guest)}>Print guest paper</button>
+            )}
             <DeleteButton r={r} guest={guest} onChanged={onChanged} />
           </div>
         </div>
