@@ -113,26 +113,30 @@ export default function BallDressPortal() {
     }
     setBusyId(item.id);
     setActionError('');
-    const { data: { session }, timedOut } = await getSessionWithTimeout();
-    if (!session) {
+    try {
+      const { data: { session }, timedOut } = await getSessionWithTimeout();
+      if (!session) {
+        if (timedOut) { setActionError('Could not check your session — check your connection and try again.'); return; }
+        setPhase('login');
+        return;
+      }
+      const approving = !item.dress_approved;
+      const { error } = await withTimeout(
+        SB.from(KIND_TABLE[item.kind]).update({
+          dress_approved: approving, dress_approved_by: approving ? session.user.email : null,
+        }).eq('id', item.id)
+      );
+      if (error) { setActionError(`Could not update ${item.name}: ${error.message}`); return; }
+      await loadAll();
+    } catch (e) {
+      // A dropped connection mid-request throws instead of resolving with
+      // { error } — without this catch the button would stay greyed out
+      // forever with no explanation at all (the actual "nothing happens"
+      // report from mobile Safari).
+      setActionError(`Could not update ${item.name}: ${e?.message || 'connection lost mid-request'}. Try again.`);
+    } finally {
       setBusyId(null);
-      if (timedOut) { setActionError('Could not check your session — check your connection and try again.'); return; }
-      setPhase('login');
-      return;
     }
-    const approving = !item.dress_approved;
-    const { error } = await withTimeout(
-      SB.from(KIND_TABLE[item.kind]).update({
-        dress_approved: approving, dress_approved_by: approving ? session.user.email : null,
-      }).eq('id', item.id)
-    );
-    if (error) {
-      setActionError(`Could not update ${item.name}: ${error.message}`);
-      setBusyId(null);
-      return;
-    }
-    await loadAll();
-    setBusyId(null);
   }
 
   const { pending, approved, total } = useMemo(() => {
@@ -158,22 +162,26 @@ export default function BallDressPortal() {
     if (!ok) return;
     setBulkBusy(true);
     setActionError('');
-    const { data: { session }, timedOut } = await getSessionWithTimeout();
-    if (!session) {
+    try {
+      const { data: { session }, timedOut } = await getSessionWithTimeout();
+      if (!session) {
+        if (timedOut) { setActionError('Could not check your session — check your connection and try again.'); return; }
+        setPhase('login');
+        return;
+      }
+      const byKind = (k) => pending.filter((x) => x.kind === k && !(k === 'guest' && !x.verified_at)).map((x) => x.id);
+      const results = await Promise.all(Object.entries(KIND_TABLE).map(([kind, table]) => {
+        const ids = byKind(kind);
+        return ids.length ? withTimeout(SB.from(table).update({ dress_approved: true, dress_approved_by: session.user.email }).in('id', ids)) : null;
+      }));
+      const failed = results.find((r) => r?.error);
+      if (failed) setActionError(`Could not approve all: ${failed.error.message}`);
+      await loadAll();
+    } catch (e) {
+      setActionError(`Could not approve all: ${e?.message || 'connection lost mid-request'}. Try again.`);
+    } finally {
       setBulkBusy(false);
-      if (timedOut) { setActionError('Could not check your session — check your connection and try again.'); return; }
-      setPhase('login');
-      return;
     }
-    const byKind = (k) => pending.filter((x) => x.kind === k && !(k === 'guest' && !x.verified_at)).map((x) => x.id);
-    const results = await Promise.all(Object.entries(KIND_TABLE).map(([kind, table]) => {
-      const ids = byKind(kind);
-      return ids.length ? withTimeout(SB.from(table).update({ dress_approved: true, dress_approved_by: session.user.email }).in('id', ids)) : null;
-    }));
-    const failed = results.find((r) => r?.error);
-    if (failed) setActionError(`Could not approve all: ${failed.error.message}`);
-    await loadAll();
-    setBulkBusy(false);
   }
 
   const shell = (children) => (
