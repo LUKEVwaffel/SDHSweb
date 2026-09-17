@@ -95,6 +95,19 @@
 .bp-stat.is-done { border-color: var(--rv-green); color: var(--rv-green); background: var(--rv-green-soft); }
 .bp-stat.is-done b { color: var(--rv-green); }
 
+button.bp-stat {
+  appearance: none;
+  cursor: pointer;
+  transition: color 0.15s var(--rv-ease), border-color 0.15s var(--rv-ease), background 0.15s var(--rv-ease);
+}
+button.bp-stat:hover { border-color: var(--rv-ink); }
+.bp-stat.is-active {
+  border-color: var(--rv-ink);
+  background: var(--rv-ink);
+  color: var(--rv-surface);
+}
+.bp-stat.is-active b { color: inherit; }
+
 .bp-search {
   width: 100%;
   box-sizing: border-box;

@@ -87,6 +87,29 @@ const ALLERGY_OPTS = [{ value: 'pending', label: 'pending' }, { value: 'contacte
 const GTYPE_OPTS = [{ value: 'date', label: 'date' }, { value: 'friend', label: 'friend' }];
 const FPAY_OPTS = [{ value: null, label: '—' }, { value: 'host_delivers', label: 'host brings it' }, { value: 'self_pays', label: 'friend pays direct' }];
 
+// --- status filters ---------------------------------------------------------
+// Shared with the stats row so the count shown on a chip always matches what
+// clicking it will actually list.
+const needsFriendCash = (g) => g?.guest_type === 'friend' && g.friend_payment_method === 'self_pays';
+
+const FILTERS = [
+  { key: 'all', label: 'All', test: () => true },
+  { key: 'awaiting', label: 'Awaiting guest', test: (r) => r.status === 'guest_pending' },
+  { key: 'verified', label: 'Verified', test: (r) => r.status === 'fully_verified' },
+  {
+    key: 'cash',
+    label: 'Cash outstanding',
+    test: (r, g) => r.status === 'fully_verified' && (!r.cash_received || (needsFriendCash(g) && !g.friend_cash_received)),
+  },
+  {
+    key: 'form',
+    label: 'Form outstanding',
+    test: (r, g) => r.status === 'fully_verified' && r.field_trip_form_required
+      && (!r.field_trip_form_received || (!!g && !g.field_trip_form_received)),
+  },
+  { key: 'allergy', label: 'Allergy flagged', test: (r) => !!r.cadet_has_allergy },
+];
+
 // ------------------------------------------------------------------------
 
 export default function BallOverviewTab() {
@@ -94,6 +117,7 @@ export default function BallOverviewTab() {
   const [guestBySignup, setGuestBySignup] = useState({});
   const [err, setErr] = useState('');
   const [q, setQ] = useState('');
+  const [statusFilter, setStatusFilter] = useState('all');
   const [openId, setOpenId] = useState(null);
   const [reminderBusy, setReminderBusy] = useState(false);
   const [reminderFlash, setReminderFlash] = useState(null); // { tone: 'ok' | 'err', msg }
@@ -142,39 +166,25 @@ export default function BallOverviewTab() {
     setReminderFlash({ tone: 'ok', msg: `Sent ${data.sent} reminder${data.sent === 1 ? '' : 's'}${data.failed ? ` (${data.failed} failed)` : ''}.` });
   }
 
-  const { list, stats } = useMemo(() => {
+  const { list, filterCounts } = useMemo(() => {
     const rows = signups || [];
     const term = q.trim().toLowerCase();
-    const match = (r) => {
+    const matchesSearch = (r) => {
       if (!term) return true;
       const guest = guestBySignup[r.id];
       return (r.cadet_name || '').toLowerCase().includes(term)
         || (r.cadet_school_email || '').toLowerCase().includes(term)
         || (guest?.name || '').toLowerCase().includes(term);
     };
-    const filtered = rows.filter(match);
-    const verified = rows.filter((r) => r.status === 'fully_verified');
+    const searched = rows.filter(matchesSearch);
+    const activeTest = (FILTERS.find((f) => f.key === statusFilter) || FILTERS[0]).test;
+    const counts = {};
+    FILTERS.forEach((f) => { counts[f.key] = rows.filter((r) => f.test(r, guestBySignup[r.id])).length; });
     return {
-      list: filtered,
-      stats: {
-        total: rows.length,
-        verified: verified.length,
-        awaiting: rows.filter((r) => r.status === 'guest_pending').length,
-        cashOut: verified.filter((r) => {
-          const g = guestBySignup[r.id];
-          const needsFriendCash = g?.guest_type === 'friend' && g.friend_payment_method === 'self_pays';
-          return !r.cash_received || (needsFriendCash && !g.friend_cash_received);
-        }).length,
-        formOut: verified.filter((r) => {
-          if (!r.field_trip_form_required) return false;
-          if (!r.field_trip_form_received) return true;
-          const g = guestBySignup[r.id];
-          return !!g && !g.field_trip_form_received;
-        }).length,
-        allergies: rows.filter((r) => r.cadet_has_allergy).length,
-      },
+      list: searched.filter((r) => activeTest(r, guestBySignup[r.id])),
+      filterCounts: counts,
     };
-  }, [signups, guestBySignup, q]);
+  }, [signups, guestBySignup, q, statusFilter]);
 
   if (signups === null) {
     return (
@@ -214,12 +224,16 @@ export default function BallOverviewTab() {
         )}
 
         <div className="bp-stats">
-          <span className="bp-stat"><b>{stats.total}</b> signups</span>
-          <span className={`bp-stat ${stats.verified ? 'is-done' : ''}`}><b>{stats.verified}</b> verified</span>
-          <span className="bp-stat"><b>{stats.awaiting}</b> awaiting guest</span>
-          <span className={`bp-stat ${stats.cashOut ? 'is-alert' : ''}`}><b>{stats.cashOut}</b> cash outstanding</span>
-          <span className={`bp-stat ${stats.formOut ? 'is-alert' : ''}`}><b>{stats.formOut}</b> form outstanding</span>
-          <span className="bp-stat"><b>{stats.allergies}</b> allergy flags</span>
+          {FILTERS.map((f) => (
+            <button
+              key={f.key}
+              type="button"
+              className={`bp-stat ${statusFilter === f.key ? 'is-active' : ''}`}
+              onClick={() => setStatusFilter(statusFilter === f.key ? 'all' : f.key)}
+            >
+              <b>{filterCounts[f.key]}</b> {f.label}
+            </button>
+          ))}
         </div>
 
         {signups.length > 6 && (
@@ -230,6 +244,8 @@ export default function BallOverviewTab() {
 
         {signups.length === 0 ? (
           <div className="bp-empty">No ball signups yet.</div>
+        ) : list.length === 0 ? (
+          <div className="bp-empty">No signups match this filter.</div>
         ) : (
           <div className="rv-list">
             {list.map((r) => (
