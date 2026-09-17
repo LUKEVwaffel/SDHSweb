@@ -107,3 +107,39 @@ export async function getReviewer(req: Request): Promise<Reviewer | null> {
 
   return data ? { email, mustChangePassword: !!data.must_change_password } : null;
 }
+
+export interface RifleAdmin {
+  email: string;
+  mustChangePassword: boolean;
+}
+
+// Identify the signed-in caller as a RIFLE ADMIN (rifle_admins — separate
+// population from admin_roles and email_reviewers, per
+// rifle_admin_portal.sql). Used by every rifle-* write function.
+// mustChangePassword is returned but NOT enforced here, same reasoning as
+// getReviewer() — complete-rifle-first-login must be callable regardless of
+// its value. Every other rifle-* caller that writes real data (roster, comp
+// uploads) MUST check !mustChangePassword itself before doing anything.
+export async function getRifleAdmin(req: Request): Promise<RifleAdmin | null> {
+  const authHeader = req.headers.get("Authorization");
+  if (!authHeader) return null;
+
+  const scoped = createClient(
+    Deno.env.get("SUPABASE_URL")!,
+    Deno.env.get("SUPABASE_ANON_KEY")!,
+    { global: { headers: { Authorization: authHeader } }, auth: { persistSession: false } },
+  );
+  const { data: { user } } = await scoped.auth.getUser();
+  const email = user?.email?.toLowerCase();
+  if (!email) return null;
+
+  const svc = serviceClient();
+  const { data } = await svc
+    .from("rifle_admins")
+    .select("email, must_change_password")
+    .eq("email", email)
+    .eq("active", true)
+    .maybeSingle();
+
+  return data ? { email, mustChangePassword: !!data.must_change_password } : null;
+}

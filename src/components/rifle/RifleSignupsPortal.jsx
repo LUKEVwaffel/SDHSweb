@@ -1,6 +1,8 @@
 import { useState, useEffect, useCallback } from 'react';
+import { Navigate } from 'react-router-dom';
 import { supabase as SB } from '../../lib/supabaseClient';
-import EmailOnlyLogin from '../ball/dress/BallDressLogin';
+import PortalMovedNotice from '../portal/PortalMovedNotice';
+import { isPortalMoveNoticeActive } from '../portal/portalMoveConfig';
 import '../review/review.css';
 
 function fmtDate(v) {
@@ -36,7 +38,6 @@ function exportCsv(rows) {
 export default function RifleSignupsPortal() {
   const [phase, setPhase] = useState('checking');
   const [errorMsg, setErrorMsg] = useState('');
-  const [loginNotice, setLoginNotice] = useState('');
   const [rows, setRows] = useState([]);
   const [q, setQ] = useState('');
   const [copied, setCopied] = useState(false);
@@ -60,7 +61,7 @@ export default function RifleSignupsPortal() {
     if (!session) { setPhase('login'); return; }
     const { data: rev } = await SB.from('email_reviewers')
       .select('email').eq('email', session.user.email.toLowerCase()).eq('active', true).maybeSingle();
-    if (!rev) { setLoginNotice('That account is not an active reviewer.'); setPhase('login'); return; }
+    if (!rev) { setPhase('login'); return; }
     await loadAll();
   }, [loadAll]);
 
@@ -90,15 +91,7 @@ export default function RifleSignupsPortal() {
   );
 
   if (phase === 'checking') return shell(<p className="rv-sub"><span className="rv-dot" />Checking your session&hellip;</p>);
-  if (phase === 'login') return shell(
-    <EmailOnlyLogin
-      notice={loginNotice}
-      onSignedIn={verifyAndLoad}
-      heading="Rifle Signups"
-      fn="reviewer-email-login"
-      deniedMessage="That account is not an active reviewer."
-    />
-  );
+  if (phase === 'login') return isPortalMoveNoticeActive() ? <PortalMovedNotice portalName="Rifle Signups" /> : <Navigate to="/portal" replace />;
   if (phase === 'error') return shell(
     <div className="rv-panel" style={{ borderColor: '#dcbdb6' }}>
       <h1 className="rv-h1" style={{ fontSize: 20, color: 'var(--rv-red)' }}>Something went wrong</h1>

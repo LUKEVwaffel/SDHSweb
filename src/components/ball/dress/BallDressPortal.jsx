@@ -1,6 +1,8 @@
 import { useState, useEffect, useCallback, useMemo } from 'react';
+import { Navigate } from 'react-router-dom';
 import { supabase as SB } from '../../../lib/supabaseClient';
-import BallDressLogin from './BallDressLogin';
+import PortalMovedNotice from '../../portal/PortalMovedNotice';
+import { isPortalMoveNoticeActive } from '../../portal/portalMoveConfig';
 import '../../review/review.css';
 import '../portal.css';
 
@@ -21,7 +23,6 @@ function byLine(email) {
 export default function BallDressPortal() {
   const [phase, setPhase] = useState('checking');
   const [errorMsg, setErrorMsg] = useState('');
-  const [loginNotice, setLoginNotice] = useState('');
   const [email, setEmail] = useState('');
   const [cadets, setCadets] = useState([]);
   const [guests, setGuests] = useState([]);
@@ -52,7 +53,7 @@ export default function BallDressPortal() {
     const { data: { session } } = await SB.auth.getSession();
     if (!session) { setPhase('login'); return; }
     const { data: staff } = await SB.rpc('is_ball_dress');
-    if (!staff) { setLoginNotice('That account is not an active dress approver.'); setPhase('login'); return; }
+    if (!staff) { setPhase('login'); return; }
     setEmail(session.user.email);
     await loadAll();
   }, [loadAll]);
@@ -88,7 +89,6 @@ export default function BallDressPortal() {
     const { data: { session } } = await SB.auth.getSession();
     if (!session) {
       setBusyId(null);
-      setLoginNotice('Your session expired — sign in again to keep approving.');
       setPhase('login');
       return;
     }
@@ -131,7 +131,6 @@ export default function BallDressPortal() {
     const { data: { session } } = await SB.auth.getSession();
     if (!session) {
       setBulkBusy(false);
-      setLoginNotice('Your session expired — sign in again to keep approving.');
       setPhase('login');
       return;
     }
@@ -156,7 +155,7 @@ export default function BallDressPortal() {
   );
 
   if (phase === 'checking') return shell(<p className="rv-sub"><span className="rv-dot" />Checking your session&hellip;</p>);
-  if (phase === 'login') return shell(<BallDressLogin notice={loginNotice} onSignedIn={verifyAndLoad} />);
+  if (phase === 'login') return isPortalMoveNoticeActive() ? <PortalMovedNotice portalName="Dress Approval" /> : <Navigate to="/portal" replace />;
   if (phase === 'error') return shell(<div className="rv-panel" style={{ borderColor: '#dcbdb6' }}><h1 className="rv-h1" style={{ fontSize: 20 }}>Something went wrong</h1><p className="rv-sub">{errorMsg}</p></div>);
 
   return shell(

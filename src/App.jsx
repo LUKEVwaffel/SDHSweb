@@ -32,6 +32,7 @@ import RaiderTeam from './components/RaiderTeam';
 import Rifle from './components/Rifle';
 import RifleSignup from './components/rifle/RifleSignup';
 import RifleSignupsPortal from './components/rifle/RifleSignupsPortal';
+import RiflePortal from './components/rifle/portal/RiflePortal';
 import Staff from './components/Staff';
 import EventsPage from './components/EventsPage';
 import SubmitHub from './components/SubmitHub';
@@ -64,6 +65,7 @@ import BallGuestVerify from './components/ball/BallGuestVerify';
 import BallOpsPortal from './components/ball/ops/BallOpsPortal';
 import BallDressPortal from './components/ball/dress/BallDressPortal';
 import BallAttirePortal from './components/ball/attire/BallAttirePortal';
+import PortalHub from './components/portal/PortalHub';
 import Optic from './components/optic/Optic';
 import LukeUploadRoute from './components/optic/LukeUpload';
 import LukePwaRoute from './components/optic/LukePwa';
@@ -100,6 +102,10 @@ export default function App() {
   // — bypass TopNav/Footer entirely, same as the old hash early-return.
   if (location.pathname === '/admin' || location.pathname.startsWith('/admin/')) return <Admin />;
   if (location.pathname === '/review' || location.pathname.startsWith('/review/')) return <ReviewPortal />;
+  // Unified staff-portal login — every non-DISPATCH portal below redirects
+  // here instead of showing its own login screen (see each portal's
+  // phase === 'login' branch). DISPATCH (/admin) is not part of this.
+  if (location.pathname === '/portal' || location.pathname.startsWith('/portal/')) return <PortalHub />;
   // OPTIC comp photo system — three self-contained surfaces, each its own
   // auth/chrome, same early-return pattern as /admin. /rhea is the pre-2.0
   // route name; kept as a redirect for one comp so old installed-PWA links
@@ -128,6 +134,7 @@ export default function App() {
   if (location.pathname === '/ball/dress' || location.pathname.startsWith('/ball/dress/')) return <BallDressPortal />;
   if (location.pathname === '/ball/attire' || location.pathname.startsWith('/ball/attire/')) return <BallAttirePortal />;
   if (location.pathname === '/rifle/signup-review' || location.pathname.startsWith('/rifle/signup-review/')) return <RifleSignupsPortal />;
+  if (location.pathname === '/rifle/portal' || location.pathname.startsWith('/rifle/portal/')) return <RiflePortal />;
 
   return (
     <div style={{ minHeight: '100vh', background: '#06101F', fontFamily: 'Inter, sans-serif' }}>

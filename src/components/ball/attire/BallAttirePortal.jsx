@@ -1,6 +1,8 @@
 import { useState, useEffect, useCallback, useMemo } from 'react';
+import { Navigate } from 'react-router-dom';
 import { supabase as SB } from '../../../lib/supabaseClient';
-import BallDressLogin from '../dress/BallDressLogin';
+import PortalMovedNotice from '../../portal/PortalMovedNotice';
+import { isPortalMoveNoticeActive } from '../../portal/portalMoveConfig';
 import '../../review/review.css';
 import '../portal.css';
 
@@ -18,7 +20,6 @@ function byLine(email) {
 export default function BallAttirePortal() {
   const [phase, setPhase] = useState('checking');
   const [errorMsg, setErrorMsg] = useState('');
-  const [loginNotice, setLoginNotice] = useState('');
   const [email, setEmail] = useState('');
   const [rows, setRows] = useState([]);
   const [busyId, setBusyId] = useState(null);
@@ -36,7 +37,7 @@ export default function BallAttirePortal() {
     const { data: { session } } = await SB.auth.getSession();
     if (!session) { setPhase('login'); return; }
     const { data: ok } = await SB.rpc('is_ball_attire');
-    if (!ok) { setLoginNotice('That account is not the male-guest attire approver.'); setPhase('login'); return; }
+    if (!ok) { setPhase('login'); return; }
     setEmail(session.user.email);
     await loadAll();
   }, [loadAll]);
@@ -102,7 +103,7 @@ export default function BallAttirePortal() {
   );
 
   if (phase === 'checking') return shell(<p className="rv-sub"><span className="rv-dot" />Checking your session&hellip;</p>);
-  if (phase === 'login') return shell(<BallDressLogin heading="Male-Guest Attire" notice={loginNotice} onSignedIn={verifyAndLoad} />);
+  if (phase === 'login') return isPortalMoveNoticeActive() ? <PortalMovedNotice portalName="Male-Guest Attire" /> : <Navigate to="/portal" replace />;
   if (phase === 'error') return shell(<div className="rv-panel" style={{ borderColor: '#dcbdb6' }}><h1 className="rv-h1" style={{ fontSize: 20 }}>Something went wrong</h1><p className="rv-sub">{errorMsg}</p></div>);
 
   return shell(

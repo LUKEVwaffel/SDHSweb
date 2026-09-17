@@ -1,6 +1,8 @@
 import { useState, useEffect, useCallback, useMemo } from 'react';
+import { Navigate } from 'react-router-dom';
 import { supabase as SB } from '../../../lib/supabaseClient';
-import EmailOnlyLogin from '../dress/BallDressLogin';
+import PortalMovedNotice from '../../portal/PortalMovedNotice';
+import { isPortalMoveNoticeActive } from '../../portal/portalMoveConfig';
 import '../../review/review.css';
 import '../portal.css';
 
@@ -78,10 +80,10 @@ function exportCsv(rows, guestsBySignup) {
   URL.revokeObjectURL(url);
 }
 
-// Ball Ops portal — Kaz/Chief payment + field trip form tracking. Reuses the
-// EXISTING email-only login wholesale (EmailOnlyLogin/BallDressLogin.jsx, same
-// email_reviewers population + reviewer-email-login edge fn as the email
-// review portal) — same people (Kaz + Chief), second surface. Reads through
+// Ball Ops portal — Kaz/Chief payment + field trip form tracking. Same
+// email_reviewers population as /review (reached from its PortalPicker); an
+// unauthed direct hit here since 2026-09-17 shows PortalMovedNotice and
+// redirects to /portal instead of its own login screen. Reads through
 // ball_signups_ops_view / ball_guests_ops_view (RLS-scoped, no dress fields,
 // no allergies). Writes go directly to the base table under the column-guard
 // trigger, then a fire-and-forget notify-ball-status-update.
@@ -91,7 +93,6 @@ function exportCsv(rows, guestsBySignup) {
 export default function BallOpsPortal() {
   const [phase, setPhase] = useState('checking');
   const [errorMsg, setErrorMsg] = useState('');
-  const [loginNotice, setLoginNotice] = useState('');
   const [rows, setRows] = useState([]);
   const [guestsBySignup, setGuestsBySignup] = useState({});
   const [busyId, setBusyId] = useState(null);
@@ -227,15 +228,7 @@ export default function BallOpsPortal() {
   );
 
   if (phase === 'checking') return shell(<p className="rv-sub"><span className="rv-dot" />Checking your session&hellip;</p>);
-  if (phase === 'login') return shell(
-    <EmailOnlyLogin
-      notice={loginNotice || 'Sign in to Ball Ops (same account as email review).'}
-      onSignedIn={verifyAndLoad}
-      heading="Ball Ops"
-      fn="reviewer-email-login"
-      deniedMessage="That account is not an active ops reviewer."
-    />
-  );
+  if (phase === 'login') return isPortalMoveNoticeActive() ? <PortalMovedNotice portalName="Ball Ops" /> : <Navigate to="/portal" replace />;
   if (phase === 'error') return shell(<div className="rv-panel" style={{ borderColor: '#dcbdb6' }}><h1 className="rv-h1" style={{ fontSize: 20 }}>Something went wrong</h1><p className="rv-sub">{errorMsg}</p></div>);
 
   const totalVerified = rows.filter((r) => r.status === 'fully_verified').length;

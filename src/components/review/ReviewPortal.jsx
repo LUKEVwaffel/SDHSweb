@@ -2,7 +2,8 @@ import { useState, useEffect, useCallback, useRef } from 'react';
 import { Navigate, useLocation, useNavigate, useSearchParams } from 'react-router-dom';
 import { FunctionsHttpError } from '@supabase/supabase-js';
 import { supabase as SB } from '../../lib/supabaseClient';
-import EmailOnlyLogin from '../ball/dress/BallDressLogin';
+import PortalMovedNotice from '../portal/PortalMovedNotice';
+import { isPortalMoveNoticeActive } from '../portal/portalMoveConfig';
 import ForcePasswordChange from './ForcePasswordChange';
 import './review.css';
 
@@ -12,13 +13,14 @@ import './review.css';
 // console — polished (real type/palette/motion, see review.css) but simple.
 //
 // Auth: email-only, no password, no PIN (reviewer-email-login mints a real
-// GoTrue session for any active email_reviewers row — see EmailOnlyLogin,
-// which is BallDressLogin.jsx generalized for reuse here). The
-// submit-for-review notification email links here with /review?draft=<id> —
-// a plain deep link, not an auto-authenticating token. On mount we check for
-// an existing session; if none, EmailOnlyLogin runs. Either way, the session
-// is then checked against email_reviewers (the authorization gate — active
-// reviewer yes/no) before showing anything.
+// GoTrue session for any active email_reviewers row). Since 2026-09-17,
+// signing in happens at the unified /portal hub, not here — an unauthed hit
+// on /review shows PortalMovedNotice and redirects there (see
+// portalMoveConfig.js). The submit-for-review notification email links here
+// with /review?draft=<id> — a plain deep link, not an auto-authenticating
+// token. On mount we check for an existing session, then check it against
+// email_reviewers (the authorization gate — active reviewer yes/no) before
+// showing anything.
 //
 // Three tabs: Pending (actionable), Sent (read-only history, ALL reviewers
 // see ALL approved-or-sent messages per email_review_visibility.sql — count
@@ -67,7 +69,6 @@ export default function ReviewPortal() {
   const [searchParams] = useSearchParams();
   const [phase, setPhase] = useState('checking'); // checking | login | force-password | ready | error
   const [errorMsg, setErrorMsg] = useState('');
-  const [loginNotice, setLoginNotice] = useState('');
   const [reviewerName, setReviewerName] = useState('');
   const [reviewerEmail, setReviewerEmail] = useState('');
   // After login the reviewer picks which portal to use — Email Review (this
@@ -123,7 +124,6 @@ export default function ReviewPortal() {
       .eq('active', true).maybeSingle();
 
     if (!rev) {
-      setLoginNotice('That account is not an active reviewer.');
       setPhase('login');
       return;
     }
@@ -276,15 +276,7 @@ export default function ReviewPortal() {
 
   if (phase === 'checking') return shell(<p className="rv-sub"><span className="rv-dot" />Checking your session&hellip;</p>);
 
-  if (phase === 'login') return shell(
-    <EmailOnlyLogin
-      notice={loginNotice}
-      onSignedIn={verifyReviewerAndLoad}
-      heading="DISPATCH Reviewer Portal"
-      fn="reviewer-email-login"
-      deniedMessage="That account is not an active reviewer."
-    />
-  );
+  if (phase === 'login') return isPortalMoveNoticeActive() ? <PortalMovedNotice portalName="Reviewer Portal" /> : <Navigate to="/portal" replace />;
 
   if (phase === 'force-password') return shell(
     <ForcePasswordChange email={reviewerEmail} onDone={finishForcePassword} />
