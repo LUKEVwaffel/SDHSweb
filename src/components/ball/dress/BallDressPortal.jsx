@@ -10,6 +10,29 @@ function byLine(email) {
   return email ? email.split('@')[0] : '';
 }
 
+const ACTION_TIMEOUT_MS = 12000;
+
+// A stalled network/auth-refresh request otherwise hangs forever with zero
+// visible feedback — the exact "I tapped it and nothing happened" report.
+// Races every write against a hard timeout so it always resolves one way or
+// the other, instead of leaving the button spinning indefinitely.
+function withTimeout(promise, ms = ACTION_TIMEOUT_MS) {
+  return Promise.race([
+    promise,
+    new Promise((resolve) => setTimeout(() => resolve({ error: { message: 'Timed out — check your connection and try again.' } }), ms)),
+  ]);
+}
+
+// getSession() has a different return shape ({ data: { session } }), so a
+// hang here degrades to "no session" (→ redirect to sign in) rather than
+// throwing on the destructure.
+function getSessionWithTimeout(ms = ACTION_TIMEOUT_MS) {
+  return Promise.race([
+    SB.auth.getSession(),
+    new Promise((resolve) => setTimeout(() => resolve({ data: { session: null }, timedOut: true }), ms)),
+  ]);
+}
+
 // Dress approval portal — female cadets + female guests + female VIP guests
 // + female VIP dates (visiting XO/BC/CSM and past King/Queen are the VIPs;
 // only a King/Queen may bring a date — see ball_vip_signup.sql) in one
@@ -84,18 +107,25 @@ export default function BallDressPortal() {
   };
 
   async function toggle(item) {
+    if (item.kind === 'guest' && !item.verified_at) {
+      setActionError(`${item.name} hasn't verified their email yet — they can't be approved until they do.`);
+      return;
+    }
     setBusyId(item.id);
     setActionError('');
-    const { data: { session } } = await SB.auth.getSession();
+    const { data: { session }, timedOut } = await getSessionWithTimeout();
     if (!session) {
       setBusyId(null);
+      if (timedOut) { setActionError('Could not check your session — check your connection and try again.'); return; }
       setPhase('login');
       return;
     }
     const approving = !item.dress_approved;
-    const { error } = await SB.from(KIND_TABLE[item.kind]).update({
-      dress_approved: approving, dress_approved_by: approving ? session.user.email : null,
-    }).eq('id', item.id);
+    const { error } = await withTimeout(
+      SB.from(KIND_TABLE[item.kind]).update({
+        dress_approved: approving, dress_approved_by: approving ? session.user.email : null,
+      }).eq('id', item.id)
+    );
     if (error) {
       setActionError(`Could not update ${item.name}: ${error.message}`);
       setBusyId(null);
@@ -128,16 +158,17 @@ export default function BallDressPortal() {
     if (!ok) return;
     setBulkBusy(true);
     setActionError('');
-    const { data: { session } } = await SB.auth.getSession();
+    const { data: { session }, timedOut } = await getSessionWithTimeout();
     if (!session) {
       setBulkBusy(false);
+      if (timedOut) { setActionError('Could not check your session — check your connection and try again.'); return; }
       setPhase('login');
       return;
     }
     const byKind = (k) => pending.filter((x) => x.kind === k && !(k === 'guest' && !x.verified_at)).map((x) => x.id);
     const results = await Promise.all(Object.entries(KIND_TABLE).map(([kind, table]) => {
       const ids = byKind(kind);
-      return ids.length ? SB.from(table).update({ dress_approved: true, dress_approved_by: session.user.email }).in('id', ids) : null;
+      return ids.length ? withTimeout(SB.from(table).update({ dress_approved: true, dress_approved_by: session.user.email }).in('id', ids)) : null;
     }));
     const failed = results.find((r) => r?.error);
     if (failed) setActionError(`Could not approve all: ${failed.error.message}`);
@@ -275,7 +306,7 @@ function DressRow({ x, busy, onToggle, state }) {
         )}
       </div>
       <div className="bp-actions">
-        <button className={`bp-toggle ${x.dress_approved ? 'is-on' : ''}`} disabled={busy || unverified} onClick={() => onToggle(x)}>
+        <button className={`bp-toggle ${x.dress_approved ? 'is-on' : ''} ${unverified ? 'is-blocked' : ''}`} disabled={busy} onClick={() => onToggle(x)}>
           {unverified ? 'Not verified yet' : x.dress_approved ? '✓ Approved' : 'Mark approved'}
         </button>
       </div>

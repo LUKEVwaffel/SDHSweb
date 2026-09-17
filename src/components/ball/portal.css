@@ -284,6 +284,7 @@ button.bp-stat:hover { border-color: var(--rv-ink); }
 .bp-toggle.is-on { background: var(--rv-green); border-color: var(--rv-green); color: #fff; }
 .bp-toggle.is-on:hover:not(:disabled) { box-shadow: 0 4px 14px rgba(31, 111, 74, 0.28); }
 .bp-toggle:disabled { opacity: 0.5; cursor: default; }
+.bp-toggle.is-blocked { border-style: dashed; color: var(--rv-accent); }
 
 .bp-by { font-family: 'JetBrains Mono', monospace; font-size: 10px; color: var(--rv-faint); margin-top: 5px; }
 
