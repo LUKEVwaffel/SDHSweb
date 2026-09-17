@@ -2,9 +2,7 @@ import { useState, useEffect, useRef } from 'react';
 import { supabase as SB } from '../../../../lib/supabaseClient';
 import { P, mono, sp } from '../../theme';
 import { Btn, Input, Label, PanelHeader } from '../../shared/ui';
-import BallDressStaffTab from './BallDressStaffTab';
 import BallOverviewTab from './BallOverviewTab';
-import BallReviewerAccountsTab from './BallReviewerAccountsTab';
 import BallEmailsTab from './BallEmailsTab';
 import { DRESS_APPROVERS, WESTON } from '../../../../lib/ballApprovers';
 
@@ -12,17 +10,15 @@ const TABS = [
   { id: 'overview', label: 'OVERVIEW' },
   { id: 'settings', label: 'SETTINGS' },
   { id: 'emails', label: 'EMAILS' },
-  { id: 'dress-staff', label: 'ATTIRE STAFF ACCOUNTS' },
-  { id: 'reviewers', label: 'REVIEW PORTAL ACCOUNTS' },
 ];
 const BUCKET = 'ball-assets';
 
 // S-6-only Ball admin panel. Settings tab covers the full public-landing +
 // wizard config surface (dates, venue, dinner + flat menu, split pricing,
-// dress approvers + code + PDF, Weston contact, gallery). Attire Staff
-// Accounts provisions the female-dress approvers AND Weston's male-guest-
-// attire access — email-only login, no PIN (see ball-dress-set-pin's role
-// param).
+// dress approvers + code + PDF, Weston contact, gallery). Dress/attire and
+// reviewer account provisioning moved to the Portal Access panel (SYSTEM
+// nav) — it covers every non-DISPATCH staff portal in one place now,
+// not just the Ball ones.
 export default function BallPanel() {
   const [tab, setTab] = useState('overview');
   const [config, setConfig] = useState(null);
@@ -137,8 +133,6 @@ export default function BallPanel() {
 
       {tab === 'overview' && <BallOverviewTab />}
       {tab === 'emails' && <BallEmailsTab />}
-      {tab === 'dress-staff' && <BallDressStaffTab />}
-      {tab === 'reviewers' && <BallReviewerAccountsTab />}
 
       {tab === 'settings' && (
         <div>

@@ -43,6 +43,7 @@ export const NAV_GROUPS = [
   {
     heading: 'SYSTEM',
     items: [
+      { id: 'portalaccess', icon: '⚷', label: 'Portal Access' },
       { id: 'advanced', icon: '⚙', label: 'Advanced', danger: true },
     ],
   },

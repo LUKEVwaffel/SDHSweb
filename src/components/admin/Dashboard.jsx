@@ -24,6 +24,7 @@ import EventFeedbackPanel from './panels/feedback/EventFeedbackPanel';
 import BallPanel from './panels/ball/BallPanel';
 import BallAllergyPanel from './panels/ball/BallAllergyPanel';
 import RifleSignupsPanel from './panels/RifleSignupsPanel';
+import PortalAccessPanel from './panels/portal/PortalAccessPanel';
 
 // Push-to-TV / TV Photos is intentionally restricted to this one account —
 // a deliberate departure from DISPATCH's usual "no per-email logic"
@@ -81,7 +82,7 @@ const SECTION_LABEL = {
 // tv_daily_settings emergency guard to accept is_bc(); is_admin()/is_s6()/
 // is_s5() are untouched, so every other admin table stays locked to him.
 const ROLE_SECTIONS = {
-  s6: ['overview', 'events', 'people', 'photos', 'questions', 'email', 'media', 'messages', 'advanced', 'tvremote', 'raidertv', 'beta', 'rafting', 'feedback', 'ball', 'ballallergy', 'riflesignups'],
+  s6: ['overview', 'events', 'people', 'photos', 'questions', 'email', 'media', 'messages', 'advanced', 'tvremote', 'raidertv', 'beta', 'rafting', 'feedback', 'ball', 'ballallergy', 'riflesignups', 'portalaccess'],
   s5: ['events', 'aars', 'feedback', 'messages', 'account', 'tvremote', 'ballallergy'],
   bc: ['tvremote'],
 };
@@ -132,6 +133,7 @@ export default function Dashboard({ onLogout, adminId, role = 's6' }) {
           {section === 'ball'     && <BallPanel />}
           {section === 'ballallergy' && <BallAllergyPanel />}
           {section === 'riflesignups' && <RifleSignupsPanel />}
+          {section === 'portalaccess' && <PortalAccessPanel />}
         </div>
       </div>
       <StatusBar sectionLabel={SECTION_LABEL[section] || section.toUpperCase()} />
