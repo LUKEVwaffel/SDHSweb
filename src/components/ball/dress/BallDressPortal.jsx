@@ -31,6 +31,7 @@ export default function BallDressPortal() {
   const [bulkBusy, setBulkBusy] = useState(false);
   const [q, setQ] = useState('');
   const [approvedOpen, setApprovedOpen] = useState(false);
+  const [actionError, setActionError] = useState('');
 
   const loadAll = useCallback(async () => {
     const [{ data: c, error: cErr }, { data: g, error: gErr }, { data: v, error: vErr }, { data: vd, error: vdErr }] = await Promise.all([
@@ -83,11 +84,17 @@ export default function BallDressPortal() {
 
   async function toggle(item) {
     setBusyId(item.id);
+    setActionError('');
     const { data: { session } } = await SB.auth.getSession();
     const approving = !item.dress_approved;
-    await SB.from(KIND_TABLE[item.kind]).update({
+    const { error } = await SB.from(KIND_TABLE[item.kind]).update({
       dress_approved: approving, dress_approved_by: approving ? session.user.email : null,
     }).eq('id', item.id);
+    if (error) {
+      setActionError(`Could not update ${item.name}: ${error.message}`);
+      setBusyId(null);
+      return;
+    }
     await loadAll();
     setBusyId(null);
   }
@@ -114,12 +121,15 @@ export default function BallDressPortal() {
     const ok = window.confirm(`Mark all ${pending.length} pending as approved?`);
     if (!ok) return;
     setBulkBusy(true);
+    setActionError('');
     const { data: { session } } = await SB.auth.getSession();
     const byKind = (k) => pending.filter((x) => x.kind === k && !(k === 'guest' && !x.verified_at)).map((x) => x.id);
-    await Promise.all(Object.entries(KIND_TABLE).map(([kind, table]) => {
+    const results = await Promise.all(Object.entries(KIND_TABLE).map(([kind, table]) => {
       const ids = byKind(kind);
       return ids.length ? SB.from(table).update({ dress_approved: true, dress_approved_by: session.user.email }).in('id', ids) : null;
     }));
+    const failed = results.find((r) => r?.error);
+    if (failed) setActionError(`Could not approve all: ${failed.error.message}`);
     await loadAll();
     setBulkBusy(false);
   }
@@ -148,6 +158,8 @@ export default function BallDressPortal() {
         <h1 className="bp-title">Dress Approvals</h1>
         <button className="bp-refresh" onClick={loadAll}>Refresh</button>
       </div>
+
+      {actionError && <div className="bp-action-error">{actionError}</div>}
 
       <div className="bp-stats">
         <span className={`bp-stat ${pending.length ? 'is-alert' : ''}`}><b>{pending.length}</b> to approve</span>

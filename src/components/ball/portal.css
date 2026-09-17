@@ -372,6 +372,17 @@ button.bp-stat:hover { border-color: var(--rv-ink); }
   border-radius: var(--rv-radius);
 }
 
+.bp-action-error {
+  border: 1px solid var(--rv-accent);
+  background: var(--rv-accent-soft);
+  color: var(--rv-accent);
+  border-radius: var(--rv-radius);
+  padding: 10px 14px;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 12px;
+  margin-bottom: 14px;
+}
+
 @media (max-width: 560px) {
   .bp-row { flex-direction: column; align-items: stretch; }
   .bp-actions { justify-content: stretch; }
