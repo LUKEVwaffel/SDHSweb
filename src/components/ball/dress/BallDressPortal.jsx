@@ -86,6 +86,12 @@ export default function BallDressPortal() {
     setBusyId(item.id);
     setActionError('');
     const { data: { session } } = await SB.auth.getSession();
+    if (!session) {
+      setBusyId(null);
+      setLoginNotice('Your session expired — sign in again to keep approving.');
+      setPhase('login');
+      return;
+    }
     const approving = !item.dress_approved;
     const { error } = await SB.from(KIND_TABLE[item.kind]).update({
       dress_approved: approving, dress_approved_by: approving ? session.user.email : null,
@@ -123,6 +129,12 @@ export default function BallDressPortal() {
     setBulkBusy(true);
     setActionError('');
     const { data: { session } } = await SB.auth.getSession();
+    if (!session) {
+      setBulkBusy(false);
+      setLoginNotice('Your session expired — sign in again to keep approving.');
+      setPhase('login');
+      return;
+    }
     const byKind = (k) => pending.filter((x) => x.kind === k && !(k === 'guest' && !x.verified_at)).map((x) => x.id);
     const results = await Promise.all(Object.entries(KIND_TABLE).map(([kind, table]) => {
       const ids = byKind(kind);
