@@ -3,9 +3,11 @@
 // Goes to the cadet's company so they can chase the guest down in person.
 // Carries the email the invite was actually sent to, plus a blank line staff
 // can use to write down the corrected email if the cadet says it was wrong.
-const NAVY = '#142847';
-const GOLD = '#C9A961';
-
+//
+// Printed on office B&W printers with no color/toner and often with
+// "background graphics" OFF in the print dialog — so nothing here may rely on
+// a colored background to carry contrast. Every line of text is solid black
+// ink; hierarchy comes from size/weight/borders only, never from color alone.
 function escapeHtml(s) {
   return String(s || '')
     .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
@@ -15,26 +17,37 @@ function escapeHtml(s) {
 const DOC_STYLE = `
   @page { size: letter; margin: 0.6in; }
   * { box-sizing: border-box; }
-  html, body { background: #ffffff; color: #111111; margin: 0; }
+  html, body { background: #ffffff; color: #000000; margin: 0; }
   body { font-family: 'Inter', Arial, sans-serif; }
   .sheet { max-width: 7.4in; margin: 0 auto; }
-  .head { border-bottom: 3px solid ${GOLD}; background: ${NAVY}; color: #F4ECD8; padding: 22px 26px; }
-  .head .org { font-family: Arial, Helvetica, sans-serif; font-size: 10px; letter-spacing: 3px; text-transform: uppercase; opacity: 0.85; }
-  .head .title { font-family: Georgia, 'Times New Roman', serif; font-weight: 700; font-size: 23px; letter-spacing: 0.02em; margin-top: 4px; }
-  .head .company { font-family: 'Courier New', monospace; font-size: 12px; letter-spacing: 0.08em; margin-top: 8px; color: ${GOLD}; }
-  .meta-row { display: flex; justify-content: space-between; font-family: 'Courier New', monospace; font-size: 9.5px; color: #666; padding: 9px 26px; border-bottom: 1px solid #ddd; }
-  .body { padding: 20px 26px 4px; }
-  .field { margin-bottom: 16px; }
-  .field .k { font-family: 'Courier New', monospace; font-size: 9px; letter-spacing: 0.1em; text-transform: uppercase; color: #888; margin-bottom: 3px; }
-  .field .v { font-family: Georgia, 'Times New Roman', serif; font-size: 18px; color: ${NAVY}; }
-  .field .v.email { font-family: 'Courier New', monospace; font-size: 15px; word-break: break-all; }
-  .notice { font-family: Inter, Arial, sans-serif; font-size: 10.5px; line-height: 1.55; color: #444; background: #f7f5ef; border-left: 3px solid ${GOLD}; padding: 12px 16px; margin: 10px 0 20px; }
-  .correction { border: 1.5px dashed #bbb; border-radius: 6px; padding: 14px 16px 18px; margin-top: 4px; }
-  .correction .k { font-family: 'Courier New', monospace; font-size: 9.5px; letter-spacing: 0.08em; text-transform: uppercase; color: #888; margin-bottom: 10px; }
-  .correction .line { border-bottom: 1.5px solid #999; height: 30px; margin-bottom: 10px; }
-  .correction .sub { font-family: 'Courier New', monospace; font-size: 8.5px; color: #999; display: flex; justify-content: space-between; }
-  .foot { text-align: center; padding: 18px; font-family: 'Courier New', monospace; font-size: 8px; color: #aaa; }
-  @media print { .no-print { display: none; } }
+  .company-banner { border: 3px solid #000000; padding: 10px 16px; text-align: center; margin-bottom: 14px; }
+  .company-banner .lbl { font-family: Arial, Helvetica, sans-serif; font-weight: 700; font-size: 11px; letter-spacing: 0.2em; text-transform: uppercase; color: #000000; }
+  .company-banner .name { font-family: Georgia, 'Times New Roman', serif; font-weight: 700; font-size: 32px; letter-spacing: 0.02em; color: #000000; margin-top: 2px; }
+  .head { border-bottom: 4px solid #000000; padding: 0 0 16px; }
+  .head .org { font-family: Arial, Helvetica, sans-serif; font-weight: 700; font-size: 12px; letter-spacing: 3px; text-transform: uppercase; color: #000000; }
+  .head .title { font-family: Georgia, 'Times New Roman', serif; font-weight: 700; font-size: 26px; letter-spacing: 0.01em; margin-top: 6px; color: #000000; }
+  .meta-row { display: flex; justify-content: space-between; font-family: 'Courier New', monospace; font-weight: 700; font-size: 11px; color: #000000; padding: 10px 0; border-bottom: 1.5px solid #000000; }
+  .directive { border: 2px solid #000000; padding: 14px 16px; margin: 16px 0; }
+  .directive .k { font-family: Arial, Helvetica, sans-serif; font-weight: 700; font-size: 11px; letter-spacing: 0.1em; text-transform: uppercase; color: #000000; margin-bottom: 6px; }
+  .directive .msg { font-family: Inter, Arial, sans-serif; font-weight: 600; font-size: 14px; line-height: 1.6; color: #000000; }
+  .cadet-msg { border-left: 5px solid #000000; padding: 10px 16px; margin: 16px 0 22px; }
+  .cadet-msg .k { font-family: Arial, Helvetica, sans-serif; font-weight: 700; font-size: 11px; letter-spacing: 0.1em; text-transform: uppercase; color: #000000; margin-bottom: 6px; }
+  .cadet-msg .msg { font-family: Inter, Arial, sans-serif; font-weight: 600; font-size: 13.5px; line-height: 1.6; color: #000000; }
+  .body { padding: 4px 0 4px; }
+  .field { margin-bottom: 18px; }
+  .field .k { font-family: Arial, Helvetica, sans-serif; font-weight: 700; font-size: 11px; letter-spacing: 0.08em; text-transform: uppercase; color: #000000; margin-bottom: 4px; }
+  .field .v { font-family: Georgia, 'Times New Roman', serif; font-weight: 700; font-size: 20px; color: #000000; }
+  .field .v.email { font-family: 'Courier New', monospace; font-size: 16px; word-break: break-all; }
+  .field .v .let { font-family: 'Courier New', monospace; font-weight: 700; font-size: 13px; color: #000000; }
+  .correction { border: 2px solid #000000; border-radius: 6px; padding: 14px 16px 18px; margin-top: 4px; }
+  .correction .k { font-family: Arial, Helvetica, sans-serif; font-weight: 700; font-size: 11px; letter-spacing: 0.05em; text-transform: uppercase; color: #000000; margin-bottom: 12px; }
+  .correction .line { border-bottom: 1.5px solid #000000; height: 32px; margin-bottom: 10px; }
+  .correction .sub { font-family: 'Courier New', monospace; font-weight: 700; font-size: 10px; color: #000000; display: flex; justify-content: space-between; }
+  .foot { text-align: center; padding: 18px 16px; font-family: Arial, Helvetica, sans-serif; font-weight: 700; font-size: 13px; color: #000000; border: 2px solid #000000; margin-top: 18px; }
+  @media print {
+    .no-print { display: none; }
+    * { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+  }
 `;
 
 function documentHtml({ companyLabel, generatedOn, cadetName, letLevel, guestName, sentTo }) {
@@ -44,16 +57,30 @@ function documentHtml({ companyLabel, generatedOn, cadetName, letLevel, guestNam
 </head>
 <body>
   <div class="sheet">
+    <div class="company-banner">
+      <div class="lbl">Company</div>
+      <div class="name">${escapeHtml(companyLabel)}</div>
+    </div>
     <div class="head">
       <div class="org">Trojan Battalion JROTC · Military Ball</div>
       <div class="title">Guest Not Yet Verified</div>
-      <div class="company">${escapeHtml(companyLabel)}</div>
     </div>
-    <div class="meta-row"><span>Generated ${escapeHtml(generatedOn)}</span><span>Route to cadet's company</span></div>
+    <div class="meta-row"><span>Generated ${escapeHtml(generatedOn)}</span><span>Return completed sheet to S-6</span></div>
+
+    <div class="directive">
+      <div class="k">To the company commander</div>
+      <div class="msg">Deliver this paper directly to <b>${escapeHtml(cadetName)}</b> in <b>${escapeHtml(companyLabel)}</b> company.</div>
+    </div>
+
+    <div class="cadet-msg">
+      <div class="k">To the cadet</div>
+      <div class="msg">Your guest, <b>${escapeHtml(guestName)}</b>, has not verified yet. Please check with your guest that the email below is correct, and have them check their spam/junk folder for the verification email.</div>
+    </div>
+
     <div class="body">
       <div class="field">
         <div class="k">Cadet</div>
-        <div class="v">${escapeHtml(cadetName)}${letLevel ? ` <span style="font-family:'Courier New',monospace;font-size:12px;color:#888;">LET ${escapeHtml(letLevel)}</span>` : ''}</div>
+        <div class="v">${escapeHtml(cadetName)}${letLevel ? ` <span class="let">LET ${escapeHtml(letLevel)}</span>` : ''}</div>
       </div>
       <div class="field">
         <div class="k">Guest</div>
@@ -63,18 +90,14 @@ function documentHtml({ companyLabel, generatedOn, cadetName, letLevel, guestNam
         <div class="k">Verification email sent to</div>
         <div class="v email">${escapeHtml(sentTo)}</div>
       </div>
-      <div class="notice">
-        This guest has not clicked their verification link yet. Have the cadet check with their guest that the
-        email above is correct and check spam/junk. This sheet is not recorded in DISPATCH — it is only a runner
-        to get the cadet's attention.
-      </div>
       <div class="correction">
         <div class="k">If the email above is wrong, write the correct one here:</div>
         <div class="line"></div>
         <div class="sub"><span>Corrected by (name)</span><span>Date</span></div>
       </div>
     </div>
-    <div class="foot">Hand this back to S-6 / Ball staff so the corrected email can be re-sent in DISPATCH.</div>
+
+    <div class="foot">Once complete, return this sheet to the S-6 desk.</div>
   </div>
 </body></html>`;
 }

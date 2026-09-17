@@ -338,5 +338,14 @@
   "336": "optic-sw.js",
   "337": "ball_dress_realtime.sql",
   "338": "@dnd-kit/utilities",
-  "339": "optic_spring_hill_events.sql"
+  "339": "optic_spring_hill_events.sql",
+  "340": "ball_vip_signup.sql",
+  "341": "ball_dress_phone.sql",
+  "342": "rifle_signup.sql",
+  "343": "OpticHeroStrip.jsx",
+  "344": "OpticPromoBand.jsx",
+  "345": "ball_guest_cash_split.sql",
+  "346": "ball_guest_form_split.sql",
+  "347": "ball_dress_guest_verified.sql",
+  "348": "ball_reminder_deadlines.sql"
 }
