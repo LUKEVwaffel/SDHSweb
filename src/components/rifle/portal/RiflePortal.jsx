@@ -6,11 +6,12 @@ import { isPortalMoveNoticeActive } from '../../portal/portalMoveConfig';
 import RifleForcePasswordChange from './RifleForcePasswordChange';
 import RiflePinControl from './RiflePinControl';
 import RosterTab from './RosterTab';
+import CompUploadTab from './CompUploadTab';
 import { P, mono, oswald } from '../theme';
 
 const TABS = [
   { id: 'roster', label: 'Roster' },
-  // Comp-upload/AI-analysis tab lands in the next phase of this build.
+  { id: 'compupload', label: 'Comp Upload' },
 ];
 
 // Self-contained portal at /rifle/portal — Makaio's own login, own chrome,
@@ -113,6 +114,7 @@ export default function RiflePortal() {
         </div>
 
         {tab === 'roster' && <RosterTab />}
+        {tab === 'compupload' && <CompUploadTab />}
         {tab === 'settings' && (
           <div style={{ maxWidth: 380 }}>
             <RiflePinControl email={admin.email} hasPin={hasPin} onChange={setHasPin} />
