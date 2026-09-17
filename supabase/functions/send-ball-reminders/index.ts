@@ -52,6 +52,10 @@ interface GuestRow {
   field_trip_form_received: boolean | null;
 }
 
+function fieldTripAttachment(url: string | null): Array<{ filename: string; path: string }> {
+  return url ? [{ filename: "field-trip-permission-form.pdf", path: url }] : [];
+}
+
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return preflight();
   if (req.method !== "POST") return json({ error: "method not allowed" }, 405);
@@ -71,7 +75,7 @@ Deno.serve(async (req) => {
         .eq("status", "fully_verified"),
       svc.from("ball_guests")
         .select("signup_id, name, guest_type, friend_payment_method, friend_amount_due, friend_cash_received, field_trip_form_received"),
-      svc.from("ball_config").select("payment_deadline, dress_deadline").maybeSingle(),
+      svc.from("ball_config").select("payment_deadline, dress_deadline, field_trip_form_pdf_url").maybeSingle(),
     ]);
     if (sErr || gErr) return json({ error: (sErr || gErr)?.message }, 500);
 
@@ -81,30 +85,35 @@ Deno.serve(async (req) => {
     const deadlinePretty = cfg?.payment_deadline ? fmtLongDate(cfg.payment_deadline) : null;
     const dressDeadlinePretty = cfg?.dress_deadline ? fmtLongDate(cfg.dress_deadline) : null;
 
-    type Candidate = { row: SignupRow; guest: GuestRow | undefined; todo: string[] };
+    type Candidate = { row: SignupRow; guest: GuestRow | undefined; todo: string[]; needsForm: boolean };
     const candidates: Candidate[] = [];
     for (const row of (signups || []) as SignupRow[]) {
       if (!row.notification_email) continue;
       const guest = guestBySignup.get(row.id);
       const todo: string[] = [];
+      let needsForm = false;
       if (!row.cash_received) {
         const amt = money(row.amount_due);
-        todo.push(amt ? `Render payment of <strong>${amt}</strong> in full, by cash or check, to Chief.` : "Render payment <strong>in full</strong>, by cash or check, to Chief.");
+        todo.push(amt ? `Render payment of <strong>${amt}</strong> in full, by cash or check, to <strong>Kaz and Chief ONLY</strong>.` : "Render payment <strong>in full</strong>, by cash or check, to <strong>Kaz and Chief ONLY</strong>.");
       }
       if (row.field_trip_form_required && !row.field_trip_form_received) {
-        todo.push("Submit your <strong>signed field trip permission form</strong> (physical signature only) to Chief.");
+        const attachedNote = cfg?.field_trip_form_pdf_url ? ", attached to this email" : "";
+        todo.push(`Submit your <strong>signed field trip permission form</strong> (physical signature only${attachedNote}) to <strong>Kaz and Chief ONLY</strong>.`);
+        needsForm = true;
       }
       if (guest?.guest_type === "friend" && guest.friend_payment_method === "self_pays" && !guest.friend_cash_received) {
         const fa = money(guest.friend_amount_due);
-        todo.push(`Your friend <strong>${escapeHtml(guest.name || "")}</strong> still owes${fa ? ` <strong>${fa}</strong>` : ""} of their own, which they pay or deliver themselves.`);
+        todo.push(`Your friend <strong>${escapeHtml(guest.name || "")}</strong> still owes${fa ? ` <strong>${fa}</strong>` : ""} of their own, which they pay or deliver themselves to <strong>Kaz and Chief ONLY</strong>.`);
       }
       // Guest's own field-trip form is tracked separately from the host's —
       // a guest exists whenever field_trip_form_required is true and it's not
       // purely the host's own requirement (see ball_guest_form_split.sql).
       if (row.field_trip_form_required && guest && !guest.field_trip_form_received) {
-        todo.push(`<strong>${escapeHtml(guest.name || "Your guest")}</strong>'s own field trip permission form is also still needed.`);
+        const attachedNote = cfg?.field_trip_form_pdf_url ? " (attached to this email)" : "";
+        todo.push(`<strong>${escapeHtml(guest.name || "Your guest")}</strong>'s own field trip permission form is also still needed${attachedNote} — hand it to <strong>Kaz and Chief ONLY</strong>.`);
+        needsForm = true;
       }
-      if (todo.length) candidates.push({ row, guest, todo });
+      if (todo.length) candidates.push({ row, guest, todo, needsForm });
     }
 
     if (dry_run) return json({ ok: true, dry_run: true, candidates: candidates.length });
@@ -122,7 +131,8 @@ Deno.serve(async (req) => {
       : "";
 
     let sent = 0, failed = 0;
-    for (const { row, todo } of candidates) {
+    for (const { row, todo, needsForm } of candidates) {
+      const formAttach = needsForm ? fieldTripAttachment(cfg?.field_trip_form_pdf_url ?? null) : [];
       const vars: Record<string, string> = {
         cadet_name: escapeHtml(row.cadet_name),
         what: todo.map((li) => li.replace(/<[^>]+>/g, "")).join("; "),
@@ -167,6 +177,7 @@ ${dressDeadlinePretty ? `\nSeparately: any cadet or guest whose dress has not ye
           to: [row.notification_email],
           subject: pick(t, "subject", "Military Ball: payment / form reminder", vars),
           html,
+          ...(formAttach.length ? { attachments: formAttach } : {}),
           text,
         }),
       });

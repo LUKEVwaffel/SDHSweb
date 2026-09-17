@@ -314,11 +314,13 @@
   "312": "RaiderCarousel.jsx",
   "313": "TvRangeRaiderPracticeWidget.jsx",
   "314": "CadetManual.jsx",
+  "315": "TvTopStrip.jsx",
   "316": "pwa.js",
   "317": "ball_guard_service_role_fix.sql",
   "318": "FillBlankGame.jsx",
   "319": "ball_signups_wipe.sql",
   "320": "optic-send-push/index.ts",
+  "321": "ball-submit-vip-signup/index.ts",
   "322": "optic_2.sql",
   "323": "event_feedback_opens_at.sql",
   "324": "rafting_photos.sql",
@@ -327,6 +329,7 @@
   "327": "ball_dress_staff_status.sql",
   "328": "TvKiosk.jsx",
   "329": "StepRangeSchedule.jsx",
+  "330": "useOpticGate.js",
   "331": "posthog-react-native",
   "332": "exifr",
   "333": "posthog-js",
@@ -344,5 +347,6 @@
   "345": "ball_guest_cash_split.sql",
   "346": "ball_guest_form_split.sql",
   "347": "ball_dress_guest_verified.sql",
-  "348": "ball_reminder_deadlines.sql"
+  "348": "ball_reminder_deadlines.sql",
+  "349": "@simplewebauthn/browser"
 }
