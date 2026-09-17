@@ -1,7 +1,10 @@
 -- Rifle team interest signup — 2026-27 season. Public, pre-auth form at
--- /rifle/signup for cadets who want to try out. A returning varsity shooter
--- does NOT sign up here (copy on the form says so) — this is for new/JV
--- interest only.
+-- /rifle/signup, open to EVERY cadet who wants in — new, JV, and returning
+-- varsity alike. A returning shooter is recognized automatically: if their
+-- school_email matches an active row in rifle_shooters (last season's
+-- roster, backfilled with emails via the admin Roster tab), the signup is
+-- flagged is_varsity on insert (see rifle-submit-signup). No manual
+-- self-report, no "don't sign up" carve-out.
 --
 -- Deliberately just an identifier + contact info, nothing else: the cadet's
 -- name/age/grade/company already live in DISPATCH's own roster data, keyed
@@ -45,8 +48,21 @@ create table if not exists public.rifle_signups (
   personal_email  text not null,
   parent_email    text not null,
   phone           text not null,
+  is_varsity      boolean not null default false,
   created_at      timestamptz not null default now()
 );
+
+-- Idempotent add for installs where the table already existed pre-varsity-flag.
+alter table public.rifle_signups add column if not exists is_varsity boolean not null default false;
+
+-- Lets rifle-submit-signup recognize a returning shooter by school_email.
+-- rifle_shooters (rifle_admin_portal.sql) predates this column and holds no
+-- email for past rosters until Makaio/Kaz backfill them via the Roster tab —
+-- until then, nobody matches and every signup lands as non-varsity, which is
+-- the safe default.
+alter table public.rifle_shooters add column if not exists school_email text;
+create unique index if not exists rifle_shooters_school_email_idx
+  on public.rifle_shooters (lower(school_email)) where school_email is not null;
 
 alter table public.rifle_signups enable row level security;
 
@@ -62,7 +78,7 @@ revoke all on public.rifle_signups from anon;
 drop view if exists public.rifle_signups_review_view;
 create view public.rifle_signups_review_view
 with (security_barrier = true) as
-  select id, school_email, personal_email, parent_email, phone, created_at
+  select id, school_email, personal_email, parent_email, phone, is_varsity, created_at
   from public.rifle_signups
   where public.is_reviewer() or public.is_s6();
 grant select on public.rifle_signups_review_view to authenticated;

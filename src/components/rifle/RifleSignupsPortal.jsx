@@ -16,10 +16,10 @@ function csvCell(v) {
 }
 
 function exportCsv(rows) {
-  const headers = ['School Email', 'Personal Email', 'Parent Email', 'Phone', 'Signed Up'];
+  const headers = ['School Email', 'Personal Email', 'Parent Email', 'Phone', 'Varsity', 'Signed Up'];
   const lines = [headers.join(',')];
   rows.forEach((r) => {
-    lines.push([r.school_email, r.personal_email, r.parent_email, r.phone, fmtDate(r.created_at)].map(csvCell).join(','));
+    lines.push([r.school_email, r.personal_email, r.parent_email, r.phone, r.is_varsity ? 'Yes' : 'No', fmtDate(r.created_at)].map(csvCell).join(','));
   });
   const blob = new Blob([lines.join('\r\n')], { type: 'text/csv;charset=utf-8;' });
   const url = URL.createObjectURL(blob);
@@ -136,6 +136,11 @@ export default function RifleSignupsPortal() {
               <div className="rv-row-title" style={{ display: 'flex', alignItems: 'baseline', gap: 10, flexWrap: 'wrap' }}>
                 {r.school_email}
                 <span style={{ fontWeight: 700, color: 'var(--rv-accent)' }}>{r.phone}</span>
+                {r.is_varsity && (
+                  <span style={{ fontSize: 11, fontWeight: 700, letterSpacing: '0.1em', color: '#06101F', background: 'var(--rv-accent)', padding: '2px 8px' }}>
+                    VARSITY
+                  </span>
+                )}
               </div>
               <div className="rv-row-meta">
                 Personal: {r.personal_email} &middot; Parent: {r.parent_email}

@@ -348,5 +348,13 @@
   "346": "ball_guest_form_split.sql",
   "347": "ball_dress_guest_verified.sql",
   "348": "ball_reminder_deadlines.sql",
-  "349": "@simplewebauthn/browser"
+  "349": "@simplewebauthn/browser",
+  "350": "rifle-submit-signup/index.ts",
+  "351": "@dnd-kit/sortable",
+  "352": "@dnd-kit/utilities",
+  "353": "@fingerprintjs/fingerprintjs",
+  "354": "qrcode",
+  "355": "portal_hub.sql",
+  "356": "rifle_admin_status.sql",
+  "357": "ball_dress_diagnostic.sql"
 }

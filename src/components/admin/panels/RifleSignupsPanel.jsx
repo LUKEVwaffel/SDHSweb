@@ -14,10 +14,10 @@ function csvCell(v) {
 }
 
 function exportCsv(rows) {
-  const headers = ['School Email', 'Personal Email', 'Parent Email', 'Phone', 'Signed Up'];
+  const headers = ['School Email', 'Personal Email', 'Parent Email', 'Phone', 'Varsity', 'Signed Up'];
   const lines = [headers.join(',')];
   rows.forEach((r) => {
-    lines.push([r.school_email, r.personal_email, r.parent_email, r.phone, new Date(r.created_at).toLocaleString()].map(csvCell).join(','));
+    lines.push([r.school_email, r.personal_email, r.parent_email, r.phone, r.is_varsity ? 'Yes' : 'No', new Date(r.created_at).toLocaleString()].map(csvCell).join(','));
   });
   const blob = new Blob([lines.join('\r\n')], { type: 'text/csv;charset=utf-8;' });
   const url = URL.createObjectURL(blob);
@@ -67,7 +67,7 @@ export default function RifleSignupsPanel() {
     <div>
       <PanelHeader
         title="RIFLE SIGNUPS"
-        sub={`${rows.length} cadet${rows.length === 1 ? '' : 's'} signed up · new/JV interest, 2026-27 season`}
+        sub={`${rows.length} cadet${rows.length === 1 ? '' : 's'} signed up · 2026-27 season`}
         action={<Btn onClick={load} variant="ghost" size="sm">REFRESH</Btn>}
       />
 
@@ -100,6 +100,11 @@ export default function RifleSignupsPanel() {
               <div style={{ display: 'flex', alignItems: 'baseline', gap: 10, flexWrap: 'wrap' }}>
                 <div style={{ fontFamily: mono, fontSize: fs.sm, color: P.cream, letterSpacing: '0.02em' }}>{r.school_email}</div>
                 <div style={{ fontFamily: mono, fontSize: fs.sm, color: P.gold, fontWeight: 700, letterSpacing: '0.02em' }}>{r.phone}</div>
+                {r.is_varsity && (
+                  <div style={{ fontFamily: mono, fontSize: fs.micro, color: P.ink, background: P.gold, fontWeight: 700, letterSpacing: '0.1em', padding: '2px 8px' }}>
+                    VARSITY
+                  </div>
+                )}
               </div>
               <div style={{ fontFamily: mono, fontSize: fs.micro, color: P.mute, marginTop: 6, letterSpacing: '0.02em' }}>
                 Personal: {r.personal_email} &middot; Parent: {r.parent_email}

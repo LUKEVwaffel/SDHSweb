@@ -25,8 +25,8 @@
     "semantic_hash": "c1ee9ce6a4fe04105dbf8e619390df5e"
   },
   "src/App.jsx": {
-    "mtime": 1789561848.8116171,
-    "ast_hash": "7e797406d5838846a2779c53138c4d3e",
+    "mtime": 1789649087.7664046,
+    "ast_hash": "0d43ab5fff02666d3dc89710a6282498",
     "semantic_hash": ""
   },
   "src/components/About.jsx": {
@@ -130,8 +130,8 @@
     "semantic_hash": ""
   },
   "src/components/admin/Dashboard.jsx": {
-    "mtime": 1789565475.877272,
-    "ast_hash": "d50c1eca3f51455801d783add74b5159",
+    "mtime": 1789650566.9554415,
+    "ast_hash": "cb5a4d248bcfada7e7a5e53238e20471",
     "semantic_hash": ""
   },
   "src/components/admin/LoginScreen.jsx": {
@@ -150,8 +150,8 @@
     "semantic_hash": "872097bb6f2a4e8b32dfd0a1ba37dedc"
   },
   "src/components/admin/nav/Sidebar.jsx": {
-    "mtime": 1789564663.5900772,
-    "ast_hash": "44862ab2984cc61d2098d7f4d20ff0b8",
+    "mtime": 1789650511.929336,
+    "ast_hash": "5278e7c06f98086392d861cf0cd83d8a",
     "semantic_hash": ""
   },
   "src/components/admin/nav/StatusBar.jsx": {
@@ -455,8 +455,8 @@
     "semantic_hash": ""
   },
   "supabase/functions/_shared/supabase.ts": {
-    "mtime": 1785879695.0685394,
-    "ast_hash": "4cd41d580eb40faf0d1a318dde500117",
+    "mtime": 1789638572.4087002,
+    "ast_hash": "a5c01daf8d7db8812a4ae0c3e5853af9",
     "semantic_hash": ""
   },
   "supabase/functions/_shared/webauthn.ts": {
@@ -580,8 +580,8 @@
     "semantic_hash": ""
   },
   "src/components/review/ReviewPortal.jsx": {
-    "mtime": 1789567365.0658257,
-    "ast_hash": "257be09650d85ab3c7a2303fa223c2f6",
+    "mtime": 1789649604.6179545,
+    "ast_hash": "d24341c209aef638268a6e41edfb94d0",
     "semantic_hash": ""
   },
   "supabase/email_review_history.sql": {
@@ -1990,8 +1990,8 @@
     "semantic_hash": ""
   },
   "src/components/admin/panels/ball/BallPanel.jsx": {
-    "mtime": 1789471833.287949,
-    "ast_hash": "89d354099602ab8ab57bd58189aa3fd1",
+    "mtime": 1789650507.3331065,
+    "ast_hash": "33058573004fd352c3b83a75e96a4e81",
     "semantic_hash": ""
   },
   "src/components/ball/BallGuestVerify.jsx": {
@@ -2010,13 +2010,13 @@
     "semantic_hash": ""
   },
   "src/components/ball/dress/BallDressPortal.jsx": {
-    "mtime": 1789567441.1765711,
-    "ast_hash": "4bb70b1d56fb950ba5df22a40bcc7aca",
+    "mtime": 1789652324.0122123,
+    "ast_hash": "af1b6630ce1ae9214ed979edb2d2f139",
     "semantic_hash": ""
   },
   "src/components/ball/ops/BallOpsPortal.jsx": {
-    "mtime": 1789567401.0476735,
-    "ast_hash": "48663cbae0d8bd0d023a0d9f1f926e91",
+    "mtime": 1789649610.9878316,
+    "ast_hash": "ebf3f22c2d0192edf94f29ba88b9d90d",
     "semantic_hash": ""
   },
   "src/components/ball/signup/BallSignupWizard.jsx": {
@@ -2390,8 +2390,8 @@
     "semantic_hash": ""
   },
   "src/components/ball/attire/BallAttirePortal.jsx": {
-    "mtime": 1789134698.3797255,
-    "ast_hash": "958f9c8d3ab3dc5805abb8901568653c",
+    "mtime": 1789649242.9887278,
+    "ast_hash": "267ecd369702dce18d2e7ca4bc7d5d3f",
     "semantic_hash": ""
   },
   "supabase/admin_change_email.sql": {
@@ -2815,8 +2815,8 @@
     "semantic_hash": ""
   },
   "src/components/admin/panels/RifleSignupsPanel.jsx": {
-    "mtime": 1789565784.0241852,
-    "ast_hash": "f76885a2c96a5c643ed3ea9dc3e0b614",
+    "mtime": 1789652840.9522104,
+    "ast_hash": "0b8fc3626f4a923f9b216e1729745e4d",
     "semantic_hash": ""
   },
   "src/components/admin/panels/ball/BallVipList.jsx": {
@@ -2830,13 +2830,13 @@
     "semantic_hash": ""
   },
   "src/components/rifle/RifleSignup.jsx": {
-    "mtime": 1789565720.6929984,
-    "ast_hash": "19d4ea9d02a690895d4a72df4fdb928c",
+    "mtime": 1789652796.673835,
+    "ast_hash": "75a0c178feca93d96ebd434b2968117d",
     "semantic_hash": ""
   },
   "src/components/rifle/RifleSignupsPortal.jsx": {
-    "mtime": 1789567435.0102203,
-    "ast_hash": "485b2cf9c6df67b4d1d8e1b29a57bb99",
+    "mtime": 1789652854.514733,
+    "ast_hash": "a3a10a2ac8079d0af68f136e0649b4bd",
     "semantic_hash": ""
   },
   "src/lib/ballGuestVerifyPdf.js": {
@@ -2900,8 +2900,8 @@
     "semantic_hash": ""
   },
   "supabase/functions/rifle-submit-signup/index.ts": {
-    "mtime": 1789561720.5344737,
-    "ast_hash": "98129b0d22b706976454051001d5a60e",
+    "mtime": 1789652782.9225817,
+    "ast_hash": "32d7fb8d558d29af09d0ba59d63f636d",
     "semantic_hash": ""
   },
   "supabase/functions/send-ball-reminders/index.ts": {
@@ -2910,13 +2910,133 @@
     "semantic_hash": ""
   },
   "supabase/rifle_signup.sql": {
-    "mtime": 1789565007.1627245,
-    "ast_hash": "dc93df016d9924c150687eb8814582e8",
+    "mtime": 1789652772.828511,
+    "ast_hash": "0cc5f424a5e6a8bf5a6df3dbb184fec7",
     "semantic_hash": ""
   },
   "torjanviewerlogo.png": {
     "mtime": 1787956776.186692,
     "ast_hash": "87f4f58a55b18cc7ffafc93a0c56cdeb",
+    "semantic_hash": ""
+  },
+  "src/components/admin/panels/portal/PortalAccessPanel.jsx": {
+    "mtime": 1789650444.8103852,
+    "ast_hash": "df9654c01544be1e410f6ac668fdbf6a",
+    "semantic_hash": ""
+  },
+  "src/components/admin/panels/portal/RifleAdminAccountsTab.jsx": {
+    "mtime": 1789650413.351024,
+    "ast_hash": "70bf766542efdcdab1af42113f9d704b",
+    "semantic_hash": ""
+  },
+  "src/components/portal/PortalHub.jsx": {
+    "mtime": 1789649559.8477776,
+    "ast_hash": "e9f466c0b966230cc40effa4b9fecd6a",
+    "semantic_hash": ""
+  },
+  "src/components/portal/PortalMovedNotice.jsx": {
+    "mtime": 1789649176.8344584,
+    "ast_hash": "84005321bb8c2685bcbd5a7f9e43bf3e",
+    "semantic_hash": ""
+  },
+  "src/components/portal/portalMoveConfig.js": {
+    "mtime": 1789649169.1718585,
+    "ast_hash": "331c0d0b50c2ff1c4ae3ad6b32239b5a",
+    "semantic_hash": ""
+  },
+  "src/components/rifle/portal/CompUploadTab.jsx": {
+    "mtime": 1789651732.2406936,
+    "ast_hash": "c73f0cfd360d0e4d19d915344b6eb767",
+    "semantic_hash": ""
+  },
+  "src/components/rifle/portal/RifleForcePasswordChange.jsx": {
+    "mtime": 1789638653.0794973,
+    "ast_hash": "22f26c12b401a1c28f4a80fba5df2a08",
+    "semantic_hash": ""
+  },
+  "src/components/rifle/portal/RiflePinControl.jsx": {
+    "mtime": 1789638638.8436391,
+    "ast_hash": "d4d8c2e83322f78aeb9b2fed0abd6b5e",
+    "semantic_hash": ""
+  },
+  "src/components/rifle/portal/RiflePortal.jsx": {
+    "mtime": 1789651964.9640257,
+    "ast_hash": "ea3bd8a07e6ebd76ad9fde217edb2b44",
+    "semantic_hash": ""
+  },
+  "src/components/rifle/portal/RiflePortalLogin.jsx": {
+    "mtime": 1789638759.8935373,
+    "ast_hash": "14c3c914893fe2a0bb9b4272668ace0c",
+    "semantic_hash": ""
+  },
+  "src/components/rifle/portal/RosterTab.jsx": {
+    "mtime": 1789652824.9739957,
+    "ast_hash": "de3a1e51971b13a594b9814d7235dce4",
+    "semantic_hash": ""
+  },
+  "src/components/rifle/theme.js": {
+    "mtime": 1789638617.8631704,
+    "ast_hash": "4c8af62634cfa6e6a35cec11c5bb2ae7",
+    "semantic_hash": ""
+  },
+  "src/lib/rifleAdminApi.js": {
+    "mtime": 1789638626.4281445,
+    "ast_hash": "842627531b7f3d570fd5dceb33ee3961",
+    "semantic_hash": ""
+  },
+  "supabase/ball_dress_diagnostic.sql": {
+    "mtime": 1789646449.442649,
+    "ast_hash": "2d759c6089b1405b7b2268872c7094e5",
+    "semantic_hash": ""
+  },
+  "supabase/functions/complete-rifle-first-login/index.ts": {
+    "mtime": 1789638610.5211544,
+    "ast_hash": "2ae00549006591e491d7e8452ef86c06",
+    "semantic_hash": ""
+  },
+  "supabase/functions/portal-email-login/index.ts": {
+    "mtime": 1789649056.9106128,
+    "ast_hash": "5838737766c0cf53ce542e2d611ce1a8",
+    "semantic_hash": ""
+  },
+  "supabase/functions/rifle-admin-set/index.ts": {
+    "mtime": 1789650382.9409854,
+    "ast_hash": "805fee797726547037c0523271bf8cba",
+    "semantic_hash": ""
+  },
+  "supabase/functions/rifle-clear-pin/index.ts": {
+    "mtime": 1789638604.1634808,
+    "ast_hash": "b889cbf4e0dc8d88a9ac90f44da1df24",
+    "semantic_hash": ""
+  },
+  "supabase/functions/rifle-comp-parse/index.ts": {
+    "mtime": 1789651694.5481122,
+    "ast_hash": "e1dde0d968531a92e91625e93c050edd",
+    "semantic_hash": ""
+  },
+  "supabase/functions/rifle-pin-login/index.ts": {
+    "mtime": 1789638584.7923164,
+    "ast_hash": "1b75b8cb756339b1fc2acba7e9c7977e",
+    "semantic_hash": ""
+  },
+  "supabase/functions/rifle-set-pin/index.ts": {
+    "mtime": 1789638592.6368043,
+    "ast_hash": "0ea9de7441371ea30b81e7131c410aed",
+    "semantic_hash": ""
+  },
+  "supabase/portal_hub.sql": {
+    "mtime": 1789649048.4484038,
+    "ast_hash": "aeb3aa4cd7bbe51fbe2ae1f400eda8ce",
+    "semantic_hash": ""
+  },
+  "supabase/rifle_admin_portal.sql": {
+    "mtime": 1789638729.6804445,
+    "ast_hash": "0f533b2339688049960d68a194ba7b68",
+    "semantic_hash": ""
+  },
+  "supabase/rifle_admin_status.sql": {
+    "mtime": 1789650389.8387973,
+    "ast_hash": "5a6f9e1ed8e0314e8ce7cf0cbb318ab0",
     "semantic_hash": ""
   }
 }

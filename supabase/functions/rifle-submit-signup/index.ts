@@ -1,8 +1,11 @@
 // Edge function: rifle-submit-signup
-// PUBLIC, pre-auth. Rifle team interest signup for new/JV cadets — see
-// rifle_signup.sql. Only identifying field is school_email (the cadet's full
-// profile already lives in DISPATCH's roster, keyed off that); everything
-// else here is contact info the roster doesn't carry.
+// PUBLIC, pre-auth. Rifle team interest signup, open to every cadet — new,
+// JV, and returning varsity — see rifle_signup.sql. Only identifying field
+// is school_email (the cadet's full profile already lives in DISPATCH's
+// roster, keyed off that); everything else here is contact info the roster
+// doesn't carry. A returning shooter is recognized automatically: if
+// school_email matches an active rifle_shooters row, the signup is stored
+// with is_varsity = true.
 //
 // Deploy WITHOUT jwt verification:
 //   supabase functions deploy rifle-submit-signup --no-verify-jwt
@@ -51,11 +54,19 @@ Deno.serve(async (req) => {
       return json({ error: "a valid phone number is required" }, 400);
     }
 
+    const { data: shooter } = await svc
+      .from("rifle_shooters")
+      .select("id")
+      .eq("active", true)
+      .ilike("school_email", schoolEmail)
+      .maybeSingle();
+
     const { error: insertErr } = await svc.from("rifle_signups").insert({
       school_email: schoolEmail,
       personal_email: personalEmail,
       parent_email: parentEmail,
       phone,
+      is_varsity: !!shooter,
     });
     if (insertErr) {
       if (insertErr.code === "23505") {

@@ -41,8 +41,10 @@ function TextInput({ style, ...rest }) {
   );
 }
 
-// Rifle team interest signup — new/JV cadets only (see the notice below). All
-// we need is the cadet's school email; their full profile (name/age/grade/
+// Rifle team interest signup — open to every cadet, new/JV and returning
+// varsity alike; a returning shooter is auto-flagged server-side by matching
+// school_email against rifle_shooters (see rifle-submit-signup). All we need
+// here is the cadet's school email; their full profile (name/age/grade/
 // company) already lives in DISPATCH's roster, so this form only collects
 // contact info the roster doesn't carry. Kaz/Chief see submissions in the
 // reviewer portal (RifleSignupsPortal.jsx via /review).
@@ -94,16 +96,10 @@ export default function RifleSignup() {
           Rifle Season Signup
         </h1>
         <p style={{ fontFamily: mono, fontSize: 12, color: P.mute, lineHeight: 1.7, margin: '0 0 20px', maxWidth: 470 }}>
-          Interested in trying out for the rifle team this season? Sign up below with your school email —
-          we already have the rest of your profile in DISPATCH.
+          Interested in rifle this season — new, JV, or returning varsity? Sign up below with your school email —
+          we already have the rest of your profile in DISPATCH, and if you shot for us last year we'll flag you
+          as a returning shooter automatically.
         </p>
-
-        <div style={{
-          border: `1px solid ${P.gold}`, background: 'rgba(201,169,97,0.08)', padding: '10px 14px', marginBottom: 30,
-          fontFamily: mono, fontSize: 12, color: P.cream, letterSpacing: '0.02em', lineHeight: 1.6,
-        }}>
-          <span style={{ color: P.gold, letterSpacing: '0.18em' }}>RETURNING VARSITY SHOOTERS</span> — you do not need to sign up here.
-        </div>
 
         {submitted ? (
           <div style={{ border: `1px solid ${P.gold}`, background: P.navy, padding: 28 }}>
