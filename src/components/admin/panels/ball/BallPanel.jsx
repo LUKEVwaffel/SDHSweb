@@ -4,10 +4,12 @@ import { P, mono, sp } from '../../theme';
 import { Btn, Input, Label, PanelHeader } from '../../shared/ui';
 import BallOverviewTab from './BallOverviewTab';
 import BallEmailsTab from './BallEmailsTab';
+import BallLabelsTab from './BallLabelsTab';
 import { DRESS_APPROVERS, WESTON } from '../../../../lib/ballApprovers';
 
 const TABS = [
   { id: 'overview', label: 'OVERVIEW' },
+  { id: 'labels', label: 'LABELS' },
   { id: 'settings', label: 'SETTINGS' },
   { id: 'emails', label: 'EMAILS' },
 ];
@@ -132,6 +134,7 @@ export default function BallPanel() {
       </div>
 
       {tab === 'overview' && <BallOverviewTab />}
+      {tab === 'labels' && <BallLabelsTab />}
       {tab === 'emails' && <BallEmailsTab />}
 
       {tab === 'settings' && (
