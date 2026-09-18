@@ -62,7 +62,7 @@ function exportCsv(rows, guestsBySignup) {
       g?.name, g?.guest_type, g?.age,
       r.amount_due, g?.friend_amount_due, g?.friend_payment_method,
       r.cash_received ? 'Yes' : 'No',
-      g ? (g?.friend_cash_received ? 'Yes' : 'No') : '',
+      g?.guest_type === 'friend' ? (g?.friend_cash_received ? 'Yes' : 'No') : '',
       r.field_trip_form_required ? 'Yes' : 'No',
       r.field_trip_form_received ? 'Yes' : 'No',
       g?.field_trip_form_required ? (g?.field_trip_form_received ? 'Yes' : 'No') : '',
@@ -186,13 +186,15 @@ export default function BallOpsPortal() {
 
   // A self_pays friend owes their own $35 in a separate handoff — settled
   // requires BOTH the host's cash_received AND the friend's own
-  // friend_cash_received. host_delivers (or any 'date' guest) is one handoff,
-  // covered by cash_received alone — a date's guest-cash toggle (below) is an
-  // optional bookkeeping aid only, and does NOT gate settled, since couple-
-  // rate tickets aren't actually split by amount_due. Field trip form is a
-  // real per-person legal requirement, not optional: the guest needs their own
-  // (guest.field_trip_form_required, set at signup from whether THEY are an
-  // SDHS student) independent of whatever the host's own flag is.
+  // friend_cash_received. host_delivers is one handoff, covered by
+  // cash_received alone, but the toggle (below) is still shown for ANY
+  // friend so ops can note it arrived separately without it gating settled.
+  // A 'date' guest has no separate payment at all — couple rate is one
+  // combined charge, so no guest-cash toggle exists for a date. Field trip
+  // form is a real per-person legal requirement, not optional: the guest
+  // needs their own (guest.field_trip_form_required, set at signup from
+  // whether THEY are an SDHS student) independent of whatever the host's own
+  // flag is — this applies to date AND friend guests alike.
   const needsFriendCash = (r, g) => g?.guest_type === 'friend' && g?.friend_payment_method === 'self_pays';
   const needsGuestForm = (r, g) => !!g && g.field_trip_form_required;
   const settled = useCallback((r) => {
@@ -456,7 +458,7 @@ function PersonDetail({ r, guest, busy, confirming, onRequestToggle, onConfirm, 
               >
                 {r.cash_received ? '✓ Cash received — tap to revoke' : 'Mark cash received'}
               </button>
-              {!!guest && (
+              {guest?.guest_type === 'friend' && (
                 <button
                   className={`bp-toggle ${guest.friend_cash_received ? 'is-on' : ''}`}
                   disabled={busy}

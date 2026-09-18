@@ -349,7 +349,7 @@ function SignupItem({ r, guest, open, onToggle, onChanged }) {
                 {guest.other_jrotc && <Field label="Other JROTC" value={guest.other_jrotc_school || 'yes'} />}
                 {guest.guest_type === 'friend' && <Field label="Friend owes" value={money(guest.friend_amount_due)} />}
                 {guest.guest_type === 'friend' && <Field label="Friend pays via" value={guest.friend_payment_method === 'host_delivers' ? 'host brings it' : 'friend pays direct'} />}
-                <Field label="Guest cash received" value={guest.friend_cash_received ? 'yes' : 'no'} />
+                {guest.guest_type === 'friend' && <Field label="Guest cash received" value={guest.friend_cash_received ? 'yes' : 'no'} />}
                 {guest.field_trip_form_required && <Field label="Field-trip form (guest)" value={guest.field_trip_form_received ? 'received' : 'outstanding'} />}
                 <Field label="POC" value={guest.poc_name} />
                 <Field label="POC email" value={guest.poc_email} />
@@ -521,7 +521,7 @@ function EditForm({ r, guest, onDone }) {
         poc_phone: g.poc_phone.trim() || null,
         friend_amount_due: g.guest_type === 'friend' ? numOrNull(g.friend_amount_due) : null,
         friend_payment_method: g.guest_type === 'friend' ? g.friend_payment_method : null,
-        friend_cash_received: !!g.friend_cash_received,
+        friend_cash_received: g.guest_type === 'friend' ? !!g.friend_cash_received : false,
         field_trip_form_required: !!g.field_trip_form_required,
         field_trip_form_received: !!g.field_trip_form_received,
         dress_approved: g.dress_approved,
@@ -582,7 +582,9 @@ function EditForm({ r, guest, onDone }) {
           </div>
           <div style={{ display: 'flex', flexWrap: 'wrap', gap: 16, marginTop: 12 }}>
             <ECheck label="Guest dress approved" checked={g.dress_approved} onChange={(v) => setGF('dress_approved', v)} />
-            <ECheck label="Guest cash received" checked={g.friend_cash_received} onChange={(v) => setGF('friend_cash_received', v)} />
+            {g.guest_type === 'friend' && (
+              <ECheck label="Guest cash received" checked={g.friend_cash_received} onChange={(v) => setGF('friend_cash_received', v)} />
+            )}
             <ECheck label="Field trip form required (guest)" checked={g.field_trip_form_required} onChange={(v) => setGF('field_trip_form_required', v)} />
             <ECheck label="Field trip form received (guest)" checked={g.field_trip_form_received} onChange={(v) => setGF('field_trip_form_received', v)} />
           </div>
