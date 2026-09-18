@@ -7,10 +7,12 @@ import RifleForcePasswordChange from './RifleForcePasswordChange';
 import RiflePinControl from './RiflePinControl';
 import RosterTab from './RosterTab';
 import CompUploadTab from './CompUploadTab';
+import SignupsTab from './SignupsTab';
 import { P, mono, oswald } from '../theme';
 
 const TABS = [
   { id: 'roster', label: 'Roster' },
+  { id: 'signups', label: 'Signups' },
   { id: 'compupload', label: 'Comp Upload' },
 ];
 
@@ -115,6 +117,7 @@ export default function RiflePortal() {
         </div>
 
         {tab === 'roster' && <RosterTab />}
+        {tab === 'signups' && <SignupsTab />}
         {tab === 'compupload' && <CompUploadTab />}
         {tab === 'settings' && (
           <div style={{ maxWidth: 380 }}>

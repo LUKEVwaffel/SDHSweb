@@ -71,14 +71,17 @@ create policy rifle_signups_all_s6 on public.rifle_signups
   for all to authenticated using (public.is_s6()) with check (public.is_s6());
 revoke all on public.rifle_signups from anon;
 
--- Read-only scoped view for the reviewer portal (RifleSignupsPortal.jsx) —
--- same security_barrier SECURITY DEFINER shape as ball_vip_signups_dress_view:
--- the WHERE clause is the entire access gate, since the base table carries no
--- SELECT policy for a plain reviewer session at all.
+-- Read-only scoped view for the reviewer portal (RifleSignupsPortal.jsx) AND
+-- Makaio's own /rifle/portal (SignupsTab.jsx) — same security_barrier
+-- SECURITY DEFINER shape as ball_vip_signups_dress_view: the WHERE clause is
+-- the entire access gate, since the base table carries no SELECT policy for
+-- a plain reviewer or rifle-admin session at all. is_rifle_admin() added
+-- 2026-09-18 — the rifle admin had no read access anywhere to his own team's
+-- interest signups, reviewer-only was an oversight, not intentional scoping.
 drop view if exists public.rifle_signups_review_view;
 create view public.rifle_signups_review_view
 with (security_barrier = true) as
   select id, school_email, personal_email, parent_email, phone, is_varsity, created_at
   from public.rifle_signups
-  where public.is_reviewer() or public.is_s6();
+  where public.is_reviewer() or public.is_s6() or public.is_rifle_admin();
 grant select on public.rifle_signups_review_view to authenticated;

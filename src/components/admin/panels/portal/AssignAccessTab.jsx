@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useCallback, useRef } from 'react';
 import { supabase as SB } from '../../../../lib/supabaseClient';
 import { P, mono, sp } from '../../theme';
 import { Btn, Input, Label } from '../../shared/ui';
@@ -44,6 +44,10 @@ const resultRow = (tone) => ({
 export default function AssignAccessTab() {
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
+  const [search, setSearch] = useState('');
+  const [matches, setMatches] = useState([]);
+  const [showMatches, setShowMatches] = useState(false);
+  const searchTimer = useRef(null);
   const [checked, setChecked] = useState({ reviewer: false, female_dress: false, male_guest_attire: false, rifle_admin: false });
   const [title, setTitle] = useState('');
   const [pin, setPin] = useState('');
@@ -54,6 +58,27 @@ export default function AssignAccessTab() {
 
   const toggle = (key) => setChecked((c) => ({ ...c, [key]: !c[key] }));
   const anyChecked = Object.values(checked).some(Boolean);
+
+  const runSearch = useCallback((term) => {
+    clearTimeout(searchTimer.current);
+    if (!term.trim()) { setMatches([]); return; }
+    searchTimer.current = setTimeout(async () => {
+      const { data } = await SB.from('cadet_consent')
+        .select('id, name, school_email')
+        .ilike('name', `%${term.trim()}%`)
+        .order('name')
+        .limit(8);
+      setMatches(data || []);
+    }, 200);
+  }, []);
+
+  function pickPerson(person) {
+    setName(person.name || '');
+    setEmail(person.school_email || '');
+    setSearch('');
+    setMatches([]);
+    setShowMatches(false);
+  }
 
   async function submit() {
     setFormErr('');
@@ -122,10 +147,40 @@ export default function AssignAccessTab() {
   return (
     <div style={{ maxWidth: 640 }}>
       <p style={{ fontFamily: mono, fontSize: 12, color: P.mute, margin: `0 0 ${sp[4]}px`, maxWidth: 520 }}>
-        Grant one person any combination of the small staff portals in a single submit. Each person must already exist as a
-        Supabase Auth user for Reviewer / Rifle Admin (Dashboard → Authentication → Users) — Dress/Attire creates the sign-in
-        account for you.
+        Grant one person any combination of the small staff portals in a single submit. Reviewer Portal needs the person to
+        already exist as a Supabase Auth user (Dashboard → Authentication → Users) — Dress/Attire and Rifle Team Admin create
+        the sign-in account for you.
       </p>
+
+      <div style={{ position: 'relative', marginBottom: sp[3] }}>
+        <Label>FIND IN ROSTER (optional — picks name + email for you)</Label>
+        <Input
+          value={search}
+          onChange={(e) => { setSearch(e.target.value); setShowMatches(true); runSearch(e.target.value); }}
+          onFocus={() => setShowMatches(true)}
+          onBlur={() => setTimeout(() => setShowMatches(false), 150)}
+          placeholder="Type a cadet's name…"
+        />
+        {showMatches && matches.length > 0 && (
+          <div style={{
+            position: 'absolute', top: '100%', left: 0, right: 0, zIndex: 5, marginTop: 4,
+            background: P.navy, border: `1px solid ${P.hairStrong}`, maxHeight: 240, overflowY: 'auto',
+          }}>
+            {matches.map((m) => (
+              <div
+                key={m.id}
+                onMouseDown={() => pickPerson(m)}
+                style={{ padding: '9px 12px', cursor: 'pointer', borderBottom: `1px solid ${P.hair}` }}
+                onMouseEnter={(e) => { e.currentTarget.style.background = P.deep; }}
+                onMouseLeave={(e) => { e.currentTarget.style.background = 'transparent'; }}
+              >
+                <div style={{ fontFamily: mono, fontSize: 13, color: P.cream }}>{m.name}</div>
+                <div style={{ fontFamily: mono, fontSize: 11, color: P.mute, marginTop: 1 }}>{m.school_email || 'no school email on file'}</div>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
 
       <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: sp[2], marginBottom: sp[4] }}>
         <div><Label>NAME</Label><Input value={name} onChange={(e) => setName(e.target.value)} placeholder="Full name" /></div>
