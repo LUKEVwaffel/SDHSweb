@@ -3060,8 +3060,8 @@
     "semantic_hash": ""
   },
   "src/components/admin/panels/portal/AuthAccountsTab.jsx": {
-    "mtime": 1789736042.6484888,
-    "ast_hash": "2075ab492d34041e94260748c189663b",
+    "mtime": 1789737119.4290268,
+    "ast_hash": "553c31a0b2cf258d7c0aaa18fc2c9a3b",
     "semantic_hash": ""
   },
   "src/components/rifle/portal/SignupsTab.jsx": {
@@ -3070,13 +3070,28 @@
     "semantic_hash": ""
   },
   "supabase/admin_auth_directory.sql": {
-    "mtime": 1789735992.7869008,
-    "ast_hash": "2a8789a1f2b786b8cf71e36203bafd7a",
+    "mtime": 1789736969.7731357,
+    "ast_hash": "e3282a5c6fa0fc1fe3892c0aa896704c",
     "semantic_hash": ""
   },
   "supabase/functions/admin-create-auth-user/index.ts": {
     "mtime": 1789736016.0464523,
     "ast_hash": "b42c843a69812197c2203c36f3638085",
+    "semantic_hash": ""
+  },
+  "supabase/functions/admin-delete-auth-user/index.ts": {
+    "mtime": 1789737070.907225,
+    "ast_hash": "33c49c58e74de7e588aa4d9c6efab0e9",
+    "semantic_hash": ""
+  },
+  "supabase/functions/admin-reset-auth-password/index.ts": {
+    "mtime": 1789737004.8748245,
+    "ast_hash": "8f7935aa116628296a58ed10108df7fd",
+    "semantic_hash": ""
+  },
+  "supabase/functions/admin-set-portal-active/index.ts": {
+    "mtime": 1789737027.392848,
+    "ast_hash": "2be374389035ba790b6e3cf4e1690c5f",
     "semantic_hash": ""
   }
 }

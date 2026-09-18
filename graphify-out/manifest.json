@@ -455,8 +455,8 @@
     "semantic_hash": ""
   },
   "supabase/functions/_shared/supabase.ts": {
-    "mtime": 1789638572.4087002,
-    "ast_hash": "a5c01daf8d7db8812a4ae0c3e5853af9",
+    "mtime": 1789737504.1336656,
+    "ast_hash": "f5abfb5ec829b88afc0dd0872cb71b63",
     "semantic_hash": ""
   },
   "supabase/functions/_shared/webauthn.ts": {
@@ -580,8 +580,8 @@
     "semantic_hash": ""
   },
   "src/components/review/ReviewPortal.jsx": {
-    "mtime": 1789649604.6179545,
-    "ast_hash": "d24341c209aef638268a6e41edfb94d0",
+    "mtime": 1789737568.0787125,
+    "ast_hash": "1618a2d50af943443f0e1ffae76a8e5f",
     "semantic_hash": ""
   },
   "supabase/email_review_history.sql": {
@@ -595,8 +595,8 @@
     "semantic_hash": ""
   },
   "supabase/functions/submit-review-decision/index.ts": {
-    "mtime": 1785879859.2718492,
-    "ast_hash": "8cb4860826e06ef62f5fae28cc9d31c0",
+    "mtime": 1789737513.9554787,
+    "ast_hash": "7b7703a56a8238d0f488b09635e82867",
     "semantic_hash": ""
   },
   "src/components/FaqSection.jsx": {
@@ -2015,8 +2015,8 @@
     "semantic_hash": ""
   },
   "src/components/ball/ops/BallOpsPortal.jsx": {
-    "mtime": 1789733611.7058852,
-    "ast_hash": "204a25a6b383c03e7fcdced6dd8e06bc",
+    "mtime": 1789737581.5808227,
+    "ast_hash": "02664a3ddf645d8c1bde3a4e2aeb6c0d",
     "semantic_hash": ""
   },
   "src/components/ball/signup/BallSignupWizard.jsx": {
@@ -2100,8 +2100,8 @@
     "semantic_hash": ""
   },
   "supabase/functions/notify-ball-status-update/index.ts": {
-    "mtime": 1789476355.8810153,
-    "ast_hash": "07497a2e74081ec7514cf4b9384fab36",
+    "mtime": 1789737520.5459204,
+    "ast_hash": "4f4e14dc779486b49d73eaf16cbf9d90",
     "semantic_hash": ""
   },
   "supabase/dispatch_bc_role.sql": {
@@ -2440,13 +2440,13 @@
     "semantic_hash": ""
   },
   "src/components/admin/panels/ball/BallReviewerAccountsTab.jsx": {
-    "mtime": 1788472425.483042,
-    "ast_hash": "6b9701592d9ebfc3a31880bc88cfa6ea",
+    "mtime": 1789738589.3848968,
+    "ast_hash": "83a57c473771dee647482e3c64d2b990",
     "semantic_hash": ""
   },
   "supabase/ball_guards.sql": {
-    "mtime": 1789732743.884572,
-    "ast_hash": "94cbd0e7c7ab4a56e18753d3e29d4cf7",
+    "mtime": 1789737898.880719,
+    "ast_hash": "2a9d48f2f8dc7faa1617613fff285f87",
     "semantic_hash": ""
   },
   "supabase/ball_hardening.sql": {
@@ -2460,8 +2460,8 @@
     "semantic_hash": ""
   },
   "supabase/functions/admin-set-reviewer-pin/index.ts": {
-    "mtime": 1788441102.8300297,
-    "ast_hash": "c42cdb322e0de649eb2eda3aada5c39b",
+    "mtime": 1789738384.3077369,
+    "ast_hash": "e929abcd66e994e655fd4383b6408fd9",
     "semantic_hash": ""
   },
   "supabase/reviewer_admin_pin_status.sql": {
@@ -2835,8 +2835,8 @@
     "semantic_hash": ""
   },
   "src/components/rifle/RifleSignupsPortal.jsx": {
-    "mtime": 1789652854.514733,
-    "ast_hash": "a3a10a2ac8079d0af68f136e0649b4bd",
+    "mtime": 1789737577.5824654,
+    "ast_hash": "50668d55626c3d8b2272c1d2590e89ed",
     "semantic_hash": ""
   },
   "src/lib/ballGuestVerifyPdf.js": {
@@ -3025,8 +3025,8 @@
     "semantic_hash": ""
   },
   "supabase/portal_hub.sql": {
-    "mtime": 1789733583.8385348,
-    "ast_hash": "f14b175424057dd87fa4cd9d5dd6040f",
+    "mtime": 1789737622.8541434,
+    "ast_hash": "cff72a52ef858673c5ea2e0ca456cede",
     "semantic_hash": ""
   },
   "supabase/rifle_admin_portal.sql": {
@@ -3040,8 +3040,8 @@
     "semantic_hash": ""
   },
   "supabase/ball_guest_form_required_split.sql": {
-    "mtime": 1789733272.8968937,
-    "ast_hash": "37f09e906d35d907fb39d64789fb0663",
+    "mtime": 1789737807.0283113,
+    "ast_hash": "da7fddbb56f5cc703b3dc393414f6012",
     "semantic_hash": ""
   },
   "supabase/optic_push_auto.sql": {
@@ -3050,8 +3050,8 @@
     "semantic_hash": ""
   },
   "src/components/admin/panels/portal/AssignAccessTab.jsx": {
-    "mtime": 1789736104.6584857,
-    "ast_hash": "5f92c1f8ff1451f2da3a43edef30510c",
+    "mtime": 1789738442.283147,
+    "ast_hash": "3621806ab5414d3256a63770bdc5aa12",
     "semantic_hash": ""
   },
   "supabase/functions/rifle-admin-delete/index.ts": {
@@ -3060,8 +3060,8 @@
     "semantic_hash": ""
   },
   "src/components/admin/panels/portal/AuthAccountsTab.jsx": {
-    "mtime": 1789737119.4290268,
-    "ast_hash": "553c31a0b2cf258d7c0aaa18fc2c9a3b",
+    "mtime": 1789738545.0356088,
+    "ast_hash": "c4a9a3d506c4c3d6a333b9630ddea5f9",
     "semantic_hash": ""
   },
   "src/components/rifle/portal/SignupsTab.jsx": {
@@ -3070,8 +3070,8 @@
     "semantic_hash": ""
   },
   "supabase/admin_auth_directory.sql": {
-    "mtime": 1789736969.7731357,
-    "ast_hash": "e3282a5c6fa0fc1fe3892c0aa896704c",
+    "mtime": 1789738485.3037558,
+    "ast_hash": "db0b8f21eaf0b924fcab7b240bc038ca",
     "semantic_hash": ""
   },
   "supabase/functions/admin-create-auth-user/index.ts": {
@@ -3090,8 +3090,13 @@
     "semantic_hash": ""
   },
   "supabase/functions/admin-set-portal-active/index.ts": {
-    "mtime": 1789737027.392848,
-    "ast_hash": "2be374389035ba790b6e3cf4e1690c5f",
+    "mtime": 1789738503.5752687,
+    "ast_hash": "4f819fcf582495a2fc3bbf82be8b0fe9",
+    "semantic_hash": ""
+  },
+  "supabase/email_reviewer_capability_split.sql": {
+    "mtime": 1789738958.4914334,
+    "ast_hash": "5af7563909a1a4847716bd43850b5692",
     "semantic_hash": ""
   }
 }
