@@ -32,6 +32,16 @@ end $$;
 alter table public.ball_guests
   add column if not exists field_trip_form_required boolean not null default false;
 
+-- The column-guard triggers fire on EVERY UPDATE regardless of who's
+-- connected — the SQL editor session has no Supabase auth JWT, so it isn't
+-- service_role, isn't S-6, isn't anything the guards recognize, and the
+-- backfill UPDATEs below would raise 'not authorized' just like an
+-- unprivileged caller. Earlier ball_guest_*_split.sql files never hit this
+-- because they were ALTER TABLE only (DDL, no trigger). Disable both guard
+-- triggers for just this backfill, then put them back immediately.
+alter table public.ball_guests disable trigger ball_guests_column_guard_trg;
+alter table public.ball_signups disable trigger ball_signups_column_guard_trg;
+
 -- Backfill existing guest rows: an SDHS student is either the in-program
 -- roster tag or a non-cadet who attends Soddy Daisy High School (the literal
 -- string ball-submit-signup writes into school_attended for that case).
@@ -45,6 +55,9 @@ where field_trip_form_required = false
 update public.ball_signups
 set field_trip_form_required = true
 where field_trip_form_required = false;
+
+alter table public.ball_guests enable trigger ball_guests_column_guard_trg;
+alter table public.ball_signups enable trigger ball_signups_column_guard_trg;
 
 -- Widen the ops view Kaz/Chief read from.
 drop view if exists public.ball_guests_ops_view;
