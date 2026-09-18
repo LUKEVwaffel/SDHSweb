@@ -78,9 +78,10 @@ export default function RifleAdminAccountsTab() {
                   {a.email}{a.created_at ? ` · added ${fmtTime(a.created_at)}` : ''}
                 </div>
               </div>
-              <div style={{ display: 'flex', gap: sp[1], flexWrap: 'wrap', justifyContent: 'flex-end' }}>
+              <div style={{ display: 'flex', gap: sp[1], flexWrap: 'wrap', justifyContent: 'flex-end', alignItems: 'center' }}>
                 {a.must_change_password && <Badge tone="gold">needs password</Badge>}
                 <Badge tone={a.active ? 'green' : 'mute'}>{a.active ? 'active' : 'inactive'}</Badge>
+                <DeleteButton email={a.email} name={a.display_name} onDone={load} />
               </div>
             </div>
           ))}
@@ -90,6 +91,30 @@ export default function RifleAdminAccountsTab() {
       <StaffAdder onDone={load} />
     </div>
   );
+}
+
+function DeleteButton({ email, name, onDone }) {
+  const [busy, setBusy] = useState(false);
+  const [confirming, setConfirming] = useState(false);
+
+  async function del() {
+    setBusy(true);
+    const { data, error } = await SB.functions.invoke('rifle-admin-delete', { body: { email } });
+    setBusy(false);
+    setConfirming(false);
+    if (error || data?.error) { alert(`Failed: ${data?.error || error.message}`); return; }
+    onDone();
+  }
+
+  if (confirming) {
+    return (
+      <span style={{ display: 'flex', gap: 4 }}>
+        <Btn size="sm" variant="danger" disabled={busy} onClick={del}>{busy ? 'DELETING…' : `DELETE ${name}?`}</Btn>
+        <Btn size="sm" variant="ghost" disabled={busy} onClick={() => setConfirming(false)}>CANCEL</Btn>
+      </span>
+    );
+  }
+  return <Btn size="sm" variant="ghost" onClick={() => setConfirming(true)}>DELETE</Btn>;
 }
 
 function StaffAdder({ onDone }) {
