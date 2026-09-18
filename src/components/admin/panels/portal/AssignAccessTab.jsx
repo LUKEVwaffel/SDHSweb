@@ -148,7 +148,7 @@ export default function AssignAccessTab() {
     <div style={{ maxWidth: 640 }}>
       <p style={{ fontFamily: mono, fontSize: 12, color: P.mute, margin: `0 0 ${sp[4]}px`, maxWidth: 520 }}>
         Grant one person any combination of the small staff portals in a single submit. Reviewer Portal needs the person to
-        already exist as a Supabase Auth user (Dashboard → Authentication → Users) — Dress/Attire and Rifle Team Admin create
+        already have a login — create one on the AUTH tab first if they don't. Dress/Attire and Rifle Team Admin create
         the sign-in account for you.
       </p>
 

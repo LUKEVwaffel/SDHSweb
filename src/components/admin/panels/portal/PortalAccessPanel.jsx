@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { Btn, PanelHeader } from '../../shared/ui';
 import { sp } from '../../theme';
+import AuthAccountsTab from './AuthAccountsTab';
 import AssignAccessTab from './AssignAccessTab';
 import BallDressStaffTab from '../ball/BallDressStaffTab';
 import BallReviewerAccountsTab from '../ball/BallReviewerAccountsTab';
@@ -14,9 +15,12 @@ import RifleAdminAccountsTab from './RifleAdminAccountsTab';
 // accounts had no DISPATCH UI at all — pure SQL-editor provisioning. This is
 // the one place for all of it now. DISPATCH access itself (admin_roles) is
 // NOT here — that's a separate, more guarded population (see People panel).
-// ASSIGN is the fast path — grant any combination in one submit; the other
-// three tabs are for viewing rosters, deactivating, or deleting an account.
+// AUTH is the prerequisite layer (raw Supabase Auth logins — create one
+// before anything else can use it). ASSIGN is the fast path once a login
+// exists — grant any combination in one submit. The other three tabs are for
+// viewing rosters, deactivating, or deleting a portal-specific account.
 const TABS = [
+  { id: 'auth', label: 'AUTH' },
   { id: 'assign', label: 'ASSIGN' },
   { id: 'dress', label: 'DRESS / ATTIRE' },
   { id: 'reviewer', label: 'REVIEWER PORTAL' },
@@ -24,7 +28,7 @@ const TABS = [
 ];
 
 export default function PortalAccessPanel() {
-  const [tab, setTab] = useState('assign');
+  const [tab, setTab] = useState('auth');
 
   return (
     <div>
@@ -33,6 +37,7 @@ export default function PortalAccessPanel() {
         {TABS.map((t) => <Btn key={t.id} variant={tab === t.id ? 'gold' : 'ghost'} size="sm" onClick={() => setTab(t.id)}>{t.label}</Btn>)}
       </div>
 
+      {tab === 'auth' && <AuthAccountsTab />}
       {tab === 'assign' && <AssignAccessTab />}
       {tab === 'dress' && <BallDressStaffTab />}
       {tab === 'reviewer' && <BallReviewerAccountsTab />}
