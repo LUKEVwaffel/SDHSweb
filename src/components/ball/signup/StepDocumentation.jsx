@@ -30,11 +30,11 @@ export default function StepDocumentation({ signupToken, cadetGender, cadetDetai
   const hasGuest = guest.bringing_guest === true;
   const guestType = hasGuest ? guest.guest_type : null;
   const isFriend = guestType === 'friend';
-  // Any SDHS student attending needs the field trip form: the cadet always,
-  // plus a guest who is an SDHS student (in-program roster cadet OR attends
-  // Soddy Daisy). Applies whether the guest is a date or a friend.
+  // Any SDHS student attending needs the field trip form: the cadet ALWAYS
+  // (they're always an SDHS student, regardless of who they bring), plus a
+  // guest who is an SDHS student themselves (in-program roster cadet OR
+  // attends Soddy Daisy). Applies whether the guest is a date or a friend.
   const guestIsSdhsStudent = (guestType === 'date' && guest.is_sdhs_jrotc) || guest.goes_to_sdhs === true;
-  const formRequired = !hasGuest || guestIsSdhsStudent;
   const hostDue = (!hasGuest || isFriend) ? config?.price_cadet : config?.price_couple;
   const friendDue = isFriend ? config?.price_cadet : null;
   const isFemale = cadetGender === 'female';
@@ -79,7 +79,7 @@ export default function StepDocumentation({ signupToken, cadetGender, cadetDetai
   return (
     <div>
       <p style={p}>
-        What's left for you: {formRequired ? 'sign and turn in the field trip form, ' : ''}pay your ticket in full{isFemale ? ', and get your dress approved.' : '.'}
+        What's left for you: sign and turn in the field trip form, pay your ticket in full{isFemale ? ', and get your dress approved.' : '.'}
         {hasGuest ? ' After you submit, your guest gets an email with their own allergy + attire steps to finish.' : ''}
       </p>
 
@@ -101,21 +101,14 @@ export default function StepDocumentation({ signupToken, cadetGender, cadetDetai
       </Section>
 
       <Section title="FIELD TRIP PERMISSION FORM">
-        {formRequired ? (
-          <>
-            <p style={p}>
-              Must be physically signed. No electronic signatures accepted. Every SDHS student attending fills one out &mdash; you, and your guest too if they go to Soddy Daisy.
-            </p>
-            {config?.field_trip_form_pdf_url ? (
-              <a href={config.field_trip_form_pdf_url} target="_blank" rel="noopener noreferrer" style={{ ...linkBtn }}>DOWNLOAD FORM ↓</a>
-            ) : (
-              <p style={p}>Pick one up from Chief's desk.</p>
-            )}
-          </>
+        <p style={p}>
+          Must be physically signed. No electronic signatures accepted. Every SDHS student attending fills one out &mdash; you always,
+          {guestIsSdhsStudent ? ' and your guest too, since they attend Soddy Daisy.' : ' your guest does not need one.'}
+        </p>
+        {config?.field_trip_form_pdf_url ? (
+          <a href={config.field_trip_form_pdf_url} target="_blank" rel="noopener noreferrer" style={{ ...linkBtn }}>DOWNLOAD FORM ↓</a>
         ) : (
-          <p style={p}>
-            Not required for this signup. The field trip form is only for Soddy Daisy students, and your guest goes to another school.
-          </p>
+          <p style={p}>Pick one up from Chief's desk.</p>
         )}
       </Section>
 

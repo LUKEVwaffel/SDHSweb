@@ -63,7 +63,9 @@ const TEAM_FILTERS = [
 function OpticApp() {
   const config = useOpticConfig();
   const gate = useOpticGate();
-  const { photos, loading, error } = useOpticPhotos({ eventId: config.eventId, scope: 'public', enabled: gate.open });
+  const { photos, loading, error, pendingCount, showNew } = useOpticPhotos({
+    eventId: config.eventId, scope: 'public', enabled: gate.open, deferMidScroll: true,
+  });
   const likes = useOpticLikes(photos);
   const [reel, setReel] = useState(null); // index into visiblePhotos, or null
   const [teamFilter, setTeamFilter] = useState('all');
@@ -109,6 +111,11 @@ function OpticApp() {
               filter={teamFilter}
               onFilterChange={setTeamFilter}
               counts={teamCounts}
+              pendingCount={pendingCount}
+              onShowNew={() => {
+                showNew();
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+              }}
             />
           </div>
         )}
@@ -580,7 +587,7 @@ function UploadCard({ eventId }) {
   );
 }
 
-function Feed({ photos, loading, error, likes, onOpen, filter, onFilterChange, counts }) {
+function Feed({ photos, loading, error, likes, onOpen, filter, onFilterChange, counts, pendingCount = 0, onShowNew }) {
   return (
     <section>
       <div className="rhea-live">
@@ -590,6 +597,12 @@ function Feed({ photos, loading, error, likes, onOpen, filter, onFilterChange, c
           {photos.length} PHOTO{photos.length === 1 ? '' : 'S'}
         </span>
       </div>
+
+      {pendingCount > 0 && (
+        <button className="rhea-newpill" onClick={onShowNew}>
+          {pendingCount} NEW PHOTO{pendingCount === 1 ? '' : 'S'} · TAP TO VIEW
+        </button>
+      )}
 
       <div className="rhea-fchips" role="group" aria-label="Filter by team">
         {TEAM_FILTERS.map((t) => (

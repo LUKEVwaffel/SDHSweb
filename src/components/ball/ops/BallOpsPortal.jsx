@@ -62,10 +62,10 @@ function exportCsv(rows, guestsBySignup) {
       g?.name, g?.guest_type, g?.age,
       r.amount_due, g?.friend_amount_due, g?.friend_payment_method,
       r.cash_received ? 'Yes' : 'No',
-      g?.guest_type === 'friend' && g?.friend_payment_method === 'self_pays' ? (g?.friend_cash_received ? 'Yes' : 'No') : '',
+      g ? (g?.friend_cash_received ? 'Yes' : 'No') : '',
       r.field_trip_form_required ? 'Yes' : 'No',
       r.field_trip_form_received ? 'Yes' : 'No',
-      r.field_trip_form_required && g ? (g?.field_trip_form_received ? 'Yes' : 'No') : '',
+      g?.field_trip_form_required ? (g?.field_trip_form_received ? 'Yes' : 'No') : '',
       g?.poc_name, g?.poc_phone, g?.poc_email, g?.personal_email, r.notification_email,
     ].map(csvCell).join(','));
   });
@@ -187,11 +187,14 @@ export default function BallOpsPortal() {
   // A self_pays friend owes their own $35 in a separate handoff — settled
   // requires BOTH the host's cash_received AND the friend's own
   // friend_cash_received. host_delivers (or any 'date' guest) is one handoff,
-  // covered by cash_received alone. Same idea for the field trip form: when a
-  // guest exists and a form is required, BOTH the host's own
-  // field_trip_form_received AND the guest's own count toward settled.
+  // covered by cash_received alone — a date's guest-cash toggle (below) is an
+  // optional bookkeeping aid only, and does NOT gate settled, since couple-
+  // rate tickets aren't actually split by amount_due. Field trip form is a
+  // real per-person legal requirement, not optional: the guest needs their own
+  // (guest.field_trip_form_required, set at signup from whether THEY are an
+  // SDHS student) independent of whatever the host's own flag is.
   const needsFriendCash = (r, g) => g?.guest_type === 'friend' && g?.friend_payment_method === 'self_pays';
-  const needsGuestForm = (r, g) => r.field_trip_form_required && !!g;
+  const needsGuestForm = (r, g) => !!g && g.field_trip_form_required;
   const settled = useCallback((r) => {
     const g = guestsBySignup[r.id];
     return r.cash_received
@@ -334,7 +337,7 @@ function Section({ title, hide, children }) {
 function LookupRow({ r, guest, onOpen, tone }) {
   const friendPaysOwnCash = guest?.guest_type === 'friend' && guest?.friend_payment_method === 'self_pays';
   const cashDone = r.cash_received && (!friendPaysOwnCash || guest.friend_cash_received);
-  const guestNeedsOwnForm = r.field_trip_form_required && !!guest;
+  const guestNeedsOwnForm = !!guest && guest.field_trip_form_required;
   const formDone = !r.field_trip_form_required || (r.field_trip_form_received && (!guestNeedsOwnForm || guest.field_trip_form_received));
   const awaitingGuest = r.status === 'guest_pending';
 
@@ -375,8 +378,7 @@ function ContactLine({ label, name, phone, email }) {
 // lives here instead of cluttering every row in the list.
 function PersonDetail({ r, guest, busy, confirming, onRequestToggle, onConfirm, onCancel, onBack }) {
   const friend = guest?.guest_type === 'friend';
-  const friendPaysOwnCash = friend && guest?.friend_payment_method === 'self_pays';
-  const guestNeedsOwnForm = r.field_trip_form_required && !!guest;
+  const guestNeedsOwnForm = !!guest && guest.field_trip_form_required;
   const awaitingGuest = r.status === 'guest_pending';
   const hasContact = guest?.poc_name || guest?.poc_phone || guest?.poc_email
     || guest?.personal_email || r.notification_email;
@@ -454,7 +456,7 @@ function PersonDetail({ r, guest, busy, confirming, onRequestToggle, onConfirm, 
               >
                 {r.cash_received ? '✓ Cash received — tap to revoke' : 'Mark cash received'}
               </button>
-              {friendPaysOwnCash && (
+              {!!guest && (
                 <button
                   className={`bp-toggle ${guest.friend_cash_received ? 'is-on' : ''}`}
                   disabled={busy}

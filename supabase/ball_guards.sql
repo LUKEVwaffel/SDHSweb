@@ -66,8 +66,13 @@ end $$;
 -- field_trip_form_received — the GUEST's own field-trip form, tracked
 -- separately from the host's field_trip_form_received on ball_signups. See
 -- ball_guest_form_split.sql.
+-- v8 (2026-09-18): ball_guests.field_trip_form_required (the guest's own
+-- form-required flag, set at signup time from whether THEY are an SDHS
+-- student) is frozen against ops/dress/attire, same as every other
+-- *_required column — only S-6 or the service role may set it. See
+-- ball_guest_form_required_split.sql.
 create or replace function public.ball_guard_version()
-returns int language sql immutable as $$ select 7 $$;
+returns int language sql immutable as $$ select 8 $$;
 
 
 -- ── is_ball_dress() — female-dress approvers ONLY ──────────────────────────
@@ -230,6 +235,7 @@ begin
        or new.guest_type           is distinct from old.guest_type
        or new.friend_payment_method is distinct from old.friend_payment_method
        or new.friend_amount_due    is distinct from old.friend_amount_due
+       or new.field_trip_form_required is distinct from old.field_trip_form_required
        or new.dress_approved       is distinct from old.dress_approved
        or new.dress_approved_by    is distinct from old.dress_approved_by
     then
@@ -260,6 +266,7 @@ begin
        or new.friend_payment_method is distinct from old.friend_payment_method
        or new.friend_amount_due    is distinct from old.friend_amount_due
        or new.friend_cash_received is distinct from old.friend_cash_received
+       or new.field_trip_form_required is distinct from old.field_trip_form_required
        or new.field_trip_form_received is distinct from old.field_trip_form_received
     then
       raise exception 'dress/attire staff may only change dress_approved / dress_approved_by';
@@ -285,7 +292,7 @@ create trigger ball_guests_column_guard_trg
 
 -- ============================================================================
 -- VERIFY AFTER RUNNING:
---   select public.ball_guard_version();                                   -- 7
+--   select public.ball_guard_version();                                   -- 8
 --   select tgname from pg_trigger where tgrelid = 'public.ball_signups'::regclass; -- includes ball_signups_column_guard_trg
 --   -- as a seeded 'male_guest_attire' session:
 --   --   select public.is_ball_dress(), public.is_ball_attire();          -- f, t

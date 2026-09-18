@@ -43,8 +43,8 @@
       "source_location": "L3",
       "_origin": "ast",
       "id": "ref_react",
-      "community": 229,
-      "community_name": "rheaComp.js",
+      "community": 4,
+      "community_name": "ui.jsx",
       "norm_label": "react"
     },
     {
@@ -1077,8 +1077,8 @@
       "source_location": "L15",
       "_origin": "ast",
       "id": "package_dependencies_dnd_kit_utilities",
-      "community": 80,
-      "community_name": "dependencies",
+      "community": 352,
+      "community_name": "@dnd-kit/utilities",
       "norm_label": "@dnd-kit/utilities"
     },
     {
@@ -1088,8 +1088,8 @@
       "source_location": "L15",
       "_origin": "ast",
       "id": "dnd_kit_utilities",
-      "community": 80,
-      "community_name": "dependencies",
+      "community": 352,
+      "community_name": "@dnd-kit/utilities",
       "norm_label": "@dnd-kit/utilities"
     },
     {
@@ -1165,8 +1165,8 @@
       "source_location": "L19",
       "_origin": "ast",
       "id": "package_dependencies_exifr",
-      "community": 352,
-      "community_name": "@dnd-kit/utilities",
+      "community": 80,
+      "community_name": "dependencies",
       "norm_label": "exifr"
     },
     {
@@ -1176,8 +1176,8 @@
       "source_location": "L19",
       "_origin": "ast",
       "id": "exifr",
-      "community": 352,
-      "community_name": "@dnd-kit/utilities",
+      "community": 80,
+      "community_name": "dependencies",
       "norm_label": "exifr"
     },
     {
@@ -2078,8 +2078,8 @@
       "source_location": "L94",
       "_origin": "ast",
       "id": "src_app_app",
-      "community": 265,
-      "community_name": "CheckinSurvey.jsx",
+      "community": 283,
+      "community_name": "TvRangeRaiderPracticeWidget.jsx",
       "norm_label": "app()"
     },
     {
@@ -2793,8 +2793,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "src_components_compphotoband",
-      "community": 91,
-      "community_name": "OverviewPanel.jsx",
+      "community": 184,
+      "community_name": "ConversationList.jsx",
       "norm_label": "compphotoband.jsx"
     },
     {
@@ -2804,8 +2804,8 @@
       "source_location": "L5",
       "_origin": "ast",
       "id": "src_components_compphotoband_p",
-      "community": 91,
-      "community_name": "OverviewPanel.jsx",
+      "community": 184,
+      "community_name": "ConversationList.jsx",
       "norm_label": "p"
     },
     {
@@ -2815,8 +2815,8 @@
       "source_location": "L16",
       "_origin": "ast",
       "id": "src_components_compphotoband_compphotoband",
-      "community": 91,
-      "community_name": "OverviewPanel.jsx",
+      "community": 184,
+      "community_name": "ConversationList.jsx",
       "norm_label": "compphotoband()"
     },
     {
@@ -2969,8 +2969,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "src_components_congratspopup",
-      "community": 91,
-      "community_name": "OverviewPanel.jsx",
+      "community": 184,
+      "community_name": "ConversationList.jsx",
       "norm_label": "congratspopup.jsx"
     },
     {
@@ -2980,8 +2980,8 @@
       "source_location": "L6",
       "_origin": "ast",
       "id": "src_components_congratspopup_p",
-      "community": 91,
-      "community_name": "OverviewPanel.jsx",
+      "community": 184,
+      "community_name": "ConversationList.jsx",
       "norm_label": "p"
     },
     {
@@ -2991,8 +2991,8 @@
       "source_location": "L20",
       "_origin": "ast",
       "id": "src_components_congratspopup_congratspopup",
-      "community": 91,
-      "community_name": "OverviewPanel.jsx",
+      "community": 184,
+      "community_name": "ConversationList.jsx",
       "norm_label": "congratspopup()"
     },
     {
@@ -3189,8 +3189,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "src_components_eventspotlightband",
-      "community": 265,
-      "community_name": "CheckinSurvey.jsx",
+      "community": 77,
+      "community_name": "PeoplePanel.jsx",
       "norm_label": "eventspotlightband.jsx"
     },
     {
@@ -3200,8 +3200,8 @@
       "source_location": "L4",
       "_origin": "ast",
       "id": "src_components_eventspotlightband_p",
-      "community": 265,
-      "community_name": "CheckinSurvey.jsx",
+      "community": 77,
+      "community_name": "PeoplePanel.jsx",
       "norm_label": "p"
     },
     {
@@ -3211,8 +3211,8 @@
       "source_location": "L26",
       "_origin": "ast",
       "id": "src_components_eventspotlightband_formateventdate",
-      "community": 265,
-      "community_name": "CheckinSurvey.jsx",
+      "community": 77,
+      "community_name": "PeoplePanel.jsx",
       "norm_label": "formateventdate()"
     },
     {
@@ -3222,8 +3222,8 @@
       "source_location": "L32",
       "_origin": "ast",
       "id": "src_components_eventspotlightband_photocarousel",
-      "community": 265,
-      "community_name": "CheckinSurvey.jsx",
+      "community": 77,
+      "community_name": "PeoplePanel.jsx",
       "norm_label": "photocarousel()"
     },
     {
@@ -3233,8 +3233,8 @@
       "source_location": "L82",
       "_origin": "ast",
       "id": "src_components_eventspotlightband_readcachedactive",
-      "community": 265,
-      "community_name": "CheckinSurvey.jsx",
+      "community": 77,
+      "community_name": "PeoplePanel.jsx",
       "norm_label": "readcachedactive()"
     },
     {
@@ -3244,8 +3244,8 @@
       "source_location": "L90",
       "_origin": "ast",
       "id": "src_components_eventspotlightband_writecachedactive",
-      "community": 265,
-      "community_name": "CheckinSurvey.jsx",
+      "community": 77,
+      "community_name": "PeoplePanel.jsx",
       "norm_label": "writecachedactive()"
     },
     {
@@ -3255,8 +3255,8 @@
       "source_location": "L98",
       "_origin": "ast",
       "id": "src_components_eventspotlightband_spotlightskeleton",
-      "community": 265,
-      "community_name": "CheckinSurvey.jsx",
+      "community": 77,
+      "community_name": "PeoplePanel.jsx",
       "norm_label": "spotlightskeleton()"
     },
     {
@@ -3266,8 +3266,8 @@
       "source_location": "L118",
       "_origin": "ast",
       "id": "src_components_eventspotlightband_eventspotlightband",
-      "community": 265,
-      "community_name": "CheckinSurvey.jsx",
+      "community": 77,
+      "community_name": "PeoplePanel.jsx",
       "norm_label": "eventspotlightband()"
     },
     {
@@ -3299,8 +3299,8 @@
       "source_location": "L23",
       "_origin": "ast",
       "id": "src_components_eventspage_eventspage",
-      "community": 326,
-      "community_name": "slideRegistry.js",
+      "community": 9,
+      "community_name": "App.jsx",
       "norm_label": "eventspage()"
     },
     {
@@ -3310,8 +3310,8 @@
       "source_location": "L163",
       "_origin": "ast",
       "id": "src_components_eventspage_photogrid",
-      "community": 326,
-      "community_name": "slideRegistry.js",
+      "community": 9,
+      "community_name": "App.jsx",
       "norm_label": "photogrid()"
     },
     {
@@ -3332,8 +3332,8 @@
       "source_location": "L232",
       "_origin": "ast",
       "id": "src_components_eventspage_eventdetailcard",
-      "community": 9,
-      "community_name": "App.jsx",
+      "community": 276,
+      "community_name": "StepRangeSchedule.jsx",
       "norm_label": "eventdetailcard()"
     },
     {
@@ -3673,8 +3673,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "src_components_opticpopup",
-      "community": 91,
-      "community_name": "OverviewPanel.jsx",
+      "community": 273,
+      "community_name": "RaiderParentWelcome.jsx",
       "norm_label": "opticpopup.jsx"
     },
     {
@@ -3684,8 +3684,8 @@
       "source_location": "L8",
       "_origin": "ast",
       "id": "src_components_opticpopup_p",
-      "community": 91,
-      "community_name": "OverviewPanel.jsx",
+      "community": 273,
+      "community_name": "RaiderParentWelcome.jsx",
       "norm_label": "p"
     },
     {
@@ -3695,8 +3695,8 @@
       "source_location": "L17",
       "_origin": "ast",
       "id": "src_components_opticpopup_features",
-      "community": 91,
-      "community_name": "OverviewPanel.jsx",
+      "community": 273,
+      "community_name": "RaiderParentWelcome.jsx",
       "norm_label": "features"
     },
     {
@@ -3706,8 +3706,8 @@
       "source_location": "L36",
       "_origin": "ast",
       "id": "src_components_opticpopup_opticpopup",
-      "community": 91,
-      "community_name": "OverviewPanel.jsx",
+      "community": 273,
+      "community_name": "RaiderParentWelcome.jsx",
       "norm_label": "opticpopup()"
     },
     {
@@ -4432,8 +4432,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "src_components_raidervoting",
-      "community": 241,
-      "community_name": "TvCongratsScreen.jsx",
+      "community": 264,
+      "community_name": "RaiderPolls.jsx",
       "norm_label": "raidervoting.jsx"
     },
     {
@@ -4443,8 +4443,8 @@
       "source_location": "L7",
       "_origin": "ast",
       "id": "src_components_raidervoting_p",
-      "community": 241,
-      "community_name": "TvCongratsScreen.jsx",
+      "community": 264,
+      "community_name": "RaiderPolls.jsx",
       "norm_label": "p"
     },
     {
@@ -4454,8 +4454,8 @@
       "source_location": "L18",
       "_origin": "ast",
       "id": "src_components_raidervoting_cats",
-      "community": 241,
-      "community_name": "TvCongratsScreen.jsx",
+      "community": 264,
+      "community_name": "RaiderPolls.jsx",
       "norm_label": "cats"
     },
     {
@@ -4465,8 +4465,8 @@
       "source_location": "L24",
       "_origin": "ast",
       "id": "src_components_raidervoting_fmtcountdown",
-      "community": 241,
-      "community_name": "TvCongratsScreen.jsx",
+      "community": 264,
+      "community_name": "RaiderPolls.jsx",
       "norm_label": "fmtcountdown()"
     },
     {
@@ -4476,8 +4476,8 @@
       "source_location": "L37",
       "_origin": "ast",
       "id": "src_components_raidervoting_raidervoting",
-      "community": 241,
-      "community_name": "TvCongratsScreen.jsx",
+      "community": 264,
+      "community_name": "RaiderPolls.jsx",
       "norm_label": "raidervoting()"
     },
     {
@@ -4487,8 +4487,8 @@
       "source_location": "L277",
       "_origin": "ast",
       "id": "src_components_raidervoting_loadingstyle",
-      "community": 241,
-      "community_name": "TvCongratsScreen.jsx",
+      "community": 264,
+      "community_name": "RaiderPolls.jsx",
       "norm_label": "loadingstyle"
     },
     {
@@ -4498,8 +4498,8 @@
       "source_location": "L278",
       "_origin": "ast",
       "id": "src_components_raidervoting_statlabel",
-      "community": 241,
-      "community_name": "TvCongratsScreen.jsx",
+      "community": 264,
+      "community_name": "RaiderPolls.jsx",
       "norm_label": "statlabel"
     },
     {
@@ -4509,8 +4509,8 @@
       "source_location": "L279",
       "_origin": "ast",
       "id": "src_components_raidervoting_centered",
-      "community": 241,
-      "community_name": "TvCongratsScreen.jsx",
+      "community": 264,
+      "community_name": "RaiderPolls.jsx",
       "norm_label": "centered"
     },
     {
@@ -4520,8 +4520,8 @@
       "source_location": "L280",
       "_origin": "ast",
       "id": "src_components_raidervoting_ghostbtn",
-      "community": 241,
-      "community_name": "TvCongratsScreen.jsx",
+      "community": 264,
+      "community_name": "RaiderPolls.jsx",
       "norm_label": "ghostbtn"
     },
     {
@@ -4839,8 +4839,8 @@
       "source_location": "L307",
       "_origin": "ast",
       "id": "src_components_rifle_rifle",
-      "community": 93,
-      "community_name": "ConversationList.jsx",
+      "community": 330,
+      "community_name": "useOpticGate.js",
       "norm_label": "rifle()"
     },
     {
@@ -5477,8 +5477,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "src_components_admin_loginscreen",
-      "community": 4,
-      "community_name": "ui.jsx",
+      "community": 43,
+      "community_name": "Rifle.jsx",
       "norm_label": "loginscreen.jsx"
     },
     {
@@ -5499,8 +5499,8 @@
       "source_location": "L42",
       "_origin": "ast",
       "id": "src_components_admin_loginscreen_loginshell",
-      "community": 4,
-      "community_name": "ui.jsx",
+      "community": 43,
+      "community_name": "Rifle.jsx",
       "norm_label": "loginshell()"
     },
     {
@@ -5554,8 +5554,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "src_components_admin_login_accountauth",
-      "community": 4,
-      "community_name": "ui.jsx",
+      "community": 43,
+      "community_name": "Rifle.jsx",
       "norm_label": "accountauth.jsx"
     },
     {
@@ -5565,8 +5565,8 @@
       "source_location": "L11",
       "_origin": "ast",
       "id": "src_components_admin_login_accountauth_accountauth",
-      "community": 4,
-      "community_name": "ui.jsx",
+      "community": 43,
+      "community_name": "Rifle.jsx",
       "norm_label": "accountauth()"
     },
     {
@@ -5576,8 +5576,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "src_components_admin_login_accountgrid",
-      "community": 4,
-      "community_name": "ui.jsx",
+      "community": 43,
+      "community_name": "Rifle.jsx",
       "norm_label": "accountgrid.jsx"
     },
     {
@@ -5587,8 +5587,8 @@
       "source_location": "L9",
       "_origin": "ast",
       "id": "src_components_admin_login_accountgrid_accountgrid",
-      "community": 4,
-      "community_name": "ui.jsx",
+      "community": 43,
+      "community_name": "Rifle.jsx",
       "norm_label": "accountgrid()"
     },
     {
@@ -5598,8 +5598,8 @@
       "source_location": "L60",
       "_origin": "ast",
       "id": "src_components_admin_login_accountgrid_rule",
-      "community": 4,
-      "community_name": "ui.jsx",
+      "community": 43,
+      "community_name": "Rifle.jsx",
       "norm_label": "rule()"
     },
     {
@@ -5609,8 +5609,8 @@
       "source_location": "L64",
       "_origin": "ast",
       "id": "src_components_admin_login_accountgrid_accountcard",
-      "community": 4,
-      "community_name": "ui.jsx",
+      "community": 43,
+      "community_name": "Rifle.jsx",
       "norm_label": "accountcard()"
     },
     {
@@ -5620,8 +5620,8 @@
       "source_location": "L144",
       "_origin": "ast",
       "id": "src_components_admin_login_accountgrid_methodchip",
-      "community": 4,
-      "community_name": "ui.jsx",
+      "community": 43,
+      "community_name": "Rifle.jsx",
       "norm_label": "methodchip()"
     },
     {
@@ -5631,8 +5631,8 @@
       "source_location": "L154",
       "_origin": "ast",
       "id": "src_components_admin_login_accountgrid_pip",
-      "community": 4,
-      "community_name": "ui.jsx",
+      "community": 43,
+      "community_name": "Rifle.jsx",
       "norm_label": "pip()"
     },
     {
@@ -5642,8 +5642,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "src_components_admin_login_eyeicon",
-      "community": 4,
-      "community_name": "ui.jsx",
+      "community": 43,
+      "community_name": "Rifle.jsx",
       "norm_label": "eyeicon.jsx"
     },
     {
@@ -5653,8 +5653,8 @@
       "source_location": "L3",
       "_origin": "ast",
       "id": "src_components_admin_login_eyeicon_eyeicon",
-      "community": 4,
-      "community_name": "ui.jsx",
+      "community": 43,
+      "community_name": "Rifle.jsx",
       "norm_label": "eyeicon()"
     },
     {
@@ -5664,8 +5664,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "src_components_admin_login_forcepasswordchange",
-      "community": 4,
-      "community_name": "ui.jsx",
+      "community": 43,
+      "community_name": "Rifle.jsx",
       "norm_label": "login/forcepasswordchange.jsx"
     },
     {
@@ -5675,8 +5675,8 @@
       "source_location": "L21",
       "_origin": "ast",
       "id": "src_components_admin_login_forcepasswordchange_forcepasswordchange",
-      "community": 4,
-      "community_name": "ui.jsx",
+      "community": 43,
+      "community_name": "Rifle.jsx",
       "norm_label": "forcepasswordchange()"
     },
     {
@@ -5686,8 +5686,8 @@
       "source_location": "L110",
       "_origin": "ast",
       "id": "src_components_admin_login_forcepasswordchange_inputstyle",
-      "community": 4,
-      "community_name": "ui.jsx",
+      "community": 43,
+      "community_name": "Rifle.jsx",
       "norm_label": "inputstyle()"
     },
     {
@@ -5697,8 +5697,8 @@
       "source_location": "L121",
       "_origin": "ast",
       "id": "src_components_admin_login_forcepasswordchange_shell",
-      "community": 4,
-      "community_name": "ui.jsx",
+      "community": 43,
+      "community_name": "Rifle.jsx",
       "norm_label": "shell()"
     },
     {
@@ -5708,8 +5708,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "src_components_admin_login_passwordform",
-      "community": 4,
-      "community_name": "ui.jsx",
+      "community": 43,
+      "community_name": "Rifle.jsx",
       "norm_label": "passwordform.jsx"
     },
     {
@@ -5719,8 +5719,8 @@
       "source_location": "L9",
       "_origin": "ast",
       "id": "src_components_admin_login_passwordform_passwordform",
-      "community": 4,
-      "community_name": "ui.jsx",
+      "community": 43,
+      "community_name": "Rifle.jsx",
       "norm_label": "passwordform()"
     },
     {
@@ -5884,8 +5884,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "src_components_admin_panels_eventspanel",
-      "community": 229,
-      "community_name": "rheaComp.js",
+      "community": 272,
+      "community_name": "Messages.jsx",
       "norm_label": "eventspanel.jsx"
     },
     {
@@ -5895,8 +5895,8 @@
       "source_location": "L13",
       "_origin": "ast",
       "id": "src_components_admin_panels_eventspanel_category_options",
-      "community": 229,
-      "community_name": "rheaComp.js",
+      "community": 272,
+      "community_name": "Messages.jsx",
       "norm_label": "category_options"
     },
     {
@@ -5906,8 +5906,8 @@
       "source_location": "L18",
       "_origin": "ast",
       "id": "src_components_admin_panels_eventspanel_todatetimelocal",
-      "community": 229,
-      "community_name": "rheaComp.js",
+      "community": 272,
+      "community_name": "Messages.jsx",
       "norm_label": "todatetimelocal()"
     },
     {
@@ -5939,8 +5939,8 @@
       "source_location": "L49",
       "_origin": "ast",
       "id": "src_components_admin_panels_eventspanel_ascot_colors",
-      "community": 229,
-      "community_name": "rheaComp.js",
+      "community": 272,
+      "community_name": "Messages.jsx",
       "norm_label": "ascot_colors"
     },
     {
@@ -5950,8 +5950,8 @@
       "source_location": "L50",
       "_origin": "ast",
       "id": "src_components_admin_panels_eventspanel_glove_colors",
-      "community": 229,
-      "community_name": "rheaComp.js",
+      "community": 272,
+      "community_name": "Messages.jsx",
       "norm_label": "glove_colors"
     },
     {
@@ -5994,8 +5994,8 @@
       "source_location": "L1002",
       "_origin": "ast",
       "id": "src_components_admin_panels_eventspanel_cadetpicker",
-      "community": 229,
-      "community_name": "rheaComp.js",
+      "community": 272,
+      "community_name": "Messages.jsx",
       "norm_label": "cadetpicker()"
     },
     {
@@ -6005,8 +6005,8 @@
       "source_location": "L1057",
       "_origin": "ast",
       "id": "src_components_admin_panels_eventspanel_selectstyle",
-      "community": 229,
-      "community_name": "rheaComp.js",
+      "community": 272,
+      "community_name": "Messages.jsx",
       "norm_label": "selectstyle"
     },
     {
@@ -6434,8 +6434,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "src_components_admin_panels_selfaccountpanel",
-      "community": 4,
-      "community_name": "ui.jsx",
+      "community": 229,
+      "community_name": "rheaComp.js",
       "norm_label": "selfaccountpanel.jsx"
     },
     {
@@ -6962,8 +6962,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "src_components_admin_panels_advanced_selfcredentialcontrols",
-      "community": 4,
-      "community_name": "ui.jsx",
+      "community": 229,
+      "community_name": "rheaComp.js",
       "norm_label": "selfcredentialcontrols.jsx"
     },
     {
@@ -6973,8 +6973,8 @@
       "source_location": "L15",
       "_origin": "ast",
       "id": "src_components_admin_panels_advanced_selfcredentialcontrols_selfcredentialcontrols",
-      "community": 4,
-      "community_name": "ui.jsx",
+      "community": 229,
+      "community_name": "rheaComp.js",
       "norm_label": "selfcredentialcontrols()"
     },
     {
@@ -7193,8 +7193,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "src_components_admin_panels_ball_ballemailstab",
-      "community": 229,
-      "community_name": "rheaComp.js",
+      "community": 4,
+      "community_name": "ui.jsx",
       "norm_label": "ballemailstab.jsx"
     },
     {
@@ -7204,8 +7204,8 @@
       "source_location": "L16",
       "_origin": "ast",
       "id": "src_components_admin_panels_ball_ballemailstab_fields",
-      "community": 229,
-      "community_name": "rheaComp.js",
+      "community": 4,
+      "community_name": "ui.jsx",
       "norm_label": "fields"
     },
     {
@@ -7215,8 +7215,8 @@
       "source_location": "L24",
       "_origin": "ast",
       "id": "src_components_admin_panels_ball_ballemailstab_ta",
-      "community": 229,
-      "community_name": "rheaComp.js",
+      "community": 4,
+      "community_name": "ui.jsx",
       "norm_label": "ta"
     },
     {
@@ -7226,8 +7226,8 @@
       "source_location": "L29",
       "_origin": "ast",
       "id": "src_components_admin_panels_ball_ballemailstab_ballemailstab",
-      "community": 229,
-      "community_name": "rheaComp.js",
+      "community": 4,
+      "community_name": "ui.jsx",
       "norm_label": "ballemailstab()"
     },
     {
@@ -7509,7 +7509,7 @@
       "label": "BallOverviewTab()",
       "file_type": "code",
       "source_file": "src/components/admin/panels/ball/BallOverviewTab.jsx",
-      "source_location": "L117",
+      "source_location": "L115",
       "_origin": "ast",
       "id": "src_components_admin_panels_ball_balloverviewtab_balloverviewtab",
       "community": 255,
@@ -7520,7 +7520,7 @@
       "label": "SignupItem()",
       "file_type": "code",
       "source_file": "src/components/admin/panels/ball/BallOverviewTab.jsx",
-      "source_location": "L287",
+      "source_location": "L274",
       "_origin": "ast",
       "id": "src_components_admin_panels_ball_balloverviewtab_signupitem",
       "community": 255,
@@ -7531,7 +7531,7 @@
       "label": "ResendGuestButton()",
       "file_type": "code",
       "source_file": "src/components/admin/panels/ball/BallOverviewTab.jsx",
-      "source_location": "L383",
+      "source_location": "L370",
       "_origin": "ast",
       "id": "src_components_admin_panels_ball_balloverviewtab_resendguestbutton",
       "community": 255,
@@ -7542,7 +7542,7 @@
       "label": "DeleteButton()",
       "file_type": "code",
       "source_file": "src/components/admin/panels/ball/BallOverviewTab.jsx",
-      "source_location": "L423",
+      "source_location": "L410",
       "_origin": "ast",
       "id": "src_components_admin_panels_ball_balloverviewtab_deletebutton",
       "community": 255,
@@ -7553,7 +7553,7 @@
       "label": "EditForm()",
       "file_type": "code",
       "source_file": "src/components/admin/panels/ball/BallOverviewTab.jsx",
-      "source_location": "L445",
+      "source_location": "L432",
       "_origin": "ast",
       "id": "src_components_admin_panels_ball_balloverviewtab_editform",
       "community": 255,
@@ -7567,8 +7567,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "src_components_admin_panels_ball_ballpanel",
-      "community": 229,
-      "community_name": "rheaComp.js",
+      "community": 4,
+      "community_name": "ui.jsx",
       "norm_label": "ballpanel.jsx"
     },
     {
@@ -7578,8 +7578,8 @@
       "source_location": "L9",
       "_origin": "ast",
       "id": "src_components_admin_panels_ball_ballpanel_tabs",
-      "community": 229,
-      "community_name": "rheaComp.js",
+      "community": 4,
+      "community_name": "ui.jsx",
       "norm_label": "tabs"
     },
     {
@@ -7589,8 +7589,8 @@
       "source_location": "L22",
       "_origin": "ast",
       "id": "src_components_admin_panels_ball_ballpanel_ballpanel",
-      "community": 229,
-      "community_name": "rheaComp.js",
+      "community": 4,
+      "community_name": "ui.jsx",
       "norm_label": "ballpanel()"
     },
     {
@@ -7600,8 +7600,8 @@
       "source_location": "L233",
       "_origin": "ast",
       "id": "src_components_admin_panels_ball_ballpanel_minibtn",
-      "community": 229,
-      "community_name": "rheaComp.js",
+      "community": 4,
+      "community_name": "ui.jsx",
       "norm_label": "minibtn"
     },
     {
@@ -7743,8 +7743,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "src_components_admin_panels_ball_ballviplist",
-      "community": 255,
-      "community_name": "EventSpotlightBand.jsx",
+      "community": 4,
+      "community_name": "ui.jsx",
       "norm_label": "ballviplist.jsx"
     },
     {
@@ -7754,8 +7754,8 @@
       "source_location": "L4",
       "_origin": "ast",
       "id": "src_components_admin_panels_ball_ballviplist_role_label",
-      "community": 255,
-      "community_name": "EventSpotlightBand.jsx",
+      "community": 4,
+      "community_name": "ui.jsx",
       "norm_label": "role_label"
     },
     {
@@ -7776,8 +7776,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "src_components_admin_panels_beta_betafeaturespanel",
-      "community": 200,
-      "community_name": "@dnd-kit/core",
+      "community": 229,
+      "community_name": "rheaComp.js",
       "norm_label": "betafeaturespanel.jsx"
     },
     {
@@ -7798,8 +7798,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "src_components_admin_panels_email_emailpanel",
-      "community": 229,
-      "community_name": "rheaComp.js",
+      "community": 198,
+      "community_name": "RaiderCarousel.jsx",
       "norm_label": "emailpanel.jsx"
     },
     {
@@ -7809,8 +7809,8 @@
       "source_location": "L7",
       "_origin": "ast",
       "id": "src_components_admin_panels_email_emailpanel_emailpanel",
-      "community": 41,
-      "community_name": "PhotoUploader.jsx",
+      "community": 198,
+      "community_name": "RaiderCarousel.jsx",
       "norm_label": "emailpanel()"
     },
     {
@@ -7875,8 +7875,8 @@
       "source_location": "L8",
       "_origin": "ast",
       "id": "src_components_admin_panels_email_subscribers_subscribers",
-      "community": 229,
-      "community_name": "rheaComp.js",
+      "community": 198,
+      "community_name": "RaiderCarousel.jsx",
       "norm_label": "subscribers()"
     },
     {
@@ -7886,8 +7886,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "src_components_admin_panels_email_builder_blockfields",
-      "community": 43,
-      "community_name": "Rifle.jsx",
+      "community": 198,
+      "community_name": "RaiderCarousel.jsx",
       "norm_label": "blockfields.jsx"
     },
     {
@@ -8029,8 +8029,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "src_components_admin_panels_email_emailrender",
-      "community": 184,
-      "community_name": "ConversationList.jsx",
+      "community": 198,
+      "community_name": "RaiderCarousel.jsx",
       "norm_label": "emailrender.js"
     },
     {
@@ -8040,8 +8040,8 @@
       "source_location": "L13",
       "_origin": "ast",
       "id": "src_components_admin_panels_email_emailrender_c",
-      "community": 184,
-      "community_name": "ConversationList.jsx",
+      "community": 198,
+      "community_name": "RaiderCarousel.jsx",
       "norm_label": "c"
     },
     {
@@ -8051,8 +8051,8 @@
       "source_location": "L23",
       "_origin": "ast",
       "id": "src_components_admin_panels_email_emailrender_escapehtml",
-      "community": 184,
-      "community_name": "ConversationList.jsx",
+      "community": 198,
+      "community_name": "RaiderCarousel.jsx",
       "norm_label": "escapehtml()"
     },
     {
@@ -8062,8 +8062,8 @@
       "source_location": "L30",
       "_origin": "ast",
       "id": "src_components_admin_panels_email_emailrender_safeurl",
-      "community": 184,
-      "community_name": "ConversationList.jsx",
+      "community": 198,
+      "community_name": "RaiderCarousel.jsx",
       "norm_label": "safeurl()"
     },
     {
@@ -8073,8 +8073,8 @@
       "source_location": "L40",
       "_origin": "ast",
       "id": "src_components_admin_panels_email_emailrender_fmtbytes",
-      "community": 184,
-      "community_name": "ConversationList.jsx",
+      "community": 198,
+      "community_name": "RaiderCarousel.jsx",
       "norm_label": "fmtbytes()"
     },
     {
@@ -8084,8 +8084,8 @@
       "source_location": "L48",
       "_origin": "ast",
       "id": "src_components_admin_panels_email_emailrender_blockhtml",
-      "community": 184,
-      "community_name": "ConversationList.jsx",
+      "community": 198,
+      "community_name": "RaiderCarousel.jsx",
       "norm_label": "blockhtml()"
     },
     {
@@ -8095,8 +8095,8 @@
       "source_location": "L102",
       "_origin": "ast",
       "id": "src_components_admin_panels_email_emailrender_blockstohtml",
-      "community": 184,
-      "community_name": "ConversationList.jsx",
+      "community": 198,
+      "community_name": "RaiderCarousel.jsx",
       "norm_label": "blockstohtml()"
     },
     {
@@ -8106,8 +8106,8 @@
       "source_location": "L149",
       "_origin": "ast",
       "id": "src_components_admin_panels_email_emailrender_blockstotext",
-      "community": 184,
-      "community_name": "ConversationList.jsx",
+      "community": 198,
+      "community_name": "RaiderCarousel.jsx",
       "norm_label": "blockstotext()"
     },
     {
@@ -8117,8 +8117,8 @@
       "source_location": "L166",
       "_origin": "ast",
       "id": "src_components_admin_panels_email_emailrender_collectattachments",
-      "community": 184,
-      "community_name": "ConversationList.jsx",
+      "community": 198,
+      "community_name": "RaiderCarousel.jsx",
       "norm_label": "collectattachments()"
     },
     {
@@ -8128,8 +8128,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "src_components_admin_panels_feedback_eventfeedbackpanel",
-      "community": 0,
-      "community_name": "react",
+      "community": 229,
+      "community_name": "rheaComp.js",
       "norm_label": "eventfeedbackpanel.jsx"
     },
     {
@@ -8139,8 +8139,8 @@
       "source_location": "L10",
       "_origin": "ast",
       "id": "src_components_admin_panels_feedback_eventfeedbackpanel_fun_labels",
-      "community": 0,
-      "community_name": "react",
+      "community": 229,
+      "community_name": "rheaComp.js",
       "norm_label": "fun_labels"
     },
     {
@@ -8150,8 +8150,8 @@
       "source_location": "L12",
       "_origin": "ast",
       "id": "src_components_admin_panels_feedback_eventfeedbackpanel_copylink",
-      "community": 0,
-      "community_name": "react",
+      "community": 229,
+      "community_name": "rheaComp.js",
       "norm_label": "copylink()"
     },
     {
@@ -8161,8 +8161,8 @@
       "source_location": "L20",
       "_origin": "ast",
       "id": "src_components_admin_panels_feedback_eventfeedbackpanel_analysisresult",
-      "community": 0,
-      "community_name": "react",
+      "community": 229,
+      "community_name": "rheaComp.js",
       "norm_label": "analysisresult()"
     },
     {
@@ -8172,8 +8172,8 @@
       "source_location": "L96",
       "_origin": "ast",
       "id": "src_components_admin_panels_feedback_eventfeedbackpanel_submissionrow",
-      "community": 0,
-      "community_name": "react",
+      "community": 229,
+      "community_name": "rheaComp.js",
       "norm_label": "submissionrow()"
     },
     {
@@ -8183,8 +8183,8 @@
       "source_location": "L131",
       "_origin": "ast",
       "id": "src_components_admin_panels_feedback_eventfeedbackpanel_eventfeedbackpanel",
-      "community": 0,
-      "community_name": "react",
+      "community": 229,
+      "community_name": "rheaComp.js",
       "norm_label": "eventfeedbackpanel()"
     },
     {
@@ -8216,8 +8216,8 @@
       "source_location": "L16",
       "_origin": "ast",
       "id": "src_components_admin_panels_messages_composer_composer",
-      "community": 251,
-      "community_name": "Messages.jsx",
+      "community": 4,
+      "community_name": "ui.jsx",
       "norm_label": "composer()"
     },
     {
@@ -8304,8 +8304,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "src_components_admin_panels_messages_messagespanel",
-      "community": 251,
-      "community_name": "Messages.jsx",
+      "community": 4,
+      "community_name": "ui.jsx",
       "norm_label": "messagespanel.jsx"
     },
     {
@@ -8315,8 +8315,8 @@
       "source_location": "L24",
       "_origin": "ast",
       "id": "src_components_admin_panels_messages_messagespanel_messagespanel",
-      "community": 251,
-      "community_name": "Messages.jsx",
+      "community": 93,
+      "community_name": "ConversationList.jsx",
       "norm_label": "messagespanel()"
     },
     {
@@ -8326,8 +8326,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "src_components_admin_panels_messages_newconversationmodal",
-      "community": 43,
-      "community_name": "Rifle.jsx",
+      "community": 229,
+      "community_name": "rheaComp.js",
       "norm_label": "newconversationmodal.jsx"
     },
     {
@@ -8337,8 +8337,8 @@
       "source_location": "L6",
       "_origin": "ast",
       "id": "src_components_admin_panels_messages_newconversationmodal_newconversationmodal",
-      "community": 251,
-      "community_name": "Messages.jsx",
+      "community": 4,
+      "community_name": "ui.jsx",
       "norm_label": "newconversationmodal()"
     },
     {
@@ -8348,8 +8348,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "src_components_admin_panels_messages_threadview",
-      "community": 251,
-      "community_name": "Messages.jsx",
+      "community": 4,
+      "community_name": "ui.jsx",
       "norm_label": "threadview.jsx"
     },
     {
@@ -8359,8 +8359,8 @@
       "source_location": "L11",
       "_origin": "ast",
       "id": "src_components_admin_panels_messages_threadview_conversationname",
-      "community": 251,
-      "community_name": "Messages.jsx",
+      "community": 4,
+      "community_name": "ui.jsx",
       "norm_label": "conversationname()"
     },
     {
@@ -8370,8 +8370,8 @@
       "source_location": "L19",
       "_origin": "ast",
       "id": "src_components_admin_panels_messages_threadview_isotheronline",
-      "community": 251,
-      "community_name": "Messages.jsx",
+      "community": 4,
+      "community_name": "ui.jsx",
       "norm_label": "isotheronline()"
     },
     {
@@ -8381,8 +8381,8 @@
       "source_location": "L26",
       "_origin": "ast",
       "id": "src_components_admin_panels_messages_threadview_timelabel",
-      "community": 251,
-      "community_name": "Messages.jsx",
+      "community": 4,
+      "community_name": "ui.jsx",
       "norm_label": "timelabel()"
     },
     {
@@ -8392,8 +8392,8 @@
       "source_location": "L30",
       "_origin": "ast",
       "id": "src_components_admin_panels_messages_threadview_threadview",
-      "community": 251,
-      "community_name": "Messages.jsx",
+      "community": 4,
+      "community_name": "ui.jsx",
       "norm_label": "threadview()"
     },
     {
@@ -8601,8 +8601,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "src_components_admin_panels_people_personachievements",
-      "community": 0,
-      "community_name": "react",
+      "community": 229,
+      "community_name": "rheaComp.js",
       "norm_label": "personachievements.jsx"
     },
     {
@@ -8623,8 +8623,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "src_components_admin_panels_photos_adminbulkupload",
-      "community": 200,
-      "community_name": "@dnd-kit/core",
+      "community": 229,
+      "community_name": "rheaComp.js",
       "norm_label": "adminbulkupload.jsx"
     },
     {
@@ -8634,8 +8634,8 @@
       "source_location": "L14",
       "_origin": "ast",
       "id": "src_components_admin_panels_photos_adminbulkupload_adminbulkupload",
-      "community": 200,
-      "community_name": "@dnd-kit/core",
+      "community": 11,
+      "community_name": "blocks.js",
       "norm_label": "adminbulkupload()"
     },
     {
@@ -8964,8 +8964,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "src_components_admin_panels_rafting_raftingpanel",
-      "community": 200,
-      "community_name": "@dnd-kit/core",
+      "community": 43,
+      "community_name": "Rifle.jsx",
       "norm_label": "raftingpanel.jsx"
     },
     {
@@ -8986,8 +8986,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "src_components_admin_panels_raidertv_raidertvpanel",
-      "community": 273,
-      "community_name": "RaiderParentWelcome.jsx",
+      "community": 41,
+      "community_name": "PhotoUploader.jsx",
       "norm_label": "raidertvpanel.jsx"
     },
     {
@@ -8997,8 +8997,8 @@
       "source_location": "L12",
       "_origin": "ast",
       "id": "src_components_admin_panels_raidertv_raidertvpanel_safename",
-      "community": 273,
-      "community_name": "RaiderParentWelcome.jsx",
+      "community": 41,
+      "community_name": "PhotoUploader.jsx",
       "norm_label": "safename()"
     },
     {
@@ -9008,8 +9008,8 @@
       "source_location": "L14",
       "_origin": "ast",
       "id": "src_components_admin_panels_raidertv_raidertvpanel_readduration",
-      "community": 273,
-      "community_name": "RaiderParentWelcome.jsx",
+      "community": 41,
+      "community_name": "PhotoUploader.jsx",
       "norm_label": "readduration()"
     },
     {
@@ -9019,8 +9019,8 @@
       "source_location": "L25",
       "_origin": "ast",
       "id": "src_components_admin_panels_raidertv_raidertvpanel_raidertvpanel",
-      "community": 273,
-      "community_name": "RaiderParentWelcome.jsx",
+      "community": 41,
+      "community_name": "PhotoUploader.jsx",
       "norm_label": "raidertvpanel()"
     },
     {
@@ -9030,8 +9030,8 @@
       "source_location": "L242",
       "_origin": "ast",
       "id": "src_components_admin_panels_raidertv_raidertvpanel_arrowbtn",
-      "community": 273,
-      "community_name": "RaiderParentWelcome.jsx",
+      "community": 41,
+      "community_name": "PhotoUploader.jsx",
       "norm_label": "arrowbtn()"
     },
     {
@@ -9041,8 +9041,8 @@
       "source_location": "L249",
       "_origin": "ast",
       "id": "src_components_admin_panels_raidertv_raidertvpanel_minibtn",
-      "community": 273,
-      "community_name": "RaiderParentWelcome.jsx",
+      "community": 41,
+      "community_name": "PhotoUploader.jsx",
       "norm_label": "minibtn()"
     },
     {
@@ -9074,8 +9074,8 @@
       "source_location": "L30",
       "_origin": "ast",
       "id": "src_components_admin_panels_tvphotos_emergencypushpanel_emergencypushpanel",
-      "community": 43,
-      "community_name": "Rifle.jsx",
+      "community": 304,
+      "community_name": "TEAMS",
       "norm_label": "emergencypushpanel()"
     },
     {
@@ -9085,8 +9085,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "src_components_admin_panels_tvphotos_focalpointpicker",
-      "community": 229,
-      "community_name": "rheaComp.js",
+      "community": 4,
+      "community_name": "ui.jsx",
       "norm_label": "focalpointpicker.jsx"
     },
     {
@@ -9096,8 +9096,8 @@
       "source_location": "L10",
       "_origin": "ast",
       "id": "src_components_admin_panels_tvphotos_focalpointpicker_focalpointpicker",
-      "community": 229,
-      "community_name": "rheaComp.js",
+      "community": 4,
+      "community_name": "ui.jsx",
       "norm_label": "focalpointpicker()"
     },
     {
@@ -9107,8 +9107,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "src_components_admin_panels_tvphotos_tvphotoassignmodal",
-      "community": 229,
-      "community_name": "rheaComp.js",
+      "community": 4,
+      "community_name": "ui.jsx",
       "norm_label": "tvphotoassignmodal.jsx"
     },
     {
@@ -9129,8 +9129,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "src_components_admin_panels_tvphotos_tvphotoeditcropmodal",
-      "community": 229,
-      "community_name": "rheaComp.js",
+      "community": 4,
+      "community_name": "ui.jsx",
       "norm_label": "tvphotoeditcropmodal.jsx"
     },
     {
@@ -9195,8 +9195,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "src_components_admin_panels_tvphotos_tvspotlightpushmodal",
-      "community": 43,
-      "community_name": "Rifle.jsx",
+      "community": 229,
+      "community_name": "rheaComp.js",
       "norm_label": "tvspotlightpushmodal.jsx"
     },
     {
@@ -9217,8 +9217,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "src_components_admin_panels_tvphotos_tvterminalmanager",
-      "community": 11,
-      "community_name": "blocks.js",
+      "community": 229,
+      "community_name": "rheaComp.js",
       "norm_label": "tvterminalmanager.jsx"
     },
     {
@@ -9261,8 +9261,8 @@
       "source_location": "L13",
       "_origin": "ast",
       "id": "src_components_admin_panels_tvremote_tabintro_tabintro",
-      "community": 43,
-      "community_name": "Rifle.jsx",
+      "community": 304,
+      "community_name": "TEAMS",
       "norm_label": "tabintro()"
     },
     {
@@ -9272,8 +9272,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "src_components_admin_panels_tvremote_tvremoteguide",
-      "community": 43,
-      "community_name": "Rifle.jsx",
+      "community": 304,
+      "community_name": "TEAMS",
       "norm_label": "tvremoteguide.jsx"
     },
     {
@@ -9283,8 +9283,8 @@
       "source_location": "L9",
       "_origin": "ast",
       "id": "src_components_admin_panels_tvremote_tvremoteguide_block",
-      "community": 43,
-      "community_name": "Rifle.jsx",
+      "community": 304,
+      "community_name": "TEAMS",
       "norm_label": "block()"
     },
     {
@@ -9294,8 +9294,8 @@
       "source_location": "L28",
       "_origin": "ast",
       "id": "src_components_admin_panels_tvremote_tvremoteguide_tvremoteguide",
-      "community": 43,
-      "community_name": "Rifle.jsx",
+      "community": 304,
+      "community_name": "TEAMS",
       "norm_label": "tvremoteguide()"
     },
     {
@@ -9305,8 +9305,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "src_components_admin_panels_tvremote_tvremotepanel",
-      "community": 43,
-      "community_name": "Rifle.jsx",
+      "community": 304,
+      "community_name": "TEAMS",
       "norm_label": "tvremotepanel.jsx"
     },
     {
@@ -9338,8 +9338,8 @@
       "source_location": "L36",
       "_origin": "ast",
       "id": "src_components_admin_panels_tvremote_tvremotepanel_base_tabs",
-      "community": 43,
-      "community_name": "Rifle.jsx",
+      "community": 304,
+      "community_name": "TEAMS",
       "norm_label": "base_tabs"
     },
     {
@@ -9349,8 +9349,8 @@
       "source_location": "L44",
       "_origin": "ast",
       "id": "src_components_admin_panels_tvremote_tvremotepanel_range_tab",
-      "community": 43,
-      "community_name": "Rifle.jsx",
+      "community": 304,
+      "community_name": "TEAMS",
       "norm_label": "range_tab"
     },
     {
@@ -9360,8 +9360,8 @@
       "source_location": "L45",
       "_origin": "ast",
       "id": "src_components_admin_panels_tvremote_tvremotepanel_range_layout_tab",
-      "community": 43,
-      "community_name": "Rifle.jsx",
+      "community": 304,
+      "community_name": "TEAMS",
       "norm_label": "range_layout_tab"
     },
     {
@@ -9371,8 +9371,8 @@
       "source_location": "L46",
       "_origin": "ast",
       "id": "src_components_admin_panels_tvremote_tvremotepanel_range_notice_tabs",
-      "community": 43,
-      "community_name": "Rifle.jsx",
+      "community": 304,
+      "community_name": "TEAMS",
       "norm_label": "range_notice_tabs"
     },
     {
@@ -9382,8 +9382,8 @@
       "source_location": "L54",
       "_origin": "ast",
       "id": "src_components_admin_panels_tvremote_tvremotepanel_default_range_config",
-      "community": 43,
-      "community_name": "Rifle.jsx",
+      "community": 304,
+      "community_name": "TEAMS",
       "norm_label": "default_range_config"
     },
     {
@@ -9393,8 +9393,8 @@
       "source_location": "L68",
       "_origin": "ast",
       "id": "src_components_admin_panels_tvremote_tvremotepanel_widget_mode_labels",
-      "community": 43,
-      "community_name": "Rifle.jsx",
+      "community": 304,
+      "community_name": "TEAMS",
       "norm_label": "widget_mode_labels"
     },
     {
@@ -9459,8 +9459,8 @@
       "source_location": "L9",
       "_origin": "ast",
       "id": "src_components_admin_panels_tvremote_tvremoteupdatemodal_tvremoteupdatemodal",
-      "community": 43,
-      "community_name": "Rifle.jsx",
+      "community": 304,
+      "community_name": "TEAMS",
       "norm_label": "tvremoteupdatemodal()"
     },
     {
@@ -9481,8 +9481,8 @@
       "source_location": "L11",
       "_origin": "ast",
       "id": "src_components_admin_panels_tvremote_tvremotewalkthrough_tvremotewalkthrough",
-      "community": 43,
-      "community_name": "Rifle.jsx",
+      "community": 304,
+      "community_name": "TEAMS",
       "norm_label": "tvremotewalkthrough()"
     },
     {
@@ -9492,8 +9492,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "src_components_admin_panels_tvremote_tvremotehelpcontent",
-      "community": 43,
-      "community_name": "Rifle.jsx",
+      "community": 304,
+      "community_name": "TEAMS",
       "norm_label": "tvremotehelpcontent.js"
     },
     {
@@ -9503,8 +9503,8 @@
       "source_location": "L15",
       "_origin": "ast",
       "id": "src_components_admin_panels_tvremote_tvremotehelpcontent_tab_intro",
-      "community": 43,
-      "community_name": "Rifle.jsx",
+      "community": 304,
+      "community_name": "TEAMS",
       "norm_label": "tab_intro"
     },
     {
@@ -9514,8 +9514,8 @@
       "source_location": "L90",
       "_origin": "ast",
       "id": "src_components_admin_panels_tvremote_tvremotehelpcontent_walkthrough",
-      "community": 43,
-      "community_name": "Rifle.jsx",
+      "community": 304,
+      "community_name": "TEAMS",
       "norm_label": "walkthrough"
     },
     {
@@ -9525,8 +9525,8 @@
       "source_location": "L168",
       "_origin": "ast",
       "id": "src_components_admin_panels_tvremote_tvremotehelpcontent_guide_sections",
-      "community": 43,
-      "community_name": "Rifle.jsx",
+      "community": 304,
+      "community_name": "TEAMS",
       "norm_label": "guide_sections"
     },
     {
@@ -9646,8 +9646,8 @@
       "source_location": "L238",
       "_origin": "ast",
       "id": "src_components_admin_shared_ui_select",
-      "community": 0,
-      "community_name": "react",
+      "community": 229,
+      "community_name": "rheaComp.js",
       "norm_label": "select()"
     },
     {
@@ -9679,8 +9679,8 @@
       "source_location": "L317",
       "_origin": "ast",
       "id": "src_components_admin_shared_ui_toast",
-      "community": 0,
-      "community_name": "react",
+      "community": 229,
+      "community_name": "rheaComp.js",
       "norm_label": "toast()"
     },
     {
@@ -9690,8 +9690,8 @@
       "source_location": "L331",
       "_origin": "ast",
       "id": "src_components_admin_shared_ui_modal",
-      "community": 229,
-      "community_name": "rheaComp.js",
+      "community": 4,
+      "community_name": "ui.jsx",
       "norm_label": "modal()"
     },
     {
@@ -9712,8 +9712,8 @@
       "source_location": "L389",
       "_origin": "ast",
       "id": "src_components_admin_shared_ui_emptystate",
-      "community": 200,
-      "community_name": "@dnd-kit/core",
+      "community": 229,
+      "community_name": "rheaComp.js",
       "norm_label": "emptystate()"
     },
     {
@@ -9778,8 +9778,8 @@
       "source_location": "L34",
       "_origin": "ast",
       "id": "src_components_admin_theme_shadow",
-      "community": 4,
-      "community_name": "ui.jsx",
+      "community": 43,
+      "community_name": "Rifle.jsx",
       "norm_label": "shadow"
     },
     {
@@ -10009,8 +10009,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "src_components_ball_ballsignuppopup",
-      "community": 91,
-      "community_name": "OverviewPanel.jsx",
+      "community": 273,
+      "community_name": "RaiderParentWelcome.jsx",
       "norm_label": "ballsignuppopup.jsx"
     },
     {
@@ -10020,8 +10020,8 @@
       "source_location": "L18",
       "_origin": "ast",
       "id": "src_components_ball_ballsignuppopup_p",
-      "community": 91,
-      "community_name": "OverviewPanel.jsx",
+      "community": 273,
+      "community_name": "RaiderParentWelcome.jsx",
       "norm_label": "p"
     },
     {
@@ -10031,8 +10031,8 @@
       "source_location": "L27",
       "_origin": "ast",
       "id": "src_components_ball_ballsignuppopup_fmtshort",
-      "community": 91,
-      "community_name": "OverviewPanel.jsx",
+      "community": 273,
+      "community_name": "RaiderParentWelcome.jsx",
       "norm_label": "fmtshort()"
     },
     {
@@ -10042,8 +10042,8 @@
       "source_location": "L32",
       "_origin": "ast",
       "id": "src_components_ball_ballsignuppopup_ballsignuppopup",
-      "community": 91,
-      "community_name": "OverviewPanel.jsx",
+      "community": 273,
+      "community_name": "RaiderParentWelcome.jsx",
       "norm_label": "ballsignuppopup()"
     },
     {
@@ -10281,7 +10281,7 @@
       "label": "Section()",
       "file_type": "code",
       "source_file": "src/components/ball/dress/BallDressPortal.jsx",
-      "source_location": "L243",
+      "source_location": "L235",
       "_origin": "ast",
       "id": "src_components_ball_dress_balldressportal_section",
       "community": 239,
@@ -10292,7 +10292,7 @@
       "label": "ApprovedSection()",
       "file_type": "code",
       "source_file": "src/components/ball/dress/BallDressPortal.jsx",
-      "source_location": "L260",
+      "source_location": "L252",
       "_origin": "ast",
       "id": "src_components_ball_dress_balldressportal_approvedsection",
       "community": 239,
@@ -10303,7 +10303,7 @@
       "label": "KIND_TAG",
       "file_type": "code",
       "source_file": "src/components/ball/dress/BallDressPortal.jsx",
-      "source_location": "L275",
+      "source_location": "L267",
       "_origin": "ast",
       "id": "src_components_ball_dress_balldressportal_kind_tag",
       "community": 239,
@@ -10314,7 +10314,7 @@
       "label": "DressRow()",
       "file_type": "code",
       "source_file": "src/components/ball/dress/BallDressPortal.jsx",
-      "source_location": "L277",
+      "source_location": "L269",
       "_origin": "ast",
       "id": "src_components_ball_dress_balldressportal_dressrow",
       "community": 239,
@@ -10328,8 +10328,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "src_components_ball_ops_ballopsportal",
-      "community": 239,
-      "community_name": "expo-application",
+      "community": 312,
+      "community_name": "RaiderCarousel.jsx",
       "norm_label": "ballopsportal.jsx"
     },
     {
@@ -10339,8 +10339,8 @@
       "source_location": "L9",
       "_origin": "ast",
       "id": "src_components_ball_ops_ballopsportal_money",
-      "community": 239,
-      "community_name": "expo-application",
+      "community": 312,
+      "community_name": "RaiderCarousel.jsx",
       "norm_label": "money()"
     },
     {
@@ -10350,8 +10350,8 @@
       "source_location": "L15",
       "_origin": "ast",
       "id": "src_components_ball_ops_ballopsportal_chip",
-      "community": 239,
-      "community_name": "expo-application",
+      "community": 312,
+      "community_name": "RaiderCarousel.jsx",
       "norm_label": "chip()"
     },
     {
@@ -10361,8 +10361,8 @@
       "source_location": "L29",
       "_origin": "ast",
       "id": "src_components_ball_ops_ballopsportal_csvcell",
-      "community": 239,
-      "community_name": "expo-application",
+      "community": 312,
+      "community_name": "RaiderCarousel.jsx",
       "norm_label": "csvcell()"
     },
     {
@@ -10372,8 +10372,8 @@
       "source_location": "L41",
       "_origin": "ast",
       "id": "src_components_ball_ops_ballopsportal_field_targets",
-      "community": 239,
-      "community_name": "expo-application",
+      "community": 312,
+      "community_name": "RaiderCarousel.jsx",
       "norm_label": "field_targets"
     },
     {
@@ -10383,8 +10383,8 @@
       "source_location": "L49",
       "_origin": "ast",
       "id": "src_components_ball_ops_ballopsportal_exportcsv",
-      "community": 239,
-      "community_name": "expo-application",
+      "community": 312,
+      "community_name": "RaiderCarousel.jsx",
       "norm_label": "exportcsv()"
     },
     {
@@ -10394,52 +10394,52 @@
       "source_location": "L93",
       "_origin": "ast",
       "id": "src_components_ball_ops_ballopsportal_ballopsportal",
-      "community": 239,
-      "community_name": "expo-application",
+      "community": 312,
+      "community_name": "RaiderCarousel.jsx",
       "norm_label": "ballopsportal()"
     },
     {
       "label": "Section()",
       "file_type": "code",
       "source_file": "src/components/ball/ops/BallOpsPortal.jsx",
-      "source_location": "L325",
+      "source_location": "L322",
       "_origin": "ast",
       "id": "src_components_ball_ops_ballopsportal_section",
-      "community": 239,
-      "community_name": "expo-application",
+      "community": 312,
+      "community_name": "RaiderCarousel.jsx",
       "norm_label": "section()"
     },
     {
       "label": "LookupRow()",
       "file_type": "code",
       "source_file": "src/components/ball/ops/BallOpsPortal.jsx",
-      "source_location": "L337",
+      "source_location": "L334",
       "_origin": "ast",
       "id": "src_components_ball_ops_ballopsportal_lookuprow",
-      "community": 239,
-      "community_name": "expo-application",
+      "community": 312,
+      "community_name": "RaiderCarousel.jsx",
       "norm_label": "lookuprow()"
     },
     {
       "label": "ContactLine()",
       "file_type": "code",
       "source_file": "src/components/ball/ops/BallOpsPortal.jsx",
-      "source_location": "L365",
+      "source_location": "L362",
       "_origin": "ast",
       "id": "src_components_ball_ops_ballopsportal_contactline",
-      "community": 239,
-      "community_name": "expo-application",
+      "community": 312,
+      "community_name": "RaiderCarousel.jsx",
       "norm_label": "contactline()"
     },
     {
       "label": "PersonDetail()",
       "file_type": "code",
       "source_file": "src/components/ball/ops/BallOpsPortal.jsx",
-      "source_location": "L379",
+      "source_location": "L376",
       "_origin": "ast",
       "id": "src_components_ball_ops_ballopsportal_persondetail",
-      "community": 239,
-      "community_name": "expo-application",
+      "community": 312,
+      "community_name": "RaiderCarousel.jsx",
       "norm_label": "persondetail()"
     },
     {
@@ -10699,7 +10699,7 @@
       "label": "p",
       "file_type": "code",
       "source_file": "src/components/ball/signup/StepDocumentation.jsx",
-      "source_location": "L150",
+      "source_location": "L157",
       "_origin": "ast",
       "id": "src_components_ball_signup_stepdocumentation_p",
       "community": 303,
@@ -10710,7 +10710,7 @@
       "label": "linkBtn",
       "file_type": "code",
       "source_file": "src/components/ball/signup/StepDocumentation.jsx",
-      "source_location": "L151",
+      "source_location": "L158",
       "_origin": "ast",
       "id": "src_components_ball_signup_stepdocumentation_linkbtn",
       "community": 303,
@@ -10721,7 +10721,7 @@
       "label": "Section()",
       "file_type": "code",
       "source_file": "src/components/ball/signup/StepDocumentation.jsx",
-      "source_location": "L153",
+      "source_location": "L160",
       "_origin": "ast",
       "id": "src_components_ball_signup_stepdocumentation_section",
       "community": 303,
@@ -11142,8 +11142,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "src_components_calendar_monthgridcalendar",
-      "community": 9,
-      "community_name": "App.jsx",
+      "community": 241,
+      "community_name": "TvCongratsScreen.jsx",
       "norm_label": "monthgridcalendar.jsx"
     },
     {
@@ -11153,8 +11153,8 @@
       "source_location": "L4",
       "_origin": "ast",
       "id": "src_components_calendar_monthgridcalendar_p",
-      "community": 9,
-      "community_name": "App.jsx",
+      "community": 241,
+      "community_name": "TvCongratsScreen.jsx",
       "norm_label": "p"
     },
     {
@@ -11164,8 +11164,8 @@
       "source_location": "L14",
       "_origin": "ast",
       "id": "src_components_calendar_monthgridcalendar_weekdays",
-      "community": 9,
-      "community_name": "App.jsx",
+      "community": 241,
+      "community_name": "TvCongratsScreen.jsx",
       "norm_label": "weekdays"
     },
     {
@@ -11175,8 +11175,8 @@
       "source_location": "L16",
       "_origin": "ast",
       "id": "src_components_calendar_monthgridcalendar_daysinmonth",
-      "community": 9,
-      "community_name": "App.jsx",
+      "community": 241,
+      "community_name": "TvCongratsScreen.jsx",
       "norm_label": "daysinmonth()"
     },
     {
@@ -11186,8 +11186,8 @@
       "source_location": "L17",
       "_origin": "ast",
       "id": "src_components_calendar_monthgridcalendar_firstweekday",
-      "community": 9,
-      "community_name": "App.jsx",
+      "community": 241,
+      "community_name": "TvCongratsScreen.jsx",
       "norm_label": "firstweekday()"
     },
     {
@@ -11197,8 +11197,8 @@
       "source_location": "L21",
       "_origin": "ast",
       "id": "src_components_calendar_monthgridcalendar_eventsbyday",
-      "community": 9,
-      "community_name": "App.jsx",
+      "community": 241,
+      "community_name": "TvCongratsScreen.jsx",
       "norm_label": "eventsbyday()"
     },
     {
@@ -11208,8 +11208,8 @@
       "source_location": "L42",
       "_origin": "ast",
       "id": "src_components_calendar_monthgridcalendar_pickinitialmonth",
-      "community": 9,
-      "community_name": "App.jsx",
+      "community": 241,
+      "community_name": "TvCongratsScreen.jsx",
       "norm_label": "pickinitialmonth()"
     },
     {
@@ -11219,8 +11219,8 @@
       "source_location": "L57",
       "_origin": "ast",
       "id": "src_components_calendar_monthgridcalendar_monthgridcalendar",
-      "community": 9,
-      "community_name": "App.jsx",
+      "community": 241,
+      "community_name": "TvCongratsScreen.jsx",
       "norm_label": "monthgridcalendar()"
     },
     {
@@ -11230,8 +11230,8 @@
       "source_location": "L192",
       "_origin": "ast",
       "id": "src_components_calendar_monthgridcalendar_navbtn",
-      "community": 9,
-      "community_name": "App.jsx",
+      "community": 241,
+      "community_name": "TvCongratsScreen.jsx",
       "norm_label": "navbtn"
     },
     {
@@ -12187,15 +12187,15 @@
       "source_location": "L63",
       "_origin": "ast",
       "id": "src_components_optic_optic_opticapp",
-      "community": 232,
-      "community_name": "RaiderCarousel.jsx",
+      "community": 20,
+      "community_name": "Companies.jsx",
       "norm_label": "opticapp()"
     },
     {
       "label": "BetaBanner()",
       "file_type": "code",
       "source_file": "src/components/optic/Optic.jsx",
-      "source_location": "L143",
+      "source_location": "L136",
       "_origin": "ast",
       "id": "src_components_optic_optic_betabanner",
       "community": 20,
@@ -12206,7 +12206,7 @@
       "label": "InstallNudge()",
       "file_type": "code",
       "source_file": "src/components/optic/Optic.jsx",
-      "source_location": "L164",
+      "source_location": "L157",
       "_origin": "ast",
       "id": "src_components_optic_optic_installnudge",
       "community": 20,
@@ -12217,7 +12217,7 @@
       "label": "NotificationCard()",
       "file_type": "code",
       "source_file": "src/components/optic/Optic.jsx",
-      "source_location": "L215",
+      "source_location": "L208",
       "_origin": "ast",
       "id": "src_components_optic_optic_notificationcard",
       "community": 264,
@@ -12228,7 +12228,7 @@
       "label": "ReinstallNotice()",
       "file_type": "code",
       "source_file": "src/components/optic/Optic.jsx",
-      "source_location": "L260",
+      "source_location": "L253",
       "_origin": "ast",
       "id": "src_components_optic_optic_reinstallnotice",
       "community": 292,
@@ -12239,7 +12239,7 @@
       "label": "OpticLocked()",
       "file_type": "code",
       "source_file": "src/components/optic/Optic.jsx",
-      "source_location": "L276",
+      "source_location": "L269",
       "_origin": "ast",
       "id": "src_components_optic_optic_opticlocked",
       "community": 20,
@@ -12250,7 +12250,7 @@
       "label": "NEW_FEATURES",
       "file_type": "code",
       "source_file": "src/components/optic/Optic.jsx",
-      "source_location": "L345",
+      "source_location": "L338",
       "_origin": "ast",
       "id": "src_components_optic_optic_new_features",
       "community": 20,
@@ -12261,7 +12261,7 @@
       "label": "WhatsNew()",
       "file_type": "code",
       "source_file": "src/components/optic/Optic.jsx",
-      "source_location": "L356",
+      "source_location": "L349",
       "_origin": "ast",
       "id": "src_components_optic_optic_whatsnew",
       "community": 20,
@@ -12272,7 +12272,7 @@
       "label": "Header()",
       "file_type": "code",
       "source_file": "src/components/optic/Optic.jsx",
-      "source_location": "L370",
+      "source_location": "L363",
       "_origin": "ast",
       "id": "src_components_optic_optic_header",
       "community": 20,
@@ -12283,7 +12283,7 @@
       "label": "UploadCard()",
       "file_type": "code",
       "source_file": "src/components/optic/Optic.jsx",
-      "source_location": "L388",
+      "source_location": "L381",
       "_origin": "ast",
       "id": "src_components_optic_optic_uploadcard",
       "community": 294,
@@ -12294,7 +12294,7 @@
       "label": "Feed()",
       "file_type": "code",
       "source_file": "src/components/optic/Optic.jsx",
-      "source_location": "L590",
+      "source_location": "L583",
       "_origin": "ast",
       "id": "src_components_optic_optic_feed",
       "community": 20,
@@ -12305,7 +12305,7 @@
       "label": "FeedItem()",
       "file_type": "code",
       "source_file": "src/components/optic/Optic.jsx",
-      "source_location": "L661",
+      "source_location": "L648",
       "_origin": "ast",
       "id": "src_components_optic_optic_feeditem",
       "community": 254,
@@ -12316,7 +12316,7 @@
       "label": "Reel()",
       "file_type": "code",
       "source_file": "src/components/optic/Optic.jsx",
-      "source_location": "L694",
+      "source_location": "L681",
       "_origin": "ast",
       "id": "src_components_optic_optic_reel",
       "community": 254,
@@ -12327,7 +12327,7 @@
       "label": "WALK_STEPS",
       "file_type": "code",
       "source_file": "src/components/optic/Optic.jsx",
-      "source_location": "L939",
+      "source_location": "L926",
       "_origin": "ast",
       "id": "src_components_optic_optic_walk_steps",
       "community": 20,
@@ -12338,7 +12338,7 @@
       "label": "Walkthrough()",
       "file_type": "code",
       "source_file": "src/components/optic/Optic.jsx",
-      "source_location": "L960",
+      "source_location": "L947",
       "_origin": "ast",
       "id": "src_components_optic_optic_walkthrough",
       "community": 20,
@@ -12484,8 +12484,8 @@
       "source_location": "L68",
       "_origin": "ast",
       "id": "src_components_optic_pwa_isstandalone",
-      "community": 232,
-      "community_name": "RaiderCarousel.jsx",
+      "community": 20,
+      "community_name": "Companies.jsx",
       "norm_label": "isstandalone()"
     },
     {
@@ -12737,8 +12737,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "src_components_raiders_compgallery",
-      "community": 12,
-      "community_name": "blocks.js",
+      "community": 290,
+      "community_name": "Staff.jsx",
       "norm_label": "compgallery.jsx"
     },
     {
@@ -12748,8 +12748,8 @@
       "source_location": "L11",
       "_origin": "ast",
       "id": "src_components_raiders_compgallery_p",
-      "community": 12,
-      "community_name": "blocks.js",
+      "community": 290,
+      "community_name": "Staff.jsx",
       "norm_label": "p"
     },
     {
@@ -12759,8 +12759,8 @@
       "source_location": "L25",
       "_origin": "ast",
       "id": "src_components_raiders_compgallery_brackets",
-      "community": 12,
-      "community_name": "blocks.js",
+      "community": 290,
+      "community_name": "Staff.jsx",
       "norm_label": "brackets()"
     },
     {
@@ -12770,8 +12770,8 @@
       "source_location": "L42",
       "_origin": "ast",
       "id": "src_components_raiders_compgallery_lightbox",
-      "community": 12,
-      "community_name": "blocks.js",
+      "community": 290,
+      "community_name": "Staff.jsx",
       "norm_label": "lightbox()"
     },
     {
@@ -12781,8 +12781,8 @@
       "source_location": "L113",
       "_origin": "ast",
       "id": "src_components_raiders_compgallery_navarrow",
-      "community": 12,
-      "community_name": "blocks.js",
+      "community": 290,
+      "community_name": "Staff.jsx",
       "norm_label": "navarrow()"
     },
     {
@@ -12792,8 +12792,8 @@
       "source_location": "L122",
       "_origin": "ast",
       "id": "src_components_raiders_compgallery_photogrid",
-      "community": 12,
-      "community_name": "blocks.js",
+      "community": 290,
+      "community_name": "Staff.jsx",
       "norm_label": "photogrid()"
     },
     {
@@ -12803,8 +12803,8 @@
       "source_location": "L148",
       "_origin": "ast",
       "id": "src_components_raiders_compgallery_comingsoon",
-      "community": 12,
-      "community_name": "blocks.js",
+      "community": 290,
+      "community_name": "Staff.jsx",
       "norm_label": "comingsoon()"
     },
     {
@@ -12814,8 +12814,8 @@
       "source_location": "L170",
       "_origin": "ast",
       "id": "src_components_raiders_compgallery_topnotice",
-      "community": 12,
-      "community_name": "blocks.js",
+      "community": 290,
+      "community_name": "Staff.jsx",
       "norm_label": "topnotice()"
     },
     {
@@ -12825,8 +12825,8 @@
       "source_location": "L186",
       "_origin": "ast",
       "id": "src_components_raiders_compgallery_eventcard",
-      "community": 12,
-      "community_name": "blocks.js",
+      "community": 290,
+      "community_name": "Staff.jsx",
       "norm_label": "eventcard()"
     },
     {
@@ -12836,8 +12836,8 @@
       "source_location": "L241",
       "_origin": "ast",
       "id": "src_components_raiders_compgallery_eventdetail",
-      "community": 12,
-      "community_name": "blocks.js",
+      "community": 290,
+      "community_name": "Staff.jsx",
       "norm_label": "eventdetail()"
     },
     {
@@ -12847,8 +12847,8 @@
       "source_location": "L277",
       "_origin": "ast",
       "id": "src_components_raiders_compgallery_sectionrule",
-      "community": 12,
-      "community_name": "blocks.js",
+      "community": 290,
+      "community_name": "Staff.jsx",
       "norm_label": "sectionrule()"
     },
     {
@@ -12858,8 +12858,8 @@
       "source_location": "L286",
       "_origin": "ast",
       "id": "src_components_raiders_compgallery_backbtn",
-      "community": 12,
-      "community_name": "blocks.js",
+      "community": 290,
+      "community_name": "Staff.jsx",
       "norm_label": "backbtn"
     },
     {
@@ -12979,8 +12979,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "src_components_raidertv_raidertv",
-      "community": 44,
-      "community_name": "imageResize.js",
+      "community": 4,
+      "community_name": "ui.jsx",
       "norm_label": "raidertv.jsx"
     },
     {
@@ -13012,8 +13012,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "src_components_raidertv_useqrdataurl",
-      "community": 44,
-      "community_name": "imageResize.js",
+      "community": 4,
+      "community_name": "ui.jsx",
       "norm_label": "useqrdataurl.js"
     },
     {
@@ -13034,8 +13034,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "src_components_review_forcepasswordchange",
-      "community": 239,
-      "community_name": "expo-application",
+      "community": 4,
+      "community_name": "ui.jsx",
       "norm_label": "review/forcepasswordchange.jsx"
     },
     {
@@ -13122,8 +13122,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "src_components_review_reviewerpincontrol",
-      "community": 239,
-      "community_name": "expo-application",
+      "community": 4,
+      "community_name": "ui.jsx",
       "norm_label": "reviewerpincontrol.jsx"
     },
     {
@@ -13133,8 +13133,8 @@
       "source_location": "L12",
       "_origin": "ast",
       "id": "src_components_review_reviewerpincontrol_reviewerpincontrol",
-      "community": 239,
-      "community_name": "expo-application",
+      "community": 4,
+      "community_name": "ui.jsx",
       "norm_label": "reviewerpincontrol()"
     },
     {
@@ -13265,8 +13265,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "src_components_rifle_portal_compuploadtab",
-      "community": 239,
-      "community_name": "expo-application",
+      "community": 10,
+      "community_name": "emailRender.js",
       "norm_label": "compuploadtab.jsx"
     },
     {
@@ -13276,8 +13276,8 @@
       "source_location": "L11",
       "_origin": "ast",
       "id": "src_components_rifle_portal_compuploadtab_inputstyle",
-      "community": 239,
-      "community_name": "expo-application",
+      "community": 10,
+      "community_name": "emailRender.js",
       "norm_label": "inputstyle"
     },
     {
@@ -13287,8 +13287,8 @@
       "source_location": "L12",
       "_origin": "ast",
       "id": "src_components_rifle_portal_compuploadtab_label",
-      "community": 239,
-      "community_name": "expo-application",
+      "community": 10,
+      "community_name": "emailRender.js",
       "norm_label": "label"
     },
     {
@@ -13298,8 +13298,8 @@
       "source_location": "L13",
       "_origin": "ast",
       "id": "src_components_rifle_portal_compuploadtab_numinput",
-      "community": 239,
-      "community_name": "expo-application",
+      "community": 10,
+      "community_name": "emailRender.js",
       "norm_label": "numinput"
     },
     {
@@ -13309,8 +13309,8 @@
       "source_location": "L15",
       "_origin": "ast",
       "id": "src_components_rifle_portal_compuploadtab_statusbadge",
-      "community": 239,
-      "community_name": "expo-application",
+      "community": 10,
+      "community_name": "emailRender.js",
       "norm_label": "statusbadge()"
     },
     {
@@ -13320,8 +13320,8 @@
       "source_location": "L24",
       "_origin": "ast",
       "id": "src_components_rifle_portal_compuploadtab_compuploadtab",
-      "community": 239,
-      "community_name": "expo-application",
+      "community": 10,
+      "community_name": "emailRender.js",
       "norm_label": "compuploadtab()"
     },
     {
@@ -13331,8 +13331,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "src_components_rifle_portal_rifleforcepasswordchange",
-      "community": 239,
-      "community_name": "expo-application",
+      "community": 10,
+      "community_name": "emailRender.js",
       "norm_label": "rifleforcepasswordchange.jsx"
     },
     {
@@ -13342,8 +13342,8 @@
       "source_location": "L13",
       "_origin": "ast",
       "id": "src_components_rifle_portal_rifleforcepasswordchange_rifleforcepasswordchange",
-      "community": 239,
-      "community_name": "expo-application",
+      "community": 10,
+      "community_name": "emailRender.js",
       "norm_label": "rifleforcepasswordchange()"
     },
     {
@@ -13353,8 +13353,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "src_components_rifle_portal_riflepincontrol",
-      "community": 239,
-      "community_name": "expo-application",
+      "community": 10,
+      "community_name": "emailRender.js",
       "norm_label": "riflepincontrol.jsx"
     },
     {
@@ -13364,8 +13364,8 @@
       "source_location": "L10",
       "_origin": "ast",
       "id": "src_components_rifle_portal_riflepincontrol_riflepincontrol",
-      "community": 239,
-      "community_name": "expo-application",
+      "community": 10,
+      "community_name": "emailRender.js",
       "norm_label": "riflepincontrol()"
     },
     {
@@ -13375,8 +13375,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "src_components_rifle_portal_rifleportal",
-      "community": 239,
-      "community_name": "expo-application",
+      "community": 10,
+      "community_name": "emailRender.js",
       "norm_label": "rifleportal.jsx"
     },
     {
@@ -13386,8 +13386,8 @@
       "source_location": "L12",
       "_origin": "ast",
       "id": "src_components_rifle_portal_rifleportal_tabs",
-      "community": 239,
-      "community_name": "expo-application",
+      "community": 10,
+      "community_name": "emailRender.js",
       "norm_label": "tabs"
     },
     {
@@ -13408,8 +13408,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "src_components_rifle_portal_rifleportallogin",
-      "community": 239,
-      "community_name": "expo-application",
+      "community": 10,
+      "community_name": "emailRender.js",
       "norm_label": "rifleportallogin.jsx"
     },
     {
@@ -13419,8 +13419,8 @@
       "source_location": "L9",
       "_origin": "ast",
       "id": "src_components_rifle_portal_rifleportallogin_rifleportallogin",
-      "community": 239,
-      "community_name": "expo-application",
+      "community": 10,
+      "community_name": "emailRender.js",
       "norm_label": "rifleportallogin()"
     },
     {
@@ -13430,8 +13430,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "src_components_rifle_portal_rostertab",
-      "community": 239,
-      "community_name": "expo-application",
+      "community": 10,
+      "community_name": "emailRender.js",
       "norm_label": "rostertab.jsx"
     },
     {
@@ -13441,8 +13441,8 @@
       "source_location": "L13",
       "_origin": "ast",
       "id": "src_components_rifle_portal_rostertab_rostertab",
-      "community": 239,
-      "community_name": "expo-application",
+      "community": 10,
+      "community_name": "emailRender.js",
       "norm_label": "rostertab()"
     },
     {
@@ -13452,8 +13452,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "src_components_rifle_theme",
-      "community": 239,
-      "community_name": "expo-application",
+      "community": 10,
+      "community_name": "emailRender.js",
       "norm_label": "rifle/theme.js"
     },
     {
@@ -13463,8 +13463,8 @@
       "source_location": "L4",
       "_origin": "ast",
       "id": "src_components_rifle_theme_p",
-      "community": 239,
-      "community_name": "expo-application",
+      "community": 10,
+      "community_name": "emailRender.js",
       "norm_label": "p"
     },
     {
@@ -13870,8 +13870,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "src_components_tv_tvcongratsscreen",
-      "community": 91,
-      "community_name": "OverviewPanel.jsx",
+      "community": 184,
+      "community_name": "ConversationList.jsx",
       "norm_label": "tvcongratsscreen.jsx"
     },
     {
@@ -13881,8 +13881,8 @@
       "source_location": "L13",
       "_origin": "ast",
       "id": "src_components_tv_tvcongratsscreen_tier_badge",
-      "community": 91,
-      "community_name": "OverviewPanel.jsx",
+      "community": 184,
+      "community_name": "ConversationList.jsx",
       "norm_label": "tier_badge"
     },
     {
@@ -13892,8 +13892,8 @@
       "source_location": "L19",
       "_origin": "ast",
       "id": "src_components_tv_tvcongratsscreen_congratsstyles",
-      "community": 91,
-      "community_name": "OverviewPanel.jsx",
+      "community": 184,
+      "community_name": "ConversationList.jsx",
       "norm_label": "congratsstyles()"
     },
     {
@@ -13903,8 +13903,8 @@
       "source_location": "L34",
       "_origin": "ast",
       "id": "src_components_tv_tvcongratsscreen_placementbadge",
-      "community": 91,
-      "community_name": "OverviewPanel.jsx",
+      "community": 184,
+      "community_name": "ConversationList.jsx",
       "norm_label": "placementbadge()"
     },
     {
@@ -13914,8 +13914,8 @@
       "source_location": "L50",
       "_origin": "ast",
       "id": "src_components_tv_tvcongratsscreen_trophyrow",
-      "community": 91,
-      "community_name": "OverviewPanel.jsx",
+      "community": 184,
+      "community_name": "ConversationList.jsx",
       "norm_label": "trophyrow()"
     },
     {
@@ -13925,8 +13925,8 @@
       "source_location": "L79",
       "_origin": "ast",
       "id": "src_components_tv_tvcongratsscreen_tvcongratsscreen",
-      "community": 91,
-      "community_name": "OverviewPanel.jsx",
+      "community": 184,
+      "community_name": "ConversationList.jsx",
       "norm_label": "tvcongratsscreen()"
     },
     {
@@ -14178,8 +14178,8 @@
       "source_location": "L68",
       "_origin": "ast",
       "id": "src_components_tv_tvphotocarousel_tvphotocarousel",
-      "community": 332,
-      "community_name": "exifr",
+      "community": 257,
+      "community_name": "emailRender.js",
       "norm_label": "tvphotocarousel()"
     },
     {
@@ -14244,8 +14244,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "src_components_tv_tvraftingscreen",
-      "community": 43,
-      "community_name": "Rifle.jsx",
+      "community": 257,
+      "community_name": "emailRender.js",
       "norm_label": "tvraftingscreen.jsx"
     },
     {
@@ -14255,8 +14255,8 @@
       "source_location": "L16",
       "_origin": "ast",
       "id": "src_components_tv_tvraftingscreen_raftingstyles",
-      "community": 43,
-      "community_name": "Rifle.jsx",
+      "community": 257,
+      "community_name": "emailRender.js",
       "norm_label": "raftingstyles()"
     },
     {
@@ -14288,8 +14288,8 @@
       "source_location": "L10",
       "_origin": "ast",
       "id": "src_components_tv_tvrangeclock_tvrangeclock",
-      "community": 92,
-      "community_name": "MonthGridCalendar.jsx",
+      "community": 267,
+      "community_name": "RecallGame",
       "norm_label": "tvrangeclock()"
     },
     {
@@ -14299,8 +14299,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "src_components_tv_tvrangekiosk",
-      "community": 92,
-      "community_name": "MonthGridCalendar.jsx",
+      "community": 267,
+      "community_name": "RecallGame",
       "norm_label": "tvrangekiosk.jsx"
     },
     {
@@ -14310,8 +14310,8 @@
       "source_location": "L27",
       "_origin": "ast",
       "id": "src_components_tv_tvrangekiosk_raider_congrats_slides",
-      "community": 92,
-      "community_name": "MonthGridCalendar.jsx",
+      "community": 267,
+      "community_name": "RecallGame",
       "norm_label": "raider_congrats_slides"
     },
     {
@@ -14420,8 +14420,8 @@
       "source_location": "L35",
       "_origin": "ast",
       "id": "src_components_tv_tvstandardlayout_tvstandardlayout",
-      "community": 332,
-      "community_name": "exifr",
+      "community": 83,
+      "community_name": "RaiderPolls.jsx",
       "norm_label": "tvstandardlayout()"
     },
     {
@@ -14629,8 +14629,8 @@
       "source_location": "L4",
       "_origin": "ast",
       "id": "src_components_tv_control_center_stepfeaturedteams_stepfeaturedteams",
-      "community": 43,
-      "community_name": "Rifle.jsx",
+      "community": 304,
+      "community_name": "TEAMS",
       "norm_label": "stepfeaturedteams()"
     },
     {
@@ -14673,8 +14673,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "src_components_tv_control_center_steprangenotices",
-      "community": 10,
-      "community_name": "emailRender.js",
+      "community": 264,
+      "community_name": "RaiderPolls.jsx",
       "norm_label": "steprangenotices.jsx"
     },
     {
@@ -14684,8 +14684,8 @@
       "source_location": "L11",
       "_origin": "ast",
       "id": "src_components_tv_control_center_steprangenotices_fieldbasestyle",
-      "community": 10,
-      "community_name": "emailRender.js",
+      "community": 264,
+      "community_name": "RaiderPolls.jsx",
       "norm_label": "fieldbasestyle"
     },
     {
@@ -14695,8 +14695,8 @@
       "source_location": "L17",
       "_origin": "ast",
       "id": "src_components_tv_control_center_steprangenotices_newentryform",
-      "community": 10,
-      "community_name": "emailRender.js",
+      "community": 3,
+      "community_name": "PhotoUploader.jsx",
       "norm_label": "newentryform()"
     },
     {
@@ -14706,8 +14706,8 @@
       "source_location": "L78",
       "_origin": "ast",
       "id": "src_components_tv_control_center_steprangenotices_existingentry",
-      "community": 10,
-      "community_name": "emailRender.js",
+      "community": 3,
+      "community_name": "PhotoUploader.jsx",
       "norm_label": "existingentry()"
     },
     {
@@ -14717,8 +14717,8 @@
       "source_location": "L173",
       "_origin": "ast",
       "id": "src_components_tv_control_center_steprangenotices_steprangenotices",
-      "community": 10,
-      "community_name": "emailRender.js",
+      "community": 3,
+      "community_name": "PhotoUploader.jsx",
       "norm_label": "steprangenotices()"
     },
     {
@@ -14959,8 +14959,8 @@
       "source_location": "L131",
       "_origin": "ast",
       "id": "src_components_tv_control_center_steprangeslideshow_announcementsingleeditor",
-      "community": 10,
-      "community_name": "emailRender.js",
+      "community": 3,
+      "community_name": "PhotoUploader.jsx",
       "norm_label": "announcementsingleeditor()"
     },
     {
@@ -15003,8 +15003,8 @@
       "source_location": "L16",
       "_origin": "ast",
       "id": "src_components_tv_control_center_stepshoutout_stepshoutout",
-      "community": 43,
-      "community_name": "Rifle.jsx",
+      "community": 304,
+      "community_name": "TEAMS",
       "norm_label": "stepshoutout()"
     },
     {
@@ -15058,8 +15058,8 @@
       "source_location": "L54",
       "_origin": "ast",
       "id": "src_components_tv_control_center_stepwidgetmode_stepwidgetmode",
-      "community": 43,
-      "community_name": "Rifle.jsx",
+      "community": 304,
+      "community_name": "TEAMS",
       "norm_label": "stepwidgetmode()"
     },
     {
@@ -15300,8 +15300,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "src_components_tv_range_tvrangerotationlayout",
-      "community": 92,
-      "community_name": "MonthGridCalendar.jsx",
+      "community": 3,
+      "community_name": "PhotoUploader.jsx",
       "norm_label": "tvrangerotationlayout.jsx"
     },
     {
@@ -15311,8 +15311,8 @@
       "source_location": "L15",
       "_origin": "ast",
       "id": "src_components_tv_range_tvrangerotationlayout_tvrangerotationlayout",
-      "community": 92,
-      "community_name": "MonthGridCalendar.jsx",
+      "community": 3,
+      "community_name": "PhotoUploader.jsx",
       "norm_label": "tvrangerotationlayout()"
     },
     {
@@ -15344,8 +15344,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "src_components_tv_range_tvrangeslideshowscreen",
-      "community": 83,
-      "community_name": "RaiderPolls.jsx",
+      "community": 3,
+      "community_name": "PhotoUploader.jsx",
       "norm_label": "tvrangeslideshowscreen.jsx"
     },
     {
@@ -15355,8 +15355,8 @@
       "source_location": "L15",
       "_origin": "ast",
       "id": "src_components_tv_range_tvrangeslideshowscreen_slide_components",
-      "community": 83,
-      "community_name": "RaiderPolls.jsx",
+      "community": 3,
+      "community_name": "PhotoUploader.jsx",
       "norm_label": "slide_components"
     },
     {
@@ -15366,8 +15366,8 @@
       "source_location": "L53",
       "_origin": "ast",
       "id": "src_components_tv_range_tvrangeslideshowscreen_tvrangeslideshowscreen",
-      "community": 92,
-      "community_name": "MonthGridCalendar.jsx",
+      "community": 3,
+      "community_name": "PhotoUploader.jsx",
       "norm_label": "tvrangeslideshowscreen()"
     },
     {
@@ -15377,8 +15377,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "src_components_tv_range_tvrangestaffschedulescreen",
-      "community": 43,
-      "community_name": "Rifle.jsx",
+      "community": 267,
+      "community_name": "RecallGame",
       "norm_label": "tvrangestaffschedulescreen.jsx"
     },
     {
@@ -15388,8 +15388,8 @@
       "source_location": "L9",
       "_origin": "ast",
       "id": "src_components_tv_range_tvrangestaffschedulescreen_tvrangestaffschedulescreen",
-      "community": 92,
-      "community_name": "MonthGridCalendar.jsx",
+      "community": 267,
+      "community_name": "RecallGame",
       "norm_label": "tvrangestaffschedulescreen()"
     },
     {
@@ -15421,8 +15421,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "src_components_tv_range_rangegrid_richtextfield",
-      "community": 77,
-      "community_name": "PeoplePanel.jsx",
+      "community": 3,
+      "community_name": "PhotoUploader.jsx",
       "norm_label": "richtextfield.jsx"
     },
     {
@@ -15432,8 +15432,8 @@
       "source_location": "L6",
       "_origin": "ast",
       "id": "src_components_tv_range_rangegrid_richtextfield_swatches",
-      "community": 77,
-      "community_name": "PeoplePanel.jsx",
+      "community": 3,
+      "community_name": "PhotoUploader.jsx",
       "norm_label": "swatches"
     },
     {
@@ -15443,8 +15443,8 @@
       "source_location": "L16",
       "_origin": "ast",
       "id": "src_components_tv_range_rangegrid_richtextfield_sizes",
-      "community": 77,
-      "community_name": "PeoplePanel.jsx",
+      "community": 3,
+      "community_name": "PhotoUploader.jsx",
       "norm_label": "sizes"
     },
     {
@@ -15454,8 +15454,8 @@
       "source_location": "L26",
       "_origin": "ast",
       "id": "src_components_tv_range_rangegrid_richtextfield_builddom",
-      "community": 77,
-      "community_name": "PeoplePanel.jsx",
+      "community": 3,
+      "community_name": "PhotoUploader.jsx",
       "norm_label": "builddom()"
     },
     {
@@ -15465,8 +15465,8 @@
       "source_location": "L45",
       "_origin": "ast",
       "id": "src_components_tv_range_rangegrid_richtextfield_toolbarbtn",
-      "community": 77,
-      "community_name": "PeoplePanel.jsx",
+      "community": 3,
+      "community_name": "PhotoUploader.jsx",
       "norm_label": "toolbarbtn()"
     },
     {
@@ -15476,8 +15476,8 @@
       "source_location": "L61",
       "_origin": "ast",
       "id": "src_components_tv_range_rangegrid_richtextfield_placeholderstyle",
-      "community": 77,
-      "community_name": "PeoplePanel.jsx",
+      "community": 3,
+      "community_name": "PhotoUploader.jsx",
       "norm_label": "placeholderstyle()"
     },
     {
@@ -15487,8 +15487,8 @@
       "source_location": "L80",
       "_origin": "ast",
       "id": "src_components_tv_range_rangegrid_richtextfield_richtextfield",
-      "community": 77,
-      "community_name": "PeoplePanel.jsx",
+      "community": 3,
+      "community_name": "PhotoUploader.jsx",
       "norm_label": "richtextfield()"
     },
     {
@@ -15520,8 +15520,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "src_components_tv_range_rangegrid_richtext",
-      "community": 77,
-      "community_name": "PeoplePanel.jsx",
+      "community": 3,
+      "community_name": "PhotoUploader.jsx",
       "norm_label": "richtext.jsx"
     },
     {
@@ -15531,8 +15531,8 @@
       "source_location": "L11",
       "_origin": "ast",
       "id": "src_components_tv_range_rangegrid_richtext_stringtoruns",
-      "community": 77,
-      "community_name": "PeoplePanel.jsx",
+      "community": 3,
+      "community_name": "PhotoUploader.jsx",
       "norm_label": "stringtoruns()"
     },
     {
@@ -15542,8 +15542,8 @@
       "source_location": "L17",
       "_origin": "ast",
       "id": "src_components_tv_range_rangegrid_richtext_runstoplaintext",
-      "community": 10,
-      "community_name": "emailRender.js",
+      "community": 3,
+      "community_name": "PhotoUploader.jsx",
       "norm_label": "runstoplaintext()"
     },
     {
@@ -15553,8 +15553,8 @@
       "source_location": "L23",
       "_origin": "ast",
       "id": "src_components_tv_range_rangegrid_richtext_truncateruns",
-      "community": 77,
-      "community_name": "PeoplePanel.jsx",
+      "community": 3,
+      "community_name": "PhotoUploader.jsx",
       "norm_label": "truncateruns()"
     },
     {
@@ -15564,8 +15564,8 @@
       "source_location": "L44",
       "_origin": "ast",
       "id": "src_components_tv_range_rangegrid_richtext_runstostoragestring",
-      "community": 10,
-      "community_name": "emailRender.js",
+      "community": 3,
+      "community_name": "PhotoUploader.jsx",
       "norm_label": "runstostoragestring()"
     },
     {
@@ -15575,8 +15575,8 @@
       "source_location": "L48",
       "_origin": "ast",
       "id": "src_components_tv_range_rangegrid_richtext_storagestringtoruns",
-      "community": 10,
-      "community_name": "emailRender.js",
+      "community": 3,
+      "community_name": "PhotoUploader.jsx",
       "norm_label": "storagestringtoruns()"
     },
     {
@@ -15586,8 +15586,8 @@
       "source_location": "L58",
       "_origin": "ast",
       "id": "src_components_tv_range_rangegrid_richtext_sameformat",
-      "community": 77,
-      "community_name": "PeoplePanel.jsx",
+      "community": 3,
+      "community_name": "PhotoUploader.jsx",
       "norm_label": "sameformat()"
     },
     {
@@ -15597,8 +15597,8 @@
       "source_location": "L63",
       "_origin": "ast",
       "id": "src_components_tv_range_rangegrid_richtext_mergeruns",
-      "community": 77,
-      "community_name": "PeoplePanel.jsx",
+      "community": 3,
+      "community_name": "PhotoUploader.jsx",
       "norm_label": "mergeruns()"
     },
     {
@@ -15608,8 +15608,8 @@
       "source_location": "L76",
       "_origin": "ast",
       "id": "src_components_tv_range_rangegrid_richtext_walk",
-      "community": 77,
-      "community_name": "PeoplePanel.jsx",
+      "community": 3,
+      "community_name": "PhotoUploader.jsx",
       "norm_label": "walk()"
     },
     {
@@ -15619,8 +15619,8 @@
       "source_location": "L98",
       "_origin": "ast",
       "id": "src_components_tv_range_rangegrid_richtext_domtoruns",
-      "community": 77,
-      "community_name": "PeoplePanel.jsx",
+      "community": 3,
+      "community_name": "PhotoUploader.jsx",
       "norm_label": "domtoruns()"
     },
     {
@@ -15630,8 +15630,8 @@
       "source_location": "L104",
       "_origin": "ast",
       "id": "src_components_tv_range_rangegrid_richtext_renderruns",
-      "community": 77,
-      "community_name": "PeoplePanel.jsx",
+      "community": 3,
+      "community_name": "PhotoUploader.jsx",
       "norm_label": "renderruns()"
     },
     {
@@ -15652,8 +15652,8 @@
       "source_location": "L11",
       "_origin": "ast",
       "id": "src_components_tv_range_slides_slideannouncementsingle_slideannouncementsingle",
-      "community": 10,
-      "community_name": "emailRender.js",
+      "community": 3,
+      "community_name": "PhotoUploader.jsx",
       "norm_label": "slideannouncementsingle()"
     },
     {
@@ -15663,8 +15663,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "src_components_tv_range_slides_slideannouncements",
-      "community": 83,
-      "community_name": "RaiderPolls.jsx",
+      "community": 3,
+      "community_name": "PhotoUploader.jsx",
       "norm_label": "slideannouncements.jsx"
     },
     {
@@ -15674,8 +15674,8 @@
       "source_location": "L8",
       "_origin": "ast",
       "id": "src_components_tv_range_slides_slideannouncements_slideannouncements",
-      "community": 83,
-      "community_name": "RaiderPolls.jsx",
+      "community": 3,
+      "community_name": "PhotoUploader.jsx",
       "norm_label": "slideannouncements()"
     },
     {
@@ -15696,8 +15696,8 @@
       "source_location": "L17",
       "_origin": "ast",
       "id": "src_components_tv_range_slides_slideeventspotlight_formateventdate",
-      "community": 83,
-      "community_name": "RaiderPolls.jsx",
+      "community": 3,
+      "community_name": "PhotoUploader.jsx",
       "norm_label": "formateventdate()"
     },
     {
@@ -15707,8 +15707,8 @@
       "source_location": "L29",
       "_origin": "ast",
       "id": "src_components_tv_range_slides_slideeventspotlight_slideeventspotlight",
-      "community": 83,
-      "community_name": "RaiderPolls.jsx",
+      "community": 3,
+      "community_name": "PhotoUploader.jsx",
       "norm_label": "slideeventspotlight()"
     },
     {
@@ -15718,8 +15718,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "src_components_tv_range_slides_slideneverforget",
-      "community": 83,
-      "community_name": "RaiderPolls.jsx",
+      "community": 3,
+      "community_name": "PhotoUploader.jsx",
       "norm_label": "slideneverforget.jsx"
     },
     {
@@ -15729,8 +15729,8 @@
       "source_location": "L8",
       "_origin": "ast",
       "id": "src_components_tv_range_slides_slideneverforget_slideneverforget",
-      "community": 83,
-      "community_name": "RaiderPolls.jsx",
+      "community": 3,
+      "community_name": "PhotoUploader.jsx",
       "norm_label": "slideneverforget()"
     },
     {
@@ -15740,8 +15740,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "src_components_tv_range_slides_slidenoticelist",
-      "community": 43,
-      "community_name": "Rifle.jsx",
+      "community": 3,
+      "community_name": "PhotoUploader.jsx",
       "norm_label": "slidenoticelist.jsx"
     },
     {
@@ -15751,8 +15751,8 @@
       "source_location": "L5",
       "_origin": "ast",
       "id": "src_components_tv_range_slides_slidenoticelist_noticerow",
-      "community": 10,
-      "community_name": "emailRender.js",
+      "community": 3,
+      "community_name": "PhotoUploader.jsx",
       "norm_label": "noticerow()"
     },
     {
@@ -15762,8 +15762,8 @@
       "source_location": "L33",
       "_origin": "ast",
       "id": "src_components_tv_range_slides_slidenoticelist_slidenoticelist",
-      "community": 83,
-      "community_name": "RaiderPolls.jsx",
+      "community": 3,
+      "community_name": "PhotoUploader.jsx",
       "norm_label": "slidenoticelist()"
     },
     {
@@ -15795,8 +15795,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "src_components_tv_range_slides_slidephotoofday",
-      "community": 332,
-      "community_name": "exifr",
+      "community": 83,
+      "community_name": "RaiderPolls.jsx",
       "norm_label": "slidephotoofday.jsx"
     },
     {
@@ -15806,8 +15806,8 @@
       "source_location": "L9",
       "_origin": "ast",
       "id": "src_components_tv_range_slides_slidephotoofday_slidephotoofday",
-      "community": 332,
-      "community_name": "exifr",
+      "community": 83,
+      "community_name": "RaiderPolls.jsx",
       "norm_label": "slidephotoofday()"
     },
     {
@@ -15817,8 +15817,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "src_components_tv_range_slides_slideraidercongrats",
-      "community": 91,
-      "community_name": "OverviewPanel.jsx",
+      "community": 184,
+      "community_name": "ConversationList.jsx",
       "norm_label": "slideraidercongrats.jsx"
     },
     {
@@ -15828,8 +15828,8 @@
       "source_location": "L10",
       "_origin": "ast",
       "id": "src_components_tv_range_slides_slideraidercongrats_slideraidercongrats",
-      "community": 91,
-      "community_name": "OverviewPanel.jsx",
+      "community": 184,
+      "community_name": "ConversationList.jsx",
       "norm_label": "slideraidercongrats()"
     },
     {
@@ -15850,8 +15850,8 @@
       "source_location": "L10",
       "_origin": "ast",
       "id": "src_components_tv_range_slides_slideraiderpractice_slideraiderpractice",
-      "community": 83,
-      "community_name": "RaiderPolls.jsx",
+      "community": 43,
+      "community_name": "Rifle.jsx",
       "norm_label": "slideraiderpractice()"
     },
     {
@@ -15861,8 +15861,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "src_components_tv_range_slides_slidestaffnotes",
-      "community": 83,
-      "community_name": "RaiderPolls.jsx",
+      "community": 3,
+      "community_name": "PhotoUploader.jsx",
       "norm_label": "slidestaffnotes.jsx"
     },
     {
@@ -15872,8 +15872,8 @@
       "source_location": "L6",
       "_origin": "ast",
       "id": "src_components_tv_range_slides_slidestaffnotes_slidestaffnotes",
-      "community": 83,
-      "community_name": "RaiderPolls.jsx",
+      "community": 3,
+      "community_name": "PhotoUploader.jsx",
       "norm_label": "slidestaffnotes()"
     },
     {
@@ -16158,8 +16158,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "src_data_tvremotechangelog",
-      "community": 4,
-      "community_name": "ui.jsx",
+      "community": 304,
+      "community_name": "TEAMS",
       "norm_label": "tvremotechangelog.js"
     },
     {
@@ -16169,8 +16169,8 @@
       "source_location": "L21",
       "_origin": "ast",
       "id": "src_data_tvremotechangelog_tv_remote_changelog",
-      "community": 4,
-      "community_name": "ui.jsx",
+      "community": 304,
+      "community_name": "TEAMS",
       "norm_label": "tv_remote_changelog"
     },
     {
@@ -16180,8 +16180,8 @@
       "source_location": "L37",
       "_origin": "ast",
       "id": "src_data_tvremotechangelog_tv_remote_latest_version",
-      "community": 4,
-      "community_name": "ui.jsx",
+      "community": 304,
+      "community_name": "TEAMS",
       "norm_label": "tv_remote_latest_version"
     },
     {
@@ -16191,8 +16191,8 @@
       "source_location": "L44",
       "_origin": "ast",
       "id": "src_data_tvremotechangelog_changelogsince",
-      "community": 43,
-      "community_name": "Rifle.jsx",
+      "community": 304,
+      "community_name": "TEAMS",
       "norm_label": "changelogsince()"
     },
     {
@@ -16367,8 +16367,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "src_hooks_useopticconfig",
-      "community": 4,
-      "community_name": "ui.jsx",
+      "community": 252,
+      "community_name": "TvRangeKiosk.jsx",
       "norm_label": "useopticconfig.js"
     },
     {
@@ -16378,8 +16378,8 @@
       "source_location": "L16",
       "_origin": "ast",
       "id": "src_hooks_useopticconfig_useopticconfig",
-      "community": 232,
-      "community_name": "RaiderCarousel.jsx",
+      "community": 252,
+      "community_name": "TvRangeKiosk.jsx",
       "norm_label": "useopticconfig()"
     },
     {
@@ -16444,59 +16444,37 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "src_hooks_useopticphotos",
-      "community": 91,
-      "community_name": "OverviewPanel.jsx",
+      "community": 232,
+      "community_name": "RaiderCarousel.jsx",
       "norm_label": "useopticphotos.js"
     },
     {
       "label": "capturedAt()",
       "file_type": "code",
       "source_file": "src/hooks/useOpticPhotos.js",
-      "source_location": "L9",
+      "source_location": "L8",
       "_origin": "ast",
       "id": "src_hooks_useopticphotos_capturedat",
-      "community": 91,
-      "community_name": "OverviewPanel.jsx",
+      "community": 232,
+      "community_name": "RaiderCarousel.jsx",
       "norm_label": "capturedat()"
-    },
-    {
-      "label": "sortNewestFirst()",
-      "file_type": "code",
-      "source_file": "src/hooks/useOpticPhotos.js",
-      "source_location": "L10",
-      "_origin": "ast",
-      "id": "src_hooks_useopticphotos_sortnewestfirst",
-      "community": 91,
-      "community_name": "OverviewPanel.jsx",
-      "norm_label": "sortnewestfirst()"
-    },
-    {
-      "label": "isAtTop()",
-      "file_type": "code",
-      "source_file": "src/hooks/useOpticPhotos.js",
-      "source_location": "L11",
-      "_origin": "ast",
-      "id": "src_hooks_useopticphotos_isattop",
-      "community": 91,
-      "community_name": "OverviewPanel.jsx",
-      "norm_label": "isattop()"
     },
     {
       "label": "useOpticPhotos()",
       "file_type": "code",
       "source_file": "src/hooks/useOpticPhotos.js",
-      "source_location": "L48",
+      "source_location": "L32",
       "_origin": "ast",
       "id": "src_hooks_useopticphotos_useopticphotos",
-      "community": 91,
-      "community_name": "OverviewPanel.jsx",
+      "community": 232,
+      "community_name": "RaiderCarousel.jsx",
       "norm_label": "useopticphotos()"
     },
     {
       "label": "useOpticSubEvents()",
       "file_type": "code",
       "source_file": "src/hooks/useOpticPhotos.js",
-      "source_location": "L152",
+      "source_location": "L87",
       "_origin": "ast",
       "id": "src_hooks_useopticphotos_useopticsubevents",
       "community": 232,
@@ -16510,8 +16488,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "src_hooks_usepaginatedphotos",
-      "community": 326,
-      "community_name": "slideRegistry.js",
+      "community": 9,
+      "community_name": "App.jsx",
       "norm_label": "usepaginatedphotos.js"
     },
     {
@@ -16521,8 +16499,8 @@
       "source_location": "L19",
       "_origin": "ast",
       "id": "src_hooks_usepaginatedphotos_ispublicrow",
-      "community": 326,
-      "community_name": "slideRegistry.js",
+      "community": 9,
+      "community_name": "App.jsx",
       "norm_label": "ispublicrow()"
     },
     {
@@ -16532,8 +16510,8 @@
       "source_location": "L21",
       "_origin": "ast",
       "id": "src_hooks_usepaginatedphotos_usepaginatedphotos",
-      "community": 326,
-      "community_name": "slideRegistry.js",
+      "community": 9,
+      "community_name": "App.jsx",
       "norm_label": "usepaginatedphotos()"
     },
     {
@@ -16543,8 +16521,8 @@
       "source_location": "L71",
       "_origin": "ast",
       "id": "src_hooks_usepaginatedphotos_useinfinitescrollsentinel",
-      "community": 326,
-      "community_name": "slideRegistry.js",
+      "community": 9,
+      "community_name": "App.jsx",
       "norm_label": "useinfinitescrollsentinel()"
     },
     {
@@ -16554,8 +16532,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "src_hooks_useraftingphotos",
-      "community": 4,
-      "community_name": "ui.jsx",
+      "community": 257,
+      "community_name": "emailRender.js",
       "norm_label": "useraftingphotos.js"
     },
     {
@@ -16576,8 +16554,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "src_hooks_useraidertvstate",
-      "community": 44,
-      "community_name": "imageResize.js",
+      "community": 4,
+      "community_name": "ui.jsx",
       "norm_label": "useraidertvstate.js"
     },
     {
@@ -16598,8 +16576,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "src_hooks_useraidervideos",
-      "community": 44,
-      "community_name": "imageResize.js",
+      "community": 4,
+      "community_name": "ui.jsx",
       "norm_label": "useraidervideos.js"
     },
     {
@@ -16642,8 +16620,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "src_hooks_usetvcarouselphotos",
-      "community": 332,
-      "community_name": "exifr",
+      "community": 83,
+      "community_name": "RaiderPolls.jsx",
       "norm_label": "usetvcarouselphotos.js"
     },
     {
@@ -16653,8 +16631,8 @@
       "source_location": "L24",
       "_origin": "ast",
       "id": "src_hooks_usetvcarouselphotos_usetvcarouselphotos",
-      "community": 332,
-      "community_name": "exifr",
+      "community": 83,
+      "community_name": "RaiderPolls.jsx",
       "norm_label": "usetvcarouselphotos()"
     },
     {
@@ -16686,8 +16664,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "src_hooks_usetvdailysettings",
-      "community": 264,
-      "community_name": "RaiderPolls.jsx",
+      "community": 304,
+      "community_name": "TEAMS",
       "norm_label": "usetvdailysettings.js"
     },
     {
@@ -16708,8 +16686,8 @@
       "source_location": "L69",
       "_origin": "ast",
       "id": "src_hooks_usetvdailysettings_updatetvdailysettings",
-      "community": 264,
-      "community_name": "RaiderPolls.jsx",
+      "community": 304,
+      "community_name": "TEAMS",
       "norm_label": "updatetvdailysettings()"
     },
     {
@@ -16785,8 +16763,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "src_hooks_usetvnotices",
-      "community": 92,
-      "community_name": "MonthGridCalendar.jsx",
+      "community": 3,
+      "community_name": "PhotoUploader.jsx",
       "norm_label": "usetvnotices.js"
     },
     {
@@ -16796,8 +16774,8 @@
       "source_location": "L12",
       "_origin": "ast",
       "id": "src_hooks_usetvnotices_usetvnotices",
-      "community": 92,
-      "community_name": "MonthGridCalendar.jsx",
+      "community": 3,
+      "community_name": "PhotoUploader.jsx",
       "norm_label": "usetvnotices()"
     },
     {
@@ -16840,8 +16818,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "src_hooks_usetvremoteonboarding",
-      "community": 4,
-      "community_name": "ui.jsx",
+      "community": 304,
+      "community_name": "TEAMS",
       "norm_label": "usetvremoteonboarding.js"
     },
     {
@@ -16851,8 +16829,8 @@
       "source_location": "L21",
       "_origin": "ast",
       "id": "src_hooks_usetvremoteonboarding_usetvremoteonboarding",
-      "community": 4,
-      "community_name": "ui.jsx",
+      "community": 304,
+      "community_name": "TEAMS",
       "norm_label": "usetvremoteonboarding()"
     },
     {
@@ -17302,8 +17280,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "src_lib_ballsignuppopupseen",
-      "community": 91,
-      "community_name": "OverviewPanel.jsx",
+      "community": 273,
+      "community_name": "RaiderParentWelcome.jsx",
       "norm_label": "ballsignuppopupseen.js"
     },
     {
@@ -17313,8 +17291,8 @@
       "source_location": "L8",
       "_origin": "ast",
       "id": "src_lib_ballsignuppopupseen_hasseenballsignuppopup",
-      "community": 91,
-      "community_name": "OverviewPanel.jsx",
+      "community": 273,
+      "community_name": "RaiderParentWelcome.jsx",
       "norm_label": "hasseenballsignuppopup()"
     },
     {
@@ -17324,8 +17302,8 @@
       "source_location": "L16",
       "_origin": "ast",
       "id": "src_lib_ballsignuppopupseen_markballsignuppopupseen",
-      "community": 91,
-      "community_name": "OverviewPanel.jsx",
+      "community": 273,
+      "community_name": "RaiderParentWelcome.jsx",
       "norm_label": "markballsignuppopupseen()"
     },
     {
@@ -17335,8 +17313,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "src_lib_bellschedules",
-      "community": 267,
-      "community_name": "RecallGame",
+      "community": 295,
+      "community_name": "TvStandardLayout.jsx",
       "norm_label": "bellschedules.js"
     },
     {
@@ -17346,8 +17324,8 @@
       "source_location": "L9",
       "_origin": "ast",
       "id": "src_lib_bellschedules_bell_schedules",
-      "community": 298,
-      "community_name": "RheaOnboarding.jsx",
+      "community": 295,
+      "community_name": "TvStandardLayout.jsx",
       "norm_label": "bell_schedules"
     },
     {
@@ -17357,8 +17335,8 @@
       "source_location": "L55",
       "_origin": "ast",
       "id": "src_lib_bellschedules_weekday_schedule",
-      "community": 267,
-      "community_name": "RecallGame",
+      "community": 295,
+      "community_name": "TvStandardLayout.jsx",
       "norm_label": "weekday_schedule"
     },
     {
@@ -17522,8 +17500,8 @@
       "source_location": "L21",
       "_origin": "ast",
       "id": "src_lib_calendar_categorycolor",
-      "community": 9,
-      "community_name": "App.jsx",
+      "community": 272,
+      "community_name": "Messages.jsx",
       "norm_label": "categorycolor()"
     },
     {
@@ -17566,8 +17544,8 @@
       "source_location": "L44",
       "_origin": "ast",
       "id": "src_lib_calendar_formateventtimerange",
-      "community": 72,
-      "community_name": "ui.jsx",
+      "community": 276,
+      "community_name": "StepRangeSchedule.jsx",
       "norm_label": "formateventtimerange()"
     },
     {
@@ -17599,8 +17577,8 @@
       "source_location": "L62",
       "_origin": "ast",
       "id": "src_lib_calendar_months",
-      "community": 9,
-      "community_name": "App.jsx",
+      "community": 241,
+      "community_name": "TvCongratsScreen.jsx",
       "norm_label": "months"
     },
     {
@@ -17852,8 +17830,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "src_lib_congratsseen",
-      "community": 91,
-      "community_name": "OverviewPanel.jsx",
+      "community": 273,
+      "community_name": "RaiderParentWelcome.jsx",
       "norm_label": "congratsseen.js"
     },
     {
@@ -17863,8 +17841,8 @@
       "source_location": "L7",
       "_origin": "ast",
       "id": "src_lib_congratsseen_hasseencongrats",
-      "community": 91,
-      "community_name": "OverviewPanel.jsx",
+      "community": 273,
+      "community_name": "RaiderParentWelcome.jsx",
       "norm_label": "hasseencongrats()"
     },
     {
@@ -17874,8 +17852,8 @@
       "source_location": "L15",
       "_origin": "ast",
       "id": "src_lib_congratsseen_markcongratsseen",
-      "community": 91,
-      "community_name": "OverviewPanel.jsx",
+      "community": 184,
+      "community_name": "ConversationList.jsx",
       "norm_label": "markcongratsseen()"
     },
     {
@@ -17951,8 +17929,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "src_lib_creedleaderboard",
-      "community": 264,
-      "community_name": "RaiderPolls.jsx",
+      "community": 24,
+      "community_name": "FaqSection.jsx",
       "norm_label": "creedleaderboard.js"
     },
     {
@@ -17962,8 +17940,8 @@
       "source_location": "L8",
       "_origin": "ast",
       "id": "src_lib_creedleaderboard_companies",
-      "community": 264,
-      "community_name": "RaiderPolls.jsx",
+      "community": 24,
+      "community_name": "FaqSection.jsx",
       "norm_label": "companies"
     },
     {
@@ -17973,8 +17951,8 @@
       "source_location": "L19",
       "_origin": "ast",
       "id": "src_lib_creedleaderboard_verifycreedeligibility",
-      "community": 264,
-      "community_name": "RaiderPolls.jsx",
+      "community": 24,
+      "community_name": "FaqSection.jsx",
       "norm_label": "verifycreedeligibility()"
     },
     {
@@ -17984,8 +17962,8 @@
       "source_location": "L34",
       "_origin": "ast",
       "id": "src_lib_creedleaderboard_submitleaderboardentry",
-      "community": 264,
-      "community_name": "RaiderPolls.jsx",
+      "community": 24,
+      "community_name": "FaqSection.jsx",
       "norm_label": "submitleaderboardentry()"
     },
     {
@@ -18336,8 +18314,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "src_lib_imageresize",
-      "community": 200,
-      "community_name": "@dnd-kit/core",
+      "community": 270,
+      "community_name": "tvRangeSchedule.js",
       "norm_label": "imageresize.js"
     },
     {
@@ -18347,8 +18325,8 @@
       "source_location": "L13",
       "_origin": "ast",
       "id": "src_lib_imageresize_raw_extensions",
-      "community": 200,
-      "community_name": "@dnd-kit/core",
+      "community": 270,
+      "community_name": "tvRangeSchedule.js",
       "norm_label": "raw_extensions"
     },
     {
@@ -18358,8 +18336,8 @@
       "source_location": "L15",
       "_origin": "ast",
       "id": "src_lib_imageresize_israwfile",
-      "community": 200,
-      "community_name": "@dnd-kit/core",
+      "community": 270,
+      "community_name": "tvRangeSchedule.js",
       "norm_label": "israwfile()"
     },
     {
@@ -18369,8 +18347,8 @@
       "source_location": "L20",
       "_origin": "ast",
       "id": "src_lib_imageresize_loadimage",
-      "community": 200,
-      "community_name": "@dnd-kit/core",
+      "community": 270,
+      "community_name": "tvRangeSchedule.js",
       "norm_label": "loadimage()"
     },
     {
@@ -18380,8 +18358,8 @@
       "source_location": "L36",
       "_origin": "ast",
       "id": "src_lib_imageresize_drawscaled",
-      "community": 200,
-      "community_name": "@dnd-kit/core",
+      "community": 270,
+      "community_name": "tvRangeSchedule.js",
       "norm_label": "drawscaled()"
     },
     {
@@ -18391,8 +18369,8 @@
       "source_location": "L49",
       "_origin": "ast",
       "id": "src_lib_imageresize_toblob",
-      "community": 200,
-      "community_name": "@dnd-kit/core",
+      "community": 270,
+      "community_name": "tvRangeSchedule.js",
       "norm_label": "toblob()"
     },
     {
@@ -18402,8 +18380,8 @@
       "source_location": "L59",
       "_origin": "ast",
       "id": "src_lib_imageresize_resizeforupload",
-      "community": 200,
-      "community_name": "@dnd-kit/core",
+      "community": 270,
+      "community_name": "tvRangeSchedule.js",
       "norm_label": "resizeforupload()"
     },
     {
@@ -18501,8 +18479,8 @@
       "source_location": "L72",
       "_origin": "ast",
       "id": "src_lib_opticcomp_uploadopticphoto",
-      "community": 294,
-      "community_name": "OpticPromoBand.jsx",
+      "community": 252,
+      "community_name": "TvRangeKiosk.jsx",
       "norm_label": "uploadopticphoto()"
     },
     {
@@ -18556,8 +18534,8 @@
       "source_location": "L145",
       "_origin": "ast",
       "id": "src_lib_opticcomp_haswalkthroughoptic",
-      "community": 254,
-      "community_name": "TvPhotoCarousel.jsx",
+      "community": 20,
+      "community_name": "Companies.jsx",
       "norm_label": "haswalkthroughoptic()"
     },
     {
@@ -18567,8 +18545,8 @@
       "source_location": "L150",
       "_origin": "ast",
       "id": "src_lib_opticcomp_markwalkthroughoptic",
-      "community": 254,
-      "community_name": "TvPhotoCarousel.jsx",
+      "community": 20,
+      "community_name": "Companies.jsx",
       "norm_label": "markwalkthroughoptic()"
     },
     {
@@ -18732,8 +18710,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "src_lib_opticseen",
-      "community": 91,
-      "community_name": "OverviewPanel.jsx",
+      "community": 273,
+      "community_name": "RaiderParentWelcome.jsx",
       "norm_label": "opticseen.js"
     },
     {
@@ -18743,8 +18721,8 @@
       "source_location": "L9",
       "_origin": "ast",
       "id": "src_lib_opticseen_hasseenoptic",
-      "community": 91,
-      "community_name": "OverviewPanel.jsx",
+      "community": 273,
+      "community_name": "RaiderParentWelcome.jsx",
       "norm_label": "hasseenoptic()"
     },
     {
@@ -18754,8 +18732,8 @@
       "source_location": "L17",
       "_origin": "ast",
       "id": "src_lib_opticseen_markopticseen",
-      "community": 91,
-      "community_name": "OverviewPanel.jsx",
+      "community": 273,
+      "community_name": "RaiderParentWelcome.jsx",
       "norm_label": "markopticseen()"
     },
     {
@@ -18897,8 +18875,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "src_lib_posthog",
-      "community": 265,
-      "community_name": "CheckinSurvey.jsx",
+      "community": 283,
+      "community_name": "TvRangeRaiderPracticeWidget.jsx",
       "norm_label": "posthog.js"
     },
     {
@@ -18908,8 +18886,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "src_lib_rafting",
-      "community": 200,
-      "community_name": "@dnd-kit/core",
+      "community": 257,
+      "community_name": "emailRender.js",
       "norm_label": "rafting.js"
     },
     {
@@ -19205,8 +19183,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "src_lib_rifleadminapi",
-      "community": 239,
-      "community_name": "expo-application",
+      "community": 10,
+      "community_name": "emailRender.js",
       "norm_label": "rifleadminapi.js"
     },
     {
@@ -19216,8 +19194,8 @@
       "source_location": "L4",
       "_origin": "ast",
       "id": "src_lib_rifleadminapi_riflesetpin",
-      "community": 239,
-      "community_name": "expo-application",
+      "community": 10,
+      "community_name": "emailRender.js",
       "norm_label": "riflesetpin()"
     },
     {
@@ -19227,8 +19205,8 @@
       "source_location": "L10",
       "_origin": "ast",
       "id": "src_lib_rifleadminapi_rifleclearpin",
-      "community": 239,
-      "community_name": "expo-application",
+      "community": 10,
+      "community_name": "emailRender.js",
       "norm_label": "rifleclearpin()"
     },
     {
@@ -19238,8 +19216,8 @@
       "source_location": "L16",
       "_origin": "ast",
       "id": "src_lib_rifleadminapi_riflecompletefirstlogin",
-      "community": 239,
-      "community_name": "expo-application",
+      "community": 10,
+      "community_name": "emailRender.js",
       "norm_label": "riflecompletefirstlogin()"
     },
     {
@@ -19392,8 +19370,8 @@
       "source_location": "L4",
       "_origin": "ast",
       "id": "src_lib_teams_teams",
-      "community": 11,
-      "community_name": "blocks.js",
+      "community": 200,
+      "community_name": "@dnd-kit/core",
       "norm_label": "teams"
     },
     {
@@ -19436,8 +19414,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "src_lib_tvcarouselaspect",
-      "community": 229,
-      "community_name": "rheaComp.js",
+      "community": 4,
+      "community_name": "ui.jsx",
       "norm_label": "tvcarouselaspect.js"
     },
     {
@@ -19447,8 +19425,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "src_lib_tvcongratsdata",
-      "community": 91,
-      "community_name": "OverviewPanel.jsx",
+      "community": 184,
+      "community_name": "ConversationList.jsx",
       "norm_label": "tvcongratsdata.js"
     },
     {
@@ -19458,8 +19436,8 @@
       "source_location": "L7",
       "_origin": "ast",
       "id": "src_lib_tvcongratsdata_congrats_meet",
-      "community": 91,
-      "community_name": "OverviewPanel.jsx",
+      "community": 184,
+      "community_name": "ConversationList.jsx",
       "norm_label": "congrats_meet"
     },
     {
@@ -19469,8 +19447,8 @@
       "source_location": "L17",
       "_origin": "ast",
       "id": "src_lib_tvcongratsdata_congrats_trophies",
-      "community": 91,
-      "community_name": "OverviewPanel.jsx",
+      "community": 184,
+      "community_name": "ConversationList.jsx",
       "norm_label": "congrats_trophies"
     },
     {
@@ -19480,8 +19458,8 @@
       "source_location": "L24",
       "_origin": "ast",
       "id": "src_lib_tvcongratsdata_congrats_photos",
-      "community": 91,
-      "community_name": "OverviewPanel.jsx",
+      "community": 184,
+      "community_name": "ConversationList.jsx",
       "norm_label": "congrats_photos"
     },
     {
@@ -19524,8 +19502,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "src_lib_tvnotices",
-      "community": 10,
-      "community_name": "emailRender.js",
+      "community": 264,
+      "community_name": "RaiderPolls.jsx",
       "norm_label": "tvnotices.js"
     },
     {
@@ -19535,8 +19513,8 @@
       "source_location": "L12",
       "_origin": "ast",
       "id": "src_lib_tvnotices_createtvnotice",
-      "community": 10,
-      "community_name": "emailRender.js",
+      "community": 264,
+      "community_name": "RaiderPolls.jsx",
       "norm_label": "createtvnotice()"
     },
     {
@@ -19546,8 +19524,8 @@
       "source_location": "L24",
       "_origin": "ast",
       "id": "src_lib_tvnotices_updatetvnotice",
-      "community": 10,
-      "community_name": "emailRender.js",
+      "community": 264,
+      "community_name": "RaiderPolls.jsx",
       "norm_label": "updatetvnotice()"
     },
     {
@@ -19557,8 +19535,8 @@
       "source_location": "L29",
       "_origin": "ast",
       "id": "src_lib_tvnotices_deletetvnotice",
-      "community": 10,
-      "community_name": "emailRender.js",
+      "community": 264,
+      "community_name": "RaiderPolls.jsx",
       "norm_label": "deletetvnotice()"
     },
     {
@@ -19568,8 +19546,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "src_lib_tvphotocaption",
-      "community": 332,
-      "community_name": "exifr",
+      "community": 200,
+      "community_name": "@dnd-kit/core",
       "norm_label": "tvphotocaption.js"
     },
     {
@@ -19579,8 +19557,8 @@
       "source_location": "L6",
       "_origin": "ast",
       "id": "src_lib_tvphotocaption_folder_labels",
-      "community": 332,
-      "community_name": "exifr",
+      "community": 200,
+      "community_name": "@dnd-kit/core",
       "norm_label": "folder_labels"
     },
     {
@@ -19590,8 +19568,8 @@
       "source_location": "L10",
       "_origin": "ast",
       "id": "src_lib_tvphotocaption_folder_order",
-      "community": 332,
-      "community_name": "exifr",
+      "community": 200,
+      "community_name": "@dnd-kit/core",
       "norm_label": "folder_order"
     },
     {
@@ -19601,8 +19579,8 @@
       "source_location": "L15",
       "_origin": "ast",
       "id": "src_lib_tvphotocaption_resolvetvphotocaption",
-      "community": 332,
-      "community_name": "exifr",
+      "community": 200,
+      "community_name": "@dnd-kit/core",
       "norm_label": "resolvetvphotocaption()"
     },
     {
@@ -19612,8 +19590,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "src_lib_tvphotos",
-      "community": 332,
-      "community_name": "exifr",
+      "community": 83,
+      "community_name": "RaiderPolls.jsx",
       "norm_label": "tvphotos.js"
     },
     {
@@ -19623,8 +19601,8 @@
       "source_location": "L4",
       "_origin": "ast",
       "id": "src_lib_tvphotos_tv_photos",
-      "community": 332,
-      "community_name": "exifr",
+      "community": 83,
+      "community_name": "RaiderPolls.jsx",
       "norm_label": "tv_photos"
     },
     {
@@ -19788,8 +19766,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "src_main",
-      "community": 265,
-      "community_name": "CheckinSurvey.jsx",
+      "community": 283,
+      "community_name": "TvRangeRaiderPracticeWidget.jsx",
       "norm_label": "main.jsx"
     },
     {
@@ -20423,7 +20401,7 @@
       "label": "public.ball_guard_version()",
       "file_type": "code",
       "source_file": "supabase/ball_guards.sql",
-      "source_location": "L74",
+      "source_location": "L69",
       "_origin": "ast",
       "id": "supabase_ball_guards_public_ball_guard_version",
       "community": 206,
@@ -20434,7 +20412,7 @@
       "label": "public.is_ball_dress()",
       "file_type": "code",
       "source_file": "supabase/ball_guards.sql",
-      "source_location": "L82",
+      "source_location": "L77",
       "_origin": "ast",
       "id": "supabase_ball_guards_public_is_ball_dress",
       "community": 206,
@@ -20445,7 +20423,7 @@
       "label": "public.is_ball_attire()",
       "file_type": "code",
       "source_file": "supabase/ball_guards.sql",
-      "source_location": "L91",
+      "source_location": "L86",
       "_origin": "ast",
       "id": "supabase_ball_guards_public_is_ball_attire",
       "community": 206,
@@ -20456,7 +20434,7 @@
       "label": "public.ball_signups_column_guard()",
       "file_type": "code",
       "source_file": "supabase/ball_guards.sql",
-      "source_location": "L110",
+      "source_location": "L105",
       "_origin": "ast",
       "id": "supabase_ball_guards_public_ball_signups_column_guard",
       "community": 206,
@@ -20467,7 +20445,7 @@
       "label": "public.ball_guests_column_guard()",
       "file_type": "code",
       "source_file": "supabase/ball_guards.sql",
-      "source_location": "L206",
+      "source_location": "L201",
       "_origin": "ast",
       "id": "supabase_ball_guards_public_ball_guests_column_guard",
       "community": 206,
@@ -20478,7 +20456,7 @@
       "label": "ball_signups_column_guard_trg",
       "file_type": "code",
       "source_file": "supabase/ball_guards.sql",
-      "source_location": "L283",
+      "source_location": "L276",
       "_origin": "ast",
       "id": "supabase_ball_guards_ball_signups_column_guard_trg",
       "community": 206,
@@ -20489,7 +20467,7 @@
       "label": "ball_guests_column_guard_trg",
       "file_type": "code",
       "source_file": "supabase/ball_guards.sql",
-      "source_location": "L288",
+      "source_location": "L281",
       "_origin": "ast",
       "id": "supabase_ball_guards_ball_guests_column_guard_trg",
       "community": 206,
@@ -20527,39 +20505,6 @@
       "id": "supabase_ball_guest_cash_split_public_ball_guests_ops_view",
       "community": 345,
       "community_name": "ball_guest_cash_split.sql",
-      "norm_label": "public.ball_guests_ops_view"
-    },
-    {
-      "label": "ball_guest_form_required_split.sql",
-      "file_type": "code",
-      "source_file": "supabase/ball_guest_form_required_split.sql",
-      "source_location": null,
-      "_origin": "ast",
-      "id": "supabase_ball_guest_form_required_split",
-      "community": 290,
-      "community_name": "Staff.jsx",
-      "norm_label": "ball_guest_form_required_split.sql"
-    },
-    {
-      "label": "public.ball_guests",
-      "file_type": "code",
-      "source_file": "supabase/ball_guest_form_required_split.sql",
-      "source_location": "L32",
-      "_origin": "ast",
-      "id": "supabase_ball_guest_form_required_split_public_ball_guests",
-      "community": 290,
-      "community_name": "Staff.jsx",
-      "norm_label": "public.ball_guests"
-    },
-    {
-      "label": "public.ball_guests_ops_view",
-      "file_type": "code",
-      "source_file": "supabase/ball_guest_form_required_split.sql",
-      "source_location": "L51",
-      "_origin": "ast",
-      "id": "supabase_ball_guest_form_required_split_public_ball_guests_ops_view",
-      "community": 290,
-      "community_name": "Staff.jsx",
       "norm_label": "public.ball_guests_ops_view"
     },
     {
@@ -23536,9 +23481,9 @@
       "label": "NOTE: the jti is burned only after a committed signup row (best-effort), and",
       "file_type": "rationale",
       "source_file": "supabase/functions/ball-submit-signup/index.ts",
-      "source_location": "L625",
+      "source_location": "L620",
       "_origin": "ast",
-      "id": "supabase_functions_ball_submit_signup_index_rationale_625",
+      "id": "supabase_functions_ball_submit_signup_index_rationale_620",
       "community": 14,
       "community_name": "PeoplePanel.jsx",
       "norm_label": "note: the jti is burned only after a committed signup row (best-effort), and"
@@ -23745,7 +23690,7 @@
       "label": "cors",
       "file_type": "code",
       "source_file": "supabase/functions/optic-send-push/index.ts",
-      "source_location": "L31",
+      "source_location": "L19",
       "_origin": "ast",
       "id": "supabase_functions_optic_send_push_index_cors",
       "community": 320,
@@ -23756,7 +23701,7 @@
       "label": "json()",
       "file_type": "code",
       "source_file": "supabase/functions/optic-send-push/index.ts",
-      "source_location": "L36",
+      "source_location": "L24",
       "_origin": "ast",
       "id": "supabase_functions_optic_send_push_index_json",
       "community": 320,
@@ -23767,7 +23712,7 @@
       "label": "preflight()",
       "file_type": "code",
       "source_file": "supabase/functions/optic-send-push/index.ts",
-      "source_location": "L38",
+      "source_location": "L26",
       "_origin": "ast",
       "id": "supabase_functions_optic_send_push_index_preflight",
       "community": 320,
@@ -23778,7 +23723,7 @@
       "label": "serviceClient()",
       "file_type": "code",
       "source_file": "supabase/functions/optic-send-push/index.ts",
-      "source_location": "L40",
+      "source_location": "L28",
       "_origin": "ast",
       "id": "supabase_functions_optic_send_push_index_serviceclient",
       "community": 320,
@@ -23789,7 +23734,7 @@
       "label": "getCaller()",
       "file_type": "code",
       "source_file": "supabase/functions/optic-send-push/index.ts",
-      "source_location": "L51",
+      "source_location": "L39",
       "_origin": "ast",
       "id": "supabase_functions_optic_send_push_index_getcaller",
       "community": 320,
@@ -24130,7 +24075,7 @@
       "label": "fieldTripAttachment()",
       "file_type": "code",
       "source_file": "supabase/functions/send-ball-reminders/index.ts",
-      "source_location": "L56",
+      "source_location": "L55",
       "_origin": "ast",
       "id": "supabase_functions_send_ball_reminders_index_fieldtripattachment",
       "community": 14,
@@ -24141,7 +24086,7 @@
       "label": "Candidate",
       "file_type": "code",
       "source_file": "supabase/functions/send-ball-reminders/index.ts",
-      "source_location": "L89",
+      "source_location": "L88",
       "_origin": "ast",
       "id": "supabase_functions_send_ball_reminders_index_candidate",
       "community": 14,
@@ -24477,39 +24422,6 @@
       "community": 335,
       "community_name": "optic_push.sql",
       "norm_label": "public.push_subscriptions"
-    },
-    {
-      "label": "optic_push_auto.sql",
-      "file_type": "code",
-      "source_file": "supabase/optic_push_auto.sql",
-      "source_location": null,
-      "_origin": "ast",
-      "id": "supabase_optic_push_auto",
-      "community": 312,
-      "community_name": "RaiderCarousel.jsx",
-      "norm_label": "optic_push_auto.sql"
-    },
-    {
-      "label": "public.optic_push_notify_state",
-      "file_type": "code",
-      "source_file": "supabase/optic_push_auto.sql",
-      "source_location": "L34",
-      "_origin": "ast",
-      "id": "supabase_optic_push_auto_public_optic_push_notify_state",
-      "community": 312,
-      "community_name": "RaiderCarousel.jsx",
-      "norm_label": "public.optic_push_notify_state"
-    },
-    {
-      "label": "public.generate_optic_push_alerts()",
-      "file_type": "code",
-      "source_file": "supabase/optic_push_auto.sql",
-      "source_location": "L40",
-      "_origin": "ast",
-      "id": "supabase_optic_push_auto_public_generate_optic_push_alerts",
-      "community": 312,
-      "community_name": "RaiderCarousel.jsx",
-      "norm_label": "public.generate_optic_push_alerts()"
     },
     {
       "label": "optic_spring_hill_events.sql",
@@ -33549,8 +33461,8 @@
       "source_location": "L12",
       "_origin": "ast",
       "id": "src_lib_raidercompgallery_comp_event_id",
-      "community": 12,
-      "community_name": "blocks.js",
+      "community": 72,
+      "community_name": "ui.jsx",
       "norm_label": "comp_event_id"
     },
     {
@@ -33560,8 +33472,8 @@
       "source_location": "L13",
       "_origin": "ast",
       "id": "src_lib_raidercompgallery_comp_event_title",
-      "community": 12,
-      "community_name": "blocks.js",
+      "community": 290,
+      "community_name": "Staff.jsx",
       "norm_label": "comp_event_title"
     }
   ],
@@ -53801,7 +53713,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "src/components/admin/panels/ball/BallOverviewTab.jsx",
-      "source_location": "L117",
+      "source_location": "L115",
       "weight": 1.0,
       "_origin": "ast",
       "source": "src_components_admin_panels_ball_balloverviewtab",
@@ -53823,7 +53735,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "src/components/admin/panels/ball/BallOverviewTab.jsx",
-      "source_location": "L423",
+      "source_location": "L410",
       "weight": 1.0,
       "_origin": "ast",
       "source": "src_components_admin_panels_ball_balloverviewtab",
@@ -53856,7 +53768,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "src/components/admin/panels/ball/BallOverviewTab.jsx",
-      "source_location": "L445",
+      "source_location": "L432",
       "weight": 1.0,
       "_origin": "ast",
       "source": "src_components_admin_panels_ball_balloverviewtab",
@@ -54043,7 +53955,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "src/components/admin/panels/ball/BallOverviewTab.jsx",
-      "source_location": "L383",
+      "source_location": "L370",
       "weight": 1.0,
       "_origin": "ast",
       "source": "src_components_admin_panels_ball_balloverviewtab",
@@ -54076,7 +53988,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "src/components/admin/panels/ball/BallOverviewTab.jsx",
-      "source_location": "L287",
+      "source_location": "L274",
       "weight": 1.0,
       "_origin": "ast",
       "source": "src_components_admin_panels_ball_balloverviewtab",
@@ -54194,7 +54106,7 @@
       "context": "call",
       "confidence": "EXTRACTED",
       "source_file": "src/components/admin/panels/ball/BallOverviewTab.jsx",
-      "source_location": "L313",
+      "source_location": "L300",
       "weight": 1.0,
       "_origin": "ast",
       "source": "src_components_admin_panels_ball_balloverviewtab_signupitem",
@@ -54206,7 +54118,7 @@
       "context": "call",
       "confidence": "EXTRACTED",
       "source_file": "src/components/admin/panels/ball/BallOverviewTab.jsx",
-      "source_location": "L308",
+      "source_location": "L295",
       "weight": 1.0,
       "_origin": "ast",
       "source": "src_components_admin_panels_ball_balloverviewtab_signupitem",
@@ -54218,7 +54130,7 @@
       "context": "call",
       "confidence": "EXTRACTED",
       "source_file": "src/components/admin/panels/ball/BallOverviewTab.jsx",
-      "source_location": "L312",
+      "source_location": "L299",
       "weight": 1.0,
       "_origin": "ast",
       "source": "src_components_admin_panels_ball_balloverviewtab_signupitem",
@@ -54242,7 +54154,7 @@
       "context": "call",
       "confidence": "EXTRACTED",
       "source_file": "src/components/admin/panels/ball/BallOverviewTab.jsx",
-      "source_location": "L371",
+      "source_location": "L358",
       "weight": 1.0,
       "_origin": "ast",
       "source": "src_components_admin_panels_ball_balloverviewtab_signupitem",
@@ -67251,7 +67163,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "src/components/ball/dress/BallDressPortal.jsx",
-      "source_location": "L260",
+      "source_location": "L252",
       "weight": 1.0,
       "_origin": "ast",
       "source": "src_components_ball_dress_balldressportal",
@@ -67284,7 +67196,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "src/components/ball/dress/BallDressPortal.jsx",
-      "source_location": "L277",
+      "source_location": "L269",
       "weight": 1.0,
       "_origin": "ast",
       "source": "src_components_ball_dress_balldressportal",
@@ -67306,7 +67218,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "src/components/ball/dress/BallDressPortal.jsx",
-      "source_location": "L275",
+      "source_location": "L267",
       "weight": 1.0,
       "_origin": "ast",
       "source": "src_components_ball_dress_balldressportal",
@@ -67317,7 +67229,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "src/components/ball/dress/BallDressPortal.jsx",
-      "source_location": "L243",
+      "source_location": "L235",
       "weight": 1.0,
       "_origin": "ast",
       "source": "src_components_ball_dress_balldressportal",
@@ -67412,7 +67324,7 @@
       "context": "call",
       "confidence": "EXTRACTED",
       "source_file": "src/components/ball/dress/BallDressPortal.jsx",
-      "source_location": "L313",
+      "source_location": "L305",
       "weight": 1.0,
       "_origin": "ast",
       "source": "src_components_ball_dress_balldressportal_dressrow",
@@ -67425,7 +67337,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "src/components/ball/dress/BallDressPortal.jsx",
-      "source_location": "L197",
+      "source_location": "L189",
       "weight": 1.0,
       "_origin": "ast",
       "source": "src_components_ball_dress_balldressportal_balldressportal",
@@ -67457,7 +67369,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "src/components/ball/ops/BallOpsPortal.jsx",
-      "source_location": "L365",
+      "source_location": "L362",
       "weight": 1.0,
       "_origin": "ast",
       "source": "src_components_ball_ops_ballopsportal",
@@ -67501,7 +67413,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "src/components/ball/ops/BallOpsPortal.jsx",
-      "source_location": "L337",
+      "source_location": "L334",
       "weight": 1.0,
       "_origin": "ast",
       "source": "src_components_ball_ops_ballopsportal",
@@ -67523,7 +67435,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "src/components/ball/ops/BallOpsPortal.jsx",
-      "source_location": "L379",
+      "source_location": "L376",
       "weight": 1.0,
       "_origin": "ast",
       "source": "src_components_ball_ops_ballopsportal",
@@ -67534,7 +67446,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "src/components/ball/ops/BallOpsPortal.jsx",
-      "source_location": "L325",
+      "source_location": "L322",
       "weight": 1.0,
       "_origin": "ast",
       "source": "src_components_ball_ops_ballopsportal",
@@ -67618,7 +67530,7 @@
       "context": "call",
       "confidence": "EXTRACTED",
       "source_file": "src/components/ball/ops/BallOpsPortal.jsx",
-      "source_location": "L358",
+      "source_location": "L355",
       "weight": 1.0,
       "_origin": "ast",
       "source": "src_components_ball_ops_ballopsportal_lookuprow",
@@ -67630,7 +67542,7 @@
       "context": "call",
       "confidence": "EXTRACTED",
       "source_file": "src/components/ball/ops/BallOpsPortal.jsx",
-      "source_location": "L406",
+      "source_location": "L404",
       "weight": 1.0,
       "_origin": "ast",
       "source": "src_components_ball_ops_ballopsportal_persondetail",
@@ -67642,7 +67554,7 @@
       "context": "call",
       "confidence": "EXTRACTED",
       "source_file": "src/components/ball/ops/BallOpsPortal.jsx",
-      "source_location": "L357",
+      "source_location": "L354",
       "weight": 1.0,
       "_origin": "ast",
       "source": "src_components_ball_ops_ballopsportal_lookuprow",
@@ -67666,7 +67578,7 @@
       "context": "call",
       "confidence": "EXTRACTED",
       "source_file": "src/components/ball/ops/BallOpsPortal.jsx",
-      "source_location": "L265",
+      "source_location": "L262",
       "weight": 1.0,
       "_origin": "ast",
       "source": "src_components_ball_ops_ballopsportal_ballopsportal",
@@ -67679,7 +67591,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "src/components/ball/ops/BallOpsPortal.jsx",
-      "source_location": "L234",
+      "source_location": "L231",
       "weight": 1.0,
       "_origin": "ast",
       "source": "src_components_ball_ops_ballopsportal_ballopsportal",
@@ -68490,7 +68402,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "src/components/ball/signup/StepDocumentation.jsx",
-      "source_location": "L151",
+      "source_location": "L158",
       "weight": 1.0,
       "_origin": "ast",
       "source": "src_components_ball_signup_stepdocumentation",
@@ -68512,7 +68424,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "src/components/ball/signup/StepDocumentation.jsx",
-      "source_location": "L150",
+      "source_location": "L157",
       "weight": 1.0,
       "_origin": "ast",
       "source": "src_components_ball_signup_stepdocumentation",
@@ -68523,7 +68435,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "src/components/ball/signup/StepDocumentation.jsx",
-      "source_location": "L153",
+      "source_location": "L160",
       "weight": 1.0,
       "_origin": "ast",
       "source": "src_components_ball_signup_stepdocumentation",
@@ -72372,7 +72284,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "src/components/optic/Optic.jsx",
-      "source_location": "L143",
+      "source_location": "L136",
       "weight": 1.0,
       "_origin": "ast",
       "source": "src_components_optic_optic",
@@ -72383,7 +72295,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "src/components/optic/Optic.jsx",
-      "source_location": "L590",
+      "source_location": "L583",
       "weight": 1.0,
       "_origin": "ast",
       "source": "src_components_optic_optic",
@@ -72394,7 +72306,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "src/components/optic/Optic.jsx",
-      "source_location": "L661",
+      "source_location": "L648",
       "weight": 1.0,
       "_origin": "ast",
       "source": "src_components_optic_optic",
@@ -72405,7 +72317,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "src/components/optic/Optic.jsx",
-      "source_location": "L370",
+      "source_location": "L363",
       "weight": 1.0,
       "_origin": "ast",
       "source": "src_components_optic_optic",
@@ -72416,7 +72328,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "src/components/optic/Optic.jsx",
-      "source_location": "L164",
+      "source_location": "L157",
       "weight": 1.0,
       "_origin": "ast",
       "source": "src_components_optic_optic",
@@ -72427,7 +72339,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "src/components/optic/Optic.jsx",
-      "source_location": "L345",
+      "source_location": "L338",
       "weight": 1.0,
       "_origin": "ast",
       "source": "src_components_optic_optic",
@@ -72449,7 +72361,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "src/components/optic/Optic.jsx",
-      "source_location": "L215",
+      "source_location": "L208",
       "weight": 1.0,
       "_origin": "ast",
       "source": "src_components_optic_optic",
@@ -72493,7 +72405,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "src/components/optic/Optic.jsx",
-      "source_location": "L276",
+      "source_location": "L269",
       "weight": 1.0,
       "_origin": "ast",
       "source": "src_components_optic_optic",
@@ -72504,7 +72416,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "src/components/optic/Optic.jsx",
-      "source_location": "L694",
+      "source_location": "L681",
       "weight": 1.0,
       "_origin": "ast",
       "source": "src_components_optic_optic",
@@ -72515,7 +72427,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "src/components/optic/Optic.jsx",
-      "source_location": "L260",
+      "source_location": "L253",
       "weight": 1.0,
       "_origin": "ast",
       "source": "src_components_optic_optic",
@@ -72537,7 +72449,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "src/components/optic/Optic.jsx",
-      "source_location": "L388",
+      "source_location": "L381",
       "weight": 1.0,
       "_origin": "ast",
       "source": "src_components_optic_optic",
@@ -72548,7 +72460,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "src/components/optic/Optic.jsx",
-      "source_location": "L939",
+      "source_location": "L926",
       "weight": 1.0,
       "_origin": "ast",
       "source": "src_components_optic_optic",
@@ -72559,7 +72471,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "src/components/optic/Optic.jsx",
-      "source_location": "L960",
+      "source_location": "L947",
       "weight": 1.0,
       "_origin": "ast",
       "source": "src_components_optic_optic",
@@ -72570,7 +72482,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "src/components/optic/Optic.jsx",
-      "source_location": "L356",
+      "source_location": "L349",
       "weight": 1.0,
       "_origin": "ast",
       "source": "src_components_optic_optic",
@@ -73110,7 +73022,7 @@
       "context": "call",
       "confidence": "EXTRACTED",
       "source_file": "src/components/optic/Optic.jsx",
-      "source_location": "L435",
+      "source_location": "L428",
       "weight": 1.0,
       "_origin": "ast",
       "source": "src_components_optic_optic_uploadcard",
@@ -73158,7 +73070,7 @@
       "context": "call",
       "confidence": "EXTRACTED",
       "source_file": "src/components/optic/Optic.jsx",
-      "source_location": "L72",
+      "source_location": "L70",
       "weight": 1.0,
       "_origin": "ast",
       "source": "src_components_optic_optic_opticapp",
@@ -73170,7 +73082,7 @@
       "context": "call",
       "confidence": "EXTRACTED",
       "source_file": "src/components/optic/Optic.jsx",
-      "source_location": "L73",
+      "source_location": "L71",
       "weight": 1.0,
       "_origin": "ast",
       "source": "src_components_optic_optic_opticapp",
@@ -73206,7 +73118,7 @@
       "context": "call",
       "confidence": "EXTRACTED",
       "source_file": "src/components/optic/Optic.jsx",
-      "source_location": "L69",
+      "source_location": "L67",
       "weight": 1.0,
       "_origin": "ast",
       "source": "src_components_optic_optic_opticapp",
@@ -73230,7 +73142,7 @@
       "context": "call",
       "confidence": "EXTRACTED",
       "source_file": "src/components/optic/Optic.jsx",
-      "source_location": "L72",
+      "source_location": "L70",
       "weight": 1.0,
       "_origin": "ast",
       "source": "src_components_optic_optic_opticapp",
@@ -73242,7 +73154,7 @@
       "context": "call",
       "confidence": "EXTRACTED",
       "source_file": "src/components/optic/Optic.jsx",
-      "source_location": "L135",
+      "source_location": "L128",
       "weight": 1.0,
       "_origin": "ast",
       "source": "src_components_optic_optic_opticapp",
@@ -73255,7 +73167,7 @@
       "confidence": "INFERRED",
       "confidence_score": 0.8,
       "source_file": "src/components/optic/Optic.jsx",
-      "source_location": "L166",
+      "source_location": "L159",
       "weight": 1.0,
       "_origin": "ast",
       "source": "src_components_optic_optic_installnudge",
@@ -73266,7 +73178,7 @@
       "context": "call",
       "confidence": "EXTRACTED",
       "source_file": "src/components/optic/Optic.jsx",
-      "source_location": "L190",
+      "source_location": "L183",
       "weight": 1.0,
       "_origin": "ast",
       "source": "src_components_optic_optic_installnudge",
@@ -73278,7 +73190,7 @@
       "context": "call",
       "confidence": "EXTRACTED",
       "source_file": "src/components/optic/Optic.jsx",
-      "source_location": "L170",
+      "source_location": "L163",
       "weight": 1.0,
       "_origin": "ast",
       "source": "src_components_optic_optic_installnudge",
@@ -73290,7 +73202,7 @@
       "context": "call",
       "confidence": "EXTRACTED",
       "source_file": "src/components/optic/Optic.jsx",
-      "source_location": "L168",
+      "source_location": "L161",
       "weight": 1.0,
       "_origin": "ast",
       "source": "src_components_optic_optic_installnudge",
@@ -73302,7 +73214,7 @@
       "context": "call",
       "confidence": "EXTRACTED",
       "source_file": "src/components/optic/Optic.jsx",
-      "source_location": "L178",
+      "source_location": "L171",
       "weight": 1.0,
       "_origin": "ast",
       "source": "src_components_optic_optic_installnudge",
@@ -73315,7 +73227,7 @@
       "confidence": "INFERRED",
       "confidence_score": 0.8,
       "source_file": "src/components/optic/Optic.jsx",
-      "source_location": "L165",
+      "source_location": "L158",
       "weight": 1.0,
       "_origin": "ast",
       "source": "src_components_optic_optic_installnudge",
@@ -73326,7 +73238,7 @@
       "context": "call",
       "confidence": "EXTRACTED",
       "source_file": "src/components/optic/Optic.jsx",
-      "source_location": "L173",
+      "source_location": "L166",
       "weight": 1.0,
       "_origin": "ast",
       "source": "src_components_optic_optic_installnudge",
@@ -73338,7 +73250,7 @@
       "context": "call",
       "confidence": "EXTRACTED",
       "source_file": "src/components/optic/Optic.jsx",
-      "source_location": "L216",
+      "source_location": "L209",
       "weight": 1.0,
       "_origin": "ast",
       "source": "src_components_optic_optic_notificationcard",
@@ -73350,7 +73262,7 @@
       "context": "call",
       "confidence": "EXTRACTED",
       "source_file": "src/components/optic/Optic.jsx",
-      "source_location": "L235",
+      "source_location": "L228",
       "weight": 1.0,
       "_origin": "ast",
       "source": "src_components_optic_optic_notificationcard",
@@ -73362,7 +73274,7 @@
       "context": "call",
       "confidence": "EXTRACTED",
       "source_file": "src/components/optic/Optic.jsx",
-      "source_location": "L219",
+      "source_location": "L212",
       "weight": 1.0,
       "_origin": "ast",
       "source": "src_components_optic_optic_notificationcard",
@@ -73374,7 +73286,7 @@
       "context": "call",
       "confidence": "EXTRACTED",
       "source_file": "src/components/optic/Optic.jsx",
-      "source_location": "L225",
+      "source_location": "L218",
       "weight": 1.0,
       "_origin": "ast",
       "source": "src_components_optic_optic_notificationcard",
@@ -73386,7 +73298,7 @@
       "context": "call",
       "confidence": "EXTRACTED",
       "source_file": "src/components/optic/Optic.jsx",
-      "source_location": "L268",
+      "source_location": "L261",
       "weight": 1.0,
       "_origin": "ast",
       "source": "src_components_optic_optic_reinstallnotice",
@@ -73398,7 +73310,7 @@
       "context": "call",
       "confidence": "EXTRACTED",
       "source_file": "src/components/optic/Optic.jsx",
-      "source_location": "L329",
+      "source_location": "L322",
       "weight": 1.0,
       "_origin": "ast",
       "source": "src_components_optic_optic_opticlocked",
@@ -73410,7 +73322,7 @@
       "context": "call",
       "confidence": "EXTRACTED",
       "source_file": "src/components/optic/Optic.jsx",
-      "source_location": "L397",
+      "source_location": "L390",
       "weight": 1.0,
       "_origin": "ast",
       "source": "src_components_optic_optic_uploadcard",
@@ -73422,7 +73334,7 @@
       "context": "call",
       "confidence": "EXTRACTED",
       "source_file": "src/components/optic/Optic.jsx",
-      "source_location": "L409",
+      "source_location": "L402",
       "weight": 1.0,
       "_origin": "ast",
       "source": "src_components_optic_optic_uploadcard",
@@ -73434,7 +73346,7 @@
       "context": "call",
       "confidence": "EXTRACTED",
       "source_file": "src/components/optic/Optic.jsx",
-      "source_location": "L429",
+      "source_location": "L422",
       "weight": 1.0,
       "_origin": "ast",
       "source": "src_components_optic_optic_uploadcard",
@@ -73446,7 +73358,7 @@
       "context": "call",
       "confidence": "EXTRACTED",
       "source_file": "src/components/optic/Optic.jsx",
-      "source_location": "L429",
+      "source_location": "L422",
       "weight": 1.0,
       "_origin": "ast",
       "source": "src_components_optic_optic_uploadcard",
@@ -73458,7 +73370,7 @@
       "context": "call",
       "confidence": "EXTRACTED",
       "source_file": "src/components/optic/Optic.jsx",
-      "source_location": "L466",
+      "source_location": "L459",
       "weight": 1.0,
       "_origin": "ast",
       "source": "src_components_optic_optic_uploadcard",
@@ -73470,7 +73382,7 @@
       "context": "call",
       "confidence": "EXTRACTED",
       "source_file": "src/components/optic/Optic.jsx",
-      "source_location": "L450",
+      "source_location": "L443",
       "weight": 1.0,
       "_origin": "ast",
       "source": "src_components_optic_optic_uploadcard",
@@ -73482,7 +73394,7 @@
       "context": "call",
       "confidence": "EXTRACTED",
       "source_file": "src/components/optic/Optic.jsx",
-      "source_location": "L663",
+      "source_location": "L650",
       "weight": 1.0,
       "_origin": "ast",
       "source": "src_components_optic_optic_feeditem",
@@ -73494,7 +73406,7 @@
       "context": "call",
       "confidence": "EXTRACTED",
       "source_file": "src/components/optic/Optic.jsx",
-      "source_location": "L662",
+      "source_location": "L649",
       "weight": 1.0,
       "_origin": "ast",
       "source": "src_components_optic_optic_feeditem",
@@ -73506,7 +73418,7 @@
       "context": "call",
       "confidence": "EXTRACTED",
       "source_file": "src/components/optic/Optic.jsx",
-      "source_location": "L910",
+      "source_location": "L897",
       "weight": 1.0,
       "_origin": "ast",
       "source": "src_components_optic_optic_reel",
@@ -73518,7 +73430,7 @@
       "context": "call",
       "confidence": "EXTRACTED",
       "source_file": "src/components/optic/Optic.jsx",
-      "source_location": "L843",
+      "source_location": "L830",
       "weight": 1.0,
       "_origin": "ast",
       "source": "src_components_optic_optic_reel",
@@ -73530,7 +73442,7 @@
       "context": "call",
       "confidence": "EXTRACTED",
       "source_file": "src/components/optic/Optic.jsx",
-      "source_location": "L870",
+      "source_location": "L857",
       "weight": 1.0,
       "_origin": "ast",
       "source": "src_components_optic_optic_reel",
@@ -83851,7 +83763,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "src/hooks/useOpticPhotos.js",
-      "source_location": "L9",
+      "source_location": "L8",
       "weight": 1.0,
       "_origin": "ast",
       "source": "src_hooks_useopticphotos",
@@ -83862,29 +83774,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "src/hooks/useOpticPhotos.js",
-      "source_location": "L11",
-      "weight": 1.0,
-      "_origin": "ast",
-      "source": "src_hooks_useopticphotos",
-      "target": "src_hooks_useopticphotos_isattop",
-      "confidence_score": 1.0
-    },
-    {
-      "relation": "contains",
-      "confidence": "EXTRACTED",
-      "source_file": "src/hooks/useOpticPhotos.js",
-      "source_location": "L10",
-      "weight": 1.0,
-      "_origin": "ast",
-      "source": "src_hooks_useopticphotos",
-      "target": "src_hooks_useopticphotos_sortnewestfirst",
-      "confidence_score": 1.0
-    },
-    {
-      "relation": "contains",
-      "confidence": "EXTRACTED",
-      "source_file": "src/hooks/useOpticPhotos.js",
-      "source_location": "L48",
+      "source_location": "L32",
       "weight": 1.0,
       "_origin": "ast",
       "source": "src_hooks_useopticphotos",
@@ -83895,7 +83785,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "src/hooks/useOpticPhotos.js",
-      "source_location": "L152",
+      "source_location": "L87",
       "weight": 1.0,
       "_origin": "ast",
       "source": "src_hooks_useopticphotos",
@@ -83931,35 +83821,11 @@
       "context": "call",
       "confidence": "EXTRACTED",
       "source_file": "src/hooks/useOpticPhotos.js",
-      "source_location": "L10",
+      "source_location": "L46",
       "weight": 1.0,
       "_origin": "ast",
-      "source": "src_hooks_useopticphotos_sortnewestfirst",
+      "source": "src_hooks_useopticphotos_useopticphotos",
       "target": "src_hooks_useopticphotos_capturedat",
-      "confidence_score": 1.0
-    },
-    {
-      "relation": "calls",
-      "context": "call",
-      "confidence": "EXTRACTED",
-      "source_file": "src/hooks/useOpticPhotos.js",
-      "source_location": "L70",
-      "weight": 1.0,
-      "_origin": "ast",
-      "source": "src_hooks_useopticphotos_useopticphotos",
-      "target": "src_hooks_useopticphotos_sortnewestfirst",
-      "confidence_score": 1.0
-    },
-    {
-      "relation": "calls",
-      "context": "call",
-      "confidence": "EXTRACTED",
-      "source_file": "src/hooks/useOpticPhotos.js",
-      "source_location": "L91",
-      "weight": 1.0,
-      "_origin": "ast",
-      "source": "src_hooks_useopticphotos_useopticphotos",
-      "target": "src_hooks_useopticphotos_isattop",
       "confidence_score": 1.0
     },
     {
@@ -89511,7 +89377,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "supabase/ball_guards.sql",
-      "source_location": "L288",
+      "source_location": "L281",
       "weight": 1.0,
       "_origin": "ast",
       "source": "supabase_ball_guards",
@@ -89522,7 +89388,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "supabase/ball_guards.sql",
-      "source_location": "L283",
+      "source_location": "L276",
       "weight": 1.0,
       "_origin": "ast",
       "source": "supabase_ball_guards",
@@ -89533,7 +89399,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "supabase/ball_guards.sql",
-      "source_location": "L74",
+      "source_location": "L69",
       "weight": 1.0,
       "_origin": "ast",
       "source": "supabase_ball_guards",
@@ -89544,7 +89410,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "supabase/ball_guards.sql",
-      "source_location": "L206",
+      "source_location": "L201",
       "weight": 1.0,
       "_origin": "ast",
       "source": "supabase_ball_guards",
@@ -89555,7 +89421,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "supabase/ball_guards.sql",
-      "source_location": "L110",
+      "source_location": "L105",
       "weight": 1.0,
       "_origin": "ast",
       "source": "supabase_ball_guards",
@@ -89566,7 +89432,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "supabase/ball_guards.sql",
-      "source_location": "L91",
+      "source_location": "L86",
       "weight": 1.0,
       "_origin": "ast",
       "source": "supabase_ball_guards",
@@ -89577,7 +89443,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "supabase/ball_guards.sql",
-      "source_location": "L82",
+      "source_location": "L77",
       "weight": 1.0,
       "_origin": "ast",
       "source": "supabase_ball_guards",
@@ -89588,7 +89454,7 @@
       "relation": "triggers",
       "confidence": "EXTRACTED",
       "source_file": "supabase/ball_guards.sql",
-      "source_location": "L283",
+      "source_location": "L276",
       "weight": 1.0,
       "_origin": "ast",
       "source": "supabase_ball_guards_ball_signups_column_guard_trg",
@@ -89599,7 +89465,7 @@
       "relation": "triggers",
       "confidence": "EXTRACTED",
       "source_file": "supabase/ball_guards.sql",
-      "source_location": "L288",
+      "source_location": "L281",
       "weight": 1.0,
       "_origin": "ast",
       "source": "supabase_ball_guards_ball_guests_column_guard_trg",
@@ -89637,39 +89503,6 @@
       "_origin": "ast",
       "source": "supabase_ball_guest_cash_split_public_ball_guests_ops_view",
       "target": "supabase_ball_guest_cash_split_public_ball_guests",
-      "confidence_score": 1.0
-    },
-    {
-      "relation": "contains",
-      "confidence": "EXTRACTED",
-      "source_file": "supabase/ball_guest_form_required_split.sql",
-      "source_location": "L32",
-      "weight": 1.0,
-      "_origin": "ast",
-      "source": "supabase_ball_guest_form_required_split",
-      "target": "supabase_ball_guest_form_required_split_public_ball_guests",
-      "confidence_score": 1.0
-    },
-    {
-      "relation": "contains",
-      "confidence": "EXTRACTED",
-      "source_file": "supabase/ball_guest_form_required_split.sql",
-      "source_location": "L51",
-      "weight": 1.0,
-      "_origin": "ast",
-      "source": "supabase_ball_guest_form_required_split",
-      "target": "supabase_ball_guest_form_required_split_public_ball_guests_ops_view",
-      "confidence_score": 1.0
-    },
-    {
-      "relation": "reads_from",
-      "confidence": "EXTRACTED",
-      "source_file": "supabase/ball_guest_form_required_split.sql",
-      "source_location": "L56",
-      "weight": 1.0,
-      "_origin": "ast",
-      "source": "supabase_ball_guest_form_required_split_public_ball_guests_ops_view",
-      "target": "supabase_ball_guest_form_required_split_public_ball_guests",
       "confidence_score": 1.0
     },
     {
@@ -97714,10 +97547,10 @@
       "relation": "rationale_for",
       "confidence": "EXTRACTED",
       "source_file": "supabase/functions/ball-submit-signup/index.ts",
-      "source_location": "L625",
+      "source_location": "L620",
       "weight": 1.0,
       "_origin": "ast",
-      "source": "supabase_functions_ball_submit_signup_index_rationale_625",
+      "source": "supabase_functions_ball_submit_signup_index_rationale_620",
       "target": "supabase_functions_ball_submit_signup_index",
       "confidence_score": 1.0
     },
@@ -97840,7 +97673,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "supabase/functions/optic-send-push/index.ts",
-      "source_location": "L31",
+      "source_location": "L19",
       "weight": 1.0,
       "_origin": "ast",
       "source": "supabase_functions_optic_send_push_index",
@@ -97851,7 +97684,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "supabase/functions/optic-send-push/index.ts",
-      "source_location": "L51",
+      "source_location": "L39",
       "weight": 1.0,
       "_origin": "ast",
       "source": "supabase_functions_optic_send_push_index",
@@ -97862,7 +97695,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "supabase/functions/optic-send-push/index.ts",
-      "source_location": "L36",
+      "source_location": "L24",
       "weight": 1.0,
       "_origin": "ast",
       "source": "supabase_functions_optic_send_push_index",
@@ -97873,7 +97706,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "supabase/functions/optic-send-push/index.ts",
-      "source_location": "L38",
+      "source_location": "L26",
       "weight": 1.0,
       "_origin": "ast",
       "source": "supabase_functions_optic_send_push_index",
@@ -97884,7 +97717,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "supabase/functions/optic-send-push/index.ts",
-      "source_location": "L40",
+      "source_location": "L28",
       "weight": 1.0,
       "_origin": "ast",
       "source": "supabase_functions_optic_send_push_index",
@@ -97896,7 +97729,7 @@
       "context": "call",
       "confidence": "EXTRACTED",
       "source_file": "supabase/functions/optic-send-push/index.ts",
-      "source_location": "L64",
+      "source_location": "L52",
       "weight": 1.0,
       "_origin": "ast",
       "source": "supabase_functions_optic_send_push_index_getcaller",
@@ -98006,7 +97839,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "supabase/functions/send-ball-reminders/index.ts",
-      "source_location": "L89",
+      "source_location": "L88",
       "weight": 1.0,
       "_origin": "ast",
       "source": "supabase_functions_send_ball_reminders_index",
@@ -98017,7 +97850,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "supabase/functions/send-ball-reminders/index.ts",
-      "source_location": "L56",
+      "source_location": "L55",
       "weight": 1.0,
       "_origin": "ast",
       "source": "supabase_functions_send_ball_reminders_index",
@@ -98286,39 +98119,6 @@
       "_origin": "ast",
       "source": "supabase_optic_push",
       "target": "supabase_optic_push_public_push_subscriptions",
-      "confidence_score": 1.0
-    },
-    {
-      "relation": "contains",
-      "confidence": "EXTRACTED",
-      "source_file": "supabase/optic_push_auto.sql",
-      "source_location": "L40",
-      "weight": 1.0,
-      "_origin": "ast",
-      "source": "supabase_optic_push_auto",
-      "target": "supabase_optic_push_auto_public_generate_optic_push_alerts",
-      "confidence_score": 1.0
-    },
-    {
-      "relation": "contains",
-      "confidence": "EXTRACTED",
-      "source_file": "supabase/optic_push_auto.sql",
-      "source_location": "L34",
-      "weight": 1.0,
-      "_origin": "ast",
-      "source": "supabase_optic_push_auto",
-      "target": "supabase_optic_push_auto_public_optic_push_notify_state",
-      "confidence_score": 1.0
-    },
-    {
-      "relation": "reads_from",
-      "confidence": "EXTRACTED",
-      "source_file": "supabase/optic_push_auto.sql",
-      "source_location": "L66",
-      "weight": 1.0,
-      "_origin": "ast",
-      "source": "supabase_optic_push_auto_public_generate_optic_push_alerts",
-      "target": "supabase_optic_push_auto_public_optic_push_notify_state",
       "confidence_score": 1.0
     },
     {
@@ -107046,5 +106846,5 @@
     }
   ],
   "hyperedges": [],
-  "built_at_commit": "a12e14fd372347c65b133880a611cc1efb72edc1"
+  "built_at_commit": "5cd90aaa21ab95c7728af34f7ccfd5d47a45310e"
 }

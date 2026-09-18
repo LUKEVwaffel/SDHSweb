@@ -382,11 +382,15 @@ Deno.serve(async (req) => {
     const hostAmountDue = (!hasGuest || guestType === "friend") ? priceCadet : priceCouple;
     const friendAmountDue = guestType === "friend" ? priceCadet : null;
     // Permission form: any SDHS student attending needs one. The cadet host
-    // always does. A guest needs one when they are an SDHS student too —
-    // whether an in-program roster cadet (isSdhsJrotc) or a non-cadet who
-    // attends Soddy Daisy High School (goesToSdhs). Applies to date AND friend.
+    // is ALWAYS an SDHS student, so this is always true regardless of guest —
+    // it must NOT be zeroed out just because a guest happens not to need one.
+    // A guest needs their OWN, tracked separately on ball_guests
+    // (field_trip_form_required, see ball_guest_form_required_split.sql), set
+    // whenever they are an SDHS student too — whether an in-program roster
+    // cadet (isSdhsJrotc) or a non-cadet who attends Soddy Daisy High School
+    // (goesToSdhs). Applies to date AND friend guests alike.
     const guestIsSdhsStudent = isSdhsJrotc || goesToSdhs;
-    const fieldTripFormRequired = !hasGuest || guestIsSdhsStudent;
+    const fieldTripFormRequired = true;
 
     // Double-submit protection is the unique(lower(cadet_school_email)) index
     // on ball_signups below (→ 23505 → clean 409). The jti ledger is a
@@ -514,6 +518,7 @@ Deno.serve(async (req) => {
       guest_type: guestType,
       friend_payment_method: friendPaymentMethod,
       friend_amount_due: friendAmountDue,
+      field_trip_form_required: guestIsSdhsStudent,
     });
     if (guestErr) {
       console.error("ball-submit-signup insert guest", guestErr);

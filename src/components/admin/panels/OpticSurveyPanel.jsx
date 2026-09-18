@@ -1,19 +1,27 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useMemo } from 'react';
 import { supabase as SB } from '../../../lib/supabaseClient';
 import { P, mono, inter, fs, sp } from '../theme';
 import { Btn, Card, PanelHeader, EmptyState } from '../shared/ui';
-import { QUESTIONS, TEXT_QUESTIONS, CAMPAIGN_ID } from '../../../lib/opticSurveyQuestions';
+import { QUESTIONS, TEXT_QUESTIONS, CAMPAIGN_ID, PAST_ROUNDS } from '../../../lib/opticSurveyQuestions';
 
 // Luke-only view of optic_survey_responses (RLS: public insert, is_luke()-only
 // read/delete — see supabase/optic_survey.sql). Anonymous responses, so this
 // is read + aggregate + delete only. Same shape as CheckinPanel.
+//
+// Old and new rounds carry different question sets (opticSurveyQuestions.js
+// gets rewritten each round), so switching the campaign switches which
+// QUESTIONS/TEXT_QUESTIONS shape drives the breakdown below, not just which
+// rows are queried — otherwise old rows would render against the wrong
+// question labels and mostly show as zero.
+const CURRENT_ROUND = { label: 'Current round', questions: QUESTIONS, textQuestions: TEXT_QUESTIONS };
+const ROUNDS = { [CAMPAIGN_ID]: CURRENT_ROUND, ...PAST_ROUNDS };
 
 const TEAM_LABEL = { male: 'Male team', coed: 'Coed team', both: 'Both', unsure: 'Not sure' };
 const PHONE_LABEL = { iphone: 'iPhone', android: 'Android', other: 'Other' };
 
-function writtenEntries(r) {
+function writtenEntries(r, textQuestions) {
   const entries = [];
-  for (const q of TEXT_QUESTIONS) {
+  for (const q of textQuestions) {
     const text = r[q.id];
     if (text) entries.push({ label: q.label, text });
   }
@@ -52,9 +60,10 @@ function QuestionBreakdown({ q, rows }) {
   );
 }
 
-// Headline: this round exists to chase specific bugs (notifications, iPhone
-// save), so the top-line number is "how many people hit a real problem",
-// not a return-rate — that question was already answered by the prior round.
+// Headline for the CURRENT round: this round exists to chase specific bugs
+// (notifications, iPhone save), so the top-line number is "how many people
+// hit a real problem", not a return-rate — that question was already
+// answered by the prior round.
 function ProblemSummary({ rows }) {
   const total = rows.length;
   if (!total) return null;
@@ -77,21 +86,53 @@ function ProblemSummary({ rows }) {
   );
 }
 
+// Headline for the PAST round (optic-return-2026-09): that round's whole
+// point was "should we run OPTIC again", so its own headline is the return
+// rate off `will_return` — a field the current round no longer asks.
+function ReturnSummary({ rows }) {
+  const total = rows.length;
+  if (!total) return null;
+  const yes = rows.filter((r) => r.will_return === 'definitely' || r.will_return === 'probably').length;
+  const pct = Math.round((yes / total) * 100);
+  return (
+    <Card style={{ marginBottom: sp[4], border: `1px solid ${P.gold}` }}>
+      <div style={{ fontFamily: mono, fontSize: fs.micro, color: P.gold, letterSpacing: '0.1em', marginBottom: 6 }}>
+        WOULD BRING OPTIC BACK
+      </div>
+      <div style={{ fontFamily: inter, fontSize: fs.xl, color: P.cream, fontWeight: 600 }}>
+        {yes} of {total} · {pct}%
+      </div>
+      <div style={{ fontFamily: mono, fontSize: fs.micro, color: P.mute, marginTop: 4 }}>
+        answered “definitely” or “probably” on the last question
+      </div>
+    </Card>
+  );
+}
+
+const selectStyle = {
+  background: P.deep, border: `1px solid ${P.hair}`, color: P.cream,
+  fontFamily: mono, fontSize: fs.xs, padding: '8px 10px', borderRadius: 5,
+};
+
 export default function OpticSurveyPanel() {
+  const [campaignId, setCampaignId] = useState(CAMPAIGN_ID);
   const [rows, setRows] = useState([]);
   const [loading, setLoading] = useState(true);
   const [busy, setBusy] = useState('');
   const [view, setView] = useState('breakdown'); // breakdown | comments
 
+  const round = ROUNDS[campaignId] || CURRENT_ROUND;
+  const isCurrentRound = campaignId === CAMPAIGN_ID;
+
   const load = useCallback(async () => {
     setLoading(true);
     const { data } = await SB.from('optic_survey_responses')
       .select('*')
-      .eq('campaign_id', CAMPAIGN_ID)
+      .eq('campaign_id', campaignId)
       .order('submitted_at', { ascending: false });
     setRows(data || []);
     setLoading(false);
-  }, []);
+  }, [campaignId]);
   useEffect(() => { load(); }, [load]);
 
   async function del(row) {
@@ -102,15 +143,26 @@ export default function OpticSurveyPanel() {
     load();
   }
 
-  const withComments = rows.filter((r) => writtenEntries(r).length > 0);
+  const withComments = useMemo(
+    () => rows.filter((r) => writtenEntries(r, round.textQuestions).length > 0),
+    [rows, round],
+  );
 
   return (
     <div>
       <PanelHeader
         title="OPTIC SURVEY"
-        sub={`${rows.length} response${rows.length === 1 ? '' : 's'} · campaign ${CAMPAIGN_ID}`}
+        sub={`${rows.length} response${rows.length === 1 ? '' : 's'} · campaign ${campaignId}`}
         action={<Btn onClick={load} variant="ghost" size="sm">REFRESH</Btn>}
       />
+
+      <div style={{ display: 'flex', gap: sp[2], marginBottom: sp[3], flexWrap: 'wrap', alignItems: 'center' }}>
+        <select value={campaignId} onChange={(e) => setCampaignId(e.target.value)} style={selectStyle}>
+          {Object.entries(ROUNDS).map(([id, r]) => (
+            <option key={id} value={id}>{id === CAMPAIGN_ID ? `Current · ${id}` : (r.label || id)}</option>
+          ))}
+        </select>
+      </div>
 
       <div style={{ display: 'flex', gap: sp[2], marginBottom: sp[4] }}>
         <Btn variant={view === 'breakdown' ? 'gold' : 'ghost'} size="sm" onClick={() => setView('breakdown')}>BREAKDOWN</Btn>
@@ -125,8 +177,8 @@ export default function OpticSurveyPanel() {
         <EmptyState icon="◎" title="NO RESPONSES YET" hint="Parent responses from the /survey page appear here." />
       ) : view === 'breakdown' ? (
         <div>
-          <ProblemSummary rows={rows} />
-          {QUESTIONS.map((q) => <QuestionBreakdown key={q.id} q={q} rows={rows} />)}
+          {isCurrentRound ? <ProblemSummary rows={rows} /> : <ReturnSummary rows={rows} />}
+          {round.questions.map((q) => <QuestionBreakdown key={q.id} q={q} rows={rows} />)}
         </div>
       ) : withComments.length === 0 ? (
         <EmptyState icon="✎" title="NO WRITTEN FEEDBACK YET" hint="Responses that filled in an optional text box appear here." />
@@ -135,7 +187,7 @@ export default function OpticSurveyPanel() {
           {withComments.map((r) => (
             <div key={r.id} style={{ background: P.deep, border: `1px solid ${P.hair}`, padding: '14px 18px' }}>
               <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
-                {writtenEntries(r).map((entry, i) => (
+                {writtenEntries(r, round.textQuestions).map((entry, i) => (
                   <div key={i}>
                     <div style={{ fontFamily: mono, fontSize: fs.micro, color: P.gold, letterSpacing: '0.06em', marginBottom: 3 }}>
                       {entry.label.toUpperCase()}

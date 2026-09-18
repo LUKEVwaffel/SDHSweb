@@ -1,16 +1,28 @@
 // Edge function: optic-send-push
-// Admin-triggered from /lukepwa (SubEvents tab, "SEND ALERT" — see
-// LukePwa.jsx). Sends one web-push notification to every device subscribed
-// for the given event. Dead subscriptions (410/404 from the push service —
-// the browser uninstalled or the user cleared data) are deleted so the table
-// stays clean without a separate sweep job.
+// Two callers, both authenticated, no anonymous path:
+//   1. Admin-triggered from /lukepwa (SubEvents tab, "SEND ALERT" — see
+//      LukePwa.jsx) for ad-hoc net-control messages unrelated to photos
+//      ("CCR over by the water jugs in 10 min"). Verified via a real admin
+//      user JWT + admin_roles lookup (getCaller below).
+//   2. Automatic photo-post alerts, queued by pg_net from
+//      generate_optic_push_alerts() (supabase/optic_push_auto.sql), itself
+//      fired every 2 minutes by pg_cron. Verified the same way
+//      send-uniform-reminders verifies pg_net: the bearer token must equal
+//      this project's own SUPABASE_SERVICE_ROLE_KEY exactly — that's already
+//      a valid Supabase JWT so the platform's jwt-verification gate passes,
+//      and checking it against the literal secret means nothing else can
+//      trigger a real send by guessing a URL.
+// Sends one web-push notification to every device subscribed for the given
+// event. Dead subscriptions (410/404 from the push service — the browser
+// uninstalled or the user cleared data) are deleted so the table stays clean
+// without a separate sweep job.
 //
 // Self-contained (no ../_shared imports) so this can be pasted directly into
 // the Supabase Dashboard's function editor if the local CLI's bundler is
 // unavailable — see supabase/functions/README_DEPLOY.md.
 //
-// Deploy WITH jwt (default) — this is an authenticated admin action, unlike
-// the pre-auth ball-* notify functions:
+// Deploy WITH jwt (default) — both callers present a valid Supabase JWT,
+// unlike the pre-auth ball-* notify functions:
 //   supabase functions deploy optic-send-push
 //   supabase secrets set VAPID_PUBLIC_KEY=... VAPID_PRIVATE_KEY=... VAPID_SUBJECT=mailto:you@example.com
 import webpush from "npm:web-push@3";
@@ -59,8 +71,13 @@ Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return preflight();
   if (req.method !== "POST") return json({ error: "method not allowed" }, 405);
 
-  const caller = await getCaller(req);
-  if (!caller || !caller.role) return json({ error: "not authorised" }, 403);
+  const authHeader = req.headers.get("Authorization") ?? "";
+  const serviceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");
+  const isInternalCron = !!serviceKey && authHeader === `Bearer ${serviceKey}`;
+  if (!isInternalCron) {
+    const caller = await getCaller(req);
+    if (!caller || !caller.role) return json({ error: "not authorised" }, 403);
+  }
 
   const VAPID_PUBLIC_KEY = Deno.env.get("VAPID_PUBLIC_KEY");
   const VAPID_PRIVATE_KEY = Deno.env.get("VAPID_PRIVATE_KEY");

@@ -80,6 +80,7 @@ export default function RiflePortal() {
               TROJAN BATTALION · RIFLE
             </div>
             <h1 style={{ fontFamily: oswald, fontSize: 28, fontWeight: 600, color: P.cream, margin: 0 }}>Team Portal</h1>
+            <div style={{ fontFamily: mono, fontSize: 12, color: P.mute, marginTop: 6 }}>Welcome, Makky</div>
           </div>
           <button onClick={signOut} style={{ background: 'transparent', border: `1px solid ${P.hairStrong}`, color: P.mute, fontFamily: mono, fontSize: 11, letterSpacing: '0.1em', padding: '9px 16px', cursor: 'pointer' }}>
             SIGN OUT
