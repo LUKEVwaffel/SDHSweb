@@ -6,13 +6,17 @@
 // Sgt Kaz, 1SG), so email / display_name / title are caller-supplied and the
 // target is upserted.
 //
-// This one login covers BOTH review surfaces — /review (DISPATCH email
-// approvals) and /ball/ops (Military Ball payment tracking) — because both
-// gate on the same email_reviewers population.
+// This one login/PIN can cover any combination of THREE independent
+// surfaces — /review (email approvals), /ball/ops (Ball payments), and
+// /rifle/signup-review (rifle signups) — via can_email_review / can_ball_ops
+// / can_rifle_signups (email_reviewer_capability_split.sql). Each is only
+// set when the caller explicitly passes it (boolean), so a reactivation that
+// omits them leaves the existing flags untouched instead of quietly
+// resetting them to the column defaults (false).
 //
-// The person must ALREADY exist as a Supabase Auth user (Dashboard →
-// Authentication → Users) before their first PIN sign-in can mint a session —
-// same manual prerequisite as ball-dress-set-pin.
+// The person must already have a Supabase Auth login (Portal Access → AUTH)
+// before their first PIN sign-in can mint a session — same prerequisite as
+// ball-dress-set-pin.
 //
 // activate_now: pass true only when S-6 has already set this account's real
 // password in the Auth dashboard, so the forced-password-change wall
@@ -63,6 +67,9 @@ Deno.serve(async (req) => {
       active: true,
     };
     if (activateNow) reviewerRow.must_change_password = false;
+    if (typeof body.can_email_review === "boolean") reviewerRow.can_email_review = body.can_email_review;
+    if (typeof body.can_ball_ops === "boolean") reviewerRow.can_ball_ops = body.can_ball_ops;
+    if (typeof body.can_rifle_signups === "boolean") reviewerRow.can_rifle_signups = body.can_rifle_signups;
 
     const { error: rErr } = await svc.from("email_reviewers").upsert(reviewerRow);
     if (rErr) return json({ error: rErr.message }, 500);

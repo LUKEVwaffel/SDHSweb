@@ -60,7 +60,7 @@ export default function RifleSignupsPortal() {
     const { data: { session } } = await SB.auth.getSession();
     if (!session) { setPhase('login'); return; }
     const { data: rev } = await SB.from('email_reviewers')
-      .select('email').eq('email', session.user.email.toLowerCase()).eq('active', true).maybeSingle();
+      .select('email').eq('email', session.user.email.toLowerCase()).eq('active', true).eq('can_rifle_signups', true).maybeSingle();
     if (!rev) { setPhase('login'); return; }
     await loadAll();
   }, [loadAll]);

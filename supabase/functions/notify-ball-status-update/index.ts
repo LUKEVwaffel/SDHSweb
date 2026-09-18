@@ -26,6 +26,9 @@ Deno.serve(async (req) => {
   try {
     const reviewer = await getReviewer(req);
     if (!reviewer) return json({ error: "not authorized" }, 403);
+    // Ball Ops is its own grantable capability (can_ball_ops), independent
+    // of Email Review / Rifle Signups — see email_reviewer_capability_split.sql.
+    if (!reviewer.canBallOps) return json({ error: "not authorized for ball ops" }, 403);
 
     const { signup_id, field } = await req.json().catch(() => ({}));
     if (!signup_id || !FIELD_LABEL[field]) return json({ error: "signup_id and a valid field are required" }, 400);

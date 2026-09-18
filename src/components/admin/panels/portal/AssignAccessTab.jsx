@@ -10,14 +10,22 @@ import { Btn, Input, Label } from '../../shared/ui';
 // rifle-admin-set) — no new authorization surface, just one shared front end
 // over the three that already exist. Each portal's own tab in this panel
 // remains the place to view rosters, deactivate, or delete an account; this
-// tab only grants.
+// tab only grants (never revokes) — see AUTH tab for that.
+//
+// Email Review / Ball Payments / Rifle Signups used to be ONE bundled
+// "Reviewer Portal" checkbox — one grant meant all three, with no way to
+// give just one (email_reviewer_capability_split.sql). They're three
+// separate checkboxes now, sharing one login+PIN (one admin-set-reviewer-pin
+// call, since they're still the same email_reviewers row) but independently
+// grantable/revocable capabilities.
 
-const PORTALS = [
-  {
-    key: 'reviewer',
-    label: 'Reviewer Portal',
-    hint: 'Email Review (/review) + Ball Payments (/ball/ops) + Rifle Signup viewer — one login, all three.',
-  },
+const REVIEWER_PORTALS = [
+  { key: 'email_review', field: 'can_email_review', label: 'Reviewer — Email Review', hint: '/review — approve or deny outgoing DISPATCH email.' },
+  { key: 'ball_ops', field: 'can_ball_ops', label: 'Reviewer — Ball Payments', hint: '/ball/ops — Military Ball cash + field-trip forms.' },
+  { key: 'rifle_signups', field: 'can_rifle_signups', label: 'Reviewer — Rifle Signups', hint: '/rifle/signup-review — view rifle team interest signups.' },
+];
+
+const OTHER_PORTALS = [
   {
     key: 'female_dress',
     label: 'Ball — Dress Approval',
@@ -41,6 +49,8 @@ const resultRow = (tone) => ({
   color: tone === 'ok' ? P.green : P.red, marginBottom: sp[1],
 });
 
+const INITIAL_CHECKED = { email_review: false, ball_ops: false, rifle_signups: false, female_dress: false, male_guest_attire: false, rifle_admin: false };
+
 export default function AssignAccessTab() {
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
@@ -48,7 +58,7 @@ export default function AssignAccessTab() {
   const [matches, setMatches] = useState([]);
   const [showMatches, setShowMatches] = useState(false);
   const searchTimer = useRef(null);
-  const [checked, setChecked] = useState({ reviewer: false, female_dress: false, male_guest_attire: false, rifle_admin: false });
+  const [checked, setChecked] = useState(INITIAL_CHECKED);
   const [title, setTitle] = useState('');
   const [pin, setPin] = useState('');
   const [activateNow, setActivateNow] = useState(false);
@@ -58,6 +68,7 @@ export default function AssignAccessTab() {
 
   const toggle = (key) => setChecked((c) => ({ ...c, [key]: !c[key] }));
   const anyChecked = Object.values(checked).some(Boolean);
+  const anyReviewer = checked.email_review || checked.ball_ops || checked.rifle_signups;
 
   const runSearch = useCallback((term) => {
     clearTimeout(searchTimer.current);
@@ -93,18 +104,24 @@ export default function AssignAccessTab() {
       setFormErr('Pick at least one portal to grant.');
       return;
     }
-    if (checked.reviewer && !/^\d{4}$/.test(pin)) {
+    if (anyReviewer && !/^\d{4}$/.test(pin)) {
       setFormErr('Reviewer Portal needs a 4-digit PIN.');
       return;
     }
 
     setBusy(true);
     const jobs = [];
-    if (checked.reviewer) {
+    if (anyReviewer) {
+      const granted = REVIEWER_PORTALS.filter((p) => checked[p.key]).map((p) => p.label.replace('Reviewer — ', ''));
       jobs.push({
-        key: 'reviewer', label: 'Reviewer Portal',
+        key: 'reviewer', label: `Reviewer Portal (${granted.join(', ')})`,
         run: () => SB.functions.invoke('admin-set-reviewer-pin', {
-          body: { email: trimmedEmail, display_name: trimmedName, title: title.trim() || null, pin, activate_now: activateNow },
+          body: {
+            email: trimmedEmail, display_name: trimmedName, title: title.trim() || null, pin, activate_now: activateNow,
+            ...(checked.email_review ? { can_email_review: true } : {}),
+            ...(checked.ball_ops ? { can_ball_ops: true } : {}),
+            ...(checked.rifle_signups ? { can_rifle_signups: true } : {}),
+          },
         }),
       });
     }
@@ -139,7 +156,7 @@ export default function AssignAccessTab() {
     setBusy(false);
     setResults(settled);
     if (settled.every((r) => r.ok)) {
-      setChecked({ reviewer: false, female_dress: false, male_guest_attire: false, rifle_admin: false });
+      setChecked(INITIAL_CHECKED);
       setPin(''); setTitle(''); setActivateNow(false);
     }
   }
@@ -147,9 +164,10 @@ export default function AssignAccessTab() {
   return (
     <div style={{ maxWidth: 640 }}>
       <p style={{ fontFamily: mono, fontSize: 12, color: P.mute, margin: `0 0 ${sp[4]}px`, maxWidth: 520 }}>
-        Grant one person any combination of the small staff portals in a single submit. Reviewer Portal needs the person to
-        already have a login — create one on the AUTH tab first if they don't. Dress/Attire and Rifle Team Admin create
-        the sign-in account for you.
+        Grant one person any combination of the small staff portals in a single submit. The three Reviewer boxes share one
+        login+PIN but are independently grantable — checking Ball Payments does not also grant Email Review. Reviewer
+        needs the person to already have a login — create one on the AUTH tab first if they don't. Dress/Attire and
+        Rifle Team Admin create the sign-in account for you.
       </p>
 
       <div style={{ position: 'relative', marginBottom: sp[3] }}>
@@ -197,7 +215,7 @@ export default function AssignAccessTab() {
 
       <Label>PORTALS TO GRANT</Label>
       <div style={{ display: 'flex', flexDirection: 'column', gap: sp[2], margin: `${sp[2]}px 0 ${sp[4]}px` }}>
-        {PORTALS.map((p) => (
+        {[...REVIEWER_PORTALS, ...OTHER_PORTALS].map((p) => (
           <label key={p.key} style={{ ...checkboxRow, borderColor: checked[p.key] ? P.gold : P.hair }}>
             <input type="checkbox" checked={checked[p.key]} onChange={() => toggle(p.key)} style={{ marginTop: 3 }} />
             <div>
@@ -208,10 +226,10 @@ export default function AssignAccessTab() {
         ))}
       </div>
 
-      {checked.reviewer && (
+      {anyReviewer && (
         <div style={{ border: `1px solid ${P.hair}`, padding: sp[3], marginBottom: sp[4] }}>
           <div style={{ fontFamily: mono, fontSize: 10, letterSpacing: '0.1em', textTransform: 'uppercase', color: P.mute, marginBottom: sp[2] }}>
-            Reviewer Portal needs
+            Reviewer login needs
           </div>
           <div style={{ display: 'flex', gap: sp[2], alignItems: 'flex-end', flexWrap: 'wrap' }}>
             <div style={{ flex: 1, minWidth: 140 }}><Label>TITLE (optional)</Label><Input value={title} onChange={(e) => setTitle(e.target.value)} placeholder="SAI, Sgt Kaz…" /></div>

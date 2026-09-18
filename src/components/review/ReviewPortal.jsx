@@ -121,7 +121,7 @@ export default function ReviewPortal() {
 
     const { data: rev } = await SB.from('email_reviewers')
       .select('display_name, must_change_password').eq('email', session.user.email.toLowerCase())
-      .eq('active', true).maybeSingle();
+      .eq('active', true).eq('can_email_review', true).maybeSingle();
 
     if (!rev) {
       setPhase('login');

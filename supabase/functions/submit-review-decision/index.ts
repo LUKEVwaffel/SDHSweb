@@ -29,6 +29,12 @@ Deno.serve(async (req) => {
     if (reviewer.mustChangePassword) {
       return json({ error: "password change required before reviewing" }, 403);
     }
+    // Email review is now its own grantable capability (can_email_review),
+    // independent of Ball Ops / Rifle Signups — a reviewer with only one of
+    // the other two must not be able to approve/deny DISPATCH email.
+    if (!reviewer.canEmailReview) {
+      return json({ error: "not authorized for email review" }, 403);
+    }
 
     const { message_id, decision, feedback } = await req.json().catch(() => ({}));
     if (!message_id || !["approve", "deny"].includes(decision)) {

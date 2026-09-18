@@ -33,6 +33,15 @@ function Badge({ tone = 'mute', children }) {
 
 const DRESS_LABEL = { female_dress: 'Dress Approval', male_guest_attire: 'Male Guest Attire' };
 
+// The three Reviewer capabilities are independent grants sharing one login —
+// email_reviewer_capability_split.sql. Shown/revoked separately, never as
+// one lump "Reviewer" toggle.
+const REVIEWER_CAPS = [
+  { field: 'can_email_review', label: 'Email Review' },
+  { field: 'can_ball_ops', label: 'Ball Ops' },
+  { field: 'can_rifle_signups', label: 'Rifle Signups' },
+];
+
 export default function AuthAccountsTab() {
   const [rows, setRows] = useState(null);
   const [fnMissing, setFnMissing] = useState(false);
@@ -100,9 +109,10 @@ function AuthRow({ r, open, onToggle, onChanged }) {
     setFlash("New temp password below — relay it to them; it won't be shown again.");
   }
 
-  async function setActive(table, active) {
-    setBusy(table); setFlash('');
-    const { data, error } = await SB.functions.invoke('admin-set-portal-active', { body: { table, email: r.email, active } });
+  async function setActive(table, active, field) {
+    const busyKey = field ? `${table}.${field}` : table;
+    setBusy(busyKey); setFlash('');
+    const { data, error } = await SB.functions.invoke('admin-set-portal-active', { body: { table, email: r.email, active, field } });
     setBusy('');
     if (error || data?.error) { setFlash(`Failed: ${data?.error || error.message}`); return; }
     onChanged();
@@ -131,7 +141,10 @@ function AuthRow({ r, open, onToggle, onChanged }) {
         </div>
         <div style={{ display: 'flex', gap: 5, flexWrap: 'wrap', justifyContent: 'flex-end' }}>
           {r.admin_role && <Badge tone="gold">DISPATCH · {r.admin_role}</Badge>}
-          {r.reviewer_active != null && <Badge tone={r.reviewer_active ? 'green' : 'mute'}>Reviewer{r.reviewer_active ? '' : ' (revoked)'}</Badge>}
+          {r.reviewer_active != null && REVIEWER_CAPS.map((c) => {
+            const on = r.reviewer_active && r[c.field];
+            return <Badge key={c.field} tone={on ? 'green' : 'mute'}>{c.label}{on ? '' : ' (revoked)'}</Badge>;
+          })}
           {r.dress_role && <Badge tone={r.dress_active ? 'green' : 'mute'}>{DRESS_LABEL[r.dress_role] || r.dress_role}{r.dress_active ? '' : ' (revoked)'}</Badge>}
           {r.rifle_admin_active != null && <Badge tone={r.rifle_admin_active ? 'green' : 'mute'}>Rifle Admin{r.rifle_admin_active ? '' : ' (revoked)'}</Badge>}
           {!hasAnyPortal && <Badge>no portals</Badge>}
@@ -147,11 +160,15 @@ function AuthRow({ r, open, onToggle, onChanged }) {
           <div>
             <Label>REVOKE A PORTAL</Label>
             <div style={{ display: 'flex', gap: sp[2], flexWrap: 'wrap', marginTop: sp[1] }}>
-              {r.reviewer_active != null && (
-                <Btn size="sm" variant="ghost" disabled={busy === 'email_reviewers'} onClick={() => setActive('email_reviewers', !r.reviewer_active)}>
-                  {busy === 'email_reviewers' ? '…' : r.reviewer_active ? 'REVOKE REVIEWER' : 'RESTORE REVIEWER'}
-                </Btn>
-              )}
+              {r.reviewer_active != null && REVIEWER_CAPS.map((c) => {
+                const on = r.reviewer_active && r[c.field];
+                const busyKey = `email_reviewers.${c.field}`;
+                return (
+                  <Btn key={c.field} size="sm" variant="ghost" disabled={busy === busyKey} onClick={() => setActive('email_reviewers', !on, c.field)}>
+                    {busy === busyKey ? '…' : on ? `REVOKE ${c.label.toUpperCase()}` : `RESTORE ${c.label.toUpperCase()}`}
+                  </Btn>
+                );
+              })}
               {r.dress_role && (
                 <Btn size="sm" variant="ghost" disabled={busy === 'ball_dress_staff'} onClick={() => setActive('ball_dress_staff', !r.dress_active)}>
                   {busy === 'ball_dress_staff' ? '…' : r.dress_active ? `REVOKE ${(DRESS_LABEL[r.dress_role] || r.dress_role).toUpperCase()}` : 'RESTORE DRESS/ATTIRE'}

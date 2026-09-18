@@ -203,12 +203,24 @@ function ReviewerItem({ r, onDone }) {
   );
 }
 
+// Email Review / Ball Ops / Rifle Signups are three independent capabilities
+// on this one row now (email_reviewer_capability_split.sql) — default all
+// three checked here since this form has always meant "give this person the
+// whole reviewer login"; uncheck one if this person genuinely needs less.
+const CAPABILITY_FIELDS = [
+  { key: 'can_email_review', label: 'Email Review' },
+  { key: 'can_ball_ops', label: 'Ball Ops' },
+  { key: 'can_rifle_signups', label: 'Rifle Signups' },
+];
+
 function AddReviewer({ onDone }) {
   const [f, setF] = useState({ display_name: '', email: '', title: '', pin: '' });
+  const [caps, setCaps] = useState({ can_email_review: true, can_ball_ops: true, can_rifle_signups: true });
   const [activateNow, setActivateNow] = useState(false);
   const [busy, setBusy] = useState(false);
   const [flash, setFlash] = useState('');
   const set = (k, v) => setF((s) => ({ ...s, [k]: v }));
+  const toggleCap = (k) => setCaps((c) => ({ ...c, [k]: !c[k] }));
 
   async function submit() {
     if (!f.display_name.trim() || !f.email.trim()) { setFlash('Name and email are required.'); return; }
@@ -221,6 +233,7 @@ function AddReviewer({ onDone }) {
         title: f.title.trim() || null,
         pin: f.pin,
         activate_now: activateNow,
+        ...caps,
       },
     });
     setBusy(false);
@@ -239,6 +252,14 @@ function AddReviewer({ onDone }) {
         <input className="rv-textarea" style={editInput} value={f.email} onChange={(e) => set('email', e.target.value)} placeholder="name@hcde.org" />
         <input className="rv-textarea" style={editInput} value={f.title} onChange={(e) => set('title', e.target.value)} placeholder="Title (SAI, Sgt Kaz…)" />
         <input className="rv-textarea" style={pinInput} value={f.pin} inputMode="numeric" onChange={(e) => set('pin', e.target.value.replace(/\D/g, '').slice(0, 4))} placeholder="4-digit PIN" />
+      </div>
+      <div style={{ display: 'flex', gap: 16, flexWrap: 'wrap', marginBottom: 12 }}>
+        {CAPABILITY_FIELDS.map((c) => (
+          <label key={c.key} style={{ display: 'flex', alignItems: 'center', gap: 8, fontFamily: "'JetBrains Mono', monospace", fontSize: 12, color: 'var(--rv-mute)', cursor: 'pointer' }}>
+            <input type="checkbox" checked={caps[c.key]} onChange={() => toggleCap(c.key)} />
+            {c.label}
+          </label>
+        ))}
       </div>
       <label style={{ display: 'flex', alignItems: 'center', gap: 8, fontFamily: "'JetBrains Mono', monospace", fontSize: 12, color: 'var(--rv-mute)', marginBottom: 12, cursor: 'pointer' }}>
         <input type="checkbox" checked={activateNow} onChange={(e) => setActivateNow(e.target.checked)} />

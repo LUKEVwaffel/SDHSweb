@@ -7,10 +7,11 @@
 -- surface (PIN/password/passkey via /admin), not reachable from this hub.
 --
 -- my_portals() is read-only and additive: it just asks the same is_*()
--- functions each portal's own RLS already trusts (is_reviewer(),
--- is_ball_dress(), is_ball_attire()), so there is no new authorization
--- surface here, no new source of truth, and no way for this hub to disagree
--- with the portal it links to.
+-- functions each portal's own RLS already trusts (is_email_reviewer(),
+-- is_ball_ops_reviewer(), is_rifle_signups_reviewer(), is_ball_dress(),
+-- is_ball_attire()), so there is no new authorization surface here, no new
+-- source of truth, and no way for this hub to disagree with the portal it
+-- links to.
 --
 -- rifle_portal is the ONE exception, and deliberately does NOT use
 -- is_rifle_admin() here: that gate also requires `not must_change_password`
@@ -28,9 +29,21 @@
 create or replace function public.my_portals()
 returns table (key text, label text, description text, path text)
 language sql stable security definer set search_path = public as $$
-  select 'review'::text, 'Reviewer Portal'::text,
-         'Email review, Ball payments, Rifle signups'::text, '/review'::text
-  where public.is_reviewer()
+  -- The old single 'Reviewer Portal' entry granted email review, ball ops,
+  -- and rifle signups together with no way to have just one — now three
+  -- independently gated entries, each to its own real route
+  -- (email_reviewer_capability_split.sql).
+  select 'email_review'::text, 'Email Review'::text,
+         'Approve or deny outgoing DISPATCH email'::text, '/review'::text
+  where public.is_email_reviewer()
+  union all
+  select 'ball_ops'::text, 'Ball Payments'::text,
+         'Track Military Ball cash + field-trip forms'::text, '/ball/ops'::text
+  where public.is_ball_ops_reviewer()
+  union all
+  select 'rifle_signups'::text, 'Rifle Signups'::text,
+         'View rifle team interest signups'::text, '/rifle/signup-review'::text
+  where public.is_rifle_signups_reviewer()
   union all
   select 'ball_dress', 'Ball — Dress Approval',
          'Approve female cadet & guest attire photos', '/ball/dress'

@@ -124,7 +124,7 @@ export default function BallOpsPortal() {
     const { data: { session } } = await SB.auth.getSession();
     if (!session) { setPhase('login'); return; }
     const { data: rev } = await SB.from('email_reviewers')
-      .select('email').eq('email', session.user.email.toLowerCase()).eq('active', true).maybeSingle();
+      .select('email').eq('email', session.user.email.toLowerCase()).eq('active', true).eq('can_ball_ops', true).maybeSingle();
     if (!rev) { setLoginNotice('That account is not an active ops reviewer.'); setPhase('login'); return; }
     await loadAll();
   }, [loadAll]);

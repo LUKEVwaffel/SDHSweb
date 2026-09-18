@@ -59,13 +59,18 @@ where field_trip_form_required = false;
 alter table public.ball_guests enable trigger ball_guests_column_guard_trg;
 alter table public.ball_signups enable trigger ball_signups_column_guard_trg;
 
--- Widen the ops view Kaz/Chief read from.
+-- Widen the ops view Kaz/Chief read from. Carries forward poc_name/poc_email/
+-- poc_phone/personal_email from ball_ops_poc_fields.sql too — that file's
+-- version of this view predates this one and would otherwise get silently
+-- dropped by this DROP+CREATE (same footgun ball_ops_dress_views_fix.sql's
+-- own comment warns about).
 drop view if exists public.ball_guests_ops_view;
 create view public.ball_guests_ops_view
 with (security_barrier = true) as
   select id, signup_id, name, age, guest_type, is_sdhs_jrotc, school_attended,
          friend_payment_method, friend_amount_due, friend_cash_received,
-         field_trip_form_required, field_trip_form_received
+         field_trip_form_required, field_trip_form_received,
+         poc_name, poc_email, poc_phone, personal_email
   from public.ball_guests
   where public.is_reviewer();
 grant select on public.ball_guests_ops_view to authenticated;

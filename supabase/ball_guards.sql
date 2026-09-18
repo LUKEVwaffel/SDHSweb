@@ -71,8 +71,12 @@ end $$;
 -- student) is frozen against ops/dress/attire, same as every other
 -- *_required column — only S-6 or the service role may set it. See
 -- ball_guest_form_required_split.sql.
+-- v9 (2026-09-18): the reviewer branch on BOTH column guards now checks
+-- is_ball_ops_reviewer() instead of is_reviewer() — Ball Ops is its own
+-- grantable capability now, separate from Email Review / Rifle Signups. See
+-- email_reviewer_capability_split.sql.
 create or replace function public.ball_guard_version()
-returns int language sql immutable as $$ select 8 $$;
+returns int language sql immutable as $$ select 9 $$;
 
 
 -- ── is_ball_dress() — female-dress approvers ONLY ──────────────────────────
@@ -99,7 +103,7 @@ $$;
 
 -- ── ball_signups_column_guard() ──────────────────────────────────────────
 -- S-6           → anything.
--- Ops (reviewer)→ cash_received / field_trip_form_received ONLY.
+-- Ops (ball ops reviewer)→ cash_received / field_trip_form_received ONLY.
 -- Dress         → dress_approved / dress_approved_by ONLY.
 -- S-5           → allergy_status / allergy_contacted_at ONLY.
 -- anyone else   → denied.
@@ -122,7 +126,7 @@ begin
     return new;
   end if;
 
-  if public.is_reviewer() then
+  if public.is_ball_ops_reviewer() then
     if new.cadet_school_email    is distinct from old.cadet_school_email
        or new.cadet_name         is distinct from old.cadet_name
        or new.cadet_let_level    is distinct from old.cadet_let_level
@@ -200,7 +204,7 @@ end $$;
 
 -- ── ball_guests_column_guard() ──────────────────────────────────────────
 -- S-6                    → anything.
--- Ops (reviewer)         → friend_cash_received / field_trip_form_received ONLY.
+-- Ops (ball ops reviewer) → friend_cash_received / field_trip_form_received ONLY.
 -- Dress OR attire staff  → dress_approved / dress_approved_by ONLY.
 -- anyone else            → denied.
 create or replace function public.ball_guests_column_guard()
@@ -214,7 +218,7 @@ begin
     return new;
   end if;
 
-  if public.is_reviewer() then
+  if public.is_ball_ops_reviewer() then
     if new.signup_id              is distinct from old.signup_id
        or new.name                is distinct from old.name
        or new.age                 is distinct from old.age

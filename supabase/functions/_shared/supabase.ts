@@ -70,6 +70,9 @@ export async function getCaller(req: Request): Promise<Caller | null> {
 export interface Reviewer {
   email: string;
   mustChangePassword: boolean;
+  canEmailReview: boolean;
+  canBallOps: boolean;
+  canRifleSignups: boolean;
 }
 
 // Identify the signed-in caller as a REVIEWER (email_reviewers, not
@@ -84,6 +87,14 @@ export interface Reviewer {
 // enough to allow before the forced change completes. submit-review-decision
 // is the one caller that checks this field itself before allowing a real
 // approve/deny decision — see that function for why.
+//
+// The three can_* flags (email_reviewer_capability_split.sql) let S-6 grant
+// email review / ball ops / rifle signups independently instead of one
+// blanket "reviewer" toggle. NOT enforced here, same reasoning as
+// mustChangePassword — each surface-specific caller (submit-review-decision,
+// notify-ball-status-update) checks its own flag. PIN self-service
+// (set-/clear-reviewer-pin, complete-first-login) is about the login itself,
+// not any one surface, so those stay ungated by these flags.
 export async function getReviewer(req: Request): Promise<Reviewer | null> {
   const authHeader = req.headers.get("Authorization");
   if (!authHeader) return null;
@@ -100,12 +111,18 @@ export async function getReviewer(req: Request): Promise<Reviewer | null> {
   const svc = serviceClient();
   const { data } = await svc
     .from("email_reviewers")
-    .select("email, must_change_password")
+    .select("email, must_change_password, can_email_review, can_ball_ops, can_rifle_signups")
     .eq("email", email)
     .eq("active", true)
     .maybeSingle();
 
-  return data ? { email, mustChangePassword: !!data.must_change_password } : null;
+  return data ? {
+    email,
+    mustChangePassword: !!data.must_change_password,
+    canEmailReview: !!data.can_email_review,
+    canBallOps: !!data.can_ball_ops,
+    canRifleSignups: !!data.can_rifle_signups,
+  } : null;
 }
 
 export interface RifleAdmin {
