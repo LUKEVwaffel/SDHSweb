@@ -2015,8 +2015,8 @@
     "semantic_hash": ""
   },
   "src/components/ball/ops/BallOpsPortal.jsx": {
-    "mtime": 1789732672.4463682,
-    "ast_hash": "e5f35e45c327014f89df22ef3e12814a",
+    "mtime": 1789733611.7058852,
+    "ast_hash": "204a25a6b383c03e7fcdced6dd8e06bc",
     "semantic_hash": ""
   },
   "src/components/ball/signup/BallSignupWizard.jsx": {
@@ -2435,8 +2435,8 @@
     "semantic_hash": ""
   },
   "src/components/admin/panels/ball/BallOverviewTab.jsx": {
-    "mtime": 1789732559.7247827,
-    "ast_hash": "bd3a4efe2b772b122e974658025efaa2",
+    "mtime": 1789733646.3740714,
+    "ast_hash": "f71027f718e43a35bc33a65671ce210d",
     "semantic_hash": ""
   },
   "src/components/admin/panels/ball/BallReviewerAccountsTab.jsx": {
@@ -2920,13 +2920,13 @@
     "semantic_hash": ""
   },
   "src/components/admin/panels/portal/PortalAccessPanel.jsx": {
-    "mtime": 1789650444.8103852,
-    "ast_hash": "df9654c01544be1e410f6ac668fdbf6a",
+    "mtime": 1789734764.5846777,
+    "ast_hash": "8bf8c9cfb1a28fd5aafe9e85e280d987",
     "semantic_hash": ""
   },
   "src/components/admin/panels/portal/RifleAdminAccountsTab.jsx": {
-    "mtime": 1789650413.351024,
-    "ast_hash": "70bf766542efdcdab1af42113f9d704b",
+    "mtime": 1789733377.1119227,
+    "ast_hash": "7936a9b5c54e0d3778cacaff061a8c96",
     "semantic_hash": ""
   },
   "src/components/portal/PortalHub.jsx": {
@@ -2960,8 +2960,8 @@
     "semantic_hash": ""
   },
   "src/components/rifle/portal/RiflePortal.jsx": {
-    "mtime": 1789651964.9640257,
-    "ast_hash": "ea3bd8a07e6ebd76ad9fde217edb2b44",
+    "mtime": 1789733075.7838285,
+    "ast_hash": "57098e9b335ea038477f5296d9346cb9",
     "semantic_hash": ""
   },
   "src/components/rifle/portal/RiflePortalLogin.jsx": {
@@ -3025,8 +3025,8 @@
     "semantic_hash": ""
   },
   "supabase/portal_hub.sql": {
-    "mtime": 1789649048.4484038,
-    "ast_hash": "aeb3aa4cd7bbe51fbe2ae1f400eda8ce",
+    "mtime": 1789733583.8385348,
+    "ast_hash": "f14b175424057dd87fa4cd9d5dd6040f",
     "semantic_hash": ""
   },
   "supabase/rifle_admin_portal.sql": {
@@ -3040,13 +3040,23 @@
     "semantic_hash": ""
   },
   "supabase/ball_guest_form_required_split.sql": {
-    "mtime": 1789732718.7229774,
-    "ast_hash": "08b2b03a738aa78691051648ea8ad8c5",
+    "mtime": 1789733272.8968937,
+    "ast_hash": "37f09e906d35d907fb39d64789fb0663",
     "semantic_hash": ""
   },
   "supabase/optic_push_auto.sql": {
     "mtime": 1789723628.0734131,
     "ast_hash": "d3de246db1e200e5d6859412b64ac7fa",
+    "semantic_hash": ""
+  },
+  "src/components/admin/panels/portal/AssignAccessTab.jsx": {
+    "mtime": 1789734777.4609647,
+    "ast_hash": "0dfdd8dd419c4e2ad7e09e304ca9637e",
+    "semantic_hash": ""
+  },
+  "supabase/functions/rifle-admin-delete/index.ts": {
+    "mtime": 1789733366.2808602,
+    "ast_hash": "281e56ecdde7e3271357e4b43e272f0c",
     "semantic_hash": ""
   }
 }
