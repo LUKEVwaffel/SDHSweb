@@ -182,10 +182,18 @@ export default function AssignAccessTab() {
         )}
       </div>
 
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: sp[2], marginBottom: sp[4] }}>
-        <div><Label>NAME</Label><Input value={name} onChange={(e) => setName(e.target.value)} placeholder="Full name" /></div>
-        <div><Label>EMAIL</Label><Input value={email} onChange={(e) => setEmail(e.target.value)} placeholder="name@hcde.org" /></div>
-      </div>
+      {name && email && (
+        <div style={{ display: 'flex', alignItems: 'center', gap: sp[2], marginBottom: sp[4], fontFamily: mono, fontSize: 12, color: P.mute }}>
+          Selected: <span style={{ color: P.cream }}>{name}</span> — {email}
+          <button
+            type="button"
+            onClick={() => { setName(''); setEmail(''); }}
+            style={{ background: 'none', border: 'none', color: P.gold, fontFamily: mono, fontSize: 11, cursor: 'pointer', padding: 0 }}
+          >
+            change
+          </button>
+        </div>
+      )}
 
       <Label>PORTALS TO GRANT</Label>
       <div style={{ display: 'flex', flexDirection: 'column', gap: sp[2], margin: `${sp[2]}px 0 ${sp[4]}px` }}>
