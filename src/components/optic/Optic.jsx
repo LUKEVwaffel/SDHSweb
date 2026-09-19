@@ -406,14 +406,14 @@ function OpticLocked({ opensAt, eventId }) {
           </p>
 
           <div className="rhea-lock-cards">
-            {isStandalone() && <ReinstallNotice />}
+            {isStandalone() ? <ReinstallNotice /> : <InstallNudge />}
             <NotificationCard eventId={eventId} />
             <WhatsNew />
           </div>
 
           {!isStandalone() && (
             <p className="rhea-lock-hint">
-              Add OPTIC to your home screen now so it&apos;s one tap when the feed opens.
+              One tap installs it above, or install manually from your browser menu.
             </p>
           )}
         </>
