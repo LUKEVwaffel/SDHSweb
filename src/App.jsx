@@ -70,7 +70,7 @@ import LukePwaRoute from './components/optic/LukePwa';
 import RaiderTv from './components/raidertv/RaiderTv';
 import RaiderRemote from './components/raidertv/RaiderRemote';
 import WatchingZone from './components/watchzone/WatchingZone';
-import WatchZoneBanner from './components/WatchZoneBanner';
+import WatchZonePopup from './components/WatchZonePopup';
 import BallTv from './components/balltv/BallTv';
 
 const TABS = [
@@ -149,10 +149,10 @@ export default function App() {
           <>
             {/* Homepage-only takeovers — mounted here, never on a standalone route.
                 BallSignupPopup + OpticPopup suppressed for now (see imports
-                above) so CongratsPopup is the only one that fires.
-                WatchZoneBanner is a non-blocking bar, not a takeover — safe
-                to show alongside it. */}
-            <WatchZoneBanner />
+                above) so CongratsPopup is the only site-wide one; WatchZonePopup
+                fires after it (longer delay) and stacks on top if Congrats is
+                still up — same layering RemembrancePopup used. */}
+            <WatchZonePopup />
             <Hero />
             <OpticHeroStrip />
             {/* "Picture of the Comp" vote band taken down 2026-09-08 — restore <CompPhotoBand /> to bring it back. */}

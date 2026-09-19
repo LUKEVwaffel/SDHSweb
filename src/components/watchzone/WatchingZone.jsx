@@ -67,40 +67,55 @@ export default function WatchingZone() {
     };
   }, []);
 
+  // iOS Safari has no element-level Fullscreen API — only <video> itself can
+  // go fullscreen there, via the legacy webkit method. Everywhere else
+  // (including desktop Safari) the standard/webkit container API works, which
+  // is what keeps the slow-mo rail + title visible while fullscreen.
   function toggleFullscreen() {
     const el = stageRef.current;
-    if (!el) return;
+    const v = videoRef.current;
     if (getFullscreenElement()) {
       (document.exitFullscreen || document.webkitExitFullscreen)?.call(document);
-    } else {
+      return;
+    }
+    const canContainerFullscreen = document.fullscreenEnabled || document.webkitFullscreenEnabled;
+    if (canContainerFullscreen && el) {
       (el.requestFullscreen || el.webkitRequestFullscreen)?.call(el);
+    } else if (v?.webkitEnterFullscreen) {
+      v.webkitEnterFullscreen();
     }
   }
 
   return (
     <div style={{ minHeight: '100vh', background: P.ink, fontFamily: inter }}>
+      <style>{`
+        .wz-grid { display: grid; grid-template-columns: minmax(0,1fr) 300px; gap: 24px; }
+        @media (max-width: 760px) {
+          .wz-grid { grid-template-columns: 1fr; gap: 28px; }
+        }
+      `}</style>
+
       <div style={{
         position: 'sticky', top: 0, zIndex: 5, background: 'rgba(6,16,31,0.92)',
         backdropFilter: 'blur(6px)', borderBottom: `1px solid ${P.hair}`,
-        padding: `${sp[4]}px ${sp[5]}px`, display: 'flex', alignItems: 'baseline', gap: sp[3], flexWrap: 'wrap',
+        padding: `${sp[3]}px ${sp[4]}px`, display: 'flex', alignItems: 'baseline', gap: sp[3], flexWrap: 'wrap',
       }}>
         <a href="/" style={{
-          fontFamily: mono, fontSize: fs.tiny, letterSpacing: '0.2em', color: P.mute, textDecoration: 'none',
+          fontFamily: mono, fontSize: fs.tiny, letterSpacing: '0.16em', color: P.mute, textDecoration: 'none',
         }}>&larr; TROJAN BATTALION</a>
         <div style={{
-          fontFamily: mono, fontSize: fs.tiny, letterSpacing: '0.3em', color: P.gold, textTransform: 'uppercase',
+          fontFamily: mono, fontSize: fs.tiny, letterSpacing: '0.24em', color: P.gold, textTransform: 'uppercase',
         }}>Watching Zone</div>
         <h1 style={{
           margin: '0 0 0 auto', fontFamily: fraunces, fontStyle: 'italic', fontWeight: 700, color: P.cream,
-          fontSize: 'clamp(20px,2.6vw,30px)',
+          fontSize: 'clamp(18px,5vw,30px)',
         }}>
           Raider Film
         </h1>
       </div>
 
-      <div style={{
-        maxWidth: 1240, margin: '0 auto', padding: `${sp[6]}px ${sp[5]}px ${sp[16]}px`,
-        display: 'grid', gridTemplateColumns: 'minmax(0,1fr) 300px', gap: sp[6],
+      <div className="wz-grid" style={{
+        maxWidth: 1240, margin: '0 auto', padding: `${sp[5]}px ${sp[4]}px ${sp[16]}px`,
       }}>
         {/* Stage */}
         <div>
@@ -138,7 +153,7 @@ export default function WatchingZone() {
                 aria-label={isFullscreen ? 'Exit full screen' : 'Full screen'}
                 style={{
                   position: 'absolute', top: sp[3], right: sp[3], zIndex: 2,
-                  width: 40, height: 40, display: 'flex', alignItems: 'center', justifyContent: 'center',
+                  width: 44, height: 44, display: 'flex', alignItems: 'center', justifyContent: 'center',
                   background: 'rgba(6,16,31,0.72)', border: `1px solid ${P.hair}`, borderRadius: radius.sm,
                   color: P.cream, cursor: 'pointer', backdropFilter: 'blur(4px)',
                 }}
