@@ -610,6 +610,20 @@ function SubEvents({ eventId, subEvents, counts, emailRef, refreshSubs, setActio
     refreshSubs();
   }
 
+  // photos.sub_event_id is ON DELETE SET NULL (rhea_comp_photos.sql), so a
+  // delete here never touches the photos themselves — it just un-tags them
+  // back to "untagged" instead of erroring or cascading.
+  async function deleteSubEvent(id, name, n) {
+    const warn = n > 0
+      ? `Delete "${name}"? ${n} photo${n === 1 ? '' : 's'} tagged to it will go back to untagged, not deleted.`
+      : `Delete "${name}"?`;
+    if (!window.confirm(warn)) return;
+    haptic(10);
+    const { error } = await SB.from('raider_sub_events').delete().eq('id', id);
+    if (error) { setActionErr(error.message || 'Could not delete sub-event.'); return; }
+    refreshSubs();
+  }
+
   async function retag() {
     if (!eventId) { setActionErr('No active event set. Set optic_config.active_event_id first.'); return; }
     setRetagging(true); setRetagMsg(''); setActionErr('');
@@ -733,6 +747,13 @@ function SubEvents({ eventId, subEvents, counts, emailRef, refreshSubs, setActio
               {windowed && (
                 <button className="lp-btn lp-btn--ghost lp-btn--sm" onClick={() => clearWindow(s.id)}>CLEAR TIME</button>
               )}
+              <button
+                className="lp-btn lp-btn--danger lp-btn--sm"
+                onClick={() => deleteSubEvent(s.id, s.name, n)}
+                aria-label={`Delete ${s.name}`}
+              >
+                DELETE
+              </button>
             </div>
           );
         })}

@@ -1,21 +1,31 @@
 -- ============================================================================
--- OPTIC 2.0 — East Hamilton Raider Competition sub-events (2026-09-19), same
--- 5 MOI stations x 2 teams SDHS fields as the Spring Hill template
--- (optic_spring_hill_events.sql) this is copied from. Run once; guarded by
--- NOT EXISTS so re-running doesn't duplicate rows. Times are NULL — Luke
--- tap-stamps starts_at/ends_at live in /lukepwa's EVENTS tab as each heat
--- actually runs, same as every prior comp.
+-- OPTIC 2.0 — East Hamilton Raider Competition sub-events (2026-09-19).
+--
+-- 2026-09-18: first pass guessed 5 stations copied from Spring Hill's MOI.
+-- 2026-09-19 (day-of): Luke gave the real 7-station list below — the guess
+-- was wrong. Corrected live via a one-off delete+reinsert (zero photos had
+-- been tagged to the wrong rows yet, confirmed before deleting), and this
+-- file updated to match so it stays an accurate record. Re-running it is
+-- guarded by NOT EXISTS so it won't duplicate the now-correct rows; it will
+-- NOT remove the old wrong ones on its own if this file is re-run on a
+-- machine that still has them — that cleanup already happened live.
+--
+-- Times are NULL — Luke tap-stamps starts_at/ends_at live in /lukepwa's
+-- EVENTS tab as each heat actually runs, same as every prior comp. Each
+-- team runs all 7 stations, per Luke.
 -- ============================================================================
 
 do $$
 declare
   v_event_id uuid := '0d0eef63-eff6-4988-bc4a-b9686ccc9dd4'; -- East Hamilton Raider Competition
   v_stations text[] := array[
-    'Physical Team Test (PTT)',
-    'Humvee Load and Push',
-    'Cross Country Rescue (CCR)',
-    'One Rope Bridge',
-    'Obstacle Course (The Juggernaut)'
+    'One Rope',
+    'Hurricane Haul',
+    'Hurricane Hill',
+    'Hurricane Hell',
+    'Team Photo',
+    'The Murph',
+    'Family Fun Run'
   ];
   v_teams text[] := array['male', 'coed'];
   v_station text;
