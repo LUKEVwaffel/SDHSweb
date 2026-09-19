@@ -19,8 +19,17 @@ function getFullscreenElement() {
   return document.fullscreenElement || document.webkitFullscreenElement || null;
 }
 
+// Curated allowlist — the coaching library (raider_videos) has years of
+// practice clips DISPATCH manages; this public page only ever shows what's
+// explicitly featured here. Add an id to feature another clip.
+const FEATURED_IDS = new Set([
+  '86839e28-6160-42d0-9d49-46adca8c345a', // OC — Part 1
+  '3252c9a8-6e2f-4578-8649-70d184f0029e', // OC — Part 2
+]);
+
 export default function WatchingZone() {
-  const { videos, loading } = useRaiderVideos();
+  const { videos: allVideos, loading } = useRaiderVideos();
+  const videos = useMemo(() => allVideos.filter((v) => FEATURED_IDS.has(v.id)), [allVideos]);
   const [activeId, setActiveId] = useState(null);
   const [rate, setRate] = useState(1);
   const [isFullscreen, setIsFullscreen] = useState(false);
