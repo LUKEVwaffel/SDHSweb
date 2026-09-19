@@ -145,7 +145,6 @@ function OpticApp() {
     <div className="rhea">
       <div className="rhea-shell">
         <Header onHelp={() => setWalk(true)} />
-        <BetaBanner />
         {gate.loading ? (
           <div className="rhea-wrap"><div className="rhea-feed-msg">LOADING…</div></div>
         ) : !gate.open ? (
@@ -216,20 +215,6 @@ function OpticApp() {
       )}
 
       <PwaUpdateBar show={updateReady} />
-    </div>
-  );
-}
-
-function BetaBanner() {
-  return (
-    <div className="rhea-beta" role="note">
-      <div className="rhea-beta-in">
-        <span className="rhea-beta-tag">BETA</span>
-        <span className="rhea-beta-txt">
-          OPTIC is a test run for the SDHS JROTC comp. We may ask you
-          for quick feedback afterward.
-        </span>
-      </div>
     </div>
   );
 }
