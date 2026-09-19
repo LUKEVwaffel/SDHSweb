@@ -1,17 +1,21 @@
 // Edge function: optic-send-push
-// Two callers, both authenticated, no anonymous path:
+// Two callers:
 //   1. Admin-triggered from /lukepwa (SubEvents tab, "SEND ALERT" — see
 //      LukePwa.jsx) for ad-hoc net-control messages unrelated to photos
 //      ("CCR over by the water jugs in 10 min"). Verified via a real admin
 //      user JWT + admin_roles lookup (getCaller below).
 //   2. Automatic photo-post alerts, queued by pg_net from
 //      generate_optic_push_alerts() (supabase/optic_push_auto.sql), itself
-//      fired every 2 minutes by pg_cron. Verified the same way
-//      send-uniform-reminders verifies pg_net: the bearer token must equal
-//      this project's own SUPABASE_SERVICE_ROLE_KEY exactly — that's already
-//      a valid Supabase JWT so the platform's jwt-verification gate passes,
-//      and checking it against the literal secret means nothing else can
-//      trigger a real send by guessing a URL.
+//      fired every 2 minutes by pg_cron. Verified against a dedicated
+//      shared secret, OPTIC_PUSH_CRON_SECRET (set here via `secrets set`,
+//      and stashed in Vault under the same name so the SQL side can read
+//      it) — NOT SUPABASE_SERVICE_ROLE_KEY. Found live 2026-09-19: this
+//      project's edge runtime injects the newer sb_secret_... key under
+//      that env var, not the legacy JWT `supabase projects api-keys`
+//      returns (219 chars vs 41, confirmed via a masked runtime diagnostic
+//      before shipping this), so comparing pg_net's bearer against it can
+//      never match — a dedicated secret sidesteps depending on which
+//      Supabase key format happens to be injected at all.
 // Sends one web-push notification to every device subscribed for the given
 // event. Dead subscriptions (410/404 from the push service — the browser
 // uninstalled or the user cleared data) are deleted so the table stays clean
@@ -21,10 +25,11 @@
 // the Supabase Dashboard's function editor if the local CLI's bundler is
 // unavailable — see supabase/functions/README_DEPLOY.md.
 //
-// Deploy WITH jwt (default) — both callers present a valid Supabase JWT,
-// unlike the pre-auth ball-* notify functions:
+// Deploy WITH jwt (default) — both callers present a valid Supabase JWT or
+// this function's own shared secret, unlike the pre-auth ball-* notify
+// functions:
 //   supabase functions deploy optic-send-push
-//   supabase secrets set VAPID_PUBLIC_KEY=... VAPID_PRIVATE_KEY=... VAPID_SUBJECT=mailto:you@example.com
+//   supabase secrets set VAPID_PUBLIC_KEY=... VAPID_PRIVATE_KEY=... VAPID_SUBJECT=mailto:you@example.com OPTIC_PUSH_CRON_SECRET=...
 import webpush from "npm:web-push@3";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
@@ -72,8 +77,8 @@ Deno.serve(async (req) => {
   if (req.method !== "POST") return json({ error: "method not allowed" }, 405);
 
   const authHeader = req.headers.get("Authorization") ?? "";
-  const serviceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");
-  const isInternalCron = !!serviceKey && authHeader === `Bearer ${serviceKey}`;
+  const cronSecret = Deno.env.get("OPTIC_PUSH_CRON_SECRET");
+  const isInternalCron = !!cronSecret && authHeader === `Bearer ${cronSecret}`;
   if (!isInternalCron) {
     const caller = await getCaller(req);
     if (!caller || !caller.role) return json({ error: "not authorised" }, 403);

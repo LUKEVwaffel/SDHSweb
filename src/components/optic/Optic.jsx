@@ -7,7 +7,7 @@ import { useOpticGate } from '../../hooks/useOpticGate';
 import { useOpticConfig } from '../../hooks/useOpticConfig';
 import {
   uploadOpticPhoto, isAllowedImage, OPTIC_ACCEPT_ATTR, REJECT_MESSAGE,
-  feedAttribution, feedChip, downloadPhoto,
+  feedAttribution, feedChip, downloadPhoto, downloadPhotos,
   hasOnboardedOptic, hasWalkthroughOptic, markWalkthroughOptic,
   hasInstallDismissedOptic, markInstallDismissedOptic,
 } from '../../lib/opticComp';
@@ -69,7 +69,11 @@ function OpticApp() {
   const likes = useOpticLikes(photos);
   const [reel, setReel] = useState(null); // index into visiblePhotos, or null
   const [teamFilter, setTeamFilter] = useState('all');
+  const [subEventFilter, setSubEventFilter] = useState('all');
   const [walk, setWalk] = useState(() => isStandalone() && !hasWalkthroughOptic());
+  const [selectMode, setSelectMode] = useState(false);
+  const [selected, setSelected] = useState(() => new Set());
+  const [batchState, setBatchState] = useState('idle'); // idle | saving | error
   const updateReady = usePwaUpdate();
 
   const showWalk = walk && gate.open;
@@ -83,10 +87,59 @@ function OpticApp() {
     male: photos.filter((p) => p.raider_team === 'male' || p.raider_team === 'both').length,
     coed: photos.filter((p) => p.raider_team === 'coed' || p.raider_team === 'both').length,
   }), [photos]);
+
+  // Filter by sub-event (Rope Bridge, CCR, etc.) alongside team — parent
+  // ask (Luke's mom), the natural complement to the team chips: a parent
+  // wants their cadet's specific event, not the whole day. Options are
+  // derived from whatever sub-events actually have tagged photos right now
+  // rather than a separate live query, same approach teamCounts already
+  // uses. Only rendered when there's more than one to choose from.
+  const subEventOptions = useMemo(() => {
+    const seen = new Map();
+    for (const p of photos) {
+      if (p.sub_event_id && p.raider_sub_events?.name) seen.set(p.sub_event_id, p.raider_sub_events.name);
+    }
+    return Array.from(seen, ([id, name]) => ({ id, name })).sort((a, b) => a.name.localeCompare(b.name));
+  }, [photos]);
+  const subEventCounts = useMemo(() => {
+    const counts = { all: photos.length };
+    for (const opt of subEventOptions) counts[opt.id] = 0;
+    for (const p of photos) if (p.sub_event_id) counts[p.sub_event_id] = (counts[p.sub_event_id] || 0) + 1;
+    return counts;
+  }, [photos, subEventOptions]);
+
   const visiblePhotos = useMemo(() => {
-    if (teamFilter === 'all') return photos;
-    return photos.filter((p) => p.raider_team === teamFilter || p.raider_team === 'both');
-  }, [photos, teamFilter]);
+    let list = photos;
+    if (teamFilter !== 'all') list = list.filter((p) => p.raider_team === teamFilter || p.raider_team === 'both');
+    if (subEventFilter !== 'all') list = list.filter((p) => p.sub_event_id === subEventFilter);
+    return list;
+  }, [photos, teamFilter, subEventFilter]);
+
+  function toggleSelectMode() {
+    setSelectMode((on) => !on);
+    setSelected(new Set());
+    setBatchState('idle');
+  }
+
+  function toggleSelected(id) {
+    setSelected((prev) => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id); else next.add(id);
+      return next;
+    });
+  }
+
+  async function downloadSelected() {
+    const chosen = visiblePhotos.filter((p) => selected.has(p.id));
+    if (!chosen.length || batchState === 'saving') return;
+    setBatchState('saving');
+    const result = await downloadPhotos(chosen);
+    setBatchState(result.ok ? 'idle' : 'error');
+    // saved === 0 with ok: true means the user cancelled the share sheet on
+    // purpose — leave the selection in place so they can just tap DOWNLOAD
+    // again instead of losing their picks.
+    if (result.ok && result.saved > 0) { setSelectMode(false); setSelected(new Set()); }
+  }
 
   return (
     <div className="rhea">
@@ -111,15 +164,42 @@ function OpticApp() {
               filter={teamFilter}
               onFilterChange={setTeamFilter}
               counts={teamCounts}
+              subEventOptions={subEventOptions}
+              subEventFilter={subEventFilter}
+              onSubEventFilterChange={setSubEventFilter}
+              subEventCounts={subEventCounts}
               pendingCount={pendingCount}
               onShowNew={() => {
                 showNew();
                 window.scrollTo({ top: 0, behavior: 'smooth' });
               }}
+              selectMode={selectMode}
+              onToggleSelectMode={toggleSelectMode}
+              selected={selected}
+              onToggleSelected={toggleSelected}
             />
           </div>
         )}
       </div>
+
+      {selectMode && (
+        <div className="rhea-batchbar">
+          <span className="rhea-batchbar-count">{selected.size} SELECTED</span>
+          <div className="rhea-batchbar-actions">
+            <button className="rhea-btn rhea-btn--ghost" onClick={toggleSelectMode}>CANCEL</button>
+            <button
+              className="rhea-btn"
+              onClick={downloadSelected}
+              disabled={!selected.size || batchState === 'saving'}
+            >
+              {batchState === 'saving' ? 'SAVING…' : `DOWNLOAD ${selected.size || ''}`.trim()}
+            </button>
+          </div>
+          {batchState === 'error' && (
+            <span className="rhea-batchbar-err">Save failed, try again.</span>
+          )}
+        </div>
+      )}
 
       {gate.open && reel !== null && visiblePhotos[reel] && (
         <Reel
@@ -310,7 +390,7 @@ function OpticLocked({ opensAt, eventId }) {
         <>
           <h1 className="rhea-lock-h">The feed opens <span className="accent">{when}</span>.</h1>
 
-          <div className="rhea-cd" role="timer" aria-label="Time until the feed opens">
+          <div className="rhea-cd" data-urgent={ms > 0 && ms < 3_600_000} role="timer" aria-label="Time until the feed opens">
             {days > 0 && (
               <span className="rhea-cd-unit"><b>{days}</b><i>{days === 1 ? 'day' : 'days'}</i></span>
             )}
@@ -318,7 +398,7 @@ function OpticLocked({ opensAt, eventId }) {
             <span className="rhea-cd-sep">:</span>
             <span className="rhea-cd-unit"><b>{pad(mins)}</b><i>min</i></span>
             <span className="rhea-cd-sep">:</span>
-            <span className="rhea-cd-unit"><b>{pad(secs)}</b><i>sec</i></span>
+            <span className="rhea-cd-unit rhea-cd-tick"><b>{pad(secs)}</b><i>sec</i></span>
           </div>
 
           <p className="rhea-lock-p">
@@ -374,7 +454,7 @@ function Header({ onHelp }) {
         <OpticGlyph className="rhea-glyph" />
         <div>
           <div className="rhea-kick">SDHS JROTC · OPTIC</div>
-          <div className="rhea-title">SPRING HILL RAIDER CHALLENGE</div>
+          <div className="rhea-title">EAST HAMILTON RAIDER COMPETITION</div>
         </div>
         <div className="rhea-hdr-right">
           <button className="rhea-help" onClick={onHelp} aria-label="Show walkthrough">?</button>
@@ -587,7 +667,11 @@ function UploadCard({ eventId }) {
   );
 }
 
-function Feed({ photos, loading, error, likes, onOpen, filter, onFilterChange, counts, pendingCount = 0, onShowNew }) {
+function Feed({
+  photos, loading, error, likes, onOpen, filter, onFilterChange, counts, pendingCount = 0, onShowNew,
+  subEventOptions = [], subEventFilter = 'all', onSubEventFilterChange, subEventCounts = {},
+  selectMode = false, onToggleSelectMode, selected, onToggleSelected,
+}) {
   return (
     <section>
       <div className="rhea-live">
@@ -596,6 +680,11 @@ function Feed({ photos, loading, error, likes, onOpen, filter, onFilterChange, c
         <span className="rhea-live-count">
           {photos.length} PHOTO{photos.length === 1 ? '' : 'S'}
         </span>
+        {photos.length > 0 && (
+          <button className="rhea-select-toggle" data-on={selectMode} onClick={onToggleSelectMode}>
+            {selectMode ? 'DONE' : 'SELECT'}
+          </button>
+        )}
       </div>
 
       {pendingCount > 0 && (
@@ -618,6 +707,30 @@ function Feed({ photos, loading, error, likes, onOpen, filter, onFilterChange, c
         ))}
       </div>
 
+      {subEventOptions.length > 1 && (
+        <div className="rhea-fchips" role="group" aria-label="Filter by event">
+          <button
+            className="rhea-fchip"
+            data-on={subEventFilter === 'all'}
+            aria-pressed={subEventFilter === 'all'}
+            onClick={() => onSubEventFilterChange('all')}
+          >
+            ALL EVENTS<span className="rhea-fchip-n">{subEventCounts.all ?? 0}</span>
+          </button>
+          {subEventOptions.map((o) => (
+            <button
+              key={o.id}
+              className="rhea-fchip"
+              data-on={subEventFilter === o.id}
+              aria-pressed={subEventFilter === o.id}
+              onClick={() => onSubEventFilterChange(o.id)}
+            >
+              {o.name.toUpperCase()}<span className="rhea-fchip-n">{subEventCounts[o.id] ?? 0}</span>
+            </button>
+          ))}
+        </div>
+      )}
+
       {loading && (
         <div className="rhea-feed">
           {[0, 1, 2].map((i) => (
@@ -635,7 +748,9 @@ function Feed({ photos, loading, error, likes, onOpen, filter, onFilterChange, c
 
       {!loading && !error && photos.length === 0 && (
         <div className="rhea-empty">
-          {filter === 'all' ? 'No photos yet. Be the first, add one above.' : 'No photos tagged to this team yet.'}
+          {filter === 'all' && subEventFilter === 'all'
+            ? 'No photos yet. Be the first, add one above.'
+            : 'No photos match this filter yet.'}
         </div>
       )}
 
@@ -650,6 +765,9 @@ function Feed({ photos, loading, error, likes, onOpen, filter, onFilterChange, c
               likeCount={likes.countFor(p)}
               onLike={() => likes.toggle(p)}
               onOpen={() => onOpen(i)}
+              selectMode={selectMode}
+              selected={selected?.has(p.id)}
+              onToggleSelected={() => onToggleSelected(p.id)}
             />
           ))}
         </div>
@@ -658,26 +776,37 @@ function Feed({ photos, loading, error, likes, onOpen, filter, onFilterChange, c
   );
 }
 
-function FeedItem({ photo, pos, liked, likeCount, onLike, onOpen }) {
+function FeedItem({ photo, pos, liked, likeCount, onLike, onOpen, selectMode, selected, onToggleSelected }) {
   const chip = feedChip(photo);
   const who = feedAttribution(photo);
   const isLuke = photo.source === 'luke';
   return (
     <figure className="rhea-item" style={{ '--d': `${Math.min(pos, 8) * 45}ms` }}>
       <div className="rhea-shot-wrap">
-        <button className="rhea-shot" onClick={onOpen} aria-label="Open photo reel">
+        <button
+          className="rhea-shot"
+          onClick={selectMode ? onToggleSelected : onOpen}
+          aria-label={selectMode ? (selected ? 'Deselect photo' : 'Select photo') : 'Open photo reel'}
+        >
           <img src={photo.photo_url} alt="" loading="lazy" />
         </button>
-        <button
-          className="rhea-like"
-          data-on={liked}
-          onClick={(e) => { e.stopPropagation(); onLike(); }}
-          aria-pressed={liked}
-          aria-label={liked ? 'Unlike photo' : 'Like photo'}
-        >
-          <span className="rhea-like-ico">{liked ? '♥' : '♡'}</span>
-          {likeCount > 0 && <span>{likeCount}</span>}
-        </button>
+        {selectMode && (
+          <span className="rhea-select-mark" data-on={selected} aria-hidden="true">
+            {selected ? '✓' : ''}
+          </span>
+        )}
+        {!selectMode && (
+          <button
+            className="rhea-like"
+            data-on={liked}
+            onClick={(e) => { e.stopPropagation(); onLike(); }}
+            aria-pressed={liked}
+            aria-label={liked ? 'Unlike photo' : 'Like photo'}
+          >
+            <span className="rhea-like-ico">{liked ? '♥' : '♡'}</span>
+            {likeCount > 0 && <span>{likeCount}</span>}
+          </button>
+        )}
       </div>
       <figcaption className="rhea-cap">
         <span className="rhea-who" data-luke={isLuke}>{who}</span>

@@ -22,16 +22,18 @@
 -- confirmed-delivery time. Same tradeoff generate_opticsend_drafts() already
 -- accepts for its idempotency marker.
 --
--- ⚠ MANUAL STEP REQUIRED BEFORE THIS WORKS — run once, separately, with your
--- REAL service_role key (Project Settings → API → service_role). NEVER put
--- the actual key in this file / commit it:
+-- ⚠ MANUAL STEP REQUIRED BEFORE THIS WORKS — run once, separately, with a
+-- dedicated random secret (NOT the service_role key — see this file's
+-- companion edge function header for why that doesn't work on this
+-- project). Generate one, then:
 --
---   select vault.create_secret('<paste service_role key here>', 'service_role_key');
+--   supabase secrets set UNIFORM_REMINDERS_CRON_SECRET=<the value>
+--   select vault.create_secret('<the same value>', 'uniform_reminders_cron_secret');
+--   supabase functions deploy send-uniform-reminders --no-verify-jwt
 --
--- net.http_post authenticates to the edge function using that key (pulled
--- from Vault at call time, never stored in plain SQL) — the edge function
--- deploys WITH jwt verification (default), and a service-role bearer token
--- is itself a valid Supabase JWT, so it passes that gate cleanly.
+-- net.http_post authenticates to the edge function using that secret
+-- (pulled from Vault at call time, never stored in plain SQL). Already done
+-- for this project as of 2026-09-19.
 -- ============================================================================
 
 create extension if not exists pg_net;
@@ -55,13 +57,13 @@ set search_path = public
 as $$
 declare
   v_fn_url     constant text := 'https://bjgyvmdzcymruunzavni.supabase.co/functions/v1/send-uniform-reminders';
-  v_svc_key    text;
+  v_cron_secret text;
   r            record;
   n            int := 0;
 begin
-  select decrypted_secret into v_svc_key from vault.decrypted_secrets where name = 'service_role_key';
-  if v_svc_key is null then
-    raise notice 'service_role_key not in Vault yet — see header comment. Skipping this run.';
+  select decrypted_secret into v_cron_secret from vault.decrypted_secrets where name = 'uniform_reminders_cron_secret';
+  if v_cron_secret is null then
+    raise notice 'uniform_reminders_cron_secret not in Vault yet — see header comment. Skipping this run.';
     return 0;
   end if;
 
@@ -82,7 +84,7 @@ begin
 
     perform net.http_post(
       url     := v_fn_url,
-      headers := jsonb_build_object('Authorization', 'Bearer ' || v_svc_key, 'Content-Type', 'application/json'),
+      headers := jsonb_build_object('Authorization', 'Bearer ' || v_cron_secret, 'Content-Type', 'application/json'),
       body    := jsonb_build_object('event_id', r.id, 'offset', r.offset_label)
     );
     n := n + 1;

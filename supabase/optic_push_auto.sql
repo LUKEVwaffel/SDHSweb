@@ -11,14 +11,25 @@
 -- public photos on its own and fires the alert.
 --
 -- Depends on: optic_push.sql (push_subscriptions), photo_hub_v2.sql
--- (public.photos), optic-send-push edge fn (send side, unchanged — this
--- just adds a second, automated caller alongside the existing manual
--- "SEND ALERT" net-control button, which stays for ad-hoc messages
--- unrelated to photos, e.g. "CCR over by the water jugs in 10 min"),
--- uniform_reminders.sql (pg_net + vault.decrypted_secrets pattern reused
--- as-is — if that file's `vault.create_secret('...', 'service_role_key')`
--- step has already been run once for this project, nothing further to do
--- here).
+-- (public.photos), optic-send-push edge fn (dual auth: a real admin JWT for
+-- the manual "SEND ALERT" net-control button, OR this file's own dedicated
+-- OPTIC_PUSH_CRON_SECRET for pg_net). pg_net + vault.decrypted_secrets
+-- pattern borrowed from uniform_reminders.sql, but NOT the same secret —
+-- found live 2026-09-19 that this project's edge runtime injects
+-- SUPABASE_SERVICE_ROLE_KEY as the newer sb_secret_... key, not the legacy
+-- JWT `service_role_key` in Vault holds, so a bearer-equality check against
+-- it can never match (confirmed via a masked runtime diagnostic before
+-- shipping this). Fix: a purpose-built secret instead of hoping a Supabase
+-- platform key format lines up. One-time setup, already done for this
+-- project — repeat only if OPTIC_PUSH_CRON_SECRET is ever rotated:
+--   supabase secrets set OPTIC_PUSH_CRON_SECRET=<random 64-hex value>
+--   select vault.create_secret('<same value>', 'optic_push_cron_secret');
+--   supabase functions deploy optic-send-push --no-verify-jwt   (see that
+--     file's own header — the platform's JWT gateway rejects a non-JWT
+--     bearer before the function's own code ever runs, so this specific
+--     function needs verify_jwt off; getCaller() inside it still does real
+--     JWT validation by hand for the admin-JWT caller, same security either
+--     way, just enforced in code instead of by the platform gateway).
 --
 -- Batching: photos land one at a time during active uploading, so this does
 -- NOT fire per-photo (that would spam every subscribed device). It fires
@@ -46,13 +57,13 @@ as $$
 declare
   v_fn_url      constant text := 'https://bjgyvmdzcymruunzavni.supabase.co/functions/v1/optic-send-push';
   v_quiet       constant interval := interval '2 minutes';
-  v_svc_key     text;
+  v_cron_secret text;
   r             record;
   n             int := 0;
 begin
-  select decrypted_secret into v_svc_key from vault.decrypted_secrets where name = 'service_role_key';
-  if v_svc_key is null then
-    raise notice 'service_role_key not in Vault yet — see uniform_reminders.sql header. Skipping this run.';
+  select decrypted_secret into v_cron_secret from vault.decrypted_secrets where name = 'optic_push_cron_secret';
+  if v_cron_secret is null then
+    raise notice 'optic_push_cron_secret not in Vault yet — see this file''s header. Skipping this run.';
     return 0;
   end if;
 
@@ -82,7 +93,7 @@ begin
 
     perform net.http_post(
       url     := v_fn_url,
-      headers := jsonb_build_object('Authorization', 'Bearer ' || v_svc_key, 'Content-Type', 'application/json'),
+      headers := jsonb_build_object('Authorization', 'Bearer ' || v_cron_secret, 'Content-Type', 'application/json'),
       body    := jsonb_build_object(
         'event_id', r.event_id,
         'title', 'OPTIC',
@@ -111,10 +122,9 @@ do $$ begin perform cron.unschedule('optic-push-auto'); exception when others th
 select cron.schedule('optic-push-auto', '*/2 * * * *', $$select public.generate_optic_push_alerts()$$);
 
 -- ============================================================================
--- Done. Requires optic-send-push redeployed (see optic-send-push/index.ts —
--- now also accepts the service_role bearer pg_net sends, same pattern as
--- send-uniform-reminders):
---   supabase functions deploy optic-send-push
+-- Done. Requires optic-send-push already deployed --no-verify-jwt with
+-- OPTIC_PUSH_CRON_SECRET set (see this file's header) — already done for
+-- this project as of 2026-09-19.
 --
 -- Verify:
 --   select * from cron.job where jobname = 'optic-push-auto';

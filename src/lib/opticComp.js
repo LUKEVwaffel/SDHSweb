@@ -8,11 +8,12 @@ import { adminDisplayName } from './admins';
 // below is only the pre-config fallback (and what legacy dormant surfaces —
 // RaiderCarousel, TvCongratsScreen, compPhotoVote, raiderCompGallery — still
 // import directly; those aren't part of the live feed and stay pinned to this
-// one comp until they're revisited). Bumped 2026-09-12 from Rhea County ->
-// Spring Hill; was previously left pointed at Rhea County's id with a stale
-// "Spring Hill" title comment — that mismatch is fixed now, id and title match.
-export const OPTIC_EVENT_ID = 'fa96f288-3b72-484b-bca3-e69c2f5d0ca3';
-export const OPTIC_EVENT_TITLE = 'Spring Hill Raider Competition';
+// one comp until they're revisited). Bumped 2026-09-18 from Spring Hill ->
+// East Hamilton (comp 2026-09-19) — id/title match the `events` row Luke
+// created in DISPATCH's Events tab, and optic_config.active_event_id got the
+// same bump so the live /optic feed points here too.
+export const OPTIC_EVENT_ID = '0d0eef63-eff6-4988-bc4a-b9686ccc9dd4';
+export const OPTIC_EVENT_TITLE = 'East Hamilton Raider Competition';
 
 const BUCKET = 'team-photos';
 // photos.team MUST stay 'raiders' , the photos_require_posted_event trigger
@@ -199,25 +200,110 @@ export async function setLike(photoId, deviceFp, liked) {
   }
 }
 
+const IOS_UA = /iphone|ipad|ipod/i;
+const isIosDevice = () => IOS_UA.test(window.navigator.userAgent) && !window.MSStream;
+// Web Share's own cancel signal ("user tapped Cancel/X on the share sheet")
+// vs. an actual failure — conflating them means a deliberate cancel falls
+// through to opening a tab the user never asked for. Chrome and Safari both
+// reject with this DOMException name on cancel.
+const isShareCancel = (err) => err?.name === 'AbortError';
+
+// Saves an already-fetched blob without touching Web Share — the desktop
+// `<a download>` hack, or (iOS, which has no working blob download at all)
+// the real-URL long-press fallback. Kept separate from downloadPhoto() so
+// downloadPhotos()'s per-item fallback can call this directly instead of
+// re-fetching every photo a second time and re-opening a share sheet once
+// per photo if only single-file share (not multi-file) turns out supported.
+function saveBlobDirect(blob, name, url) {
+  if (isIosDevice()) {
+    window.open(url, '_blank', 'noopener');
+    return;
+  }
+  const obj = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = obj;
+  a.download = name;
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+  setTimeout(() => URL.revokeObjectURL(obj), 4000);
+}
+
 /**
- * Force a real download (Save) of a cross-origin storage image. A plain
- * <a download> is ignored cross-origin and just opens the file in a tab.
- * Desktop/Android path only — iOS has no reliable cross-origin blob download,
- * see lib/opticSave.js for the Web Share / long-press fallback used in Reel.
+ * Save a cross-origin storage image to the device. iOS Safari has no
+ * working blob download at all: `<a download>` on a blob: URL is silently
+ * ignored, and clicking it just navigates to a QuickLook-style document
+ * preview with no image render and no "Save Image" option (confirmed live
+ * via a parent screenshot, 2026-09-19 - this was the exact bug behind the
+ * Spring Hill survey's "tried to save a photo and it just opened a new tab"
+ * report; the earlier fix attempt never actually shipped). Web Share's file
+ * support is the one path on iOS that reaches "Save to Photos", so it's
+ * tried first everywhere it's available (Android shares it too); the
+ * `<a download>` hack is the fallback for browsers where it actually works
+ * (desktop Chrome/Firefox/Edge).
  */
 export async function downloadPhoto(url, filename) {
+  const name = filename || url.split('/').pop() || 'photo.jpg';
+  let blob;
   try {
     const res = await fetch(url);
-    const blob = await res.blob();
-    const obj = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = obj;
-    a.download = filename || url.split('/').pop() || 'photo.jpg';
-    document.body.appendChild(a);
-    a.click();
-    a.remove();
-    setTimeout(() => URL.revokeObjectURL(obj), 4000);
+    blob = await res.blob();
   } catch {
     window.open(url, '_blank', 'noopener');
+    return;
   }
+
+  const file = new File([blob], name, { type: blob.type || 'image/jpeg' });
+  if (navigator.canShare?.({ files: [file] })) {
+    try {
+      await navigator.share({ files: [file] });
+      return;
+    } catch (err) {
+      if (isShareCancel(err)) return; // backed out on purpose, leave it alone
+    }
+  }
+
+  saveBlobDirect(blob, name, url);
+}
+
+/**
+ * Batch save. iOS/Android with Web Share file support: one share-sheet call
+ * with every file, so the OS's own "Save N Images" does the batching - this
+ * is the only path that reliably reaches Camera Roll for more than one photo
+ * at once on iOS (a zip just lands as a Files document, not in Photos).
+ * Everywhere else: fall back to saveBlobDirect() per photo (reusing the
+ * blobs already fetched below, no per-item Web Share retry), staggered so
+ * the browser doesn't treat a burst of same-tick downloads as a popup flood
+ * and block them.
+ */
+export async function downloadPhotos(photos) {
+  const items = await Promise.all(photos.map(async (p) => {
+    try {
+      const res = await fetch(p.photo_url);
+      const blob = await res.blob();
+      const name = `optic_${p.id}.jpg`;
+      return { blob, name, url: p.photo_url, file: new File([blob], name, { type: blob.type || 'image/jpeg' }) };
+    } catch {
+      return null;
+    }
+  }));
+  const ready = items.filter(Boolean);
+  if (!ready.length) return { ok: false, saved: 0 };
+
+  const files = ready.map((r) => r.file);
+  if (navigator.canShare?.({ files })) {
+    try {
+      await navigator.share({ files });
+      return { ok: true, saved: files.length };
+    } catch (err) {
+      if (isShareCancel(err)) return { ok: true, saved: 0 }; // cancelled on purpose, not a failure
+    }
+  }
+
+  for (let i = 0; i < ready.length; i += 1) {
+    saveBlobDirect(ready[i].blob, ready[i].name, ready[i].url);
+    // eslint-disable-next-line no-await-in-loop
+    await new Promise((resolve) => setTimeout(resolve, 350));
+  }
+  return { ok: true, saved: ready.length };
 }

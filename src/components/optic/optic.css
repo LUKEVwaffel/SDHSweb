@@ -292,6 +292,46 @@
 .rhea-like-ico { font-size: 14px; line-height: 1; transition: transform 200ms var(--ease-spring); }
 .rhea-like[data-on="true"] .rhea-like-ico { color: #ff5a7a; transform: scale(1.18); }
 
+/* batch-select toggle, sits in the LIVE FEED bar next to the photo count */
+.rhea-select-toggle {
+  background: transparent; border: 1px solid var(--hair-strong); border-radius: 999px;
+  padding: 5px 11px; cursor: pointer;
+  font-family: var(--mono); font-size: 9px; letter-spacing: 0.14em; color: var(--faint);
+  transition: border-color 0.15s, color 0.15s, background 0.15s;
+}
+.rhea-select-toggle[data-on="true"] { border-color: var(--gold); color: var(--gold); background: rgba(201, 169, 97, 0.12); }
+
+/* selection checkmark overlay, replaces the like button while selecting.
+   Left, not right — right is the zoom-hint icon's spot (.rhea-shot::after),
+   which would otherwise stack under this on desktop hover. */
+.rhea-select-mark {
+  position: absolute; left: 10px; top: 10px; z-index: 2;
+  width: 26px; height: 26px; border-radius: 50%;
+  display: grid; place-items: center;
+  border: 1.5px solid var(--hair-strong); background: rgba(6, 16, 31, 0.55);
+  color: var(--ink); font-size: 13px; font-weight: 700;
+  backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px);
+  transition: background-color 140ms ease, border-color 140ms ease;
+}
+.rhea-select-mark[data-on="true"] { border-color: var(--gold); background: var(--gold); }
+
+/* fixed bar for the active batch-download selection */
+.rhea-batchbar {
+  position: fixed; left: 0; right: 0; bottom: 0; z-index: 40;
+  display: flex; align-items: center; gap: 14px; flex-wrap: wrap;
+  padding: 14px 20px calc(14px + env(safe-area-inset-bottom, 0px));
+  background: rgba(6, 16, 31, 0.92); border-top: 1px solid var(--hair-strong);
+  backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
+}
+.rhea-batchbar-count {
+  font-family: var(--mono); font-size: 11px; letter-spacing: 0.12em; color: var(--cream);
+}
+.rhea-batchbar-actions { display: flex; gap: 10px; margin-left: auto; }
+.rhea-batchbar-actions .rhea-btn { width: auto; margin-top: 0; padding: 11px 18px; }
+.rhea-batchbar-err {
+  width: 100%; font-family: var(--inter); font-size: 12px; color: #E8A79E;
+}
+
 /* skeletons */
 .rhea-skel {
   border-radius: 14px; overflow: hidden; border: 1px solid var(--hair); background: var(--navy-deep);
@@ -567,6 +607,23 @@
 .rhea-cd-sep {
   font-family: var(--oswald); font-size: 30px; line-height: 1; color: var(--hair-strong);
   padding-top: 1px;
+}
+
+/* Heartbeat on the seconds digit so the countdown reads as alive, not a
+   static number that happens to change. Timed to 1s, not synced to the
+   actual tick (no need — a slight phase drift is imperceptible here). */
+.rhea-cd-tick b { animation: rhea-cd-pulse 1s ease-in-out infinite; }
+@keyframes rhea-cd-pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.5; } }
+
+/* Inside the final hour: the card gets a slow gold breathing glow instead of
+   sitting flat, so the room the countdown matters most in also looks it. */
+.rhea-cd[data-urgent="true"] {
+  border-color: var(--gold);
+  animation: rhea-cd-glow 2.4s ease-in-out infinite;
+}
+@keyframes rhea-cd-glow {
+  0%, 100% { box-shadow: 0 22px 50px -26px rgba(0, 0, 0, 0.7), inset 0 1px 0 rgba(244, 236, 216, 0.04), 0 0 0 1px rgba(201, 169, 97, 0.16); }
+  50%      { box-shadow: 0 22px 50px -26px rgba(0, 0, 0, 0.7), inset 0 1px 0 rgba(244, 236, 216, 0.04), 0 0 0 1px rgba(201, 169, 97, 0.55); }
 }
 
 @media (prefers-reduced-motion: reduce) {

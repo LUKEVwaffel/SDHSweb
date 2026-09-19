@@ -11,14 +11,12 @@ import TabGrid from './components/TabGrid';
 import Bulletin from './components/Bulletin';
 import EventSpotlightBand from './components/EventSpotlightBand';
 import RaftingPhotoBand from './components/RaftingPhotoBand';
-// OPTIC homepage promo (hero strip + promo band + popup) taken down
-// 2026-09-15 — Spring Hill comp is over, feed is closing (rhea_gate ->
-// mode='closed'), and the next push is the post-comp problem survey, not
-// new-user discovery. Files kept on disk; re-add these imports + the two
-// render lines below (OpticHeroStrip in the '/' route, OpticPromoBand in
-// the '/' route) to bring it back for the next comp.
-// import OpticHeroStrip from './components/OpticHeroStrip';
-// import OpticPromoBand from './components/OpticPromoBand';
+// OPTIC homepage promo (hero strip + promo band) restored 2026-09-18 for the
+// next comp — East Hamilton, 2026-09-19. Popup stays suppressed, see the
+// BallSignupPopup/OpticPopup note below (separate decision about not
+// stacking nag popups behind CongratsPopup).
+import OpticHeroStrip from './components/OpticHeroStrip';
+import OpticPromoBand from './components/OpticPromoBand';
 // import OpticPopup from './components/OpticPopup'; — see BallSignupPopup note above.
 import HomeNewsletterBand from './components/HomeNewsletterBand';
 import Footer from './components/Footer';
@@ -148,7 +146,7 @@ export default function App() {
                 BallSignupPopup + OpticPopup suppressed for now (see imports
                 above) so CongratsPopup is the only one that fires. */}
             <Hero />
-            {/* OpticHeroStrip taken down 2026-09-15, see import note above. */}
+            <OpticHeroStrip />
             {/* "Picture of the Comp" vote band taken down 2026-09-08 — restore <CompPhotoBand /> to bring it back. */}
             <RaftingPhotoBand />
             {/* Disabled via SPOTLIGHT_BAND_ENABLED — kept mounted so re-enabling is a one-flag flip. */}
@@ -156,7 +154,7 @@ export default function App() {
             <BattalionCommand />
             <TabGrid />
             <Bulletin />
-            {/* OpticPromoBand taken down 2026-09-15, see import note above. */}
+            <OpticPromoBand />
             <HomeNewsletterBand />
           </>
         )} />

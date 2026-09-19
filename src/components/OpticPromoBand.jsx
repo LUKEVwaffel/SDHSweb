@@ -41,12 +41,12 @@ export default function OpticPromoBand() {
             color: P.cream, fontFamily: 'Oswald, sans-serif', fontWeight: 700,
             fontSize: 'clamp(34px, 5vw, 52px)', letterSpacing: '0.03em',
             lineHeight: 0.98, margin: '0 0 18px',
-          }}>LIVE AT<br />SPRING HILL</h2>
+          }}>LIVE AT<br />EAST HAMILTON</h2>
           <p style={{
             color: P.mute, fontFamily: 'Inter, sans-serif', fontSize: 16,
             lineHeight: 1.7, maxWidth: 480, margin: 0,
           }}>
-            The Raider Challenge feeds <strong style={{ color: P.gold }}>OPTIC</strong>,
+            The Raider Competition feeds <strong style={{ color: P.gold }}>OPTIC</strong>,
             our comp photo feed. Upload from your phone in seconds and every family
             at the comp sees it, live.
           </p>
@@ -74,7 +74,7 @@ export default function OpticPromoBand() {
           <div style={{
             fontFamily: "'JetBrains Mono', monospace", fontSize: 9, color: P.mute,
             letterSpacing: '0.18em', margin: '10px 0 24px',
-          }}>SPRING HILL RAIDER CHALLENGE · BETA</div>
+          }}>EAST HAMILTON RAIDER COMPETITION · BETA</div>
           <button onClick={() => navigate('/optic')} style={{
             background: P.gold, color: P.ink, border: 'none', cursor: 'pointer', width: '100%',
             fontFamily: "'JetBrains Mono', monospace", fontSize: 12, letterSpacing: '0.18em',

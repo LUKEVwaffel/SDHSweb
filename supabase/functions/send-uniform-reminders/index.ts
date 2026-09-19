@@ -4,13 +4,20 @@
 // no review. "Ironclad": every Thursday UNIFORM_DAY event auto-emails every
 // cadet on the preceding Monday and Wednesday.
 //
-// Auth: the caller is pg_net, not a human — it presents the project's own
-// service_role key (pulled from Vault) as its bearer token. That's already a
-// valid Supabase JWT, so the platform's own jwt-verification gate passes;
-// this function ALSO checks the bearer equals SUPABASE_SERVICE_ROLE_KEY
-// directly, so nothing else can ever trigger a real send by guessing a URL.
-// Deploy WITH jwt verification (default):
-//   supabase functions deploy send-uniform-reminders
+// Auth: the caller is pg_net, not a human — it presents a dedicated shared
+// secret, UNIFORM_REMINDERS_CRON_SECRET, as its bearer token (set here via
+// `secrets set`, stashed in Vault under the same name so the SQL side can
+// read it). NOT SUPABASE_SERVICE_ROLE_KEY — found live 2026-09-19 (chasing
+// the identical bug in optic-send-push) that this project's edge runtime
+// injects the newer sb_secret_... key under that env var, not the legacy
+// JWT `service_role_key` in Vault held, so a bearer-equality check against
+// it could never match: this cron's daily sends have very likely been
+// silently failing since it was set up. Fixed with its own purpose-built
+// secret instead of depending on a Supabase platform key format.
+// Deploy WITHOUT jwt verification — a raw shared secret isn't JWT-shaped,
+// so the platform's own gateway would reject it before this code ever
+// runs; auth is fully manual below instead:
+//   supabase functions deploy send-uniform-reminders --no-verify-jwt
 
 import { json, preflight, escapeHtml } from "../_shared/http.ts";
 import { serviceClient } from "../_shared/supabase.ts";
@@ -21,8 +28,8 @@ Deno.serve(async (req) => {
 
   try {
     const authHeader = req.headers.get("Authorization") ?? "";
-    const serviceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");
-    if (!serviceKey || authHeader !== `Bearer ${serviceKey}`) {
+    const cronSecret = Deno.env.get("UNIFORM_REMINDERS_CRON_SECRET");
+    if (!cronSecret || authHeader !== `Bearer ${cronSecret}`) {
       return json({ error: "forbidden" }, 403);
     }
 

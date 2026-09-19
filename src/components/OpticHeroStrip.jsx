@@ -48,7 +48,7 @@ export default function OpticHeroStrip() {
           fontFamily: 'Inter, sans-serif', fontSize: 13.5, color: P.mute,
           flex: 1, minWidth: 200, lineHeight: 1.5,
         }}>
-          Live at the Spring Hill Raider Challenge. Upload from your phone, seen by every family there.
+          Tomorrow at the East Hamilton Raider Competition. Upload from your phone, seen by every family there.
         </span>
 
         <span className="optic-strip-cta" style={{

@@ -164,7 +164,7 @@ export default function OpticPopup() {
           <div className="optic-row" style={{ '--d': '0.18s',
             fontFamily: "'JetBrains Mono', monospace", fontSize: 10.5, letterSpacing: '0.2em',
             color: P.mute, marginBottom: 20,
-          }}>SPRING HILL RAIDER CHALLENGE · BETA</div>
+          }}>EAST HAMILTON RAIDER COMPETITION · BETA</div>
 
           <p className="optic-row" style={{ '--d': '0.24s',
             fontFamily: 'Inter, sans-serif', fontSize: 15.5, lineHeight: 1.65,
