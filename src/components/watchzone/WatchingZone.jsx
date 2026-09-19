@@ -75,12 +75,17 @@ export default function WatchingZone() {
     const el = stageRef.current;
     const v = videoRef.current;
     if (getFullscreenElement()) {
-      (document.exitFullscreen || document.webkitExitFullscreen)?.call(document);
+      Promise.resolve((document.exitFullscreen || document.webkitExitFullscreen)?.call(document)).catch(() => {});
       return;
     }
     const canContainerFullscreen = document.fullscreenEnabled || document.webkitFullscreenEnabled;
     if (canContainerFullscreen && el) {
-      (el.requestFullscreen || el.webkitRequestFullscreen)?.call(el);
+      // WebKit rejects the container request (AbortError) when it denies the
+      // request or the tap gesture is stale. Fall back to the video element so
+      // an iPhone still goes fullscreen instead of the rejection escaping.
+      Promise.resolve((el.requestFullscreen || el.webkitRequestFullscreen)?.call(el)).catch(() => {
+        v?.webkitEnterFullscreen?.();
+      });
     } else if (v?.webkitEnterFullscreen) {
       v.webkitEnterFullscreen();
     }
