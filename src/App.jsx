@@ -69,6 +69,8 @@ import LukeUploadRoute from './components/optic/LukeUpload';
 import LukePwaRoute from './components/optic/LukePwa';
 import RaiderTv from './components/raidertv/RaiderTv';
 import RaiderRemote from './components/raidertv/RaiderRemote';
+import WatchingZone from './components/watchzone/WatchingZone';
+import WatchZoneBanner from './components/WatchZoneBanner';
 import BallTv from './components/balltv/BallTv';
 
 const TABS = [
@@ -118,6 +120,9 @@ export default function App() {
   // /raiderremote is the phone that drives it. Self-contained anon routes.
   if (location.pathname === '/raidertv') return <RaiderTv />;
   if (location.pathname === '/raiderremote') return <RaiderRemote />;
+  // /watchzone — public Raider film archive, no pairing required. Fullscreen
+  // + slow-mo player over the same raider_videos library.
+  if (location.pathname === '/watchzone') return <WatchingZone />;
   // /balltv — hallway-TV promo loop for the Military Ball. Read-only slideshow,
   // no remote; reads ball_config + ball_gallery like /ball.
   if (location.pathname === '/balltv') return <BallTv />;
@@ -144,7 +149,10 @@ export default function App() {
           <>
             {/* Homepage-only takeovers — mounted here, never on a standalone route.
                 BallSignupPopup + OpticPopup suppressed for now (see imports
-                above) so CongratsPopup is the only one that fires. */}
+                above) so CongratsPopup is the only one that fires.
+                WatchZoneBanner is a non-blocking bar, not a takeover — safe
+                to show alongside it. */}
+            <WatchZoneBanner />
             <Hero />
             <OpticHeroStrip />
             {/* "Picture of the Comp" vote band taken down 2026-09-08 — restore <CompPhotoBand /> to bring it back. */}
