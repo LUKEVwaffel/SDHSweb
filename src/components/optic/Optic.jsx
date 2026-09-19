@@ -334,23 +334,6 @@ function NotificationCard({ eventId }) {
   );
 }
 
-// Everyone already standalone (old /rhea shortcut) hits this the moment the
-// gate loads — it's the one thing on this screen that's actually actionable
-// today, so it's the first card, above the feedback reveal.
-function ReinstallNotice() {
-  return (
-    <div className="rhea-card2" data-tone="alert">
-      <div className="rhea-card2-kick">HAD OPTIC BEFORE?</div>
-      <p className="rhea-card2-p">
-        This is a rebuild, not an update. The app already on your home
-        screen won&apos;t pull the new version on its own. Fully delete it,
-        not just remove it from your home screen, then{' '}
-        {isIos() ? 'add this page to your home screen again from the share menu' : 'reinstall from your browser menu'}.
-      </p>
-    </div>
-  );
-}
-
 // Countdown hold shown until the gate opens (scheduled time or Luke's manual
 // override). uses a local 1 Hz tick; useOpticGate flips `open` when it lands.
 function OpticLocked({ opensAt, eventId }) {
@@ -406,7 +389,7 @@ function OpticLocked({ opensAt, eventId }) {
           </p>
 
           <div className="rhea-lock-cards">
-            {isStandalone() ? <ReinstallNotice /> : <InstallNudge />}
+            <InstallNudge />
             <NotificationCard eventId={eventId} />
             <WhatsNew />
           </div>
@@ -423,9 +406,10 @@ function OpticLocked({ opensAt, eventId }) {
 }
 
 const NEW_FEATURES = [
-  'Filter by team, Male or Coed',
-  'The upload cap that killed people’s batches mid-upload is gone',
-  'Photos sort by when they were actually taken, not when they finished uploading',
+  'Saving a photo on iPhone actually saves it now',
+  'Photo alerts fire on their own, nobody has to remember to send them',
+  'Select and download several photos at once',
+  'Filter by event (Rope Bridge, CCR, etc.), not just team',
 ];
 
 // Reveal panel on the locked/countdown screen — this is the surface almost
@@ -436,9 +420,9 @@ const NEW_FEATURES = [
 function WhatsNew() {
   return (
     <div className="rhea-card2">
-      <div className="rhea-card2-kick">OPTIC 2.0</div>
+      <div className="rhea-card2-kick">OPTIC 2.1</div>
       <p className="rhea-card2-p">
-        Rebuilt after the last comp based on what people said in the survey.
+        Fixed after Spring Hill based on what people said in the survey.
       </p>
       <ul className="rhea-card2-list">
         {NEW_FEATURES.map((text) => <li key={text}>{text}</li>)}
