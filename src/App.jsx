@@ -72,6 +72,7 @@ import RaiderRemote from './components/raidertv/RaiderRemote';
 import WatchingZone from './components/watchzone/WatchingZone';
 import WatchZonePopup from './components/WatchZonePopup';
 import BallTv from './components/balltv/BallTv';
+import RollCounter from './components/rolls/RollCounter';
 
 const TABS = [
   { id: 'cadet-manual', label: 'Cadet Manual',  short: 'MANUAL' },
@@ -127,6 +128,8 @@ export default function App() {
   // no remote; reads ball_config + ball_gallery like /ball.
   if (location.pathname === '/balltv') return <BallTv />;
   if (location.pathname === '/raiderparent') return <RaiderParentWelcome />;
+  // /rolls — Texas Roadhouse roll counter, fun one-off group tracker.
+  if (location.pathname === '/rolls') return <RollCounter />;
   if (location.pathname === '/feedback') return <EventFeedbackPicker />;
   if (location.pathname.startsWith('/feedback/')) return <EventFeedbackForm />;
   // "Picture of the Comp" vote taken down 2026-09-08 — restore CompPhotoVote to bring it back.
