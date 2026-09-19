@@ -164,6 +164,18 @@ export function markInstallDismissedOptic() {
   try { localStorage.setItem(OPTIC_INSTALL_DISMISSED_KEY, '1'); } catch { /* private mode */ }
 }
 
+const OPTIC_WATCHZONE_DISMISSED_KEY = 'optic_watchzone_dismissed';
+
+/** True once the visitor has dismissed the Watching Zone nudge in the feed. */
+export function hasWatchZoneDismissedOptic() {
+  try { return localStorage.getItem(OPTIC_WATCHZONE_DISMISSED_KEY) === '1'; } catch { return false; }
+}
+
+/** Mark the Watching Zone nudge dismissed on this device. */
+export function markWatchZoneDismissedOptic() {
+  try { localStorage.setItem(OPTIC_WATCHZONE_DISMISSED_KEY, '1'); } catch { /* private mode */ }
+}
+
 // ── likes ─────────────────────────────────────────────────────────────────
 // One like per photo per device. `deviceFp` is the same FingerprintJS +
 // localStorage-nonce string used for upload rate-limiting. The visible count

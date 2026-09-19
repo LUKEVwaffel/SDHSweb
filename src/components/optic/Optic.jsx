@@ -10,6 +10,7 @@ import {
   feedAttribution, feedChip, downloadPhoto, downloadPhotos,
   hasOnboardedOptic, hasWalkthroughOptic, markWalkthroughOptic,
   hasInstallDismissedOptic, markInstallDismissedOptic,
+  hasWatchZoneDismissedOptic, markWatchZoneDismissedOptic,
 } from '../../lib/opticComp';
 import { readTakenAt } from '../../lib/opticExif';
 import { pushSupported, hasDecidedPush, markPushDecided, subscribeToPush } from '../../lib/opticPush';
@@ -153,6 +154,7 @@ function OpticApp() {
           <div className="rhea-wrap">
             <InstallNudge />
             <NotificationCard eventId={config.eventId} />
+            <WatchZoneCard />
             <UploadCard eventId={config.eventId} />
             <Feed
               photos={visiblePhotos}
@@ -319,6 +321,40 @@ function NotificationCard({ eventId }) {
   );
 }
 
+// Points OPTIC visitors at /watchzone — the pairing-free Raider film archive
+// (fullscreen + slow-mo) that lives on the main site. Same dismiss-once
+// pattern as InstallNudge/NotificationCard above.
+function WatchZoneCard() {
+  const [dismissed, setDismissed] = useState(hasWatchZoneDismissedOptic);
+  if (dismissed) return null;
+
+  function dismiss() {
+    markWatchZoneDismissedOptic();
+    setDismissed(true);
+  }
+
+  return (
+    <div className="rhea-card2" data-tone="alert">
+      <div className="rhea-card2-kick">RAIDER FILM</div>
+      <p className="rhea-card2-p">
+        New Raider OC film is up in the Watching Zone — full screen, slow-mo,
+        the works.
+      </p>
+      <div className="rhea-card2-row">
+        <a
+          className="rhea-btn"
+          style={{ flex: 1, textAlign: 'center', textDecoration: 'none' }}
+          href="/watchzone"
+          onClick={() => posthog.capture('optic_watchzone_clicked')}
+        >
+          WATCH NOW
+        </a>
+        <button className="rhea-btn rhea-btn--ghost" onClick={dismiss}>NOT NOW</button>
+      </div>
+    </div>
+  );
+}
+
 // Countdown hold shown until the gate opens (scheduled time or Luke's manual
 // override). uses a local 1 Hz tick; useOpticGate flips `open` when it lands.
 function OpticLocked({ opensAt, eventId }) {
@@ -376,6 +412,7 @@ function OpticLocked({ opensAt, eventId }) {
           <div className="rhea-lock-cards">
             <InstallNudge />
             <NotificationCard eventId={eventId} />
+            <WatchZoneCard />
             <WhatsNew />
           </div>
 
