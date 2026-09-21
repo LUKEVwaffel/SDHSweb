@@ -39,13 +39,20 @@ export const ERROR_CODES = {
 // Fire-and-forget — logging must never itself break the UI flow a reviewer
 // is already stuck in, so failures here are swallowed. Returns the
 // user-facing string (code included) for the caller to show inline.
+//
+// SB.rpc() returns a PostgrestFilterBuilder, a thenable with `then` but no
+// `catch`, so calling `.catch()` on it directly throws a TypeError and takes
+// down the whole reporter. Promise.resolve() adopts the builder (running the
+// query) and gives back a real Promise we can attach `.catch()` to.
 export function reportError(code, portal, message, { detail, context } = {}) {
-  SB.rpc('log_client_error', {
-    p_code: code,
-    p_portal: portal,
-    p_message: message,
-    p_detail: detail ?? null,
-    p_context: context ?? null,
-  }).catch(() => {});
+  Promise.resolve(
+    SB.rpc('log_client_error', {
+      p_code: code,
+      p_portal: portal,
+      p_message: message,
+      p_detail: detail ?? null,
+      p_context: context ?? null,
+    })
+  ).catch(() => {});
   return `${message} (Error ${code} — write this down so it can be looked up)`;
 }
