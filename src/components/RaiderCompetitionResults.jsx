@@ -10,7 +10,7 @@ import { useState } from 'react';
 //     teams[]  → { team, place (e.g. '1st' | '4th' | 'DNF'), of (field size) }
 //     events[] → { name, result, note? }
 
-const SEASON = {
+export const SEASON = {
   label: '2025–26 SEASON',
   // Manual headline tiles — the auto-summary derives only from `teams[]` (division
   // standings) and would miss event-level podiums like the Co-Ed CCR win. Keep

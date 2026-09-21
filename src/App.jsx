@@ -72,6 +72,7 @@ import RaiderRemote from './components/raidertv/RaiderRemote';
 import WatchingZone from './components/watchzone/WatchingZone';
 import WatchZonePopup from './components/WatchZonePopup';
 import BallTv from './components/balltv/BallTv';
+import VideoTv from './components/videotv/VideoTv';
 import RollCounter from './components/rolls/RollCounter';
 
 const TABS = [
@@ -127,6 +128,10 @@ export default function App() {
   // /balltv — hallway-TV promo loop for the Military Ball. Read-only slideshow,
   // no remote; reads ball_config + ball_gallery like /ball.
   if (location.pathname === '/balltv') return <BallTv />;
+  // /videotv — hallway-TV loop of the East Hamilton OC run (both clips, muted,
+  // no remote) followed by the season trophy case. Reads raider_videos (same
+  // library /watchzone features from) + RaiderCompetitionResults' SEASON data.
+  if (location.pathname === '/videotv') return <VideoTv />;
   if (location.pathname === '/raiderparent') return <RaiderParentWelcome />;
   // /rolls — Texas Roadhouse roll counter, fun one-off group tracker.
   if (location.pathname === '/rolls') return <RollCounter />;
