@@ -33,7 +33,7 @@ export default function SignupsTab() {
 
   const term = q.trim().toLowerCase();
   const filtered = term
-    ? rows.filter((r) => [r.school_email, r.personal_email, r.parent_email].some((v) => (v || '').toLowerCase().includes(term)))
+    ? rows.filter((r) => [r.cadet_name, r.school_email, r.personal_email, r.parent_email].some((v) => (v || '').toLowerCase().includes(term)))
     : rows;
 
   const inputStyle = {
@@ -53,7 +53,7 @@ export default function SignupsTab() {
       </div>
 
       {rows.length > 0 && (
-        <input value={q} onChange={(e) => setQ(e.target.value)} placeholder="Search by email…" style={{ ...inputStyle, marginBottom: 18 }} />
+        <input value={q} onChange={(e) => setQ(e.target.value)} placeholder="Search by name or email…" style={{ ...inputStyle, marginBottom: 18 }} />
       )}
 
       {err && <div style={{ fontFamily: mono, fontSize: 12, color: P.red, marginBottom: 14 }}>{err}</div>}
@@ -69,7 +69,9 @@ export default function SignupsTab() {
           {filtered.map((r) => (
             <div key={r.id} style={{ background: P.deep, border: `1px solid ${P.hair}`, padding: '14px 18px' }}>
               <div style={{ display: 'flex', alignItems: 'baseline', gap: 10, flexWrap: 'wrap' }}>
-                <div style={{ fontFamily: mono, fontSize: 13, color: P.cream, letterSpacing: '0.02em' }}>{r.school_email}</div>
+                <div style={{ fontFamily: mono, fontSize: 13, color: P.cream, fontWeight: 700, letterSpacing: '0.02em' }}>
+                  {r.cadet_name || '(no roster match)'}
+                </div>
                 <div style={{ fontFamily: mono, fontSize: 13, color: P.gold, fontWeight: 700, letterSpacing: '0.02em' }}>{r.phone}</div>
                 {r.is_varsity && (
                   <div style={{ fontFamily: mono, fontSize: 10, color: P.ink, background: P.gold, fontWeight: 700, letterSpacing: '0.1em', padding: '2px 8px' }}>
@@ -77,8 +79,14 @@ export default function SignupsTab() {
                   </div>
                 )}
               </div>
-              <div style={{ fontFamily: mono, fontSize: 11, color: P.mute, marginTop: 6 }}>
-                Personal: {r.personal_email} &middot; Parent: {r.parent_email}
+              {(r.cadet_company || r.cadet_grade || r.cadet_let_level || r.cadet_birthdate) && (
+                <div style={{ fontFamily: mono, fontSize: 11, color: P.mute, marginTop: 4 }}>
+                  {[r.cadet_company, r.cadet_grade && `Grade ${r.cadet_grade}`, r.cadet_let_level && `LET ${r.cadet_let_level}`, r.cadet_birthdate && new Date(r.cadet_birthdate).toLocaleDateString()]
+                    .filter(Boolean).join(' · ')}
+                </div>
+              )}
+              <div style={{ fontFamily: mono, fontSize: 11, color: P.mute, marginTop: 4 }}>
+                {r.school_email} &middot; Personal: {r.personal_email} &middot; Parent: {r.parent_email}
               </div>
               <div style={{ fontFamily: mono, fontSize: 11, color: P.mute, marginTop: 4, letterSpacing: '0.08em' }}>
                 Signed up {new Date(r.created_at).toLocaleString()}
