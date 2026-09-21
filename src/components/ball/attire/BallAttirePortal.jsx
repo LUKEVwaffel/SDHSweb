@@ -32,10 +32,10 @@ export default function BallAttirePortal() {
   const loadAll = useCallback(async () => {
     const { data, error } = await SB.rpc('ball_attire_guest_list');
     if (error) {
-      setPhase('error');
       setErrorMsg(reportError(ERROR_CODES.BALL_ATTIRE_LOAD_FAILED, 'ball_attire', error.message, {
         detail: { supabase_error: error }, context: { source: 'ball_attire_guest_list' },
       }));
+      setPhase('error');
       return;
     }
     setRows(data || []);
@@ -47,10 +47,10 @@ export default function BallAttirePortal() {
     if (!session) { setPhase('login'); return; }
     const { data: ok, error: okErr } = await SB.rpc('is_ball_attire');
     if (okErr) {
-      setPhase('error');
       setErrorMsg(reportError(ERROR_CODES.BALL_ATTIRE_LOAD_FAILED, 'ball_attire', okErr.message, {
         detail: { supabase_error: okErr }, context: { stage: 'is_ball_attire', email: session.user.email },
       }));
+      setPhase('error');
       return;
     }
     if (!ok) {

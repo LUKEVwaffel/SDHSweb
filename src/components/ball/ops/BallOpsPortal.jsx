@@ -116,10 +116,10 @@ export default function BallOpsPortal() {
     ]);
     if (sErr || gErr) {
       const err = sErr || gErr;
-      setPhase('error');
       setErrorMsg(reportError(ERROR_CODES.BALL_OPS_LOAD_FAILED, 'ball_ops', err.message, {
         detail: { supabase_error: err }, context: { source: sErr ? 'ball_signups_ops_view' : 'ball_guests_ops_view' },
       }));
+      setPhase('error');
       return;
     }
     const bySignup = {};
@@ -135,10 +135,10 @@ export default function BallOpsPortal() {
     const { data: rev, error: revErr } = await SB.from('email_reviewers')
       .select('email').eq('email', session.user.email.toLowerCase()).eq('active', true).eq('can_ball_ops', true).maybeSingle();
     if (revErr) {
-      setPhase('error');
       setErrorMsg(reportError(ERROR_CODES.BALL_OPS_SESSION_ERROR, 'ball_ops', revErr.message, {
         detail: { supabase_error: revErr }, context: { stage: 'reviewer_check', email: session.user.email },
       }));
+      setPhase('error');
       return;
     }
     if (!rev) {

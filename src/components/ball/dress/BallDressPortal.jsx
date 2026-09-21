@@ -69,10 +69,10 @@ export default function BallDressPortal() {
     if (cErr || gErr || vErr || vdErr) {
       const err = cErr || gErr || vErr || vdErr;
       const source = cErr ? 'ball_signups_dress_view' : gErr ? 'ball_guests_dress_view' : vErr ? 'ball_vip_signups_dress_view' : 'ball_vip_dates_dress_view';
-      setPhase('error');
       setErrorMsg(reportError(ERROR_CODES.BALL_DRESS_LOAD_FAILED, 'ball_dress', err.message, {
         detail: { supabase_error: err }, context: { source },
       }));
+      setPhase('error');
       return;
     }
     setCadets(c || []);
@@ -87,10 +87,10 @@ export default function BallDressPortal() {
     if (!session) { setPhase('login'); return; }
     const { data: staff, error: staffErr } = await SB.rpc('is_ball_dress');
     if (staffErr) {
-      setPhase('error');
       setErrorMsg(reportError(ERROR_CODES.BALL_DRESS_SESSION_TIMEOUT, 'ball_dress', staffErr.message, {
         detail: { supabase_error: staffErr }, context: { stage: 'is_ball_dress', email: session.user.email },
       }));
+      setPhase('error');
       return;
     }
     if (!staff) {
