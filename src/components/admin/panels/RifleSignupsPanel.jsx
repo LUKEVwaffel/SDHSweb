@@ -14,10 +14,13 @@ function csvCell(v) {
 }
 
 function exportCsv(rows) {
-  const headers = ['School Email', 'Personal Email', 'Parent Email', 'Phone', 'Varsity', 'Signed Up'];
+  const headers = ['Name', 'Company', 'Grade', 'LET Level', 'Birthdate', 'School Email', 'Personal Email', 'Parent Email', 'Phone', 'Varsity', 'Signed Up'];
   const lines = [headers.join(',')];
   rows.forEach((r) => {
-    lines.push([r.school_email, r.personal_email, r.parent_email, r.phone, r.is_varsity ? 'Yes' : 'No', new Date(r.created_at).toLocaleString()].map(csvCell).join(','));
+    lines.push([
+      r.cadet?.name, r.cadet?.company, r.cadet?.grade, r.cadet?.let_level, r.cadet?.birthdate,
+      r.school_email, r.personal_email, r.parent_email, r.phone, r.is_varsity ? 'Yes' : 'No', new Date(r.created_at).toLocaleString(),
+    ].map(csvCell).join(','));
   });
   const blob = new Blob([lines.join('\r\n')], { type: 'text/csv;charset=utf-8;' });
   const url = URL.createObjectURL(blob);
@@ -45,8 +48,13 @@ export default function RifleSignupsPanel() {
 
   const load = useCallback(async () => {
     setLoading(true);
-    const { data } = await SB.from('rifle_signups').select('*').order('created_at', { ascending: false });
-    setRows(data || []);
+    const [{ data: signups }, { data: cadets }] = await Promise.all([
+      SB.from('rifle_signups').select('*').order('created_at', { ascending: false }),
+      SB.from('cadet_consent').select('name, company, grade, let_level, birthdate, school_email'),
+    ]);
+    const bySchoolEmail = new Map((cadets || []).map((c) => [(c.school_email || '').toLowerCase(), c]));
+    const merged = (signups || []).map((r) => ({ ...r, cadet: bySchoolEmail.get((r.school_email || '').toLowerCase()) || null }));
+    setRows(merged);
     setLoading(false);
   }, []);
   useEffect(() => { load(); }, [load]);
@@ -60,7 +68,7 @@ export default function RifleSignupsPanel() {
 
   const term = q.trim().toLowerCase();
   const filtered = term
-    ? rows.filter((r) => [r.school_email, r.personal_email, r.parent_email].some((v) => (v || '').toLowerCase().includes(term)))
+    ? rows.filter((r) => [r.cadet?.name, r.school_email, r.personal_email, r.parent_email].some((v) => (v || '').toLowerCase().includes(term)))
     : rows;
 
   return (
@@ -76,7 +84,7 @@ export default function RifleSignupsPanel() {
           <input
             value={q}
             onChange={(e) => setQ(e.target.value)}
-            placeholder="Search by email…"
+            placeholder="Search by name or email…"
             style={{
               flex: 1, maxWidth: 320, background: P.deep, border: `1px solid ${P.hair}`, color: P.cream,
               fontFamily: mono, fontSize: fs.sm, padding: '9px 12px', outline: 'none',
@@ -98,7 +106,9 @@ export default function RifleSignupsPanel() {
           {filtered.map((r) => (
             <div key={r.id} style={{ background: P.deep, border: `1px solid ${P.hair}`, padding: '14px 18px' }}>
               <div style={{ display: 'flex', alignItems: 'baseline', gap: 10, flexWrap: 'wrap' }}>
-                <div style={{ fontFamily: mono, fontSize: fs.sm, color: P.cream, letterSpacing: '0.02em' }}>{r.school_email}</div>
+                <div style={{ fontFamily: mono, fontSize: fs.sm, color: P.cream, fontWeight: 700, letterSpacing: '0.02em' }}>
+                  {r.cadet?.name || '(no roster match)'}
+                </div>
                 <div style={{ fontFamily: mono, fontSize: fs.sm, color: P.gold, fontWeight: 700, letterSpacing: '0.02em' }}>{r.phone}</div>
                 {r.is_varsity && (
                   <div style={{ fontFamily: mono, fontSize: fs.micro, color: P.ink, background: P.gold, fontWeight: 700, letterSpacing: '0.1em', padding: '2px 8px' }}>
@@ -106,8 +116,14 @@ export default function RifleSignupsPanel() {
                   </div>
                 )}
               </div>
-              <div style={{ fontFamily: mono, fontSize: fs.micro, color: P.mute, marginTop: 6, letterSpacing: '0.02em' }}>
-                Personal: {r.personal_email} &middot; Parent: {r.parent_email}
+              {r.cadet && (
+                <div style={{ fontFamily: mono, fontSize: fs.micro, color: P.mute, marginTop: 4, letterSpacing: '0.02em' }}>
+                  {[r.cadet.company, r.cadet.grade && `Grade ${r.cadet.grade}`, r.cadet.let_level && `LET ${r.cadet.let_level}`, r.cadet.birthdate && new Date(r.cadet.birthdate).toLocaleDateString()]
+                    .filter(Boolean).join(' · ')}
+                </div>
+              )}
+              <div style={{ fontFamily: mono, fontSize: fs.micro, color: P.mute, marginTop: 4, letterSpacing: '0.02em' }}>
+                {r.school_email} &middot; Personal: {r.personal_email} &middot; Parent: {r.parent_email}
               </div>
               <div style={{ fontFamily: mono, fontSize: fs.micro, color: P.mute, marginTop: 4, letterSpacing: '0.08em' }}>
                 Signed up {new Date(r.created_at).toLocaleString()}
