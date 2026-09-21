@@ -144,14 +144,22 @@ export default function BallDressPortal() {
         return;
       }
       const approving = !item.dress_approved;
-      const { error } = await withTimeout(
+      const { error, count } = await withTimeout(
         SB.from(KIND_TABLE[item.kind]).update({
           dress_approved: approving, dress_approved_by: approving ? session.user.email : null,
-        }).eq('id', item.id)
+        }, { count: 'exact' }).eq('id', item.id)
       );
       if (error) {
         setActionError(reportError(ERROR_CODES.BALL_DRESS_TOGGLE_FAILED, 'ball_dress', `Could not update ${item.name}: ${error.message}`, {
           detail: { supabase_error: error }, context: { id: item.id, kind: item.kind, table: KIND_TABLE[item.kind] },
+        }));
+        return;
+      }
+      // No error AND no row matched means RLS/the column-guard silently
+      // filtered the write instead of raising — reads as success otherwise.
+      if (!count) {
+        setActionError(reportError(ERROR_CODES.BALL_DRESS_TOGGLE_NO_MATCH, 'ball_dress', `Update for ${item.name} was blocked (0 rows changed) — this looks like a permissions issue, not a network drop. Nothing was saved.`, {
+          context: { id: item.id, kind: item.kind, table: KIND_TABLE[item.kind] },
         }));
         return;
       }
@@ -200,15 +208,24 @@ export default function BallDressPortal() {
         return;
       }
       const byKind = (k) => pending.filter((x) => x.kind === k && !(k === 'guest' && !x.verified_at)).map((x) => x.id);
-      const results = await Promise.all(Object.entries(KIND_TABLE).map(([kind, table]) => {
-        const ids = byKind(kind);
-        return ids.length ? withTimeout(SB.from(table).update({ dress_approved: true, dress_approved_by: session.user.email }).in('id', ids)) : null;
-      }));
+      const requests = Object.entries(KIND_TABLE).map(([kind, table]) => ({ kind, table, ids: byKind(kind) }));
+      const results = await Promise.all(requests.map(({ table, ids }) =>
+        ids.length ? withTimeout(SB.from(table).update({ dress_approved: true, dress_approved_by: session.user.email }, { count: 'exact' }).in('id', ids)) : null
+      ));
       const failed = results.find((r) => r?.error);
       if (failed) {
         setActionError(reportError(ERROR_CODES.BALL_DRESS_BULK_FAILED, 'ball_dress', `Could not approve all: ${failed.error.message}`, {
           detail: { supabase_error: failed.error },
         }));
+      } else {
+        // No error AND fewer rows changed than requested means RLS/the
+        // column-guard silently filtered some or all of the writes.
+        const shortfall = results.reduce((n, r, i) => n + (r ? requests[i].ids.length - (r.count || 0) : 0), 0);
+        if (shortfall > 0) {
+          setActionError(reportError(ERROR_CODES.BALL_DRESS_BULK_NO_MATCH, 'ball_dress', `${shortfall} of ${pending.length} were blocked (0 rows changed) — this looks like a permissions issue, not a network drop.`, {
+            context: { shortfall, requested: pending.length },
+          }));
+        }
       }
       await loadAll();
     } catch (e) {

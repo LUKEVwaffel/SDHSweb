@@ -89,12 +89,20 @@ export default function BallAttirePortal() {
       const { data: { session } } = await SB.auth.getSession();
       if (!session) { setPhase('login'); return; }
       const approving = !row.dress_approved;
-      const { error } = await SB.from('ball_guests').update({
+      const { error, count } = await SB.from('ball_guests').update({
         dress_approved: approving, dress_approved_by: approving ? session.user.email : null,
-      }).eq('id', row.id);
+      }, { count: 'exact' }).eq('id', row.id);
       if (error) {
         setActionError(reportError(ERROR_CODES.BALL_ATTIRE_TOGGLE_FAILED, 'ball_attire', `Could not update ${row.guest_name}: ${error.message}`, {
           detail: { supabase_error: error }, context: { id: row.id },
+        }));
+        return;
+      }
+      // No error AND no row matched means RLS/the column-guard silently
+      // filtered the write instead of raising — reads as success otherwise.
+      if (!count) {
+        setActionError(reportError(ERROR_CODES.BALL_ATTIRE_TOGGLE_NO_MATCH, 'ball_attire', `Update for ${row.guest_name} was blocked (0 rows changed) — this looks like a permissions issue, not a network drop. Nothing was saved.`, {
+          context: { id: row.id },
         }));
         return;
       }
@@ -126,14 +134,23 @@ export default function BallAttirePortal() {
     try {
       const { data: { session } } = await SB.auth.getSession();
       if (!session) { setPhase('login'); return; }
-      const { error } = await SB.from('ball_guests').update({
+      const ids = pending.map((r) => r.id);
+      const { error, count } = await SB.from('ball_guests').update({
         dress_approved: true, dress_approved_by: session.user.email,
-      }).in('id', pending.map((r) => r.id));
+      }, { count: 'exact' }).in('id', ids);
       if (error) {
         setActionError(reportError(ERROR_CODES.BALL_ATTIRE_BULK_FAILED, 'ball_attire', `Could not approve all: ${error.message}`, {
-          detail: { supabase_error: error }, context: { ids: pending.map((r) => r.id) },
+          detail: { supabase_error: error }, context: { ids },
         }));
         return;
+      }
+      // No error AND fewer rows changed than requested means RLS/the
+      // column-guard silently filtered some or all of the writes.
+      const shortfall = ids.length - (count || 0);
+      if (shortfall > 0) {
+        setActionError(reportError(ERROR_CODES.BALL_ATTIRE_BULK_NO_MATCH, 'ball_attire', `${shortfall} of ${ids.length} were blocked (0 rows changed) — this looks like a permissions issue, not a network drop.`, {
+          context: { shortfall, requested: ids.length },
+        }));
       }
       await loadAll();
     } catch (e) {

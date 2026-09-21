@@ -189,14 +189,26 @@ export default function BallOpsPortal() {
     setBusyId(row.id);
     setFlash(null);
     try {
-      const { error } = onGuest
-        ? await SB.from('ball_guests').update({ [target.column]: turningOn }).eq('id', guest.id)
-        : await SB.from('ball_signups').update({ [target.column]: turningOn }).eq('id', row.id);
+      const { error, count } = onGuest
+        ? await SB.from('ball_guests').update({ [target.column]: turningOn }, { count: 'exact' }).eq('id', guest.id)
+        : await SB.from('ball_signups').update({ [target.column]: turningOn }, { count: 'exact' }).eq('id', row.id);
       if (error) {
         setFlash({
           tone: 'err',
           msg: reportError(ERROR_CODES.BALL_OPS_TOGGLE_FAILED, 'ball_ops', `Could not update: ${error.message}`, {
             detail: { supabase_error: error }, context: { signup_id: row.id, guest_id: guest?.id, field, table: target.table },
+          }),
+        });
+        return;
+      }
+      // No error AND no row matched means RLS/the column-guard silently
+      // filtered the write instead of raising — the request "succeeds" with
+      // nothing actually changed. Without this check that reads as success.
+      if (!count) {
+        setFlash({
+          tone: 'err',
+          msg: reportError(ERROR_CODES.BALL_OPS_TOGGLE_NO_MATCH, 'ball_ops', 'Update was blocked (0 rows changed) — this looks like a permissions issue, not a network drop. Nothing was saved.', {
+            context: { signup_id: row.id, guest_id: guest?.id, field, table: target.table },
           }),
         });
         return;
