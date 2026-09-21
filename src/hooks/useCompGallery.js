@@ -2,8 +2,9 @@ import { useState, useEffect, useCallback, useRef } from 'react';
 import { supabase as SB } from '../lib/supabaseClient';
 import { COMP_EVENT_ID, COMP_EVENTS, sortSubEvents, compEventMeta } from '../lib/raiderCompGallery';
 
-// Public read model for /raiders/comp. One fetch on mount - retrospective
-// gallery, no live-event pressure.
+// Public read model for /raiders/comp. One fetch per eventId - retrospective
+// gallery, no live-event pressure. Defaults to the current comp; pass a past
+// comp's id (see COMP_ARCHIVE) to load its gallery instead.
 //
 // A photo shows here when ALL of:
 //   event_id   = the comp
@@ -22,7 +23,7 @@ import { COMP_EVENT_ID, COMP_EVENTS, sortSubEvents, compEventMeta } from '../lib
 
 const slugify = (s) => (s || '').toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
 
-export function useCompGallery() {
+export function useCompGallery(eventId = COMP_EVENT_ID) {
   const [subEvents, setSubEvents] = useState([]);
   const [photos, setPhotos] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -30,11 +31,12 @@ export function useCompGallery() {
   const alive = useRef(true);
 
   const load = useCallback(async () => {
+    setLoading(true);
     const [se, ph] = await Promise.all([
-      SB.from('raider_sub_events').select('*').eq('event_id', COMP_EVENT_ID),
+      SB.from('raider_sub_events').select('*').eq('event_id', eventId),
       SB.from('photos')
         .select('id, photo_url, thumb_url, uploader_name, sub_event_id, created_at')
-        .eq('event_id', COMP_EVENT_ID)
+        .eq('event_id', eventId)
         .eq('source', 'luke')
         .eq('status', 'live')
         .not('sub_event_id', 'is', null)
@@ -46,7 +48,7 @@ export function useCompGallery() {
     setSubEvents(sortSubEvents(se.data || []));
     setPhotos(ph.data || []);
     setLoading(false);
-  }, []);
+  }, [eventId]);
 
   useEffect(() => {
     alive.current = true;

@@ -13,10 +13,9 @@ import TvRefreshNotice from './TvRefreshNotice.jsx';
 // one-line change.
 const TAKEOVER_MODE = true;
 
-// Spring Hill comp (2026-09-12) result takeover: /tv shows the Raider Team
-// Congrats board instead of the rafting takeover. 9/11's Never Forget
-// override lived here through 09-11; that's done for the year, replaced with
-// this. Flip to false (or delete) to restore the rafting takeover.
+// East Hamilton comp (2026-09-19) result takeover: /tv shows the Raider Team
+// Congrats board instead of the rafting takeover. Flip to false (or delete)
+// to restore the rafting takeover.
 const RAIDER_CONGRATS_OUTSIDE_OVERRIDE = true;
 
 /**

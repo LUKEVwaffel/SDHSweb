@@ -12,6 +12,16 @@ import { OPTIC_EVENT_ID, OPTIC_EVENT_TITLE } from './opticComp';
 export const COMP_EVENT_ID = OPTIC_EVENT_ID;
 export const COMP_EVENT_TITLE = OPTIC_EVENT_TITLE;
 
+// Every comp with a gallery, newest first. The current comp's id/title stay
+// derived from OPTIC_EVENT_ID/TITLE above (single source of truth); past
+// comps are pinned here permanently since opticComp.js only tracks whichever
+// one is live. Add one entry each time opticComp.js bumps to a new comp.
+export const COMP_ARCHIVE = [
+  { id: OPTIC_EVENT_ID, title: OPTIC_EVENT_TITLE, date: 'Sep 19, 2026' },
+  { id: 'fa96f288-3b72-484b-bca3-e69c2f5d0ca3', title: 'Spring Hill Raider Competition', date: 'Sep 12, 2026' },
+  { id: 'e8a305fe-86cf-4092-a580-5865423271b9', title: 'Rhea County Raider Competition', date: 'Aug 29, 2026' },
+];
+
 // Canonical order (chronological - the way the day actually ran) + blurb for
 // every comp event. Matched to the raider_sub_events rows by normalised
 // name or leading phrase, so Luke's real labels ("CCR", "Tire Stacker (Both

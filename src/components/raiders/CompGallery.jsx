@@ -1,11 +1,13 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useCompGallery } from '../../hooks/useCompGallery';
-import { COMP_EVENT_TITLE } from '../../lib/raiderCompGallery';
+import { COMP_EVENT_ID, COMP_ARCHIVE } from '../../lib/raiderCompGallery';
 
 // Public "View Competition" gallery - /raiders/comp. Retrospective, per-event
-// cut of the Rhea County comp: Luke's photos only, grouped by the 6 events.
-// URL ?event=<slug> deep-links a single event (shareable, back button works).
+// cut of whichever comp is selected: Luke's photos only, grouped by the 9
+// canonical events. ?comp=<id> switches between comps (COMP_ARCHIVE - every
+// comp the battalion has run), ?event=<slug> deep-links a single event within
+// it. Both are shareable and survive the back button.
 // Palette mirrors Raiders.jsx so it reads as the same specialty-team surface.
 
 const P = {
@@ -288,18 +290,52 @@ const backBtn = {
   fontFamily: mono, fontSize: 10, letterSpacing: '0.22em', padding: '4px 0',
 };
 
+// ── Comp picker (index view only) — switches which comp's gallery loads ────
+function CompPicker({ activeId, onPick }) {
+  if (COMP_ARCHIVE.length < 2) return null;
+  return (
+    <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', marginBottom: 24 }}>
+      {COMP_ARCHIVE.map((c) => {
+        const on = c.id === activeId;
+        return (
+          <button
+            key={c.id}
+            onClick={() => onPick(c.id)}
+            style={{
+              fontFamily: mono, fontSize: 9, letterSpacing: '0.14em', cursor: 'pointer',
+              padding: '9px 14px', background: on ? P.gold : 'transparent', color: on ? P.ink : P.mute,
+              border: `1px solid ${on ? P.gold : P.hair}`,
+            }}
+          >
+            {c.title.toUpperCase()} · {c.date.toUpperCase()}
+          </button>
+        );
+      })}
+    </div>
+  );
+}
+
 // ── Page ───────────────────────────────────────────────────────────────────
 export default function CompGallery() {
   const navigate = useNavigate();
   const [params, setParams] = useSearchParams();
-  const { groups, totals, loading, error } = useCompGallery();
+
+  const compId = params.get('comp') || COMP_EVENT_ID;
+  const activeComp = COMP_ARCHIVE.find((c) => c.id === compId) || COMP_ARCHIVE[0];
+  const { groups, totals, loading, error } = useCompGallery(activeComp.id);
 
   const activeSlug = params.get('event');
   const active = groups.find((g) => g.slug === activeSlug) || null;
 
-  useEffect(() => { window.scrollTo(0, 0); }, [activeSlug]);
+  useEffect(() => { window.scrollTo(0, 0); }, [activeSlug, compId]);
 
-  const openEvent = (slug) => setParams(slug ? { event: slug } : {});
+  const openEvent = (slug) => {
+    const next = {};
+    if (compId !== COMP_EVENT_ID) next.comp = compId;
+    if (slug) next.event = slug;
+    setParams(next);
+  };
+  const openComp = (id) => setParams(id !== COMP_EVENT_ID ? { comp: id } : {});
 
   return (
     <div style={{ background: P.ink, minHeight: '100vh', fontFamily: 'Inter, sans-serif' }}>
@@ -309,6 +345,8 @@ export default function CompGallery() {
           ← RAIDERS
         </button>
 
+        {!active && <CompPicker activeId={activeComp.id} onPick={openComp} />}
+
         {!loading && !error && <TopNotice />}
 
         {!active && !loading && (
@@ -317,7 +355,7 @@ export default function CompGallery() {
               VIEW COMPETITION
             </div>
             <h1 style={{ fontFamily: oswald, fontWeight: 700, fontSize: 60, color: P.cream, letterSpacing: '0.02em', margin: 0, lineHeight: 1 }}>
-              {COMP_EVENT_TITLE.toUpperCase()}
+              {activeComp.title.toUpperCase()}
             </h1>
             <div style={{ fontFamily: mono, fontSize: 9, letterSpacing: '0.2em', color: P.gold, opacity: 0.6, marginTop: 16 }}>
               {totals.withPhotos} OF {totals.events} EVENTS POSTED · {totals.photos} PHOTO{totals.photos === 1 ? '' : 'S'}

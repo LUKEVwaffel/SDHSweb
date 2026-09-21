@@ -16,9 +16,9 @@ const SEASON = {
   // standings) and would miss event-level podiums like the Co-Ed CCR win. Keep
   // these in sync with the meet log below.
   summary: [
-    { label: 'MEETS', value: '2' },
-    { label: 'TROPHIES', value: '9', sub: 'podium placements' },
-    { label: 'FIRST-PLACE FINISHES', value: '2', sub: 'CCR · Co-Ed / OC · Co-Ed' },
+    { label: 'MEETS', value: '3' },
+    { label: 'TROPHIES', value: '13', sub: 'podium placements' },
+    { label: 'FIRST-PLACE FINISHES', value: '3', sub: 'CCR · Co-Ed / OC · Co-Ed / Hurricane Hill · Co-Ed' },
     { label: 'BEST DIVISION FINISH', value: '2nd', sub: 'Male · overall' },
   ],
   // Add one object per meet as results come in:
@@ -30,6 +30,19 @@ const SEASON = {
   //     events: [{ name: 'One-Rope Bridge', result: '3:42', note: '1st' }, ...],
   //   }
   meets: [
+    {
+      name: 'East Hamilton Raider Competition',
+      date: 'Sep 19, 2026',
+      location: 'East Hamilton, TN',
+      // No overall division standing posted for this meet — event splits only.
+      teams: [],
+      events: [
+        { name: 'Hurricane Hill · Co-Ed', result: '1st' },
+        { name: 'Hurricane Hill · Male', result: '3rd' },
+        { name: 'One Rope Bridge · Co-Ed', result: '3rd' },
+        { name: 'One Rope Bridge · Male', result: '3rd' },
+      ],
+    },
     {
       name: 'Spring Hill Raider Competition',
       date: 'Sep 12, 2026',
@@ -131,7 +144,7 @@ function PlaceBadge({ place, of }) {
 }
 
 function MeetCard({ meet, open, onToggle }) {
-  const topTeam = [...meet.teams].sort((a, b) => placeRank(a.place) - placeRank(b.place))[0];
+  const topTeam = [...meet.teams].sort((a, b) => placeRank(a.place) - placeRank(b.place))[0] || null;
   return (
     <div style={{ border: `1px solid ${open ? P.hairStrong : P.hair}`, background: P.deep, position: 'relative', transition: 'border-color 0.2s' }}>
       <Brackets size={16} opacity={open ? 0.6 : 0.28} />
@@ -152,31 +165,35 @@ function MeetCard({ meet, open, onToggle }) {
           </div>
         </div>
         <div style={{ display: 'flex', alignItems: 'center', gap: 14 }}>
-          <div style={{ textAlign: 'right' }}>
-            <div style={{ fontFamily: mono, fontSize: 8, color: P.mute, letterSpacing: '0.2em', marginBottom: 4 }}>TOP TEAM</div>
-            <div style={{ fontFamily: oswald, fontWeight: 700, fontSize: 16, color: P.gold }}>
-              {topTeam.team} · {topTeam.place}
+          {topTeam && (
+            <div style={{ textAlign: 'right' }}>
+              <div style={{ fontFamily: mono, fontSize: 8, color: P.mute, letterSpacing: '0.2em', marginBottom: 4 }}>TOP TEAM</div>
+              <div style={{ fontFamily: oswald, fontWeight: 700, fontSize: 16, color: P.gold }}>
+                {topTeam.team} · {topTeam.place}
+              </div>
             </div>
-          </div>
+          )}
           <span style={{ fontFamily: mono, fontSize: 14, color: P.gold, transform: open ? 'rotate(90deg)' : 'none', transition: 'transform 0.2s' }}>›</span>
         </div>
       </button>
 
       {open && (
         <div style={{ borderTop: `1px solid ${P.hair}`, padding: '20px 24px', display: 'grid', gap: 22 }}>
-          <div>
-            <div style={{ fontFamily: mono, fontSize: 8, color: P.gold, letterSpacing: '0.28em', opacity: 0.7, marginBottom: 12 }}>
-              TEAM PLACEMENTS
+          {meet.teams.length > 0 && (
+            <div>
+              <div style={{ fontFamily: mono, fontSize: 8, color: P.gold, letterSpacing: '0.28em', opacity: 0.7, marginBottom: 12 }}>
+                TEAM PLACEMENTS
+              </div>
+              <div style={{ display: 'flex', flexWrap: 'wrap', gap: 12 }}>
+                {meet.teams.map((t) => (
+                  <div key={t.team} style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+                    <span style={{ fontFamily: mono, fontSize: 10, color: P.cream, letterSpacing: '0.16em' }}>{t.team}</span>
+                    <PlaceBadge place={t.place} of={t.of} />
+                  </div>
+                ))}
+              </div>
             </div>
-            <div style={{ display: 'flex', flexWrap: 'wrap', gap: 12 }}>
-              {meet.teams.map((t) => (
-                <div key={t.team} style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-                  <span style={{ fontFamily: mono, fontSize: 10, color: P.cream, letterSpacing: '0.16em' }}>{t.team}</span>
-                  <PlaceBadge place={t.place} of={t.of} />
-                </div>
-              ))}
-            </div>
-          </div>
+          )}
 
           {meet.events?.length > 0 && (
             <div>
