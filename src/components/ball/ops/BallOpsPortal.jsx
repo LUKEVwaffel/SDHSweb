@@ -3,6 +3,7 @@ import { Navigate } from 'react-router-dom';
 import { supabase as SB } from '../../../lib/supabaseClient';
 import PortalMovedNotice from '../../portal/PortalMovedNotice';
 import { isPortalMoveNoticeActive } from '../../portal/portalMoveConfig';
+import { ERROR_CODES, reportError } from '../../../lib/errorCodes';
 import '../../review/review.css';
 import '../portal.css';
 
@@ -93,6 +94,7 @@ function exportCsv(rows, guestsBySignup) {
 export default function BallOpsPortal() {
   const [phase, setPhase] = useState('checking');
   const [errorMsg, setErrorMsg] = useState('');
+  const [deniedMsg, setDeniedMsg] = useState('');
   const [rows, setRows] = useState([]);
   const [guestsBySignup, setGuestsBySignup] = useState({});
   const [busyId, setBusyId] = useState(null);
@@ -112,7 +114,14 @@ export default function BallOpsPortal() {
       SB.from('ball_signups_ops_view').select('*').order('created_at', { ascending: true }),
       SB.from('ball_guests_ops_view').select('*'),
     ]);
-    if (sErr || gErr) { setPhase('error'); setErrorMsg((sErr || gErr).message); return; }
+    if (sErr || gErr) {
+      const err = sErr || gErr;
+      setPhase('error');
+      setErrorMsg(reportError(ERROR_CODES.BALL_OPS_LOAD_FAILED, 'ball_ops', err.message, {
+        detail: { supabase_error: err }, context: { source: sErr ? 'ball_signups_ops_view' : 'ball_guests_ops_view' },
+      }));
+      return;
+    }
     const bySignup = {};
     (guests || []).forEach((g) => { bySignup[g.signup_id] = g; });
     setGuestsBySignup(bySignup);
@@ -123,9 +132,22 @@ export default function BallOpsPortal() {
   const verifyAndLoad = useCallback(async () => {
     const { data: { session } } = await SB.auth.getSession();
     if (!session) { setPhase('login'); return; }
-    const { data: rev } = await SB.from('email_reviewers')
+    const { data: rev, error: revErr } = await SB.from('email_reviewers')
       .select('email').eq('email', session.user.email.toLowerCase()).eq('active', true).eq('can_ball_ops', true).maybeSingle();
-    if (!rev) { setLoginNotice('That account is not an active ops reviewer.'); setPhase('login'); return; }
+    if (revErr) {
+      setPhase('error');
+      setErrorMsg(reportError(ERROR_CODES.BALL_OPS_SESSION_ERROR, 'ball_ops', revErr.message, {
+        detail: { supabase_error: revErr }, context: { stage: 'reviewer_check', email: session.user.email },
+      }));
+      return;
+    }
+    if (!rev) {
+      setDeniedMsg(reportError(ERROR_CODES.BALL_OPS_NOT_AUTHORIZED, 'ball_ops', 'That account is not an active ops reviewer.', {
+        context: { email: session.user.email },
+      }));
+      setPhase('denied');
+      return;
+    }
     await loadAll();
   }, [loadAll]);
 
@@ -144,7 +166,7 @@ export default function BallOpsPortal() {
 
   async function signOut() {
     await SB.auth.signOut();
-    setRows([]); setGuestsBySignup({}); setOpenId(null); setConfirmTarget(null);
+    setRows([]); setGuestsBySignup({}); setOpenId(null); setConfirmTarget(null); setDeniedMsg('');
     setPhase('login');
   }
 
@@ -166,22 +188,38 @@ export default function BallOpsPortal() {
     setConfirmTarget(null);
     setBusyId(row.id);
     setFlash(null);
-    const { error } = onGuest
-      ? await SB.from('ball_guests').update({ [target.column]: turningOn }).eq('id', guest.id)
-      : await SB.from('ball_signups').update({ [target.column]: turningOn }).eq('id', row.id);
-    if (error) {
+    try {
+      const { error } = onGuest
+        ? await SB.from('ball_guests').update({ [target.column]: turningOn }).eq('id', guest.id)
+        : await SB.from('ball_signups').update({ [target.column]: turningOn }).eq('id', row.id);
+      if (error) {
+        setFlash({
+          tone: 'err',
+          msg: reportError(ERROR_CODES.BALL_OPS_TOGGLE_FAILED, 'ball_ops', `Could not update: ${error.message}`, {
+            detail: { supabase_error: error }, context: { signup_id: row.id, guest_id: guest?.id, field, table: target.table },
+          }),
+        });
+        return;
+      }
+      // Notification is fire-and-forget — a failed email must not block the flip.
+      await SB.functions
+        .invoke('notify-ball-status-update', { body: { signup_id: row.id, field: target.notify } })
+        .catch(() => {});
+      await loadAll();
+      const Label = target.label.charAt(0).toUpperCase() + target.label.slice(1);
+      setFlash({ tone: 'ok', msg: `${Label} ${turningOn ? 'marked received' : 'revoked'} for ${who}.` });
+    } catch (e) {
+      // A dropped connection mid-request throws instead of resolving with
+      // { error } — without this the button would stay greyed out forever.
+      setFlash({
+        tone: 'err',
+        msg: reportError(ERROR_CODES.BALL_OPS_TOGGLE_EXCEPTION, 'ball_ops', `Could not update: ${e?.message || 'connection lost mid-request'}. Try again.`, {
+          detail: { thrown: String(e?.message || e) }, context: { signup_id: row.id, guest_id: guest?.id, field, table: target.table },
+        }),
+      });
+    } finally {
       setBusyId(null);
-      setFlash({ tone: 'err', msg: `Could not update: ${error.message}` });
-      return;
     }
-    // Notification is fire-and-forget — a failed email must not block the flip.
-    await SB.functions
-      .invoke('notify-ball-status-update', { body: { signup_id: row.id, field: target.notify } })
-      .catch(() => {});
-    await loadAll();
-    setBusyId(null);
-    const Label = target.label.charAt(0).toUpperCase() + target.label.slice(1);
-    setFlash({ tone: 'ok', msg: `${Label} ${turningOn ? 'marked received' : 'revoked'} for ${who}.` });
   }
 
   // A self_pays friend owes their own $35 in a separate handoff — settled
@@ -234,6 +272,16 @@ export default function BallOpsPortal() {
 
   if (phase === 'checking') return shell(<p className="rv-sub"><span className="rv-dot" />Checking your session&hellip;</p>);
   if (phase === 'login') return isPortalMoveNoticeActive() ? <PortalMovedNotice portalName="Ball Ops" /> : <Navigate to="/portal" replace />;
+  if (phase === 'denied') return shell(
+    <div className="rv-panel" style={{ borderColor: '#dcbdb6' }}>
+      <h1 className="rv-h1" style={{ fontSize: 20 }}>Not authorized</h1>
+      <p className="rv-sub">{deniedMsg}</p>
+      <div style={{ display: 'flex', gap: 12, marginTop: 12 }}>
+        <a className="rv-link" style={{ margin: 0 }} href="/portal">&lsaquo; Back to portal picker</a>
+        <button className="rv-link" style={{ margin: 0 }} onClick={signOut}>Sign out</button>
+      </div>
+    </div>
+  );
   if (phase === 'error') return shell(<div className="rv-panel" style={{ borderColor: '#dcbdb6' }}><h1 className="rv-h1" style={{ fontSize: 20 }}>Something went wrong</h1><p className="rv-sub">{errorMsg}</p></div>);
 
   const totalVerified = rows.filter((r) => r.status === 'fully_verified').length;

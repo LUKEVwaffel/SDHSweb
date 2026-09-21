@@ -3,6 +3,7 @@ import { Navigate } from 'react-router-dom';
 import { supabase as SB } from '../../../lib/supabaseClient';
 import PortalMovedNotice from '../../portal/PortalMovedNotice';
 import { isPortalMoveNoticeActive } from '../../portal/portalMoveConfig';
+import { ERROR_CODES, reportError } from '../../../lib/errorCodes';
 import '../../review/review.css';
 import '../portal.css';
 
@@ -46,6 +47,7 @@ function getSessionWithTimeout(ms = ACTION_TIMEOUT_MS) {
 export default function BallDressPortal() {
   const [phase, setPhase] = useState('checking');
   const [errorMsg, setErrorMsg] = useState('');
+  const [deniedMsg, setDeniedMsg] = useState('');
   const [email, setEmail] = useState('');
   const [cadets, setCadets] = useState([]);
   const [guests, setGuests] = useState([]);
@@ -64,7 +66,15 @@ export default function BallDressPortal() {
       SB.from('ball_vip_signups_dress_view').select('*').eq('gender', 'female'),
       SB.from('ball_vip_dates_dress_view').select('*').eq('gender', 'female'),
     ]);
-    if (cErr || gErr || vErr || vdErr) { setPhase('error'); setErrorMsg((cErr || gErr || vErr || vdErr).message); return; }
+    if (cErr || gErr || vErr || vdErr) {
+      const err = cErr || gErr || vErr || vdErr;
+      const source = cErr ? 'ball_signups_dress_view' : gErr ? 'ball_guests_dress_view' : vErr ? 'ball_vip_signups_dress_view' : 'ball_vip_dates_dress_view';
+      setPhase('error');
+      setErrorMsg(reportError(ERROR_CODES.BALL_DRESS_LOAD_FAILED, 'ball_dress', err.message, {
+        detail: { supabase_error: err }, context: { source },
+      }));
+      return;
+    }
     setCadets(c || []);
     setGuests(g || []);
     setVips(v || []);
@@ -75,8 +85,21 @@ export default function BallDressPortal() {
   const verifyAndLoad = useCallback(async () => {
     const { data: { session } } = await SB.auth.getSession();
     if (!session) { setPhase('login'); return; }
-    const { data: staff } = await SB.rpc('is_ball_dress');
-    if (!staff) { setPhase('login'); return; }
+    const { data: staff, error: staffErr } = await SB.rpc('is_ball_dress');
+    if (staffErr) {
+      setPhase('error');
+      setErrorMsg(reportError(ERROR_CODES.BALL_DRESS_SESSION_TIMEOUT, 'ball_dress', staffErr.message, {
+        detail: { supabase_error: staffErr }, context: { stage: 'is_ball_dress', email: session.user.email },
+      }));
+      return;
+    }
+    if (!staff) {
+      setDeniedMsg(reportError(ERROR_CODES.BALL_DRESS_NOT_AUTHORIZED, 'ball_dress', 'That account is not an active dress approver.', {
+        context: { email: session.user.email },
+      }));
+      setPhase('denied');
+      return;
+    }
     setEmail(session.user.email);
     await loadAll();
   }, [loadAll]);
@@ -98,7 +121,7 @@ export default function BallDressPortal() {
 
   async function signOut() {
     await SB.auth.signOut();
-    setCadets([]); setGuests([]); setVips([]); setVipDates([]); setEmail('');
+    setCadets([]); setGuests([]); setVips([]); setVipDates([]); setEmail(''); setDeniedMsg('');
     setPhase('login');
   }
 
@@ -126,14 +149,21 @@ export default function BallDressPortal() {
           dress_approved: approving, dress_approved_by: approving ? session.user.email : null,
         }).eq('id', item.id)
       );
-      if (error) { setActionError(`Could not update ${item.name}: ${error.message}`); return; }
+      if (error) {
+        setActionError(reportError(ERROR_CODES.BALL_DRESS_TOGGLE_FAILED, 'ball_dress', `Could not update ${item.name}: ${error.message}`, {
+          detail: { supabase_error: error }, context: { id: item.id, kind: item.kind, table: KIND_TABLE[item.kind] },
+        }));
+        return;
+      }
       await loadAll();
     } catch (e) {
       // A dropped connection mid-request throws instead of resolving with
       // { error } — without this catch the button would stay greyed out
       // forever with no explanation at all (the actual "nothing happens"
       // report from mobile Safari).
-      setActionError(`Could not update ${item.name}: ${e?.message || 'connection lost mid-request'}. Try again.`);
+      setActionError(reportError(ERROR_CODES.BALL_DRESS_TOGGLE_EXCEPTION, 'ball_dress', `Could not update ${item.name}: ${e?.message || 'connection lost mid-request'}. Try again.`, {
+        detail: { thrown: String(e?.message || e) }, context: { id: item.id, kind: item.kind },
+      }));
     } finally {
       setBusyId(null);
     }
@@ -175,10 +205,16 @@ export default function BallDressPortal() {
         return ids.length ? withTimeout(SB.from(table).update({ dress_approved: true, dress_approved_by: session.user.email }).in('id', ids)) : null;
       }));
       const failed = results.find((r) => r?.error);
-      if (failed) setActionError(`Could not approve all: ${failed.error.message}`);
+      if (failed) {
+        setActionError(reportError(ERROR_CODES.BALL_DRESS_BULK_FAILED, 'ball_dress', `Could not approve all: ${failed.error.message}`, {
+          detail: { supabase_error: failed.error },
+        }));
+      }
       await loadAll();
     } catch (e) {
-      setActionError(`Could not approve all: ${e?.message || 'connection lost mid-request'}. Try again.`);
+      setActionError(reportError(ERROR_CODES.BALL_DRESS_BULK_EXCEPTION, 'ball_dress', `Could not approve all: ${e?.message || 'connection lost mid-request'}. Try again.`, {
+        detail: { thrown: String(e?.message || e) },
+      }));
     } finally {
       setBulkBusy(false);
     }
@@ -195,6 +231,16 @@ export default function BallDressPortal() {
 
   if (phase === 'checking') return shell(<p className="rv-sub"><span className="rv-dot" />Checking your session&hellip;</p>);
   if (phase === 'login') return isPortalMoveNoticeActive() ? <PortalMovedNotice portalName="Dress Approval" /> : <Navigate to="/portal" replace />;
+  if (phase === 'denied') return shell(
+    <div className="rv-panel" style={{ borderColor: '#dcbdb6' }}>
+      <h1 className="rv-h1" style={{ fontSize: 20 }}>Not authorized</h1>
+      <p className="rv-sub">{deniedMsg}</p>
+      <div style={{ display: 'flex', gap: 12, marginTop: 12 }}>
+        <a className="rv-link" style={{ margin: 0 }} href="/portal">&lsaquo; Back to portal picker</a>
+        <button className="rv-link" style={{ margin: 0 }} onClick={signOut}>Sign out</button>
+      </div>
+    </div>
+  );
   if (phase === 'error') return shell(<div className="rv-panel" style={{ borderColor: '#dcbdb6' }}><h1 className="rv-h1" style={{ fontSize: 20 }}>Something went wrong</h1><p className="rv-sub">{errorMsg}</p></div>);
 
   return shell(

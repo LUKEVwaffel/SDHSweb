@@ -3,6 +3,7 @@ import { Navigate } from 'react-router-dom';
 import { supabase as SB } from '../../../lib/supabaseClient';
 import PortalMovedNotice from '../../portal/PortalMovedNotice';
 import { isPortalMoveNoticeActive } from '../../portal/portalMoveConfig';
+import { ERROR_CODES, reportError } from '../../../lib/errorCodes';
 import '../../review/review.css';
 import '../portal.css';
 
@@ -20,6 +21,8 @@ function byLine(email) {
 export default function BallAttirePortal() {
   const [phase, setPhase] = useState('checking');
   const [errorMsg, setErrorMsg] = useState('');
+  const [deniedMsg, setDeniedMsg] = useState('');
+  const [actionError, setActionError] = useState('');
   const [email, setEmail] = useState('');
   const [rows, setRows] = useState([]);
   const [busyId, setBusyId] = useState(null);
@@ -28,7 +31,13 @@ export default function BallAttirePortal() {
 
   const loadAll = useCallback(async () => {
     const { data, error } = await SB.rpc('ball_attire_guest_list');
-    if (error) { setPhase('error'); setErrorMsg(error.message); return; }
+    if (error) {
+      setPhase('error');
+      setErrorMsg(reportError(ERROR_CODES.BALL_ATTIRE_LOAD_FAILED, 'ball_attire', error.message, {
+        detail: { supabase_error: error }, context: { source: 'ball_attire_guest_list' },
+      }));
+      return;
+    }
     setRows(data || []);
     setPhase('ready');
   }, []);
@@ -36,8 +45,21 @@ export default function BallAttirePortal() {
   const verifyAndLoad = useCallback(async () => {
     const { data: { session } } = await SB.auth.getSession();
     if (!session) { setPhase('login'); return; }
-    const { data: ok } = await SB.rpc('is_ball_attire');
-    if (!ok) { setPhase('login'); return; }
+    const { data: ok, error: okErr } = await SB.rpc('is_ball_attire');
+    if (okErr) {
+      setPhase('error');
+      setErrorMsg(reportError(ERROR_CODES.BALL_ATTIRE_LOAD_FAILED, 'ball_attire', okErr.message, {
+        detail: { supabase_error: okErr }, context: { stage: 'is_ball_attire', email: session.user.email },
+      }));
+      return;
+    }
+    if (!ok) {
+      setDeniedMsg(reportError(ERROR_CODES.BALL_ATTIRE_NOT_AUTHORIZED, 'ball_attire', 'That account is not an active attire approver.', {
+        context: { email: session.user.email },
+      }));
+      setPhase('denied');
+      return;
+    }
     setEmail(session.user.email);
     await loadAll();
   }, [loadAll]);
@@ -56,19 +78,34 @@ export default function BallAttirePortal() {
 
   async function signOut() {
     await SB.auth.signOut();
-    setRows([]); setEmail('');
+    setRows([]); setEmail(''); setDeniedMsg('');
     setPhase('login');
   }
 
   async function toggle(row) {
     setBusyId(row.id);
-    const { data: { session } } = await SB.auth.getSession();
-    const approving = !row.dress_approved;
-    await SB.from('ball_guests').update({
-      dress_approved: approving, dress_approved_by: approving ? session.user.email : null,
-    }).eq('id', row.id);
-    await loadAll();
-    setBusyId(null);
+    setActionError('');
+    try {
+      const { data: { session } } = await SB.auth.getSession();
+      if (!session) { setPhase('login'); return; }
+      const approving = !row.dress_approved;
+      const { error } = await SB.from('ball_guests').update({
+        dress_approved: approving, dress_approved_by: approving ? session.user.email : null,
+      }).eq('id', row.id);
+      if (error) {
+        setActionError(reportError(ERROR_CODES.BALL_ATTIRE_TOGGLE_FAILED, 'ball_attire', `Could not update ${row.guest_name}: ${error.message}`, {
+          detail: { supabase_error: error }, context: { id: row.id },
+        }));
+        return;
+      }
+      await loadAll();
+    } catch (e) {
+      setActionError(reportError(ERROR_CODES.BALL_ATTIRE_TOGGLE_EXCEPTION, 'ball_attire', `Could not update ${row.guest_name}: ${e?.message || 'connection lost mid-request'}. Try again.`, {
+        detail: { thrown: String(e?.message || e) }, context: { id: row.id },
+      }));
+    } finally {
+      setBusyId(null);
+    }
   }
 
   const { pending, approved } = useMemo(() => {
@@ -85,12 +122,27 @@ export default function BallAttirePortal() {
     const ok = window.confirm(`Mark all ${pending.length} pending as approved?`);
     if (!ok) return;
     setBulkBusy(true);
-    const { data: { session } } = await SB.auth.getSession();
-    await SB.from('ball_guests').update({
-      dress_approved: true, dress_approved_by: session.user.email,
-    }).in('id', pending.map((r) => r.id));
-    await loadAll();
-    setBulkBusy(false);
+    setActionError('');
+    try {
+      const { data: { session } } = await SB.auth.getSession();
+      if (!session) { setPhase('login'); return; }
+      const { error } = await SB.from('ball_guests').update({
+        dress_approved: true, dress_approved_by: session.user.email,
+      }).in('id', pending.map((r) => r.id));
+      if (error) {
+        setActionError(reportError(ERROR_CODES.BALL_ATTIRE_BULK_FAILED, 'ball_attire', `Could not approve all: ${error.message}`, {
+          detail: { supabase_error: error }, context: { ids: pending.map((r) => r.id) },
+        }));
+        return;
+      }
+      await loadAll();
+    } catch (e) {
+      setActionError(reportError(ERROR_CODES.BALL_ATTIRE_BULK_EXCEPTION, 'ball_attire', `Could not approve all: ${e?.message || 'connection lost mid-request'}. Try again.`, {
+        detail: { thrown: String(e?.message || e) },
+      }));
+    } finally {
+      setBulkBusy(false);
+    }
   }
 
   const shell = (children) => (
@@ -104,6 +156,16 @@ export default function BallAttirePortal() {
 
   if (phase === 'checking') return shell(<p className="rv-sub"><span className="rv-dot" />Checking your session&hellip;</p>);
   if (phase === 'login') return isPortalMoveNoticeActive() ? <PortalMovedNotice portalName="Male-Guest Attire" /> : <Navigate to="/portal" replace />;
+  if (phase === 'denied') return shell(
+    <div className="rv-panel" style={{ borderColor: '#dcbdb6' }}>
+      <h1 className="rv-h1" style={{ fontSize: 20 }}>Not authorized</h1>
+      <p className="rv-sub">{deniedMsg}</p>
+      <div style={{ display: 'flex', gap: 12, marginTop: 12 }}>
+        <a className="rv-link" style={{ margin: 0 }} href="/portal">&lsaquo; Back to portal picker</a>
+        <button className="rv-link" style={{ margin: 0 }} onClick={signOut}>Sign out</button>
+      </div>
+    </div>
+  );
   if (phase === 'error') return shell(<div className="rv-panel" style={{ borderColor: '#dcbdb6' }}><h1 className="rv-h1" style={{ fontSize: 20 }}>Something went wrong</h1><p className="rv-sub">{errorMsg}</p></div>);
 
   return shell(
@@ -117,6 +179,8 @@ export default function BallAttirePortal() {
         <h1 className="bp-title">Male-Guest Attire</h1>
         <button className="bp-refresh" onClick={loadAll}>Refresh</button>
       </div>
+
+      {actionError && <div className="bp-action-error">{actionError}</div>}
 
       <div className="bp-stats">
         <span className={`bp-stat ${pending.length ? 'is-alert' : ''}`}><b>{pending.length}</b> to approve</span>
