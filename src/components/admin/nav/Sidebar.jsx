@@ -32,6 +32,7 @@ export const NAV_GROUPS = [
       { id: 'ball', icon: '♛', label: 'Military Ball' },
       { id: 'ballallergy', icon: '⚕', label: 'Ball Allergies' },
       { id: 'riflesignups', icon: '⊙', label: 'Rifle Signups' },
+      { id: 'halloween', icon: '🎃', label: 'Halloween Bash Poll' },
     ],
   },
   {
