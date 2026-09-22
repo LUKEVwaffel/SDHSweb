@@ -53,13 +53,29 @@ function toBlob(canvas) {
   );
 }
 
-function loadImageFromUrl(url) {
+// Fetches the image bytes ourselves rather than pointing an <img crossOrigin>
+// at the URL directly. The photo is almost always already sitting in the
+// browser's HTTP cache from the plain (non-CORS) <img> the viewer just
+// rendered — reusing that cached response taints the canvas silently, with
+// no error, which is why blur previously appeared to do nothing. Fetching
+// fresh with cache:'reload' and decoding from a same-origin blob: URL avoids
+// that entirely.
+async function loadImageFromUrl(url) {
+  const res = await fetch(url, { mode: 'cors', cache: 'reload' });
+  if (!res.ok) throw new Error(`Could not fetch image for editing (${res.status})`);
+  const blob = await res.blob();
+  const objectUrl = URL.createObjectURL(blob);
   return new Promise((resolve, reject) => {
     const img = new Image();
-    img.crossOrigin = 'anonymous';
-    img.onload = () => resolve(img);
-    img.onerror = () => reject(new Error('Could not load image for editing'));
-    img.src = url;
+    img.onload = () => {
+      URL.revokeObjectURL(objectUrl);
+      resolve(img);
+    };
+    img.onerror = () => {
+      URL.revokeObjectURL(objectUrl);
+      reject(new Error('Could not decode image for editing'));
+    };
+    img.src = objectUrl;
   });
 }
 

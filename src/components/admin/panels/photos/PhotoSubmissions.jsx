@@ -62,6 +62,7 @@ export default function PhotoSubmissions({ adminId, showTvPhotos = false }) {
   const [blurMode, setBlurMode] = useState(false);
   const [ovals, setOvals] = useState([]);
   const [savingBlur, setSavingBlur] = useState(false);
+  const [blurError, setBlurError] = useState('');
   const imgWrapRef = useRef(null);
   const dragRef = useRef(null);
 
@@ -109,6 +110,7 @@ export default function PhotoSubmissions({ adminId, showTvPhotos = false }) {
   useEffect(() => {
     setBlurMode(false);
     setOvals([]);
+    setBlurError('');
   }, [viewerId]);
 
   // Keyboard controls while the viewer is open: "d" toggles the open photo
@@ -141,6 +143,7 @@ export default function PhotoSubmissions({ adminId, showTvPhotos = false }) {
 
   function startBlurEdit() {
     setOvals([{ id: Date.now(), ...DEFAULT_OVAL }]);
+    setBlurError('');
     setBlurMode(true);
   }
 
@@ -184,6 +187,7 @@ export default function PhotoSubmissions({ adminId, showTvPhotos = false }) {
   async function applyBlur() {
     if (!viewerRow || !ovals.length) return;
     setSavingBlur(true);
+    setBlurError('');
     try {
       const { full, thumb } = await applyOvalBlurToUrl(viewerRow.photo_url, ovals);
       const tPath = thumbPath(viewerRow.storage_path);
@@ -207,7 +211,7 @@ export default function PhotoSubmissions({ adminId, showTvPhotos = false }) {
       setBlurMode(false);
       setOvals([]);
     } catch (err) {
-      alert(`Could not apply blur: ${err.message || err}`);
+      setBlurError(err.message || 'Could not apply blur.');
     } finally {
       setSavingBlur(false);
     }
@@ -395,6 +399,11 @@ export default function PhotoSubmissions({ adminId, showTvPhotos = false }) {
             {blurMode && (
               <div style={{ fontFamily: mono, fontSize: 9, color: P.mute, letterSpacing: '0.04em' }}>
                 Drag an oval over the face to cover it · drag the gold dot to resize · × removes it · Esc cancels
+              </div>
+            )}
+            {blurError && (
+              <div style={{ fontFamily: mono, fontSize: fs.xs, color: P.red }}>
+                {blurError}
               </div>
             )}
             <div style={{ background: P.ink, border: `1px solid ${P.hairStrong}`, overflow: 'auto', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
