@@ -37,6 +37,15 @@ function thumbPath(storagePath) {
   return storagePath ? storagePath.replace(/\.jpg$/i, '_t.jpg') : null;
 }
 
+// team-photos storage policies only grant INSERT for new paths (see
+// PhotoUploader.jsx) — there is no update/overwrite permission, so an
+// upsert onto the existing path is silently rejected. Blurring writes to a
+// fresh path in the same folder instead, exactly like a new upload.
+function blurredPath(storagePath) {
+  const stamp = `${Date.now()}_${Math.random().toString(36).slice(2, 8)}`;
+  return storagePath.replace(/\.jpg$/i, `_blur_${stamp}.jpg`);
+}
+
 // Deletes the storage objects + row + audit log entry for one photo.
 // Shared by the single-photo delete button and the batch delete action.
 async function deletePhotoRecord(row, adminId) {
@@ -190,24 +199,36 @@ export default function PhotoSubmissions({ adminId, showTvPhotos = false }) {
     setBlurError('');
     try {
       const { full, thumb } = await applyOvalBlurToUrl(viewerRow.photo_url, ovals);
-      const tPath = thumbPath(viewerRow.storage_path);
-      await SB.storage.from(BUCKET).upload(viewerRow.storage_path, full, { upsert: true, contentType: 'image/jpeg' });
-      if (tPath) await SB.storage.from(BUCKET).upload(tPath, thumb, { upsert: true, contentType: 'image/jpeg' });
 
-      // Public URLs are CDN-cached at the same path — bust the cache so the
-      // blur shows up immediately everywhere the photo is served, not just here.
-      const bust = Date.now();
-      const newPhotoUrl = `${SB.storage.from(BUCKET).getPublicUrl(viewerRow.storage_path).data.publicUrl}?b=${bust}`;
-      const newThumbUrl = tPath ? `${SB.storage.from(BUCKET).getPublicUrl(tPath).data.publicUrl}?b=${bust}` : newPhotoUrl;
+      const newPath = blurredPath(viewerRow.storage_path);
+      const newThumbPath = thumbPath(newPath);
 
-      await SB.from('photos').update({ photo_url: newPhotoUrl, thumb_url: newThumbUrl }).eq('id', viewerRow.id);
+      const up1 = await SB.storage.from(BUCKET).upload(newPath, full, { contentType: 'image/jpeg' });
+      if (up1.error) throw up1.error;
+      const up2 = await SB.storage.from(BUCKET).upload(newThumbPath, thumb, { contentType: 'image/jpeg' });
+      if (up2.error) throw up2.error;
+
+      const newPhotoUrl = SB.storage.from(BUCKET).getPublicUrl(newPath).data.publicUrl;
+      const newThumbUrl = SB.storage.from(BUCKET).getPublicUrl(newThumbPath).data.publicUrl;
+
+      const { error: updateError } = await SB.from('photos')
+        .update({ storage_path: newPath, photo_url: newPhotoUrl, thumb_url: newThumbUrl })
+        .eq('id', viewerRow.id);
+      if (updateError) throw updateError;
+
+      // Old objects are now orphaned — clean them up, but a failure here
+      // shouldn't roll back a blur that already succeeded and is already
+      // live on the row above.
+      const oldPaths = [viewerRow.storage_path, thumbPath(viewerRow.storage_path)].filter(Boolean);
+      if (oldPaths.length) await SB.storage.from(BUCKET).remove(oldPaths);
+
       await SB.from('change_log').insert({
         admin_id: adminId, page: 'photos', element: viewerRow.id,
         label: `BLUR PHOTO: ${viewerRow.team}${viewerRow.uploader_name ? ` · ${viewerRow.uploader_name}` : ''}`,
         value_before: { photo_url: viewerRow.photo_url, thumb_url: viewerRow.thumb_url },
         value_after: { photo_url: newPhotoUrl, thumb_url: newThumbUrl },
       });
-      setRows((prev) => prev.map((r) => (r.id === viewerRow.id ? { ...r, photo_url: newPhotoUrl, thumb_url: newThumbUrl } : r)));
+      setRows((prev) => prev.map((r) => (r.id === viewerRow.id ? { ...r, storage_path: newPath, photo_url: newPhotoUrl, thumb_url: newThumbUrl } : r)));
       setBlurMode(false);
       setOvals([]);
     } catch (err) {
