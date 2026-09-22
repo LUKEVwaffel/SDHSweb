@@ -9,6 +9,16 @@ function fmtDate(v) {
   return v ? new Date(v).toLocaleString() : '—';
 }
 
+// Postgres `date` columns come back as a bare "YYYY-MM-DD" string — parsing
+// that directly with `new Date()` reads it as UTC midnight, which rolls
+// back a day in any negative-UTC timezone. Building the Date from parts
+// keeps it local and avoids that off-by-one.
+function formatBirthdate(dateStr) {
+  if (!dateStr) return '';
+  const [y, m, d] = dateStr.split('-').map(Number);
+  return new Date(y, m - 1, d).toLocaleDateString();
+}
+
 function csvCell(v) {
   if (v == null) return '';
   const s = String(v);
@@ -16,10 +26,13 @@ function csvCell(v) {
 }
 
 function exportCsv(rows) {
-  const headers = ['School Email', 'Personal Email', 'Parent Email', 'Phone', 'Varsity', 'Signed Up'];
+  const headers = ['Name', 'Company', 'Grade', 'LET Level', 'Birthdate', 'School Email', 'Personal Email', 'Parent Email', 'Phone', 'Varsity', 'Signed Up'];
   const lines = [headers.join(',')];
   rows.forEach((r) => {
-    lines.push([r.school_email, r.personal_email, r.parent_email, r.phone, r.is_varsity ? 'Yes' : 'No', fmtDate(r.created_at)].map(csvCell).join(','));
+    lines.push([
+      r.cadet_name, r.cadet_company, r.cadet_grade, r.cadet_let_level, r.cadet_birthdate,
+      r.school_email, r.personal_email, r.parent_email, r.phone, r.is_varsity ? 'Yes' : 'No', fmtDate(r.created_at),
+    ].map(csvCell).join(','));
   });
   const blob = new Blob([lines.join('\r\n')], { type: 'text/csv;charset=utf-8;' });
   const url = URL.createObjectURL(blob);
@@ -101,7 +114,7 @@ export default function RifleSignupsPortal() {
 
   const term = q.trim().toLowerCase();
   const filtered = term
-    ? rows.filter((r) => [r.school_email, r.personal_email, r.parent_email].some((v) => (v || '').toLowerCase().includes(term)))
+    ? rows.filter((r) => [r.cadet_name, r.school_email, r.personal_email, r.parent_email].some((v) => (v || '').toLowerCase().includes(term)))
     : rows;
 
   return shell(
@@ -118,7 +131,7 @@ export default function RifleSignupsPortal() {
       {rows.length > 0 && (
         <div style={{ display: 'flex', gap: 10, marginBottom: 14 }}>
           {rows.length > 6 && (
-            <input className="rv-search" placeholder="Search by email…" value={q} onChange={(e) => setQ(e.target.value)} style={{ flex: 1 }} />
+            <input className="rv-search" placeholder="Search by name or email…" value={q} onChange={(e) => setQ(e.target.value)} style={{ flex: 1 }} />
           )}
           <button className="rv-link" onClick={() => copyPhones(rows)}>{copied ? 'Copied!' : 'Copy phone numbers'}</button>
           <button className="rv-link" onClick={() => exportCsv(rows)}>Export CSV</button>
@@ -134,7 +147,7 @@ export default function RifleSignupsPortal() {
           {filtered.map((r) => (
             <div key={r.id} className="rv-row" style={{ cursor: 'default' }}>
               <div className="rv-row-title" style={{ display: 'flex', alignItems: 'baseline', gap: 10, flexWrap: 'wrap' }}>
-                {r.school_email}
+                {r.cadet_name || '(no roster match)'}
                 <span style={{ fontWeight: 700, color: 'var(--rv-accent)' }}>{r.phone}</span>
                 {r.is_varsity && (
                   <span style={{ fontSize: 11, fontWeight: 700, letterSpacing: '0.1em', color: '#06101F', background: 'var(--rv-accent)', padding: '2px 8px' }}>
@@ -142,8 +155,14 @@ export default function RifleSignupsPortal() {
                   </span>
                 )}
               </div>
+              {(r.cadet_company || r.cadet_grade || r.cadet_let_level || r.cadet_birthdate) && (
+                <div className="rv-row-meta">
+                  {[r.cadet_company, r.cadet_grade && `Grade ${r.cadet_grade}`, r.cadet_let_level && `LET ${r.cadet_let_level}`, r.cadet_birthdate && formatBirthdate(r.cadet_birthdate)]
+                    .filter(Boolean).join(' · ')}
+                </div>
+              )}
               <div className="rv-row-meta">
-                Personal: {r.personal_email} &middot; Parent: {r.parent_email}
+                {r.school_email} &middot; Personal: {r.personal_email} &middot; Parent: {r.parent_email}
               </div>
               <div className="rv-row-meta">Signed up {fmtDate(r.created_at)}</div>
             </div>
