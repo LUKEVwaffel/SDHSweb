@@ -2,6 +2,16 @@ import { useState, useEffect, useCallback } from 'react';
 import { supabase as SB } from '../../../lib/supabaseClient';
 import { P, mono } from '../theme';
 
+// Postgres `date` columns come back as a bare "YYYY-MM-DD" string — parsing
+// that directly with `new Date()` reads it as UTC midnight, which rolls
+// back a day in any negative-UTC timezone. Building the Date from parts
+// keeps it local and avoids that off-by-one.
+function formatBirthdate(dateStr) {
+  if (!dateStr) return '';
+  const [y, m, d] = dateStr.split('-').map(Number);
+  return new Date(y, m - 1, d).toLocaleDateString();
+}
+
 // Read-only list of /rifle/signup interest signups, scoped through
 // rifle_signups_review_view (is_rifle_admin() was added to that view's gate
 // alongside this tab — Makaio previously had no way to see who signed up for
@@ -81,7 +91,7 @@ export default function SignupsTab() {
               </div>
               {(r.cadet_company || r.cadet_grade || r.cadet_let_level || r.cadet_birthdate) && (
                 <div style={{ fontFamily: mono, fontSize: 11, color: P.mute, marginTop: 4 }}>
-                  {[r.cadet_company, r.cadet_grade && `Grade ${r.cadet_grade}`, r.cadet_let_level && `LET ${r.cadet_let_level}`, r.cadet_birthdate && new Date(r.cadet_birthdate).toLocaleDateString()]
+                  {[r.cadet_company, r.cadet_grade && `Grade ${r.cadet_grade}`, r.cadet_let_level && `LET ${r.cadet_let_level}`, r.cadet_birthdate && formatBirthdate(r.cadet_birthdate)]
                     .filter(Boolean).join(' · ')}
                 </div>
               )}

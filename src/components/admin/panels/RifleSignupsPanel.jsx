@@ -7,6 +7,16 @@ import { Btn, PanelHeader, EmptyState } from '../shared/ui';
 // Reads the base table directly — s6 already has full RLS access via
 // rifle_signups_all_s6, unlike the reviewer portal which reads the scoped
 // rifle_signups_review_view (RifleSignupsPortal.jsx, /rifle/signup-review).
+// Postgres `date` columns come back as a bare "YYYY-MM-DD" string — parsing
+// that directly with `new Date()` reads it as UTC midnight, which rolls
+// back a day in any negative-UTC timezone. Building the Date from parts
+// keeps it local and avoids that off-by-one.
+function formatBirthdate(dateStr) {
+  if (!dateStr) return '';
+  const [y, m, d] = dateStr.split('-').map(Number);
+  return new Date(y, m - 1, d).toLocaleDateString();
+}
+
 function csvCell(v) {
   if (v == null) return '';
   const s = String(v);
@@ -118,7 +128,7 @@ export default function RifleSignupsPanel() {
               </div>
               {r.cadet && (
                 <div style={{ fontFamily: mono, fontSize: fs.micro, color: P.mute, marginTop: 4, letterSpacing: '0.02em' }}>
-                  {[r.cadet.company, r.cadet.grade && `Grade ${r.cadet.grade}`, r.cadet.let_level && `LET ${r.cadet.let_level}`, r.cadet.birthdate && new Date(r.cadet.birthdate).toLocaleDateString()]
+                  {[r.cadet.company, r.cadet.grade && `Grade ${r.cadet.grade}`, r.cadet.let_level && `LET ${r.cadet.let_level}`, r.cadet.birthdate && formatBirthdate(r.cadet.birthdate)]
                     .filter(Boolean).join(' · ')}
                 </div>
               )}
