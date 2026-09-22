@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react';
+import { useMemo, useRef, useState } from 'react';
 import { SEASON_META, SHOOTERS, TEAM, buildNarrative } from './rifleData';
 
 const P = {
@@ -234,6 +234,62 @@ function cell(align) {
   };
 }
 
+// ── Quick-glance leaderboard — every tier/avg/best visible with zero clicks ──
+
+function QuickTable({ ordered, onJump }) {
+  const cols = ['#', 'NAME', 'CLASS', 'AVG', 'TOP SHOT', 'TREND', 'FIRED'];
+  return (
+    <div style={{ border: `1px solid ${P.hair}`, background: P.deep, overflowX: 'auto', marginBottom: 20 }}>
+      <table style={{ borderCollapse: 'collapse', width: '100%', minWidth: 560 }}>
+        <thead>
+          <tr>
+            {cols.map((c, i) => (
+              <th key={c} style={{
+                fontFamily: MONO, fontSize: 8, color: P.gold, letterSpacing: '0.16em', opacity: 0.7,
+                textAlign: i <= 1 ? 'left' : 'right', padding: '9px 12px',
+                borderBottom: `1px solid ${P.hair}`, whiteSpace: 'nowrap', background: P.navy,
+              }}>{c}</th>
+            ))}
+          </tr>
+        </thead>
+        <tbody>
+          {ordered.map((s, i) => (
+            <tr
+              key={s.name}
+              onClick={() => onJump(s.name)}
+              role="button"
+              tabIndex={0}
+              onKeyDown={(e) => activate(e, () => onJump(s.name))}
+              style={{ cursor: 'pointer' }}
+              onMouseEnter={(e) => (e.currentTarget.style.background = 'rgba(201,169,97,0.06)')}
+              onMouseLeave={(e) => (e.currentTarget.style.background = 'transparent')}
+            >
+              <td style={cell('left')}>{s.dns ? '—' : String(i + 1).padStart(2, '0')}</td>
+              <td style={{ ...cell('left'), color: P.cream, fontFamily: HEAD, fontSize: 13, letterSpacing: '0.02em' }}>{s.name}</td>
+              <td style={{ ...cell('right'), padding: '6px 12px' }}>
+                {s.dns ? <span style={{ color: P.faint }}>DNS</span> : <ClassChip tier={s.classification.tier} range={s.classification.range} small />}
+              </td>
+              <td style={cell('right')}>{s.dns ? '—' : s.avg}</td>
+              <td style={{ ...cell('right'), color: TIER_COLOR[s.classification?.tier] || P.cream }}>{s.dns ? '—' : s.best}</td>
+              <td style={{ ...cell('right'), color: s.dns ? P.faint : s.trend >= 0 ? P.win : P.warn }}>
+                {s.dns ? '—' : `${s.trend >= 0 ? '+' : ''}${s.trend}`}
+              </td>
+              <td style={cell('right')}>{s.dns ? '0' : s.firedCount}/{SEASON_META.matches}</td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
+  );
+}
+
+function activate(e, fn) {
+  if (e.key === 'Enter' || e.key === ' ') {
+    e.preventDefault();
+    fn();
+  }
+}
+
 // ── Shooter dossier ──────────────────────────────────────────────────────────
 
 function ShooterDossier({ shooter, rank, expanded, onToggle }) {
@@ -431,6 +487,7 @@ export default function RifleAnalysis() {
 
   const [expanded, setExpanded] = useState(() => new Set([ranked[0]?.name]));
   const allOpen = expanded.size >= ordered.length;
+  const rowRefs = useRef({});
 
   const toggle = (name) =>
     setExpanded((prev) => {
@@ -442,6 +499,13 @@ export default function RifleAnalysis() {
 
   const toggleAll = () =>
     setExpanded(allOpen ? new Set() : new Set(ordered.map((s) => s.name)));
+
+  const jumpTo = (name) => {
+    setExpanded((prev) => new Set(prev).add(name));
+    requestAnimationFrame(() => {
+      rowRefs.current[name]?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    });
+  };
 
   return (
     <div>
@@ -476,6 +540,11 @@ export default function RifleAnalysis() {
 
       <TeamOverview />
 
+      <div style={{ fontFamily: MONO, fontSize: 8, color: P.faint, letterSpacing: '0.2em', marginBottom: 8 }}>
+        QUICK LOOK · TAP A ROW TO JUMP TO FULL DOSSIER
+      </div>
+      <QuickTable ordered={ordered} onJump={jumpTo} />
+
       {/* Roster controls */}
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12, flexWrap: 'wrap', gap: 10 }}>
         <div style={{ fontFamily: MONO, fontSize: 8, color: P.faint, letterSpacing: '0.2em' }}>
@@ -496,13 +565,14 @@ export default function RifleAnalysis() {
 
       <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
         {ordered.map((s, i) => (
+          <div key={s.name} ref={(el) => { rowRefs.current[s.name] = el; }} style={{ scrollMarginTop: 90 }}>
           <ShooterDossier
-            key={s.name}
             shooter={s}
             rank={s.dns ? null : i + 1}
             expanded={expanded.has(s.name)}
             onToggle={() => toggle(s.name)}
           />
+          </div>
         ))}
       </div>
 

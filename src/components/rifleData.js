@@ -218,7 +218,8 @@ export function analyzeShooter(raw) {
     bullsPerMatch: round(bulls / fired.length, 1),
     bestJump,
     worstDrop,
-    classification: classify(avg),
+    // Classification is off best card (top shot), not season average.
+    classification: classify(bestW.tot),
   };
 }
 
@@ -282,8 +283,8 @@ export function buildNarrative(s, team) {
   const posArticle = pos === 'Expert' ? 'an' : 'a';
 
   out.push(
-    `${s.name} fired ${s.firedCount} of ${SEASON_META.matches} matches for a ${s.avg} aggregate average — ${posArticle} ${pos}-class season (${s.classification.range}). ` +
-      `Peak card ${s.best} in week ${s.bestWeek}; low card ${s.worst} in week ${s.worstWeek}, a ${s.range}-point spread.`,
+    `${s.name} fired ${s.firedCount} of ${SEASON_META.matches} matches, peaking at ${s.best} in week ${s.bestWeek} — ${posArticle} ${pos}-class top shot (${s.classification.range}). ` +
+      `Season aggregate average ${s.avg}; low card ${s.worst} in week ${s.worstWeek}, a ${s.range}-point spread.`,
   );
 
   const dir =

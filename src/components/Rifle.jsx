@@ -333,6 +333,17 @@ export default function Rifle() {
             <div style={{ width: 5, height: 5, background: `${P.gold}50` }} />
             <div style={{ width: 48, height: 1, background: P.hair, marginLeft: 4 }} />
           </div>
+          <a
+            href="#shooter-analysis"
+            className="rf-clickable"
+            style={{
+              display: 'inline-flex', alignItems: 'center', gap: 8, marginTop: 18,
+              fontFamily: "'JetBrains Mono', monospace", fontSize: 10, letterSpacing: '0.16em',
+              color: P.gold, textDecoration: 'none', border: `1px solid ${P.hair}`, padding: '8px 14px',
+            }}
+          >
+            ↓ JUMP TO SHOOTER STATS &amp; TIERS
+          </a>
         </div>
 
         {/* ── Signup banner — clearly marked call-to-action for new/JV cadets ── */}
@@ -380,7 +391,7 @@ export default function Rifle() {
         </div>
 
         {/* ── Shooter analysis (last season) ── */}
-        <div style={{ marginBottom: 72 }}>
+        <div id="shooter-analysis" style={{ marginBottom: 72, scrollMarginTop: 24 }}>
           <RifleAnalysis />
         </div>
 
