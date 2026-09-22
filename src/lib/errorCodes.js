@@ -40,12 +40,20 @@ export const ERROR_CODES = {
 // is already stuck in, so failures here are swallowed. Returns the
 // user-facing string (code included) for the caller to show inline.
 export function reportError(code, portal, message, { detail, context } = {}) {
-  SB.rpc('log_client_error', {
-    p_code: code,
-    p_portal: portal,
-    p_message: message,
-    p_detail: detail ?? null,
-    p_context: context ?? null,
-  }).catch(() => {});
+  // SB.rpc(...) returns a PostgrestBuilder — it implements .then() (thenable)
+  // but NOT .catch()/.finally(), unlike a real Promise. Calling .catch()
+  // directly on it throws synchronously ("...catch is not a function"),
+  // which — because this runs before the caller's setError/setDeniedMsg —
+  // silently kills the enclosing function with no UI feedback at all. Wrap
+  // in Promise.resolve() to get a real Promise before chaining .catch().
+  Promise.resolve(
+    SB.rpc('log_client_error', {
+      p_code: code,
+      p_portal: portal,
+      p_message: message,
+      p_detail: detail ?? null,
+      p_context: context ?? null,
+    })
+  ).catch(() => {});
   return `${message} (Error ${code} — write this down so it can be looked up)`;
 }
