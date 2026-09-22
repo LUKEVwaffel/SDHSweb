@@ -372,8 +372,5 @@
   "370": "halloween_poll.sql",
   "371": "rifle_signup_review_view_cadet_join.sql",
   "372": "ball_rw_select_policy_fix.sql",
-  "373": "optic_east_hamilton_events.sql",
-  "374": "TvTopStrip.jsx",
-  "375": "WatchZonePopup.jsx",
-  "376": "@simplewebauthn/browser"
+  "373": "optic_east_hamilton_events.sql"
 }

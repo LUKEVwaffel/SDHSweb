@@ -90,8 +90,8 @@
     "semantic_hash": ""
   },
   "src/components/Rifle.jsx": {
-    "mtime": 1790093196.7441642,
-    "ast_hash": "6b22ccacf3fd7c24fe673952446371c9",
+    "mtime": 1789561876.8270388,
+    "ast_hash": "dce326a5b7b3cddfbcb56dccf67c112c",
     "semantic_hash": ""
   },
   "src/components/Staff.jsx": {
@@ -130,8 +130,8 @@
     "semantic_hash": ""
   },
   "src/components/admin/Dashboard.jsx": {
-    "mtime": 1790099459.6694322,
-    "ast_hash": "a81df7aa859e0aed596f63145449ceca",
+    "mtime": 1790001438.2518227,
+    "ast_hash": "5e061dcb860ec88889ed0f7d144dff46",
     "semantic_hash": ""
   },
   "src/components/admin/LoginScreen.jsx": {
@@ -150,8 +150,8 @@
     "semantic_hash": "872097bb6f2a4e8b32dfd0a1ba37dedc"
   },
   "src/components/admin/nav/Sidebar.jsx": {
-    "mtime": 1790099452.0597296,
-    "ast_hash": "c4dd389ac77a4db08c05c95e8b89f450",
+    "mtime": 1790001441.1457367,
+    "ast_hash": "89f6d1d3a7352e1f83484102d1eee9a4",
     "semantic_hash": ""
   },
   "src/components/admin/nav/StatusBar.jsx": {
@@ -270,8 +270,8 @@
     "semantic_hash": ""
   },
   "src/components/admin/panels/photos/PhotoSubmissions.jsx": {
-    "mtime": 1790104871.4549522,
-    "ast_hash": "94238a9f33d6bddfb682226ae425b58b",
+    "mtime": 1786909249.287745,
+    "ast_hash": "062a897eb289c544a959fb87ca180fd2",
     "semantic_hash": ""
   },
   "src/components/admin/panels/photos/PhotosPanel.jsx": {
@@ -2170,13 +2170,13 @@
     "semantic_hash": ""
   },
   "src/components/RifleAnalysis.jsx": {
-    "mtime": 1790093168.7697468,
-    "ast_hash": "4edccfcbbf200ab32e92a2d67a32b973",
+    "mtime": 1787929229.181933,
+    "ast_hash": "5bfdbaf373fe8bf707b6394c2e620386",
     "semantic_hash": ""
   },
   "src/components/rifleData.js": {
-    "mtime": 1790093076.5100133,
-    "ast_hash": "5a1f660c261b2454165e0870b2a6ff79",
+    "mtime": 1787929065.7420135,
+    "ast_hash": "87382c8fd6b4539e24b5c2074550badd",
     "semantic_hash": ""
   },
   "public/lukepwa-sw.js": {
@@ -2835,8 +2835,8 @@
     "semantic_hash": ""
   },
   "src/components/rifle/RifleSignupsPortal.jsx": {
-    "mtime": 1790092156.670944,
-    "ast_hash": "e899429f0004cc671e9d22167b350d19",
+    "mtime": 1789737577.5824654,
+    "ast_hash": "50668d55626c3d8b2272c1d2590e89ed",
     "semantic_hash": ""
   },
   "src/lib/ballGuestVerifyPdf.js": {
