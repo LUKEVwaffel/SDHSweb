@@ -1,9 +1,13 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { supabase as SB } from '../../../../lib/supabaseClient';
 import { P, mono, inter, fs, sp } from '../../theme';
 import { Btn, PanelHeader, EmptyState } from '../../shared/ui';
 import TvPhotosPanel from '../tvphotos/TvPhotosPanel';
 import TvTerminalManager from '../tvphotos/TvTerminalManager';
+import { applyOvalBlurToUrl } from '../../../../lib/imageResize';
+
+const DEFAULT_OVAL = { cx: 0.5, cy: 0.32, rx: 0.16, ry: 0.2 };
+const MIN_OVAL_RADIUS = 0.03;
 
 // Every public photo submission (PhotoUploader → photos table, bucket
 // team-photos) lands here — battalion AND all 4 specialty teams. This is the
@@ -55,6 +59,11 @@ export default function PhotoSubmissions({ adminId, showTvPhotos = false }) {
   const [bulkBusy, setBulkBusy] = useState(false);
   const [selected, setSelected] = useState(() => new Set());
   const [viewerId, setViewerId] = useState(null);
+  const [blurMode, setBlurMode] = useState(false);
+  const [ovals, setOvals] = useState([]);
+  const [savingBlur, setSavingBlur] = useState(false);
+  const imgWrapRef = useRef(null);
+  const dragRef = useRef(null);
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -95,12 +104,25 @@ export default function PhotoSubmissions({ adminId, showTvPhotos = false }) {
     setViewerId(filtered[index].id);
   }
 
+  // Reset any in-progress blur edit whenever the viewed photo changes, so
+  // stale ovals from the last photo never carry over.
+  useEffect(() => {
+    setBlurMode(false);
+    setOvals([]);
+  }, [viewerId]);
+
   // Keyboard controls while the viewer is open: "d" toggles the open photo
   // for batch delete without leaving the viewer, arrows move between photos,
-  // Escape closes — all without ever navigating away from this panel.
+  // Escape closes — all without ever navigating away from this panel. While
+  // actively positioning a blur oval, only Escape (cancel the edit) applies,
+  // so arrow/d presses don't fight with mouse dragging.
   useEffect(() => {
     if (!viewerRow) return undefined;
     function onKey(e) {
+      if (blurMode) {
+        if (e.key === 'Escape') { setBlurMode(false); setOvals([]); }
+        return;
+      }
       if (e.key === 'd' || e.key === 'D') {
         e.preventDefault();
         toggleSelect(viewerRow.id);
@@ -115,7 +137,81 @@ export default function PhotoSubmissions({ adminId, showTvPhotos = false }) {
     window.addEventListener('keydown', onKey);
     return () => window.removeEventListener('keydown', onKey);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [viewerRow, viewerIndex, filtered.length]);
+  }, [viewerRow, viewerIndex, filtered.length, blurMode]);
+
+  function startBlurEdit() {
+    setOvals([{ id: Date.now(), ...DEFAULT_OVAL }]);
+    setBlurMode(true);
+  }
+
+  function addOval() {
+    setOvals((prev) => [...prev, { id: Date.now(), ...DEFAULT_OVAL }]);
+  }
+
+  function removeOval(id) {
+    setOvals((prev) => prev.filter((o) => o.id !== id));
+  }
+
+  const onDragMove = useCallback((e) => {
+    const drag = dragRef.current;
+    const rect = imgWrapRef.current;
+    if (!drag || !rect) return;
+    const box = rect.getBoundingClientRect();
+    const px = Math.min(1, Math.max(0, (e.clientX - box.left) / box.width));
+    const py = Math.min(1, Math.max(0, (e.clientY - box.top) / box.height));
+    setOvals((prev) => prev.map((o) => {
+      if (o.id !== drag.id) return o;
+      if (drag.mode === 'move') return { ...o, cx: px, cy: py };
+      return { ...o, rx: Math.max(MIN_OVAL_RADIUS, Math.abs(px - o.cx)), ry: Math.max(MIN_OVAL_RADIUS, Math.abs(py - o.cy)) };
+    }));
+  }, []);
+
+  const onDragEnd = useCallback(() => {
+    dragRef.current = null;
+    window.removeEventListener('pointermove', onDragMove);
+    window.removeEventListener('pointerup', onDragEnd);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [onDragMove]);
+
+  function startDrag(e, id, mode) {
+    e.stopPropagation();
+    e.preventDefault();
+    dragRef.current = { id, mode };
+    window.addEventListener('pointermove', onDragMove);
+    window.addEventListener('pointerup', onDragEnd);
+  }
+
+  async function applyBlur() {
+    if (!viewerRow || !ovals.length) return;
+    setSavingBlur(true);
+    try {
+      const { full, thumb } = await applyOvalBlurToUrl(viewerRow.photo_url, ovals);
+      const tPath = thumbPath(viewerRow.storage_path);
+      await SB.storage.from(BUCKET).upload(viewerRow.storage_path, full, { upsert: true, contentType: 'image/jpeg' });
+      if (tPath) await SB.storage.from(BUCKET).upload(tPath, thumb, { upsert: true, contentType: 'image/jpeg' });
+
+      // Public URLs are CDN-cached at the same path — bust the cache so the
+      // blur shows up immediately everywhere the photo is served, not just here.
+      const bust = Date.now();
+      const newPhotoUrl = `${SB.storage.from(BUCKET).getPublicUrl(viewerRow.storage_path).data.publicUrl}?b=${bust}`;
+      const newThumbUrl = tPath ? `${SB.storage.from(BUCKET).getPublicUrl(tPath).data.publicUrl}?b=${bust}` : newPhotoUrl;
+
+      await SB.from('photos').update({ photo_url: newPhotoUrl, thumb_url: newThumbUrl }).eq('id', viewerRow.id);
+      await SB.from('change_log').insert({
+        admin_id: adminId, page: 'photos', element: viewerRow.id,
+        label: `BLUR PHOTO: ${viewerRow.team}${viewerRow.uploader_name ? ` · ${viewerRow.uploader_name}` : ''}`,
+        value_before: { photo_url: viewerRow.photo_url, thumb_url: viewerRow.thumb_url },
+        value_after: { photo_url: newPhotoUrl, thumb_url: newThumbUrl },
+      });
+      setRows((prev) => prev.map((r) => (r.id === viewerRow.id ? { ...r, photo_url: newPhotoUrl, thumb_url: newThumbUrl } : r)));
+      setBlurMode(false);
+      setOvals([]);
+    } catch (err) {
+      alert(`Could not apply blur: ${err.message || err}`);
+    } finally {
+      setSavingBlur(false);
+    }
+  }
 
   // Local-state updates (no full reload) so the grid never collapses to a
   // "LOADING…" placeholder under an action — that collapse was what threw
@@ -278,17 +374,69 @@ export default function PhotoSubmissions({ adminId, showTvPhotos = false }) {
                 {(viewerRow.uploader_name || 'Anonymous')} · {(viewerRow.team || '?').toUpperCase()} · {viewerIndex + 1}/{filtered.length}
                 {selected.has(viewerRow.id) && <span style={{ color: P.gold, marginLeft: 8 }}>· SELECTED (d)</span>}
               </div>
-              <div style={{ display: 'flex', gap: sp[2] }}>
-                <Btn onClick={() => showAt(viewerIndex - 1)} variant="ghost" size="sm" disabled={viewerIndex <= 0}>◀ PREV</Btn>
-                <Btn onClick={() => showAt(viewerIndex + 1)} variant="ghost" size="sm" disabled={viewerIndex >= filtered.length - 1}>NEXT ▶</Btn>
-                <Btn onClick={() => toggleSelect(viewerRow.id)} variant={selected.has(viewerRow.id) ? 'gold' : 'ghost'} size="sm">{selected.has(viewerRow.id) ? 'UNSELECT (d)' : 'SELECT (d)'}</Btn>
-                <Btn onClick={() => toggleHidden(viewerRow)} variant="ghost" size="sm" disabled={busy === viewerRow.id}>{viewerRow.status === 'hidden' ? 'SHOW' : 'HIDE'}</Btn>
-                <Btn onClick={() => del(viewerRow)} variant="danger" size="sm" disabled={busy === viewerRow.id}>{busy === viewerRow.id ? '…' : 'DELETE'}</Btn>
-                <Btn onClick={closeViewer} variant="gold" size="sm">CLOSE</Btn>
-              </div>
+              {!blurMode ? (
+                <div style={{ display: 'flex', gap: sp[2], flexWrap: 'wrap' }}>
+                  <Btn onClick={() => showAt(viewerIndex - 1)} variant="ghost" size="sm" disabled={viewerIndex <= 0}>◀ PREV</Btn>
+                  <Btn onClick={() => showAt(viewerIndex + 1)} variant="ghost" size="sm" disabled={viewerIndex >= filtered.length - 1}>NEXT ▶</Btn>
+                  <Btn onClick={() => toggleSelect(viewerRow.id)} variant={selected.has(viewerRow.id) ? 'gold' : 'ghost'} size="sm">{selected.has(viewerRow.id) ? 'UNSELECT (d)' : 'SELECT (d)'}</Btn>
+                  <Btn onClick={() => toggleHidden(viewerRow)} variant="ghost" size="sm" disabled={busy === viewerRow.id}>{viewerRow.status === 'hidden' ? 'SHOW' : 'HIDE'}</Btn>
+                  {viewerRow.storage_path && <Btn onClick={startBlurEdit} variant="ghost" size="sm">BLUR FACE</Btn>}
+                  <Btn onClick={() => del(viewerRow)} variant="danger" size="sm" disabled={busy === viewerRow.id}>{busy === viewerRow.id ? '…' : 'DELETE'}</Btn>
+                  <Btn onClick={closeViewer} variant="gold" size="sm">CLOSE</Btn>
+                </div>
+              ) : (
+                <div style={{ display: 'flex', gap: sp[2], flexWrap: 'wrap' }}>
+                  <Btn onClick={addOval} variant="ghost" size="sm" disabled={savingBlur}>+ OVAL</Btn>
+                  <Btn onClick={applyBlur} variant="gold" size="sm" disabled={savingBlur || !ovals.length}>{savingBlur ? 'APPLYING…' : 'APPLY BLUR'}</Btn>
+                  <Btn onClick={() => { setBlurMode(false); setOvals([]); }} variant="ghost" size="sm" disabled={savingBlur}>CANCEL</Btn>
+                </div>
+              )}
             </div>
+            {blurMode && (
+              <div style={{ fontFamily: mono, fontSize: 9, color: P.mute, letterSpacing: '0.04em' }}>
+                Drag an oval over the face to cover it · drag the gold dot to resize · × removes it · Esc cancels
+              </div>
+            )}
             <div style={{ background: P.ink, border: `1px solid ${P.hairStrong}`, overflow: 'auto', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-              <img src={viewerRow.photo_url} alt="" style={{ maxWidth: '88vw', maxHeight: '78vh', objectFit: 'contain', display: 'block' }} />
+              <div ref={imgWrapRef} style={{ position: 'relative', display: 'inline-block', lineHeight: 0 }}>
+                <img src={viewerRow.photo_url} alt="" style={{ maxWidth: '88vw', maxHeight: '78vh', objectFit: 'contain', display: 'block' }} />
+                {blurMode && ovals.map((o) => (
+                  <div
+                    key={o.id}
+                    onPointerDown={(e) => startDrag(e, o.id, 'move')}
+                    style={{
+                      position: 'absolute',
+                      left: `${(o.cx - o.rx) * 100}%`,
+                      top: `${(o.cy - o.ry) * 100}%`,
+                      width: `${o.rx * 2 * 100}%`,
+                      height: `${o.ry * 2 * 100}%`,
+                      border: `2px solid ${P.gold}`,
+                      borderRadius: '50%',
+                      background: 'rgba(212,175,55,0.18)',
+                      cursor: 'move',
+                      touchAction: 'none',
+                    }}
+                  >
+                    <div
+                      onPointerDown={(e) => startDrag(e, o.id, 'resize')}
+                      style={{
+                        position: 'absolute', right: -7, bottom: -7, width: 14, height: 14, borderRadius: '50%',
+                        background: P.gold, border: `1px solid ${P.ink}`, cursor: 'nwse-resize', touchAction: 'none',
+                      }}
+                    />
+                    <button
+                      onClick={(e) => { e.stopPropagation(); removeOval(o.id); }}
+                      aria-label="Remove blur oval"
+                      style={{
+                        position: 'absolute', top: -10, right: -10, width: 18, height: 18, borderRadius: '50%',
+                        background: P.red, color: '#fff', border: 'none', fontSize: 10, lineHeight: '18px', cursor: 'pointer', padding: 0,
+                      }}
+                    >
+                      ×
+                    </button>
+                  </div>
+                ))}
+              </div>
             </div>
           </div>
         </div>
