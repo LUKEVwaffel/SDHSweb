@@ -28,11 +28,10 @@ export const NAV_GROUPS = [
     items: [
       { id: 'media', icon: '⊡', label: 'Media' },
       { id: 'raidertv', icon: '▶', label: 'Raider TV' },
-      { id: 'rafting', icon: '⛵', label: 'Rafting Trip' },
       { id: 'ball', icon: '♛', label: 'Military Ball' },
       { id: 'ballallergy', icon: '⚕', label: 'Ball Allergies' },
       { id: 'riflesignups', icon: '⊙', label: 'Rifle Signups' },
-      { id: 'halloween', icon: '🎃', label: 'Halloween Bash Poll' },
+      { id: 'halloween', icon: '🎃', label: 'Halloween Movie Poll' },
     ],
   },
   {
