@@ -211,16 +211,26 @@ export default function PhotoSubmissions({ adminId, showTvPhotos = false }) {
       const newPhotoUrl = SB.storage.from(BUCKET).getPublicUrl(newPath).data.publicUrl;
       const newThumbUrl = SB.storage.from(BUCKET).getPublicUrl(newThumbPath).data.publicUrl;
 
+      // The first blur pass preserves the pre-blur original so it can be
+      // restored later. A second pass just chains onto the already-blurred
+      // image, so orig_* (already set) must not be clobbered.
+      const isFirstBlur = !viewerRow.orig_storage_path;
+      const origFields = isFirstBlur
+        ? { orig_storage_path: viewerRow.storage_path, orig_photo_url: viewerRow.photo_url, orig_thumb_url: viewerRow.thumb_url }
+        : {};
+
       const { error: updateError } = await SB.from('photos')
-        .update({ storage_path: newPath, photo_url: newPhotoUrl, thumb_url: newThumbUrl })
+        .update({ storage_path: newPath, photo_url: newPhotoUrl, thumb_url: newThumbUrl, ...origFields })
         .eq('id', viewerRow.id);
       if (updateError) throw updateError;
 
-      // Old objects are now orphaned — clean them up, but a failure here
-      // shouldn't roll back a blur that already succeeded and is already
-      // live on the row above.
-      const oldPaths = [viewerRow.storage_path, thumbPath(viewerRow.storage_path)].filter(Boolean);
-      if (oldPaths.length) await SB.storage.from(BUCKET).remove(oldPaths);
+      // Clean up the superseded objects — but only when they were an
+      // intermediate blurred version, never the true original (that's now
+      // preserved under orig_storage_path for REMOVE BLUR to restore).
+      if (!isFirstBlur) {
+        const oldPaths = [viewerRow.storage_path, thumbPath(viewerRow.storage_path)].filter(Boolean);
+        if (oldPaths.length) await SB.storage.from(BUCKET).remove(oldPaths);
+      }
 
       await SB.from('change_log').insert({
         admin_id: adminId, page: 'photos', element: viewerRow.id,
@@ -228,11 +238,46 @@ export default function PhotoSubmissions({ adminId, showTvPhotos = false }) {
         value_before: { photo_url: viewerRow.photo_url, thumb_url: viewerRow.thumb_url },
         value_after: { photo_url: newPhotoUrl, thumb_url: newThumbUrl },
       });
-      setRows((prev) => prev.map((r) => (r.id === viewerRow.id ? { ...r, storage_path: newPath, photo_url: newPhotoUrl, thumb_url: newThumbUrl } : r)));
+      setRows((prev) => prev.map((r) => (r.id === viewerRow.id ? { ...r, storage_path: newPath, photo_url: newPhotoUrl, thumb_url: newThumbUrl, ...origFields } : r)));
       setBlurMode(false);
       setOvals([]);
     } catch (err) {
       setBlurError(err.message || 'Could not apply blur.');
+    } finally {
+      setSavingBlur(false);
+    }
+  }
+
+  async function removeBlur() {
+    if (!viewerRow || !viewerRow.orig_storage_path) return;
+    if (!confirm('Remove blur and restore the original photo?')) return;
+    setSavingBlur(true);
+    setBlurError('');
+    try {
+      const restored = {
+        storage_path: viewerRow.orig_storage_path,
+        photo_url: viewerRow.orig_photo_url,
+        thumb_url: viewerRow.orig_thumb_url,
+      };
+      const cleared = { orig_storage_path: null, orig_photo_url: null, orig_thumb_url: null };
+
+      const { error: updateError } = await SB.from('photos')
+        .update({ ...restored, ...cleared })
+        .eq('id', viewerRow.id);
+      if (updateError) throw updateError;
+
+      const blurredPaths = [viewerRow.storage_path, thumbPath(viewerRow.storage_path)].filter(Boolean);
+      if (blurredPaths.length) await SB.storage.from(BUCKET).remove(blurredPaths);
+
+      await SB.from('change_log').insert({
+        admin_id: adminId, page: 'photos', element: viewerRow.id,
+        label: `REMOVE BLUR: ${viewerRow.team}${viewerRow.uploader_name ? ` · ${viewerRow.uploader_name}` : ''}`,
+        value_before: { photo_url: viewerRow.photo_url, thumb_url: viewerRow.thumb_url },
+        value_after: { photo_url: restored.photo_url, thumb_url: restored.thumb_url },
+      });
+      setRows((prev) => prev.map((r) => (r.id === viewerRow.id ? { ...r, ...restored, ...cleared } : r)));
+    } catch (err) {
+      setBlurError(err.message || 'Could not remove blur.');
     } finally {
       setSavingBlur(false);
     }
@@ -357,6 +402,7 @@ export default function PhotoSubmissions({ adminId, showTvPhotos = false }) {
                     {(r.team || '?').toUpperCase()}
                   </span>
                   {hidden && <span style={{ position: 'absolute', bottom: 6, right: 6, background: 'rgba(6,16,31,0.82)', color: P.mute, fontFamily: mono, fontSize: 8, padding: '3px 6px' }}>HIDDEN</span>}
+                  {r.orig_storage_path && <span style={{ position: 'absolute', bottom: 6, left: 6, background: 'rgba(6,16,31,0.82)', color: P.gold, fontFamily: mono, fontSize: 8, padding: '3px 6px' }}>BLURRED</span>}
                 </button>
                 <div style={{ padding: '7px 9px' }}>
                   <div style={{ fontFamily: inter, fontSize: fs.tiny, color: P.cream, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
@@ -405,7 +451,8 @@ export default function PhotoSubmissions({ adminId, showTvPhotos = false }) {
                   <Btn onClick={() => showAt(viewerIndex + 1)} variant="ghost" size="sm" disabled={viewerIndex >= filtered.length - 1}>NEXT ▶</Btn>
                   <Btn onClick={() => toggleSelect(viewerRow.id)} variant={selected.has(viewerRow.id) ? 'gold' : 'ghost'} size="sm">{selected.has(viewerRow.id) ? 'UNSELECT (d)' : 'SELECT (d)'}</Btn>
                   <Btn onClick={() => toggleHidden(viewerRow)} variant="ghost" size="sm" disabled={busy === viewerRow.id}>{viewerRow.status === 'hidden' ? 'SHOW' : 'HIDE'}</Btn>
-                  {viewerRow.storage_path && <Btn onClick={startBlurEdit} variant="ghost" size="sm">BLUR FACE</Btn>}
+                  {viewerRow.storage_path && <Btn onClick={startBlurEdit} variant="ghost" size="sm" disabled={savingBlur}>BLUR FACE</Btn>}
+                  {viewerRow.orig_storage_path && <Btn onClick={removeBlur} variant="ghost" size="sm" disabled={savingBlur}>{savingBlur ? '…' : 'REMOVE BLUR'}</Btn>}
                   <Btn onClick={() => del(viewerRow)} variant="danger" size="sm" disabled={busy === viewerRow.id}>{busy === viewerRow.id ? '…' : 'DELETE'}</Btn>
                   <Btn onClick={closeViewer} variant="gold" size="sm">CLOSE</Btn>
                 </div>
