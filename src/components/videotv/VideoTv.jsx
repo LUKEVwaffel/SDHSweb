@@ -3,20 +3,21 @@ import { P, mono, oswald, fraunces } from '../admin/theme.js';
 import { videoUrl } from '../../lib/raiderTv.js';
 import { SEASON } from '../RaiderCompetitionResults.jsx';
 
-// /videotv — hallway-TV loop for the East Hamilton OC run: plays both OC clips
-// back-to-back (muted, no controls, no remote — read-only, same family as
-// /balltv and /raidertv), then a Trophy Case slide showing every podium the
-// battalion has won this season, then repeats forever.
+// /videotv — hallway-TV loop for the East Hamilton Hurricane Haul run: plays
+// both clips back-to-back (muted, no controls, no remote — read-only, same
+// family as /balltv and /raidertv), then a Trophy Case slide showing every
+// podium the battalion has won this season, then repeats forever.
 //
 // Self-contained full-screen anon route (App.jsx bypass), same pattern as
 // /balltv and /watchzone.
 
-// The two OC clips from raider_videos (same table /watchzone features from —
-// see FEATURED_IDS there). storage_path is resolved against the public
+// The two Hurricane Haul clips from raider_videos, uploaded full-length
+// (uploaded via scripts/upload-hurricane-haul.mjs, replacing the earlier
+// trimmed "OC" cut). storage_path is resolved against the public
 // raider-videos bucket via videoUrl().
-const OC_CLIPS = [
-  { id: '86839e28-6160-42d0-9d49-46adca8c345a', title: 'OC — Part 1', storage_path: '1789831439000-part1-oc.mp4', duration_sec: 531.5 },
-  { id: '3252c9a8-6e2f-4578-8649-70d184f0029e', title: 'OC — Part 2', storage_path: '1789831439001-part2-oc.mp4', duration_sec: 297.2 },
+const HAUL_CLIPS = [
+  { id: '68f59b7d-ed48-443d-acff-6f59a63582ad', title: 'Hurricane Haul — Part 1', storage_path: '1790151785323-hurricane-haul-part1.mp4', duration_sec: 531.5 },
+  { id: '2779746e-374d-430c-b6e8-654bfa882760', title: 'Hurricane Haul — Part 2', storage_path: '1790151785324-hurricane-haul-part2.mp4', duration_sec: 445.2 },
 ];
 
 const WATCHING_LABEL = 'East Hamilton Raider Competition';
@@ -30,11 +31,12 @@ const VIDEO_FALLBACK_MS = 20000; // advance anyway if a clip never fires 'ended'
 
 // Playback order: part 1 → intermission title card → part 2 → trophy case → repeat.
 const STEPS = [
-  { kind: 'video', clip: OC_CLIPS[0] },
+  { kind: 'video', clip: HAUL_CLIPS[0] },
   { kind: 'title' },
-  { kind: 'video', clip: OC_CLIPS[1] },
+  { kind: 'video', clip: HAUL_CLIPS[1] },
   { kind: 'trophy' },
 ];
+const STEP_LABELS = ['Part 1', 'Coaching Corner', 'Part 2', 'Trophy Case'];
 
 const placeRank = (p) => {
   const n = parseInt(p, 10);
@@ -178,11 +180,17 @@ export default function VideoTv() {
         )}
       </div>
 
-      {/* bottom bar — progress only, same solid-black treatment as the top */}
+      {/* bottom bar — click a tick to jump straight to that part of the loop */}
       <div style={bottomBar}>
         <div style={ticks}>
           {STEPS.map((s, i) => (
-            <div key={i} style={{ ...tick, ...(i === step ? tickActive : i < step ? tickDone : null) }} />
+            <button
+              key={i}
+              type="button"
+              aria-label={`Jump to ${STEP_LABELS[i]}`}
+              onClick={() => setStep(i)}
+              style={{ ...tick, ...(i === step ? tickActive : i < step ? tickDone : null) }}
+            />
           ))}
         </div>
       </div>
@@ -225,7 +233,10 @@ const bottomBar = {
   padding: 'clamp(10px,1.6vh,18px) 0', display: 'flex', justifyContent: 'center',
 };
 const ticks = { display: 'flex', gap: 10 };
-const tick = { width: 34, height: 3, background: P.hair };
+const tick = {
+  width: 34, height: 3, background: P.hair, backgroundClip: 'content-box',
+  border: 'none', padding: '10px 0', margin: 0, cursor: 'pointer',
+};
 const tickActive = { background: P.gold };
 const tickDone = { background: P.hairStrong };
 
