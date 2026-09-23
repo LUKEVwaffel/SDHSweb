@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { supabase as SB } from '../../../lib/supabaseClient';
 import { P, mono } from '../theme';
+import { SectionLabel, Card, Badge, PrimaryBtn, GhostBtn, DangerBtn, EmptyState, th, td } from './ui';
 
 // Comp Upload — paste a match's raw score sheet, Claude extracts structured
 // per-shooter rows (rifle-comp-parse edge function, since it needs the
@@ -13,12 +14,8 @@ const label = { fontFamily: mono, fontSize: 11, color: P.gold, letterSpacing: '0
 const numInput = { ...inputStyle, width: 72, textAlign: 'center' };
 
 function StatusBadge({ status }) {
-  const tone = { pending_review: P.warn, published: P.win, discarded: P.faint }[status] || P.mute;
-  return (
-    <span style={{ fontFamily: mono, fontSize: 10, letterSpacing: '0.08em', textTransform: 'uppercase', padding: '3px 8px', border: `1px solid ${tone}`, color: tone }}>
-      {status.replace('_', ' ')}
-    </span>
-  );
+  const tone = { pending_review: 'warn', published: 'win', discarded: 'mute' }[status] || 'mute';
+  return <Badge tone={tone}>{status.replace('_', ' ')}</Badge>;
 }
 
 export default function CompUploadTab() {
@@ -124,6 +121,8 @@ export default function CompUploadTab() {
 
   return (
     <div>
+      <SectionLabel tag="// COMP UPLOAD · AI PARSE" title="Score Sheet Upload" sub="Paste a raw match score sheet — Claude extracts per-shooter rows for review before publishing." />
+
       <div style={{ display: 'flex', gap: 14, alignItems: 'flex-end', flexWrap: 'wrap', marginBottom: 10 }}>
         <div>
           <div style={label}>MATCH</div>
@@ -136,18 +135,16 @@ export default function CompUploadTab() {
         </div>
       </div>
 
-      <div style={{ border: `1px solid ${P.hair}`, padding: 14, marginBottom: 22 }}>
+      <Card style={{ marginBottom: 22 }}>
         <div style={{ ...label, marginBottom: 10 }}>ADD A NEW MATCH</div>
         <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap' }}>
           <input value={newMatch.week} onChange={(e) => setNewMatch((m) => ({ ...m, week: e.target.value.replace(/\D/g, '') }))} placeholder="Week #" style={{ ...inputStyle, width: 80 }} />
           <input value={newMatch.dates} onChange={(e) => setNewMatch((m) => ({ ...m, dates: e.target.value }))} placeholder="Dates" style={inputStyle} />
           <input value={newMatch.opponent} onChange={(e) => setNewMatch((m) => ({ ...m, opponent: e.target.value }))} placeholder="Opponent" style={inputStyle} />
           <input value={newMatch.location} onChange={(e) => setNewMatch((m) => ({ ...m, location: e.target.value }))} placeholder="Location" style={inputStyle} />
-          <button onClick={addMatch} style={{ background: 'transparent', border: `1px solid ${P.hairStrong}`, color: P.gold, fontFamily: mono, fontSize: 12, padding: '9px 16px', cursor: 'pointer' }}>
-            ADD MATCH
-          </button>
+          <GhostBtn onClick={addMatch} active>ADD MATCH</GhostBtn>
         </div>
-      </div>
+      </Card>
 
       <div style={{ marginBottom: 28 }}>
         <div style={label}>PASTE RAW SCORE SHEET</div>
@@ -156,16 +153,16 @@ export default function CompUploadTab() {
           placeholder="Paste the CSV or copy-pasted score sheet text here&hellip;"
           style={{ ...inputStyle, width: '100%', boxSizing: 'border-box', fontSize: 12, resize: 'vertical', marginBottom: 10 }}
         />
-        <button onClick={parse} disabled={parsing} style={{ background: P.gold, color: P.ink, border: 'none', fontFamily: mono, fontSize: 12, fontWeight: 700, letterSpacing: '0.1em', padding: '11px 18px', cursor: parsing ? 'wait' : 'pointer' }}>
+        <PrimaryBtn onClick={parse} disabled={parsing}>
           {parsing ? 'PARSING WITH AI…' : 'PARSE WITH AI'}
-        </button>
+        </PrimaryBtn>
       </div>
 
       {err && <div style={{ fontFamily: mono, fontSize: 12, color: P.red, marginBottom: 18 }}>{err}</div>}
 
       <div style={{ ...label, marginBottom: 10 }}>RECENT UPLOADS</div>
       {uploads.length === 0 ? (
-        <div style={{ fontFamily: mono, fontSize: 12, color: P.mute }}>No uploads yet.</div>
+        <EmptyState>No uploads yet.</EmptyState>
       ) : uploads.map((u) => {
         const open = openUploadId === u.id;
         const rows = rowsFor(u);
@@ -188,21 +185,21 @@ export default function CompUploadTab() {
                 <div style={{ overflowX: 'auto' }}>
                   <table style={{ width: '100%', borderCollapse: 'collapse', fontFamily: mono, fontSize: 12 }}>
                     <thead>
-                      <tr style={{ color: P.gold, textAlign: 'left' }}>
-                        <th style={{ padding: '6px 8px' }}>Raw name</th>
-                        <th style={{ padding: '6px 8px' }}>Matched shooter</th>
-                        <th style={{ padding: '6px 8px' }}>Prone</th>
-                        <th style={{ padding: '6px 8px' }}>Standing</th>
-                        <th style={{ padding: '6px 8px' }}>Kneeling</th>
-                        <th style={{ padding: '6px 8px' }}>Total</th>
-                        <th style={{ padding: '6px 8px' }}>Bulls</th>
+                      <tr>
+                        <th style={th()}>Raw name</th>
+                        <th style={th()}>Matched shooter</th>
+                        <th style={th()}>Prone</th>
+                        <th style={th()}>Standing</th>
+                        <th style={th()}>Kneeling</th>
+                        <th style={th()}>Total</th>
+                        <th style={th()}>Bulls</th>
                       </tr>
                     </thead>
                     <tbody>
                       {rows.map((r, i) => (
-                        <tr key={i} style={{ borderTop: `1px solid ${P.hair}` }}>
-                          <td style={{ padding: '6px 8px', color: P.faint }}>{r.raw_name}</td>
-                          <td style={{ padding: '6px 8px' }}>
+                        <tr key={i}>
+                          <td style={{ ...td(), color: P.faint }}>{r.raw_name}</td>
+                          <td style={td()}>
                             {u.status === 'pending_review' ? (
                               <input
                                 value={r.matched_shooter_name || ''} list="rifle-shooter-names"
@@ -212,7 +209,7 @@ export default function CompUploadTab() {
                             ) : (r.matched_shooter_name || r.raw_name)}
                           </td>
                           {['prone', 'standing', 'kneeling', 'total', 'bulls'].map((f) => (
-                            <td key={f} style={{ padding: '6px 8px' }}>
+                            <td key={f} style={td()}>
                               {u.status === 'pending_review' ? (
                                 <input
                                   value={r[f] ?? ''} inputMode="decimal"
@@ -229,12 +226,8 @@ export default function CompUploadTab() {
                 </div>
                 {u.status === 'pending_review' && (
                   <div style={{ display: 'flex', gap: 10, marginTop: 14 }}>
-                    <button onClick={() => publish(u)} style={{ background: P.win, color: P.ink, border: 'none', fontFamily: mono, fontSize: 12, fontWeight: 700, letterSpacing: '0.08em', padding: '9px 16px', cursor: 'pointer' }}>
-                      PUBLISH TO SCORES
-                    </button>
-                    <button onClick={() => discard(u)} style={{ background: 'transparent', border: `1px solid ${P.red}`, color: P.red, fontFamily: mono, fontSize: 12, padding: '9px 16px', cursor: 'pointer' }}>
-                      DISCARD
-                    </button>
+                    <PrimaryBtn onClick={() => publish(u)} style={{ background: P.win }}>PUBLISH TO SCORES</PrimaryBtn>
+                    <DangerBtn onClick={() => discard(u)} style={{ padding: '9px 16px' }}>DISCARD</DangerBtn>
                   </div>
                 )}
               </div>

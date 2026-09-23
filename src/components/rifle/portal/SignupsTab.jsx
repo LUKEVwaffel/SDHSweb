@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { supabase as SB } from '../../../lib/supabaseClient';
 import { P, mono } from '../theme';
+import { SectionLabel, Card, Badge, GhostBtn, EmptyState } from './ui';
 
 // Postgres `date` columns come back as a bare "YYYY-MM-DD" string — parsing
 // that directly with `new Date()` reads it as UTC midnight, which rolls
@@ -53,13 +54,13 @@ export default function SignupsTab() {
 
   return (
     <div>
+      <SectionLabel tag="// SIGNUPS · INTEREST" title="Signups" sub="Read-only — pulled live from /rifle/signup. Editing lives in DISPATCH." />
+
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 18, flexWrap: 'wrap', gap: 10 }}>
         <div style={{ fontFamily: mono, fontSize: 12, color: P.mute }}>
-          {rows.length} cadet{rows.length === 1 ? '' : 's'} signed up
+          <span style={{ color: P.gold, fontWeight: 700 }}>{rows.length}</span> cadet{rows.length === 1 ? '' : 's'} signed up
         </div>
-        <button onClick={load} style={{ background: 'transparent', border: `1px solid ${P.hairStrong}`, color: P.mute, fontFamily: mono, fontSize: 11, letterSpacing: '0.1em', padding: '7px 14px', cursor: 'pointer' }}>
-          REFRESH
-        </button>
+        <GhostBtn onClick={load}>REFRESH</GhostBtn>
       </div>
 
       {rows.length > 0 && (
@@ -71,23 +72,19 @@ export default function SignupsTab() {
       {loading ? (
         <div style={{ fontFamily: mono, fontSize: 12, color: P.mute }}>Loading&hellip;</div>
       ) : rows.length === 0 ? (
-        <div style={{ fontFamily: mono, fontSize: 12, color: P.mute }}>Nobody has signed up yet — signups from /rifle/signup appear here.</div>
+        <EmptyState>Nobody has signed up yet — signups from /rifle/signup appear here.</EmptyState>
       ) : filtered.length === 0 ? (
-        <div style={{ fontFamily: mono, fontSize: 12, color: P.mute }}>Nothing matches &ldquo;{q}&rdquo;.</div>
+        <EmptyState>Nothing matches &ldquo;{q}&rdquo;.</EmptyState>
       ) : (
         <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
           {filtered.map((r) => (
-            <div key={r.id} style={{ background: P.deep, border: `1px solid ${P.hair}`, padding: '14px 18px' }}>
+            <Card key={r.id} bracket={false} padding="14px 18px">
               <div style={{ display: 'flex', alignItems: 'baseline', gap: 10, flexWrap: 'wrap' }}>
                 <div style={{ fontFamily: mono, fontSize: 13, color: P.cream, fontWeight: 700, letterSpacing: '0.02em' }}>
                   {r.cadet_name || '(no roster match)'}
                 </div>
                 <div style={{ fontFamily: mono, fontSize: 13, color: P.gold, fontWeight: 700, letterSpacing: '0.02em' }}>{r.phone}</div>
-                {r.is_varsity && (
-                  <div style={{ fontFamily: mono, fontSize: 10, color: P.ink, background: P.gold, fontWeight: 700, letterSpacing: '0.1em', padding: '2px 8px' }}>
-                    VARSITY
-                  </div>
-                )}
+                {r.is_varsity && <Badge tone="gold">Varsity</Badge>}
               </div>
               {(r.cadet_company || r.cadet_grade || r.cadet_let_level || r.cadet_birthdate) && (
                 <div style={{ fontFamily: mono, fontSize: 11, color: P.mute, marginTop: 4 }}>
@@ -101,7 +98,7 @@ export default function SignupsTab() {
               <div style={{ fontFamily: mono, fontSize: 11, color: P.mute, marginTop: 4, letterSpacing: '0.08em' }}>
                 Signed up {new Date(r.created_at).toLocaleString()}
               </div>
-            </div>
+            </Card>
           ))}
         </div>
       )}

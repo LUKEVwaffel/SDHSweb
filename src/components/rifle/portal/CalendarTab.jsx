@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback, useMemo } from 'react';
 import { supabase as SB } from '../../../lib/supabaseClient';
 import { P, mono } from '../theme';
+import { SectionLabel, Card, PrimaryBtn, DangerBtn, EmptyState } from './ui';
 
 // Rifle calendar CRUD — feeds the public /rifle page's EventCalendar, which
 // was a static placeholder with no data source until rifle_calendar.sql.
@@ -11,7 +12,6 @@ const TYPE_COLOR = { competition: P.gold, practice: '#4A9EFF', qualifier: P.win,
 
 const label = { fontFamily: mono, fontSize: 11, color: P.gold, letterSpacing: '0.1em' };
 const inputStyle = { background: P.deep, border: `1px solid ${P.hair}`, color: P.cream, fontFamily: mono, fontSize: 13, padding: '9px 11px', outline: 'none' };
-const dangerBtn = { background: 'transparent', border: `1px solid ${P.red}`, color: P.red, fontFamily: mono, fontSize: 11, letterSpacing: '0.06em', padding: '6px 12px', cursor: 'pointer' };
 
 function todayStr() {
   return new Date().toISOString().slice(0, 10);
@@ -86,14 +86,12 @@ export default function CalendarTab() {
 
   return (
     <div>
-      <div style={{ fontFamily: mono, fontSize: 12, color: P.mute, marginBottom: 20, lineHeight: 1.6 }}>
-        Matches, practices, and qualifiers — shows live on the public /rifle page's Event Calendar.
-      </div>
+      <SectionLabel tag="// SCHEDULE · CALENDAR" title="Events" sub="Matches, practices, and qualifiers — shows live on the public /rifle page's Event Calendar." />
 
       {err && <div style={{ fontFamily: mono, fontSize: 12, color: P.red, marginBottom: 14 }}>{err}</div>}
       {ok && <div style={{ fontFamily: mono, fontSize: 12, color: P.win, marginBottom: 14 }}>{ok}</div>}
 
-      <div style={{ border: `1px solid ${P.hair}`, padding: 14, marginBottom: 24 }}>
+      <Card style={{ marginBottom: 24 }}>
         <div style={{ ...label, marginBottom: 10 }}>ADD AN EVENT</div>
         <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap', alignItems: 'flex-end' }}>
           <div>
@@ -114,14 +112,12 @@ export default function CalendarTab() {
             <div style={{ ...label, fontSize: 10, marginBottom: 4 }}>LOCATION</div>
             <input value={form.location} onChange={(e) => setForm((f) => ({ ...f, location: e.target.value }))} style={inputStyle} />
           </div>
-          <button onClick={addEvent} style={{ background: P.gold, color: P.ink, border: 'none', fontFamily: mono, fontSize: 12, fontWeight: 700, letterSpacing: '0.1em', padding: '9px 16px', cursor: 'pointer' }}>
-            ADD
-          </button>
+          <PrimaryBtn onClick={addEvent}>ADD</PrimaryBtn>
         </div>
         <div style={{ marginTop: 10 }}>
           <input value={form.notes} onChange={(e) => setForm((f) => ({ ...f, notes: e.target.value }))} placeholder="Notes (optional)" style={{ ...inputStyle, width: '100%', boxSizing: 'border-box' }} />
         </div>
-      </div>
+      </Card>
 
       <div style={{ display: 'flex', gap: 14, alignItems: 'flex-end', flexWrap: 'wrap', marginBottom: 16 }}>
         <div>
@@ -142,7 +138,7 @@ export default function CalendarTab() {
       </div>
 
       {visible.length === 0 ? (
-        <div style={{ fontFamily: mono, fontSize: 12, color: P.mute }}>No events match.</div>
+        <EmptyState>No events match.</EmptyState>
       ) : visible.map((ev) => (
         <div key={ev.id} style={{ border: `1px solid ${P.hair}`, borderLeft: `3px solid ${TYPE_COLOR[ev.event_type] || P.mute}`, padding: '12px 14px', marginBottom: 8, display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: 14, flexWrap: 'wrap' }}>
           <div style={{ display: 'flex', gap: 14, alignItems: 'flex-start', flexWrap: 'wrap', flex: 1 }}>
@@ -153,7 +149,7 @@ export default function CalendarTab() {
             </select>
             <input defaultValue={ev.location || ''} onBlur={(e) => updateField(ev, 'location', e.target.value)} placeholder="location" style={{ ...inputStyle, padding: '6px 8px', fontSize: 12, minWidth: 140 }} />
           </div>
-          <button onClick={() => deleteEvent(ev)} style={dangerBtn}>DELETE</button>
+          <DangerBtn onClick={() => deleteEvent(ev)}>DELETE</DangerBtn>
         </div>
       ))}
     </div>

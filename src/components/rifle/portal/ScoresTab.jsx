@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback, useMemo } from 'react';
 import { supabase as SB } from '../../../lib/supabaseClient';
 import { P, mono } from '../theme';
+import { SectionLabel, Card, PrimaryBtn, GhostBtn, DangerBtn, th, td } from './ui';
 
 // Full match + score editor — the gap CompUploadTab leaves open: once an
 // upload is published its rows go read-only there (by design, as an audit
@@ -12,8 +13,6 @@ import { P, mono } from '../theme';
 const inputStyle = { background: P.deep, border: `1px solid ${P.hair}`, color: P.cream, fontFamily: mono, fontSize: 13, padding: '9px 11px', outline: 'none' };
 const label = { fontFamily: mono, fontSize: 11, color: P.gold, letterSpacing: '0.1em' };
 const numInput = { ...inputStyle, width: 76, textAlign: 'center', padding: '7px 8px', fontSize: 12 };
-const smallBtn = { background: 'transparent', border: `1px solid ${P.hairStrong}`, color: P.mute, fontFamily: mono, fontSize: 11, letterSpacing: '0.06em', padding: '6px 12px', cursor: 'pointer' };
-const dangerBtn = { ...smallBtn, borderColor: P.red, color: P.red };
 const STAT_FIELDS = ['prone', 'standing', 'kneeling', 'total', 'bulls'];
 
 function seasonOf(match) {
@@ -152,10 +151,11 @@ export default function ScoresTab() {
 
   return (
     <div>
-      <div style={{ fontFamily: mono, fontSize: 12, color: P.mute, marginBottom: 20, lineHeight: 1.6 }}>
-        Edit any match or score directly — including past seasons. Comp Upload is for pasting a new score
-        sheet; this tab is for fixing what's already published.
-      </div>
+      <SectionLabel
+        tag="// MATCHES · SCORES"
+        title="Scores Editor"
+        sub="Edit any match or score directly — including past seasons. Comp Upload is for pasting a new score sheet; this tab is for fixing what's already published."
+      />
 
       {err && <div style={{ fontFamily: mono, fontSize: 12, color: P.red, marginBottom: 14 }}>{err}</div>}
       {ok && <div style={{ fontFamily: mono, fontSize: 12, color: P.win, marginBottom: 14 }}>{ok}</div>}
@@ -178,18 +178,18 @@ export default function ScoresTab() {
         <div style={{ overflowX: 'auto' }}>
           <table style={{ width: '100%', borderCollapse: 'collapse', fontFamily: mono, fontSize: 12 }}>
             <thead>
-              <tr style={{ color: P.gold, textAlign: 'left' }}>
-                <th style={{ padding: '10px 10px' }}>Week</th>
-                <th style={{ padding: '10px 10px' }}>Dates</th>
-                <th style={{ padding: '10px 10px' }}>Opponent</th>
-                <th style={{ padding: '10px 10px' }}>Location</th>
-                <th style={{ padding: '10px 10px' }}># Scores</th>
-                <th style={{ padding: '10px 10px' }} />
+              <tr>
+                <th style={th()}>Week</th>
+                <th style={th()}>Dates</th>
+                <th style={th()}>Opponent</th>
+                <th style={th()}>Location</th>
+                <th style={th()}># Scores</th>
+                <th style={th()} />
               </tr>
             </thead>
             <tbody>
               {visibleMatches.length === 0 && (
-                <tr><td colSpan={6} style={{ padding: '14px 10px', color: P.mute }}>No matches in this season.</td></tr>
+                <tr><td colSpan={6} style={{ padding: '14px 10px', color: P.mute, fontFamily: mono }}>No matches in this season.</td></tr>
               )}
               {visibleMatches.map((m) => {
                 const count = scores.filter((sc) => sc.match_id === m.id).length;
@@ -210,10 +210,10 @@ export default function ScoresTab() {
                     </td>
                     <td style={{ padding: '8px 10px', color: P.mute }}>{count}</td>
                     <td style={{ padding: '8px 10px', whiteSpace: 'nowrap' }}>
-                      <button onClick={() => setSelectedMatchId(selected ? null : m.id)} style={{ ...smallBtn, marginRight: 6, color: selected ? P.gold : P.mute, borderColor: selected ? P.gold : P.hairStrong }}>
+                      <GhostBtn onClick={() => setSelectedMatchId(selected ? null : m.id)} active={selected} style={{ marginRight: 6 }}>
                         {selected ? 'CLOSE' : 'SCORES'}
-                      </button>
-                      <button onClick={() => deleteMatch(m)} style={dangerBtn}>DELETE</button>
+                      </GhostBtn>
+                      <DangerBtn onClick={() => deleteMatch(m)}>DELETE</DangerBtn>
                     </td>
                   </tr>
                 );
@@ -223,18 +223,16 @@ export default function ScoresTab() {
         </div>
       </div>
 
-      <div style={{ border: `1px solid ${P.hair}`, padding: 14, marginBottom: 28 }}>
+      <Card style={{ marginBottom: 28 }}>
         <div style={{ ...label, marginBottom: 10 }}>ADD A MATCH</div>
         <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap' }}>
           <input value={newMatch.week} onChange={(e) => setNewMatch((m) => ({ ...m, week: e.target.value.replace(/\D/g, '') }))} placeholder="Week #" style={{ ...inputStyle, width: 80 }} />
           <input value={newMatch.dates} onChange={(e) => setNewMatch((m) => ({ ...m, dates: e.target.value }))} placeholder="Dates (include year)" style={inputStyle} />
           <input value={newMatch.opponent} onChange={(e) => setNewMatch((m) => ({ ...m, opponent: e.target.value }))} placeholder="Opponent" style={inputStyle} />
           <input value={newMatch.location} onChange={(e) => setNewMatch((m) => ({ ...m, location: e.target.value }))} placeholder="Location" style={inputStyle} />
-          <button onClick={addMatch} style={{ background: P.gold, color: P.ink, border: 'none', fontFamily: mono, fontSize: 12, fontWeight: 700, letterSpacing: '0.1em', padding: '9px 16px', cursor: 'pointer' }}>
-            ADD MATCH
-          </button>
+          <PrimaryBtn onClick={addMatch}>ADD MATCH</PrimaryBtn>
         </div>
-      </div>
+      </Card>
 
       {/* Score editor for the selected match */}
       {selectedMatch && (
@@ -250,30 +248,30 @@ export default function ScoresTab() {
           <div style={{ overflowX: 'auto', marginBottom: 14 }}>
             <table style={{ width: '100%', borderCollapse: 'collapse', fontFamily: mono, fontSize: 12 }}>
               <thead>
-                <tr style={{ color: P.gold, textAlign: 'left' }}>
-                  <th style={{ padding: '6px 8px' }}>Shooter</th>
-                  {STAT_FIELDS.map((f) => <th key={f} style={{ padding: '6px 8px', textTransform: 'capitalize' }}>{f}</th>)}
-                  <th style={{ padding: '6px 8px' }} />
+                <tr>
+                  <th style={th()}>Shooter</th>
+                  {STAT_FIELDS.map((f) => <th key={f} style={{ ...th(), textTransform: 'capitalize' }}>{f}</th>)}
+                  <th style={th()} />
                 </tr>
               </thead>
               <tbody>
                 {matchScores.length === 0 && (
-                  <tr><td colSpan={STAT_FIELDS.length + 2} style={{ padding: '12px 8px', color: P.mute }}>No scores recorded for this match yet.</td></tr>
+                  <tr><td colSpan={STAT_FIELDS.length + 2} style={{ padding: '12px 8px', color: P.mute, fontFamily: mono }}>No scores recorded for this match yet.</td></tr>
                 )}
                 {matchScores.map((sc) => {
                   const inactive = !shooters.find((s) => s.id === sc.shooter_id)?.active;
                   return (
-                    <tr key={sc.id} style={{ borderTop: `1px solid ${P.hair}` }}>
-                      <td style={{ padding: '6px 8px', color: inactive ? P.faint : P.cream }}>
+                    <tr key={sc.id}>
+                      <td style={{ ...td(), color: inactive ? P.faint : P.cream }}>
                         {shooterName(sc.shooter_id)}{inactive ? ' (inactive)' : ''}
                       </td>
                       {STAT_FIELDS.map((f) => (
-                        <td key={f} style={{ padding: '6px 8px' }}>
+                        <td key={f} style={td()}>
                           <input defaultValue={sc[f] ?? ''} inputMode="decimal" onBlur={(e) => updateScoreField(sc, f, e.target.value)} style={numInput} />
                         </td>
                       ))}
-                      <td style={{ padding: '6px 8px' }}>
-                        <button onClick={() => deleteScore(sc)} style={dangerBtn}>REMOVE</button>
+                      <td style={td()}>
+                        <DangerBtn onClick={() => deleteScore(sc)}>REMOVE</DangerBtn>
                       </td>
                     </tr>
                   );
@@ -288,9 +286,9 @@ export default function ScoresTab() {
                 <option value="">Add shooter to this match&hellip;</option>
                 {unscoredShooters.map((s) => <option key={s.id} value={s.id}>{s.name}{s.active ? '' : ' (inactive)'}</option>)}
               </select>
-              <button onClick={addScoreRow} disabled={!addShooterId} style={{ ...smallBtn, color: P.gold, borderColor: P.gold, opacity: addShooterId ? 1 : 0.4 }}>
+              <GhostBtn onClick={addScoreRow} disabled={!addShooterId} active>
                 ADD
-              </button>
+              </GhostBtn>
             </div>
           )}
         </div>

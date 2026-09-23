@@ -1,6 +1,7 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useMemo } from 'react';
 import { supabase as SB } from '../../../lib/supabaseClient';
 import { P, mono } from '../theme';
+import { Card, SectionLabel, StatGrid, Stat, EmptyState, PrimaryBtn, GhostBtn, DangerBtn } from './ui';
 
 // Roster CRUD — direct table reads/writes through Supabase-js. No edge
 // function needed: rifle_shooters' RLS (is_rifle_admin() or is_s6()) is
@@ -66,33 +67,46 @@ export default function RosterTab() {
   const rowStyle = { display: 'flex', alignItems: 'center', gap: 12, padding: '12px 0', borderBottom: `1px solid ${P.hair}` };
   const label = { fontFamily: mono, fontSize: 11, color: P.gold, letterSpacing: '0.1em' };
 
+  const activeCount = useMemo(() => rows.filter((r) => r.active).length, [rows]);
+  const emailedCount = useMemo(() => rows.filter((r) => r.school_email).length, [rows]);
+
   return (
     <div>
-      <div style={{ display: 'flex', gap: 10, alignItems: 'flex-end', marginBottom: 22, flexWrap: 'wrap' }}>
-        <div>
-          <div style={{ ...label, marginBottom: 6 }}>NAME</div>
-          <input value={name} onChange={(e) => setName(e.target.value)} placeholder="Shooter name"
-            style={{ background: P.deep, border: `1px solid ${P.hair}`, color: P.cream, fontFamily: mono, fontSize: 13, padding: '10px 12px', outline: 'none' }} />
+      <SectionLabel tag="// TEAM · ROSTER" title="Shooters" sub="Every cadet on the rifle roster — school email links a returning shooter to their signup automatically." />
+
+      <StatGrid>
+        <Stat label="TOTAL" value={rows.length} />
+        <Stat label="ACTIVE" value={activeCount} tone="up" sub={`${rows.length - activeCount} inactive`} />
+        <Stat label="EMAIL ON FILE" value={emailedCount} sub="for signup match" />
+      </StatGrid>
+
+      <div style={{ height: 22 }} />
+
+      <Card style={{ marginBottom: 22 }}>
+        <div style={{ display: 'flex', gap: 10, alignItems: 'flex-end', flexWrap: 'wrap' }}>
+          <div>
+            <div style={{ ...label, marginBottom: 6 }}>NAME</div>
+            <input value={name} onChange={(e) => setName(e.target.value)} placeholder="Shooter name"
+              style={{ background: P.deep, border: `1px solid ${P.hair}`, color: P.cream, fontFamily: mono, fontSize: 13, padding: '10px 12px', outline: 'none' }} />
+          </div>
+          <div>
+            <div style={{ ...label, marginBottom: 6 }}>RIFLE #</div>
+            <input value={rifleNo} onChange={(e) => setRifleNo(e.target.value.replace(/\D/g, ''))} placeholder="#" style={{ width: 70, background: P.deep, border: `1px solid ${P.hair}`, color: P.cream, fontFamily: mono, fontSize: 13, padding: '10px 12px', outline: 'none' }} />
+          </div>
+          <div>
+            <div style={{ ...label, marginBottom: 6 }}>SCHOOL EMAIL (for signup match)</div>
+            <input value={schoolEmail} onChange={(e) => setSchoolEmail(e.target.value)} placeholder="jsmith123@students.hcde.org"
+              style={{ width: 220, background: P.deep, border: `1px solid ${P.hair}`, color: P.cream, fontFamily: mono, fontSize: 13, padding: '10px 12px', outline: 'none' }} />
+          </div>
+          <PrimaryBtn onClick={addShooter}>ADD SHOOTER</PrimaryBtn>
         </div>
-        <div>
-          <div style={{ ...label, marginBottom: 6 }}>RIFLE #</div>
-          <input value={rifleNo} onChange={(e) => setRifleNo(e.target.value.replace(/\D/g, ''))} placeholder="#" style={{ width: 70, background: P.deep, border: `1px solid ${P.hair}`, color: P.cream, fontFamily: mono, fontSize: 13, padding: '10px 12px', outline: 'none' }} />
-        </div>
-        <div>
-          <div style={{ ...label, marginBottom: 6 }}>SCHOOL EMAIL (for signup match)</div>
-          <input value={schoolEmail} onChange={(e) => setSchoolEmail(e.target.value)} placeholder="jsmith123@students.hcde.org"
-            style={{ width: 220, background: P.deep, border: `1px solid ${P.hair}`, color: P.cream, fontFamily: mono, fontSize: 13, padding: '10px 12px', outline: 'none' }} />
-        </div>
-        <button onClick={addShooter} style={{ background: P.gold, color: P.ink, border: 'none', fontFamily: mono, fontSize: 12, fontWeight: 700, letterSpacing: '0.1em', padding: '11px 18px', cursor: 'pointer' }}>
-          ADD SHOOTER
-        </button>
-      </div>
+      </Card>
 
       {err && <div style={{ fontFamily: mono, fontSize: 12, color: P.red, marginBottom: 14 }}>{err}</div>}
       {loading ? (
         <div style={{ fontFamily: mono, fontSize: 12, color: P.mute }}>Loading roster…</div>
       ) : rows.length === 0 ? (
-        <div style={{ fontFamily: mono, fontSize: 12, color: P.mute }}>No shooters yet — add one above.</div>
+        <EmptyState>No shooters yet — add one above.</EmptyState>
       ) : (
         rows.map((r) => (
           <div key={r.id} style={rowStyle}>
@@ -104,12 +118,10 @@ export default function RosterTab() {
               placeholder="school email"
               style={{ width: 200, background: P.deep, border: `1px solid ${P.hair}`, color: r.school_email ? P.cream : P.faint, fontFamily: mono, fontSize: 11, padding: '6px 8px', outline: 'none' }}
             />
-            <button onClick={() => toggleActive(r)} style={{ background: 'transparent', border: `1px solid ${P.hairStrong}`, color: r.active ? P.win : P.faint, fontFamily: mono, fontSize: 11, letterSpacing: '0.08em', padding: '6px 12px', cursor: 'pointer' }}>
+            <GhostBtn onClick={() => toggleActive(r)} style={{ color: r.active ? P.win : P.faint, borderColor: r.active ? `${P.win}66` : P.hairStrong }}>
               {r.active ? 'ACTIVE' : 'INACTIVE'}
-            </button>
-            <button onClick={() => removeShooter(r)} style={{ background: 'transparent', border: 'none', color: P.red, fontFamily: mono, fontSize: 11, cursor: 'pointer', padding: '6px 8px' }}>
-              REMOVE
-            </button>
+            </GhostBtn>
+            <DangerBtn onClick={() => removeShooter(r)} style={{ border: 'none' }}>REMOVE</DangerBtn>
           </div>
         ))
       )}

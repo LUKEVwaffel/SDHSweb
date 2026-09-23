@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback, useMemo } from 'react';
 import { supabase as SB } from '../../../lib/supabaseClient';
 import { P, mono } from '../theme';
+import { SectionLabel, EmptyState, GhostBtn } from './ui';
 
 // Edit history + undo for the Scores tab's CRUD — reads rifle_audit_log,
 // which rifle_scores_audit.sql's trigger fills automatically on every
@@ -110,11 +111,11 @@ export default function HistoryTab() {
 
   return (
     <div>
-      <div style={{ fontFamily: mono, fontSize: 12, color: P.mute, marginBottom: 20, lineHeight: 1.6 }}>
-        Every edit to matches, scores, and the roster — most recent {LOAD_LIMIT} changes. Undo reverts one
-        entry back to what it was before that change; undoing itself is logged too, so nothing disappears
-        from the trail.
-      </div>
+      <SectionLabel
+        tag="// AUDIT · HISTORY"
+        title="Edit History"
+        sub={`Every edit to matches, scores, and the roster — most recent ${LOAD_LIMIT} changes. Undo reverts one entry back to what it was before that change; undoing itself is logged too, so nothing disappears from the trail.`}
+      />
 
       {err && <div style={{ fontFamily: mono, fontSize: 12, color: P.red, marginBottom: 14 }}>{err}</div>}
       {ok && <div style={{ fontFamily: mono, fontSize: 12, color: P.win, marginBottom: 14 }}>{ok}</div>}
@@ -136,7 +137,7 @@ export default function HistoryTab() {
       </div>
 
       {visible.length === 0 ? (
-        <div style={{ fontFamily: mono, fontSize: 12, color: P.mute }}>No matching history.</div>
+        <EmptyState>No matching history.</EmptyState>
       ) : visible.map((e) => {
         const fields = changedFields(e);
         const color = P[ACTION_COLOR[e.action]] || P.mute;
@@ -158,12 +159,9 @@ export default function HistoryTab() {
               </div>
             </div>
             {!e.undone && (
-              <button
-                onClick={() => undo(e)} disabled={busyId === e.id}
-                style={{ background: 'transparent', border: `1px solid ${P.hairStrong}`, color: P.gold, fontFamily: mono, fontSize: 11, letterSpacing: '0.06em', padding: '7px 14px', cursor: busyId === e.id ? 'wait' : 'pointer', whiteSpace: 'nowrap' }}
-              >
+              <GhostBtn onClick={() => undo(e)} disabled={busyId === e.id} style={{ color: P.gold, whiteSpace: 'nowrap' }}>
                 {busyId === e.id ? 'UNDOING…' : 'UNDO'}
-              </button>
+              </GhostBtn>
             )}
           </div>
         );

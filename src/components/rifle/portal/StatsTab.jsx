@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback, useMemo } from 'react';
 import { supabase as SB } from '../../../lib/supabaseClient';
 import { P, mono } from '../theme';
+import { SectionLabel, Card } from './ui';
 
 // Charts + season comparisons over rifle_scores. Plain inline SVG — the
 // dataset (one school team, a season or two of matches) is small enough
@@ -171,10 +172,12 @@ export default function StatsTab() {
 
   return (
     <div>
+      <SectionLabel tag="// ANALYSIS · CHARTS" title="Team &amp; Shooter Stats" sub="Live season charts pulled from the same match/score data the Scores tab edits." />
+
       <div style={{ ...label, marginBottom: 10 }}>TEAM AVERAGE TOTAL BY SEASON</div>
-      <div style={{ border: `1px solid ${P.hair}`, padding: 16, marginBottom: 30 }}>
+      <Card style={{ marginBottom: 30 }} padding={16}>
         <BarChart bars={seasonBars} />
-      </div>
+      </Card>
 
       <div style={{ display: 'flex', gap: 14, alignItems: 'flex-end', flexWrap: 'wrap', marginBottom: 14 }}>
         <div>
@@ -198,9 +201,9 @@ export default function StatsTab() {
       </div>
 
       <div style={{ ...label, marginBottom: 10 }}>{selectedShooter ? selectedShooter.name.toUpperCase() : 'SHOOTER'} — TOTAL SCORE OVER TIME</div>
-      <div style={{ border: `1px solid ${P.hair}`, padding: 16 }}>
+      <Card padding={16}>
         <LineChart points={shooterPoints} />
-      </div>
+      </Card>
     </div>
   );
 }

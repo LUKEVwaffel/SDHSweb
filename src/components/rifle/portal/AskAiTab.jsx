@@ -1,6 +1,7 @@
 import { useState, useRef, useEffect } from 'react';
 import { supabase as SB } from '../../../lib/supabaseClient';
 import { P, mono, inter } from '../theme';
+import { SectionLabel } from './ui';
 
 // Natural-language Q&A over the team's scores — calls the rifle-scores-ai
 // edge function, which hands Claude the full shooters/matches/scores table
@@ -40,10 +41,7 @@ export default function AskAiTab() {
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', height: 'calc(100vh - 320px)', minHeight: 380 }}>
-      <div style={{ fontFamily: mono, fontSize: 12, color: P.mute, marginBottom: 16, lineHeight: 1.6 }}>
-        Ask about averages, trends, or comparisons across any season on record. Answers are computed
-        from the actual score data, not guessed.
-      </div>
+      <SectionLabel tag="// ASK AI · SCORES Q&amp;A" title="Ask AI" sub="Ask about averages, trends, or comparisons across any season on record. Answers are computed from the actual score data, not guessed." />
 
       <div style={{ flex: 1, overflowY: 'auto', border: `1px solid ${P.hair}`, padding: 16, marginBottom: 14 }}>
         {thread.length === 0 && (
