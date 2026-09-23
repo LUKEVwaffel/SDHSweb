@@ -47,20 +47,31 @@ create trigger rifle_audit_trigger after insert or update or delete on public.ri
   for each row execute function public.rifle_audit_row();
 
 -- rifle_lineups has a composite primary key (match_id, slot), not a single
--- `id` column like every other audited table — rifle_audit_row() reads
--- coalesce(new.id, old.id) for row_id, which would be null here. Give it a
--- stable synthetic id instead so undo can still find rows by row_id: reuse
--- the shooter_id column value, since (audit row_id + table_name) only needs
--- to be enough for THIS function's own lookups below (it never joins
--- row_id back to rifle_lineups by primary key — it rebuilds the full
--- match_id/slot/shooter_id triple from old_data/new_data directly).
+-- `id` column like every other audited table. row_id just needs to be SOME
+-- stable-ish uuid here — the undo RPC's rifle_lineups branch never looks it
+-- up by primary key, it rebuilds the full match_id/slot/shooter_id triple
+-- from old_data/new_data directly. Falls back to shooter_id, then a fresh
+-- uuid. Uses to_jsonb(...)->>'field' rather than dot-notation field access
+-- (new.shooter_id) — this function is shared across every audited table via
+-- the trigger below, and a direct field reference to a column that doesn't
+-- exist on the CURRENTLY FIRING table (e.g. rifle_matches has no
+-- shooter_id) fails at parse time regardless of COALESCE's runtime
+-- short-circuiting. jsonb key lookup is generic and just returns null for a
+-- missing key instead.
 create or replace function public.rifle_audit_row()
 returns trigger language plpgsql security definer set search_path = public as $$
+declare
+  v_row jsonb := to_jsonb(coalesce(new, old));
+  v_row_id uuid := coalesce(
+    (v_row->>'id')::uuid,
+    (v_row->>'shooter_id')::uuid,
+    gen_random_uuid()
+  );
 begin
   insert into public.rifle_audit_log (table_name, row_id, action, old_data, new_data, changed_by)
   values (
     TG_TABLE_NAME,
-    coalesce(new.id, old.id, new.shooter_id, old.shooter_id),
+    v_row_id,
     TG_OP,
     case when TG_OP in ('UPDATE', 'DELETE') then to_jsonb(old) else null end,
     case when TG_OP in ('INSERT', 'UPDATE') then to_jsonb(new) else null end,
