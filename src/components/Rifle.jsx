@@ -1,8 +1,9 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import TeamGallery from './TeamGallery';
 import RifleAnalysis from './RifleAnalysis';
 import useIsMobile from '../hooks/useIsMobile';
+import { supabase as SB } from '../lib/supabaseClient';
 
 const P = {
   ink: '#06101F', navy: '#142847', deep: '#0A1628',
@@ -185,9 +186,25 @@ function CommanderCard() {
 }
 
 // ── Calendar ──────────────────────────────────────────────────────────────────
+const EVENT_TYPE_COLOR = { competition: '#C9A961', practice: '#4A9EFF', qualifier: '#7EC87E', other: 'rgba(244,236,216,0.55)' };
+const EVENT_TYPE_LABEL = { competition: 'COMPETITION', practice: 'PRACTICE', qualifier: 'QUALIFIER', other: 'OTHER' };
+
 function EventCalendar() {
   const today = new Date();
   const [viewDate, setViewDate] = useState(new Date(today.getFullYear(), today.getMonth(), 1));
+  const [events, setEvents] = useState([]);
+  const [loaded, setLoaded] = useState(false);
+
+  useEffect(() => {
+    let cancelled = false;
+    SB.from('rifle_calendar_events').select('*').order('event_date').then(({ data, error }) => {
+      if (cancelled) return;
+      if (error) { console.error('rifle calendar load', error); setLoaded(true); return; }
+      setEvents(data || []);
+      setLoaded(true);
+    });
+    return () => { cancelled = true; };
+  }, []);
 
   const year  = viewDate.getFullYear();
   const month = viewDate.getMonth();
@@ -204,6 +221,12 @@ function EventCalendar() {
   while (cells.length % 7 !== 0) cells.push(null);
 
   const isToday = (d) => d && year === today.getFullYear() && month === today.getMonth() && d === today.getDate();
+
+  const dateKey = (d) => `${year}-${String(month + 1).padStart(2, '0')}-${String(d).padStart(2, '0')}`;
+  const eventsOn = (d) => (d ? events.filter((e) => e.event_date === dateKey(d)) : []);
+  const monthEvents = events
+    .filter((e) => e.event_date.slice(0, 7) === `${year}-${String(month + 1).padStart(2, '0')}`)
+    .sort((a, b) => a.event_date.localeCompare(b.event_date));
 
   const prevMonth = () => setViewDate(new Date(year, month - 1, 1));
   const nextMonth = () => setViewDate(new Date(year, month + 1, 1));
@@ -248,7 +271,9 @@ function EventCalendar() {
 
         {/* Day grid */}
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(7, 1fr)' }}>
-          {cells.map((d, i) => (
+          {cells.map((d, i) => {
+            const dayEvents = eventsOn(d);
+            return (
             <div key={i} style={{
               minHeight: 72,
               borderRight: `1px solid ${P.hair}`,
@@ -268,19 +293,44 @@ function EventCalendar() {
                   {isToday(d) && (
                     <div style={{ width: 4, height: 4, background: P.gold, borderRadius: '50%', position: 'absolute', top: 8, right: 8 }} />
                   )}
+                  {dayEvents.length > 0 && (
+                    <div style={{ display: 'flex', gap: 3, flexWrap: 'wrap', marginTop: 8 }}>
+                      {dayEvents.slice(0, 4).map((e) => (
+                        <div key={e.id} title={e.title} style={{ width: 6, height: 6, background: EVENT_TYPE_COLOR[e.event_type] || P.mute, opacity: 0.85 }} />
+                      ))}
+                    </div>
+                  )}
                 </>
               )}
             </div>
-          ))}
+            );
+          })}
         </div>
 
-        {/* Empty events state */}
-        <div style={{ padding: '20px 24px', borderTop: `1px solid ${P.hair}`, display: 'flex', alignItems: 'center', gap: 12 }}>
-          <div className="rf-live-dot" style={{ width: 6, height: 6, background: `${P.gold}66`, flexShrink: 0 }} />
-          <div style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: 9, color: `${P.gold}66`, letterSpacing: '0.18em' }}>
-            SEASON NOT STARTED · COMPETITION SCHEDULE TO BE ANNOUNCED
+        {/* This month's events / empty state */}
+        {monthEvents.length > 0 ? (
+          <div style={{ borderTop: `1px solid ${P.hair}` }}>
+            {monthEvents.map((e) => (
+              <div key={e.id} style={{ padding: '12px 24px', borderBottom: `1px solid ${P.hair}`, display: 'flex', alignItems: 'center', gap: 12 }}>
+                <div style={{ width: 6, height: 6, background: EVENT_TYPE_COLOR[e.event_type] || P.mute, flexShrink: 0 }} />
+                <div style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: 10, color: P.gold, letterSpacing: '0.1em', width: 56, flexShrink: 0 }}>
+                  {e.event_date.slice(5).replace('-', '/')}
+                </div>
+                <div style={{ fontFamily: 'Inter, sans-serif', fontSize: 13, color: P.cream, flex: 1 }}>{e.title}</div>
+                {e.location && (
+                  <div style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: 10, color: P.mute, letterSpacing: '0.05em' }}>{e.location}</div>
+                )}
+              </div>
+            ))}
           </div>
-        </div>
+        ) : (
+          <div style={{ padding: '20px 24px', borderTop: `1px solid ${P.hair}`, display: 'flex', alignItems: 'center', gap: 12 }}>
+            <div className="rf-live-dot" style={{ width: 6, height: 6, background: `${P.gold}66`, flexShrink: 0 }} />
+            <div style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: 9, color: `${P.gold}66`, letterSpacing: '0.18em' }}>
+              {loaded && events.length === 0 ? 'SEASON NOT STARTED · COMPETITION SCHEDULE TO BE ANNOUNCED' : 'NO EVENTS SCHEDULED THIS MONTH'}
+            </div>
+          </div>
+        )}
       </div>
 
       {/* Legend */}

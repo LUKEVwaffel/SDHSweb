@@ -12,6 +12,7 @@ import ScoresTab from './ScoresTab';
 import StatsTab from './StatsTab';
 import HistoryTab from './HistoryTab';
 import AskAiTab from './AskAiTab';
+import CalendarTab from './CalendarTab';
 import { P, mono, oswald } from '../theme';
 
 const TABS = [
@@ -19,6 +20,7 @@ const TABS = [
   { id: 'signups', label: 'Signups' },
   { id: 'compupload', label: 'Comp Upload' },
   { id: 'scores', label: 'Scores' },
+  { id: 'calendar', label: 'Calendar' },
   { id: 'stats', label: 'Stats' },
   { id: 'history', label: 'History' },
   { id: 'askai', label: 'Ask AI' },
@@ -128,6 +130,7 @@ export default function RiflePortal() {
         {tab === 'signups' && <SignupsTab />}
         {tab === 'compupload' && <CompUploadTab />}
         {tab === 'scores' && <ScoresTab />}
+        {tab === 'calendar' && <CalendarTab />}
         {tab === 'stats' && <StatsTab />}
         {tab === 'history' && <HistoryTab />}
         {tab === 'askai' && <AskAiTab />}
