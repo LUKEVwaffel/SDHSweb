@@ -5,7 +5,7 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "vite build && posthog-cli --dotenv-file .env sourcemap process --directory ./dist",
+    "build": "vite build && (posthog-cli --dotenv-file .env sourcemap process --directory ./dist || true)",
     "lint": "oxlint",
     "preview": "vite preview"
   },
