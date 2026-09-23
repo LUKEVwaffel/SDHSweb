@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useMemo, useRef } from 'react';
 import { Navigate } from 'react-router-dom';
 import { supabase as SB } from '../../../lib/supabaseClient';
 import PortalMovedNotice from '../../portal/PortalMovedNotice';
@@ -13,14 +13,20 @@ import StatsTab from './StatsTab';
 import HistoryTab from './HistoryTab';
 import AskAiTab from './AskAiTab';
 import CalendarTab from './CalendarTab';
+import DashboardTab from './DashboardTab';
+import ShooterTab from './ShooterTab';
+import LineupTab from './LineupTab';
 import { P, mono, oswald } from '../theme';
-import { Brackets, Stat } from './ui';
+import { seasonOf } from './rifleStats';
 
 const TABS = [
+  { id: 'dashboard', label: 'Dashboard' },
+  { id: 'scores', label: 'Scores' },
+  { id: 'shooters', label: 'Shooters' },
+  { id: 'lineup', label: 'Lineup' },
   { id: 'roster', label: 'Roster' },
   { id: 'signups', label: 'Signups' },
   { id: 'compupload', label: 'Comp Upload' },
-  { id: 'scores', label: 'Scores' },
   { id: 'calendar', label: 'Calendar' },
   { id: 'stats', label: 'Stats' },
   { id: 'history', label: 'History' },
@@ -33,25 +39,39 @@ const TABS = [
 // account population (rifle_admins) scoped to the rifle domain only.
 export default function RiflePortal() {
   const [phase, setPhase] = useState('checking'); // checking | login | force-password | ready | error
-  const [admin, setAdmin] = useState(null); // { email, must_change_password }
+  const [admin, setAdmin] = useState(null); // { email, must_change_password, display_name }
   const [hasPin, setHasPin] = useState(false);
-  const [tab, setTab] = useState('roster');
+  const [tab, setTab] = useState('dashboard');
+  const [tabExtra, setTabExtra] = useState(null); // e.g. { profileId } for the Shooters tab, { matchId } for Scores
   const [errorMsg, setErrorMsg] = useState('');
-  const [overview, setOverview] = useState(null);
+  const [badge, setBadge] = useState(null); // { season, week, weeks }
+  const [searchIndex, setSearchIndex] = useState({ shooters: [], matches: [] });
+  const [q, setQ] = useState('');
+  const searchRef = useRef(null);
 
-  const loadOverview = useCallback(async () => {
-    const today = new Date().toISOString().slice(0, 10);
-    const [{ data: shooters }, { data: nextEvents }, { data: signups }, { data: lastMatch }] = await Promise.all([
-      SB.from('rifle_shooters').select('id, active'),
-      SB.from('rifle_calendar_events').select('title, event_date').gte('event_date', today).order('event_date').limit(1),
-      SB.from('rifle_signups_review_view').select('id'),
-      SB.from('rifle_matches').select('week, dates, opponent').order('week', { ascending: false }).limit(1),
+  const goTab = useCallback((id, extra) => {
+    setTab(id);
+    setTabExtra(extra || null);
+    setQ('');
+  }, []);
+
+  const loadShell = useCallback(async () => {
+    const [{ data: shooters }, { data: matches }, { data: scoreRows }] = await Promise.all([
+      SB.from('rifle_shooters').select('id, name, active').order('name'),
+      SB.from('rifle_matches').select('id, week, dates, opponent').order('week', { ascending: false }),
+      SB.from('rifle_scores').select('match_id'),
     ]);
-    setOverview({
-      activeShooters: (shooters || []).filter((s) => s.active).length,
-      nextEvent: nextEvents?.[0] || null,
-      signupCount: (signups || []).length,
-      lastMatch: lastMatch?.[0] || null,
+    setSearchIndex({
+      shooters: (shooters || []).map((s) => ({ id: s.id, name: s.name, active: s.active })),
+      matches: (matches || []).map((m) => ({ id: m.id, week: m.week, opponent: m.opponent })),
+    });
+    const scoredIds = new Set((scoreRows || []).map((r) => r.match_id));
+    const scoredMatches = (matches || []).filter((m) => scoredIds.has(m.id));
+    const mostRecent = scoredMatches[0]; // matches already ordered week desc
+    setBadge({
+      season: mostRecent ? seasonOf(mostRecent) : (matches?.[0] ? seasonOf(matches[0]) : '—'),
+      week: mostRecent?.week ?? 0,
+      weeks: matches?.length ?? 0,
     });
   }, []);
 
@@ -79,8 +99,20 @@ export default function RiflePortal() {
   }, [verify]);
 
   useEffect(() => {
-    if (phase === 'ready') loadOverview();
-  }, [phase, loadOverview]);
+    if (phase === 'ready') loadShell();
+  }, [phase, loadShell]);
+
+  useEffect(() => {
+    function onKey(e) {
+      if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 'k') {
+        e.preventDefault();
+        searchRef.current?.focus();
+      }
+      if (e.key === 'Escape') setQ('');
+    }
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  }, []);
 
   async function signOut() {
     await SB.auth.signOut();
@@ -88,7 +120,25 @@ export default function RiflePortal() {
     setPhase('login');
   }
 
-  const shellStyle = { background: P.ink, minHeight: '100vh', fontFamily: 'Inter, sans-serif' };
+  const results = useMemo(() => {
+    const ql = q.trim().toLowerCase();
+    if (!ql) return [];
+    const shooterHits = searchIndex.shooters
+      .filter((s) => s.name.toLowerCase().includes(ql))
+      .slice(0, 4)
+      .map((s) => ({ key: `s${s.id}`, label: s.name, kind: 'SHOOTER', go: () => goTab('shooters', { profileId: s.id }) }));
+    const matchHits = searchIndex.matches
+      .filter((m) => `week ${m.week} ${m.opponent || ''}`.toLowerCase().includes(ql))
+      .slice(0, 4)
+      .map((m) => ({ key: `m${m.id}`, label: `Week ${m.week}${m.opponent ? ` · ${m.opponent}` : ''}`, kind: 'MATCH', go: () => goTab('scores', { matchId: m.id }) }));
+    return [...shooterHits, ...matchHits].slice(0, 6);
+  }, [q, searchIndex, goTab]);
+
+  const shellStyle = {
+    background: P.ink, minHeight: '100vh', fontFamily: 'Inter, sans-serif',
+    backgroundImage: 'linear-gradient(rgba(201,169,97,0.035) 1px,transparent 1px),linear-gradient(90deg,rgba(201,169,97,0.035) 1px,transparent 1px)',
+    backgroundSize: '48px 48px',
+  };
 
   if (phase === 'checking') {
     return <div style={shellStyle}><div style={{ padding: 40, fontFamily: mono, fontSize: 12, color: P.mute }}>Checking your session…</div></div>;
@@ -105,47 +155,68 @@ export default function RiflePortal() {
     return <div style={shellStyle}><div style={{ padding: 40, fontFamily: mono, fontSize: 12, color: P.red }}>{errorMsg}</div></div>;
   }
 
-  const nextEventLabel = overview?.nextEvent
-    ? `${overview.nextEvent.event_date.slice(5).replace('-', '/')} · ${overview.nextEvent.title}`
-    : overview ? 'None scheduled' : '—';
-  const lastMatchLabel = overview?.lastMatch
-    ? `WK ${overview.lastMatch.week}${overview.lastMatch.opponent ? ` · ${overview.lastMatch.opponent}` : ''}`
-    : overview ? 'No matches yet' : '—';
+  const initials = (admin.display_name || admin.email || '??').split(/[\s@.]+/).filter(Boolean).slice(0, 2).map((w) => w[0]).join('').toUpperCase();
 
   return (
     <div style={shellStyle}>
-      <div style={{ maxWidth: 1040, margin: '0 auto', padding: '40px 24px 100px' }}>
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 24, position: 'relative' }}>
-          <Brackets size={16} opacity={0.25} />
-          <div style={{ paddingLeft: 18 }}>
-            <div style={{ fontFamily: mono, fontSize: 11, color: P.gold, letterSpacing: '0.3em', marginBottom: 8 }}>
-              TROJAN BATTALION · RIFLE
+      <div style={{ borderBottom: `1px solid ${P.hair}`, background: 'rgba(6,16,31,0.92)', position: 'sticky', top: 0, zIndex: 20, backdropFilter: 'blur(6px)' }}>
+        <div style={{ maxWidth: 1600, margin: '0 auto', padding: '0 24px', display: 'flex', alignItems: 'center', gap: 24, height: 62, flexWrap: 'wrap' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+            <div style={{ width: 28, height: 28, border: `1px solid ${P.gold}`, borderRadius: '50%', position: 'relative', display: 'flex', alignItems: 'center', justifyContent: 'center', flex: 'none' }}>
+              <div style={{ width: 7, height: 7, borderRadius: '50%', background: P.gold }} />
             </div>
-            <h1 style={{ fontFamily: oswald, fontSize: 30, fontWeight: 600, color: P.cream, margin: 0, letterSpacing: '0.01em' }}>Team Portal</h1>
-            <div style={{ fontFamily: mono, fontSize: 12, color: P.mute, marginTop: 6 }}>Welcome, Makky</div>
+            <div>
+              <div style={{ fontFamily: mono, fontSize: 9, color: P.gold, letterSpacing: '0.3em' }}>TROJAN BATTALION · RIFLE</div>
+              <div style={{ fontFamily: oswald, fontSize: 17, fontWeight: 600, color: P.cream, lineHeight: 1.1 }}>RANGE OPS</div>
+            </div>
           </div>
-          <button onClick={signOut} style={{ background: 'transparent', border: `1px solid ${P.hairStrong}`, color: P.mute, fontFamily: mono, fontSize: 11, letterSpacing: '0.1em', padding: '9px 16px', cursor: 'pointer' }}>
-            SIGN OUT
-          </button>
+
+          {badge && (
+            <div style={{ display: 'flex', alignItems: 'center', gap: 8, fontFamily: mono, fontSize: 10, letterSpacing: '0.12em', color: P.mute, borderLeft: `1px solid ${P.hair}`, paddingLeft: 20, whiteSpace: 'nowrap' }}>
+              <span style={{ width: 6, height: 6, borderRadius: '50%', background: P.win, boxShadow: `0 0 8px ${P.win}` }} />
+              <span>SEASON {badge.season} · WK {badge.week} OF {badge.weeks}</span>
+            </div>
+          )}
+
+          <div style={{ position: 'relative', flex: 1, maxWidth: 280, minWidth: 160 }}>
+            <input
+              ref={searchRef} value={q} onChange={(e) => setQ(e.target.value)}
+              placeholder="Jump to shooter or match…"
+              style={{ width: '100%', boxSizing: 'border-box', background: P.deep, border: `1px solid ${P.hair}`, color: P.cream, fontFamily: mono, fontSize: 12, padding: '8px 44px 8px 10px', outline: 'none' }}
+            />
+            <div style={{ position: 'absolute', right: 7, top: 6, fontFamily: mono, fontSize: 9, color: P.faint, border: `1px solid ${P.hair}`, padding: '1px 5px' }}>⌘K</div>
+            {results.length > 0 && (
+              <div style={{ position: 'absolute', top: 36, left: 0, right: 0, background: P.deep, border: `1px solid ${P.hairStrong}`, boxShadow: '0 20px 40px rgba(0,0,0,0.5)', zIndex: 30 }}>
+                {results.map((r) => (
+                  <div key={r.key} onClick={r.go} style={{ padding: '9px 11px', display: 'flex', justifyContent: 'space-between', gap: 10, cursor: 'pointer', borderBottom: `1px solid ${P.hair}`, fontFamily: mono, fontSize: 12 }}>
+                    <span style={{ color: P.cream }}>{r.label}</span>
+                    <span style={{ color: P.faint, fontSize: 10, letterSpacing: '0.1em' }}>{r.kind}</span>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+
+          <div style={{ display: 'flex', alignItems: 'center', gap: 10, borderLeft: `1px solid ${P.hair}`, paddingLeft: 18, marginLeft: 'auto' }}>
+            <div style={{ width: 30, height: 30, background: P.navy, border: `1px solid ${P.hairStrong}`, display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: oswald, fontSize: 12, color: P.bright }}>{initials}</div>
+            <div style={{ fontFamily: mono, fontSize: 10, color: P.mute, letterSpacing: '0.06em', lineHeight: 1.4 }}>
+              {admin.display_name || admin.email}<br /><span style={{ color: P.faint }}>TEAM ADMIN</span>
+            </div>
+            <button onClick={signOut} style={{ background: 'transparent', border: `1px solid ${P.hairStrong}`, color: P.mute, fontFamily: mono, fontSize: 10, letterSpacing: '0.1em', padding: '8px 12px', cursor: 'pointer' }}>
+              SIGN OUT
+            </button>
+          </div>
         </div>
 
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(150px, 1fr))', gap: 8, marginBottom: 24 }}>
-          <Stat label="ACTIVE ROSTER" value={overview ? overview.activeShooters : '—'} sub="shooters" />
-          <Stat label="NEXT EVENT" value={overview?.nextEvent ? overview.nextEvent.event_date.slice(5).replace('-', '/') : (overview ? '—' : '…')} sub={overview?.nextEvent ? overview.nextEvent.title : nextEventLabel} />
-          <Stat label="INTEREST SIGNUPS" value={overview ? overview.signupCount : '—'} sub="from /rifle/signup" tone={overview?.signupCount ? 'up' : undefined} />
-          <Stat label="LAST MATCH" value={overview?.lastMatch ? `WK ${overview.lastMatch.week}` : (overview ? '—' : '…')} sub={overview?.lastMatch?.opponent || lastMatchLabel} />
-        </div>
-
-        <div style={{ display: 'flex', gap: 2, marginBottom: 28, borderBottom: `1px solid ${P.hair}`, flexWrap: 'wrap' }}>
+        <div style={{ maxWidth: 1600, margin: '0 auto', padding: '0 24px', display: 'flex', gap: 0, overflowX: 'auto' }}>
           {TABS.map((t) => (
             <button
-              key={t.id} onClick={() => setTab(t.id)}
+              key={t.id} onClick={() => goTab(t.id)}
               style={{
                 background: tab === t.id ? 'rgba(201,169,97,0.08)' : 'transparent', border: 'none', cursor: 'pointer',
-                fontFamily: mono, fontSize: 12, letterSpacing: '0.1em', fontWeight: 600,
-                color: tab === t.id ? P.gold : P.mute, padding: '10px 12px',
+                fontFamily: mono, fontSize: 11, letterSpacing: '0.08em', fontWeight: 600, whiteSpace: 'nowrap',
+                color: tab === t.id ? P.bright : P.mute, padding: '10px 11px',
                 borderBottom: tab === t.id ? `2px solid ${P.gold}` : '2px solid transparent',
-                transition: 'color 0.15s, background 0.15s',
               }}
               onMouseEnter={(e) => { if (tab !== t.id) e.currentTarget.style.color = P.cream; }}
               onMouseLeave={(e) => { if (tab !== t.id) e.currentTarget.style.color = P.mute; }}
@@ -154,22 +225,27 @@ export default function RiflePortal() {
             </button>
           ))}
           <button
-            onClick={() => setTab('settings')}
+            onClick={() => goTab('settings')}
             style={{
               background: tab === 'settings' ? 'rgba(201,169,97,0.08)' : 'transparent', border: 'none', cursor: 'pointer', marginLeft: 'auto',
-              fontFamily: mono, fontSize: 12, letterSpacing: '0.1em', fontWeight: 600,
-              color: tab === 'settings' ? P.gold : P.mute, padding: '10px 12px',
+              fontFamily: mono, fontSize: 11, letterSpacing: '0.08em', fontWeight: 600, whiteSpace: 'nowrap',
+              color: tab === 'settings' ? P.bright : P.mute, padding: '10px 11px',
               borderBottom: tab === 'settings' ? `2px solid ${P.gold}` : '2px solid transparent',
             }}
           >
             SETTINGS
           </button>
         </div>
+      </div>
 
+      <div style={{ maxWidth: 1600, margin: '0 auto', padding: '26px 24px 100px' }}>
+        {tab === 'dashboard' && <DashboardTab onNavigate={goTab} />}
+        {tab === 'scores' && <ScoresTab initialMatchId={tabExtra?.matchId} />}
+        {tab === 'shooters' && <ShooterTab initialProfileId={tabExtra?.profileId} onNavigate={goTab} />}
+        {tab === 'lineup' && <LineupTab onNavigate={goTab} />}
         {tab === 'roster' && <RosterTab />}
         {tab === 'signups' && <SignupsTab />}
         {tab === 'compupload' && <CompUploadTab />}
-        {tab === 'scores' && <ScoresTab />}
         {tab === 'calendar' && <CalendarTab />}
         {tab === 'stats' && <StatsTab />}
         {tab === 'history' && <HistoryTab />}
