@@ -180,7 +180,7 @@ export default function VideoTv() {
         )}
       </div>
 
-      {/* bottom bar — click a tick to jump straight to that part of the loop */}
+      {/* bottom bar — a labeled step nav, click any step to jump straight there */}
       <div style={bottomBar}>
         <div style={ticks}>
           {STEPS.map((s, i) => (
@@ -189,8 +189,11 @@ export default function VideoTv() {
               type="button"
               aria-label={`Jump to ${STEP_LABELS[i]}`}
               onClick={() => setStep(i)}
-              style={{ ...tick, ...(i === step ? tickActive : i < step ? tickDone : null) }}
-            />
+              style={tickBtn}
+            >
+              <span style={{ ...tickLabel, ...(i === step ? tickLabelActive : null) }}>{STEP_LABELS[i]}</span>
+              <span style={{ ...tickBar, ...(i === step ? tickActive : i < step ? tickDone : null) }} />
+            </button>
           ))}
         </div>
       </div>
@@ -230,15 +233,21 @@ const infoTeam = {
 };
 const bottomBar = {
   flexShrink: 0, background: '#000', borderTop: `1px solid ${P.hairStrong}`,
-  padding: 'clamp(10px,1.6vh,18px) 0', display: 'flex', justifyContent: 'center',
+  padding: 'clamp(12px,1.8vh,20px) clamp(16px,2vw,32px)', display: 'flex', justifyContent: 'center',
 };
-const ticks = { display: 'flex', gap: 10 };
-const tick = {
-  width: 34, height: 3, background: P.hair, backgroundClip: 'content-box',
-  border: 'none', padding: '10px 0', margin: 0, cursor: 'pointer',
+const ticks = { display: 'flex', gap: 'clamp(20px,3vw,48px)' };
+const tickBtn = {
+  display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 8,
+  background: 'none', border: 'none', padding: '4px 2px', margin: 0, cursor: 'pointer',
 };
+const tickLabel = {
+  fontFamily: mono, fontSize: 'clamp(9px,0.9vw,12px)', color: P.mute,
+  letterSpacing: '0.12em', textTransform: 'uppercase', whiteSpace: 'nowrap',
+};
+const tickLabelActive = { color: P.gold };
+const tickBar = { display: 'block', width: 'clamp(44px,5vw,80px)', height: 5, background: P.hairStrong, borderRadius: 3 };
 const tickActive = { background: P.gold };
-const tickDone = { background: P.hairStrong };
+const tickDone = { background: P.bright };
 
 const titleCardWrap = {
   display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
