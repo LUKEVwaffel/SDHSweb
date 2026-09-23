@@ -2,7 +2,10 @@
 // Rifle Portal "Ask AI" tab — Makaio asks a plain-English question about the
 // team's scores ("what's Jordan's average total this season", "compare fall
 // vs spring standing scores") and this hands Claude the full shooters/
-// matches/scores table plus the question, and returns its answer as text.
+// matches/scores table plus the question. Claude answers via a forced tool
+// call so the response comes back as structured stats (headline figure,
+// a small stat grid, an optional comparison table, narrative) instead of a
+// wall of prose — the frontend renders these as real stat tiles/tables.
 // Read-only: never writes to rifle_scores/matches/shooters. Same secret and
 // caller pattern as rifle-comp-parse (getRifleAdmin + ANTHROPIC_API_KEY).
 //
@@ -19,11 +22,56 @@ const MAX_ROWS = 4000; // generous headroom for a school rifle team's full histo
 const SYSTEM_PROMPT = `You answer questions about a high school rifle team's match scores, using ONLY the data table given to you below the question. The table is CSV: shooter,season,week,opponent,date,prone,standing,kneeling,total,bulls — any stat may be blank if it wasn't recorded.
 
 Rules:
-- Compute averages, totals, comparisons, trends, and rankings yourself from the rows given — show your arithmetic isn't needed, just the result, but make sure it's correct.
-- When comparing seasons or matches, name them explicitly (e.g. "Fall 2025 average total was 268.4 vs Spring 2026's 271.1").
-- If the data doesn't cover what's asked (e.g. a shooter or season not present), say so plainly instead of guessing or inventing numbers.
-- Keep answers short and concrete: lead with the number/answer, then at most 1-2 sentences of context.
-- Never fabricate a score that isn't in the table.`;
+- Compute averages, totals, comparisons, trends, and rankings yourself from the rows given — make sure the arithmetic is correct.
+- Always call the format_answer tool to respond — never respond in plain prose.
+- Put the single most important number in "headline" (e.g. the average asked for, or the top answer to a "who/what" question). Omit it (null) only when there is no single number that answers the question.
+- Use "stats" for a handful (2-6) of supporting figures — e.g. per-season averages, top-N rankings, per-position breakdowns. Leave it an empty array if nothing more than the headline is needed.
+- Use "table" only for a genuine row/column comparison (e.g. multiple shooters x multiple seasons, or a match-by-match breakdown). Leave it null otherwise — do not restate the stats as a table too.
+- "narrative" is always required: 1-2 short sentences of context or caveats. If the data doesn't cover what's asked (a shooter/season not present), say so plainly there instead of guessing, and leave headline/stats/table empty.
+- Never fabricate a score that isn't in the table. Round decimals to 1 place.`;
+
+const FORMAT_ANSWER_TOOL = {
+  name: "format_answer",
+  description: "Return the answer to the user's question about rifle team scores as structured stats.",
+  input_schema: {
+    type: "object",
+    properties: {
+      headline: {
+        type: ["object", "null"],
+        description: "The single most important number, or null if none applies.",
+        properties: {
+          label: { type: "string", description: "Short caption, e.g. 'FALL 2025 AVG TOTAL'" },
+          value: { type: "string", description: "The number/answer itself, e.g. '268.4' or 'Jordan Lee'" },
+          sub: { type: "string", description: "Optional one-line qualifier, e.g. 'across 8 matches'" },
+        },
+        required: ["label", "value"],
+      },
+      stats: {
+        type: "array",
+        description: "0-6 supporting figures.",
+        items: {
+          type: "object",
+          properties: {
+            label: { type: "string" },
+            value: { type: "string" },
+            tone: { type: "string", enum: ["up", "down", "neutral"], description: "up=improvement/better, down=decline/worse, neutral=default" },
+          },
+          required: ["label", "value"],
+        },
+      },
+      table: {
+        type: ["object", "null"],
+        description: "A genuine row/column comparison, or null.",
+        properties: {
+          headers: { type: "array", items: { type: "string" } },
+          rows: { type: "array", items: { type: "array", items: { type: "string" } } },
+        },
+      },
+      narrative: { type: "string", description: "1-2 short sentences of context, caveats, or the full answer when no number applies." },
+    },
+    required: ["headline", "stats", "table", "narrative"],
+  },
+};
 
 function csvEscape(v: unknown): string {
   const s = v === null || v === undefined ? "" : String(v);
@@ -84,7 +132,7 @@ Deno.serve(async (req) => {
     });
 
     if (rows.length === 0) {
-      return json({ ok: true, answer: "There's no score data recorded yet, so I can't answer that." });
+      return json({ ok: true, answer: { headline: null, stats: [], table: null, narrative: "There's no score data recorded yet, so I can't answer that." } });
     }
 
     const userPrompt = `Question: ${q}\n\nData (${rows.length} rows):\n${header}\n${rows.join("\n")}`;
@@ -101,6 +149,8 @@ Deno.serve(async (req) => {
         max_tokens: 1024,
         system: SYSTEM_PROMPT,
         messages: [{ role: "user", content: userPrompt }],
+        tools: [FORMAT_ANSWER_TOOL],
+        tool_choice: { type: "tool", name: "format_answer" },
       }),
     });
 
@@ -111,8 +161,9 @@ Deno.serve(async (req) => {
     }
 
     const claudeBody = await claudeRes.json();
-    const answer = claudeBody?.content?.[0]?.text?.trim() ?? "";
-    if (!answer) return json({ error: "AI returned an empty answer" }, 502);
+    const toolUse = (claudeBody?.content || []).find((b: { type?: string }) => b.type === "tool_use");
+    const answer = toolUse?.input;
+    if (!answer || typeof answer !== "object") return json({ error: "AI returned an empty answer" }, 502);
 
     return json({ ok: true, answer });
   } catch (e) {
