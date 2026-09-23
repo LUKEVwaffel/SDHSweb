@@ -3,25 +3,71 @@
 // per-shooter / per-match aggregates — computed once here instead of four
 // slightly-different reimplementations).
 
+// Who may start a new comp-score upload (paste-parse or spreadsheet import)
+// — narrower than is_rifle_admin()/is_s6(), by the coach's own request: only
+// the two people who actually maintain the season workbook. Mirrored
+// server-side in rifle-comp-parse and rifle-xlsx-parse's UPLOAD_ALLOWLIST —
+// this one only drives UI visibility, the edge functions are the real gate.
+export const RIFLE_UPLOAD_ALLOWLIST = [
+  'lukevetsch77@gmail.com',
+  // TODO: add Kaz's email here.
+];
+
 export function seasonOf(match) {
   const m = (match?.dates || '').match(/\b(20\d{2})\b/);
   return m ? m[1] : 'Undated';
+}
+
+// School-year grouping ("2026-2027"), not a single calendar year — the team's
+// season runs fall through spring, so a match dated e.g. 2027-02-15 belongs
+// to the SAME season as one dated 2026-08-01. A bare year regex (seasonOf,
+// above — kept for the places that just want a label) would wrongly split
+// a season's second half into the next calendar year's bucket.
+export function schoolYearOf(match) {
+  const raw = match?.dates || '';
+  const iso = raw.match(/\b(20\d{2})-(\d{2})-\d{2}\b/);
+  let year;
+  let month;
+  if (iso) {
+    year = Number(iso[1]);
+    month = Number(iso[2]);
+  } else {
+    const y = raw.match(/\b(20\d{2})\b/);
+    if (!y) return 'Undated';
+    year = Number(y[1]);
+    month = 9; // only a bare year on record — assume fall (start of season)
+  }
+  const startYear = month >= 7 ? year : year - 1;
+  return `${startYear}-${startYear + 1}`;
+}
+
+// The school-year label a real calendar date falls in "right now" — used to
+// pick a sensible default season in the picker.
+export function currentSchoolYear(now = new Date()) {
+  const year = now.getFullYear();
+  const month = now.getMonth() + 1;
+  const startYear = month >= 7 ? year : year - 1;
+  return `${startYear}-${startYear + 1}`;
 }
 
 export function num(v) {
   return v === '' || v == null || Number.isNaN(+v) ? 0 : +v;
 }
 
+export function round1(n) {
+  return Math.round(n * 10) / 10;
+}
+
+// Rounded at the source — raw float addition of DB decimals (e.g. 96.5 +
+// 84.2 + 91.3) produces binary-float noise like 271.90000000000003, and
+// every KPI/aggregate/leaderboard in the redesign is built on this value.
+// Fixing it once here beats chasing every render-site call.
 export function scoreTotal(sc) {
-  return num(sc?.prone) + num(sc?.standing) + num(sc?.kneeling);
+  return round1(num(sc?.prone) + num(sc?.standing) + num(sc?.kneeling));
 }
 
 export function avgOf(arr) {
   return arr.length ? arr.reduce((a, b) => a + b, 0) / arr.length : 0;
-}
-
-export function round1(n) {
-  return Math.round(n * 10) / 10;
 }
 
 // One row per shooter: { shooterId, rows, avg, pr, last, last3, trend, prone, standing, kneeling, bulls, n }
@@ -66,7 +112,7 @@ export function teamAggregates(matches, scores) {
     .sort((a, b) => (a.week ?? 0) - (b.week ?? 0))
     .map((m) => {
       const totals = scores.filter((sc) => sc.match_id === m.id).map(scoreTotal).sort((a, b) => b - a);
-      return { match: m, agg: totals.slice(0, 4).reduce((a, b) => a + b, 0), avg: avgOf(totals), count: totals.length };
+      return { match: m, agg: round1(totals.slice(0, 4).reduce((a, b) => a + b, 0)), avg: avgOf(totals), count: totals.length };
     });
 }
 

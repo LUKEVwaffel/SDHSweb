@@ -3,7 +3,7 @@ import { supabase as SB } from '../../../lib/supabaseClient';
 import { P, mono, oswald } from '../theme';
 import { Badge } from './ui';
 import { TrendChart, Sparkline } from './charts';
-import { perShooterStats, teamAggregates, num, round1, initials, badgeFor } from './rifleStats';
+import { perShooterStats, teamAggregates, num, round1, initials, badgeFor, schoolYearOf } from './rifleStats';
 
 const label = { fontFamily: mono, fontSize: 9, color: P.gold, letterSpacing: '0.22em' };
 const POS = [
@@ -12,9 +12,9 @@ const POS = [
   { k: 'kneeling', label: 'KNEELING', color: '#B99AE0' },
 ];
 
-export default function ShooterTab({ initialProfileId, onNavigate }) {
+export default function ShooterTab({ season, initialProfileId, onNavigate }) {
   const [shooters, setShooters] = useState([]);
-  const [matches, setMatches] = useState([]);
+  const [allMatches, setAllMatches] = useState([]);
   const [scores, setScores] = useState([]);
   const [loading, setLoading] = useState(true);
   const [profileId, setProfileId] = useState(initialProfileId || null);
@@ -28,7 +28,7 @@ export default function ShooterTab({ initialProfileId, onNavigate }) {
       SB.from('rifle_scores').select('*'),
     ]);
     setShooters(sh || []);
-    setMatches(m || []);
+    setAllMatches(m || []);
     setScores(sc || []);
     setLoading(false);
     if (!profileId && sh?.length) setProfileId((sh.find((s) => s.active) || sh[0]).id);
@@ -38,6 +38,7 @@ export default function ShooterTab({ initialProfileId, onNavigate }) {
   useEffect(() => { load(); }, [load]);
   useEffect(() => { if (initialProfileId) setProfileId(initialProfileId); }, [initialProfileId]);
 
+  const matches = useMemo(() => allMatches.filter((m) => schoolYearOf(m) === season), [allMatches, season]);
   const per = useMemo(() => perShooterStats(shooters, matches, scores), [shooters, matches, scores]);
   const team = useMemo(() => teamAggregates(matches, scores), [matches, scores]);
 

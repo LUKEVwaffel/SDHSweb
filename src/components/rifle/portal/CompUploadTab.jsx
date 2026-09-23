@@ -3,12 +3,14 @@ import { supabase as SB } from '../../../lib/supabaseClient';
 import { P, mono } from '../theme';
 import { SectionLabel, Card, Badge, PrimaryBtn, GhostBtn, DangerBtn, EmptyState, th, td } from './ui';
 
-// Comp Upload — paste a match's raw score sheet, Claude extracts structured
-// per-shooter rows (rifle-comp-parse edge function, since it needs the
-// ANTHROPIC_API_KEY secret), then Makaio reviews/edits the draft here before
-// publishing. Publish itself is a plain client-side write: rifle_scores'
-// RLS (is_rifle_admin() or is_s6()) is the whole access gate, same as
-// RosterTab.jsx — no edge function needed for it.
+// Comp Upload — Kaz or Luke pastes a match's raw score sheet, Claude
+// extracts structured per-shooter rows (rifle-comp-parse edge function,
+// since it needs the ANTHROPIC_API_KEY secret — that function also enforces
+// the Kaz/Luke-only gate server-side, `canUpload` here is just UI). Any
+// rifle_admin can then review/edit the draft and publish. Publish itself is
+// a plain client-side write: rifle_scores' RLS (is_rifle_admin() or is_s6())
+// is the whole access gate, same as RosterTab.jsx — no edge function needed
+// for it.
 const inputStyle = { background: P.deep, border: `1px solid ${P.hair}`, color: P.cream, fontFamily: mono, fontSize: 13, padding: '9px 11px', outline: 'none' };
 const label = { fontFamily: mono, fontSize: 11, color: P.gold, letterSpacing: '0.1em', marginBottom: 6 };
 const numInput = { ...inputStyle, width: 72, textAlign: 'center' };
@@ -18,7 +20,7 @@ function StatusBadge({ status }) {
   return <Badge tone={tone}>{status.replace('_', ' ')}</Badge>;
 }
 
-export default function CompUploadTab() {
+export default function CompUploadTab({ canUpload = true }) {
   const [matches, setMatches] = useState([]);
   const [matchId, setMatchId] = useState('');
   const [newMatch, setNewMatch] = useState({ week: '', dates: '', opponent: '', location: '' });
@@ -146,17 +148,23 @@ export default function CompUploadTab() {
         </div>
       </Card>
 
-      <div style={{ marginBottom: 28 }}>
-        <div style={label}>PASTE RAW SCORE SHEET</div>
-        <textarea
-          value={csv} onChange={(e) => setCsv(e.target.value)} rows={8}
-          placeholder="Paste the CSV or copy-pasted score sheet text here&hellip;"
-          style={{ ...inputStyle, width: '100%', boxSizing: 'border-box', fontSize: 12, resize: 'vertical', marginBottom: 10 }}
-        />
-        <PrimaryBtn onClick={parse} disabled={parsing}>
-          {parsing ? 'PARSING WITH AI…' : 'PARSE WITH AI'}
-        </PrimaryBtn>
-      </div>
+      {canUpload ? (
+        <div style={{ marginBottom: 28 }}>
+          <div style={label}>PASTE RAW SCORE SHEET</div>
+          <textarea
+            value={csv} onChange={(e) => setCsv(e.target.value)} rows={8}
+            placeholder="Paste the CSV or copy-pasted score sheet text here&hellip;"
+            style={{ ...inputStyle, width: '100%', boxSizing: 'border-box', fontSize: 12, resize: 'vertical', marginBottom: 10 }}
+          />
+          <PrimaryBtn onClick={parse} disabled={parsing}>
+            {parsing ? 'PARSING WITH AI…' : 'PARSE WITH AI'}
+          </PrimaryBtn>
+        </div>
+      ) : (
+        <div style={{ fontFamily: mono, fontSize: 12, color: P.mute, marginBottom: 28 }}>
+          Only Kaz and Luke can upload a new score sheet here — you can still review, edit, publish, or discard uploads below.
+        </div>
+      )}
 
       {err && <div style={{ fontFamily: mono, fontSize: 12, color: P.red, marginBottom: 18 }}>{err}</div>}
 

@@ -1,20 +1,21 @@
 // Edge function: rifle-comp-parse
-// Rifle Portal "Comp Upload" — Makaio pastes the raw score sheet for a match
-// (copy-pasted from whatever format the meet software/officials hand out;
-// never consistent row-by-row) and this sends it to Claude to extract
+// Rifle Portal "Comp Upload" — Kaz or Luke pastes the raw score sheet for a
+// match (copy-pasted from whatever format the meet software/officials hand
+// out; never consistent row-by-row) and this sends it to Claude to extract
 // structured per-shooter scores, matched against the existing roster where
 // possible. Writes the raw text + AI draft into rifle_comp_uploads as
-// status='pending_review' — nothing touches rifle_scores/rifle_shooters yet,
-// Makaio reviews/edits the draft client-side before publishing (that publish
-// step is a plain client-side write, same as RosterTab.jsx — rifle_scores'
-// own RLS is_rifle_admin()-or-is_s6() is the whole gate there, no edge
-// function needed for it).
+// status='pending_review' — nothing touches rifle_scores/rifle_shooters yet;
+// review/publish stays open to any rifle_admin (RosterTab.jsx-style direct
+// write, rifle_scores' own RLS is_rifle_admin()-or-is_s6() is that gate) —
+// only STARTING a new upload is restricted to Kaz/Luke, per the coach's own
+// request (see RIFLE_UPLOAD_ALLOWLIST).
 //
 // Secrets (set with `supabase secrets set`, NEVER in .env / client bundle):
 //   ANTHROPIC_API_KEY   required (shared with analyze-event-feedback)
 // Deploy WITH jwt verification (default).
 import { json, preflight } from "../_shared/http.ts";
 import { serviceClient, getRifleAdmin } from "../_shared/supabase.ts";
+import { RIFLE_UPLOAD_ALLOWLIST } from "../_shared/rifleUploaders.ts";
 
 const CLAUDE_MODEL = "claude-sonnet-4-5-20250929";
 const MAX_CSV_CHARS = 20000;
@@ -39,6 +40,9 @@ Deno.serve(async (req) => {
     const caller = await getRifleAdmin(req);
     if (!caller) return json({ error: "not authorized" }, 403);
     if (caller.mustChangePassword) return json({ error: "password_change_required" }, 403);
+    if (!RIFLE_UPLOAD_ALLOWLIST.includes(caller.email)) {
+      return json({ error: "score sheet upload is restricted to Kaz and Luke" }, 403);
+    }
 
     const { raw_csv } = await req.json().catch(() => ({}));
     const csv = String(raw_csv || "").trim();

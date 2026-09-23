@@ -3,7 +3,7 @@ import { supabase as SB } from '../../../lib/supabaseClient';
 import { P, mono, oswald } from '../theme';
 import { GhostBtn, PrimaryBtn, DangerBtn, Badge } from './ui';
 import { Sparkline, downloadCsv } from './charts';
-import { seasonOf, scoreTotal, perShooterStats, num, round1 } from './rifleStats';
+import { schoolYearOf, scoreTotal, perShooterStats, num, round1 } from './rifleStats';
 
 // Grid-style match + score editor — the Range Ops redesign's replacement for
 // the old row-per-match table view. Same underlying CRUD as before (direct
@@ -23,15 +23,14 @@ function heat(n, active) {
   return `rgba(201,169,97,${(0.02 + t * t * 0.32).toFixed(3)})`;
 }
 
-export default function ScoresTab({ initialMatchId }) {
-  const [matches, setMatches] = useState([]);
+export default function ScoresTab({ season, initialMatchId, canUpload = true }) {
+  const [allMatches, setAllMatches] = useState([]);
   const [shooters, setShooters] = useState([]);
   const [scores, setScores] = useState([]);
   const [loading, setLoading] = useState(true);
   const [err, setErr] = useState('');
   const [ok, setOk] = useState('');
   const [selectedMatchId, setSelectedMatchId] = useState(null);
-  const [seasonFilter, setSeasonFilter] = useState('All');
   const [matchSearch, setMatchSearch] = useState('');
   const [shooterSearch, setShooterSearch] = useState('');
   const [newMatch, setNewMatch] = useState({ week: '', dates: '', opponent: '', location: '' });
@@ -49,7 +48,7 @@ export default function ScoresTab({ initialMatchId }) {
       SB.from('rifle_scores').select('*'),
     ]);
     if (mErr || sErr || scErr) { setErr((mErr || sErr || scErr).message); setLoading(false); return; }
-    setMatches(m || []);
+    setAllMatches(m || []);
     setShooters(s || []);
     setScores(sc || []);
     setLoading(false);
@@ -83,20 +82,15 @@ export default function ScoresTab({ initialMatchId }) {
     flash(`Undone: ${last.label}`);
   }
 
+  const matches = useMemo(() => allMatches.filter((m) => schoolYearOf(m) === season), [allMatches, season]);
   const per = useMemo(() => perShooterStats(shooters, matches, scores), [shooters, matches, scores]);
   const scoredMatchIds = useMemo(() => new Set(scores.map((sc) => sc.match_id)), [scores]);
-
-  const seasons = useMemo(() => {
-    const set = new Set(matches.map(seasonOf));
-    return ['All', ...Array.from(set).sort((a, b) => b.localeCompare(a))];
-  }, [matches]);
 
   const visibleMatches = useMemo(() => {
     const q = matchSearch.trim().toLowerCase();
     return matches
-      .filter((m) => seasonFilter === 'All' || seasonOf(m) === seasonFilter)
       .filter((m) => !q || [m.week, m.dates, m.opponent, m.location].some((v) => String(v ?? '').toLowerCase().includes(q)));
-  }, [matches, seasonFilter, matchSearch]);
+  }, [matches, matchSearch]);
 
   const shooterName = useCallback((id) => shooters.find((s) => s.id === id)?.name || 'Unknown shooter', [shooters]);
   const selectedMatch = matches.find((m) => m.id === selectedMatchId) || null;
@@ -233,9 +227,6 @@ export default function ScoresTab({ initialMatchId }) {
             <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 8 }}>
               <span style={label}>// MATCHES</span>
             </div>
-            <select value={seasonFilter} onChange={(e) => setSeasonFilter(e.target.value)} style={{ ...inputStyle, width: '100%', marginBottom: 6 }}>
-              {seasons.map((s) => <option key={s} value={s}>{s}</option>)}
-            </select>
             <input value={matchSearch} onChange={(e) => setMatchSearch(e.target.value)} placeholder="search…" style={{ ...inputStyle, width: '100%', boxSizing: 'border-box' }} />
           </div>
           <div style={{ maxHeight: 480, overflowY: 'auto' }}>
@@ -296,7 +287,7 @@ export default function ScoresTab({ initialMatchId }) {
                   <div style={{ textAlign: 'right' }}>
                     <div style={label}>TEAM AGG · TOP 4</div>
                     <div style={{ fontFamily: oswald, fontSize: 44, fontWeight: 600, color: P.bright, lineHeight: 1, marginTop: 4 }}>
-                      {matchScores.slice().sort((a, b) => scoreTotal(b) - scoreTotal(a)).slice(0, 4).reduce((a, b) => a + scoreTotal(b), 0)}
+                      {round1(matchScores.slice().sort((a, b) => scoreTotal(b) - scoreTotal(a)).slice(0, 4).reduce((a, b) => a + scoreTotal(b), 0))}
                     </div>
                     <div style={{ fontFamily: mono, fontSize: 10, color: P.faint, marginTop: 4 }}>/ 1,200</div>
                   </div>
@@ -304,7 +295,7 @@ export default function ScoresTab({ initialMatchId }) {
               </div>
 
               <div style={{ display: 'flex', gap: 8, alignItems: 'center', marginBottom: 10, flexWrap: 'wrap' }}>
-                <PrimaryBtn onClick={() => setImportOpen(true)}>✦ IMPORT / AI PARSE</PrimaryBtn>
+                {canUpload && <PrimaryBtn onClick={() => setImportOpen(true)}>✦ IMPORT</PrimaryBtn>}
                 <GhostBtn onClick={undo} disabled={!undoStack.length || undoing}>{undoing ? 'UNDOING…' : `↶ UNDO${undoStack.length ? ` (${undoStack.length})` : ''}`}</GhostBtn>
                 <GhostBtn onClick={exportCsv} disabled={!matchScores.length}>CSV</GhostBtn>
                 <GhostBtn onClick={() => window.print()}>PRINT</GhostBtn>
@@ -420,14 +411,38 @@ export default function ScoresTab({ initialMatchId }) {
           match={selectedMatch}
           shooters={shooters}
           onClose={() => setImportOpen(false)}
-          onPublished={async () => { setImportOpen(false); await load(); flash('Scores published from import'); }}
+          onPublished={async (msg) => { await load(); flash(msg || 'Scores published from import'); }}
         />
       )}
     </div>
   );
 }
 
+async function publishRows(rows, matchId, uploadId, shooters) {
+  const nextShooters = [...shooters];
+  for (const row of rows) {
+    const name = (row.matched_shooter_name || row.raw_name || '').trim();
+    if (!name) continue;
+    let shooter = nextShooters.find((s) => s.name.toLowerCase() === name.toLowerCase());
+    if (!shooter) {
+      const { data: created, error: createErr } = await SB.from('rifle_shooters').insert({ name }).select('id, name').single();
+      if (createErr) throw createErr;
+      shooter = created;
+      nextShooters.push(created);
+    }
+    const scoreRow = {
+      shooter_id: shooter.id, match_id: matchId, upload_id: uploadId ?? null,
+      prone: row.prone ?? null, standing: row.standing ?? null, kneeling: row.kneeling ?? null,
+      total: row.total ?? null, bulls: row.bulls ?? null,
+    };
+    const { error: scoreErr } = await SB.from('rifle_scores').upsert(scoreRow, { onConflict: 'shooter_id,match_id' });
+    if (scoreErr) throw scoreErr;
+  }
+  return nextShooters;
+}
+
 function ImportModal({ match, shooters, onClose, onPublished }) {
+  const [mode, setMode] = useState('paste'); // paste | spreadsheet
   const [csv, setCsv] = useState('');
   const [parsing, setParsing] = useState(false);
   const [publishing, setPublishing] = useState(false);
@@ -456,29 +471,12 @@ function ImportModal({ match, shooters, onClose, onPublished }) {
     if (!match) { setErr('Pick a match in the editor first, then reopen import.'); return; }
     setPublishing(true); setErr('');
     try {
-      const nextShooters = [...shooters];
-      for (const row of rows) {
-        const name = (row.matched_shooter_name || row.raw_name || '').trim();
-        if (!name) continue;
-        let shooter = nextShooters.find((s) => s.name.toLowerCase() === name.toLowerCase());
-        if (!shooter) {
-          const { data: created, error: createErr } = await SB.from('rifle_shooters').insert({ name }).select('id, name').single();
-          if (createErr) throw createErr;
-          shooter = created;
-          nextShooters.push(created);
-        }
-        const scoreRow = {
-          shooter_id: shooter.id, match_id: match.id, upload_id: uploadId,
-          prone: row.prone ?? null, standing: row.standing ?? null, kneeling: row.kneeling ?? null,
-          total: row.total ?? null, bulls: row.bulls ?? null,
-        };
-        const { error: scoreErr } = await SB.from('rifle_scores').upsert(scoreRow, { onConflict: 'shooter_id,match_id' });
-        if (scoreErr) throw scoreErr;
-      }
+      await publishRows(rows, match.id, uploadId, shooters);
       if (uploadId) {
         await SB.from('rifle_comp_uploads').update({ status: 'published', published_at: new Date().toISOString(), draft: { rows } }).eq('id', uploadId);
       }
       onPublished();
+      onClose();
     } catch (e) {
       setErr(`Failed: ${e.message}`);
     } finally {
@@ -488,17 +486,22 @@ function ImportModal({ match, shooters, onClose, onPublished }) {
 
   return (
     <div style={{ position: 'fixed', inset: 0, background: 'rgba(3,8,16,0.8)', zIndex: 50, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 30 }}>
-      <div style={{ width: 720, maxHeight: '88vh', overflow: 'auto', background: P.deep, border: `1px solid ${P.hairStrong}`, boxShadow: '0 40px 80px rgba(0,0,0,0.6)' }}>
+      <div style={{ width: mode === 'spreadsheet' ? 860 : 720, maxHeight: '88vh', overflow: 'auto', background: P.deep, border: `1px solid ${P.hairStrong}`, boxShadow: '0 40px 80px rgba(0,0,0,0.6)' }}>
         <div style={{ padding: '18px 22px', borderBottom: `1px solid ${P.hair}`, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
           <div>
-            <div style={{ ...label, marginBottom: 6 }}>// IMPORT · AI PARSE</div>
-            <div style={{ fontFamily: oswald, fontSize: 20, fontWeight: 600, color: P.cream }}>{match ? `Import into Week ${match.week}${match.opponent ? ` · ${match.opponent}` : ''}` : 'No match selected'}</div>
+            <div style={{ ...label, marginBottom: 6 }}>// IMPORT</div>
+            <div style={{ fontFamily: oswald, fontSize: 20, fontWeight: 600, color: P.cream }}>{match ? `Week ${match.week}${match.opponent ? ` · ${match.opponent}` : ''}` : 'No match selected in editor'}</div>
           </div>
           <span onClick={onClose} style={{ fontFamily: mono, fontSize: 18, color: P.mute, cursor: 'pointer' }}>×</span>
         </div>
+        <div style={{ display: 'flex', borderBottom: `1px solid ${P.hair}` }}>
+          {[['paste', 'PASTE TEXT'], ['spreadsheet', 'UPLOAD SPREADSHEET']].map(([id, l]) => (
+            <button key={id} onClick={() => setMode(id)} style={{ flex: 1, background: mode === id ? 'rgba(201,169,97,0.1)' : 'transparent', border: 'none', borderBottom: mode === id ? `2px solid ${P.gold}` : '2px solid transparent', color: mode === id ? P.bright : P.mute, fontFamily: mono, fontSize: 11, letterSpacing: '0.1em', padding: '10px 0', cursor: 'pointer' }}>{l}</button>
+          ))}
+        </div>
         <div style={{ padding: 20 }}>
           {err && <div style={{ fontFamily: mono, fontSize: 12, color: P.red, marginBottom: 14 }}>{err}</div>}
-          {!rows ? (
+          {mode === 'paste' && (!rows ? (
             <>
               <div style={{ ...label, marginBottom: 8 }}>PASTE RAW SCORE SHEET</div>
               <textarea value={csv} onChange={(e) => setCsv(e.target.value)} rows={9} placeholder="Paste the CSV or copy-pasted score sheet text here…"
@@ -530,9 +533,149 @@ function ImportModal({ match, shooters, onClose, onPublished }) {
                 </div>
               </div>
             </>
-          )}
+          ))}
+          {mode === 'spreadsheet' && <SpreadsheetImport shooters={shooters} onPublished={onPublished} />}
         </div>
       </div>
+    </div>
+  );
+}
+
+// Kaz/Luke's season-long workbook — same file re-uploaded weekly with a new
+// week's columns filled in. Extraction is deterministic (rifle-xlsx-parse
+// reads the sheet's own repeating headers), so what lands here is real
+// numbers, not an AI guess — only which real match a week-group belongs to
+// is left for a human, since the sheet itself doesn't say.
+function SpreadsheetImport({ shooters, onPublished }) {
+  const [parsing, setParsing] = useState(false);
+  const [weeks, setWeeks] = useState(null);
+  const [err, setErr] = useState('');
+  const [allMatches, setAllMatches] = useState([]);
+
+  useEffect(() => {
+    SB.from('rifle_matches').select('*').order('week', { ascending: false }).then(({ data }) => setAllMatches(data || []));
+  }, []);
+
+  async function onFile(e) {
+    const file = e.target.files?.[0];
+    e.target.value = '';
+    if (!file) return;
+    setParsing(true); setErr(''); setWeeks(null);
+    try {
+      const buf = await file.arrayBuffer();
+      let binary = '';
+      const bytes = new Uint8Array(buf);
+      for (let i = 0; i < bytes.length; i++) binary += String.fromCharCode(bytes[i]);
+      const file_base64 = btoa(binary);
+      const { data, error } = await SB.functions.invoke('rifle-xlsx-parse', { body: { file_base64 } });
+      if (error || data?.error) throw new Error(data?.error || error.message);
+      setWeeks(data.weeks.map((w) => ({ ...w, matchId: '', newMatch: { week: '', dates: '', opponent: '', location: '' } })));
+    } catch (e2) {
+      setErr(`Failed: ${e2.message}`);
+    } finally {
+      setParsing(false);
+    }
+  }
+
+  function updateGroup(gi, patch) {
+    setWeeks((ws) => ws.map((w, i) => (i === gi ? { ...w, ...patch } : w)));
+  }
+  function editGroupRow(gi, ri, field, value) {
+    setWeeks((ws) => ws.map((w, i) => (i === gi ? { ...w, rows: w.rows.map((r, j) => (j === ri ? { ...r, [field]: value } : r)) } : w)));
+  }
+
+  return (
+    <>
+      {err && <div style={{ fontFamily: mono, fontSize: 12, color: P.red, marginBottom: 12 }}>{err}</div>}
+      <div style={{ display: 'flex', gap: 10, alignItems: 'center', marginBottom: 14 }}>
+        <input type="file" accept=".xlsx,.xls" onChange={onFile} disabled={parsing} style={{ fontFamily: mono, fontSize: 11, color: P.mute }} />
+        {parsing && <span style={{ fontFamily: mono, fontSize: 11, color: P.mute }}>Reading…</span>}
+      </div>
+      {weeks && weeks.length === 0 && <div style={{ fontFamily: mono, fontSize: 12, color: P.mute }}>No week columns with data found in that file.</div>}
+      {weeks && weeks.map((w, gi) => (
+        <SpreadsheetWeekGroup
+          key={gi} group={w} allMatches={allMatches} shooters={shooters}
+          onChange={(patch) => updateGroup(gi, patch)}
+          onEditRow={(ri, field, value) => editGroupRow(gi, ri, field, value)}
+          onPublished={onPublished}
+        />
+      ))}
+    </>
+  );
+}
+
+function SpreadsheetWeekGroup({ group, allMatches, shooters, onChange, onEditRow, onPublished }) {
+  const [publishing, setPublishing] = useState(false);
+  const [done, setDone] = useState(false);
+  const [err, setErr] = useState('');
+  const isNew = group.matchId === '__new__';
+
+  async function publish() {
+    setErr('');
+    let matchId = group.matchId;
+    if (!matchId) { setErr('Pick which match this week is.'); return; }
+    setPublishing(true);
+    try {
+      if (isNew) {
+        if (!group.newMatch.week.trim()) throw new Error('Week number required for the new match.');
+        const { data, error } = await SB.from('rifle_matches').insert({
+          week: Number(group.newMatch.week), dates: group.newMatch.dates.trim() || null,
+          opponent: group.newMatch.opponent.trim() || null, location: group.newMatch.location.trim() || null,
+        }).select('id').single();
+        if (error) throw error;
+        matchId = data.id;
+      }
+      await publishRows(group.rows, matchId, null, shooters);
+      setDone(true);
+      onPublished(`Week group ${group.groupIndex} published`);
+    } catch (e) {
+      setErr(`Failed: ${e.message}`);
+    } finally {
+      setPublishing(false);
+    }
+  }
+
+  return (
+    <div style={{ border: `1px solid ${P.hair}`, marginBottom: 14, opacity: done ? 0.55 : 1 }}>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '10px 14px', background: P.ink, flexWrap: 'wrap', gap: 10 }}>
+        <div style={{ fontFamily: mono, fontSize: 11, color: P.gold, letterSpacing: '0.1em' }}>WEEK GROUP {group.groupIndex} · {group.rows.length} ROWS</div>
+        {done ? (
+          <span style={{ fontFamily: mono, fontSize: 11, color: P.win }}>PUBLISHED ✓</span>
+        ) : (
+          <div style={{ display: 'flex', gap: 8, alignItems: 'center', flexWrap: 'wrap' }}>
+            <select value={group.matchId} onChange={(e) => onChange({ matchId: e.target.value })} style={{ ...inputStyle, minWidth: 200 }}>
+              <option value="">Assign to match…</option>
+              <option value="__new__">+ new match…</option>
+              {allMatches.map((m) => <option key={m.id} value={m.id}>Week {m.week}{m.opponent ? ` — vs ${m.opponent}` : ''}</option>)}
+            </select>
+            {isNew && (
+              <>
+                <input value={group.newMatch.week} onChange={(e) => onChange({ newMatch: { ...group.newMatch, week: e.target.value.replace(/\D/g, '') } })} placeholder="Week #" style={{ ...inputStyle, width: 70 }} />
+                <input value={group.newMatch.dates} onChange={(e) => onChange({ newMatch: { ...group.newMatch, dates: e.target.value } })} placeholder="Dates" style={{ ...inputStyle, width: 110 }} />
+                <input value={group.newMatch.opponent} onChange={(e) => onChange({ newMatch: { ...group.newMatch, opponent: e.target.value } })} placeholder="Opponent" style={{ ...inputStyle, width: 140 }} />
+              </>
+            )}
+            <PrimaryBtn onClick={publish} disabled={publishing}>{publishing ? 'PUBLISHING…' : 'PUBLISH'}</PrimaryBtn>
+          </div>
+        )}
+      </div>
+      {err && <div style={{ fontFamily: mono, fontSize: 11, color: P.red, padding: '8px 14px' }}>{err}</div>}
+      {!done && (
+        <div>
+          <div style={{ display: 'grid', gridTemplateColumns: 'minmax(0,1fr) minmax(0,1.1fr) 56px 56px 56px 56px 56px', gap: 8, padding: '7px 12px', fontFamily: mono, fontSize: 9, color: P.gold, letterSpacing: '0.1em', borderTop: `1px solid ${P.hair}` }}>
+            <span>RAW NAME</span><span>MATCHED SHOOTER</span><span style={{ textAlign: 'right' }}>P</span><span style={{ textAlign: 'right' }}>S</span><span style={{ textAlign: 'right' }}>K</span><span style={{ textAlign: 'right' }}>TOT</span><span style={{ textAlign: 'right' }}>X</span>
+          </div>
+          {group.rows.map((r, ri) => (
+            <div key={ri} style={{ display: 'grid', gridTemplateColumns: 'minmax(0,1fr) minmax(0,1.1fr) 56px 56px 56px 56px 56px', gap: 8, padding: '6px 12px', borderTop: `1px solid ${P.hair}`, fontFamily: mono, fontSize: 12, alignItems: 'center' }}>
+              <span style={{ color: r.matched_shooter_name ? P.faint : P.warn }}>{r.raw_name}</span>
+              <input value={r.matched_shooter_name || ''} onChange={(e) => onEditRow(ri, 'matched_shooter_name', e.target.value)} placeholder="no match — type name" style={{ ...inputStyle, fontSize: 12, padding: '5px 8px' }} />
+              {['prone', 'standing', 'kneeling', 'total', 'bulls'].map((f) => (
+                <input key={f} value={r[f] ?? ''} inputMode="decimal" onChange={(e) => onEditRow(ri, f, e.target.value === '' ? null : Number(e.target.value))} style={{ ...inputStyle, width: 48, textAlign: 'center', padding: '5px 4px' }} />
+              ))}
+            </div>
+          ))}
+        </div>
+      )}
     </div>
   );
 }

@@ -17,7 +17,7 @@ import DashboardTab from './DashboardTab';
 import ShooterTab from './ShooterTab';
 import LineupTab from './LineupTab';
 import { P, mono, oswald } from '../theme';
-import { seasonOf } from './rifleStats';
+import { schoolYearOf, currentSchoolYear, RIFLE_UPLOAD_ALLOWLIST } from './rifleStats';
 
 const TABS = [
   { id: 'dashboard', label: 'Dashboard' },
@@ -44,8 +44,11 @@ export default function RiflePortal() {
   const [tab, setTab] = useState('dashboard');
   const [tabExtra, setTabExtra] = useState(null); // e.g. { profileId } for the Shooters tab, { matchId } for Scores
   const [errorMsg, setErrorMsg] = useState('');
-  const [badge, setBadge] = useState(null); // { season, week, weeks }
-  const [searchIndex, setSearchIndex] = useState({ shooters: [], matches: [] });
+  const [allMatches, setAllMatches] = useState([]); // { id, week, dates, opponent }, every season
+  const [scoredMatchIds, setScoredMatchIds] = useState(new Set());
+  const [season, setSeason] = useState(currentSchoolYear());
+  const [seasonTouched, setSeasonTouched] = useState(false);
+  const [searchIndex, setSearchIndex] = useState({ shooters: [] });
   const [q, setQ] = useState('');
   const searchRef = useRef(null);
 
@@ -61,19 +64,39 @@ export default function RiflePortal() {
       SB.from('rifle_matches').select('id, week, dates, opponent').order('week', { ascending: false }),
       SB.from('rifle_scores').select('match_id'),
     ]);
-    setSearchIndex({
-      shooters: (shooters || []).map((s) => ({ id: s.id, name: s.name, active: s.active })),
-      matches: (matches || []).map((m) => ({ id: m.id, week: m.week, opponent: m.opponent })),
-    });
-    const scoredIds = new Set((scoreRows || []).map((r) => r.match_id));
-    const scoredMatches = (matches || []).filter((m) => scoredIds.has(m.id));
-    const mostRecent = scoredMatches[0]; // matches already ordered week desc
-    setBadge({
-      season: mostRecent ? seasonOf(mostRecent) : (matches?.[0] ? seasonOf(matches[0]) : '—'),
-      week: mostRecent?.week ?? 0,
-      weeks: matches?.length ?? 0,
-    });
+    setSearchIndex({ shooters: (shooters || []).map((s) => ({ id: s.id, name: s.name, active: s.active })) });
+    setAllMatches(matches || []);
+    setScoredMatchIds(new Set((scoreRows || []).map((r) => r.match_id)));
   }, []);
+
+  const seasons = useMemo(() => {
+    const present = new Set(allMatches.map(schoolYearOf).filter((s) => s !== 'Undated'));
+    present.add(currentSchoolYear());
+    return Array.from(present).sort((a, b) => b.localeCompare(a));
+  }, [allMatches]);
+
+  // Default to the real current school year once matches are in — but only
+  // before the coach has picked one by hand, so loading in on Dashboard
+  // doesn't stomp a season they already switched to.
+  useEffect(() => {
+    if (seasonTouched || !allMatches.length) return;
+    const preferred = currentSchoolYear();
+    if (seasons.includes(preferred)) setSeason(preferred);
+    else if (seasons.length) setSeason(seasons[0]);
+  }, [allMatches, seasons, seasonTouched]);
+
+  function changeSeason(next) {
+    setSeason(next);
+    setSeasonTouched(true);
+  }
+
+  const seasonMatches = useMemo(() => allMatches.filter((m) => schoolYearOf(m) === season), [allMatches, season]);
+  const badge = useMemo(() => {
+    const scored = seasonMatches.filter((m) => scoredMatchIds.has(m.id));
+    const mostRecentWeek = scored.length ? Math.max(...scored.map((m) => m.week ?? 0)) : 0;
+    return { week: mostRecentWeek, weeks: seasonMatches.length };
+  }, [seasonMatches, scoredMatchIds]);
+  const matchIndex = useMemo(() => seasonMatches.map((m) => ({ id: m.id, week: m.week, opponent: m.opponent })), [seasonMatches]);
 
   const verify = useCallback(async () => {
     const { data: { session } } = await SB.auth.getSession();
@@ -127,12 +150,12 @@ export default function RiflePortal() {
       .filter((s) => s.name.toLowerCase().includes(ql))
       .slice(0, 4)
       .map((s) => ({ key: `s${s.id}`, label: s.name, kind: 'SHOOTER', go: () => goTab('shooters', { profileId: s.id }) }));
-    const matchHits = searchIndex.matches
+    const matchHits = matchIndex
       .filter((m) => `week ${m.week} ${m.opponent || ''}`.toLowerCase().includes(ql))
       .slice(0, 4)
       .map((m) => ({ key: `m${m.id}`, label: `Week ${m.week}${m.opponent ? ` · ${m.opponent}` : ''}`, kind: 'MATCH', go: () => goTab('scores', { matchId: m.id }) }));
     return [...shooterHits, ...matchHits].slice(0, 6);
-  }, [q, searchIndex, goTab]);
+  }, [q, searchIndex, matchIndex, goTab]);
 
   const shellStyle = {
     background: P.ink, minHeight: '100vh', fontFamily: 'Inter, sans-serif',
@@ -171,12 +194,16 @@ export default function RiflePortal() {
             </div>
           </div>
 
-          {badge && (
-            <div style={{ display: 'flex', alignItems: 'center', gap: 8, fontFamily: mono, fontSize: 10, letterSpacing: '0.12em', color: P.mute, borderLeft: `1px solid ${P.hair}`, paddingLeft: 20, whiteSpace: 'nowrap' }}>
-              <span style={{ width: 6, height: 6, borderRadius: '50%', background: P.win, boxShadow: `0 0 8px ${P.win}` }} />
-              <span>SEASON {badge.season} · WK {badge.week} OF {badge.weeks}</span>
-            </div>
-          )}
+          <div style={{ display: 'flex', alignItems: 'center', gap: 8, fontFamily: mono, fontSize: 10, letterSpacing: '0.1em', color: P.mute, borderLeft: `1px solid ${P.hair}`, paddingLeft: 20, whiteSpace: 'nowrap' }}>
+            <span style={{ width: 6, height: 6, borderRadius: '50%', background: P.win, boxShadow: `0 0 8px ${P.win}`, flex: 'none' }} />
+            <select
+              value={season} onChange={(e) => changeSeason(e.target.value)}
+              style={{ background: 'transparent', border: 'none', color: P.gold, fontFamily: mono, fontSize: 10, letterSpacing: '0.1em', cursor: 'pointer', outline: 'none' }}
+            >
+              {seasons.map((s) => <option key={s} value={s} style={{ background: P.deep, color: P.cream }}>SEASON {s}</option>)}
+            </select>
+            <span>· WK {badge.week} OF {badge.weeks}</span>
+          </div>
 
           <div style={{ position: 'relative', flex: 1, maxWidth: 280, minWidth: 160 }}>
             <input
@@ -239,13 +266,13 @@ export default function RiflePortal() {
       </div>
 
       <div style={{ maxWidth: 1600, margin: '0 auto', padding: '26px 24px 100px' }}>
-        {tab === 'dashboard' && <DashboardTab onNavigate={goTab} />}
-        {tab === 'scores' && <ScoresTab initialMatchId={tabExtra?.matchId} />}
-        {tab === 'shooters' && <ShooterTab initialProfileId={tabExtra?.profileId} onNavigate={goTab} />}
-        {tab === 'lineup' && <LineupTab onNavigate={goTab} />}
+        {tab === 'dashboard' && <DashboardTab season={season} onNavigate={goTab} />}
+        {tab === 'scores' && <ScoresTab season={season} initialMatchId={tabExtra?.matchId} canUpload={RIFLE_UPLOAD_ALLOWLIST.includes((admin.email || '').toLowerCase())} />}
+        {tab === 'shooters' && <ShooterTab season={season} initialProfileId={tabExtra?.profileId} onNavigate={goTab} />}
+        {tab === 'lineup' && <LineupTab season={season} onNavigate={goTab} />}
         {tab === 'roster' && <RosterTab />}
         {tab === 'signups' && <SignupsTab />}
-        {tab === 'compupload' && <CompUploadTab />}
+        {tab === 'compupload' && <CompUploadTab canUpload={RIFLE_UPLOAD_ALLOWLIST.includes((admin.email || '').toLowerCase())} />}
         {tab === 'calendar' && <CalendarTab />}
         {tab === 'stats' && <StatsTab />}
         {tab === 'history' && <HistoryTab />}

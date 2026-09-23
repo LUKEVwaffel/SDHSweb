@@ -2,7 +2,7 @@ import { useState, useEffect, useCallback, useMemo } from 'react';
 import { supabase as SB } from '../../../lib/supabaseClient';
 import { P, mono, oswald } from '../theme';
 import { TrendChart, Sparkline } from './charts';
-import { perShooterStats, teamAggregates, nextUpcomingMatch, avgOf, round1, num } from './rifleStats';
+import { perShooterStats, teamAggregates, nextUpcomingMatch, avgOf, round1, num, schoolYearOf } from './rifleStats';
 
 const label = { fontFamily: mono, fontSize: 9, color: P.gold, letterSpacing: '0.24em' };
 
@@ -18,9 +18,9 @@ function daysUntil(date) {
   return Math.round(ms / 86400000);
 }
 
-export default function DashboardTab({ onNavigate }) {
+export default function DashboardTab({ season, onNavigate }) {
   const [shooters, setShooters] = useState([]);
-  const [matches, setMatches] = useState([]);
+  const [allMatches, setAllMatches] = useState([]);
   const [scores, setScores] = useState([]);
   const [uploads, setUploads] = useState([]);
   const [signups, setSignups] = useState([]);
@@ -38,27 +38,29 @@ export default function DashboardTab({ onNavigate }) {
       SB.from('rifle_audit_log').select('id, table_name, action, row_id, new_data, old_data, changed_at').order('changed_at', { ascending: false }).limit(8),
     ]);
     setShooters(sh || []);
-    setMatches(m || []);
+    setAllMatches(m || []);
     setScores(sc || []);
     setUploads(up || []);
     setSignups(su || []);
     setAuditLog(al || []);
     setLoading(false);
-
-    const next = nextUpcomingMatch(m || [], sc || []);
-    if (next) {
-      const { count } = await SB.from('rifle_lineups').select('slot', { count: 'exact', head: true }).eq('match_id', next.id);
-      setLineupCount(count || 0);
-    } else {
-      setLineupCount(null);
-    }
   }, []);
 
   useEffect(() => { load(); }, [load]);
 
+  const matches = useMemo(() => allMatches.filter((m) => schoolYearOf(m) === season), [allMatches, season]);
   const per = useMemo(() => perShooterStats(shooters, matches, scores), [shooters, matches, scores]);
   const team = useMemo(() => teamAggregates(matches, scores), [matches, scores]);
   const nextMatch = useMemo(() => nextUpcomingMatch(matches, scores), [matches, scores]);
+
+  useEffect(() => {
+    if (!nextMatch) { setLineupCount(null); return; }
+    let cancelled = false;
+    SB.from('rifle_lineups').select('slot', { count: 'exact', head: true }).eq('match_id', nextMatch.id).then(({ count }) => {
+      if (!cancelled) setLineupCount(count || 0);
+    });
+    return () => { cancelled = true; };
+  }, [nextMatch]);
 
   if (loading) return <div style={{ fontFamily: mono, fontSize: 12, color: P.mute }}>Loading dashboard…</div>;
 

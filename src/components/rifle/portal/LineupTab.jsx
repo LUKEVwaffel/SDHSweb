@@ -3,7 +3,7 @@ import { supabase as SB } from '../../../lib/supabaseClient';
 import { P, mono, oswald } from '../theme';
 import { GhostBtn, PrimaryBtn } from './ui';
 import { downloadCsv } from './charts';
-import { perShooterStats, nextUpcomingMatch, round1 } from './rifleStats';
+import { perShooterStats, nextUpcomingMatch, round1, schoolYearOf } from './rifleStats';
 
 const label = { fontFamily: mono, fontSize: 9, color: P.gold, letterSpacing: '0.22em' };
 const SORTS = [
@@ -11,9 +11,9 @@ const SORTS = [
   ['prone', 'PRONE'], ['standing', 'STANDING'], ['kneeling', 'KNEELING'],
 ];
 
-export default function LineupTab({ onNavigate }) {
+export default function LineupTab({ season, onNavigate }) {
   const [shooters, setShooters] = useState([]);
-  const [matches, setMatches] = useState([]);
+  const [allMatches, setAllMatches] = useState([]);
   const [scores, setScores] = useState([]);
   const [lineups, setLineups] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -30,7 +30,7 @@ export default function LineupTab({ onNavigate }) {
       SB.from('rifle_lineups').select('*'),
     ]);
     setShooters(sh || []);
-    setMatches(m || []);
+    setAllMatches(m || []);
     setScores(sc || []);
     setLineups(lu || []);
     setLoading(false);
@@ -38,6 +38,7 @@ export default function LineupTab({ onNavigate }) {
 
   useEffect(() => { load(); }, [load]);
 
+  const matches = useMemo(() => allMatches.filter((m) => schoolYearOf(m) === season), [allMatches, season]);
   const per = useMemo(() => perShooterStats(shooters, matches, scores), [shooters, matches, scores]);
   const nextMatch = useMemo(() => nextUpcomingMatch(matches, scores), [matches, scores]);
 
