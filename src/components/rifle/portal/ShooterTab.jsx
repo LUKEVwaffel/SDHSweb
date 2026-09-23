@@ -3,7 +3,17 @@ import { supabase as SB } from '../../../lib/supabaseClient';
 import { P, mono, oswald } from '../theme';
 import { Badge } from './ui';
 import { TrendChart, Sparkline } from './charts';
-import { perShooterStats, teamAggregates, num, round1, initials, badgeFor, schoolYearOf } from './rifleStats';
+import { perShooterStats, teamAggregates, num, round1, initials, badgeFor, schoolYearOf, previousSchoolYear } from './rifleStats';
+
+const COMPARE_FIELDS = [
+  { k: 'avg', l: 'SEASON AVG' },
+  { k: 'pr', l: 'PERSONAL RECORD' },
+  { k: 'last3', l: 'LAST 3 AVG' },
+  { k: 'prone', l: 'PRONE AVG' },
+  { k: 'standing', l: 'STANDING AVG' },
+  { k: 'kneeling', l: 'KNEELING AVG' },
+  { k: 'n', l: 'MATCHES', neutral: true },
+];
 
 const label = { fontFamily: mono, fontSize: 9, color: P.gold, letterSpacing: '0.22em' };
 const POS = [
@@ -42,6 +52,10 @@ export default function ShooterTab({ season, initialProfileId, onNavigate }) {
   const per = useMemo(() => perShooterStats(shooters, matches, scores), [shooters, matches, scores]);
   const team = useMemo(() => teamAggregates(matches, scores), [matches, scores]);
 
+  const prevSeason = useMemo(() => previousSchoolYear(season), [season]);
+  const prevMatches = useMemo(() => allMatches.filter((m) => schoolYearOf(m) === prevSeason), [allMatches, prevSeason]);
+  const prevPer = useMemo(() => perShooterStats(shooters, prevMatches, scores), [shooters, prevMatches, scores]);
+
   const rosterRows = useMemo(() => {
     const q = rosterSearch.trim().toLowerCase();
     return shooters
@@ -54,6 +68,7 @@ export default function ShooterTab({ season, initialProfileId, onNavigate }) {
 
   const shooter = shooters.find((s) => s.id === profileId);
   const st = profileId ? per.get(profileId) : null;
+  const prevSt = profileId ? prevPer.get(profileId) : null;
 
   if (!shooter) {
     return <div style={{ fontFamily: mono, fontSize: 12, color: P.mute }}>No shooters on the roster yet — add one from the Roster tab.</div>;
@@ -126,6 +141,36 @@ export default function ShooterTab({ season, initialProfileId, onNavigate }) {
               <div style={{ fontFamily: oswald, fontSize: 28, fontWeight: 500, color: k.c || P.cream, marginTop: 6 }}>{k.v}</div>
             </div>
           ))}
+        </div>
+
+        <div style={{ background: P.navy, border: `1px solid ${P.hair}`, padding: '18px 20px' }}>
+          <div style={{ ...label, marginBottom: 14 }}>// {season} VS {prevSeason || 'PRIOR SEASON'}</div>
+          {!prevSt?.n ? (
+            <div style={{ fontFamily: mono, fontSize: 12, color: P.mute }}>
+              No recorded matches in {prevSeason || 'the prior season'} to compare against.
+            </div>
+          ) : (
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(130px,1fr))', gap: 16 }}>
+              {COMPARE_FIELDS.map((f) => {
+                const now = st.n ? st[f.k] : null;
+                const prev = prevSt[f.k];
+                const delta = now != null ? now - prev : null;
+                const deltaColor = f.neutral || delta == null ? P.faint : delta >= 0 ? P.win : P.red;
+                return (
+                  <div key={f.k}>
+                    <div style={{ fontFamily: mono, fontSize: 9, color: P.gold, letterSpacing: '0.14em', marginBottom: 6 }}>{f.l}</div>
+                    <div style={{ display: 'flex', alignItems: 'baseline', gap: 8 }}>
+                      <div style={{ fontFamily: oswald, fontSize: 26, color: P.cream, lineHeight: 1 }}>{now != null ? round1(now) : '—'}</div>
+                      {delta != null && !f.neutral && (
+                        <div style={{ fontFamily: mono, fontSize: 11, color: deltaColor }}>{delta >= 0 ? '+' : ''}{round1(delta)}</div>
+                      )}
+                    </div>
+                    <div style={{ fontFamily: mono, fontSize: 10, color: P.faint, marginTop: 3 }}>{prevSeason}: {round1(prev)}</div>
+                  </div>
+                );
+              })}
+            </div>
+          )}
         </div>
 
         <div style={{ background: P.navy, border: `1px solid ${P.hair}`, padding: '18px 20px 12px' }}>

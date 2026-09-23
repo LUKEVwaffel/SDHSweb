@@ -57,6 +57,15 @@ export function currentSchoolYear(now = new Date()) {
   return `${startYear}-${startYear + 1}`;
 }
 
+// "2026-2027" -> "2025-2026" — the season immediately before a given one,
+// for the Shooter Profile's this-season-vs-last comparison.
+export function previousSchoolYear(season) {
+  const m = String(season || '').match(/^(\d{4})-\d{4}$/);
+  if (!m) return null;
+  const startYear = Number(m[1]) - 1;
+  return `${startYear}-${startYear + 1}`;
+}
+
 export function num(v) {
   return v === '' || v == null || Number.isNaN(+v) ? 0 : +v;
 }
