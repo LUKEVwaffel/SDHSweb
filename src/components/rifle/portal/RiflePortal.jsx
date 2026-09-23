@@ -161,6 +161,7 @@ export default function RiflePortal() {
     background: P.ink, minHeight: '100vh', fontFamily: 'Inter, sans-serif',
     backgroundImage: 'linear-gradient(rgba(201,169,97,0.035) 1px,transparent 1px),linear-gradient(90deg,rgba(201,169,97,0.035) 1px,transparent 1px)',
     backgroundSize: '48px 48px',
+    display: 'flex', flexDirection: 'column',
   };
 
   if (phase === 'checking') {
@@ -265,7 +266,11 @@ export default function RiflePortal() {
         </div>
       </div>
 
-      <div style={{ maxWidth: 1600, margin: '0 auto', padding: '26px 24px 100px' }}>
+      <div style={{
+        maxWidth: 1600, width: '100%', margin: '0 auto', boxSizing: 'border-box',
+        padding: tab === 'askai' ? '26px 24px 24px' : '26px 24px 100px',
+        flex: 1, minHeight: 0, display: 'flex', flexDirection: 'column',
+      }}>
         {tab === 'dashboard' && <DashboardTab season={season} onNavigate={goTab} />}
         {tab === 'scores' && <ScoresTab season={season} initialMatchId={tabExtra?.matchId} canUpload={RIFLE_UPLOAD_ALLOWLIST.includes((admin.email || '').toLowerCase())} />}
         {tab === 'shooters' && <ShooterTab season={season} initialProfileId={tabExtra?.profileId} onNavigate={goTab} />}

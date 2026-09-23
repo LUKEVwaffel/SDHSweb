@@ -181,7 +181,7 @@ export default function AskAiTab() {
   }
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', height: 'calc(100vh - 320px)', minHeight: 420 }}>
+    <div style={{ display: 'flex', flexDirection: 'column', flex: 1, minHeight: 420 }}>
       <SectionLabel tag="// ASK AI · SCORES Q&amp;A" title="Ask AI" sub="Ask about averages, trends, or comparisons across any season on record. Answers are computed from the actual score data, not guessed." />
 
       <div style={{ display: 'flex', flexDirection: 'column', flex: 1, minHeight: 0, border: `1px solid ${P.hair}`, background: 'rgba(6,16,31,0.55)', borderRadius: 12, overflow: 'hidden' }}>
