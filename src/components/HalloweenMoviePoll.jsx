@@ -5,7 +5,7 @@ import posthog from '../lib/posthog';
 
 // Public, no-login, one-question poll: what movie should we watch at the
 // Halloween Bash? Self-contained route (own chrome, no TopNav/Footer — same
-// bypass as /survey and /feedback) reached at /halloweenmovie. Rating is
+// bypass as /survey and /feedback) reached at /halloween. Rating is
 // restricted to PG / PG-13 via a required dropdown — no other options exist,
 // so the constraint is enforced at submission. One suggestion per device via
 // device_fp; storage in public.halloween_movie_suggestions

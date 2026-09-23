@@ -5,7 +5,7 @@
 -- Replaces the old yes/no "do you want a bash" poll + idea-comments tables
 -- below with a single question: movie suggestions for the bash. Rating is
 -- restricted to PG / PG-13 at submission (src/components/HalloweenMoviePoll.jsx,
--- route /halloweenmovie) via a required dropdown and a DB check constraint.
+-- route /halloween) via a required dropdown and a DB check constraint.
 --
 -- Anonymous — no name captured, so public SELECT is safe (movie + rating +
 -- timestamp only) and the page can show the running suggestion list.

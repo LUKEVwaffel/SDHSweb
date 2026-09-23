@@ -3,7 +3,7 @@ import { supabase as SB } from '../../../lib/supabaseClient';
 import { P, mono, inter, fs, sp } from '../theme';
 import { Btn, PanelHeader, EmptyState } from '../shared/ui';
 
-// Results for the public /halloweenmovie poll (supabase/halloween_poll.sql).
+// Results for the public /halloween poll (supabase/halloween_poll.sql).
 // Suggestions are anonymous and publicly readable (movie + rating +
 // timestamp only), so this panel is read + delete only.
 
@@ -42,7 +42,7 @@ export default function HalloweenMoviePollPanel() {
       {loading ? (
         <div style={{ fontFamily: mono, fontSize: fs.xs, color: P.mute, textAlign: 'center', marginTop: sp[8] }}>LOADING…</div>
       ) : suggestions.length === 0 ? (
-        <EmptyState icon="🎬" title="NO SUGGESTIONS YET" hint="Suggestions from the /halloweenmovie page appear here." />
+        <EmptyState icon="🎬" title="NO SUGGESTIONS YET" hint="Suggestions from the /halloween page appear here." />
       ) : (
         <div style={{ display: 'flex', flexDirection: 'column', gap: sp[3] }}>
           {suggestions.map((r) => (

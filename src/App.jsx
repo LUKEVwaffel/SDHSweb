@@ -141,7 +141,7 @@ export default function App() {
   // "Picture of the Comp" vote taken down 2026-09-08 — restore CompPhotoVote to bring it back.
   // if (location.pathname === '/vote') return <CompPhotoVote />;
   if (location.pathname === '/survey') return <OpticSurvey />;
-  if (location.pathname === '/halloweenmovie') return <HalloweenMoviePoll />;
+  if (location.pathname === '/halloween') return <HalloweenMoviePoll />;
   if (location.pathname.startsWith('/ball/guest/')) return <BallGuestVerify />;
   if (location.pathname === '/ball/ops' || location.pathname.startsWith('/ball/ops/')) return <BallOpsPortal />;
   if (location.pathname === '/ball/dress' || location.pathname.startsWith('/ball/dress/')) return <BallDressPortal />;
