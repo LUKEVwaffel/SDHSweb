@@ -24,8 +24,17 @@ const WATCHING_LOCATION = 'East Hamilton, TN · Sep 19, 2026';
 const WATCHING_EVENT = 'Hurricane Hill · Obstacle Course';
 const WATCHING_TEAM = 'Trojan Battalion Raider Team — Male Squad';
 
-const TROPHY_MS = 16000;      // trophy case dwell time
+const TROPHY_MS = 26000;      // trophy case dwell time
+const TITLE_CARD_MS = 7000;   // "coaching corner" intermission dwell time
 const VIDEO_FALLBACK_MS = 20000; // advance anyway if a clip never fires 'ended' (stalled load)
+
+// Playback order: part 1 → intermission title card → part 2 → trophy case → repeat.
+const STEPS = [
+  { kind: 'video', clip: OC_CLIPS[0] },
+  { kind: 'title' },
+  { kind: 'video', clip: OC_CLIPS[1] },
+  { kind: 'trophy' },
+];
 
 const placeRank = (p) => {
   const n = parseInt(p, 10);
@@ -54,15 +63,16 @@ function medalFor(place) {
 }
 
 export default function VideoTv() {
-  // step: 0 = clip 1, 1 = clip 2, 2 = trophy case
   const [step, setStep] = useState(0);
   const videoRef = useRef(null);
   const fallbackRef = useRef(null);
 
-  const advance = () => setStep((s) => (s + 1) % (OC_CLIPS.length + 1));
+  const advance = () => setStep((s) => (s + 1) % STEPS.length);
 
-  const isVideoStep = step < OC_CLIPS.length;
-  const clip = isVideoStep ? OC_CLIPS[step] : null;
+  const current = STEPS[step];
+  const isVideoStep = current.kind === 'video';
+  const isTitleStep = current.kind === 'title';
+  const clip = current.clip ?? null;
 
   useEffect(() => {
     if (!isVideoStep) return undefined;
@@ -79,7 +89,7 @@ export default function VideoTv() {
 
   useEffect(() => {
     if (isVideoStep) return undefined;
-    const id = setTimeout(advance, TROPHY_MS);
+    const id = setTimeout(advance, isTitleStep ? TITLE_CARD_MS : TROPHY_MS);
     return () => clearTimeout(id);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [step]);
@@ -98,8 +108,12 @@ export default function VideoTv() {
       {/* top bar — all overlay text lives here, never drawn over the picture itself */}
       <div style={topBar}>
         <div>
-          <div style={infoKicker}>{isVideoStep ? 'NOW WATCHING' : 'SEASON RECORD'}</div>
-          <div style={infoTitle}>{isVideoStep ? clip.title : SEASON.label}</div>
+          <div style={infoKicker}>
+            {isVideoStep ? 'NOW WATCHING' : isTitleStep ? 'COACHING CORNER' : 'SEASON RECORD'}
+          </div>
+          <div style={infoTitle}>
+            {isVideoStep ? clip.title : isTitleStep ? 'Up Next: Part 2' : SEASON.label}
+          </div>
         </div>
         <div style={topBarMeta}>
           {isVideoStep ? (
@@ -108,6 +122,8 @@ export default function VideoTv() {
               <div style={infoRow}>{WATCHING_LABEL} · {WATCHING_LOCATION}</div>
               <div style={infoTeam}>{WATCHING_TEAM}</div>
             </>
+          ) : isTitleStep ? (
+            <div style={infoTeam}>A WORD FROM WILL BAKER</div>
           ) : (
             <div style={infoTeam}>{totalTrophies} podium finishes across {meetsWithTrophies.length} meets</div>
           )}
@@ -126,6 +142,17 @@ export default function VideoTv() {
             onEnded={advance}
             style={videoEl}
           />
+        ) : isTitleStep ? (
+          <div style={titleCardWrap}>
+            <div style={titleCardRule} />
+            <div style={titleCardKicker}>◆ TONIGHT'S TUTORIAL ◆</div>
+            <div style={titleCardHeadline}>
+              How to Get Up an<br />8&nbsp;Foot Wall
+              <br /><span style={titleCardWrong}>(The Wrong Way)</span>
+            </div>
+            <div style={titleCardByline}>— with Will Baker —</div>
+            <div style={titleCardRule} />
+          </div>
         ) : (
           <div style={trophyGrid}>
             {meetsWithTrophies.map(({ meet, trophies }) => (
@@ -154,8 +181,8 @@ export default function VideoTv() {
       {/* bottom bar — progress only, same solid-black treatment as the top */}
       <div style={bottomBar}>
         <div style={ticks}>
-          {[...OC_CLIPS, { id: 'trophies' }].map((c, i) => (
-            <div key={c.id} style={{ ...tick, ...(i === step ? tickActive : i < step ? tickDone : null) }} />
+          {STEPS.map((s, i) => (
+            <div key={i} style={{ ...tick, ...(i === step ? tickActive : i < step ? tickDone : null) }} />
           ))}
         </div>
       </div>
@@ -201,6 +228,25 @@ const ticks = { display: 'flex', gap: 10 };
 const tick = { width: 34, height: 3, background: P.hair };
 const tickActive = { background: P.gold };
 const tickDone = { background: P.hairStrong };
+
+const titleCardWrap = {
+  display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
+  gap: 'clamp(14px,2.2vh,28px)', padding: '4vh 6vw', textAlign: 'center',
+};
+const titleCardRule = { width: 'clamp(80px,10vw,160px)', height: 1, background: P.hairStrong };
+const titleCardKicker = {
+  fontFamily: mono, fontSize: 'clamp(11px,1.1vw,15px)', color: P.gold,
+  letterSpacing: '0.4em', textTransform: 'uppercase',
+};
+const titleCardHeadline = {
+  fontFamily: fraunces, fontStyle: 'italic', fontWeight: 700, color: P.cream,
+  fontSize: 'clamp(30px,5.2vw,80px)', lineHeight: 1.08, margin: 0,
+};
+const titleCardWrong = { color: P.gold };
+const titleCardByline = {
+  fontFamily: oswald, fontSize: 'clamp(13px,1.3vw,19px)', color: P.mute,
+  letterSpacing: '0.14em', textTransform: 'uppercase',
+};
 
 const trophyGrid = {
   width: '100%', height: '100%', overflow: 'auto', boxSizing: 'border-box',
