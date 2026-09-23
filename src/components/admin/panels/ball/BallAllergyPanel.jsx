@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback, useMemo } from 'react';
 import { supabase as SB } from '../../../../lib/supabaseClient';
 import { P, mono, sp, fs } from '../../theme';
 import { Btn, Input, Label, PanelHeader } from '../../shared/ui';
+import { openBallAllergyFollowUpPdf } from '../../../../lib/ballAllergyFollowUpPdf';
 
 // S-5 food-logistics surface. Cadets who flagged a food allergy on their
 // Military Ball signup. No allergy details are stored. S-5 contacts the cadet
@@ -210,12 +211,13 @@ function Row({ row, open, onToggle, onDone }) {
           )}
 
           <div style={{ marginTop: sp[4], display: 'flex', alignItems: 'center', gap: sp[3], flexWrap: 'wrap' }}>
+            <Btn variant="ghost" size="sm" onClick={() => openBallAllergyFollowUpPdf(row)}>PRINT FOLLOW-UP FORM</Btn>
             {!contacted && <Btn variant="ghost" size="sm" disabled={busy} onClick={markContacted}>MARK CONTACTED</Btn>}
             {contacted && <Btn variant="ghost" size="sm" disabled={busy} onClick={markContacted}>RE-STAMP CONTACTED</Btn>}
             {flash && <span style={{ fontFamily: mono, fontSize: 12, color: P.mute }}>{flash}</span>}
           </div>
           <div style={{ fontFamily: mono, fontSize: 11, color: P.mute, marginTop: sp[2] }}>
-            Call, text, email, or reach them in person — then hit “Mark contacted”.
+            Call, text, email, hand them the printed form, or reach them in person — then hit “Mark contacted”.
           </div>
         </div>
       )}

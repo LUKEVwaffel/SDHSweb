@@ -18,6 +18,8 @@ create function public.ball_allergy_list()
 returns table (
   id                   uuid,
   cadet_name           text,
+  cadet_let_level      text,
+  cadet_company        text,
   cadet_phone          text,
   cadet_allergy_email  text,
   submitted_at         timestamptz,
@@ -25,8 +27,8 @@ returns table (
   allergy_contacted_at timestamptz
 )
 language sql stable security definer set search_path = public as $$
-  select s.id, s.cadet_name, s.cadet_phone, s.cadet_allergy_email, s.created_at,
-         s.allergy_status, s.allergy_contacted_at
+  select s.id, s.cadet_name, s.cadet_let_level, s.cadet_company, s.cadet_phone, s.cadet_allergy_email,
+         s.created_at, s.allergy_status, s.allergy_contacted_at
   from public.ball_signups s
   where s.cadet_has_allergy
     and (public.is_s5() or public.is_s6())
