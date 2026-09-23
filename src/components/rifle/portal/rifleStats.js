@@ -23,6 +23,12 @@ export function seasonOf(match) {
 // to the SAME season as one dated 2026-08-01. A bare year regex (seasonOf,
 // above — kept for the places that just want a label) would wrongly split
 // a season's second half into the next calendar year's bucket.
+//
+// Real rifle_matches.dates isn't ISO — it's a week range like
+// "1/26–2/1, 2026" (M/D–M/D, YYYY). Only falls back to "assume fall" when
+// no month can be found at all, which used to silently miscategorize every
+// Jan-Jun match (no explicit month match => defaulted to September) into
+// the WRONG season, one year too late.
 export function schoolYearOf(match) {
   const raw = match?.dates || '';
   const iso = raw.match(/\b(20\d{2})-(\d{2})-\d{2}\b/);
@@ -35,7 +41,8 @@ export function schoolYearOf(match) {
     const y = raw.match(/\b(20\d{2})\b/);
     if (!y) return 'Undated';
     year = Number(y[1]);
-    month = 9; // only a bare year on record — assume fall (start of season)
+    const md = raw.match(/\b(\d{1,2})\s*\/\s*\d{1,2}\b/); // leading "M/D" of a range like "1/26–2/1, 2026"
+    month = md ? Number(md[1]) : 9; // no month found anywhere — last-resort assume fall
   }
   const startYear = month >= 7 ? year : year - 1;
   return `${startYear}-${startYear + 1}`;
