@@ -82,6 +82,13 @@ export default function BallAttirePortal() {
     setPhase('login');
   }
 
+  // "Your attire is approved" email. Fire-and-forget — a failed email must
+  // not block or undo the approval itself.
+  function notifyApproved(ids) {
+    if (!ids.length) return;
+    SB.functions.invoke('notify-ball-dress-approved', { body: { kind: 'guest', ids } }).catch(() => {});
+  }
+
   async function toggle(row) {
     setBusyId(row.id);
     setActionError('');
@@ -106,6 +113,7 @@ export default function BallAttirePortal() {
         }));
         return;
       }
+      if (approving) notifyApproved([row.id]);
       await loadAll();
     } catch (e) {
       setActionError(reportError(ERROR_CODES.BALL_ATTIRE_TOGGLE_EXCEPTION, 'ball_attire', `Could not update ${row.guest_name}: ${e?.message || 'connection lost mid-request'}. Try again.`, {
@@ -144,6 +152,7 @@ export default function BallAttirePortal() {
         }));
         return;
       }
+      if (count) notifyApproved(ids);
       // No error AND fewer rows changed than requested means RLS/the
       // column-guard silently filtered some or all of the writes.
       const shortfall = ids.length - (count || 0);

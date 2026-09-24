@@ -13,7 +13,7 @@ import { ballEmailShell } from "../_shared/ballEmail.ts";
 import { loadBallTemplate, pick, paras } from "../_shared/ballTemplate.ts";
 import type { BallTemplate } from "../_shared/ballTemplate.ts";
 
-const KEYS = ["registration_received", "guest_invitation", "guest_verified", "signup_update", "allergy_flag"];
+const KEYS = ["registration_received", "guest_invitation", "guest_verified", "signup_update", "dress_approved", "allergy_flag"];
 
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return preflight();
@@ -140,6 +140,21 @@ function build(key: string, t: BallTemplate | null, origin: string): { subject: 
         preheader: vars.what,
         heading: pick(t, "heading", "Signup Update", vars),
         introHtml: paras(pick(t, "intro_html", "{{what}} for {{cadet_name}}.", vars)),
+        noticeHtml: pick(t, "notice_html", "", vars) || undefined,
+        closingHtml: (() => { const c = pick(t, "closing_html", "", vars); return c ? paras(c) : undefined; })(),
+        siteUrl: site,
+      }),
+    };
+  }
+
+  if (key === "dress_approved") {
+    const vars: Record<string, string> = { name: "Jordan Blake" };
+    return {
+      subject: pick(t, "subject", "Military Ball: attire approved", vars),
+      html: ballEmailShell({
+        preheader: "Your Military Ball attire has been approved.",
+        heading: pick(t, "heading", "Attire Approved", vars),
+        introHtml: paras(pick(t, "intro_html", "{{name}},\n\nYour attire for the Trojan Battalion Military Ball has been reviewed and approved. No further action is needed on attire.", vars)),
         noticeHtml: pick(t, "notice_html", "", vars) || undefined,
         closingHtml: (() => { const c = pick(t, "closing_html", "", vars); return c ? paras(c) : undefined; })(),
         siteUrl: site,
