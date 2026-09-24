@@ -41,7 +41,7 @@ create policy ball_email_templates_s6_all on public.ball_email_templates
 
 grant select, update on public.ball_email_templates to authenticated;
 
--- ── seed / refresh the 5 rows (label/description/placeholders always refreshed;
+-- ── seed / refresh the 7 rows (label/description/placeholders always refreshed;
 --    the editable prose is only seeded on first insert so a re-run never
 --    clobbers S-6's edits) ────────────────────────────────────────────────────
 insert into public.ball_email_templates
@@ -92,6 +92,19 @@ Your registration for the Trojan Battalion Military Ball has been received and r
     'Military Ball signup update',
     'Signup Update',
     '{{what}} for {{cadet_name}}.',
+    '',
+    ''
+  ),
+  (
+    'dress_approved',
+    'Attire approved (attendee)',
+    'Sent to the attendee when an attire approver marks their dress / attire approved in the /ball/dress or /ball/attire portal. Goes to the cadet''s notification email, or the guest / VIP / VIP date''s personal email.',
+    '{{name}}',
+    'Military Ball: attire approved',
+    'Attire Approved',
+    '{{name}},
+
+Your attire for the Trojan Battalion Military Ball has been reviewed and approved. No further action is needed on attire.',
     '',
     ''
   ),

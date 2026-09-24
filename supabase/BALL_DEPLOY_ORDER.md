@@ -54,6 +54,7 @@ supabase functions deploy ball-dress-set-pin
 # attire login). Left on disk for rollback; no need to redeploy it.
 supabase functions deploy notify-ball-allergy      --no-verify-jwt
 supabase functions deploy notify-ball-status-update
+supabase functions deploy notify-ball-dress-approved
 supabase functions deploy send-allergy-email
 supabase functions deploy admin-set-reviewer-pin
 supabase functions deploy admin-clear-reviewer-pin

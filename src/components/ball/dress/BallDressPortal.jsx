@@ -129,6 +129,13 @@ export default function BallDressPortal() {
     cadet: 'ball_signups', guest: 'ball_guests', vip: 'ball_vip_signups', vipdate: 'ball_vip_dates',
   };
 
+  // "Your attire is approved" email. Fire-and-forget — a failed email must
+  // not block or undo the approval itself.
+  function notifyApproved(kind, ids) {
+    if (!ids.length) return;
+    SB.functions.invoke('notify-ball-dress-approved', { body: { kind, ids } }).catch(() => {});
+  }
+
   async function toggle(item) {
     if (item.kind === 'guest' && !item.verified_at) {
       setActionError(`${item.name} hasn't verified their email yet — they can't be approved until they do.`);
@@ -163,6 +170,7 @@ export default function BallDressPortal() {
         }));
         return;
       }
+      if (approving) notifyApproved(item.kind, [item.id]);
       await loadAll();
     } catch (e) {
       // A dropped connection mid-request throws instead of resolving with
@@ -212,6 +220,9 @@ export default function BallDressPortal() {
       const results = await Promise.all(requests.map(({ table, ids }) =>
         ids.length ? withTimeout(SB.from(table).update({ dress_approved: true, dress_approved_by: session.user.email }, { count: 'exact' }).in('id', ids)) : null
       ));
+      // Notify each kind whose update went through (the function re-checks
+      // dress_approved server-side, so a partially-filtered batch is safe).
+      results.forEach((r, i) => { if (r && !r.error && r.count) notifyApproved(requests[i].kind, requests[i].ids); });
       const failed = results.find((r) => r?.error);
       if (failed) {
         setActionError(reportError(ERROR_CODES.BALL_DRESS_BULK_FAILED, 'ball_dress', `Could not approve all: ${failed.error.message}`, {
