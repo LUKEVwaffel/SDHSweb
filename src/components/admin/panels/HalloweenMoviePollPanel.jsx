@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback } from 'react';
 import { supabase as SB } from '../../../lib/supabaseClient';
 import { P, mono, inter, fs, sp } from '../theme';
 import { Btn, PanelHeader, EmptyState } from '../shared/ui';
+import { openHalloweenMoviesPrint } from '../../../lib/halloweenMoviesPrint';
 
 // Results for the public /halloween poll (supabase/halloween_poll.sql).
 // Suggestions are anonymous and publicly readable (movie + rating +
@@ -36,7 +37,12 @@ export default function HalloweenMoviePollPanel() {
       <PanelHeader
         title="HALLOWEEN MOVIE POLL"
         sub={`${suggestions.length} suggestion${suggestions.length === 1 ? '' : 's'}`}
-        action={<Btn onClick={load} variant="ghost" size="sm">REFRESH</Btn>}
+        action={
+          <div style={{ display: 'flex', gap: sp[2] }}>
+            <Btn onClick={() => openHalloweenMoviesPrint(suggestions)} variant="ghost" size="sm" disabled={loading}>PRINT</Btn>
+            <Btn onClick={load} variant="ghost" size="sm">REFRESH</Btn>
+          </div>
+        }
       />
 
       {loading ? (
