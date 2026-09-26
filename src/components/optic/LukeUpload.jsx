@@ -27,7 +27,7 @@ let uid = 0;
 const nextId = () => `f${Date.now()}_${uid++}`;
 
 function LukeUpload() {
-  const { eventId } = useOpticConfig();
+  const { eventId, eventTitle } = useOpticConfig();
   const { subEvents } = useOpticSubEvents({ eventId });
   const [stationId, setStationId] = useState(null); // null = tag later
   const [publishNow, setPublishNow] = useState(false);
@@ -120,7 +120,7 @@ function LukeUpload() {
           SD CARD DUMP
         </h1>
         <div style={{ fontFamily: inter, fontSize: 13, color: P.mute }}>
-          {OPTIC_EVENT_TITLE}. Pick a station below, then drop the whole batch.
+          {eventTitle || OPTIC_EVENT_TITLE}. Pick a station below, then drop the whole batch.
         </div>
 
         {!eventId && (

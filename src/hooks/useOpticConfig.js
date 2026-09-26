@@ -15,6 +15,7 @@ const CONFIG_ID = 'default';
  */
 export function useOpticConfig() {
   const [row, setRow] = useState(null);
+  const [eventTitle, setEventTitle] = useState(null);
   const [loading, setLoading] = useState(true);
   const aliveRef = useRef(true);
 
@@ -26,6 +27,15 @@ export function useOpticConfig() {
         .from('optic_config').select('*').eq('id', CONFIG_ID).maybeSingle();
       if (!aliveRef.current) return;
       setRow(!error && data ? data : null);
+      // Title for headers (/lukepwa, /lukeupload) so they follow the switch
+      // instead of a hardcoded comp name.
+      let title = null;
+      if (data?.active_event_id) {
+        const ev = await SB.from('events').select('title').eq('id', data.active_event_id).maybeSingle();
+        title = ev.data?.title || null;
+      }
+      if (!aliveRef.current) return;
+      setEventTitle(title);
       setLoading(false);
     };
     load();
@@ -43,6 +53,7 @@ export function useOpticConfig() {
 
   return {
     eventId: row?.active_event_id || null,
+    eventTitle,
     cameraOffsetSeconds: row?.camera_offset_seconds ?? 0,
     loading,
   };
