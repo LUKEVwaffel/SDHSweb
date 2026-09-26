@@ -10,9 +10,8 @@ move.
 1. **Create the bucket.** Cloudflare dashboard → R2 → *Create bucket* → name it
    `optic-photos`. (First time using R2 asks you to enable it; the free tier is
    10 GB stored and free egress.)
-2. **Fill in `wrangler.toml`.** Set `SUPABASE_URL` and `SUPABASE_ANON_KEY` to
-   the same values as `VITE_SUPABASE_URL` / `VITE_SUPABASE_ANON_KEY` in the
-   site's `.env`. (Only used to check a DISPATCH login before a delete.)
+2. **`wrangler.toml`** already has the project URL and anon key filled in
+   (only used to check a DISPATCH login before a delete).
 3. **Deploy the Worker.**
    ```sh
    cd workers/optic-r2
@@ -69,12 +68,12 @@ photos come back as "Bad key".
    R2_SECRET_ACCESS_KEY=...
    VITE_OPTIC_R2_URL=https://optic-photos.sdhs-battalion.workers.dev
    ```
-   `.env` needs `VITE_SUPABASE_URL`.
+   plus `VITE_SUPABASE_URL=https://bjgyvmdzcymruunzavni.supabase.co`.
 3. Dry run, then the real thing:
    ```sh
    npm install
-   node --env-file=.env --env-file=.env.local scripts/migrate-photos-to-r2.mjs --dry-run
-   node --env-file=.env --env-file=.env.local scripts/migrate-photos-to-r2.mjs
+   node --env-file=.env.local scripts/migrate-photos-to-r2.mjs --dry-run
+   node --env-file=.env.local scripts/migrate-photos-to-r2.mjs
    ```
    `--event <uuid>` limits it to one comp. `--limit 5` is a good first real run.
 
