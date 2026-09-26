@@ -15,6 +15,13 @@ export function PhotoViewer({ photos, id, onId, onClose, actions, onBlurred, gro
   const photo = photos[idx];
   const [editing, setEditing] = useState(false);
   const touch = useRef(null);
+  // Full-res URLs that have finished downloading + decoding. Until the open
+  // photo's is in here, the viewer shows the small grid image the tile
+  // already has cached, so opening a photo or swiping never shows a blank.
+  const [ready, setReady] = useState(() => new Set());
+  const markReady = useCallback((url) => {
+    setReady((s) => (s.has(url) ? s : new Set(s).add(url)));
+  }, []);
 
   // The photo we were on got deleted: follow to its neighbour, or close.
   useEffect(() => {
@@ -47,12 +54,23 @@ export function PhotoViewer({ photos, id, onId, onClose, actions, onBlurred, gro
     return () => { document.body.style.overflow = prev; };
   }, []);
 
-  // Warm the neighbours so swiping doesn't flash.
+  // Load (and decode off the main thread) the open photo first, then its
+  // neighbours, so a swipe lands on an already-sharp image.
+  const openUrl = photo?.photo_url;
+  const nextUrl = photos[idx + 1]?.photo_url;
+  const prevUrl = photos[idx - 1]?.photo_url;
   useEffect(() => {
-    for (const n of [photos[idx + 1], photos[idx - 1]]) {
-      if (n) { const i = new Image(); i.src = n.photo_url; }
-    }
-  }, [idx, photos]);
+    let dead = false;
+    const warm = (url) => {
+      if (!url) return Promise.resolve();
+      const i = new Image();
+      i.decoding = 'async';
+      i.src = url;
+      return i.decode().then(() => { if (!dead) markReady(url); }).catch(() => {});
+    };
+    warm(openUrl).then(() => { if (!dead) { warm(nextUrl); warm(prevUrl); } });
+    return () => { dead = true; };
+  }, [openUrl, nextUrl, prevUrl, markReady]);
 
   if (!photo) return null;
 
@@ -108,7 +126,14 @@ export function PhotoViewer({ photos, id, onId, onClose, actions, onBlurred, gro
           else if (dy > SWIPE_PX * 2 && Math.abs(dy) > Math.abs(dx) * 1.4) onClose();
         }}
       >
-        <img key={photo.id} className="lp-view-img" src={photo.photo_url} alt="" draggable={false} />
+        <img
+          key={photo.id}
+          className="lp-view-img"
+          src={ready.has(photo.photo_url) ? photo.photo_url : (photo.grid_url || photo.thumb_url || photo.photo_url)}
+          data-full={ready.has(photo.photo_url)}
+          alt=""
+          draggable={false}
+        />
         {idx > 0 && (
           <button className="lp-view-nav" data-dir="prev" onClick={() => go(-1)} aria-label="Previous photo">‹</button>
         )}

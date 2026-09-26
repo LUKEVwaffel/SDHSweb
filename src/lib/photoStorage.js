@@ -17,6 +17,14 @@ export const r2Enabled = !!R2_BASE;
 
 const isR2Url = (url) => !!R2_BASE && typeof url === 'string' && url.startsWith(`${R2_BASE}/`);
 
+/** Storage key of a photo's small grid thumbnail: `<base>_s.jpg`. */
+export const gridPathFor = (storagePath) => storagePath.replace(/\.jpg$/i, '_s.jpg');
+
+/** Public URL `path` has (or would have) on the backend putPhotoFile writes to. */
+export function publicUrlFor(path) {
+  return r2Enabled ? `${R2_BASE}/${path}` : SB.storage.from(BUCKET).getPublicUrl(path).data.publicUrl;
+}
+
 /** Upload one JPEG blob at `path` and return its public URL. */
 export async function putPhotoFile(path, blob) {
   if (!r2Enabled) {
@@ -49,6 +57,9 @@ export async function removePhotoFiles(photos) {
     if (!p?.storage_path) continue;
     const pair = [p.storage_path, p.storage_path.replace(/\.jpg$/i, '_t.jpg')];
     (isR2Url(p.photo_url) ? r2Paths : sbPaths).push(...pair);
+    // The grid thumb can live on a different backend than the photo (it may
+    // have been backfilled to R2 for a photo still on Supabase).
+    if (p.grid_url) (isR2Url(p.grid_url) ? r2Paths : sbPaths).push(gridPathFor(p.storage_path));
   }
   if (sbPaths.length) await SB.storage.from(BUCKET).remove(sbPaths);
   if (!r2Paths.length) return;

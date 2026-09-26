@@ -26,22 +26,35 @@ const statusText = { fontFamily: mono, fontSize: 10, letterSpacing: '0.3em', col
  *
  * @param {string} label   short surface name shown on the sign-in card
  * @param {React.ReactNode} children  rendered once authorized; receives no props
+ * @param {boolean} [remember]  render straight away on a device whose signed-in
+ *        email already passed the role check here before, and re-check in the
+ *        background (a revoked role still flips to ACCESS NOT AUTHORIZED).
+ *        Saves a network round trip before the first photo can even start
+ *        loading. This is only about what the screen shows first: every row
+ *        is still guarded by RLS on the server.
  */
-export default function AdminGate({ label, children }) {
+const OK_KEY = 'optic_admin_gate_ok';
+const readOk = () => { try { return localStorage.getItem(OK_KEY); } catch { return null; } };
+const writeOk = (v) => { try { if (v) localStorage.setItem(OK_KEY, v); else localStorage.removeItem(OK_KEY); } catch { /* private mode */ } };
+
+export default function AdminGate({ label, children, remember = false }) {
   const [session, setSession] = useState(null);
   const [phase, setPhase] = useState('loading'); // loading | anon | checking | ok | denied
+  const [trusted, setTrusted] = useState(false); // showing children while the check runs
 
   useEffect(() => {
     SB.auth.getSession().then(({ data }) => {
       setSession(data.session);
       setPhase(data.session ? 'checking' : 'anon');
+      setTrusted(!!(remember && data.session && readOk() === data.session.user.email));
     });
     const { data: sub } = SB.auth.onAuthStateChange((_e, next) => {
       setSession(next);
       setPhase(next ? 'checking' : 'anon');
+      setTrusted(!!(remember && next && readOk() === next.user.email));
     });
     return () => sub.subscription.unsubscribe();
-  }, []);
+  }, [remember]);
 
   useEffect(() => {
     if (phase !== 'checking' || !session) return;
@@ -52,10 +65,14 @@ export default function AdminGate({ label, children }) {
       if (cancelled) return;
       // error => table/policy issue => allow (pre-RBAC parity).
       // no row => a signed-in non-admin (e.g. an email reviewer) => deny.
-      setPhase(error ? 'ok' : (data?.role ? 'ok' : 'denied'));
+      const ok = error ? true : !!data?.role;
+      setPhase(ok ? 'ok' : 'denied');
+      if (remember) writeOk(ok ? session.user.email : null);
     })();
     return () => { cancelled = true; };
-  }, [phase, session]);
+  }, [phase, session, remember]);
+
+  if (phase === 'checking' && trusted) return children;
 
   if (phase === 'loading' || phase === 'checking') {
     return <div style={centered}><div style={statusText}>AUTHENTICATING…</div></div>;

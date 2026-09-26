@@ -5,6 +5,8 @@
 const FULL_MAX = 1600;
 const THUMB_MAX = 400;
 const QUALITY = 0.82;
+// Grid thumbs are only ever shown small, so they can be squeezed harder.
+const GRID_QUALITY = 0.72;
 const BLUR_RADIUS_FRACTION = 0.06; // blur strength relative to the longest image edge
 
 // Camera RAW formats — the browser's <img>/canvas pipeline can't decode these
@@ -47,9 +49,9 @@ function drawScaled(img, maxEdge) {
   return canvas;
 }
 
-function toBlob(canvas) {
+function toBlob(canvas, quality = QUALITY) {
   return new Promise((resolve) =>
-    canvas.toBlob((b) => resolve(b), 'image/jpeg', QUALITY)
+    canvas.toBlob((b) => resolve(b), 'image/jpeg', quality)
   );
 }
 
@@ -142,12 +144,28 @@ function drawScaledWithBlur(img, maxEdge, ovals) {
  * @param {{ thumbMax?: number }} [opts]
  * @returns {Promise<{ full: Blob, thumb: Blob }>}
  */
-export async function applyOvalBlurToUrl(url, ovals, { thumbMax = THUMB_MAX } = {}) {
+export async function applyOvalBlurToUrl(url, ovals, { thumbMax = THUMB_MAX, gridMax = 0 } = {}) {
   const img = await loadImageFromUrl(url);
   const fullCanvas = drawScaledWithBlur(img, FULL_MAX, ovals);
   const thumbCanvas = drawScaledWithBlur(img, thumbMax, ovals);
-  const [full, thumb] = await Promise.all([toBlob(fullCanvas), toBlob(thumbCanvas)]);
-  return { full, thumb };
+  const [full, thumb, grid] = await Promise.all([
+    toBlob(fullCanvas),
+    toBlob(thumbCanvas),
+    gridMax ? toBlob(drawScaledWithBlur(img, gridMax, ovals), GRID_QUALITY) : null,
+  ]);
+  return { full, thumb, grid };
+}
+
+/**
+ * Small square-grid thumbnail from an image already in storage (used to
+ * backfill photos uploaded before grid thumbs existed).
+ * @param {string} url
+ * @param {number} maxEdge
+ * @returns {Promise<Blob>}
+ */
+export async function gridThumbFromUrl(url, maxEdge) {
+  const img = await loadImageFromUrl(url);
+  return toBlob(drawScaled(img, maxEdge), GRID_QUALITY);
 }
 
 /**
@@ -158,13 +176,18 @@ export async function applyOvalBlurToUrl(url, ovals, { thumbMax = THUMB_MAX } = 
 // default — OPTIC's feed shows its "thumb" full-width on a phone, where 400px
 // looks soft, but full-size (1600px) there made scrolling lag and burned
 // bandwidth.
-export async function resizeForUpload(file, { thumbMax = THUMB_MAX } = {}) {
+// `gridMax` (optional) also returns a small `grid` blob for photo-grid tiles.
+export async function resizeForUpload(file, { thumbMax = THUMB_MAX, gridMax = 0 } = {}) {
   if (isRawFile(file)) {
     throw new Error('RAW files (.CR2, .NEF, etc.) aren\'t supported — export as JPEG first.');
   }
   const img = await loadImage(file);
   const fullCanvas = drawScaled(img, FULL_MAX);
   const thumbCanvas = drawScaled(img, thumbMax);
-  const [full, thumb] = await Promise.all([toBlob(fullCanvas), toBlob(thumbCanvas)]);
-  return { full, thumb, width: fullCanvas.width, height: fullCanvas.height };
+  const [full, thumb, grid] = await Promise.all([
+    toBlob(fullCanvas),
+    toBlob(thumbCanvas),
+    gridMax ? toBlob(drawScaled(img, gridMax), GRID_QUALITY) : null,
+  ]);
+  return { full, thumb, grid, width: fullCanvas.width, height: fullCanvas.height };
 }

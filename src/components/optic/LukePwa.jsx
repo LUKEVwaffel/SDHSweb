@@ -3,7 +3,7 @@ import { supabase as SB } from '../../lib/supabaseClient';
 import AdminGate from './AdminGate';
 import { useOpticPhotos, useOpticSubEvents } from '../../hooks/useOpticPhotos';
 import { useOpticConfig } from '../../hooks/useOpticConfig';
-import { OPTIC_EVENT_TITLE, chunkIds } from '../../lib/opticComp';
+import { OPTIC_EVENT_TITLE, chunkIds, backfillGridThumbs } from '../../lib/opticComp';
 import { removePhotoFiles } from '../../lib/photoStorage';
 import { installPwaHooks, isStandalone, isIos } from './pwa';
 import { usePwaUpdate, PwaUpdateBar } from './usePwaUpdate';
@@ -19,6 +19,38 @@ const TEAMS = [
 const TABS = ['tag', 'parents', 'subs'];
 const PARENT_SEEN_KEY = 'optic_pwa_parent_seen';
 const TILE_SIZE_KEY = 'optic_pwa_tile_size';
+
+// Last session's photo list, kept on the phone so opening the console paints
+// the albums instantly (from rows + already-cached images) instead of
+// waiting on auth -> config -> photos before the first tile can even start
+// downloading. The live list replaces it a moment later, and realtime keeps
+// it current from there.
+const CACHE_KEY = 'optic_pwa_cache_v1';
+const CACHE_MAX = 1500;
+const CACHE_WRITE_MS = 1200;
+function readCache() {
+  try {
+    const c = JSON.parse(localStorage.getItem(CACHE_KEY) || 'null');
+    return c && c.eventId && Array.isArray(c.photos) ? c : null;
+  } catch { return null; }
+}
+function writeCache(c) {
+  try { localStorage.setItem(CACHE_KEY, JSON.stringify(c)); } catch { /* quota / private mode */ }
+}
+
+// Open the connections to the photo + API origins while auth is still
+// resolving, so the first requests skip DNS + TLS.
+const PRECONNECT = [import.meta.env.VITE_OPTIC_R2_URL, import.meta.env.VITE_SUPABASE_URL]
+  .map((u) => { try { return new URL(u).origin; } catch { return null; } })
+  .filter(Boolean);
+function preconnect() {
+  for (const origin of PRECONNECT) {
+    if (document.head.querySelector(`link[rel="preconnect"][href="${origin}"]`)) continue;
+    const l = document.createElement('link');
+    l.rel = 'preconnect'; l.href = origin; l.crossOrigin = 'anonymous';
+    document.head.appendChild(l);
+  }
+}
 const TILE_SIZES = ['s', 'm', 'l'];
 const readTileSize = () => {
   try { const v = localStorage.getItem(TILE_SIZE_KEY); return TILE_SIZES.includes(v) ? v : 'm'; } catch { return 'm'; }
@@ -33,18 +65,37 @@ const haptic = (p) => { try { navigator.vibrate?.(p); } catch { /* unsupported *
 // visible pulse. All curation / tagging / moderation happens here, from a
 // phone, and nothing in this file can reach the parent or cadet UIs.
 export default function LukePwaRoute() {
-  useEffect(() => { installPwaHooks(); }, []);
+  useEffect(() => { installPwaHooks(); preconnect(); }, []);
   return (
-    <AdminGate label="OPTIC · CURATION">
+    <AdminGate label="OPTIC · CURATION" remember>
       <LukePwa />
     </AdminGate>
   );
 }
 
 function LukePwa() {
-  const { eventId, eventTitle } = useOpticConfig();
-  const { photos, loading, error, refresh } = useOpticPhotos({ eventId, scope: 'all' });
-  const { subEvents, refresh: refreshSubs } = useOpticSubEvents({ eventId });
+  const [cache] = useState(readCache);
+  const config = useOpticConfig();
+  // Until optic_config answers, assume the comp hasn't changed since last
+  // time so photos start loading in parallel with the config read. If it
+  // has, eventId flips and the hook drops the seeded rows.
+  const eventId = config.loading ? (config.eventId || cache?.eventId || null) : config.eventId;
+  const eventTitle = config.eventTitle || (config.loading ? cache?.eventTitle : null);
+  const seeded = cache && cache.eventId === eventId ? cache : null;
+  const { photos, loading, error, refresh } = useOpticPhotos({
+    eventId, scope: 'all', initialPhotos: seeded?.photos,
+  });
+  const { subEvents, refresh: refreshSubs } = useOpticSubEvents({
+    eventId, initialSubEvents: seeded?.subEvents,
+  });
+
+  useEffect(() => {
+    if (loading || !eventId || config.loading) return undefined;
+    const t = setTimeout(() => writeCache({
+      eventId, eventTitle, subEvents, photos: photos.slice(0, CACHE_MAX), at: Date.now(),
+    }), CACHE_WRITE_MS);
+    return () => clearTimeout(t);
+  }, [photos, subEvents, eventId, eventTitle, loading, config.loading]);
 
   const [tab, setTab] = useState('tag');
   const [filter, setFilter] = useState('all'); // all | untagged | staged | live
@@ -307,6 +358,27 @@ function LukePwa() {
     clearPSel();
   }
 
+  // Photos from before grid thumbs existed. Only offered once the column is
+  // there (rows carry a grid_url key, even if null).
+  const hasGridColumn = photos.length > 0 && 'grid_url' in photos[0];
+  const missingGrid = useMemo(
+    () => (hasGridColumn ? merged.filter((p) => !p.grid_url && p.storage_path) : []),
+    [merged, hasGridColumn],
+  );
+  const [speed, setSpeed] = useState(null); // null | { done, total } | { msg }
+  async function speedUp() {
+    if (!missingGrid.length || (speed && !speed.msg)) return;
+    haptic(14);
+    setSpeed({ done: 0, total: missingGrid.length });
+    const r = await backfillGridThumbs(missingGrid, (done, total) => setSpeed({ done, total }));
+    haptic([10, 30, 10]);
+    setSpeed({
+      msg: r.blocked
+        || `${r.done} PHOTO${r.done === 1 ? '' : 'S'} SPED UP${r.failed ? ` · ${r.failed} SKIPPED` : ''}`,
+    });
+    refresh();
+  }
+
   // Blur saved: show the blurred copy right away (the row write already
   // landed), then let the refetch confirm it.
   function onBlurred(photo, { patch, cleanupFailed }) {
@@ -425,6 +497,27 @@ function LukePwa() {
               </button>
             ))}
           </div>
+        </div>
+      )}
+
+      {!loading && tab !== 'subs' && (missingGrid.length > 0 || speed) && (
+        <div className="lp-speed">
+          {speed && !speed.msg ? (
+            <>
+              <span>SPEEDING UP · {speed.done}/{speed.total}</span>
+              <span className="lp-speed-bar"><i style={{ width: `${(speed.done / speed.total) * 100}%` }} /></span>
+            </>
+          ) : speed?.msg ? (
+            <>
+              <span style={{ flex: 1 }}>{speed.msg}</span>
+              <button className="lp-btn lp-btn--ghost lp-btn--sm" onClick={() => setSpeed(null)}>OK</button>
+            </>
+          ) : (
+            <>
+              <span style={{ flex: 1 }}>{missingGrid.length} older photo{missingGrid.length === 1 ? '' : 's'} load slowly in the grid.</span>
+              <button className="lp-btn lp-btn--sm" onClick={speedUp}>⚡ SPEED UP</button>
+            </>
+          )}
         </div>
       )}
 

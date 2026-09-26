@@ -12,6 +12,9 @@ import { raiderTeamLabel, isBlurredPhoto } from '../../lib/opticComp';
 // selected a plain tap toggles selection instead.
 
 const LONG_PRESS_MS = 420;
+// Roughly the first screenful: fetched eagerly at high priority, everything
+// below that lazily, so the top of the page never queues behind offscreen tiles.
+const EAGER_TILES = 12;
 const MOVE_CANCEL_PX = 10;
 const UNSORTED = '__unsorted';
 
@@ -83,11 +86,19 @@ export function Albums({
   source, emptyNode,
 }) {
   if (!groups.length) return emptyNode;
+  // Tiles above each album (collapsed albums show none), for EAGER_TILES.
+  const offsets = [];
+  let seen = 0;
+  for (const g of groups) {
+    offsets.push(seen);
+    if (!collapsed.has(g.id)) seen += g.photos.length;
+  }
   return (
     <div className="lp-albums">
-      {groups.map((g) => (
+      {groups.map((g, gi) => (
         <Album
           key={g.id}
+          offset={offsets[gi]}
           group={g}
           sel={sel}
           pulseIds={pulseIds}
@@ -103,7 +114,7 @@ export function Albums({
   );
 }
 
-function Album({ group, sel, pulseIds, collapsed, onToggleCollapse, onToggleSel, onSelectMany, onOpen, source }) {
+function Album({ group, offset, sel, pulseIds, collapsed, onToggleCollapse, onToggleSel, onSelectMany, onOpen, source }) {
   const ids = useMemo(() => group.photos.map((p) => p.id), [group.photos]);
   const selCount = ids.filter((id) => sel.has(id)).length;
   const allSel = selCount === ids.length && ids.length > 0;
@@ -143,6 +154,7 @@ function Album({ group, sel, pulseIds, collapsed, onToggleCollapse, onToggleSel,
               key={p.id}
               photo={p}
               index={i}
+              eager={offset + i < EAGER_TILES}
               on={sel.has(p.id)}
               pulse={pulseIds.has(p.id)}
               selecting={selecting}
@@ -158,7 +170,7 @@ function Album({ group, sel, pulseIds, collapsed, onToggleCollapse, onToggleSel,
   );
 }
 
-function Tile({ photo: p, index, on, pulse, selecting, onToggleSel, onOpen, source, showEvent }) {
+function Tile({ photo: p, index, eager, on, pulse, selecting, onToggleSel, onOpen, source, showEvent }) {
   const timer = useRef(null);
   const start = useRef(null);
   const longFired = useRef(false);
@@ -209,7 +221,14 @@ function Tile({ photo: p, index, on, pulse, selecting, onToggleSel, onOpen, sour
       onClick={click}
       onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); click(); } }}
     >
-      <img src={p.thumb_url || p.photo_url} alt="" loading="lazy" draggable={false} />
+      <img
+        src={p.grid_url || p.thumb_url || p.photo_url}
+        alt=""
+        loading={eager ? 'eager' : 'lazy'}
+        fetchPriority={eager ? 'high' : 'low'}
+        decoding="async"
+        draggable={false}
+      />
       <span className="lp-pills">
         {source === 'luke' && (
           <span className="lp-tilepill" data-live={p.visibility === 'public'}>

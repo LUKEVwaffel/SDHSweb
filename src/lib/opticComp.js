@@ -1,7 +1,7 @@
 import { supabase as SB } from './supabaseClient';
-import { resizeForUpload, applyOvalBlurToUrl } from './imageResize';
+import { resizeForUpload, applyOvalBlurToUrl, gridThumbFromUrl } from './imageResize';
 import { adminDisplayName } from './admins';
-import { putPhotoFile, removePhotoFiles } from './photoStorage';
+import { putPhotoFile, removePhotoFiles, gridPathFor, publicUrlFor } from './photoStorage';
 
 // ── OPTIC 2.0 — comp photo pipeline. Which event this targets is no longer a
 // hardcoded id: useOpticConfig() reads it from optic_config.active_event_id so
@@ -19,6 +19,23 @@ export const OPTIC_EVENT_TITLE = 'East Hamilton Raider Competition';
 // Feed-card image size. The feed renders `thumb_url`, full-width on a
 // phone, so it needs more than the 400px gallery default to look sharp.
 const FEED_THUMB_MAX = 900;
+// Grid-tile size (/lukepwa albums). ~20KB instead of the ~150KB feed thumb,
+// which is what makes a few hundred tiles paint fast on cell data. Sized for
+// the largest tile (~150px CSS) on a 3x phone screen, with some headroom.
+export const GRID_THUMB_MAX = 360;
+
+// photos.grid_url comes from supabase/photos_grid_thumb.sql. Until that's
+// run the column doesn't exist and any write naming it fails, so every write
+// that includes it retries once without it: uploads and blurs must never
+// break over a speed-up.
+const isMissingGridColumn = (err) => /grid_url/i.test(`${err?.message || ''} ${err?.details || ''}`);
+
+// A grid thumb is a nice-to-have: if its upload fails (e.g. the R2 worker
+// hasn't been redeployed with the `_s` key rule yet), carry on without it.
+async function putGridThumb(storagePath, blob) {
+  if (!blob) return null;
+  try { return await putPhotoFile(gridPathFor(storagePath), blob); } catch { return null; }
+}
 // photos.team MUST stay 'raiders' , the photos_require_posted_event trigger
 // rejects any other value for this event. Sub-team goes in raider_team.
 const PHOTO_TEAM = 'raiders';
@@ -92,17 +109,18 @@ export async function uploadOpticPhoto(file, {
 }) {
   if (!eventId) throw new Error('No active event set. optic_config.active_event_id is missing.');
   // throws on RAW / unreadable
-  const { full, thumb } = await resizeForUpload(file, { thumbMax: FEED_THUMB_MAX });
+  const { full, thumb, grid } = await resizeForUpload(file, { thumbMax: FEED_THUMB_MAX, gridMax: GRID_THUMB_MAX });
   const stamp = `${Date.now()}_${Math.random().toString(36).slice(2, 8)}`;
   const base = `${PHOTO_TEAM}/${eventId}/${stamp}`;
 
   // R2 when configured, Supabase Storage otherwise — see lib/photoStorage.js.
-  const [photoUrl, thumbUrl] = await Promise.all([
+  const [photoUrl, thumbUrl, gridUrl] = await Promise.all([
     putPhotoFile(`${base}.jpg`, full),
     putPhotoFile(`${base}_t.jpg`, thumb),
+    putGridThumb(`${base}.jpg`, grid),
   ]);
 
-  const { data, error } = await SB.from('photos').insert({
+  const row = {
     team: PHOTO_TEAM,
     event_id: eventId,
     storage_path: `${base}.jpg`,
@@ -116,7 +134,10 @@ export async function uploadOpticPhoto(file, {
     taken_at: takenAt || null,
     ...(raiderTeam ? { raider_team: raiderTeam } : {}),
     ...(subEventId ? { sub_event_id: subEventId } : {}),
-  }).select('*, raider_sub_events(name, team)').single();
+  };
+  const insert = (r) => SB.from('photos').insert(r).select('*, raider_sub_events(name, team)').single();
+  let { data, error } = await insert(gridUrl ? { ...row, grid_url: gridUrl } : row);
+  if (error && gridUrl && isMissingGridColumn(error)) ({ data, error } = await insert(row));
   if (error) throw error;
   return data;
 }
@@ -145,24 +166,33 @@ export const isBlurredPhoto = (p) => /_blur[a-z0-9]*\.jpg$/i.test(p?.storage_pat
  */
 export async function blurOpticPhoto(photo, ovals) {
   if (!photo?.id || !ovals?.length) throw new Error('Nothing to blur.');
-  const { full, thumb } = await applyOvalBlurToUrl(photo.photo_url, ovals, { thumbMax: FEED_THUMB_MAX });
+  const { full, thumb, grid } = await applyOvalBlurToUrl(photo.photo_url, ovals, {
+    thumbMax: FEED_THUMB_MAX, gridMax: GRID_THUMB_MAX,
+  });
   const stamp = `${Date.now()}_blur${Math.random().toString(36).slice(2, 8)}`;
   const base = `${PHOTO_TEAM}/${photo.event_id}/${stamp}`;
-  const [photoUrl, thumbUrl] = await Promise.all([
+  const [photoUrl, thumbUrl, gridUrl] = await Promise.all([
     putPhotoFile(`${base}.jpg`, full),
     putPhotoFile(`${base}_t.jpg`, thumb),
+    putGridThumb(`${base}.jpg`, grid),
   ]);
 
   const patch = { storage_path: `${base}.jpg`, photo_url: photoUrl, thumb_url: thumbUrl };
+  // The old grid thumb shows the sharp face too: always replace or clear it.
+  if (gridUrl || photo.grid_url) patch.grid_url = gridUrl;
   // A photo blurred earlier from DISPATCH keeps its sharp original under
   // orig_* for that panel's REMOVE BLUR. Drop it too, or the sharp copy lives on.
   if (photo.orig_storage_path) {
     Object.assign(patch, { orig_storage_path: null, orig_photo_url: null, orig_thumb_url: null });
   }
-  const { error } = await SB.from('photos').update(patch).eq('id', photo.id);
+  let { error } = await SB.from('photos').update(patch).eq('id', photo.id);
+  if (error && 'grid_url' in patch && isMissingGridColumn(error)) {
+    delete patch.grid_url;
+    ({ error } = await SB.from('photos').update(patch).eq('id', photo.id));
+  }
   if (error) {
     // Row still points at the old files; don't leave the new ones orphaned.
-    await removePhotoFiles([{ storage_path: patch.storage_path, photo_url: photoUrl }]).catch(() => {});
+    await removePhotoFiles([{ storage_path: patch.storage_path, photo_url: photoUrl, grid_url: gridUrl }]).catch(() => {});
     throw error;
   }
 
@@ -175,6 +205,56 @@ export async function blurOpticPhoto(photo, ovals) {
   let cleanupFailed = false;
   await removePhotoFiles(stale).catch(() => { cleanupFailed = true; });
   return { patch, cleanupFailed };
+}
+
+/**
+ * Backfill grid thumbs for photos uploaded before they existed. Runs on
+ * Luke's phone from /lukepwa: each photo's feed thumb (usually already in the
+ * browser cache from scrolling) is shrunk on-device, uploaded as `_s.jpg` and
+ * written to photos.grid_url. Three at a time; a photo that fails is skipped.
+ * @param {object[]} photos  rows with no grid_url
+ * @param {(done:number, total:number) => void} [onProgress]
+ * @returns {Promise<{done:number, failed:number, blocked:string|null}>}
+ *   `blocked` is set when every attempt is being refused (column missing,
+ *   worker not redeployed) so the caller can say what to fix.
+ */
+export async function backfillGridThumbs(photos, onProgress) {
+  let next = 0;
+  let done = 0;
+  let failed = 0;
+  let blocked = null;
+  async function worker() {
+    while (next < photos.length && !blocked) {
+      const p = photos[next++];
+      try {
+        const path = gridPathFor(p.storage_path);
+        const blob = await gridThumbFromUrl(p.thumb_url || p.photo_url, GRID_THUMB_MAX);
+        const gridUrl = await putPhotoFile(path, blob).catch((e) => {
+          // "Already exists": an earlier run uploaded it, then died before
+          // the row write. The file is fine, just point the row at it.
+          if (/exists/i.test(e?.message || '')) return publicUrlFor(path);
+          throw e;
+        });
+        const { error } = await SB.from('photos').update({ grid_url: gridUrl }).eq('id', p.id);
+        if (error) {
+          if (isMissingGridColumn(error)) blocked = 'Run supabase/photos_grid_thumb.sql first.';
+          throw error;
+        }
+      } catch {
+        failed += 1;
+        // Nothing has worked yet and it's already failing a lot: stop hammering.
+        if (!blocked && failed >= 6 && done === 0) {
+          blocked = 'Grid thumbs are being refused. Redeploy the optic-r2 worker (it needs the _s.jpg key rule).';
+        }
+        onProgress?.(done + failed, photos.length);
+        continue;
+      }
+      done += 1;
+      onProgress?.(done + failed, photos.length);
+    }
+  }
+  await Promise.all(Array.from({ length: Math.min(3, photos.length) }, worker));
+  return { done, failed, blocked };
 }
 
 /**
