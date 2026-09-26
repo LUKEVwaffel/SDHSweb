@@ -1,7 +1,7 @@
 import { supabase as SB } from './supabaseClient';
-import { resizeForUpload } from './imageResize';
+import { resizeForUpload, applyOvalBlurToUrl } from './imageResize';
 import { adminDisplayName } from './admins';
-import { putPhotoFile } from './photoStorage';
+import { putPhotoFile, removePhotoFiles } from './photoStorage';
 
 // ── OPTIC 2.0 — comp photo pipeline. Which event this targets is no longer a
 // hardcoded id: useOpticConfig() reads it from optic_config.active_event_id so
@@ -119,6 +119,62 @@ export async function uploadOpticPhoto(file, {
   }).select('*, raider_sub_events(name, team)').single();
   if (error) throw error;
   return data;
+}
+
+// ── face blur (LukePwa photo editor) ──────────────────────────────────────
+// Some cadets can't appear in anything published. When one lands in a shot
+// anyway, Luke blurs her face from the PWA: the oval regions are baked into
+// the pixels (lib/imageResize.js), uploaded to a FRESH key (the R2 worker
+// never overwrites a key, and a new URL also dodges every edge/browser cache
+// still holding the sharp version), the row is repointed, and then the sharp
+// files are deleted for good. No undo copy on purpose: an unblurred original
+// sitting at a public URL is exactly what this exists to prevent. Luke still
+// has the SD card if a blur goes wrong.
+//
+// The `_blur` marker keeps the key inside the worker's upload pattern
+// (<digits>_<a-z0-9>.jpg) and lets the grid badge blurred photos.
+export const isBlurredPhoto = (p) => /_blur[a-z0-9]*\.jpg$/i.test(p?.storage_path || '');
+
+/**
+ * Blur regions of one OPTIC photo and replace it in place.
+ * @param {object} photo  photos row (needs id, event_id, photo_url, storage_path)
+ * @param {{cx:number,cy:number,rx:number,ry:number}[]} ovals  0..1 fractions
+ * @returns {Promise<{patch: object, cleanupFailed: boolean}>} the patch
+ *   written to the row, and whether the sharp files could NOT be deleted
+ *   (the row is still blurred either way; the caller should say so)
+ */
+export async function blurOpticPhoto(photo, ovals) {
+  if (!photo?.id || !ovals?.length) throw new Error('Nothing to blur.');
+  const { full, thumb } = await applyOvalBlurToUrl(photo.photo_url, ovals, { thumbMax: FEED_THUMB_MAX });
+  const stamp = `${Date.now()}_blur${Math.random().toString(36).slice(2, 8)}`;
+  const base = `${PHOTO_TEAM}/${photo.event_id}/${stamp}`;
+  const [photoUrl, thumbUrl] = await Promise.all([
+    putPhotoFile(`${base}.jpg`, full),
+    putPhotoFile(`${base}_t.jpg`, thumb),
+  ]);
+
+  const patch = { storage_path: `${base}.jpg`, photo_url: photoUrl, thumb_url: thumbUrl };
+  // A photo blurred earlier from DISPATCH keeps its sharp original under
+  // orig_* for that panel's REMOVE BLUR. Drop it too, or the sharp copy lives on.
+  if (photo.orig_storage_path) {
+    Object.assign(patch, { orig_storage_path: null, orig_photo_url: null, orig_thumb_url: null });
+  }
+  const { error } = await SB.from('photos').update(patch).eq('id', photo.id);
+  if (error) {
+    // Row still points at the old files; don't leave the new ones orphaned.
+    await removePhotoFiles([{ storage_path: patch.storage_path, photo_url: photoUrl }]).catch(() => {});
+    throw error;
+  }
+
+  const stale = [photo];
+  if (photo.orig_storage_path) {
+    stale.push({ storage_path: photo.orig_storage_path, photo_url: photo.orig_photo_url });
+  }
+  // The row already points at the blurred copy, so a failure here doesn't
+  // undo the blur, but a sharp file left behind is worth telling Luke about.
+  let cleanupFailed = false;
+  await removePhotoFiles(stale).catch(() => { cleanupFailed = true; });
+  return { patch, cleanupFailed };
 }
 
 /**

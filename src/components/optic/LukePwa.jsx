@@ -3,10 +3,12 @@ import { supabase as SB } from '../../lib/supabaseClient';
 import AdminGate from './AdminGate';
 import { useOpticPhotos, useOpticSubEvents } from '../../hooks/useOpticPhotos';
 import { useOpticConfig } from '../../hooks/useOpticConfig';
-import { OPTIC_EVENT_TITLE, raiderTeamLabel, chunkIds } from '../../lib/opticComp';
+import { OPTIC_EVENT_TITLE, chunkIds } from '../../lib/opticComp';
 import { removePhotoFiles } from '../../lib/photoStorage';
 import { installPwaHooks, isStandalone, isIos } from './pwa';
 import { usePwaUpdate, PwaUpdateBar } from './usePwaUpdate';
+import { Albums, AlbumJump, groupByEvent, groupByTeam, matchesTeam, albumAnchor, TEAM_FILTERS } from './PwaAlbums';
+import { PhotoViewer } from './PwaPhotoViewer';
 import './lukepwa.css';
 
 const TEAMS = [
@@ -16,6 +18,11 @@ const TEAMS = [
 ];
 const TABS = ['tag', 'parents', 'subs'];
 const PARENT_SEEN_KEY = 'optic_pwa_parent_seen';
+const TILE_SIZE_KEY = 'optic_pwa_tile_size';
+const TILE_SIZES = ['s', 'm', 'l'];
+const readTileSize = () => {
+  try { const v = localStorage.getItem(TILE_SIZE_KEY); return TILE_SIZES.includes(v) ? v : 'm'; } catch { return 'm'; }
+};
 
 // Android gives real haptics; iOS Safari ignores vibrate() harmlessly. Cheap
 // win for how physical the console feels on a phone.
@@ -40,7 +47,12 @@ function LukePwa() {
   const { subEvents, refresh: refreshSubs } = useOpticSubEvents({ eventId });
 
   const [tab, setTab] = useState('tag');
-  const [filter, setFilter] = useState('all'); // all | untagged | staged | live | sub:<id>
+  const [filter, setFilter] = useState('all'); // all | untagged | staged | live
+  const [team, setTeam] = useState('all');     // all | male | coed, same rule as the parent feed
+  const [collapsed, setCollapsed] = useState(() => new Set()); // `${tab}:${albumId}`
+  const [viewer, setViewer] = useState(null);  // photo id open full screen, or null
+  const [tileSize, setTileSize] = useState(readTileSize);
+  const [scrollTo, setScrollTo] = useState(null); // album id to bring into view after render
   const [sel, setSel] = useState(() => new Set());
   const [pSel, setPSel] = useState(() => new Set()); // PARENTS-tab selection (separate from `sel`)
   const [actionErr, setActionErr] = useState('');
@@ -86,17 +98,29 @@ function LukePwa() {
     [lukePhotos],
   );
 
-  // The photos actually shown in the Tagging grid, after the filter bar.
+  // The photos actually shown in the Tagging albums, after status + team.
   const shown = useMemo(() => {
-    if (filter === 'untagged') return lukePhotos.filter((p) => !p.raider_team && !p.sub_event_id);
-    if (filter === 'staged') return lukePhotos.filter((p) => p.visibility === 'staged');
-    if (filter === 'live') return lukePhotos.filter((p) => p.visibility === 'public');
-    if (filter.startsWith('sub:')) {
-      const id = filter.slice(4);
-      return lukePhotos.filter((p) => p.sub_event_id === id);
-    }
-    return lukePhotos;
-  }, [lukePhotos, filter]);
+    let list = lukePhotos;
+    if (filter === 'untagged') list = list.filter((p) => !p.raider_team && !p.sub_event_id);
+    else if (filter === 'staged') list = list.filter((p) => p.visibility === 'staged');
+    else if (filter === 'live') list = list.filter((p) => p.visibility === 'public');
+    if (team !== 'all') list = list.filter((p) => matchesTeam(p, team));
+    return list;
+  }, [lukePhotos, filter, team]);
+  const parentShown = useMemo(
+    () => (team === 'all' ? parentPhotos : parentPhotos.filter((p) => matchesTeam(p, team))),
+    [parentPhotos, team],
+  );
+  const tagGroups = useMemo(() => groupByEvent(shown, subEvents), [shown, subEvents]);
+  const parentGroups = useMemo(() => groupByTeam(parentShown), [parentShown]);
+  const teamCounts = useMemo(() => {
+    const src = tab === 'parents' ? parentPhotos : lukePhotos;
+    return {
+      all: src.length,
+      male: src.filter((p) => matchesTeam(p, 'male')).length,
+      coed: src.filter((p) => matchesTeam(p, 'coed')).length,
+    };
+  }, [tab, parentPhotos, lukePhotos]);
   const newParentCount = useMemo(
     () => parentPhotos.filter((p) => new Date(p.created_at).getTime() > seenAt).length,
     [parentPhotos, seenAt],
@@ -157,6 +181,9 @@ function LukePwa() {
   }, []);
   const clearSel = useCallback(() => setSel(new Set()), []);
   const selectAllShown = useCallback(() => { haptic(14); setSel(new Set(shown.map((p) => p.id))); }, [shown]);
+  const selectMany = useCallback((setter) => (ids, on) => {
+    setter((s) => { const n = new Set(s); ids.forEach((i) => (on ? n.add(i) : n.delete(i))); return n; });
+  }, []);
 
   const togglePSel = useCallback((id) => {
     haptic(9);
@@ -169,7 +196,29 @@ function LukePwa() {
   );
 
   const go = useCallback((t) => { haptic(9); setTab(t); }, []);
-  const jumpToSub = useCallback((subId) => { haptic(9); setFilter(`sub:${subId}`); setTab('tag'); }, []);
+  const toggleCollapse = useCallback((key) => {
+    haptic(8);
+    setCollapsed((c) => { const n = new Set(c); if (n.has(key)) n.delete(key); else n.add(key); return n; });
+  }, []);
+  // Open an album: make sure it's expanded and on screen. Used by the jump
+  // chips and by tapping a sub-event row in EVENTS.
+  const jumpToAlbum = useCallback((t, albumId) => {
+    setCollapsed((c) => { const n = new Set(c); n.delete(`${t}:${albumId}`); return n; });
+    setScrollTo(albumId);
+  }, []);
+  const jumpToSub = useCallback((subId) => {
+    haptic(9); setFilter('all'); setTeam('all'); setTab('tag'); jumpToAlbum('tag', subId);
+  }, [jumpToAlbum]);
+  useEffect(() => {
+    if (!scrollTo) return;
+    const el = document.getElementById(albumAnchor(scrollTo));
+    el?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    setScrollTo(null);
+  }, [scrollTo, tab]);
+  const pickTileSize = useCallback((v) => {
+    haptic(8); setTileSize(v);
+    try { localStorage.setItem(TILE_SIZE_KEY, v); } catch { /* private mode */ }
+  }, []);
   const openParents = useCallback(() => {
     haptic(9);
     setTab('parents');
@@ -258,11 +307,56 @@ function LukePwa() {
     clearPSel();
   }
 
-  const drawerOpen = sel.size > 0 && tab === 'tag';
+  // Blur saved: show the blurred copy right away (the row write already
+  // landed), then let the refetch confirm it.
+  function onBlurred(photo, { patch, cleanupFailed }) {
+    setOverrides((o) => ({ ...o, [photo.id]: { ...(o[photo.id] || {}), ...patch } }));
+    flash([photo.id]);
+    if (cleanupFailed) {
+      setActionErr('Blurred and replaced, but the old unblurred file could not be deleted from storage. Sign out and back in, then tell Luke/S6.');
+    }
+    refresh();
+  }
+
+  const collapsedFor = useCallback(
+    (t) => new Set([...collapsed].filter((k) => k.startsWith(`${t}:`)).map((k) => k.slice(t.length + 1))),
+    [collapsed],
+  );
+  const tagCollapsed = useMemo(() => collapsedFor('tag'), [collapsedFor]);
+  const parentCollapsed = useMemo(() => collapsedFor('parents'), [collapsedFor]);
+
+  // The viewer swipes through exactly what the open tab shows, album order.
+  const viewerGroups = tab === 'parents' ? parentGroups : tagGroups;
+  const viewerList = useMemo(() => viewerGroups.flatMap((g) => g.photos), [viewerGroups]);
+  const groupNameOf = useMemo(() => {
+    const m = new Map();
+    for (const g of viewerGroups) for (const p of g.photos) m.set(p.id, g.name);
+    return (p) => m.get(p.id);
+  }, [viewerGroups]);
+  const closeViewer = useCallback(() => setViewer(null), []);
+
+  function viewerActions(p) {
+    if (p.source === 'parent') {
+      const hidden = p.status === 'hidden';
+      return [
+        { label: pSel.has(p.id) ? '✓ SELECTED' : 'SELECT', on: pSel.has(p.id), onClick: () => togglePSel(p.id) },
+        { label: hidden ? 'UNHIDE' : 'HIDE', onClick: () => applyPatch({ status: hidden ? 'live' : 'hidden' }, [p.id]) },
+        { label: 'DELETE', danger: true, onClick: () => hardDelete(p) },
+      ];
+    }
+    const live = p.visibility === 'public';
+    return [
+      { label: sel.has(p.id) ? '✓ SELECTED' : 'SELECT', on: sel.has(p.id), onClick: () => toggleSel(p.id) },
+      { label: live ? 'UNPUBLISH' : 'PUBLISH', onClick: () => applyPatch({ visibility: live ? 'staged' : 'public' }, [p.id]) },
+      { label: 'DELETE', danger: true, onClick: () => hardDelete(p) },
+    ];
+  }
+
+  const drawerOpen = sel.size > 0 && tab === 'tag' && !viewer;
   const tabIndex = TABS.indexOf(tab);
 
   return (
-    <div className="lp" data-drawer={drawerOpen}>
+    <div className="lp" data-drawer={drawerOpen} data-size={tileSize}>
       <header className="lp-head">
         <div>
           <div className="lp-kicker">DISPATCH · OPTIC</div>
@@ -309,6 +403,31 @@ function LukePwa() {
 
       {loading && <LoadingGrid />}
 
+      {!loading && tab !== 'subs' && (
+        <div className="lp-toolbar">
+          <div className="lp-seg lp-seg--team" role="group" aria-label="Team">
+            {TEAM_FILTERS.map((t) => (
+              <button
+                key={t.id}
+                data-on={team === t.id}
+                aria-pressed={team === t.id}
+                onClick={() => { haptic(8); setTeam(t.id); }}
+              >
+                {t.label}<span className="n">{teamCounts[t.id]}</span>
+              </button>
+            ))}
+          </div>
+          <div className="lp-seg lp-seg--mini" role="group" aria-label="Tile size">
+            {TILE_SIZES.map((v) => (
+              <button key={v} data-on={tileSize === v} aria-pressed={tileSize === v} onClick={() => pickTileSize(v)}>
+                <span className="lp-sizeicon" data-v={v} aria-hidden="true" />
+                <span className="lp-sr">{v === 's' ? 'Small' : v === 'm' ? 'Medium' : 'Large'} tiles</span>
+              </button>
+            ))}
+          </div>
+        </div>
+      )}
+
       {!loading && tab === 'tag' && (
         <div className="lp-panel" key="tag">
           <div className="lp-strip">
@@ -322,15 +441,12 @@ function LukePwa() {
             <FilterChip id="untagged" cur={filter} set={setFilter} n={untaggedCount}>UNTAGGED</FilterChip>
             <FilterChip id="staged" cur={filter} set={setFilter} n={stagedIds.length}>STAGED</FilterChip>
             <FilterChip id="live" cur={filter} set={setFilter} n={liveCount}>LIVE</FilterChip>
-            {subEvents.map((s) => (
-              <FilterChip key={s.id} id={`sub:${s.id}`} cur={filter} set={setFilter} n={subCounts[s.id] || 0}>
-                {s.name.toUpperCase()}
-              </FilterChip>
-            ))}
           </div>
 
+          <AlbumJump groups={tagGroups} onJump={(id) => jumpToAlbum('tag', id)} />
+
           <div className="lp-strip" style={{ paddingTop: 8 }}>
-            <span>{shown.length} SHOWN{sel.size > 0 ? ` · ${sel.size} SELECTED` : ''}</span>
+            <span>{shown.length} SHOWN{sel.size > 0 ? ` · ${sel.size} SELECTED` : ' · HOLD TO SELECT'}</span>
             {shown.length > 0 && (
               <button
                 className="lp-btn lp-btn--ghost lp-btn--sm"
@@ -345,7 +461,24 @@ function LukePwa() {
             )}
           </div>
 
-          <TagGrid photos={shown} sel={sel} pulseIds={pulseIds} toggleSel={toggleSel} filtered={filter !== 'all'} />
+          <Albums
+            groups={tagGroups}
+            sel={sel}
+            pulseIds={pulseIds}
+            collapsed={tagCollapsed}
+            onToggleCollapse={(id) => toggleCollapse(`tag:${id}`)}
+            onToggleSel={toggleSel}
+            onSelectMany={selectMany(setSel)}
+            onOpen={setViewer}
+            source="luke"
+            emptyNode={lukePhotos.length ? (
+              <Empty k="NOTHING HERE">No photos match this filter. Tap ALL and ALL TEAMS to see the full set.</Empty>
+            ) : (
+              <Empty k="STANDING BY">
+                No dump yet. Photos from the SD-card tool appear here the moment they finish uploading.
+              </Empty>
+            )}
+          />
         </div>
       )}
 
@@ -353,8 +486,8 @@ function LukePwa() {
         <div className="lp-panel" key="parents">
           <div className="lp-strip">
             <span>
-              {parentPhotos.length} PARENT{parentPhotos.length === 1 ? '' : 'S'}
-              {pSel.size > 0 ? ` · ${pSel.size} SELECTED` : ''}
+              {parentShown.length} PARENT PHOTO{parentShown.length === 1 ? '' : 'S'}
+              {pSel.size > 0 ? ` · ${pSel.size} SELECTED` : ' · HOLD TO SELECT'}
             </span>
             {visibleParentIds.length > 0 && (
               <button
@@ -388,13 +521,25 @@ function LukePwa() {
             </button>
           </div>
 
-          <ParentGrid
-            photos={parentPhotos}
-            pulseIds={pulseIds}
+          <AlbumJump groups={parentGroups} onJump={(id) => jumpToAlbum('parents', id)} />
+
+          <Albums
+            groups={parentGroups}
             sel={pSel}
+            pulseIds={pulseIds}
+            collapsed={parentCollapsed}
+            onToggleCollapse={(id) => toggleCollapse(`parents:${id}`)}
             onToggleSel={togglePSel}
-            onHideToggle={(p) => applyPatch({ status: p.status === 'hidden' ? 'live' : 'hidden' }, [p.id])}
-            onDelete={hardDelete}
+            onSelectMany={selectMany(setPSel)}
+            onOpen={setViewer}
+            source="parent"
+            emptyNode={parentPhotos.length ? (
+              <Empty k="NOTHING HERE">No parent photos for this team. Tap ALL TEAMS.</Empty>
+            ) : (
+              <Empty k="ALL QUIET">
+                No parent uploads yet. They land here live as families post from the stands.
+              </Empty>
+            )}
           />
         </div>
       )}
@@ -425,6 +570,18 @@ function LukePwa() {
         onDelete={bulkDelete}
         onClear={clearSel}
       />
+
+      {viewer && (
+        <PhotoViewer
+          photos={viewerList}
+          id={viewer}
+          onId={setViewer}
+          onClose={closeViewer}
+          actions={viewerActions}
+          onBlurred={onBlurred}
+          groupName={groupNameOf}
+        />
+      )}
 
       <PwaUpdateBar show={updateReady} />
     </div>
@@ -493,82 +650,6 @@ function LoadingGrid() {
         {Array.from({ length: 12 }).map((_, i) => <div key={i} className="lp-skel" />)}
       </div>
     </>
-  );
-}
-
-function TagGrid({ photos, sel, pulseIds, toggleSel, filtered }) {
-  if (!photos.length) {
-    return filtered ? (
-      <Empty k="NOTHING HERE">No photos match this filter. Tap ALL to see the full set.</Empty>
-    ) : (
-      <Empty k="STANDING BY">
-        No dump yet. Photos from the SD-card tool appear here the moment they finish uploading.
-      </Empty>
-    );
-  }
-  return (
-    <div className="lp-grid">
-      {photos.map((p, i) => {
-        const on = sel.has(p.id);
-        const cap = [raiderTeamLabel(p.raider_team), p.raider_sub_events?.name].filter(Boolean).join(' · ');
-        return (
-          <button
-            key={p.id}
-            className="lp-tile"
-            aria-pressed={on}
-            data-sel={on}
-            data-pulse={pulseIds.has(p.id)}
-            style={{ animationDelay: `${Math.min(i * 24, 300)}ms` }}
-            onClick={() => toggleSel(p.id)}
-          >
-            <img src={p.thumb_url || p.photo_url} alt="" loading="lazy" />
-            <span className="lp-tilepill" data-live={p.visibility === 'public'}>
-              {p.visibility === 'public' ? 'LIVE' : 'STAGED'}
-            </span>
-            {on && <span className="lp-check">✓</span>}
-            {cap && <span className="lp-cap">{cap}</span>}
-          </button>
-        );
-      })}
-    </div>
-  );
-}
-
-function ParentGrid({ photos, pulseIds, sel, onToggleSel, onHideToggle, onDelete }) {
-  if (!photos.length) {
-    return (
-      <Empty k="ALL QUIET">
-        No parent uploads yet. They land here live as families post from the stands.
-      </Empty>
-    );
-  }
-  return (
-    <div className="lp-grid">
-      {photos.map((p, i) => {
-        const hidden = p.status === 'hidden';
-        const on = sel.has(p.id);
-        return (
-          <div
-            key={p.id}
-            className="lp-tile"
-            data-dim={hidden}
-            data-sel={on}
-            data-pulse={pulseIds.has(p.id)}
-            style={{ animationDelay: `${Math.min(i * 24, 300)}ms`, cursor: 'pointer' }}
-            onClick={() => onToggleSel(p.id)}
-          >
-            <img src={p.thumb_url || p.photo_url} alt="" loading="lazy" />
-            {hidden && <span className="lp-tilepill" data-hidden="true">HIDDEN</span>}
-            {on && <span className="lp-check">✓</span>}
-            {!hidden && p.uploader_name && <span className="lp-cap lp-cap--top">{p.uploader_name}</span>}
-            <div className="lp-tileact">
-              <button onClick={(e) => { e.stopPropagation(); onHideToggle(p); }}>{hidden ? 'UNHIDE' : 'HIDE'}</button>
-              <button className="x" onClick={(e) => { e.stopPropagation(); onDelete(p); }} aria-label="Delete permanently">✕</button>
-            </div>
-          </div>
-        );
-      })}
-    </div>
   );
 }
 

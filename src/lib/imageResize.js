@@ -79,6 +79,36 @@ async function loadImageFromUrl(url) {
   });
 }
 
+// Blurs a whole canvas by shrinking it to a handful of pixels and scaling it
+// back up with smoothing, twice. Deliberately NOT ctx.filter = 'blur()':
+// Safari (every iPhone browser) ignores ctx.filter and draws the image
+// untouched, so a "blurred" face came out perfectly sharp on iOS with no
+// error. Down/up-sampling works in every browser and throws the detail away
+// for good, so it can't be sharpened back.
+function softBlurCanvas(src, strength) {
+  const { width: w, height: h } = src;
+  const factor = Math.max(4, strength);
+  const mid = document.createElement('canvas');
+  mid.width = Math.max(1, Math.round(w / Math.sqrt(factor)));
+  mid.height = Math.max(1, Math.round(h / Math.sqrt(factor)));
+  const tiny = document.createElement('canvas');
+  tiny.width = Math.max(1, Math.round(w / factor));
+  tiny.height = Math.max(1, Math.round(h / factor));
+  const out = document.createElement('canvas');
+  out.width = w;
+  out.height = h;
+  for (const c of [mid, tiny, out]) {
+    const x = c.getContext('2d');
+    x.imageSmoothingEnabled = true;
+    x.imageSmoothingQuality = 'high';
+  }
+  mid.getContext('2d').drawImage(src, 0, 0, mid.width, mid.height);
+  tiny.getContext('2d').drawImage(mid, 0, 0, tiny.width, tiny.height);
+  mid.getContext('2d').drawImage(tiny, 0, 0, mid.width, mid.height);
+  out.getContext('2d').drawImage(mid, 0, 0, w, h);
+  return out;
+}
+
 // Draws `img` scaled to `maxEdge`, then bakes each oval (relative 0..1
 // image-space center + radii) in as a real pixel blur — not a CSS overlay —
 // so the redaction survives in storage and everywhere the photo is served.
@@ -88,13 +118,8 @@ function drawScaledWithBlur(img, maxEdge, ovals) {
   const { width: w, height: h } = canvas;
   const ctx = canvas.getContext('2d');
 
-  const blurCanvas = document.createElement('canvas');
-  blurCanvas.width = w;
-  blurCanvas.height = h;
-  const bctx = blurCanvas.getContext('2d');
   const blurPx = Math.max(6, Math.round(Math.max(w, h) * BLUR_RADIUS_FRACTION));
-  bctx.filter = `blur(${blurPx}px)`;
-  bctx.drawImage(img, 0, 0, w, h);
+  const blurCanvas = softBlurCanvas(canvas, blurPx);
 
   for (const { cx, cy, rx, ry } of ovals) {
     ctx.save();
@@ -110,14 +135,17 @@ function drawScaledWithBlur(img, maxEdge, ovals) {
 /**
  * Bakes oval blur regions into a photo already in storage, given its public
  * URL. `ovals` are {cx, cy, rx, ry} fractions of image width/height (0..1).
+ * `thumbMax` matches resizeForUpload's option (OPTIC's feed thumbs are
+ * bigger than the 400px gallery default).
  * @param {string} url
  * @param {{cx:number,cy:number,rx:number,ry:number}[]} ovals
+ * @param {{ thumbMax?: number }} [opts]
  * @returns {Promise<{ full: Blob, thumb: Blob }>}
  */
-export async function applyOvalBlurToUrl(url, ovals) {
+export async function applyOvalBlurToUrl(url, ovals, { thumbMax = THUMB_MAX } = {}) {
   const img = await loadImageFromUrl(url);
   const fullCanvas = drawScaledWithBlur(img, FULL_MAX, ovals);
-  const thumbCanvas = drawScaledWithBlur(img, THUMB_MAX, ovals);
+  const thumbCanvas = drawScaledWithBlur(img, thumbMax, ovals);
   const [full, thumb] = await Promise.all([toBlob(fullCanvas), toBlob(thumbCanvas)]);
   return { full, thumb };
 }
