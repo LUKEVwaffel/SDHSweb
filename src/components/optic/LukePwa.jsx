@@ -124,7 +124,7 @@ function LukePwa() {
 
   const [tab, setTab] = useState('tag');
   const [filter, setFilter] = useState('all'); // all | untagged | staged | live
-  const [team, setTeam] = useState('all');     // all | male | coed, same rule as the parent feed
+  const [team, setTeam] = useState('all');     // all | male | coed | both, same rule as the parent feed
   const [collapsed, setCollapsed] = useState(() => new Set()); // `${tab}:${albumId}`
   const [viewer, setViewer] = useState(null);  // photo id open full screen, or null
   const [tileSize, setTileSize] = useState(readTileSize);
@@ -195,6 +195,7 @@ function LukePwa() {
       all: src.length,
       male: src.filter((p) => matchesTeam(p, 'male')).length,
       coed: src.filter((p) => matchesTeam(p, 'coed')).length,
+      both: src.filter((p) => matchesTeam(p, 'both')).length,
     };
   }, [tab, parentPhotos, lukePhotos]);
   const newParentCount = useMemo(

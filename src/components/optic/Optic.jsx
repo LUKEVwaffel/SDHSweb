@@ -58,7 +58,15 @@ const TEAM_FILTERS = [
   { id: 'all', label: 'ALL' },
   { id: 'male', label: 'MALE' },
   { id: 'coed', label: 'COED' },
+  { id: 'both', label: 'BOTH' },
 ];
+
+// Strict: a photo tagged 'both' only shows under ALL or BOTH, never under
+// MALE or COED, so each team chip is exactly that team's photos.
+const matchesTeam = (p, team) => team === 'all' || p.raider_team === team;
+const countTeams = (list) => Object.fromEntries(
+  TEAM_FILTERS.map((t) => [t.id, list.filter((p) => matchesTeam(p, t.id)).length]),
+);
 
 function OpticApp() {
   const config = useOpticConfig();
@@ -70,6 +78,7 @@ function OpticApp() {
   const [reel, setReel] = useState(null); // index into visiblePhotos, or null
   const [teamFilter, setTeamFilter] = useState('all');
   const [subEventFilter, setSubEventFilter] = useState('all');
+  const [teamPickFor, setTeamPickFor] = useState(null); // sub-event awaiting a team choice
   const [walk, setWalk] = useState(() => isStandalone() && !hasWalkthroughOptic());
   const [selectMode, setSelectMode] = useState(false);
   const [selected, setSelected] = useState(() => new Set());
@@ -84,15 +93,9 @@ function OpticApp() {
 
   const showWalk = walk && gate.open;
 
-  // 'both' (Luke's untagged-team-but-tagged-event shots) shows under either
-  // team filter — it's the #1 ask from the OPTIC survey, so it stays simple:
-  // ALL / MALE / COED, no UNASSIGNED bucket yet. No separate FEMALE filter,
-  // SDHS fields two teams this comp (Male, Coed), no standalone Female team.
-  const teamCounts = useMemo(() => ({
-    all: photos.length,
-    male: photos.filter((p) => p.raider_team === 'male' || p.raider_team === 'both').length,
-    coed: photos.filter((p) => p.raider_team === 'coed' || p.raider_team === 'both').length,
-  }), [photos]);
+  // ALL / MALE / COED / BOTH, each team chip strict (see matchesTeam). No
+  // FEMALE filter, SDHS fields two teams this comp (Male, Coed).
+  const teamCounts = useMemo(() => countTeams(photos), [photos]);
 
   // Filter by sub-event (Rope Bridge, CCR, etc.) alongside team — parent
   // ask (Luke's mom), the natural complement to the team chips: a parent
@@ -116,10 +119,21 @@ function OpticApp() {
 
   const visiblePhotos = useMemo(() => {
     let list = photos;
-    if (teamFilter !== 'all') list = list.filter((p) => p.raider_team === teamFilter || p.raider_team === 'both');
+    if (teamFilter !== 'all') list = list.filter((p) => matchesTeam(p, teamFilter));
     if (subEventFilter !== 'all') list = list.filter((p) => p.sub_event_id === subEventFilter);
     return list;
   }, [photos, teamFilter, subEventFilter]);
+
+  // Tapping an event asks which team to show before filtering.
+  const teamPickCounts = useMemo(
+    () => (teamPickFor ? countTeams(photos.filter((p) => p.sub_event_id === teamPickFor.id)) : null),
+    [photos, teamPickFor],
+  );
+  function pickEventTeam(team) {
+    setSubEventFilter(teamPickFor.id);
+    setTeamFilter(team);
+    setTeamPickFor(null);
+  }
 
   function resetBatch() {
     setBatch({ items: [], pos: 0 });
@@ -221,7 +235,10 @@ function OpticApp() {
               counts={teamCounts}
               subEventOptions={subEventOptions}
               subEventFilter={subEventFilter}
-              onSubEventFilterChange={setSubEventFilter}
+              onSubEventFilterChange={(id) => {
+                if (id === 'all') { setSubEventFilter('all'); return; }
+                setTeamPickFor(subEventOptions.find((o) => o.id === id) || null);
+              }}
               subEventCounts={subEventCounts}
               pendingCount={pendingCount}
               onShowNew={() => {
@@ -236,6 +253,14 @@ function OpticApp() {
           </div>
         )}
       </div>
+      {teamPickFor && (
+        <EventTeamPicker
+          event={teamPickFor}
+          counts={teamPickCounts}
+          onPick={pickEventTeam}
+          onClose={() => setTeamPickFor(null)}
+        />
+      )}
 
       {selectMode && (
         <div className="rhea-batchbar">
@@ -699,6 +724,38 @@ function UploadCard({ eventId }) {
         )}
       </div>
     </section>
+  );
+}
+
+function EventTeamPicker({ event, counts, onPick, onClose }) {
+  useEffect(() => {
+    const onKey = (e) => { if (e.key === 'Escape') onClose(); };
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  }, [onClose]);
+  return (
+    <div className="rhea-wt" role="dialog" aria-label={`Pick a team for ${event.name}`} onClick={onClose}>
+      <div className="rhea-wt-card" onClick={(e) => e.stopPropagation()}>
+        <div className="rhea-wt-step">{event.name.toUpperCase()}</div>
+        <h2 className="rhea-wt-h">Which <span className="accent">team?</span></h2>
+        <div className="rhea-tpick">
+          {TEAM_FILTERS.map((t) => (
+            <button
+              key={t.id}
+              className="rhea-tpick-opt"
+              disabled={!counts?.[t.id]}
+              onClick={() => onPick(t.id)}
+            >
+              {t.id === 'all' ? 'ALL TEAMS' : t.label}
+              <span className="rhea-fchip-n">{counts?.[t.id] ?? 0}</span>
+            </button>
+          ))}
+        </div>
+        <div className="rhea-wt-foot">
+          <button className="rhea-wt-skip" onClick={onClose}>CANCEL</button>
+        </div>
+      </div>
+    </div>
   );
 }
 
