@@ -7,7 +7,7 @@ import { useOpticGate } from '../../hooks/useOpticGate';
 import { useOpticConfig } from '../../hooks/useOpticConfig';
 import {
   uploadOpticPhoto, isAllowedImage, OPTIC_ACCEPT_ATTR, REJECT_MESSAGE,
-  feedAttribution, feedChip, downloadPhoto, downloadPhotos,
+  feedAttribution, feedChip, downloadPhoto, prepareBatch, saveBatchChunk, BATCH_CHUNK,
   hasOnboardedOptic, hasWalkthroughOptic, markWalkthroughOptic,
   hasInstallDismissedOptic, markInstallDismissedOptic,
   hasWatchZoneDismissedOptic, markWatchZoneDismissedOptic,
@@ -74,7 +74,13 @@ function OpticApp() {
   const [walk, setWalk] = useState(() => isStandalone() && !hasWalkthroughOptic());
   const [selectMode, setSelectMode] = useState(false);
   const [selected, setSelected] = useState(() => new Set());
-  const [batchState, setBatchState] = useState('idle'); // idle | saving | error
+  // idle -> preparing (fetching files) -> ready (SAVE button armed) -> saving
+  // -> back to ready for the next chunk, or done. See prepareBatch() for why
+  // this is two taps instead of one.
+  const [batchState, setBatchState] = useState('idle'); // idle | preparing | ready | saving | error
+  const [batchProgress, setBatchProgress] = useState({ done: 0, total: 0 });
+  const [batchMsg, setBatchMsg] = useState('');
+  const [batch, setBatch] = useState({ items: [], pos: 0 }); // fetched files + next chunk start
   const updateReady = usePwaUpdate();
 
   const showWalk = walk && gate.open;
@@ -116,13 +122,22 @@ function OpticApp() {
     return list;
   }, [photos, teamFilter, subEventFilter]);
 
+  function resetBatch() {
+    setBatch({ items: [], pos: 0 });
+    setBatchState('idle');
+    setBatchMsg('');
+    setBatchProgress({ done: 0, total: 0 });
+  }
+
   function toggleSelectMode() {
     setSelectMode((on) => !on);
     setSelected(new Set());
-    setBatchState('idle');
+    resetBatch();
   }
 
   function toggleSelected(id) {
+    // Changing the pick after files were fetched invalidates them.
+    if (batchState !== 'idle' && batchState !== 'error') resetBatch();
     setSelected((prev) => {
       const next = new Set(prev);
       if (next.has(id)) next.delete(id); else next.add(id);
@@ -130,16 +145,57 @@ function OpticApp() {
     });
   }
 
-  async function downloadSelected() {
+  async function prepareSelected() {
     const chosen = visiblePhotos.filter((p) => selected.has(p.id));
-    if (!chosen.length || batchState === 'saving') return;
+    if (!chosen.length || batchState === 'preparing') return;
+    setBatchState('preparing');
+    setBatchMsg('');
+    setBatchProgress({ done: 0, total: chosen.length });
+    const { items, failed } = await prepareBatch(chosen, (done, total) => setBatchProgress({ done, total }));
+    posthog.capture('optic_batch_prepared', { count: chosen.length, failed });
+    if (!items.length) { setBatchState('error'); setBatchMsg('Could not load those photos. Check signal and try again.'); return; }
+    setBatch({ items, pos: 0 });
+    setBatchMsg(failed ? `${failed} photo${failed === 1 ? '' : 's'} couldn't load and will be skipped.` : '');
+    setBatchState('ready');
+  }
+
+  // Called straight off the SAVE tap with no await before share(), so iOS
+  // still treats it as user-initiated.
+  async function saveNextChunk() {
+    const { items, pos } = batch;
+    const chunk = items.slice(pos, pos + BATCH_CHUNK);
+    if (!chunk.length || batchState !== 'ready') return;
     setBatchState('saving');
-    const result = await downloadPhotos(chosen);
-    setBatchState(result.ok ? 'idle' : 'error');
-    // saved === 0 with ok: true means the user cancelled the share sheet on
-    // purpose — leave the selection in place so they can just tap DOWNLOAD
-    // again instead of losing their picks.
-    if (result.ok && result.saved > 0) { setSelectMode(false); setSelected(new Set()); }
+    const result = await saveBatchChunk(chunk);
+    if (result === 'cancelled') { setBatchState('ready'); return; }
+    if (result === 'failed') {
+      setBatchState('ready');
+      setBatchMsg('Your phone blocked that save. Tap SAVE again, or open a photo and use SAVE there.');
+      return;
+    }
+    const nextPos = pos + chunk.length;
+    posthog.capture('optic_batch_saved', { count: chunk.length });
+    if (nextPos >= items.length) {
+      setSelectMode(false);
+      setSelected(new Set());
+      resetBatch();
+      return;
+    }
+    setBatch({ items, pos: nextPos });
+    setBatchMsg('');
+    setBatchState('ready');
+  }
+
+  const batchTotal = batch.items.length;
+  const batchPos = batch.pos;
+  const batchNext = Math.min(BATCH_CHUNK, batchTotal - batchPos);
+  let batchLabel = `DOWNLOAD ${selected.size || ''}`.trim();
+  if (batchState === 'preparing') batchLabel = `LOADING ${batchProgress.done}/${batchProgress.total}…`;
+  else if (batchState === 'saving') batchLabel = 'SAVING…';
+  else if (batchState === 'ready') {
+    batchLabel = batchTotal > BATCH_CHUNK
+      ? `SAVE ${batchPos + 1}–${batchPos + batchNext} OF ${batchTotal}`
+      : `SAVE ${batchTotal} PHOTO${batchTotal === 1 ? '' : 'S'}`;
   }
 
   return (
@@ -190,15 +246,13 @@ function OpticApp() {
             <button className="rhea-btn rhea-btn--ghost" onClick={toggleSelectMode}>CANCEL</button>
             <button
               className="rhea-btn"
-              onClick={downloadSelected}
-              disabled={!selected.size || batchState === 'saving'}
+              onClick={batchState === 'ready' ? saveNextChunk : prepareSelected}
+              disabled={!selected.size || batchState === 'preparing' || batchState === 'saving'}
             >
-              {batchState === 'saving' ? 'SAVING…' : `DOWNLOAD ${selected.size || ''}`.trim()}
+              {batchLabel}
             </button>
           </div>
-          {batchState === 'error' && (
-            <span className="rhea-batchbar-err">Save failed, try again.</span>
-          )}
+          {batchMsg && <span className="rhea-batchbar-err">{batchMsg}</span>}
         </div>
       )}
 
@@ -787,14 +841,14 @@ function FeedItem({ photo, pos, liked, likeCount, onLike, onOpen, selectMode, se
   const who = feedAttribution(photo);
   const isLuke = photo.source === 'luke';
   return (
-    <figure className="rhea-item" style={{ '--d': `${Math.min(pos, 8) * 45}ms` }}>
+    <figure className="rhea-item" data-anim={pos < 8} style={{ '--d': `${pos * 45}ms` }}>
       <div className="rhea-shot-wrap">
         <button
           className="rhea-shot"
           onClick={selectMode ? onToggleSelected : onOpen}
           aria-label={selectMode ? (selected ? 'Deselect photo' : 'Select photo') : 'Open photo reel'}
         >
-          <img src={photo.photo_url} alt="" loading="lazy" />
+          <img src={photo.thumb_url || photo.photo_url} alt="" loading="lazy" decoding="async" />
         </button>
         {selectMode && (
           <span className="rhea-select-mark" data-on={selected} aria-hidden="true">
@@ -926,8 +980,20 @@ function Reel({ photos, index, likes, onIndex, onClose }) {
   // kicking the visitor out. If the reel closes some other way (X button,
   // Escape, swiping past the last photo), consume that entry ourselves so a
   // *later* real back gesture doesn't land on a dead pushState.
+  //
+  // Closing the reel also has to put the feed back exactly where the reader
+  // left it. The history.back() here (and the OS back gesture) is a history
+  // traversal, and with the browser's default scrollRestoration='auto' iOS
+  // restores whatever scroll it recorded for that entry — which, with the
+  // body scroll-locked under the reel, comes back as 0. That was the "closing
+  // a photo throws me back to the top" report (East Hamilton). So: manual
+  // restoration while the reel is up, and we scroll back to the saved Y
+  // ourselves, a few times across the async popstate to beat the browser.
   useEffect(() => {
     let closedByPop = false;
+    const savedY = window.scrollY;
+    const prevRestoration = window.history.scrollRestoration;
+    try { window.history.scrollRestoration = 'manual'; } catch { /* old Safari */ }
     window.history.pushState({ opticReel: true }, '');
     function onPopState() {
       closedByPop = true;
@@ -936,7 +1002,19 @@ function Reel({ photos, index, likes, onIndex, onClose }) {
     window.addEventListener('popstate', onPopState);
     return () => {
       window.removeEventListener('popstate', onPopState);
-      if (!closedByPop) window.history.back();
+      const restore = () => window.scrollTo(0, savedY);
+      const onBack = () => requestAnimationFrame(restore);
+      if (!closedByPop) {
+        window.addEventListener('popstate', onBack, { once: true });
+        window.history.back();
+      }
+      restore();
+      requestAnimationFrame(restore);
+      setTimeout(() => {
+        restore();
+        window.removeEventListener('popstate', onBack);
+        try { window.history.scrollRestoration = prevRestoration || 'auto'; } catch { /* old Safari */ }
+      }, 350);
     };
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
@@ -1009,11 +1087,14 @@ function Reel({ photos, index, likes, onIndex, onClose }) {
             <div className="rhea-page" key={p.id} onClick={() => onPageTap(p)}>
               {near && (
                 <>
-                  <div className="rhea-page-bg" style={{ backgroundImage: `url(${p.photo_url})` }} />
+                  {isCur && (
+                    <div className="rhea-page-bg" style={{ backgroundImage: `url(${p.thumb_url || p.photo_url})` }} />
+                  )}
                   <img
                     className="rhea-page-img"
                     src={p.photo_url}
                     alt=""
+                    decoding="async"
                     draggable="false"
                     style={isCur && zoom.scale !== 1
                       ? { transform: `translate(${zoom.x}px, ${zoom.y}px) scale(${zoom.scale})` }

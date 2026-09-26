@@ -1,6 +1,7 @@
 import { supabase as SB } from './supabaseClient';
 import { resizeForUpload } from './imageResize';
 import { adminDisplayName } from './admins';
+import { putPhotoFile } from './photoStorage';
 
 // ── OPTIC 2.0 — comp photo pipeline. Which event this targets is no longer a
 // hardcoded id: useOpticConfig() reads it from optic_config.active_event_id so
@@ -15,7 +16,9 @@ import { adminDisplayName } from './admins';
 export const OPTIC_EVENT_ID = '0d0eef63-eff6-4988-bc4a-b9686ccc9dd4';
 export const OPTIC_EVENT_TITLE = 'East Hamilton Raider Competition';
 
-const BUCKET = 'team-photos';
+// Feed-card image size. The feed renders `thumb_url`, full-width on a
+// phone, so it needs more than the 400px gallery default to look sharp.
+const FEED_THUMB_MAX = 900;
 // photos.team MUST stay 'raiders' , the photos_require_posted_event trigger
 // rejects any other value for this event. Sub-team goes in raider_team.
 const PHOTO_TEAM = 'raiders';
@@ -75,17 +78,16 @@ export async function uploadOpticPhoto(file, {
   takenAt = null, raiderTeam = null, subEventId = null, publish = false,
 }) {
   if (!eventId) throw new Error('No active event set. optic_config.active_event_id is missing.');
-  const { full, thumb } = await resizeForUpload(file); // throws on RAW / unreadable
+  // throws on RAW / unreadable
+  const { full, thumb } = await resizeForUpload(file, { thumbMax: FEED_THUMB_MAX });
   const stamp = `${Date.now()}_${Math.random().toString(36).slice(2, 8)}`;
   const base = `${PHOTO_TEAM}/${eventId}/${stamp}`;
 
-  const up1 = await SB.storage.from(BUCKET).upload(`${base}.jpg`, full, { contentType: 'image/jpeg' });
-  if (up1.error) throw up1.error;
-  const up2 = await SB.storage.from(BUCKET).upload(`${base}_t.jpg`, thumb, { contentType: 'image/jpeg' });
-  if (up2.error) throw up2.error;
-
-  const photoUrl = SB.storage.from(BUCKET).getPublicUrl(`${base}.jpg`).data.publicUrl;
-  const thumbUrl = SB.storage.from(BUCKET).getPublicUrl(`${base}_t.jpg`).data.publicUrl;
+  // R2 when configured, Supabase Storage otherwise — see lib/photoStorage.js.
+  const [photoUrl, thumbUrl] = await Promise.all([
+    putPhotoFile(`${base}.jpg`, full),
+    putPhotoFile(`${base}_t.jpg`, thumb),
+  ]);
 
   const { data, error } = await SB.from('photos').insert({
     team: PHOTO_TEAM,
@@ -278,44 +280,78 @@ export async function downloadPhoto(url, filename) {
   saveBlobDirect(blob, name, url);
 }
 
-/**
- * Batch save. iOS/Android with Web Share file support: one share-sheet call
- * with every file, so the OS's own "Save N Images" does the batching - this
- * is the only path that reliably reaches Camera Roll for more than one photo
- * at once on iOS (a zip just lands as a Files document, not in Photos).
- * Everywhere else: fall back to saveBlobDirect() per photo (reusing the
- * blobs already fetched below, no per-item Web Share retry), staggered so
- * the browser doesn't treat a burst of same-tick downloads as a popup flood
- * and block them.
- */
-export async function downloadPhotos(photos) {
-  const items = await Promise.all(photos.map(async (p) => {
-    try {
-      const res = await fetch(p.photo_url);
-      const blob = await res.blob();
-      const name = `optic_${p.id}.jpg`;
-      return { blob, name, url: p.photo_url, file: new File([blob], name, { type: blob.type || 'image/jpeg' }) };
-    } catch {
-      return null;
-    }
-  }));
-  const ready = items.filter(Boolean);
-  if (!ready.length) return { ok: false, saved: 0 };
+// ── batch save ────────────────────────────────────────────────────────────
+// Two steps on purpose. iOS only lets navigator.share() run inside a fresh
+// user tap ("transient activation", a few seconds at most). The old one-shot
+// downloadPhotos() fetched every selected photo FIRST and only then called
+// share(), so on any real selection the tap had long expired, share() threw
+// NotAllowedError, and the per-photo fallback (window.open on iOS) got
+// popup-blocked — batch save "did nothing" (parent reports after East
+// Hamilton). Now: prepareBatch() fetches with a progress count, the UI flips
+// to a SAVE button, and saveBatchChunk() calls share() synchronously off
+// that second tap with the files already in memory.
+//
+// iOS's share sheet also gets unreliable with a lot of full-size images in
+// one go, so saves go out in chunks of BATCH_CHUNK — one tap each.
+export const BATCH_CHUNK = 20;
+const MOBILE_UA = /iphone|ipad|ipod|android/i;
+const isMobile = () => MOBILE_UA.test(window.navigator.userAgent)
+  || (navigator.maxTouchPoints > 1 && /macintosh/i.test(navigator.userAgent)); // iPadOS reports as Mac
 
-  const files = ready.map((r) => r.file);
-  if (navigator.canShare?.({ files })) {
-    try {
-      await navigator.share({ files });
-      return { ok: true, saved: files.length };
-    } catch (err) {
-      if (isShareCancel(err)) return { ok: true, saved: 0 }; // cancelled on purpose, not a failure
+/**
+ * Fetch every selected photo into memory. Resolves to the items that loaded
+ * (failed fetches are dropped and counted).
+ * @param {Array<{id:string, photo_url:string}>} photos
+ * @param {(done:number, total:number) => void} [onProgress]
+ */
+export async function prepareBatch(photos, onProgress) {
+  const out = new Array(photos.length).fill(null);
+  let done = 0;
+  let next = 0;
+  async function worker() {
+    while (next < photos.length) {
+      const i = next++;
+      const p = photos[i];
+      try {
+        const res = await fetch(p.photo_url);
+        if (!res.ok) throw new Error(String(res.status));
+        const blob = await res.blob();
+        const name = `optic_${p.id}.jpg`;
+        out[i] = { blob, name, url: p.photo_url, file: new File([blob], name, { type: blob.type || 'image/jpeg' }) };
+      } catch { /* dropped, reported via failed count */ }
+      done += 1;
+      onProgress?.(done, photos.length);
     }
   }
+  await Promise.all(Array.from({ length: Math.min(4, photos.length) }, worker));
+  const items = out.filter(Boolean);
+  return { items, failed: photos.length - items.length };
+}
 
-  for (let i = 0; i < ready.length; i += 1) {
-    saveBlobDirect(ready[i].blob, ready[i].name, ready[i].url);
+/**
+ * Save one chunk of prepared items. MUST be called directly from a click
+ * handler (no awaits before it) so iOS still counts the tap.
+ * @returns {Promise<'saved'|'cancelled'|'failed'>}
+ */
+export async function saveBatchChunk(items) {
+  if (!items.length) return 'failed';
+  const files = items.map((r) => r.file);
+  if (isMobile() && navigator.canShare?.({ files })) {
+    try {
+      await navigator.share({ files });
+      return 'saved';
+    } catch (err) {
+      if (isShareCancel(err)) return 'cancelled';
+      // iOS has no working fallback (window.open per photo is popup-blocked),
+      // so report it and let the UI suggest a smaller chunk / single saves.
+      if (isIosDevice()) return 'failed';
+    }
+  }
+  for (let i = 0; i < items.length; i += 1) {
+    saveBlobDirect(items[i].blob, items[i].name, items[i].url);
+    // Staggered so the browser doesn't treat a same-tick burst as a popup flood.
     // eslint-disable-next-line no-await-in-loop
     await new Promise((resolve) => setTimeout(resolve, 350));
   }
-  return { ok: true, saved: ready.length };
+  return 'saved';
 }
