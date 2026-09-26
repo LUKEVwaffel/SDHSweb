@@ -17,6 +17,31 @@ const TEAMS = [
   { id: 'both', label: 'BOTH' },
 ];
 const TABS = ['tag', 'parents', 'subs'];
+
+// The stations every Raider comp runs, in running order. Both teams do all
+// of them, so each is team 'both'. Added with one tap from EVENTS, and
+// automatically when switching to a comp that has no sub-events yet.
+const STANDARD_EVENTS = ['Team Run', 'CCR', 'PTT', 'One Rope', 'Gauntlet', 'Obstacle Course'];
+const normName = (n) => String(n || '').trim().toLowerCase().replace(/\s+/g, ' ');
+
+/**
+ * Insert whichever standard events `eventId` doesn't have yet. One at a time
+ * so created_at keeps them in running order (albums follow that order).
+ * @returns {Promise<{added:number, error:object|null}>}
+ */
+async function addStandardEvents(eventId, existingNames, createdBy) {
+  const have = new Set(existingNames.map(normName));
+  let added = 0;
+  for (const name of STANDARD_EVENTS) {
+    if (have.has(normName(name))) continue;
+    // eslint-disable-next-line no-await-in-loop
+    const { error } = await SB.from('raider_sub_events')
+      .insert({ event_id: eventId, name, team: 'both', created_by: createdBy || null });
+    if (error) return { added, error };
+    added += 1;
+  }
+  return { added, error: null };
+}
 const PARENT_SEEN_KEY = 'optic_pwa_parent_seen';
 const TILE_SIZE_KEY = 'optic_pwa_tile_size';
 
@@ -763,6 +788,21 @@ function SubEvents({ eventId, subEvents, counts, emailRef, refreshSubs, setActio
   const [sending, setSending] = useState(false);
   const [sendMsg, setSendMsg] = useState('');
   const [alertText, setAlertText] = useState('');
+  const [prefilling, setPrefilling] = useState(false);
+
+  const have = new Set(subEvents.map((s) => normName(s.name)));
+  const missingStandard = STANDARD_EVENTS.filter((n) => !have.has(normName(n)));
+
+  async function prefill() {
+    if (!eventId || prefilling) return;
+    setPrefilling(true); setActionErr('');
+    haptic(14);
+    const { error } = await addStandardEvents(eventId, subEvents.map((s) => s.name), emailRef.current);
+    setPrefilling(false);
+    if (error) { setActionErr(error.message || 'Could not add the standard events.'); haptic([8, 40, 8]); }
+    else haptic([10, 30, 10]);
+    refreshSubs();
+  }
 
   async function create() {
     const n = name.trim();
@@ -847,6 +887,19 @@ function SubEvents({ eventId, subEvents, counts, emailRef, refreshSubs, setActio
 
   return (
     <>
+      {eventId && missingStandard.length > 0 && (
+        <div className="lp-speed" style={{ marginBottom: 2 }}>
+          <span style={{ flex: 1 }}>
+            {missingStandard.length === STANDARD_EVENTS.length
+              ? 'Add the standard events (both teams):'
+              : 'Missing standard events:'} {missingStandard.join(', ')}
+          </span>
+          <button className="lp-btn lp-btn--sm" onClick={prefill} disabled={prefilling}>
+            {prefilling ? 'ADDING…' : `ADD ${missingStandard.length}`}
+          </button>
+        </div>
+      )}
+
       <div className="lp-create">
         <input
           className="lp-input"
@@ -1034,6 +1087,14 @@ function CompControl({ eventId, eventTitle }) {
         .update({ mode: 'auto', opens_at: when.toISOString(), is_open: false, updated_at: now })
         .eq('id', 'default');
       if (gate.error) throw gate.error;
+      // Fresh comp with no stations yet: set up the standard ones. A comp
+      // that already has its own list is left alone. Best-effort; the
+      // EVENTS tab offers the same button if this doesn't land.
+      const subs = await SB.from('raider_sub_events').select('name').eq('event_id', ev.id);
+      if (!subs.error && !(subs.data || []).length) {
+        const { data: sess } = await SB.auth.getSession();
+        await addStandardEvents(ev.id, [], sess.session?.user?.email);
+      }
       setMsg(`Live for ${ev.title}. Locked until ${when.toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' })}.`);
       setOpen(false);
     } catch (e) {
