@@ -126,13 +126,17 @@ export async function applyOvalBlurToUrl(url, ovals) {
  * @param {File} file
  * @returns {Promise<{ full: Blob, thumb: Blob, width: number, height: number }>}
  */
-export async function resizeForUpload(file) {
+// `thumbMax` lets a caller ask for a bigger thumbnail than the 400px gallery
+// default — OPTIC's feed shows its "thumb" full-width on a phone, where 400px
+// looks soft, but full-size (1600px) there made scrolling lag and burned
+// bandwidth.
+export async function resizeForUpload(file, { thumbMax = THUMB_MAX } = {}) {
   if (isRawFile(file)) {
     throw new Error('RAW files (.CR2, .NEF, etc.) aren\'t supported — export as JPEG first.');
   }
   const img = await loadImage(file);
   const fullCanvas = drawScaled(img, FULL_MAX);
-  const thumbCanvas = drawScaled(img, THUMB_MAX);
+  const thumbCanvas = drawScaled(img, thumbMax);
   const [full, thumb] = await Promise.all([toBlob(fullCanvas), toBlob(thumbCanvas)]);
   return { full, thumb, width: fullCanvas.width, height: fullCanvas.height };
 }

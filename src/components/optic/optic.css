@@ -246,6 +246,17 @@
   position: relative; margin: 0; border-radius: 14px; overflow: hidden;
   background: var(--navy-deep); border: 1px solid var(--hair);
   box-shadow: 0 20px 44px -26px rgba(0, 0, 0, 0.75);
+  /* Scroll perf (parents reported the feed "very laggy" at East Hamilton):
+     let the browser skip layout/paint for cards that are off screen. With a
+     few hundred photos this is most of the list at any moment. The intrinsic
+     size is a 4:3 image on a ~360px phone plus the caption row, close enough
+     that the scrollbar doesn't jump as cards come into view. */
+  content-visibility: auto;
+  contain-intrinsic-size: auto 330px;
+}
+/* entrance animation only for the first screenful — animating every card
+   (and re-animating on every filter change) was wasted work mid-scroll */
+.rhea-item[data-anim="true"] {
   animation: rhea-rise 460ms var(--ease-out) both;
   animation-delay: var(--d, 0ms);
 }
@@ -260,7 +271,7 @@
   content: "⤢"; position: absolute; top: 10px; right: 10px;
   width: 28px; height: 28px; display: grid; place-items: center; border-radius: 8px;
   background: rgba(6, 16, 31, 0.5); border: 1px solid var(--hair-strong);
-  color: var(--cream); font-size: 13px; backdrop-filter: blur(4px);
+  color: var(--cream); font-size: 13px;
   opacity: 0; transform: translateY(-4px); transition: opacity 200ms ease, transform 200ms ease;
 }
 .rhea-item:hover .rhea-shot::after { opacity: 1; transform: translateY(0); }
@@ -282,9 +293,8 @@
   position: absolute; left: 10px; bottom: 10px; z-index: 2;
   display: flex; align-items: center; gap: 7px;
   border: 1px solid var(--hair-strong); border-radius: 999px; padding: 7px 12px 7px 10px;
-  background: rgba(6, 16, 31, 0.55); color: var(--cream); cursor: pointer;
+  background: rgba(6, 16, 31, 0.72); color: var(--cream); cursor: pointer;
   font-family: var(--mono); font-size: 11px; letter-spacing: 0.04em;
-  backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px);
   transition: transform 140ms var(--ease-spring), background-color 140ms ease, border-color 140ms ease;
 }
 .rhea-like:active { transform: scale(0.9); }
@@ -308,9 +318,8 @@
   position: absolute; left: 10px; top: 10px; z-index: 2;
   width: 26px; height: 26px; border-radius: 50%;
   display: grid; place-items: center;
-  border: 1.5px solid var(--hair-strong); background: rgba(6, 16, 31, 0.55);
+  border: 1.5px solid var(--hair-strong); background: rgba(6, 16, 31, 0.72);
   color: var(--ink); font-size: 13px; font-weight: 700;
-  backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px);
   transition: background-color 140ms ease, border-color 140ms ease;
 }
 .rhea-select-mark[data-on="true"] { border-color: var(--gold); background: var(--gold); }

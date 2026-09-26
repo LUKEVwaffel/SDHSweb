@@ -1,0 +1,21 @@
+# OPTIC photo storage on Cloudflare R2 (replaces the Supabase `team-photos`
+# bucket for /optic + /lukeupload uploads). R2 has zero egress fees, which is
+# the whole point: every parent scrolling the feed was billed against the
+# Supabase egress quota. Deploy: see ./README.md.
+name = "optic-photos"
+main = "src/index.js"
+compatibility_date = "2026-09-01"
+
+[[r2_buckets]]
+binding = "PHOTOS"
+bucket_name = "optic-photos"
+
+[vars]
+# Browser origins allowed to PUT/DELETE, comma-separated, or "*". GETs are
+# always open (public photos). Left at "*" for comp day so a preview deploy
+# or a www/non-www mismatch can't silently break parent uploads; tighten to
+# "https://www.sdhsjrotc.com,https://sdhsjrotc.com" once things are calm.
+ALLOWED_ORIGINS = "*"
+# Used to verify a DISPATCH login before a DELETE. Anon key is public-safe.
+SUPABASE_URL = "https://YOUR-PROJECT.supabase.co"
+SUPABASE_ANON_KEY = "your-anon-key"

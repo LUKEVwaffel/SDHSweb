@@ -4,6 +4,7 @@ import AdminGate from './AdminGate';
 import { useOpticPhotos, useOpticSubEvents } from '../../hooks/useOpticPhotos';
 import { useOpticConfig } from '../../hooks/useOpticConfig';
 import { OPTIC_EVENT_TITLE, raiderTeamLabel } from '../../lib/opticComp';
+import { removePhotoFiles } from '../../lib/photoStorage';
 import { installPwaHooks, isStandalone, isIos } from './pwa';
 import { usePwaUpdate, PwaUpdateBar } from './usePwaUpdate';
 import './lukepwa.css';
@@ -202,8 +203,9 @@ function LukePwa() {
     if (!window.confirm('Permanently delete this photo? The file is removed for good.')) return;
     setActionErr('');
     haptic([10, 40, 10]);
-    const thumb = photo.storage_path?.replace(/\.jpg$/i, '_t.jpg');
-    await SB.storage.from('team-photos').remove([photo.storage_path, thumb].filter(Boolean));
+    // File removal is best-effort, same as before: an orphaned file is
+    // harmless, a row left pointing at a deleted file is not.
+    await removePhotoFiles([photo]).catch(() => {});
     const { error: e } = await SB.from('photos').delete().eq('id', photo.id);
     if (e) { setActionErr(e.message || 'Delete failed. Tap again.'); return; }
     setSel((s) => { const n = new Set(s); n.delete(photo.id); return n; });
@@ -219,11 +221,7 @@ function LukePwa() {
     setActionErr('');
     haptic([10, 40, 10]);
     const targets = merged.filter((p) => sel.has(p.id));
-    const paths = targets.flatMap((p) => [
-      p.storage_path,
-      p.storage_path?.replace(/\.jpg$/i, '_t.jpg'),
-    ].filter(Boolean));
-    if (paths.length) await SB.storage.from('team-photos').remove(paths);
+    await removePhotoFiles(targets).catch(() => {});
     const { error: e } = await SB.from('photos').delete().in('id', list);
     if (e) { setActionErr(e.message || 'Delete failed. Check signal and tap again.'); return; }
     clearSel();
