@@ -46,7 +46,9 @@ export function useOpticGate() {
     };
     load();
 
-    const channel = SB.channel('optic-gate')
+    // Unique per mount (see useOpticConfig): reusing a still-leaving channel
+    // would silently drop LOCK / FORCE OPEN for this viewer.
+    const channel = SB.channel(`optic-gate-${Math.random().toString(36).slice(2, 10)}`)
       .on(
         'postgres_changes',
         { event: '*', schema: 'public', table: 'rhea_gate', filter: `id=eq.${GATE_ID}` },

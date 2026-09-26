@@ -46,7 +46,20 @@ export const REJECT_MESSAGE =
   'Only JPG and PNG files are accepted. iPhone photos saved as HEIC will not upload , ' +
   'set Settings › Camera › Formats to "Most Compatible", or send a screenshot of the photo instead.';
 
-const RAIDER_TEAM_LABEL = { male: 'Male Raiders', coed: 'Coed Raiders', both: 'Raiders' };
+// `.in('id', [...])` puts every id in the request URL (~40 chars per uuid),
+// and the Supabase gateway rejects URLs past roughly 8KB. A few hundred ids
+// (SELECT ALL -> PUBLISH on a full comp, or Luke's whole-card publish landing
+// on every viewer at once) is enough to hit that, so id lists go out in
+// chunks of this size.
+export const ID_CHUNK = 100;
+export function chunkIds(ids, size = ID_CHUNK) {
+  const list = [...ids];
+  const out = [];
+  for (let i = 0; i < list.length; i += size) out.push(list.slice(i, i + size));
+  return out;
+}
+
+const RAIDER_TEAM_LABEL ={ male: 'Male Raiders', coed: 'Coed Raiders', both: 'Raiders' };
 export const raiderTeamLabel = (t) => RAIDER_TEAM_LABEL[t] || null;
 
 /**

@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { supabase as SB } from '../lib/supabaseClient';
+import { chunkIds } from '../lib/opticComp';
 
 const SELECT = '*, raider_sub_events(name, team)';
 const CHECK_POLL_MS = 120_000; // lightweight safety net, see checkForChanges()
@@ -10,6 +11,24 @@ const capturedAt = (p) => new Date(p.taken_at || p.created_at).getTime();
 const sortNewestFirst = (rows) => rows.slice().sort((a, b) => capturedAt(b) - capturedAt(a));
 const isAtTop = () => typeof window === 'undefined' || window.scrollY <= TOP_THRESHOLD_PX;
 const inPublicScope = (row) => row.visibility === 'public' && row.status === 'live';
+const uniq = () => Math.random().toString(36).slice(2, 10);
+
+// PostgREST caps a single select at 1000 rows (Supabase default max-rows) and
+// silently truncates past it — with no ORDER BY that drops an arbitrary slice,
+// newest photos included. A full comp (Luke's card + parents) can pass that,
+// so full-list reads page through with a stable order. One request, same as
+// before, until a list actually crosses 1000.
+const PAGE = 1000;
+async function selectAllPages(build) {
+  const out = [];
+  for (let from = 0; ; from += PAGE) {
+    // eslint-disable-next-line no-await-in-loop
+    const { data, error } = await build().order('id').range(from, from + PAGE - 1);
+    if (error) return { data: null, error };
+    out.push(...(data || []));
+    if (!data || data.length < PAGE) return { data: out, error: null };
+  }
+}
 
 /**
  * Live photo list for the OPTIC feed, kept current by a Supabase Realtime
@@ -91,9 +110,10 @@ export function useOpticPhotos({ eventId, scope = 'public', enabled = true, defe
   }, []);
 
   const fetchRows = useCallback(async () => {
-    let q = SB.from('photos').select(SELECT).eq('event_id', eventId);
-    if (scope === 'public') q = q.eq('visibility', 'public').eq('status', 'live');
-    const { data, error: qErr } = await q;
+    const { data, error: qErr } = await selectAllPages(() => {
+      const q = SB.from('photos').select(SELECT).eq('event_id', eventId);
+      return scope === 'public' ? q.eq('visibility', 'public').eq('status', 'live') : q;
+    });
     return qErr ? { rows: null, qErr } : { rows: sortNewestFirst(data || []), qErr: null };
   }, [eventId, scope]);
 
@@ -123,9 +143,10 @@ export function useOpticPhotos({ eventId, scope = 'public', enabled = true, defe
   // Cheap safety net: ids + like counts only. Patches counts in place, and
   // falls back to a full reload only if photos were added or removed.
   const checkForChanges = useCallback(async () => {
-    let q = SB.from('photos').select('id, like_count').eq('event_id', eventId);
-    if (scope === 'public') q = q.eq('visibility', 'public').eq('status', 'live');
-    const { data, error: qErr } = await q;
+    const { data, error: qErr } = await selectAllPages(() => {
+      const q = SB.from('photos').select('id, like_count').eq('event_id', eventId);
+      return scope === 'public' ? q.eq('visibility', 'public').eq('status', 'live') : q;
+    });
     if (!aliveRef.current || qErr || !data) return;
     const current = pendingRef.current || photosRef.current;
     const known = new Map(current.map((p) => [p.id, p]));
@@ -147,11 +168,16 @@ export function useOpticPhotos({ eventId, scope = 'public', enabled = true, defe
     const ids = [...newIdsRef.current];
     newIdsRef.current = new Set();
     if (!ids.length) return;
-    let q = SB.from('photos').select(SELECT).in('id', ids);
-    if (scope === 'public') q = q.eq('visibility', 'public').eq('status', 'live');
-    const { data, error: qErr } = await q;
-    if (!aliveRef.current || qErr) return;
-    const incoming = new Map((data || []).map((r) => [r.id, r]));
+    // Chunked: a big publish burst can queue hundreds of ids, too many for
+    // one URL. A failed chunk is left for checkForChanges to reconcile.
+    const results = await Promise.all(chunkIds(ids).map((part) => {
+      const q = SB.from('photos').select(SELECT).in('id', part);
+      return scope === 'public' ? q.eq('visibility', 'public').eq('status', 'live') : q;
+    }));
+    if (!aliveRef.current) return;
+    const ok = results.filter((r) => !r.error);
+    if (!ok.length) return;
+    const incoming = new Map(ok.flatMap((r) => r.data || []).map((r) => [r.id, r]));
     const base = pendingRef.current || photosRef.current;
     const merged = sortNewestFirst([
       ...base.filter((p) => !incoming.has(p.id)),
@@ -207,7 +233,11 @@ export function useOpticPhotos({ eventId, scope = 'public', enabled = true, defe
     load();
 
     let everSubscribed = false;
-    const channel = SB.channel(`optic-photos-${scope}-${eventId}`)
+    // Unique per mount (see useOpticConfig): a same-name remount before the
+    // old channel's leave is acked — the gate flipping LOCK -> OPEN, a quick
+    // back-navigation — gets that dying channel back, and its subscribe() is
+    // a no-op, so the feed would silently stop updating.
+    const channel = SB.channel(`optic-photos-${scope}-${eventId}-${uniq()}`)
       .on(
         'postgres_changes',
         { event: '*', schema: 'public', table: 'photos', filter: `event_id=eq.${eventId}` },
@@ -272,7 +302,7 @@ export function useOpticSubEvents({ eventId, enabled = true } = {}) {
     aliveRef.current = true;
     if (!active) { setSubEvents([]); setLoading(false); return () => { aliveRef.current = false; }; }
     load();
-    const channel = SB.channel(`optic-sub-events-${eventId}`)
+    const channel = SB.channel(`optic-sub-events-${eventId}-${uniq()}`)
       .on(
         'postgres_changes',
         { event: '*', schema: 'public', table: 'raider_sub_events', filter: `event_id=eq.${eventId}` },

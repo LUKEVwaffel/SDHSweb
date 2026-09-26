@@ -3,7 +3,7 @@ import { supabase as SB } from '../../lib/supabaseClient';
 import AdminGate from './AdminGate';
 import { useOpticPhotos, useOpticSubEvents } from '../../hooks/useOpticPhotos';
 import { useOpticConfig } from '../../hooks/useOpticConfig';
-import { OPTIC_EVENT_TITLE, raiderTeamLabel } from '../../lib/opticComp';
+import { OPTIC_EVENT_TITLE, raiderTeamLabel, chunkIds } from '../../lib/opticComp';
 import { removePhotoFiles } from '../../lib/photoStorage';
 import { installPwaHooks, isStandalone, isIos } from './pwa';
 import { usePwaUpdate, PwaUpdateBar } from './usePwaUpdate';
@@ -189,11 +189,17 @@ function LukePwa() {
       return n;
     });
     flash(list);
-    const { error: e } = await SB.from('photos').update(patch).in('id', list);
+    let e = null;
+    for (const part of chunkIds(list)) {
+      // eslint-disable-next-line no-await-in-loop
+      ({ error: e } = await SB.from('photos').update(patch).in('id', part));
+      if (e) break;
+    }
     if (e) {
       setActionErr(e.message || 'Update failed. Check signal and tap again.');
       setOverrides((o) => { const n = { ...o }; list.forEach((id) => delete n[id]); return n; });
       haptic([8, 40, 8]);
+      refresh(); // earlier chunks may have landed; show the real state
       return;
     }
     refresh();
@@ -222,8 +228,13 @@ function LukePwa() {
     haptic([10, 40, 10]);
     const targets = merged.filter((p) => sel.has(p.id));
     await removePhotoFiles(targets).catch(() => {});
-    const { error: e } = await SB.from('photos').delete().in('id', list);
-    if (e) { setActionErr(e.message || 'Delete failed. Check signal and tap again.'); return; }
+    let e = null;
+    for (const part of chunkIds(list)) {
+      // eslint-disable-next-line no-await-in-loop
+      ({ error: e } = await SB.from('photos').delete().in('id', part));
+      if (e) break;
+    }
+    if (e) { setActionErr(e.message || 'Delete failed. Check signal and tap again.'); refresh(); return; }
     clearSel();
     refresh();
   }
@@ -939,7 +950,9 @@ function GateControl() {
       if (data) { setRow(data); setDraft((d) => d || toLocalInput(data.opens_at)); }
     };
     load();
-    const ch = SB.channel('lp-gate')
+    // Unique per mount, same reason as useOpticConfig: a remount before the
+    // old channel's leave is acked would get that dying channel back.
+    const ch = SB.channel(`lp-gate-${Math.random().toString(36).slice(2, 10)}`)
       .on('postgres_changes', { event: '*', schema: 'public', table: 'rhea_gate', filter: 'id=eq.default' }, load)
       .subscribe();
     return () => { SB.removeChannel(ch); };
