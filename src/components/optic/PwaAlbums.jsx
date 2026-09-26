@@ -4,8 +4,9 @@ import { raiderTeamLabel, isBlurredPhoto } from '../../lib/opticComp';
 // ── /lukepwa albums. Replaces the one flat grid: photos are grouped into one
 // album per sub-event (Rope Bridge, CCR, ...) in the order the events were
 // made, with everything not tagged to an event in a last UNSORTED album. The
-// team filter sits above (same ALL / MALE / COED rule as the parent feed:
-// 'both' shows under either team), so "Coed at Rope Bridge" is two taps.
+// team filter sits above (same ALL / MALE / COED / BOTH rule as the parent
+// feed: each team chip is strict, 'both' only under ALL or BOTH), so "Coed
+// at Rope Bridge" is two taps.
 //
 // Tiles follow the photo-app convention: tap opens the photo full screen,
 // long-press (or the corner circle) starts selecting, and while anything is
@@ -22,10 +23,10 @@ export const TEAM_FILTERS = [
   { id: 'all', label: 'ALL' },
   { id: 'male', label: 'MALE' },
   { id: 'coed', label: 'COED' },
+  { id: 'both', label: 'BOTH' },
 ];
 
-export const matchesTeam = (p, team) =>
-  team === 'all' || p.raider_team === team || p.raider_team === 'both';
+export const matchesTeam = (p, team) => team === 'all' || p.raider_team === team;
 
 const capturedAt = (p) => new Date(p.taken_at || p.created_at).getTime();
 const haptic = (p) => { try { navigator.vibrate?.(p); } catch { /* unsupported */ } };
