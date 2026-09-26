@@ -10,7 +10,6 @@ import {
   feedAttribution, feedChip, downloadPhoto, prepareBatch, saveBatchChunk, BATCH_CHUNK,
   hasOnboardedOptic, hasWalkthroughOptic, markWalkthroughOptic,
   hasInstallDismissedOptic, markInstallDismissedOptic,
-  hasWatchZoneDismissedOptic, markWatchZoneDismissedOptic,
 } from '../../lib/opticComp';
 import { readTakenAt } from '../../lib/opticExif';
 import { pushSupported, hasDecidedPush, markPushDecided, subscribeToPush } from '../../lib/opticPush';
@@ -210,7 +209,6 @@ function OpticApp() {
           <div className="rhea-wrap">
             <InstallNudge />
             <NotificationCard eventId={config.eventId} />
-            <WatchZoneCard />
             <UploadCard eventId={config.eventId} />
             <Feed
               photos={visiblePhotos}
@@ -375,40 +373,6 @@ function NotificationCard({ eventId }) {
   );
 }
 
-// Points OPTIC visitors at /watchzone — the pairing-free Raider film archive
-// (fullscreen + slow-mo) that lives on the main site. Same dismiss-once
-// pattern as InstallNudge/NotificationCard above.
-function WatchZoneCard() {
-  const [dismissed, setDismissed] = useState(hasWatchZoneDismissedOptic);
-  if (dismissed) return null;
-
-  function dismiss() {
-    markWatchZoneDismissedOptic();
-    setDismissed(true);
-  }
-
-  return (
-    <div className="rhea-card2" data-tone="alert">
-      <div className="rhea-card2-kick">RAIDER FILM</div>
-      <p className="rhea-card2-p">
-        New Raider OC film is up in the Watching Zone — full screen, slow-mo,
-        the works.
-      </p>
-      <div className="rhea-card2-row">
-        <a
-          className="rhea-btn"
-          style={{ flex: 1, textAlign: 'center', textDecoration: 'none' }}
-          href="/watchzone"
-          onClick={() => posthog.capture('optic_watchzone_clicked')}
-        >
-          WATCH NOW
-        </a>
-        <button className="rhea-btn rhea-btn--ghost" onClick={dismiss}>NOT NOW</button>
-      </div>
-    </div>
-  );
-}
-
 // Countdown hold shown until the gate opens (scheduled time or Luke's manual
 // override). uses a local 1 Hz tick; useOpticGate flips `open` when it lands.
 function OpticLocked({ opensAt, eventId }) {
@@ -466,7 +430,6 @@ function OpticLocked({ opensAt, eventId }) {
           <div className="rhea-lock-cards">
             <InstallNudge />
             <NotificationCard eventId={eventId} />
-            <WatchZoneCard />
             <WhatsNew />
           </div>
 
@@ -482,10 +445,10 @@ function OpticLocked({ opensAt, eventId }) {
 }
 
 const NEW_FEATURES = [
-  'Saving a photo on iPhone actually saves it now',
-  'Photo alerts fire on their own, nobody has to remember to send them',
-  'Select and download several photos at once',
-  'Filter by event (Rope Bridge, CCR, etc.), not just team',
+  'Scrolling the feed is smooth now, no more lag',
+  'Closing a photo keeps your place in the feed',
+  'Download several photos at once works on iPhone',
+  'Filter by team and by event, not just the whole day',
 ];
 
 // Reveal panel on the locked/countdown screen — this is the surface almost
@@ -508,13 +471,16 @@ function WhatsNew() {
 }
 
 function Header({ onHelp }) {
+  // Follows optic_config.active_event_id (switched from /lukepwa's SWITCH
+  // COMP) instead of a hardcoded comp name.
+  const { eventTitle } = useOpticConfig();
   return (
     <header className="rhea-hdr">
       <div className="rhea-hdr-in">
         <OpticGlyph className="rhea-glyph" />
         <div>
           <div className="rhea-kick">SDHS JROTC · OPTIC</div>
-          <div className="rhea-title">EAST HAMILTON RAIDER COMPETITION</div>
+          <div className="rhea-title">{(eventTitle || 'Raider Competition').toUpperCase()}</div>
         </div>
         <div className="rhea-hdr-right">
           <button className="rhea-help" onClick={onHelp} aria-label="Show walkthrough">?</button>

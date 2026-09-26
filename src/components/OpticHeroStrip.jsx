@@ -1,4 +1,5 @@
 import { useNavigate } from 'react-router-dom';
+import { useOpticConfig } from '../hooks/useOpticConfig';
 
 const P = {
   ink: '#06101F', navy: '#142847', deep: '#0A1628',
@@ -13,6 +14,7 @@ const P = {
 // (NOT /submit — that's an unrelated generic upload hub with no OPTIC tie-in).
 export default function OpticHeroStrip() {
   const navigate = useNavigate();
+  const { eventTitle } = useOpticConfig(); // live comp, switched in /lukepwa
 
   return (
     <section
@@ -48,7 +50,7 @@ export default function OpticHeroStrip() {
           fontFamily: 'Inter, sans-serif', fontSize: 13.5, color: P.mute,
           flex: 1, minWidth: 200, lineHeight: 1.5,
         }}>
-          Tomorrow at the East Hamilton Raider Competition. Upload from your phone, seen by every family there.
+          At the {eventTitle || 'Raider Competition'}. Upload from your phone, seen by every family there.
         </span>
 
         <span className="optic-strip-cta" style={{
