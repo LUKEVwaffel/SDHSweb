@@ -79,6 +79,9 @@ export function groupByTeam(photos) {
   return groups;
 }
 
+/** "CCR · MALE": the name alone is ambiguous once a station has one sub-event per team. */
+export const subEventLabel = (e) => (e.team && e.team !== 'both' ? `${e.name} · ${e.team.toUpperCase()}` : e.name);
+
 export const albumAnchor = (id) => `lp-album-${id}`;
 
 export function Albums({
@@ -257,7 +260,7 @@ export function AlbumJump({ groups, onJump }) {
     <div className="lp-filter lp-jump" role="navigation" aria-label="Jump to event">
       {groups.map((g) => (
         <button key={g.id} className="lp-fchip" onClick={() => { haptic(8); onJump(g.id); }}>
-          {g.name.toUpperCase()}<span className="n">{g.photos.length}</span>
+          {subEventLabel(g).toUpperCase()}<span className="n">{g.photos.length}</span>
         </button>
       ))}
     </div>
