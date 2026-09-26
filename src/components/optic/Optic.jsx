@@ -54,6 +54,8 @@ function OpticGlyph({ className }) {
   );
 }
 
+const stationKey = (name) => String(name || '').trim().toLowerCase().replace(/\s+/g, ' ');
+
 const TEAM_FILTERS = [
   { id: 'all', label: 'ALL' },
   { id: 'male', label: 'MALE' },
@@ -100,24 +102,34 @@ function OpticApp() {
   // derived from whatever sub-events actually have tagged photos right now
   // rather than a separate live query, same approach teamCounts already
   // uses. Only rendered when there's more than one to choose from.
+  //
+  // Keyed by station NAME, not sub-event id: every station is two sub-events
+  // (one MALE, one COED, see LukePwa STANDARD_EVENTS), and parents already
+  // pick the team with the chips above, so "CCR" is one chip covering both.
   const subEventOptions = useMemo(() => {
     const seen = new Map();
     for (const p of photos) {
-      if (p.sub_event_id && p.raider_sub_events?.name) seen.set(p.sub_event_id, p.raider_sub_events.name);
+      const name = p.sub_event_id && p.raider_sub_events?.name?.trim();
+      if (name && !seen.has(stationKey(name))) seen.set(stationKey(name), name);
     }
     return Array.from(seen, ([id, name]) => ({ id, name })).sort((a, b) => a.name.localeCompare(b.name));
   }, [photos]);
   const subEventCounts = useMemo(() => {
     const counts = { all: photos.length };
     for (const opt of subEventOptions) counts[opt.id] = 0;
-    for (const p of photos) if (p.sub_event_id) counts[p.sub_event_id] = (counts[p.sub_event_id] || 0) + 1;
+    for (const p of photos) {
+      const name = p.sub_event_id && p.raider_sub_events?.name;
+      if (name) counts[stationKey(name)] = (counts[stationKey(name)] || 0) + 1;
+    }
     return counts;
   }, [photos, subEventOptions]);
 
   const visiblePhotos = useMemo(() => {
     let list = photos;
     if (teamFilter !== 'all') list = list.filter((p) => p.raider_team === teamFilter || p.raider_team === 'both');
-    if (subEventFilter !== 'all') list = list.filter((p) => p.sub_event_id === subEventFilter);
+    if (subEventFilter !== 'all') {
+      list = list.filter((p) => p.sub_event_id && stationKey(p.raider_sub_events?.name) === subEventFilter);
+    }
     return list;
   }, [photos, teamFilter, subEventFilter]);
 

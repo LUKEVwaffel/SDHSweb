@@ -7,7 +7,7 @@ import { OPTIC_EVENT_TITLE, chunkIds, backfillGridThumbs } from '../../lib/optic
 import { removePhotoFiles } from '../../lib/photoStorage';
 import { installPwaHooks, isStandalone, isIos } from './pwa';
 import { usePwaUpdate, PwaUpdateBar } from './usePwaUpdate';
-import { Albums, AlbumJump, groupByEvent, groupByTeam, matchesTeam, albumAnchor, TEAM_FILTERS } from './PwaAlbums';
+import { Albums, AlbumJump, subEventLabel, groupByEvent, groupByTeam, matchesTeam, albumAnchor, TEAM_FILTERS } from './PwaAlbums';
 import { PhotoViewer } from './PwaPhotoViewer';
 import './lukepwa.css';
 
@@ -18,25 +18,34 @@ const TEAMS = [
 ];
 const TABS = ['tag', 'parents', 'subs'];
 
-// The stations every Raider comp runs, in running order. Both teams do all
-// of them, so each is team 'both'. Added with one tap from EVENTS, and
+// The stations every Raider comp runs, in running order. Both teams run
+// every one, separately, so each station is two sub-events: one MALE, one
+// COED. That keeps each team's photos in its own album, and tagging a photo
+// to one sets its team too. Added with one tap from EVENTS, and
 // automatically when switching to a comp that has no sub-events yet.
-const STANDARD_EVENTS = ['Team Run', 'CCR', 'PTT', 'One Rope', 'Gauntlet', 'Obstacle Course'];
+const STATIONS = ['Team Run', 'CCR', 'PTT', 'One Rope', 'Gauntlet', 'Obstacle Course'];
+const STANDARD_EVENTS = STATIONS.flatMap((name) => [
+  { name, team: 'male' },
+  { name, team: 'coed' },
+]);
 const normName = (n) => String(n || '').trim().toLowerCase().replace(/\s+/g, ' ');
+const eventKey = (e) => `${normName(e.name)}|${e.team}`;
+const standardLabel = (e) => `${e.name} ${e.team === 'male' ? 'M' : 'C'}`;
 
 /**
- * Insert whichever standard events `eventId` doesn't have yet. One at a time
- * so created_at keeps them in running order (albums follow that order).
+ * Insert whichever standard events `eventId` doesn't have yet (matched on
+ * name + team). One at a time so created_at keeps them in running order
+ * (albums follow that order).
  * @returns {Promise<{added:number, error:object|null}>}
  */
-async function addStandardEvents(eventId, existingNames, createdBy) {
-  const have = new Set(existingNames.map(normName));
+async function addStandardEvents(eventId, existing, createdBy) {
+  const have = new Set(existing.map(eventKey));
   let added = 0;
-  for (const name of STANDARD_EVENTS) {
-    if (have.has(normName(name))) continue;
+  for (const ev of STANDARD_EVENTS) {
+    if (have.has(eventKey(ev))) continue;
     // eslint-disable-next-line no-await-in-loop
     const { error } = await SB.from('raider_sub_events')
-      .insert({ event_id: eventId, name, team: 'both', created_by: createdBy || null });
+      .insert({ event_id: eventId, name: ev.name, team: ev.team, created_by: createdBy || null });
     if (error) return { added, error };
     added += 1;
   }
@@ -427,7 +436,7 @@ function LukePwa() {
   const viewerList = useMemo(() => viewerGroups.flatMap((g) => g.photos), [viewerGroups]);
   const groupNameOf = useMemo(() => {
     const m = new Map();
-    for (const g of viewerGroups) for (const p of g.photos) m.set(p.id, g.name);
+    for (const g of viewerGroups) for (const p of g.photos) m.set(p.id, subEventLabel(g));
     return (p) => m.get(p.id);
   }, [viewerGroups]);
   const closeViewer = useCallback(() => setViewer(null), []);
@@ -790,14 +799,14 @@ function SubEvents({ eventId, subEvents, counts, emailRef, refreshSubs, setActio
   const [alertText, setAlertText] = useState('');
   const [prefilling, setPrefilling] = useState(false);
 
-  const have = new Set(subEvents.map((s) => normName(s.name)));
-  const missingStandard = STANDARD_EVENTS.filter((n) => !have.has(normName(n)));
+  const have = new Set(subEvents.map(eventKey));
+  const missingStandard = STANDARD_EVENTS.filter((e) => !have.has(eventKey(e)));
 
   async function prefill() {
     if (!eventId || prefilling) return;
     setPrefilling(true); setActionErr('');
     haptic(14);
-    const { error } = await addStandardEvents(eventId, subEvents.map((s) => s.name), emailRef.current);
+    const { error } = await addStandardEvents(eventId, subEvents, emailRef.current);
     setPrefilling(false);
     if (error) { setActionErr(error.message || 'Could not add the standard events.'); haptic([8, 40, 8]); }
     else haptic([10, 30, 10]);
@@ -891,8 +900,10 @@ function SubEvents({ eventId, subEvents, counts, emailRef, refreshSubs, setActio
         <div className="lp-speed" style={{ marginBottom: 2 }}>
           <span style={{ flex: 1 }}>
             {missingStandard.length === STANDARD_EVENTS.length
-              ? 'Add the standard events (both teams):'
-              : 'Missing standard events:'} {missingStandard.join(', ')}
+              ? `Add the ${STATIONS.length} standard events, one MALE + one COED each:`
+              : 'Missing standard events:'} {missingStandard.length === STANDARD_EVENTS.length
+              ? STATIONS.join(', ')
+              : missingStandard.map(standardLabel).join(', ')}
           </span>
           <button className="lp-btn lp-btn--sm" onClick={prefill} disabled={prefilling}>
             {prefilling ? 'ADDING…' : `ADD ${missingStandard.length}`}
@@ -1022,7 +1033,7 @@ function BulkDrawer({ open, count, subEvents, onTeam, onSubEvent, onClearSub, on
           </span>
         )}
         {subEvents.map((s) => (
-          <button key={s.id} className="lp-chip" onClick={() => onSubEvent(s)}>{s.name}</button>
+          <button key={s.id} className="lp-chip" onClick={() => onSubEvent(s)}>{subEventLabel(s)}</button>
         ))}
         {subEvents.length > 0 && <button className="lp-chip" onClick={onClearSub}>✕ CLEAR</button>}
       </div>
@@ -1090,7 +1101,7 @@ function CompControl({ eventId, eventTitle }) {
       // Fresh comp with no stations yet: set up the standard ones. A comp
       // that already has its own list is left alone. Best-effort; the
       // EVENTS tab offers the same button if this doesn't land.
-      const subs = await SB.from('raider_sub_events').select('name').eq('event_id', ev.id);
+      const subs = await SB.from('raider_sub_events').select('name, team').eq('event_id', ev.id);
       if (!subs.error && !(subs.data || []).length) {
         const { data: sess } = await SB.auth.getSession();
         await addStandardEvents(ev.id, [], sess.session?.user?.email);
