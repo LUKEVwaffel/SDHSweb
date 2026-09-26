@@ -12,6 +12,10 @@
 // matter which backend a row lives on.
 
 const KEY_RE = /^[a-z]+\/[0-9a-f-]{36}\/[0-9]+_[a-z0-9]+(_t)?\.jpg$/;
+// Reads are looser than uploads: photos copied over from the old Supabase
+// bucket (scripts/migrate-photos-to-r2.mjs) keep their original paths, which
+// older uploaders built differently (other teams, blurred copies, PNGs).
+const READ_KEY_RE = /^[A-Za-z0-9][A-Za-z0-9._\-/ ()]*\.(jpe?g|png|webp|gif)$/i;
 const MAX_BYTES = 10 * 1024 * 1024; // resized uploads are ~0.3MB; this is just a ceiling
 const IMMUTABLE = 'public, max-age=31536000, immutable';
 
@@ -96,12 +100,13 @@ export default {
     if (req.method === 'OPTIONS') return new Response(null, { status: 204, headers: cors });
 
     const key = decodeURIComponent(new URL(req.url).pathname.replace(/^\/+/, ''));
-    if (!KEY_RE.test(key)) {
-      return key ? json({ error: 'Bad key' }, 400, cors) : new Response('OPTIC photos', { headers: cors });
-    }
+    if (!key) return new Response('OPTIC photos', { headers: cors });
+    const isRead = req.method === 'GET' || req.method === 'HEAD';
+    const validKey = isRead ? READ_KEY_RE.test(key) && !key.includes('..') : KEY_RE.test(key);
+    if (!validKey) return json({ error: 'Bad key' }, 400, cors);
 
     try {
-      if (req.method === 'GET' || req.method === 'HEAD') return await serve(req, env, ctx, key);
+      if (isRead) return await serve(req, env, ctx, key);
       if (req.method === 'PUT') return await upload(req, env, key, cors);
       if (req.method === 'DELETE') return await remove(req, env, ctx, key, cors);
       return json({ error: 'Method not allowed' }, 405, cors);

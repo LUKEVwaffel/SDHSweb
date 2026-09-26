@@ -35,7 +35,7 @@ export default function LukePwaRoute() {
 }
 
 function LukePwa() {
-  const { eventId } = useOpticConfig();
+  const { eventId, eventTitle } = useOpticConfig();
   const { photos, loading, error, refresh } = useOpticPhotos({ eventId, scope: 'all' });
   const { subEvents, refresh: refreshSubs } = useOpticSubEvents({ eventId });
 
@@ -255,7 +255,7 @@ function LukePwa() {
       <header className="lp-head">
         <div>
           <div className="lp-kicker">DISPATCH · OPTIC</div>
-          <div className="lp-title">{OPTIC_EVENT_TITLE.toUpperCase()}</div>
+          <div className="lp-title">{(eventTitle || OPTIC_EVENT_TITLE).toUpperCase()}</div>
         </div>
         <div className="lp-sync">
           <span className="lp-dot" data-stale={!!error} />
@@ -271,6 +271,7 @@ function LukePwa() {
         </div>
       )}
 
+      <CompControl eventId={eventId} eventTitle={eventTitle} />
       <GateControl />
 
       <nav className="lp-tabs">
@@ -795,6 +796,120 @@ function BulkDrawer({ open, count, subEvents, onTeam, onSubEvent, onClearSub, on
       <button className="lp-btn lp-btn--danger" style={{ width: '100%', marginTop: 6 }} onClick={onDelete}>
         DELETE PERMANENTLY
       </button>
+    </div>
+  );
+}
+
+// Switch which comp OPTIC is live for, from the phone — no SQL. Picks (or
+// creates) a posted Raider event, points optic_config.active_event_id at it
+// (fresh, empty feed; past comps keep their photos under their own
+// event_id), and re-locks the gate on an AUTO countdown to 8:00 AM local on
+// the event's date — same "open after check-in/briefing" rule every comp
+// has used. Writes are admin-only via RLS (optic_config: is_admin; events
+// insert/update: S5/S6), and this whole surface is behind AdminGate.
+const DEFAULT_OPEN_HOUR = 8;
+
+function CompControl({ eventId, eventTitle }) {
+  const [open, setOpen] = useState(false);
+  const [events, setEvents] = useState([]);
+  const [pick, setPick] = useState('');
+  const [newTitle, setNewTitle] = useState('');
+  const [newDate, setNewDate] = useState('');
+  const [busy, setBusy] = useState(false);
+  const [msg, setMsg] = useState('');
+  const [err, setErr] = useState('');
+
+  useEffect(() => {
+    if (!open) return;
+    SB.from('events').select('id, title, date, status').eq('team', 'raiders')
+      .order('date', { ascending: false }).limit(30)
+      .then(({ data }) => setEvents(data || []));
+  }, [open]);
+
+  function opensAtFor(date) {
+    // Local wall-clock 08:00 on the comp date (Luke's phone is on ET).
+    const [y, m, d] = String(date).slice(0, 10).split('-').map(Number);
+    return new Date(y, m - 1, d, DEFAULT_OPEN_HOUR, 0, 0).toISOString();
+  }
+
+  async function switchTo(ev) {
+    const when = new Date(opensAtFor(ev.date));
+    if (!window.confirm(`Switch OPTIC to "${ev.title}"?\n\nThe live feed starts empty and stays LOCKED until ${when.toLocaleString([], { weekday: 'short', month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' })}. Past comps' photos are kept.`)) return;
+    setBusy(true); setErr(''); setMsg(''); haptic(14);
+    try {
+      if (ev.status !== 'posted') {
+        // photos_require_posted_event rejects uploads to a draft event.
+        const { error } = await SB.from('events').update({ status: 'posted' }).eq('id', ev.id);
+        if (error) throw error;
+      }
+      const now = new Date().toISOString();
+      const cfg = await SB.from('optic_config').update({ active_event_id: ev.id, updated_at: now }).eq('id', 'default');
+      if (cfg.error) throw cfg.error;
+      const gate = await SB.from('rhea_gate')
+        .update({ mode: 'auto', opens_at: when.toISOString(), is_open: false, updated_at: now })
+        .eq('id', 'default');
+      if (gate.error) throw gate.error;
+      setMsg(`Live for ${ev.title}. Locked until ${when.toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' })}.`);
+      setOpen(false);
+    } catch (e) {
+      setErr(e?.message || 'Switch failed, tap again.');
+    }
+    setBusy(false);
+  }
+
+  async function createAndSwitch() {
+    const title = newTitle.trim();
+    if (!title || !newDate) return;
+    setBusy(true); setErr('');
+    const { data, error } = await SB.from('events').insert({
+      title, date: newDate, team: 'raiders', category: 'RAIDER', status: 'posted', will_have_pictures: true,
+    }).select('id, title, date, status').single();
+    setBusy(false);
+    if (error) { setErr(error.message || 'Could not create event.'); return; }
+    setNewTitle(''); setNewDate('');
+    await switchTo(data);
+  }
+
+  const picked = events.find((e) => e.id === pick);
+
+  return (
+    <div className="lp-gate">
+      <div className="lp-gate-row" style={{ justifyContent: 'space-between' }}>
+        <span className="lp-gate-status">LIVE COMP · {eventTitle ? eventTitle.toUpperCase() : 'NONE SET'}</span>
+        <button className="lp-btn lp-btn--ghost lp-btn--sm" onClick={() => setOpen((o) => !o)} disabled={busy}>
+          {open ? 'CANCEL' : 'SWITCH COMP'}
+        </button>
+      </div>
+      {open && (
+        <>
+          <div className="lp-gate-row">
+            <select className="lp-gate-input" value={pick} onChange={(e) => setPick(e.target.value)} style={{ flex: 1 }}>
+              <option value="">Pick a Raider event…</option>
+              {events.map((e) => (
+                <option key={e.id} value={e.id} disabled={e.id === eventId}>
+                  {e.date} · {e.title}{e.status !== 'posted' ? ' (draft)' : ''}{e.id === eventId ? ' (live now)' : ''}
+                </option>
+              ))}
+            </select>
+            <button className="lp-btn lp-btn--sm" disabled={busy || !picked} onClick={() => switchTo(picked)}>
+              SWITCH
+            </button>
+          </div>
+          <div className="lp-gate-note">Not listed? Create it:</div>
+          <div className="lp-gate-row" style={{ flexWrap: 'wrap' }}>
+            <input
+              className="lp-gate-input" style={{ flex: '1 1 160px' }} placeholder="Warren County Raider Competition"
+              value={newTitle} onChange={(e) => setNewTitle(e.target.value)}
+            />
+            <input className="lp-gate-input" type="date" value={newDate} onChange={(e) => setNewDate(e.target.value)} />
+            <button className="lp-btn lp-btn--sm" disabled={busy || !newTitle.trim() || !newDate} onClick={createAndSwitch}>
+              CREATE + SWITCH
+            </button>
+          </div>
+        </>
+      )}
+      {msg && <div className="lp-gate-note">{msg}</div>}
+      {err && <div className="lp-gate-note" data-err="true">{err}</div>}
     </div>
   );
 }

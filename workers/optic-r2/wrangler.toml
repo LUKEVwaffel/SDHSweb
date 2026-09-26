@@ -16,6 +16,8 @@ bucket_name = "optic-photos"
 # or a www/non-www mismatch can't silently break parent uploads; tighten to
 # "https://www.sdhsjrotc.com,https://sdhsjrotc.com" once things are calm.
 ALLOWED_ORIGINS = "*"
-# Used to verify a DISPATCH login before a DELETE. Anon key is public-safe.
-SUPABASE_URL = "https://YOUR-PROJECT.supabase.co"
-SUPABASE_ANON_KEY = "your-anon-key"
+# Used to verify a DISPATCH login before a DELETE. The anon key is public
+# (it already ships in the site bundle) and RLS-protected, so it lives here.
+# NEVER put the service_role key in this file.
+SUPABASE_URL = "https://bjgyvmdzcymruunzavni.supabase.co"
+SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJqZ3l2bWR6Y3ltcnV1bnphdm5pIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc1NjMxMTQsImV4cCI6MjA5MzEzOTExNH0.HsRE4RreQU6yZSYxoYtvsC615e-EBpIIeDTC50EW0Cs"
