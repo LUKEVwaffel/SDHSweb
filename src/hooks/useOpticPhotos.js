@@ -73,14 +73,20 @@ async function selectAllPages(build) {
  *        refresh() call always applies immediately regardless. Off by
  *        default: the admin gallery (/lukepwa) and the TV display both want
  *        instant, undeferred updates, not a tap-to-reveal pill.
+ * @param {object[]|null} [opts.initialPhotos]  rows to paint immediately
+ *        (e.g. /lukepwa's on-device cache from last session) while the real
+ *        list loads. Only honoured on first mount, and dropped the moment
+ *        they turn out to belong to a different event.
  */
-export function useOpticPhotos({ eventId, scope = 'public', enabled = true, deferMidScroll = false } = {}) {
-  const [photos, setPhotos] = useState([]);
+export function useOpticPhotos({
+  eventId, scope = 'public', enabled = true, deferMidScroll = false, initialPhotos = null,
+} = {}) {
+  const [photos, setPhotos] = useState(() => initialPhotos || []);
   const [pendingCount, setPendingCount] = useState(0);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(() => !initialPhotos?.length);
   const [error, setError] = useState(null);
   const aliveRef = useRef(true);
-  const photosRef = useRef([]);
+  const photosRef = useRef(initialPhotos || []);
   const pendingRef = useRef(null);
   const newIdsRef = useRef(new Set()); // ids waiting on the batched join fetch
   const newTimerRef = useRef(null);
@@ -142,12 +148,29 @@ export function useOpticPhotos({ eventId, scope = 'public', enabled = true, defe
 
   // Cheap safety net: ids + like counts only. Patches counts in place, and
   // falls back to a full reload only if photos were added or removed.
+  //
+  // Plus blurred photos, in full. A blur swaps a photo's files but keeps its
+  // id, so an id/like check can't see it, and a phone that was locked when
+  // the realtime UPDATE went out would keep showing the sharp face until a
+  // full reload. Blurred rows are few and marked by `_blur` in storage_path
+  // (both the /lukepwa editor and the DISPATCH one), so they're re-read
+  // whole on every check and patched in place.
   const checkForChanges = useCallback(async () => {
-    const { data, error: qErr } = await selectAllPages(() => {
-      const q = SB.from('photos').select('id, like_count').eq('event_id', eventId);
-      return scope === 'public' ? q.eq('visibility', 'public').eq('status', 'live') : q;
-    });
-    if (!aliveRef.current || qErr || !data) return;
+    const scoped = (q) => (scope === 'public' ? q.eq('visibility', 'public').eq('status', 'live') : q);
+    const [{ data, error: qErr }, blurred] = await Promise.all([
+      selectAllPages(() => scoped(SB.from('photos').select('id, like_count').eq('event_id', eventId))),
+      scoped(SB.from('photos').select('*').eq('event_id', eventId).like('storage_path', '%_blur%')),
+    ]);
+    if (!aliveRef.current) return;
+    if (!blurred.error && blurred.data?.length) {
+      const fresh = new Map(blurred.data.map((r) => [r.id, r]));
+      applyInPlace((list) => (list.some((p) => fresh.has(p.id) && fresh.get(p.id).photo_url !== p.photo_url)
+        ? list.map((p) => (fresh.has(p.id) && fresh.get(p.id).photo_url !== p.photo_url
+          ? { ...p, ...fresh.get(p.id), raider_sub_events: p.raider_sub_events }
+          : p))
+        : list));
+    }
+    if (qErr || !data) return;
     const current = pendingRef.current || photosRef.current;
     const known = new Map(current.map((p) => [p.id, p]));
     const drifted = data.length !== known.size || data.some((r) => !known.has(r.id));
@@ -229,7 +252,11 @@ export function useOpticPhotos({ eventId, scope = 'public', enabled = true, defe
       return () => { aliveRef.current = false; };
     }
 
-    setLoading(true);
+    // Seeded rows from another event (the comp was switched since the cache
+    // was written) must never show under this one.
+    if (photosRef.current.length && photosRef.current[0].event_id !== eventId) commit([]);
+    // Already painting seeded rows: refresh underneath them, no skeleton.
+    if (!photosRef.current.length) setLoading(true);
     load();
 
     let everSubscribed = false;
@@ -274,7 +301,7 @@ export function useOpticPhotos({ eventId, scope = 'public', enabled = true, defe
       if (onScroll) window.removeEventListener('scroll', onScroll);
       SB.removeChannel(channel);
     };
-  }, [eventId, scope, active, load, onChange, checkForChanges, deferMidScroll, showNew]);
+  }, [eventId, scope, active, load, onChange, checkForChanges, deferMidScroll, showNew, commit]);
 
   return { photos, loading, error, pendingCount, showNew, refresh: load };
 }
@@ -283,9 +310,9 @@ export function useOpticPhotos({ eventId, scope = 'public', enabled = true, defe
  * Live sub-event list for the comp (realtime on raider_sub_events). Powers the
  * quick-select tagging list in /lukepwa.
  */
-export function useOpticSubEvents({ eventId, enabled = true } = {}) {
-  const [subEvents, setSubEvents] = useState([]);
-  const [loading, setLoading] = useState(true);
+export function useOpticSubEvents({ eventId, enabled = true, initialSubEvents = null } = {}) {
+  const [subEvents, setSubEvents] = useState(() => initialSubEvents || []);
+  const [loading, setLoading] = useState(() => !initialSubEvents);
   const aliveRef = useRef(true);
   const active = enabled && !!eventId;
 

@@ -823,7 +823,10 @@ function FeedItem({ photo, pos, liked, likeCount, onLike, onOpen, selectMode, se
           onClick={selectMode ? onToggleSelected : onOpen}
           aria-label={selectMode ? (selected ? 'Deselect photo' : 'Select photo') : 'Open photo reel'}
         >
-          <img src={photo.thumb_url || photo.photo_url} alt="" loading="lazy" decoding="async" />
+          {/* Keyed by URL: when Luke blurs a photo the row's URLs change, and a
+              remount drops the sharp bitmap at once instead of leaving it on
+              screen until the blurred file finishes downloading. */}
+          <img key={photo.thumb_url || photo.photo_url} src={photo.thumb_url || photo.photo_url} alt="" loading="lazy" decoding="async" />
         </button>
         {selectMode && (
           <span className="rhea-select-mark" data-on={selected} aria-hidden="true">
@@ -1066,6 +1069,7 @@ function Reel({ photos, index, likes, onIndex, onClose }) {
                     <div className="rhea-page-bg" style={{ backgroundImage: `url(${p.thumb_url || p.photo_url})` }} />
                   )}
                   <img
+                    key={p.photo_url /* remount on blur, see FeedItem */}
                     className="rhea-page-img"
                     src={p.photo_url}
                     alt=""

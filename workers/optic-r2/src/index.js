@@ -8,10 +8,11 @@
 //                     Supabase's /auth/v1/user
 //
 // Keys mirror the old Supabase layout exactly (raiders/<event uuid>/<stamp>.jpg
-// and the _t.jpg thumbnail), so photos.storage_path means the same thing no
+// plus the _t.jpg feed thumbnail and the _s.jpg grid thumbnail /lukepwa
+// tiles use), so photos.storage_path means the same thing no
 // matter which backend a row lives on.
 
-const KEY_RE = /^[a-z]+\/[0-9a-f-]{36}\/[0-9]+_[a-z0-9]+(_t)?\.jpg$/;
+const KEY_RE = /^[a-z]+\/[0-9a-f-]{36}\/[0-9]+_[a-z0-9]+(_t|_s)?\.jpg$/;
 // Reads are looser than uploads: photos copied over from the old Supabase
 // bucket (scripts/migrate-photos-to-r2.mjs) keep their original paths, which
 // older uploaders built differently (other teams, blurred copies, PNGs).
