@@ -456,16 +456,6 @@ const RELEASES = [
       'Photos load faster, served from a new photo host',
     ],
   },
-  {
-    version: 'OPTIC 2.1',
-    note: 'Fixed after Spring Hill, from the survey.',
-    items: [
-      'Saving a photo on iPhone actually saves it now',
-      'Photo alerts fire on their own, nobody has to remember to send them',
-      'Select and download several photos at once',
-      'Filter by event (Rope Bridge, CCR, etc.), not just team',
-    ],
-  },
 ];
 
 // Reveal panel on the locked/countdown screen — this is the surface almost
