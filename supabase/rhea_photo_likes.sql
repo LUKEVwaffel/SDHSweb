@@ -34,13 +34,15 @@ drop policy if exists rhea_photo_likes_delete on public.rhea_photo_likes;
 create policy rhea_photo_likes_read on public.rhea_photo_likes
   for select using (true);
 
--- Anyone (anon key) may like, but only photos that belong to the one Rhea
--- event , no writing likes against arbitrary photo ids.
+-- Anyone (anon key) may like, but only photos the public feed can see , no
+-- writing likes against staged/hidden photo ids. Originally pinned to the one
+-- Rhea event id, which broke likes on every later comp; see
+-- optic_likes_any_event.sql.
 create policy rhea_photo_likes_insert on public.rhea_photo_likes
   for insert with check (
     photo_id in (
       select id from public.photos
-      where event_id = 'e8a305fe-86cf-4092-a580-5865423271b9'
+      where visibility = 'public' and status = 'live'
     )
   );
 
