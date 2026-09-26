@@ -16,7 +16,7 @@
 // Usage (put the secrets in .env.local — never commit them):
 //   node --env-file=.env --env-file=.env.local scripts/migrate-photos-to-r2.mjs --dry-run
 //   node --env-file=.env --env-file=.env.local scripts/migrate-photos-to-r2.mjs
-// Options: --dry-run  --event <event uuid>  --limit <n>
+// Options: --dry-run  --event <event uuid>  --limit <n>  --concurrency <n> (default 3)
 //
 // Env:
 //   VITE_SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY
@@ -55,7 +55,9 @@ const s3 = new AwsClient({ accessKeyId, secretAccessKey, service: 's3', region: 
 const sb = createClient(sbUrl, serviceKey, { auth: { persistSession: false } });
 
 const MARKER = '/storage/v1/object/public/team-photos/';
-const CONCURRENCY = 6;
+const CONCURRENCY = Math.max(1, Number(argVal('--concurrency')) || 3);
+const MAX_429_RETRIES = 8;
+const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 const encodeKey = (key) => key.split('/').map(encodeURIComponent).join('/');
 
 // Path inside the bucket for a Supabase public URL, or null if it isn't one.
@@ -73,9 +75,21 @@ class FatalError extends Error {}
 
 async function copyObject(sourceUrl, key) {
   if (await existsInR2(key)) return 'exists';
-  const src = await fetch(sourceUrl);
+  // 429 = Supabase rate-limiting a burst of downloads, not a restriction:
+  // back off (honouring Retry-After when sent) and try again.
+  let src;
+  for (let attempt = 0; ; attempt += 1) {
+    src = await fetch(sourceUrl);
+    if (src.status !== 429 || attempt >= MAX_429_RETRIES) break;
+    const retryAfter = Number(src.headers.get('retry-after'));
+    const wait = retryAfter > 0 ? retryAfter * 1000 : Math.min(60_000, 2000 * 2 ** attempt);
+    console.log(`  rate-limited by Supabase, waiting ${Math.round(wait / 1000)}s…`);
+    await sleep(wait);
+  }
   if (src.status === 402 || src.status === 403 || src.status === 429) {
-    throw new FatalError(`Supabase refused the download (HTTP ${src.status}). Project is probably restricted.`);
+    throw new FatalError(src.status === 429
+      ? 'Supabase kept rate-limiting (HTTP 429) after several retries. Wait a few minutes and re-run.'
+      : `Supabase refused the download (HTTP ${src.status}). Project is probably restricted.`);
   }
   if (!src.ok) throw new Error(`download ${src.status}`);
   const body = new Uint8Array(await src.arrayBuffer());
