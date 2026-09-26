@@ -40,7 +40,12 @@ export function useOpticConfig() {
     };
     load();
 
-    const channel = SB.channel('optic-config')
+    // Unique per hook instance: several components on one page use this hook
+    // (the /optic header + feed, the home-page strip + band), and supabase-js
+    // hands back the SAME already-subscribed channel for a repeated name, so
+    // the second .on() throws "cannot add postgres_changes callbacks after
+    // subscribe()" and blanks the page.
+    const channel = SB.channel(`optic-config-${Math.random().toString(36).slice(2, 10)}`)
       .on(
         'postgres_changes',
         { event: '*', schema: 'public', table: 'optic_config', filter: `id=eq.${CONFIG_ID}` },
