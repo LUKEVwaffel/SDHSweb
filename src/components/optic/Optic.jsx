@@ -444,28 +444,47 @@ function OpticLocked({ opensAt, eventId }) {
   );
 }
 
-const NEW_FEATURES = [
-  'Scrolling the feed is smooth now, no more lag',
-  'Closing a photo keeps your place in the feed',
-  'Download several photos at once works on iPhone',
-  'Filter by team and by event, not just the whole day',
+// "What's new" card on the locked/countdown screen, newest release first.
+const RELEASES = [
+  {
+    version: 'OPTIC 2.2 · BETA',
+    note: 'Fixed this week, after East Hamilton.',
+    items: [
+      'Scrolling the feed is smooth now, no more lag',
+      'Closing a photo keeps your place instead of jumping to the top',
+      'Download several photos at once works on iPhone (tap DOWNLOAD, then SAVE)',
+      'Photos load faster, served from a new photo host',
+    ],
+  },
+  {
+    version: 'OPTIC 2.1',
+    note: 'Fixed after Spring Hill, from the survey.',
+    items: [
+      'Saving a photo on iPhone actually saves it now',
+      'Photo alerts fire on their own, nobody has to remember to send them',
+      'Select and download several photos at once',
+      'Filter by event (Rope Bridge, CCR, etc.), not just team',
+    ],
+  },
 ];
 
 // Reveal panel on the locked/countdown screen — this is the surface almost
-// everyone actually sees between the SQL landing and Saturday, including
-// everyone with the old app already on their home screen (isStandalone()
-// skips onboarding entirely), so the "we heard you" moment lives here, not
-// buried in onboarding.
+// everyone actually sees before the feed opens, including everyone with the
+// app already on their home screen (isStandalone() skips onboarding
+// entirely), so the "we heard you" moment lives here, not buried in
+// onboarding.
 function WhatsNew() {
   return (
     <div className="rhea-card2">
-      <div className="rhea-card2-kick">OPTIC 2.1</div>
-      <p className="rhea-card2-p">
-        Fixed after Spring Hill based on what people said in the survey.
-      </p>
-      <ul className="rhea-card2-list">
-        {NEW_FEATURES.map((text) => <li key={text}>{text}</li>)}
-      </ul>
+      {RELEASES.map((r, i) => (
+        <div key={r.version} style={i ? { marginTop: 14, opacity: 0.75 } : undefined}>
+          <div className="rhea-card2-kick">{r.version}</div>
+          <p className="rhea-card2-p">{r.note}</p>
+          <ul className="rhea-card2-list">
+            {r.items.map((text) => <li key={text}>{text}</li>)}
+          </ul>
+        </div>
+      ))}
     </div>
   );
 }
