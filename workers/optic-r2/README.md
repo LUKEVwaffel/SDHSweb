@@ -47,3 +47,37 @@ Worker), so leave the Worker running.
   only, 10 MB cap, key must look like `raiders/<event uuid>/<stamp>.jpg`, and
   it refuses to overwrite an existing file.
 - `DELETE`: requires a signed-in Supabase session (DISPATCH / Luke's PWA).
+
+## Moving existing photos over (`scripts/migrate-photos-to-r2.mjs`)
+
+Copies every `photos` row still on Supabase Storage into R2 at the same path,
+then points `photo_url` / `thumb_url` at the Worker. Re-runnable; the
+Supabase copies are left in place until you delete them yourself.
+
+**Redeploy the Worker first.** The current `src/index.js` lets reads use the
+older path formats that migrated photos keep. Without that update, migrated
+photos come back as "Bad key".
+
+1. R2 → **Manage API tokens** → *Create API token* → **Object Read & Write**,
+   limited to the `optic-photos` bucket. Keep the Access Key ID and Secret.
+   The Account ID is the hex string at the start of the bucket's S3 API URL.
+2. Put these in `.env.local` (git-ignored, never commit it):
+   ```
+   SUPABASE_SERVICE_ROLE_KEY=...   # Supabase → Project Settings → API Keys → service_role
+   R2_ACCOUNT_ID=...
+   R2_ACCESS_KEY_ID=...
+   R2_SECRET_ACCESS_KEY=...
+   VITE_OPTIC_R2_URL=https://optic-photos.sdhs-battalion.workers.dev
+   ```
+   `.env` needs `VITE_SUPABASE_URL`.
+3. Dry run, then the real thing:
+   ```sh
+   npm install
+   node --env-file=.env --env-file=.env.local scripts/migrate-photos-to-r2.mjs --dry-run
+   node --env-file=.env --env-file=.env.local scripts/migrate-photos-to-r2.mjs
+   ```
+   `--event <uuid>` limits it to one comp. `--limit 5` is a good first real run.
+
+Every file is downloaded from Supabase once, so this uses Supabase egress one
+last time. If the project is restricted, it stops at the first refused
+download without changing anything.
