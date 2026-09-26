@@ -122,6 +122,18 @@
 }
 .rhea-fchip[data-on="true"] .rhea-fchip-n { color: var(--gold); }
 
+/* event -> team picker sheet (reuses the walkthrough sheet shell) */
+.rhea-tpick { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 20px; }
+.rhea-tpick-opt {
+  display: flex; align-items: center; justify-content: space-between; gap: 8px;
+  min-height: 48px; padding: 12px 14px; cursor: pointer;
+  background: var(--navy-deep); border: 1px solid var(--hair-strong); border-radius: 12px;
+  font-family: var(--mono); font-size: 11px; letter-spacing: 0.12em; color: var(--cream);
+  transition: border-color 0.15s, background 0.15s;
+}
+.rhea-tpick-opt:active { border-color: var(--gold); background: rgba(201, 169, 97, 0.12); }
+.rhea-tpick-opt:disabled { opacity: 0.4; cursor: default; }
+
 /* ── composer (upload) ───────────────────────────────────────────────────── */
 .rhea-card {
   position: relative; margin-top: 18px;
