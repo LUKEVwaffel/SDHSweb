@@ -129,7 +129,7 @@ export default function CongratsPopup() {
 
           <div style={{ display: 'grid', gap: 8, marginBottom: 26 }}>
             {CONGRATS_TROPHIES.map((t, i) => (
-              <div key={`${t.place}-${t.event}`} className="cg-row" style={{ '--d': `${0.24 + i * 0.05}s`,
+              <div key={`${t.place}-${t.event}-${t.detail}`} className="cg-row" style={{ '--d': `${0.24 + i * 0.05}s`,
                 display: 'flex', alignItems: 'center', gap: 12,
               }}>
                 <span style={{

@@ -15,9 +15,13 @@ export const SEASON = {
   // Manual headline tiles — the auto-summary derives only from `teams[]` (division
   // standings) and would miss event-level podiums like the Co-Ed CCR win. Keep
   // these in sync with the meet log below.
+  // Season-long conference standing — the headline number. /videotv leads its
+  // trophy slide with it.
+  conference: { place: '3rd', label: 'Overall', scope: 'State Conference' },
   summary: [
-    { label: 'MEETS', value: '3' },
-    { label: 'TROPHIES', value: '13', sub: 'podium placements' },
+    { label: 'STATE CONFERENCE', value: '3rd', sub: 'overall standing' },
+    { label: 'MEETS', value: '4' },
+    { label: 'TROPHIES', value: '14', sub: 'podium placements' },
     { label: 'FIRST-PLACE FINISHES', value: '3', sub: 'CCR · Co-Ed / OC · Co-Ed / Hurricane Hill · Co-Ed' },
     { label: 'BEST DIVISION FINISH', value: '2nd', sub: 'Male · overall' },
   ],
@@ -30,6 +34,15 @@ export const SEASON = {
   //     events: [{ name: 'One-Rope Bridge', result: '3:42', note: '1st' }, ...],
   //   }
   meets: [
+    {
+      name: 'Warren County Raider Competition',
+      date: 'Sep 26, 2026',
+      location: 'McMinnville, TN',
+      teams: [],
+      events: [
+        { name: 'One Rope Bridge · Male', result: '3rd' },
+      ],
+    },
     {
       name: 'East Hamilton Raider Competition',
       date: 'Sep 19, 2026',

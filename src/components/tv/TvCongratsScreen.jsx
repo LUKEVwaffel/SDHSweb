@@ -171,7 +171,7 @@ export default function TvCongratsScreen() {
 
           <div style={{ marginTop: sp[10], borderBottom: `1px solid ${P.hair}` }}>
             {CONGRATS_TROPHIES.map((trophy, i) => (
-              <TrophyRow key={`${trophy.place}-${trophy.event}`} trophy={trophy} index={i} />
+              <TrophyRow key={`${trophy.place}-${trophy.event}-${trophy.detail}`} trophy={trophy} index={i} />
             ))}
           </div>
         </div>

@@ -1,285 +1,224 @@
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { P, mono, oswald, fraunces } from '../admin/theme.js';
-import { videoUrl } from '../../lib/raiderTv.js';
+import { videoUrl, fmtTime } from '../../lib/raiderTv.js';
+import { useRaiderVideos } from '../../hooks/useRaiderVideos.js';
+import { buildFilms } from '../../lib/raiderFilm.js';
 import { SEASON } from '../RaiderCompetitionResults.jsx';
+import VideoTvTrophySlide from './VideoTvTrophySlide.jsx';
+import VideoTvLoopEditor from './VideoTvLoopEditor.jsx';
+import { loadLoopConfig, saveLoopConfig, orderedFilms } from './videoTvPlaylist.js';
 
-// /videotv — hallway-TV loop for the East Hamilton Hurricane Haul run: plays
-// both clips back-to-back (muted, no controls, no remote — read-only, same
-// family as /balltv and /raidertv), then a Trophy Case slide showing every
-// podium the battalion has won this season, then repeats forever.
+// /videotv — hallway-TV loop of the whole Raider film library (muted, no
+// remote). Every film plays in full — multi-part films (P1/P2, Part 1/Part 2)
+// run back-to-back as one — with the Trophy Case slide between each film,
+// then the loop repeats forever.
+//
+// Which films play and in what order is set per TV from EDIT LOOP (saved in
+// that TV's localStorage — see videoTvPlaylist.js). Default: every film,
+// newest first.
 //
 // Self-contained full-screen anon route (App.jsx bypass), same pattern as
 // /balltv and /watchzone.
 
-// The two Hurricane Haul clips from raider_videos, uploaded full-length
-// (uploaded via scripts/upload-hurricane-haul.mjs, replacing the earlier
-// trimmed "OC" cut). storage_path is resolved against the public
-// raider-videos bucket via videoUrl().
-const HAUL_CLIPS = [
-  { id: '68f59b7d-ed48-443d-acff-6f59a63582ad', title: 'Hurricane Haul — Part 1', storage_path: '1790151785323-hurricane-haul-part1.mp4', duration_sec: 531.5 },
-  { id: '2779746e-374d-430c-b6e8-654bfa882760', title: 'Hurricane Haul — Part 2', storage_path: '1790151785324-hurricane-haul-part2.mp4', duration_sec: 445.2 },
-];
-
-const WATCHING_LABEL = 'East Hamilton Raider Competition';
-const WATCHING_LOCATION = 'East Hamilton, TN · Sep 19, 2026';
-const WATCHING_EVENT = 'Hurricane Hill · Obstacle Course';
-const WATCHING_TEAM = 'Trojan Battalion Raider Team — Male Squad';
-
-const TROPHY_MS = 26000;      // trophy case dwell time
-const TITLE_CARD_MS = 7000;   // "coaching corner" intermission dwell time
-const VIDEO_FALLBACK_MS = 20000; // advance anyway if a clip never fires 'ended' (stalled load)
-
-// Playback order: part 1 → intermission title card → part 2 → trophy case → repeat.
-const STEPS = [
-  { kind: 'video', clip: HAUL_CLIPS[0] },
-  { kind: 'title' },
-  { kind: 'video', clip: HAUL_CLIPS[1] },
-  { kind: 'trophy' },
-];
-const STEP_LABELS = ['Part 1', 'Coaching Corner', 'Part 2', 'Trophy Case'];
-
-const placeRank = (p) => {
-  const n = parseInt(p, 10);
-  return Number.isNaN(n) ? 999 : n;
-};
-
-// Every podium finish across the whole season — team placements plus
-// event-level podiums — flattened out of RaiderCompetitionResults' own data
-// so this can't drift from what /raiders shows.
-function trophiesForMeet(meet) {
-  const items = [];
-  meet.teams.forEach((t) => {
-    if (placeRank(t.place) <= 3) items.push({ label: `${t.team} Team`, place: t.place });
-  });
-  meet.events.forEach((ev) => {
-    const podiumMatch = /^(1st|2nd|3rd)$/i;
-    const place = podiumMatch.test(ev.result) ? ev.result : podiumMatch.test(ev.note || '') ? ev.note : null;
-    if (place) items.push({ label: ev.name, place });
-  });
-  return items;
-}
-
-function medalFor(place) {
-  const n = placeRank(place);
-  return n === 1 ? '🥇' : n === 2 ? '🥈' : n === 3 ? '🥉' : null;
-}
+const TROPHY_MS = 20000;         // trophy case dwell between films
+const VIDEO_GRACE_MS = 20000;    // advance anyway if a clip never fires 'ended' (stalled load)
 
 export default function VideoTv() {
-  const [step, setStep] = useState(0);
+  const { videos, loading } = useRaiderVideos();
+  const films = useMemo(() => buildFilms(videos), [videos]);
+  const [loopConfig, setLoopConfig] = useState(loadLoopConfig);
+  const rows = useMemo(() => orderedFilms(films, loopConfig), [films, loopConfig]);
+  const loop = useMemo(() => rows.filter((r) => r.included).map((r) => r.film), [rows]);
+
+  const [pos, setPos] = useState({ film: 0, part: 0, phase: 'video' });
+  const [editing, setEditing] = useState(false);
+  const [progress, setProgress] = useState(0);
   const videoRef = useRef(null);
-  const fallbackRef = useRef(null);
 
-  const advance = () => setStep((s) => (s + 1) % STEPS.length);
+  const hasLoop = loop.length > 0;
+  const film = hasLoop ? loop[pos.film % loop.length] : null;
+  const part = film ? film.parts[pos.part] || film.parts[0] : null;
+  const isVideo = hasLoop && pos.phase === 'video';
+  const nextFilm = hasLoop ? loop[(pos.film + 1) % loop.length] : null;
 
-  const current = STEPS[step];
-  const isVideoStep = current.kind === 'video';
-  const isTitleStep = current.kind === 'title';
-  const clip = current.clip ?? null;
+  // Parts → next part; last part → trophy case; trophy case → next film.
+  const advance = useCallback(() => {
+    setProgress(0);
+    setPos((p) => {
+      if (!hasLoop) return p;
+      const f = loop[p.film % loop.length];
+      if (p.phase === 'video' && p.part < f.parts.length - 1) return { ...p, part: p.part + 1 };
+      if (p.phase === 'video') return { ...p, phase: 'trophy' };
+      return { film: (p.film + 1) % loop.length, part: 0, phase: 'video' };
+    });
+  }, [hasLoop, loop]);
+
+  // Loop edited — restart from the top of the new loop.
+  useEffect(() => { setPos({ film: 0, part: 0, phase: 'video' }); }, [loop.length, loopConfig]);
 
   useEffect(() => {
-    if (!isVideoStep) return undefined;
+    if (!isVideo || !part) return undefined;
     const v = videoRef.current;
     if (v) {
       v.currentTime = 0;
       v.play().catch(() => {});
     }
-    clearTimeout(fallbackRef.current);
-    fallbackRef.current = setTimeout(advance, VIDEO_FALLBACK_MS + (clip?.duration_sec ? clip.duration_sec * 1000 : 0));
-    return () => clearTimeout(fallbackRef.current);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [step]);
+    const ms = VIDEO_GRACE_MS + (Number(part.duration_sec) || 0) * 1000;
+    const id = setTimeout(advance, ms);
+    return () => clearTimeout(id);
+  }, [isVideo, part, advance]);
 
   useEffect(() => {
-    if (isVideoStep) return undefined;
-    const id = setTimeout(advance, isTitleStep ? TITLE_CARD_MS : TROPHY_MS);
+    if (isVideo) return undefined;
+    const id = setTimeout(advance, TROPHY_MS);
     return () => clearTimeout(id);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [step]);
+  }, [isVideo, pos, advance]);
 
-  const meetsWithTrophies = useMemo(
-    () => SEASON.meets.map((m) => ({ meet: m, trophies: trophiesForMeet(m) })).filter((m) => m.trophies.length > 0),
-    [],
-  );
-  const totalTrophies = useMemo(
-    () => meetsWithTrophies.reduce((n, m) => n + m.trophies.length, 0),
-    [meetsWithTrophies],
-  );
+  useEffect(() => {
+    function onKey(e) {
+      if (editing) return;
+      if (e.key === 'e' || e.key === 'E') setEditing(true);
+      if (e.key === 'ArrowRight') advance();
+    }
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  }, [editing, advance]);
+
+  function saveLoop(config) {
+    saveLoopConfig(config);
+    setLoopConfig(config);
+    setEditing(false);
+  }
+  function resetLoop() {
+    saveLoopConfig(null);
+    setLoopConfig(null);
+    setEditing(false);
+  }
+  function playNow(key) {
+    const i = loop.findIndex((f) => f.key === key);
+    setEditing(false);
+    if (i >= 0) {
+      setProgress(0);
+      setPos({ film: i, part: 0, phase: 'video' });
+    }
+  }
+
+  const conf = SEASON.conference;
+  const partLabel = film && film.parts.length > 1 ? ` · Part ${pos.part + 1} of ${film.parts.length}` : '';
 
   return (
     <div style={root}>
-      {/* top bar — all overlay text lives here, never drawn over the picture itself */}
-      <div style={topBar}>
-        <div>
-          <div style={infoKicker}>
-            {isVideoStep ? 'NOW WATCHING' : isTitleStep ? 'COACHING CORNER' : 'SEASON RECORD'}
-          </div>
-          <div style={infoTitle}>
-            {isVideoStep ? clip.title : isTitleStep ? 'Up Next: Part 2' : SEASON.label}
-          </div>
-        </div>
-        <div style={topBarMeta}>
-          {isVideoStep ? (
-            <>
-              <div style={infoRow}><span style={infoDot} />{WATCHING_EVENT}</div>
-              <div style={infoRow}>{WATCHING_LABEL} · {WATCHING_LOCATION}</div>
-              <div style={infoTeam}>{WATCHING_TEAM}</div>
-            </>
-          ) : isTitleStep ? (
-            <div style={infoTeam}>A WORD FROM WILL BAKER</div>
-          ) : (
-            <div style={infoTeam}>{totalTrophies} podium finishes across {meetsWithTrophies.length} meets</div>
-          )}
-        </div>
-      </div>
+      <style>{`
+        .vtv-fade { animation: vtvIn 0.8s ease both; }
+        @keyframes vtvIn { from { opacity: 0; } to { opacity: 1; } }
+        .vtv-btn:hover { border-color: ${P.gold} !important; color: ${P.cream} !important; }
+        @media (prefers-reduced-motion: reduce) { .vtv-fade { animation: none; } }
+      `}</style>
 
-      <div style={stage}>
-        {isVideoStep ? (
+      <header style={topBar}>
+        <div style={{ minWidth: 0 }}>
+          <div style={kicker}>{isVideo ? `NOW PLAYING · ${film.category.label}` : 'TROPHY CASE'}</div>
+          <div style={titleText}>
+            {isVideo ? `${film.title}${partLabel}` : loading ? 'Loading film…' : SEASON.label}
+          </div>
+        </div>
+        {conf && (
+          <div style={confBadge}>
+            <span style={confPlace}>{conf.place}</span>
+            <span style={confLabel}>{conf.label}<br />{conf.scope}</span>
+          </div>
+        )}
+      </header>
+
+      <main style={stage}>
+        {isVideo && part ? (
           <video
-            key={clip.id}
+            key={part.id}
             ref={videoRef}
-            src={videoUrl(clip.storage_path)}
+            src={videoUrl(part.storage_path)}
             muted
             autoPlay
             playsInline
             onEnded={advance}
+            onError={advance}
+            onTimeUpdate={(e) => {
+              const v = e.currentTarget;
+              if (v.duration) setProgress(v.currentTime / v.duration);
+            }}
             style={videoEl}
           />
-        ) : isTitleStep ? (
-          <div style={titleCardWrap}>
-            <div style={titleCardRule} />
-            <div style={titleCardKicker}>◆ TONIGHT'S TUTORIAL ◆</div>
-            <div style={titleCardHeadline}>
-              How to Get Up an<br />8&nbsp;Foot Wall
-              <br /><span style={titleCardWrong}>(The Wrong Way)</span>
-            </div>
-            <div style={titleCardByline}>— with Will Baker —</div>
-            <div style={titleCardRule} />
-          </div>
         ) : (
-          <div style={trophyGrid}>
-            {meetsWithTrophies.map(({ meet, trophies }) => (
-              <div key={meet.name} style={trophyCol}>
-                <div style={trophyColHead}>
-                  <div style={trophyMeetName}>{meet.name}</div>
-                  <div style={trophyMeetMeta}>{meet.date.toUpperCase()} · {meet.location.toUpperCase()}</div>
-                </div>
-                <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
-                  {trophies.map((t, i) => (
-                    <div key={i} style={trophyChip}>
-                      <span style={{ fontSize: 22 }}>{medalFor(t.place)}</span>
-                      <div style={{ flex: 1 }}>
-                        <div style={trophyChipLabel}>{t.label}</div>
-                        <div style={trophyChipPlace}>{t.place}</div>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            ))}
-          </div>
+          <VideoTvTrophySlide key={`trophy-${pos.film}`} upNext={nextFilm?.title} />
         )}
-      </div>
+      </main>
 
-      {/* bottom bar — a labeled step nav, click any step to jump straight there */}
-      <div style={bottomBar}>
-        <div style={ticks}>
-          {STEPS.map((s, i) => (
-            <button
-              key={i}
-              type="button"
-              aria-label={`Jump to ${STEP_LABELS[i]}`}
-              onClick={() => setStep(i)}
-              style={tickBtn}
-            >
-              <span style={{ ...tickLabel, ...(i === step ? tickLabelActive : null) }}>{STEP_LABELS[i]}</span>
-              <span style={{ ...tickBar, ...(i === step ? tickActive : i < step ? tickDone : null) }} />
-            </button>
-          ))}
+      <footer style={bottomBar}>
+        <div style={{ ...footMeta, minWidth: 0 }}>
+          {hasLoop ? (
+            <>
+              <span style={{ color: P.gold }}>FILM {(pos.film % loop.length) + 1} / {loop.length}</span>
+              {isVideo && nextFilm && <span style={nextText}>UP NEXT · {nextFilm.title}</span>}
+            </>
+          ) : (
+            <span>{loading ? 'LOADING…' : 'NO FILMS IN THIS LOOP — PRESS EDIT LOOP'}</span>
+          )}
         </div>
-      </div>
+        <div style={progressTrack} aria-hidden="true">
+          <div style={{ ...progressFill, transform: `scaleX(${isVideo ? progress : 1})` }} />
+        </div>
+        <div style={{ display: 'flex', gap: 10 }}>
+          {isVideo && part?.duration_sec ? <span style={footMeta}>{fmtTime(part.duration_sec)}</span> : null}
+          <button type="button" className="vtv-btn" style={footBtn} onClick={advance} disabled={!hasLoop}>SKIP ▶▶</button>
+          <button type="button" className="vtv-btn" style={footBtn} onClick={() => setEditing(true)}>EDIT LOOP</button>
+        </div>
+      </footer>
+
+      {editing && (
+        <VideoTvLoopEditor
+          rows={rows}
+          onSave={saveLoop}
+          onReset={resetLoop}
+          onClose={() => setEditing(false)}
+          onPlayNow={playNow}
+        />
+      )}
     </div>
   );
 }
 
 // ── styles ──────────────────────────────────────────────────────────────────
-const root = {
-  position: 'fixed', inset: 0, background: '#000',
-  display: 'flex', flexDirection: 'column',
-};
+const root = { position: 'fixed', inset: 0, background: '#000', display: 'flex', flexDirection: 'column' };
 const topBar = {
   flexShrink: 0, background: '#000', borderBottom: `1px solid ${P.hairStrong}`,
-  padding: 'clamp(16px,2.4vh,28px) clamp(20px,3vw,40px)',
-  display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between',
-  gap: '4vw', flexWrap: 'wrap',
+  padding: 'clamp(12px,2vh,24px) clamp(20px,3vw,40px)',
+  display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '3vw',
 };
-const topBarMeta = { display: 'flex', flexDirection: 'column', gap: 6, alignItems: 'flex-end', textAlign: 'right' };
+const kicker = { fontFamily: mono, fontSize: 'clamp(10px,1vw,14px)', color: P.gold, letterSpacing: '0.3em', textTransform: 'uppercase' };
+const titleText = {
+  fontFamily: fraunces, fontStyle: 'italic', fontWeight: 700, color: P.cream,
+  fontSize: 'clamp(18px,2.2vw,34px)', marginTop: 4, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis',
+};
+const confBadge = {
+  flexShrink: 0, display: 'flex', alignItems: 'center', gap: 'clamp(8px,1vw,16px)',
+  border: `1px solid ${P.gold}`, background: 'rgba(201,169,97,0.12)', padding: 'clamp(6px,0.8vh,12px) clamp(12px,1.4vw,22px)',
+};
+const confPlace = { fontFamily: fraunces, fontStyle: 'italic', fontWeight: 900, color: P.bright, fontSize: 'clamp(28px,3.4vw,56px)', lineHeight: 1 };
+const confLabel = { fontFamily: oswald, fontWeight: 600, color: P.cream, fontSize: 'clamp(11px,1.1vw,17px)', letterSpacing: '0.1em', textTransform: 'uppercase', lineHeight: 1.2 };
 const stage = { flex: 1, minHeight: 0, position: 'relative', background: '#000', display: 'flex', alignItems: 'center', justifyContent: 'center' };
 const videoEl = { width: '100%', height: '100%', objectFit: 'contain', background: '#000', display: 'block' };
-const infoKicker = {
-  fontFamily: mono, fontSize: 'clamp(10px,1vw,14px)', color: P.gold,
-  letterSpacing: '0.32em', textTransform: 'uppercase',
-};
-const infoTitle = {
-  fontFamily: fraunces, fontStyle: 'italic', fontWeight: 700, color: P.cream,
-  fontSize: 'clamp(18px,2.2vw,32px)', margin: '4px 0 0',
-};
-const infoRow = {
-  display: 'flex', alignItems: 'center', gap: 8, justifyContent: 'flex-end',
-  fontFamily: oswald, fontSize: 'clamp(12px,1.15vw,17px)', color: P.mute,
-};
-const infoDot = { width: 6, height: 6, borderRadius: '50%', background: P.gold, display: 'inline-block' };
-const infoTeam = {
-  fontFamily: mono, fontSize: 'clamp(10px,1vw,14px)', color: P.bright, letterSpacing: '0.08em',
-};
 const bottomBar = {
   flexShrink: 0, background: '#000', borderTop: `1px solid ${P.hairStrong}`,
-  padding: 'clamp(12px,1.8vh,20px) clamp(16px,2vw,32px)', display: 'flex', justifyContent: 'center',
+  padding: 'clamp(10px,1.5vh,18px) clamp(16px,2vw,32px)',
+  display: 'grid', gridTemplateColumns: 'minmax(0,1fr) minmax(120px,1.2fr) auto', alignItems: 'center', gap: '2vw',
 };
-const ticks = { display: 'flex', gap: 'clamp(20px,3vw,48px)' };
-const tickBtn = {
-  display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 8,
-  background: 'none', border: 'none', padding: '4px 2px', margin: 0, cursor: 'pointer',
+const footMeta = {
+  display: 'flex', gap: 16, alignItems: 'center', fontFamily: mono, fontSize: 'clamp(10px,0.9vw,13px)',
+  color: P.mute, letterSpacing: '0.12em', whiteSpace: 'nowrap',
 };
-const tickLabel = {
-  fontFamily: mono, fontSize: 'clamp(9px,0.9vw,12px)', color: P.mute,
-  letterSpacing: '0.12em', textTransform: 'uppercase', whiteSpace: 'nowrap',
+const nextText = { overflow: 'hidden', textOverflow: 'ellipsis' };
+const progressTrack = { height: 4, background: P.hair, overflow: 'hidden' };
+const progressFill = { height: '100%', background: P.gold, transformOrigin: 'left', transition: 'transform 0.3s linear' };
+const footBtn = {
+  fontFamily: mono, fontSize: 'clamp(10px,0.9vw,13px)', fontWeight: 700, letterSpacing: '0.12em',
+  background: 'transparent', color: P.mute, border: `1px solid ${P.hair}`, padding: '8px 14px', cursor: 'pointer',
 };
-const tickLabelActive = { color: P.gold };
-const tickBar = { display: 'block', width: 'clamp(44px,5vw,80px)', height: 5, background: P.hairStrong, borderRadius: 3 };
-const tickActive = { background: P.gold };
-const tickDone = { background: P.bright };
-
-const titleCardWrap = {
-  display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
-  gap: 'clamp(14px,2.2vh,28px)', padding: '4vh 6vw', textAlign: 'center',
-};
-const titleCardRule = { width: 'clamp(80px,10vw,160px)', height: 1, background: P.hairStrong };
-const titleCardKicker = {
-  fontFamily: mono, fontSize: 'clamp(11px,1.1vw,15px)', color: P.gold,
-  letterSpacing: '0.4em', textTransform: 'uppercase',
-};
-const titleCardHeadline = {
-  fontFamily: fraunces, fontStyle: 'italic', fontWeight: 700, color: P.cream,
-  fontSize: 'clamp(30px,5.2vw,80px)', lineHeight: 1.08, margin: 0,
-};
-const titleCardWrong = { color: P.gold };
-const titleCardByline = {
-  fontFamily: oswald, fontSize: 'clamp(13px,1.3vw,19px)', color: P.mute,
-  letterSpacing: '0.14em', textTransform: 'uppercase',
-};
-
-const trophyGrid = {
-  width: '100%', height: '100%', overflow: 'auto', boxSizing: 'border-box',
-  display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '2.4vw',
-  alignContent: 'center', padding: '4vh 6vw',
-};
-const trophyCol = { border: `1px solid ${P.hair}`, background: 'rgba(10,22,40,0.55)', padding: '1.6vw' };
-const trophyColHead = { marginBottom: '1.2vw', paddingBottom: '0.8vw', borderBottom: `1px solid ${P.hair}` };
-const trophyMeetName = { fontFamily: oswald, fontWeight: 600, color: P.bright, fontSize: 'clamp(15px,1.5vw,22px)' };
-const trophyMeetMeta = { fontFamily: mono, fontSize: 'clamp(9px,0.85vw,12px)', color: P.mute, letterSpacing: '0.1em', marginTop: 4 };
-const trophyChip = {
-  display: 'flex', alignItems: 'center', gap: 12,
-  border: `1px solid ${P.hairStrong}`, background: P.goldWash, padding: '10px 12px',
-};
-const trophyChipLabel = { fontFamily: oswald, fontSize: 'clamp(12px,1.1vw,16px)', color: P.cream };
-const trophyChipPlace = { fontFamily: mono, fontSize: 'clamp(10px,0.9vw,13px)', color: P.gold, letterSpacing: '0.08em', marginTop: 2 };

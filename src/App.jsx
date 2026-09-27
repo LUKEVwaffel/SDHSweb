@@ -129,9 +129,9 @@ export default function App() {
   // /balltv — hallway-TV promo loop for the Military Ball. Read-only slideshow,
   // no remote; reads ball_config + ball_gallery like /ball.
   if (location.pathname === '/balltv') return <BallTv />;
-  // /videotv — hallway-TV loop of the East Hamilton OC run (both clips, muted,
-  // no remote) followed by the season trophy case. Reads raider_videos (same
-  // library /watchzone features from) + RaiderCompetitionResults' SEASON data.
+  // /videotv — hallway-TV loop of the whole Raider film library (muted, loop
+  // order set per TV via EDIT LOOP) with the trophy case between every film.
+  // Reads raider_videos (same library as /watchzone) + RaiderCompetitionResults' SEASON.
   if (location.pathname === '/videotv') return <VideoTv />;
   if (location.pathname === '/raiderparent') return <RaiderParentWelcome />;
   // /rolls — Texas Roadhouse roll counter, fun one-off group tracker.

@@ -1,7 +1,7 @@
 // Once-per-device dismiss gate for the Watching Zone homepage banner
 // (src/components/WatchZoneBanner.jsx). Bump the version suffix to re-surface
 // it to every device the next time there's new film worth flagging.
-const LS_KEY = 'tb_watchzone_banner_seen_v1';
+const LS_KEY = 'tb_watchzone_banner_seen_v2'; // v2: full film library, 2026-09-27
 
 export function hasSeenWatchZoneBanner() {
   try {
