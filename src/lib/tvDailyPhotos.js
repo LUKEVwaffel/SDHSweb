@@ -1,5 +1,5 @@
-import { supabase as SB } from './supabaseClient';
 import { resizeForUpload } from './imageResize';
+import { r2Upload, r2GetPublicUrl, r2Remove } from './r2Storage';
 
 const BUCKET = 'tv-daily-photos';
 
@@ -8,8 +8,8 @@ const BUCKET = 'tv-daily-photos';
 export async function uploadTvDailyPhoto(file) {
   const { full } = await resizeForUpload(file);
   const path = `default/${Date.now()}_${Math.random().toString(36).slice(2)}.jpg`;
-  await SB.storage.from(BUCKET).upload(path, full, { upsert: true, contentType: 'image/jpeg' });
-  const { data: pub } = SB.storage.from(BUCKET).getPublicUrl(path);
+  await r2Upload(BUCKET, path, full, { contentType: 'image/jpeg' });
+  const { data: pub } = r2GetPublicUrl(BUCKET, path);
   return pub.publicUrl;
 }
 
@@ -21,5 +21,5 @@ export async function deleteTvDailyPhoto(url) {
   const idx = url.indexOf(marker);
   if (idx === -1) return;
   const path = url.slice(idx + marker.length);
-  await SB.storage.from(BUCKET).remove([path]);
+  await r2Remove(BUCKET, [path]);
 }

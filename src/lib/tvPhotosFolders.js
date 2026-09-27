@@ -1,5 +1,6 @@
 import { supabase as SB } from './supabaseClient';
 import { resizeForUpload } from './imageResize';
+import { r2Upload, r2GetPublicUrl, r2Remove } from './r2Storage';
 
 const BUCKET = 'tv-team-photos';
 
@@ -23,17 +24,24 @@ export async function listTvPhotos(folder) {
 export async function uploadTvPhotoFile(folder, file) {
   const { full } = await resizeForUpload(file);
   const path = `${folder}/${Date.now()}_${Math.random().toString(36).slice(2)}.jpg`;
-  const { error } = await SB.storage.from(BUCKET).upload(path, full, { upsert: true, contentType: 'image/jpeg' });
-  if (error) return { error };
-  const { data: pub } = SB.storage.from(BUCKET).getPublicUrl(path);
+  try {
+    await r2Upload(BUCKET, path, full, { contentType: 'image/jpeg' });
+  } catch (error) {
+    return { error };
+  }
+  const { data: pub } = r2GetPublicUrl(BUCKET, path);
   return { storagePath: path, photoUrl: pub.publicUrl };
 }
 
 // Deletes the storage object only, no tv_photos row involved — for
 // discarding a photo whose assignment popup was cancelled.
 export async function deleteTvPhotoFile(storagePath) {
-  const { error } = await SB.storage.from(BUCKET).remove([storagePath]);
-  return { error };
+  try {
+    await r2Remove(BUCKET, [storagePath]);
+    return { error: null };
+  } catch (error) {
+    return { error };
+  }
 }
 
 export async function insertTvPhoto({ folders, title, storagePath, photoUrl, uploadedBy, focalX = 0.5, focalY = 0.5 }) {
@@ -65,6 +73,10 @@ export async function updateTvPhotoFocal(id, focalX, focalY) {
 export async function deleteTvPhoto(id, storagePath) {
   const { error: rowError } = await SB.from('tv_photos').delete().eq('id', id);
   if (rowError) return { error: rowError };
-  const { error: storageError } = await SB.storage.from(BUCKET).remove([storagePath]);
-  return { error: storageError };
+  try {
+    await r2Remove(BUCKET, [storagePath]);
+    return { error: null };
+  } catch (error) {
+    return { error };
+  }
 }

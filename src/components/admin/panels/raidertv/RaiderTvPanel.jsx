@@ -3,6 +3,7 @@ import { supabase as SB } from '../../../../lib/supabaseClient';
 import { P, mono, fs, sp, radius } from '../../theme';
 import { Btn, Input, Label, PanelHeader, EmptyState } from '../../shared/ui';
 import { VIDEO_BUCKET, fmtTime } from '../../../../lib/raiderTv';
+import { r2Upload, r2Remove } from '../../../../lib/r2Storage';
 
 // DISPATCH → Raider TV. The durable video library behind /raidertv +
 // /raiderremote: upload + title + reorder + delete, plus a read-only view of
@@ -66,13 +67,13 @@ export default function RaiderTvPanel({ adminId }) {
     if (!pending || !pending.title.trim() || busy) return;
     setBusy(true);
     const path = `${Date.now()}-${safeName(pending.file.name)}`;
-    const up = await SB.storage.from(VIDEO_BUCKET).upload(path, pending.file, {
-      upsert: false,
-      contentType: pending.file.type || 'video/mp4',
-    });
-    if (up.error) {
+    try {
+      await r2Upload(VIDEO_BUCKET, path, pending.file, {
+        contentType: pending.file.type || 'video/mp4',
+      });
+    } catch (uploadError) {
       setBusy(false);
-      alert(`Upload failed: ${up.error.message}`);
+      alert(`Upload failed: ${uploadError.message}`);
       return;
     }
     const maxOrder = videos.reduce((m, v) => Math.max(m, v.sort_order ?? 0), 0);
@@ -86,7 +87,7 @@ export default function RaiderTvPanel({ adminId }) {
     setBusy(false);
     if (ins.error) {
       // Row insert failed (RLS?) — don't leave an orphan file in the bucket.
-      await SB.storage.from(VIDEO_BUCKET).remove([path]);
+      await r2Remove(VIDEO_BUCKET, [path]);
       alert(`Could not save video: ${ins.error.message}`);
       return;
     }
@@ -115,7 +116,7 @@ export default function RaiderTvPanel({ adminId }) {
 
   async function remove(v) {
     if (!confirm(`Delete "${v.title}"? Removes the video file and its library entry.`)) return;
-    await SB.storage.from(VIDEO_BUCKET).remove([v.storage_path]);
+    await r2Remove(VIDEO_BUCKET, [v.storage_path]);
     await SB.from('raider_videos').delete().eq('id', v.id);
     load();
   }
