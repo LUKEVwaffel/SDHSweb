@@ -115,9 +115,9 @@ export default function WatchZonePopup() {
             fontFamily: 'Inter, sans-serif', fontSize: 14.5, lineHeight: 1.65,
             color: P.mute, maxWidth: 380, margin: '0 auto 26px',
           }}>
-            Obstacle Course, One Rope Bridge, PTT, CCR, Gauntlet — every run
-            we&apos;ve filmed this season, full screen on your phone or computer,
-            with slow-mo so you don&apos;t miss a thing.
+            14 new runs from Warren County: Obstacle Course, One Rope Bridge,
+            PTT, CCR and Gauntlet, Male and Co-ed, plus every run from earlier
+            this season. Full screen on your phone or computer, with slow-mo.
           </p>
 
           <div className="wz-row" style={{ '--d': '0.3s', display: 'flex', flexDirection: 'column', gap: 10 }}>
