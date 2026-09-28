@@ -108,7 +108,7 @@ export default function WatchZonePopup() {
             fontFamily: "'Fraunces', serif", fontStyle: 'italic', fontWeight: 700, color: P.cream,
             fontSize: 'clamp(26px, 6vw, 36px)', lineHeight: 1.1, margin: '14px 0 14px',
           }}>
-            All our Raider film is up
+            Warren County film is up
           </h2>
 
           <p className="wz-row" style={{ '--d': '0.22s',
