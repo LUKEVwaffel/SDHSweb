@@ -7,10 +7,16 @@
 // school_email matches an active rifle_shooters row, the signup is stored
 // with is_varsity = true.
 //
+// school_email must come with a signupToken minted by rifle-lookup-cadet
+// (Step 1) proving that email actually matched a cadet in DISPATCH's
+// roster — this endpoint used to accept any well-formed @students.hcde.org
+// address, which let made-up emails through with no real cadet behind them.
+//
 // Deploy WITHOUT jwt verification:
 //   supabase functions deploy rifle-submit-signup --no-verify-jwt
 import { json, preflight } from "../_shared/http.ts";
 import { serviceClient } from "../_shared/supabase.ts";
+import { verifySignupToken } from "../_shared/signupToken.ts";
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 // Mirrored client-side in src/lib/schoolEmail.js.
@@ -41,6 +47,12 @@ Deno.serve(async (req) => {
     if (!schoolEmail || !EMAIL_RE.test(schoolEmail) || !isSchoolEmail(schoolEmail)) {
       return json({ error: "a valid @students.hcde.org email is required" }, 400);
     }
+
+    const tokenPayload = await verifySignupToken(body?.signup_token);
+    if (!tokenPayload || tokenPayload.email !== schoolEmail) {
+      return json({ error: "school email not verified — start over" }, 401);
+    }
+
     if (!personalEmail || !EMAIL_RE.test(personalEmail)) {
       return json({ error: "a valid personal email address is required" }, 400);
     }

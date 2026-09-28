@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { supabase as SB } from '../../../lib/supabaseClient';
+import { lookupCadet } from '../../../lib/ballApi';
 import { P, mono, oswald } from '../../admin/theme';
 import '../ball.css';
 import StepCadetVerify from './StepCadetVerify';
@@ -35,6 +36,22 @@ function loadDraft() {
 
 function clearDraft() {
   try { sessionStorage.removeItem(DRAFT_KEY); } catch { /* private mode — nothing to clear */ }
+}
+
+// Signup tokens are short-lived (see _shared/signupToken.ts) but the draft
+// above can restore one hours later, which used to bounce kids back to Step 1
+// mid-form. Re-mint silently when it's close to expiry — ball-lookup-cadet is
+// already public by username, so this proves nothing new server-side.
+const REFRESH_MARGIN_MS = 15 * 60 * 1000;
+const REFRESH_CHECK_MS = 5 * 60 * 1000;
+
+function tokenExpiresAt(token) {
+  try {
+    const part = token.split('.')[0].replace(/-/g, '+').replace(/_/g, '/');
+    return JSON.parse(atob(part)).exp || 0;
+  } catch {
+    return 0;
+  }
 }
 
 function fmtShort(d) {
@@ -98,6 +115,39 @@ export default function BallSignupWizard() {
     setCadet(null);
     setStep(0);
   }
+
+  // Returns true if a fresh token was minted. Drafts saved before `username`
+  // was stored can't refresh — those fall back to a real restart.
+  async function refreshToken() {
+    if (!cadet?.username) return false;
+    const { data, error } = await lookupCadet(cadet.username);
+    if (error || !data?.signupToken) return false;
+    setSignupToken(data.signupToken);
+    return true;
+  }
+
+  // Step "session expired" handler: reconnect silently, restart only if that fails.
+  async function recoverSession() {
+    const ok = await refreshToken();
+    if (!ok) resetVerification();
+    return ok;
+  }
+
+  useEffect(() => {
+    if (step === 0 || !signupToken || submitted) return undefined;
+    const check = () => {
+      if (tokenExpiresAt(signupToken) - Date.now() < REFRESH_MARGIN_MS) refreshToken();
+    };
+    check();
+    const id = setInterval(check, REFRESH_CHECK_MS);
+    document.addEventListener('visibilitychange', check);
+    return () => {
+      clearInterval(id);
+      document.removeEventListener('visibilitychange', check);
+    };
+    // refreshToken only reads cadet.username, which is fixed once verified.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [step, signupToken, submitted]);
 
   if (closed && !submitted) {
     return (
@@ -180,7 +230,7 @@ export default function BallSignupWizard() {
             onChange={setGuest}
             onBack={() => setStep(1)}
             onNext={() => setStep(3)}
-            onSessionExpired={resetVerification}
+            onSessionExpired={recoverSession}
           />
         )}
         {step === 3 && (
@@ -191,7 +241,7 @@ export default function BallSignupWizard() {
             guest={guest}
             onBack={() => setStep(2)}
             onSubmitted={(d) => { clearDraft(); setResult(d || null); setSubmitted(true); }}
-            onSessionExpired={resetVerification}
+            onSessionExpired={recoverSession}
           />
         )}
       </div>

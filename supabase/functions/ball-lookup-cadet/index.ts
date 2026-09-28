@@ -14,9 +14,7 @@ import { json, preflight } from "../_shared/http.ts";
 import { serviceClient } from "../_shared/supabase.ts";
 import { mintSignupToken } from "../_shared/signupToken.ts";
 import { displayName } from "../_shared/name.ts";
-
-const SCHOOL_DOMAIN = "@students.hcde.org";
-const USERNAME_RE = /^[a-z0-9._-]{1,64}$/i;
+import { normalizeSchoolUsername, SCHOOL_DOMAIN } from "../_shared/schoolEmail.ts";
 
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return preflight();
@@ -24,17 +22,19 @@ Deno.serve(async (req) => {
 
   try {
     const { username } = await req.json().catch(() => ({}));
-    const uname = String(username || "").trim();
-    if (!uname || !USERNAME_RE.test(uname)) return json({ error: "invalid" }, 401);
+    // Accepts "jsmith", " JSmith ", or the full school address.
+    const uname = normalizeSchoolUsername(username);
+    if (!uname) return json({ error: "invalid" }, 401);
 
-    const email = `${uname.toLowerCase()}${SCHOOL_DOMAIN}`;
+    const email = `${uname}${SCHOOL_DOMAIN}`;
     const svc = serviceClient();
 
-    const { data: cadet } = await svc
+    const { data: cadet, error: lookupErr } = await svc
       .from("cadet_consent")
       .select("id, name, let_level, company")
       .eq("school_email", email)
       .maybeSingle();
+    if (lookupErr) console.error("cadet lookup", lookupErr);
 
     if (!cadet) return json({ error: "not_found" }, 401);
 

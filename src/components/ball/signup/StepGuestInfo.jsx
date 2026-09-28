@@ -71,12 +71,12 @@ export default function StepGuestInfo({ signupToken, value, onChange, onBack, on
   }, [query, hasGuest, inProgramDate, value.sdhs_matched_cadet_id]);
 
   // A dead signup token surfaces here as an "expired" error on the roster
-  // search or resolve call. Show a real "start over" button (same as Step 4)
+  // search or resolve call. Show a RECONNECT button (same as Step 4) that re-mints the token
   // instead of a dead-end "go back and re-verify" message.
   function handleRosterError(error) {
     if (/expired|invalid or expired/i.test(error)) {
       setSessionDead(true);
-      setErr('Your signup session expired. Start over from Step 1 — it only takes a moment.');
+      setErr('Your signup session timed out. Press RECONNECT — your answers are kept.');
     } else {
       setErr(error);
     }
@@ -336,10 +336,12 @@ export default function StepGuestInfo({ signupToken, value, onChange, onBack, on
       {sessionDead && onSessionExpired && (
         <div style={{ marginTop: 8 }}>
           <button
-            onClick={onSessionExpired}
+            onClick={async () => {
+              if (await onSessionExpired()) { setSessionDead(false); setErr('Reconnected — try that again.'); }
+            }}
             style={{ background: 'none', border: `1px solid ${P.gold}`, color: P.gold, fontFamily: mono, fontSize: 12, padding: '8px 14px', cursor: 'pointer' }}
           >
-            START OVER FROM STEP 1
+            RECONNECT
           </button>
         </div>
       )}

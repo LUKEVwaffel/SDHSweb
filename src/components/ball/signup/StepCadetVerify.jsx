@@ -2,8 +2,7 @@ import { useState } from 'react';
 import { P, mono } from '../../admin/theme';
 import { lookupCadet } from '../../../lib/ballApi';
 import { Label, TextInput, Btn, ErrorText } from './formUi';
-
-const SCHOOL_DOMAIN = '@students.hcde.org';
+import { SCHOOL_DOMAIN, normalizeSchoolUsername } from '../../../lib/schoolUsername';
 
 // Step 1 — cadet identity verification. Single input (username portion of
 // school email, suffix locked/shown, same pattern as elsewhere in DISPATCH).
@@ -18,15 +17,20 @@ export default function StepCadetVerify({ onVerified }) {
   async function submit(e) {
     e?.preventDefault();
     if (!username.trim() || busy) return;
+    const uname = normalizeSchoolUsername(username);
+    if (!uname) {
+      setErr(`Use your school email — just the part before ${SCHOOL_DOMAIN}.`);
+      return;
+    }
     setBusy(true);
     setErr('');
-    const { data, error } = await lookupCadet(username.trim());
+    const { data, error } = await lookupCadet(uname);
     setBusy(false);
     if (error) {
       setErr("We couldn't find a cadet with that email. Double-check it, or see Chief if the roster needs updating.");
       return;
     }
-    setMatch(data);
+    setMatch({ ...data, username: uname });
   }
 
   if (match) {
@@ -57,7 +61,7 @@ export default function StepCadetVerify({ onVerified }) {
           >
             Not you?
           </button>
-          <Btn onClick={() => onVerified({ signupToken: match.signupToken, name: match.name, let_level: match.let_level, company: match.company })}>
+          <Btn onClick={() => onVerified({ signupToken: match.signupToken, username: match.username, name: match.name, let_level: match.let_level, company: match.company })}>
             CONTINUE →
           </Btn>
         </div>
@@ -74,6 +78,11 @@ export default function StepCadetVerify({ onVerified }) {
           value={username}
           onChange={(e) => setUsername(e.target.value)}
           placeholder="jsmith123"
+          autoCapitalize="none"
+          autoCorrect="off"
+          autoComplete="username"
+          spellCheck={false}
+          inputMode="email"
           style={{ borderRight: 'none' }}
         />
         <div className="ball-verify-suffix" style={{ background: P.deep, border: `1px solid ${P.hair}`, borderLeft: 'none', color: P.mute, fontFamily: mono, fontSize: 16, padding: '12px 12px', whiteSpace: 'nowrap', display: 'flex', alignItems: 'center' }}>

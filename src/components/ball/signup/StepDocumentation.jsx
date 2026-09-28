@@ -68,7 +68,7 @@ export default function StepDocumentation({ signupToken, cadetGender, cadetDetai
     if (error) {
       // Always show the real error — never silently bounce the cadet back to
       // step 1 (that wipes everything they typed with no explanation). A
-      // genuinely dead session gets a visible "start over" button instead.
+      // genuinely dead session gets a visible RECONNECT button instead.
       setErr(error);
       setSessionDead(/expired|invalid or expired|already used|start again from step 1/i.test(error));
       return;
@@ -131,10 +131,12 @@ export default function StepDocumentation({ signupToken, cadetGender, cadetDetai
       {sessionDead && (
         <div style={{ marginTop: 8 }}>
           <button
-            onClick={onSessionExpired}
+            onClick={async () => {
+              if (await onSessionExpired()) { setSessionDead(false); setErr('Reconnected — press submit again.'); }
+            }}
             style={{ background: 'none', border: `1px solid ${P.gold}`, color: P.gold, fontFamily: mono, fontSize: 12, padding: '8px 14px', cursor: 'pointer' }}
           >
-            START OVER FROM STEP 1
+            RECONNECT
           </button>
         </div>
       )}
