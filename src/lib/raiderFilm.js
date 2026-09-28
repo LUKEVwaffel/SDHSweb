@@ -94,6 +94,16 @@ export function groupByComp(films) {
     .filter((g) => g.films.length);
 }
 
+/**
+ * Round-robin across comps (newest comp first) so a loop touches every comp
+ * early instead of burning through the newest meet's whole batch first.
+ */
+export function interleaveByComp(films) {
+  const groups = groupByComp(films).map((g) => g.films);
+  const longest = Math.max(0, ...groups.map((g) => g.length));
+  return Array.from({ length: longest }, (_, i) => groups.map((g) => g[i]).filter(Boolean)).flat();
+}
+
 export function categoriesIn(films) {
   const present = new Set(films.map((f) => f.category.key));
   return [...CATEGORIES, OTHER].filter((c) => present.has(c.key));
