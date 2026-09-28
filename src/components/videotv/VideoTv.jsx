@@ -2,7 +2,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { P, mono, oswald, fraunces } from '../admin/theme.js';
 import { videoUrl, fmtTime } from '../../lib/raiderTv.js';
 import { useRaiderVideos } from '../../hooks/useRaiderVideos.js';
-import { buildFilms } from '../../lib/raiderFilm.js';
+import { buildFilms, groupByComp } from '../../lib/raiderFilm.js';
 import { SEASON } from '../RaiderCompetitionResults.jsx';
 import VideoTvTrophySlide from './VideoTvTrophySlide.jsx';
 import VideoTvLoopEditor from './VideoTvLoopEditor.jsx';
@@ -14,8 +14,8 @@ import { loadLoopConfig, saveLoopConfig, orderedFilms } from './videoTvPlaylist.
 // then the loop repeats forever.
 //
 // Which films play and in what order is set per TV from EDIT LOOP (saved in
-// that TV's localStorage — see videoTvPlaylist.js). Default: only the
-// latest comp's films (older films sit switched off in EDIT LOOP).
+// that TV's localStorage — see videoTvPlaylist.js). Only the latest
+// comp's films are on this TV at all; default loop plays every one of them.
 //
 // Self-contained full-screen anon route (App.jsx bypass), same pattern as
 // /balltv and /watchzone.
@@ -25,7 +25,7 @@ const VIDEO_GRACE_MS = 20000;    // advance anyway if a clip never fires 'ended'
 
 export default function VideoTv() {
   const { videos, loading } = useRaiderVideos();
-  const films = useMemo(() => buildFilms(videos), [videos]);
+  const films = useMemo(() => groupByComp(buildFilms(videos))[0]?.films ?? [], [videos]);
   const [loopConfig, setLoopConfig] = useState(loadLoopConfig);
   const rows = useMemo(() => orderedFilms(films, loopConfig), [films, loopConfig]);
   const loop = useMemo(() => rows.filter((r) => r.included).map((r) => r.film), [rows]);
