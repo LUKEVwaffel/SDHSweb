@@ -2,10 +2,10 @@
 // whoever sets up a given screen decides what it plays and in what order.
 // Shape: { order: [filmKey], hidden: [filmKey] }. Films uploaded after the
 // loop was saved aren't in `order` yet — they join at the end, visible.
-// Default (no saved loop): every film, comps interleaved so the TV cycles
-// through every meet instead of playing the newest meet's batch first.
+// Default (no saved loop): only the latest comp's films play; older films are
+// listed in EDIT LOOP but switched off.
 
-import { interleaveByComp } from '../../lib/raiderFilm.js';
+import { groupByComp } from '../../lib/raiderFilm.js';
 
 const LS_KEY = 'tb_videotv_loop_v1';
 
@@ -30,7 +30,10 @@ export function saveLoopConfig(config) {
 
 /** Every film in loop order, each flagged with whether it's in the loop. */
 export function orderedFilms(films, config) {
-  if (!config) return interleaveByComp(films).map((f) => ({ film: f, included: true }));
+  if (!config) {
+    const latest = groupByComp(films)[0]?.comp.key;
+    return films.map((f) => ({ film: f, included: f.comp.key === latest }));
+  }
   const byKey = new Map(films.map((f) => [f.key, f]));
   const hidden = new Set(config.hidden);
   const known = config.order.filter((k) => byKey.has(k));

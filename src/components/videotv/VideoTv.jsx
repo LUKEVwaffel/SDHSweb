@@ -14,8 +14,8 @@ import { loadLoopConfig, saveLoopConfig, orderedFilms } from './videoTvPlaylist.
 // then the loop repeats forever.
 //
 // Which films play and in what order is set per TV from EDIT LOOP (saved in
-// that TV's localStorage — see videoTvPlaylist.js). Default: every film,
-// comps interleaved so every meet shows up early in the loop.
+// that TV's localStorage — see videoTvPlaylist.js). Default: only the
+// latest comp's films (older films sit switched off in EDIT LOOP).
 //
 // Self-contained full-screen anon route (App.jsx bypass), same pattern as
 // /balltv and /watchzone.
