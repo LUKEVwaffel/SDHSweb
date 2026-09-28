@@ -2,7 +2,7 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 import { P, mono, fraunces, inter, fs, sp, radius, shadow, ease } from '../admin/theme.js';
 import { useRaiderVideos } from '../../hooks/useRaiderVideos.js';
 import { videoUrl, fmtTime, SPEED_PRESETS } from '../../lib/raiderTv.js';
-import { buildFilms, categoriesIn } from '../../lib/raiderFilm.js';
+import { buildFilms, categoriesIn, groupByComp } from '../../lib/raiderFilm.js';
 
 // /watchzone — public Raider film archive, desktop + mobile. No pairing, no
 // remote: pick a film, watch it. Native fullscreen + a slow-mo speed rail
@@ -10,7 +10,8 @@ import { buildFilms, categoriesIn } from '../../lib/raiderFilm.js';
 //
 // Reads the same raider_videos library DISPATCH's Raider TV panel manages
 // (anon-readable). Multi-part uploads collapse into one film via
-// buildFilms(); parts auto-advance. Audio-restricted films are forced muted.
+// buildFilms(); parts auto-advance. The library is split by comp (the meet
+// each upload followed), with comp + event filter chips. Audio-restricted films are forced muted.
 //
 // Self-contained full-screen anon route (App.jsx bypass), same pattern as
 // /raidertv.
@@ -23,7 +24,9 @@ export default function WatchingZone() {
   const { videos, loading } = useRaiderVideos();
   const films = useMemo(() => buildFilms(videos), [videos]);
   const categories = useMemo(() => categoriesIn(films), [films]);
+  const comps = useMemo(() => groupByComp(films).map((g) => g.comp), [films]);
 
+  const [comp, setComp] = useState('all');
   const [category, setCategory] = useState('all');
   const [activeKey, setActiveKey] = useState(null);
   const [partIdx, setPartIdx] = useState(0);
@@ -33,9 +36,10 @@ export default function WatchingZone() {
   const stageRef = useRef(null);
   const videoRef = useRef(null);
 
-  const shown = useMemo(
-    () => (category === 'all' ? films : films.filter((f) => f.category.key === category)),
-    [films, category],
+  const groups = useMemo(
+    () => groupByComp(films.filter((f) =>
+      (comp === 'all' || f.comp.key === comp) && (category === 'all' || f.category.key === category))),
+    [films, comp, category],
   );
 
   useEffect(() => {
@@ -191,7 +195,7 @@ export default function WatchingZone() {
               <div style={{ marginTop: sp[4], display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', gap: sp[3], flexWrap: 'wrap' }}>
                 <div>
                   <div style={{ fontFamily: mono, fontSize: fs.micro, letterSpacing: '0.24em', color: P.gold, textTransform: 'uppercase' }}>
-                    {active.category.label}
+                    {active.comp.label} · {active.category.label}
                   </div>
                   <h2 style={{ margin: '6px 0 0', fontFamily: fraunces, fontWeight: 700, color: P.cream, fontSize: 'clamp(22px,4vw,30px)' }}>
                     {active.title}
@@ -260,25 +264,47 @@ export default function WatchingZone() {
             {films.length ? `${films.length} film${films.length === 1 ? '' : 's'}` : 'LIBRARY'}
           </div>
 
+          {comps.length > 1 && (
+            <ChipRow
+              label="Competition"
+              options={[{ key: 'all', label: 'All Comps' }, ...comps.map((c) => ({ key: c.key, label: shortComp(c.label) }))]}
+              value={comp}
+              onChange={setComp}
+            />
+          )}
+
           {categories.length > 1 && (
-            <div className="wz-chips" style={{ marginBottom: sp[3] }}>
-              {[{ key: 'all', label: 'All' }, ...categories].map((c) => (
-                <button
-                  key={c.key}
-                  type="button"
-                  className="wz-chip"
-                  aria-pressed={category === c.key}
-                  onClick={() => setCategory(c.key)}
-                  style={{ ...chipStyle(category === c.key), whiteSpace: 'nowrap', flexShrink: 0 }}
-                >
-                  {c.label}
-                </button>
-              ))}
+            <ChipRow
+              label="Event"
+              options={[{ key: 'all', label: 'All' }, ...categories]}
+              value={category}
+              onChange={setCategory}
+            />
+          )}
+
+          {groups.length === 0 && !loading && (
+            <div style={{ fontFamily: mono, fontSize: fs.micro, color: P.faint, letterSpacing: '0.14em' }}>
+              NO FILM MATCHES THESE FILTERS
             </div>
           )}
 
+          {groups.map((g) => (
+          <section key={g.comp.key} aria-label={g.comp.label} style={{ marginTop: sp[4] }}>
+            <div style={{
+              display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', gap: sp[2],
+              borderBottom: `1px solid ${P.hair}`, paddingBottom: sp[2], marginBottom: sp[2],
+            }}>
+              <h3 style={{ margin: 0, fontFamily: fraunces, fontWeight: 700, fontSize: fs.md, color: P.cream }}>
+                {g.comp.label}
+              </h3>
+              {g.comp.date && (
+                <span style={{ fontFamily: mono, fontSize: fs.micro, color: P.gold, letterSpacing: '0.12em', whiteSpace: 'nowrap' }}>
+                  {g.comp.date.replace(/,\s*\d{4}$/, '').toUpperCase()}
+                </span>
+              )}
+            </div>
           <div style={{ display: 'flex', flexDirection: 'column', gap: sp[2] }}>
-            {shown.map((f) => {
+            {g.films.map((f) => {
               const isActive = f.key === activeKey;
               return (
                 <button
@@ -310,8 +336,34 @@ export default function WatchingZone() {
               );
             })}
           </div>
+          </section>
+          ))}
         </aside>
       </main>
+    </div>
+  );
+}
+
+// "East Hamilton Raider Competition" → "East Hamilton"
+function shortComp(label) {
+  return label.replace(/\s+Raider\s+(Competition|Challenge)$/i, '');
+}
+
+function ChipRow({ label, options, value, onChange }) {
+  return (
+    <div role="group" aria-label={label} className="wz-chips" style={{ marginBottom: sp[3] }}>
+      {options.map((o) => (
+        <button
+          key={o.key}
+          type="button"
+          className="wz-chip"
+          aria-pressed={value === o.key}
+          onClick={() => onChange(o.key)}
+          style={{ ...chipStyle(value === o.key), whiteSpace: 'nowrap', flexShrink: 0 }}
+        >
+          {o.label}
+        </button>
+      ))}
     </div>
   );
 }

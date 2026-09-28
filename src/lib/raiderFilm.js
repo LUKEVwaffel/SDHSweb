@@ -1,3 +1,5 @@
+import { SEASON } from '../components/RaiderCompetitionResults.jsx';
+
 // Public-facing view of the raider_videos library, shared by /watchzone
 // (desktop + mobile viewing) and /videotv (hallway-TV loop).
 //
@@ -30,6 +32,19 @@ function categoryOf(title) {
   return CATEGORIES.find((c) => c.match.test(title)) || OTHER;
 }
 
+// Meets from the season log, newest first. Footage lands in the library within
+// a few days of a meet, so each upload belongs to the latest meet on or before
+// its upload date — no per-video tagging needed.
+const COMPS = SEASON.meets
+  .map((m) => ({ key: m.name.toLowerCase(), label: m.name, date: m.date, at: new Date(m.date).getTime() }))
+  .sort((a, b) => b.at - a.at);
+const NO_COMP = { key: 'practice', label: 'Practice & Other', date: null, at: 0 };
+
+function compOf(createdAt) {
+  const t = new Date(createdAt).getTime();
+  return COMPS.find((c) => c.at <= t) || NO_COMP;
+}
+
 // "P2 Gauntlet (Male)" → { base: 'Gauntlet (Male)', part: 2 }
 // "Hurricane Haul — Part 1" → { base: 'Hurricane Haul', part: 1 }
 function parsePart(title) {
@@ -41,15 +56,18 @@ function parsePart(title) {
 }
 
 /**
- * Collapse raider_videos rows into films, newest first.
- * @returns {Array<{ key, title, category, parts, duration_sec, created_at, audioRestricted }>}
+ * Collapse raider_videos rows into films, newest first. Parts only merge
+ * within the same comp, so a repeat event title at a later meet stays its
+ * own film.
+ * @returns {Array<{ key, title, comp, category, parts, duration_sec, created_at, audioRestricted }>}
  */
 export function buildFilms(videos) {
   const byKey = new Map();
   videos.forEach((v) => {
     const { base, part } = parsePart(v.title || '');
-    const key = base.toLowerCase();
-    const entry = byKey.get(key) || { key, title: base, parts: [] };
+    const comp = compOf(v.created_at);
+    const key = `${comp.key}:${base.toLowerCase()}`;
+    const entry = byKey.get(key) || { key, title: base, comp, parts: [] };
     byKey.set(key, { ...entry, parts: [...entry.parts, { ...v, part }] });
   });
 
@@ -67,6 +85,13 @@ export function buildFilms(videos) {
       };
     })
     .sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
+}
+
+/** Films bucketed by comp, newest comp first; film order within is preserved. */
+export function groupByComp(films) {
+  return [...COMPS, NO_COMP]
+    .map((comp) => ({ comp, films: films.filter((f) => f.comp.key === comp.key) }))
+    .filter((g) => g.films.length);
 }
 
 export function categoriesIn(films) {
