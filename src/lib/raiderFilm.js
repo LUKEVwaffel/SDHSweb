@@ -5,13 +5,6 @@
 // "P2 Gauntlet (Male)", "Hurricane Haul — Part 1" + "— Part 2") collapse into
 // a single film whose parts always play back-to-back.
 
-// Clips never shown publicly. The trimmed "OC" cut was superseded by the
-// full-length Hurricane Haul upload of the same run.
-const HIDDEN_IDS = new Set([
-  '86839e28-6160-42d0-9d49-46adca8c345a', // OC — Part 1 (trimmed dup of Hurricane Haul)
-  '3252c9a8-6e2f-4578-8649-70d184f0029e', // OC — Part 2
-]);
-
 // Audio restricted at the request of the cadets in the clip. The stored file
 // is also stripped of its audio track; this is the belt-and-braces UI side
 // so no player ever offers an unmute.
@@ -53,14 +46,12 @@ function parsePart(title) {
  */
 export function buildFilms(videos) {
   const byKey = new Map();
-  videos
-    .filter((v) => !HIDDEN_IDS.has(v.id))
-    .forEach((v) => {
-      const { base, part } = parsePart(v.title || '');
-      const key = base.toLowerCase();
-      const entry = byKey.get(key) || { key, title: base, parts: [] };
-      byKey.set(key, { ...entry, parts: [...entry.parts, { ...v, part }] });
-    });
+  videos.forEach((v) => {
+    const { base, part } = parsePart(v.title || '');
+    const key = base.toLowerCase();
+    const entry = byKey.get(key) || { key, title: base, parts: [] };
+    byKey.set(key, { ...entry, parts: [...entry.parts, { ...v, part }] });
+  });
 
   return [...byKey.values()]
     .map((f) => {
