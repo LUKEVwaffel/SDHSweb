@@ -55,16 +55,29 @@ export default function BloodDrive() {
     return () => clearInterval(id);
   }, []);
 
-  // Fire the print once the slip sheet for `job` is in the DOM.
+  // Fire the print once the slip sheet for `job` is in the DOM. setTimeout, not
+  // requestAnimationFrame — rAF never runs while the tab is hidden or the
+  // window is covered, which silently stalled auto-print.
   useEffect(() => {
     if (!job) return;
-    const id = requestAnimationFrame(() => {
+    const id = setTimeout(() => {
       window.print();
       if (job.auto) setStatus((s) => ({ ...s, [job.time]: 'printed' }));
       setJob(null);
-    });
-    return () => cancelAnimationFrame(id);
+    }, 100);
+    return () => clearTimeout(id);
   }, [job]);
+
+  // Keep the laptop screen awake while armed so the tab keeps ticking.
+  useEffect(() => {
+    if (!armed || !('wakeLock' in navigator)) return;
+    let lock = null;
+    const grab = () => navigator.wakeLock.request('screen').then((l) => { lock = l; }).catch(() => {});
+    const onVisible = () => { if (document.visibilityState === 'visible') grab(); };
+    grab();
+    document.addEventListener('visibilitychange', onVisible);
+    return () => { document.removeEventListener('visibilitychange', onVisible); lock?.release().catch(() => {}); };
+  }, [armed]);
 
   // Auto queue: first due, unprinted slot with names. One at a time.
   useEffect(() => {
@@ -92,11 +105,13 @@ export default function BloodDrive() {
   }, []);
 
   const arm = () => {
-    // Slots already past when auto-print turns on get skipped, not batch-printed.
+    // Older slots get skipped, not batch-printed — but the slot currently in
+    // progress (latest one whose time has passed) still prints right away.
     const now = nyMinutesOfDay(new Date());
+    const current = [...schedule.slots].reverse().find((sl) => sl.names.length && toMinutes(sl.time) <= now);
     setStatus((s) => {
       const next = { ...s };
-      for (const slot of schedule.slots) if (!next[slot.time] && toMinutes(slot.time) < now) next[slot.time] = 'skipped';
+      for (const slot of schedule.slots) if (!next[slot.time] && slot !== current && toMinutes(slot.time) < now) next[slot.time] = 'skipped';
       return next;
     });
     setNowMin(now);
