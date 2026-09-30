@@ -217,7 +217,9 @@ export default function BloodDrive() {
                       <b>{s.label}</b>
                       <span>{periodFor(s.time).split(' (')[0]}</span>
                     </div>
-                    <p className="bd-slot-names">{s.names.length ? s.names.join(' · ') : <em>empty</em>}</p>
+                    <div className="bd-slot-names">
+                      {s.names.length ? <PersonButtons slot={s} onPrint={setJob} /> : <em>empty</em>}
+                    </div>
                     <span className="bd-slot-status">{st === 'printed' ? 'PRINTED' : st === 'skipped' ? 'SKIPPED' : past ? 'DUE' : ''}</span>
                     <button type="button" className="bd-btn bd-btn-small" disabled={!s.names.length}
                       onClick={() => { setJob(s); setStatus((x) => ({ ...x, [s.time]: 'printed' })); }}>
@@ -233,7 +235,7 @@ export default function BloodDrive() {
                 <h2>Walk-ins <small>manual print only</small></h2>
                 {schedule.walkIns.map((w) => (
                   <div key={w.label} className="bd-extra-row">
-                    <p><b>{w.label}</b> {w.names.join(' · ')}</p>
+                    <div className="bd-slot-names"><b>{w.label}</b> <PersonButtons slot={w} onPrint={setJob} /></div>
                     <button type="button" className="bd-btn bd-btn-small" onClick={() => setJob(w)}>Print</button>
                   </div>
                 ))}
@@ -253,6 +255,17 @@ export default function BloodDrive() {
       {job && <SlipSheet job={job} />}
     </div>
   );
+}
+
+// Each name is its own button — prints just that one person's pass (any time,
+// past or future). Doesn't touch the slot's auto-print status.
+function PersonButtons({ slot, onPrint }) {
+  return slot.names.map((name) => (
+    <button key={name} type="button" className="bd-person" title={`Print ${name}'s pass`}
+      onClick={() => onPrint({ ...slot, names: [name] })}>
+      {name}
+    </button>
+  ));
 }
 
 function SlipSheet({ job }) {

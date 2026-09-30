@@ -76,6 +76,16 @@
 .bd-slot-time b { font-family: 'Oswald', sans-serif; font-size: 1.35rem; display: block; line-height: 1; }
 .bd-slot-time span { font-size: 0.72rem; color: var(--bd-dim); }
 .bd-slot-names { font-size: 0.92rem; }
+.bd-slot-names { display: flex; flex-wrap: wrap; gap: 0.3rem; align-items: center; }
+.bd-person {
+  font: 0.88rem 'Inter', sans-serif; color: var(--bd-text); cursor: pointer;
+  background: transparent; border: 1px solid var(--bd-line); border-radius: 999px; padding: 0.2rem 0.65rem;
+  transition: background 150ms ease, border-color 150ms ease, transform 100ms ease;
+}
+.bd-person:hover { border-color: var(--bd-red); background: oklch(58% 0.21 25 / 0.15); }
+.bd-person:hover::after { content: ' ⎙'; }
+.bd-person:active { transform: scale(0.96); }
+.bd-person:focus-visible { outline: 2px solid var(--bd-red-hot); outline-offset: 2px; }
 .bd-slot-names em { color: var(--bd-dim); }
 .bd-slot-status { font-family: 'JetBrains Mono', monospace; font-size: 0.7rem; letter-spacing: 0.08em; color: var(--bd-dim); }
 .bd-slot.is-printed { opacity: 0.55; border-left-color: var(--bd-ok); }
