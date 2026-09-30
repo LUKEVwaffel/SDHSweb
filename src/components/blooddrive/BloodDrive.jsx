@@ -13,6 +13,15 @@ import './blooddrive.css';
 const LS_KEY = 'bloodDriveState';
 const TICK_MS = 10_000;
 const SCHEDULE = BELL_SCHEDULES.normal;
+const HELPER = 'http://127.0.0.1:17777';
+const HELPER_POLL_MS = 15_000;
+
+/** Standalone HTML of the rendered slip sheet (page styles + fonts via <base>) for the print helper. */
+function slipDocument() {
+  const styles = [...document.querySelectorAll('style, link[rel="stylesheet"]')].map((n) => n.outerHTML).join('');
+  const sheet = document.querySelector('.bd-print')?.outerHTML ?? '';
+  return `<!doctype html><html><head><meta charset="utf-8"><base href="${location.origin}/">${styles}</head><body><div class="bd-page">${sheet}</div></body></html>`;
+}
 
 function loadSaved() {
   try {
@@ -47,6 +56,7 @@ export default function BloodDrive() {
   const [job, setJob] = useState(null); // { time, label, names }
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
+  const [helper, setHelper] = useState(null); // printer name when the local helper is up
 
   useEffect(() => { save({ schedule, fileName, status, armed }); }, [schedule, fileName, status, armed]);
 
@@ -55,18 +65,48 @@ export default function BloodDrive() {
     return () => clearInterval(id);
   }, []);
 
+  // Local print helper (scripts/blooddrive-print-helper.mjs) = true silent
+  // printing via CUPS. Poll it; without it we fall back to window.print().
+  useEffect(() => {
+    let alive = true;
+    const check = () => fetch(`${HELPER}/health`).then((r) => r.json())
+      .then((j) => { if (alive) setHelper(j.ok ? j.printer : null); })
+      .catch(() => { if (alive) setHelper(null); });
+    check();
+    const id = setInterval(check, HELPER_POLL_MS);
+    return () => { alive = false; clearInterval(id); };
+  }, []);
+
   // Fire the print once the slip sheet for `job` is in the DOM. setTimeout, not
   // requestAnimationFrame — rAF never runs while the tab is hidden or the
   // window is covered, which silently stalled auto-print.
   useEffect(() => {
     if (!job) return;
-    const id = setTimeout(() => {
+    const id = setTimeout(async () => {
+      const done = () => {
+        if (job.auto) setStatus((s) => ({ ...s, [job.time]: 'printed' }));
+        setJob(null);
+      };
+      if (helper) {
+        try {
+          const res = await fetch(`${HELPER}/print`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ html: slipDocument(), label: job.label }),
+          });
+          const j = await res.json();
+          if (!j.ok) throw new Error(j.error);
+          setError('');
+          return done();
+        } catch (e) {
+          setError(`Print helper failed (${e.message}) — using browser print.`);
+        }
+      }
       window.print();
-      if (job.auto) setStatus((s) => ({ ...s, [job.time]: 'printed' }));
-      setJob(null);
+      done();
     }, 100);
     return () => clearTimeout(id);
-  }, [job]);
+  }, [job, helper]);
 
   // Keep the laptop screen awake while armed so the tab keeps ticking.
   useEffect(() => {
@@ -154,6 +194,9 @@ export default function BloodDrive() {
                   {nextSlot ? <>Next: <b>{nextSlot.label}</b> · {nextSlot.names.length} slip{nextSlot.names.length === 1 ? '' : 's'} · in {toMinutes(nextSlot.time) - nowMin} min</> : 'No slots left today.'}
                 </p>
                 <p className="bd-file">{fileName}</p>
+                <p className={`bd-helper${helper ? ' is-on' : ''}`}>
+                  {helper ? `Silent printing → ${helper.replace(/_/g, ' ')}` : 'Print helper not running — browser will show a print dialog'}
+                </p>
               </div>
               <div className="bd-control-actions">
                 {armed

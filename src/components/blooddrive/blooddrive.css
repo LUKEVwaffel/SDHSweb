@@ -48,6 +48,8 @@
 .is-armed .bd-control-state { color: var(--bd-red-hot); }
 .bd-control-next { font-size: 1.15rem; margin-top: 0.25rem; }
 .bd-file { color: var(--bd-dim); font-size: 0.8rem; margin-top: 0.25rem; }
+.bd-helper { font-family: 'JetBrains Mono', monospace; font-size: 0.75rem; margin-top: 0.4rem; color: var(--bd-red-hot); }
+.bd-helper.is-on { color: var(--bd-ok); }
 .bd-control-actions { display: flex; flex-wrap: wrap; gap: 0.5rem; }
 
 .bd-btn {
