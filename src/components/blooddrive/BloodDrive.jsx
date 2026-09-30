@@ -271,7 +271,7 @@ function SlipSheet({ job }) {
             <div className="bd-slip-wide"><dt>Student</dt><dd className="bd-slip-name">{name}</dd></div>
             <div><dt>Donation time</dt><dd>{time}</dd></div>
             <div><dt>Period</dt><dd>{period}</dd></div>
-            <div><dt>Date</dt><dd>{date}</dd></div>
+            <div className="bd-slip-wide"><dt>Date</dt><dd>{date}</dd></div>
             <div><dt>Teacher</dt><dd className="bd-slip-blank" /></div>
             <div><dt>Room #</dt><dd className="bd-slip-blank" /></div>
           </dl>
