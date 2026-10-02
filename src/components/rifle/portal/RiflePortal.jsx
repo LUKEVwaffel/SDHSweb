@@ -277,7 +277,7 @@ export default function RiflePortal() {
         {tab === 'lineup' && <LineupTab season={season} onNavigate={goTab} />}
         {tab === 'roster' && <RosterTab />}
         {tab === 'signups' && <SignupsTab />}
-        {tab === 'compupload' && <CompUploadTab canUpload={RIFLE_UPLOAD_ALLOWLIST.includes((admin.email || '').toLowerCase())} />}
+        {tab === 'compupload' && <CompUploadTab season={season} canUpload={RIFLE_UPLOAD_ALLOWLIST.includes((admin.email || '').toLowerCase())} />}
         {tab === 'calendar' && <CalendarTab />}
         {tab === 'stats' && <StatsTab />}
         {tab === 'history' && <HistoryTab />}

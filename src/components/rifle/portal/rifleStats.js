@@ -3,14 +3,14 @@
 // per-shooter / per-match aggregates — computed once here instead of four
 // slightly-different reimplementations).
 
-// Who may start a new comp-score upload (paste-parse or spreadsheet import)
-// — narrower than is_rifle_admin()/is_s6(), by the coach's own request: only
-// the two people who actually maintain the season workbook. Mirrored
-// server-side in rifle-comp-parse and rifle-xlsx-parse's UPLOAD_ALLOWLIST —
-// this one only drives UI visibility, the edge functions are the real gate.
+// Who may start a new comp-score import — narrower than
+// is_rifle_admin()/is_s6(), by the coach's own request: only the two people
+// who actually maintain the season workbook. Drives UI visibility of the
+// importer; the AI fallback is additionally gated server-side by
+// supabase/functions/_shared/rifleUploaders.ts (keep both lists in sync).
 export const RIFLE_UPLOAD_ALLOWLIST = [
   'lukevetsch77@gmail.com',
-  // TODO: add Kaz's email here.
+  'kazminski_jay@hcde.org', // Sgt Kaz
 ];
 
 export function seasonOf(match) {
