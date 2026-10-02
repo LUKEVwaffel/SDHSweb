@@ -20,7 +20,8 @@ import {
 } from './pwa';
 import { usePwaUpdate, PwaUpdateBar } from './usePwaUpdate';
 import OpticOnboarding from './OpticOnboarding';
-import { FinaleBanner, ThankYouCard, BetaGraduation, NextYearPoll } from './OpticFinale';
+import OpticShow from './OpticShow';
+import { StateStrip, OfficialBanner, hasSeenShow } from './OpticFinale';
 import posthog from '../../lib/posthog';
 import './optic.css';
 
@@ -36,11 +37,15 @@ const nextId = () => `u${Date.now()}_${uid++}`;
 // walkthrough for people who installed the app.
 export default function Optic() {
   const [onboarded, setOnboarded] = useState(() => isStandalone() || hasOnboardedOptic());
+  // Season-finale show (OpticShow.jsx) plays first on launch, once per
+  // device; REPLAY on the locked screen brings it back.
+  const [showing, setShowing] = useState(() => !hasSeenShow());
 
   useEffect(() => { installOpticPwaHooks(); }, []);
 
+  if (showing) return <OpticShow onDone={() => setShowing(false)} />;
   if (!onboarded) return <OpticOnboarding onDone={() => setOnboarded(true)} />;
-  return <OpticApp />;
+  return <OpticApp onReplay={() => setShowing(true)} />;
 }
 
 function OpticGlyph({ className }) {
@@ -75,7 +80,7 @@ const countTeams = (list) => Object.fromEntries(
   TEAM_FILTERS.map((t) => [t.id, list.filter((p) => matchesTeam(p, t.id)).length]),
 );
 
-function OpticApp() {
+function OpticApp({ onReplay }) {
   const config = useOpticConfig();
   const gate = useOpticGate();
   const { photos, loading, error, pendingCount, showNew } = useOpticPhotos({
@@ -227,14 +232,13 @@ function OpticApp() {
         {gate.loading ? (
           <div className="rhea-wrap"><div className="rhea-feed-msg">LOADING…</div></div>
         ) : !gate.open ? (
-          <OpticLocked opensAt={gate.opensAt} eventId={config.eventId} />
+          <OpticLocked opensAt={gate.opensAt} eventId={config.eventId} onReplay={onReplay} />
         ) : (
           <div className="rhea-wrap">
-            <FinaleBanner compact />
+            <StateStrip />
             <InstallNudge />
             <NotificationCard eventId={config.eventId} />
             <UploadCard eventId={config.eventId} />
-            <ThankYouCard />
             <Feed
               photos={visiblePhotos}
               loading={loading}
@@ -303,8 +307,6 @@ function OpticApp() {
       {showWalk && (
         <Walkthrough onClose={() => { markWalkthroughOptic(); setWalk(false); }} />
       )}
-
-      <NextYearPoll hold={gate.loading || showWalk || !!teamPickFor || reel !== null} />
 
       <PwaUpdateBar show={updateReady} />
     </div>
@@ -413,7 +415,7 @@ function NotificationCard({ eventId }) {
 
 // Countdown hold shown until the gate opens (scheduled time or Luke's manual
 // override). uses a local 1 Hz tick; useOpticGate flips `open` when it lands.
-function OpticLocked({ opensAt, eventId }) {
+function OpticLocked({ opensAt, eventId, onReplay }) {
   const [now, setNow] = useState(() => Date.now());
   useEffect(() => {
     const t = setInterval(() => setNow(Date.now()), 1000);
@@ -438,7 +440,6 @@ function OpticLocked({ opensAt, eventId }) {
   return (
     <div className="rhea-lock">
       <OpticGlyph className="rhea-lock-glyph" />
-      <FinaleBanner />
       {paused ? (
         <>
           <h1 className="rhea-lock-h">The feed is <span className="accent">paused</span>.</h1>
@@ -446,10 +447,8 @@ function OpticLocked({ opensAt, eventId }) {
             Photos are on hold for a moment. Keep this page open, it comes back
             on its own the second it reopens, no refresh needed.
           </p>
-          <div className="rhea-lock-cards">
-            <ThankYouCard />
-            <BetaGraduation />
-          </div>
+          <StateStrip onReplay={onReplay} />
+          <OfficialBanner />
         </>
       ) : (
         <>
@@ -466,15 +465,12 @@ function OpticLocked({ opensAt, eventId }) {
             <span className="rhea-cd-unit rhea-cd-tick"><b>{pad(secs)}</b><i>sec</i></span>
           </div>
 
-          <p className="rhea-lock-p">
-            Nothing to do until then. Uploads and the feed both unlock at once.
-          </p>
+          <StateStrip onReplay={onReplay} />
+          <OfficialBanner />
 
           <div className="rhea-lock-cards">
             <InstallNudge />
             <NotificationCard eventId={eventId} />
-            <ThankYouCard />
-            <BetaGraduation />
           </div>
 
           {!isStandalone() && (

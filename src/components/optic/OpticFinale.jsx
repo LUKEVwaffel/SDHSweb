@@ -6,90 +6,93 @@ import posthog from '../../lib/posthog';
 import './optic-finale.css';
 
 // ── Final comp of the 2026 season (Hamilton County Raider Championship at
-// Central, 2026-10-03). Everything season-ending lives here so the next
-// season's reset is one import swap in Optic.jsx, not a hunt through it:
-//   FinaleBanner      "last comp / 3rd in state" header, locked + open feed
-//   ThankYouCard      thanks to every family + the Noblit shoutout
-//   BetaGraduation    replaces the "what's new" card: BETA comes off 2.2
-//   NextYearPoll      one-tap "bring OPTIC back next year?" on launch
+// Central, 2026-10-03). Pieces shared by the launch show (OpticShow.jsx) and
+// the locked / live screens in Optic.jsx. Next season: drop OpticShow from
+// Optic() and these strips from OpticLocked / OpticApp.
 
-const SEASON = '2026';
-const PLACE = 'Central High School';
+export const SEASON = '2026';
+export const PLACE = 'Central High School';
+// Real logo file wins when present; RaiderCrest falls back to the SVG below.
+const RAIDER_LOGO_SRC = '/images/raiders/raider-logo.png';
+
+const SHOW_KEY = 'optic_show_2026_final';
 const POLL_KEY = 'optic_next_year_v1';
 const POLL_CAMPAIGN = 'optic-next-year-2026';
-const POLL_DELAY_MS = 900;
-const POLL_THANKS_MS = 1800;
 
-/** @param {{ compact?: boolean }} props */
-export function FinaleBanner({ compact = false }) {
+const readFlag = (k) => { try { return localStorage.getItem(k); } catch { return null; } };
+const writeFlag = (k, v) => { try { localStorage.setItem(k, v); } catch { /* private mode */ } };
+
+export const hasSeenShow = () => !!readFlag(SHOW_KEY);
+export const markShowSeen = () => writeFlag(SHOW_KEY, '1');
+export const hasAnsweredPoll = () => !!readFlag(POLL_KEY);
+
+/** Raider team logo: the real image if it's in /public, else an SVG crest. */
+export function RaiderCrest({ className }) {
+  const [useImg, setUseImg] = useState(true);
+  if (useImg) {
+    return (
+      <img
+        className={className}
+        src={RAIDER_LOGO_SRC}
+        alt="SDHS Raiders"
+        width="512"
+        height="512"
+        onError={() => setUseImg(false)}
+      />
+    );
+  }
   return (
-    <section className="fin-banner" data-compact={compact} aria-label="Final competition of the season">
-      <div className="fin-banner-kick">
-        <span className="fin-dot" aria-hidden="true" />
-        FINAL COMP · {SEASON} SEASON
+    <svg className={className} viewBox="0 0 240 280" role="img" aria-label="SDHS Raiders">
+      <path d="M120 8 L224 40 V140 C224 206 176 248 120 272 C64 248 16 206 16 140 V40 Z"
+        fill="none" stroke="currentColor" strokeWidth="8" />
+      <path d="M120 26 L208 53 V140 C208 196 168 232 120 253 C72 232 32 196 32 140 V53 Z"
+        fill="none" stroke="currentColor" strokeOpacity="0.45" strokeWidth="3" />
+      <text x="120" y="78" textAnchor="middle" fill="currentColor"
+        style={{ font: '700 17px Oswald, sans-serif', letterSpacing: '0.32em' }}>SDHS</text>
+      <text x="120" y="170" textAnchor="middle" fill="currentColor"
+        style={{ font: '700 96px Oswald, sans-serif' }}>R</text>
+      <path d="M58 190 H182" stroke="currentColor" strokeWidth="3" />
+      <text x="120" y="218" textAnchor="middle" fill="currentColor"
+        style={{ font: '700 22px Oswald, sans-serif', letterSpacing: '0.26em' }}>RAIDERS</text>
+    </svg>
+  );
+}
+
+/** Condensed "3rd in state" line for the locked screen + live feed. */
+export function StateStrip({ onReplay }) {
+  return (
+    <section className="fin-strip" aria-label="Third place in the state">
+      <div className="fin-strip-medal" aria-hidden="true">3<sup>RD</sup></div>
+      <div className="fin-strip-copy">
+        <div className="fin-strip-h">3rd in State</div>
+        <div className="fin-strip-sub">FINAL COMP · {SEASON} RAIDER SEASON</div>
       </div>
-      <div className="fin-banner-row">
-        <div className="fin-medal" aria-label="Third place in the state">
-          <b>3<sup>RD</sup></b>
-          <i>IN STATE</i>
-        </div>
-        <div className="fin-banner-copy">
-          <h2 className="fin-banner-h">
-            One last <span className="accent">time.</span>
-          </h2>
-          <p className="fin-banner-p">
-            This is the last Raider comp of the season, at {PLACE}. We finished
-            third in the state, and we are bringing everything we have.
-          </p>
-        </div>
-      </div>
+      {onReplay && (
+        <button className="fin-strip-replay" onClick={onReplay} aria-label="Replay the season show">
+          ▶ REPLAY
+        </button>
+      )}
     </section>
   );
 }
 
-export function ThankYouCard() {
+/** Static "official 2.2" banner, the resting state of BetaGraduation. */
+export function OfficialBanner() {
   return (
-    <section className="rhea-card2 fin-thanks" aria-label="Thank you, families">
-      <div className="rhea-card2-kick">TO EVERY RAIDER FAMILY</div>
-      <h3 className="fin-thanks-h">Thank you.</h3>
-      <p className="rhea-card2-p">
-        The early mornings, the long drives, the coolers, the cheering from the
-        tree line, the photos. None of this season happens without you, and we
-        are eternally grateful.
-      </p>
-
-      <div className="fin-shout">
-        <div className="fin-shout-kick">A BIG SHOUTOUT</div>
-        <div className="fin-shout-name">Amber &amp; Jack Noblit</div>
-        <p className="fin-shout-p">
-          Weston&apos;s parents gave our Raiders more of their time this season
-          than we could ever repay. Thank you for showing up for every one of
-          these cadets.
-        </p>
-      </div>
+    <section className="fin-official" aria-label="OPTIC 2.2 official release">
+      <div className="fin-official-ver">OPTIC <span>2.2</span></div>
+      <div className="fin-official-stamp">OFFICIAL RELEASE</div>
+      <p className="fin-official-p">Out of beta, built from your feedback. Thank you, parents.</p>
     </section>
   );
 }
 
-// The 2.2 card plays once it scrolls into view: BETA gets struck through,
-// knocked off, and 2.2 settles in gold. Reduced motion lands on the final
+// BETA gets struck through, knocked off with sparks, and 2.2 settles in gold.
+// `play` comes from the show's scene clock; reduced motion lands on the final
 // frame (optic.css collapses every .rhea animation to ~0ms, fill: both).
-export function BetaGraduation() {
-  const ref = useRef(null);
-  const [play, setPlay] = useState(false);
-
-  useEffect(() => {
-    const el = ref.current;
-    if (!el || typeof IntersectionObserver === 'undefined') { setPlay(true); return undefined; }
-    const io = new IntersectionObserver(([entry]) => {
-      if (entry.isIntersecting) { setPlay(true); io.disconnect(); }
-    }, { threshold: 0.45 });
-    io.observe(el);
-    return () => io.disconnect();
-  }, []);
-
+export function BetaGraduation({ play }) {
   return (
-    <section ref={ref} className="rhea-card2 fin-grad" data-play={play} aria-label="OPTIC 2.2 is out of beta">
+    <div className="fin-grad" data-play={play}>
       <div className="fin-grad-stage" aria-hidden="true">
         <span className="fin-grad-word">OPTIC</span>
         <span className="fin-grad-ver">
@@ -103,28 +106,10 @@ export function BetaGraduation() {
           <span key={i} className="fin-spark" style={{ '--a': `${i * 36}deg`, '--d': `${i % 2 ? 46 : 64}px` }} />
         ))}
         <span className="fin-grad-shine" />
+        <span className="fin-grad-stamp">OFFICIAL RELEASE</span>
       </div>
-      <div className="fin-grad-stamp" aria-hidden="true">OFFICIAL RELEASE</div>
-
-      <div className="fin-grad-body">
-        <div className="rhea-card2-kick">OPTIC 2.2 · OUT OF BETA</div>
-        <p className="rhea-card2-p">
-          OPTIC started this season as a beta. Every fix since then came from
-          you: the team filters, the event filters, photo alerts, saving on
-          iPhone, the smoother feed. You filled out the surveys and told us
-          what broke, and that is why the beta tag comes off today.
-        </p>
-        <p className="rhea-card2-p fin-grad-sign">Thank you for the feedback, parents. This one is yours.</p>
-      </div>
-    </section>
+    </div>
   );
-}
-
-function hasAnsweredPoll() {
-  try { return !!localStorage.getItem(POLL_KEY); } catch { return false; }
-}
-function markPoll(value) {
-  try { localStorage.setItem(POLL_KEY, value); } catch { /* private mode */ }
 }
 
 const POLL_OPTIONS = [
@@ -133,28 +118,12 @@ const POLL_OPTIONS = [
   { id: 'no', label: 'NO' },
 ];
 
-/**
- * One question for every OPTIC user on launch. Answered once per device;
- * "ASK ME LATER" only hides it for this visit.
- * @param {{ hold?: boolean }} props  hold = another sheet is up, wait
- */
-export function NextYearPoll({ hold = false }) {
-  const [open, setOpen] = useState(false);
-  const [state, setState] = useState('ask'); // ask | sending | thanks | err
+/** "Bring OPTIC back next year?" buttons; one stored answer per device. */
+export function PollButtons({ onVoted }) {
+  const [state, setState] = useState('ask'); // ask | sending | err
+  const sentRef = useRef(false);
 
-  useEffect(() => {
-    if (hold || hasAnsweredPoll()) return undefined;
-    const t = setTimeout(() => setOpen(true), POLL_DELAY_MS);
-    return () => clearTimeout(t);
-  }, [hold]);
-
-  useEffect(() => {
-    if (state !== 'thanks') return undefined;
-    const t = setTimeout(() => setOpen(false), POLL_THANKS_MS);
-    return () => clearTimeout(t);
-  }, [state]);
-
-  if (!open || hold) return null;
+  useEffect(() => () => { sentRef.current = true; }, []);
 
   async function vote(choice) {
     if (state === 'sending') return;
@@ -163,53 +132,31 @@ export function NextYearPoll({ hold = false }) {
     const { error } = await SB.from('optic_next_year_votes').insert({
       campaign_id: POLL_CAMPAIGN, vote: choice, standalone: isStandalone(), voter_fp: fp,
     });
+    if (sentRef.current) return;
     if (error) { setState('err'); return; }
-    markPoll(choice);
+    writeFlag(POLL_KEY, choice);
     posthog.capture('optic_next_year_vote', { vote: choice });
-    setState('thanks');
+    onVoted(choice);
   }
 
   return (
-    <div className="rhea-wt" role="dialog" aria-modal="true" aria-labelledby="fin-poll-h">
-      <div className="rhea-wt-card fin-poll">
-        {state === 'thanks' ? (
-          <div className="fin-poll-done">
-            <div className="fin-poll-check" aria-hidden="true">✓</div>
-            <h2 className="rhea-wt-h">Thank you.</h2>
-            <p className="rhea-wt-p">Got it. Enjoy the last comp.</p>
-          </div>
-        ) : (
-          <>
-            <div className="rhea-wt-step">ONE QUICK QUESTION</div>
-            <h2 id="fin-poll-h" className="rhea-wt-h">
-              Should we bring OPTIC back <span className="accent">next year?</span>
-            </h2>
-            <p className="rhea-wt-p">
-              This is the last comp of the {SEASON} season. Your answer decides
-              whether we build it again.
-            </p>
-            <div className="fin-poll-opts">
-              {POLL_OPTIONS.map((o) => (
-                <button
-                  key={o.id}
-                  className="fin-poll-opt"
-                  data-primary={o.id === 'yes'}
-                  disabled={state === 'sending'}
-                  onClick={() => vote(o.id)}
-                >
-                  {o.label}
-                </button>
-              ))}
-            </div>
-            {state === 'err' && (
-              <p className="rhea-card2-err">Could not send that. Check signal and tap again.</p>
-            )}
-            <div className="rhea-wt-foot">
-              <button className="rhea-wt-skip" onClick={() => setOpen(false)}>ASK ME LATER</button>
-            </div>
-          </>
-        )}
+    <>
+      <div className="fin-poll-opts">
+        {POLL_OPTIONS.map((o) => (
+          <button
+            key={o.id}
+            className="fin-poll-opt"
+            data-primary={o.id === 'yes'}
+            disabled={state === 'sending'}
+            onClick={() => vote(o.id)}
+          >
+            {o.label}
+          </button>
+        ))}
       </div>
-    </div>
+      {state === 'err' && (
+        <p className="rhea-card2-err">Could not send that. Check signal and tap again.</p>
+      )}
+    </>
   );
 }
