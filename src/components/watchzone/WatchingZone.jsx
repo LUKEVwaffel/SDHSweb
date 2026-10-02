@@ -2,15 +2,16 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 import { P, mono, fraunces, inter, fs, sp, radius, shadow, ease } from '../admin/theme.js';
 import { useRaiderVideos } from '../../hooks/useRaiderVideos.js';
 import { videoUrl, fmtTime, SPEED_PRESETS } from '../../lib/raiderTv.js';
+import { buildFilms, categoriesIn, groupByComp } from '../../lib/raiderFilm.js';
 
-// /watchzone — public Raider film archive. No pairing, no remote: pick a clip,
-// watch it. Native fullscreen + a slow-mo speed rail (the OC footage is shot
-// at high frame rate specifically so it holds up slowed down).
+// /watchzone — public Raider film archive, desktop + mobile. No pairing, no
+// remote: pick a film, watch it. Native fullscreen + a slow-mo speed rail
+// (much of the footage is 120fps specifically so it holds up slowed down).
 //
-// Reuses the same raider_videos library DISPATCH's Raider TV panel manages —
-// that table has always been anon-readable (the /raidertv display reads it
-// the same way). This just orders the list newest-first instead of by the
-// coaching sort_order, so a fresh upload is what a visitor sees first.
+// Reads the same raider_videos library DISPATCH's Raider TV panel manages
+// (anon-readable). Multi-part uploads collapse into one film via
+// buildFilms(); parts auto-advance. The library is split by comp (the meet
+// each upload followed), with comp + event filter chips. Audio-restricted films are forced muted.
 //
 // Self-contained full-screen anon route (App.jsx bypass), same pattern as
 // /raidertv.
@@ -19,43 +20,47 @@ function getFullscreenElement() {
   return document.fullscreenElement || document.webkitFullscreenElement || null;
 }
 
-// Curated allowlist — the coaching library (raider_videos) has years of
-// practice clips DISPATCH manages; this public page only ever shows what's
-// explicitly featured here. Add an id to feature another clip.
-const FEATURED_IDS = new Set([
-  '86839e28-6160-42d0-9d49-46adca8c345a', // OC — Part 1
-  '3252c9a8-6e2f-4578-8649-70d184f0029e', // OC — Part 2
-]);
-
 export default function WatchingZone() {
-  const { videos: allVideos, loading } = useRaiderVideos();
-  const videos = useMemo(() => allVideos.filter((v) => FEATURED_IDS.has(v.id)), [allVideos]);
-  const [activeId, setActiveId] = useState(null);
+  const { videos, loading } = useRaiderVideos();
+  const films = useMemo(() => buildFilms(videos), [videos]);
+  const categories = useMemo(() => categoriesIn(films), [films]);
+  const comps = useMemo(() => groupByComp(films).map((g) => g.comp), [films]);
+
+  const [comp, setComp] = useState('all');
+  const [category, setCategory] = useState('all');
+  const [activeKey, setActiveKey] = useState(null);
+  const [partIdx, setPartIdx] = useState(0);
   const [rate, setRate] = useState(1);
   const [isFullscreen, setIsFullscreen] = useState(false);
 
   const stageRef = useRef(null);
   const videoRef = useRef(null);
 
-  const ordered = useMemo(
-    () => [...videos].sort((a, b) => new Date(b.created_at) - new Date(a.created_at)),
-    [videos],
+  const groups = useMemo(
+    () => groupByComp(films.filter((f) =>
+      (comp === 'all' || f.comp.key === comp) && (category === 'all' || f.category.key === category))),
+    [films, comp, category],
   );
 
   useEffect(() => {
-    if (!ordered.length) return;
-    if (!activeId || !ordered.some((v) => v.id === activeId)) setActiveId(ordered[0].id);
-  }, [ordered, activeId]);
+    if (!films.length) return;
+    if (!activeKey || !films.some((f) => f.key === activeKey)) setActiveKey(films[0].key);
+  }, [films, activeKey]);
 
-  const active = ordered.find((v) => v.id === activeId) || null;
+  const active = films.find((f) => f.key === activeKey) || null;
+  const part = active?.parts[partIdx] || active?.parts[0] || null;
+  const muted = Boolean(active?.audioRestricted);
 
-  // New clip loaded — reset speed to normal.
-  useEffect(() => { setRate(1); }, [activeId]);
+  function selectFilm(key) {
+    setActiveKey(key);
+    setPartIdx(0);
+    setRate(1);
+  }
 
   useEffect(() => {
     const v = videoRef.current;
     if (v) v.playbackRate = rate;
-  }, [rate, activeId]);
+  }, [rate, part?.id]);
 
   useEffect(() => {
     const onChange = () => setIsFullscreen(getFullscreenElement() === stageRef.current);
@@ -66,6 +71,16 @@ export default function WatchingZone() {
       document.removeEventListener('webkitfullscreenchange', onChange);
     };
   }, []);
+
+  // Parts of one film play straight through.
+  function onEnded() {
+    if (active && partIdx < active.parts.length - 1) setPartIdx(partIdx + 1);
+  }
+
+  // Native controls expose an unmute button — snap it back for restricted films.
+  function onVolumeChange(e) {
+    if (muted && !e.currentTarget.muted) e.currentTarget.muted = true;
+  }
 
   // iOS Safari has no element-level Fullscreen API — only <video> itself can
   // go fullscreen there, via the legacy webkit method. Everywhere else
@@ -89,13 +104,20 @@ export default function WatchingZone() {
   return (
     <div style={{ minHeight: '100vh', background: P.ink, fontFamily: inter }}>
       <style>{`
-        .wz-grid { display: grid; grid-template-columns: minmax(0,1fr) 300px; gap: 24px; }
+        .wz-grid { display: grid; grid-template-columns: minmax(0,1fr) 320px; gap: 28px; align-items: start; }
+        .wz-lib { position: sticky; top: 72px; max-height: calc(100vh - 96px); overflow-y: auto; }
+        .wz-chips { display: flex; flex-wrap: wrap; gap: 8px; }
+        .wz-chips::-webkit-scrollbar { display: none; }
+        .wz-film:hover { border-color: ${P.hairStrong} !important; }
+        .wz-film:focus-visible, .wz-chip:focus-visible, .wz-speed:focus-visible { outline: 2px solid ${P.gold}; outline-offset: 2px; }
         @media (max-width: 760px) {
-          .wz-grid { grid-template-columns: 1fr; gap: 28px; }
+          .wz-grid { grid-template-columns: minmax(0,1fr); gap: 24px; }
+          .wz-lib { position: static; max-height: none; overflow: visible; }
+          .wz-chips { flex-wrap: nowrap; overflow-x: auto; scrollbar-width: none; }
         }
       `}</style>
 
-      <div style={{
+      <header style={{
         position: 'sticky', top: 0, zIndex: 5, background: 'rgba(6,16,31,0.92)',
         backdropFilter: 'blur(6px)', borderBottom: `1px solid ${P.hair}`,
         padding: `${sp[3]}px ${sp[4]}px`, display: 'flex', alignItems: 'baseline', gap: sp[3], flexWrap: 'wrap',
@@ -112,13 +134,13 @@ export default function WatchingZone() {
         }}>
           Raider Film
         </h1>
-      </div>
+      </header>
 
-      <div className="wz-grid" style={{
-        maxWidth: 1240, margin: '0 auto', padding: `${sp[5]}px ${sp[4]}px ${sp[16]}px`,
+      <main className="wz-grid" style={{
+        maxWidth: 1280, margin: '0 auto', padding: `${sp[5]}px ${sp[4]}px ${sp[16]}px`,
       }}>
         {/* Stage */}
-        <div>
+        <section aria-label="Player">
           <div
             ref={stageRef}
             style={{
@@ -127,13 +149,18 @@ export default function WatchingZone() {
               boxShadow: shadow.lg, border: `1px solid ${P.hairStrong}`,
             }}
           >
-            {active ? (
+            {part ? (
               <video
-                key={active.id}
+                key={part.id}
                 ref={videoRef}
-                src={videoUrl(active.storage_path)}
+                src={videoUrl(part.storage_path)}
                 controls
+                controlsList="nodownload"
                 playsInline
+                muted={muted}
+                autoPlay={partIdx > 0}
+                onEnded={onEnded}
+                onVolumeChange={onVolumeChange}
                 onLoadedMetadata={() => { if (videoRef.current) videoRef.current.playbackRate = rate; }}
                 style={{ width: '100%', height: '100%', objectFit: 'contain', display: 'block', background: '#000' }}
               />
@@ -146,7 +173,7 @@ export default function WatchingZone() {
               </div>
             )}
 
-            {active && (
+            {part && (
               <button
                 type="button"
                 onClick={toggleFullscreen}
@@ -166,9 +193,14 @@ export default function WatchingZone() {
           {active && (
             <>
               <div style={{ marginTop: sp[4], display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', gap: sp[3], flexWrap: 'wrap' }}>
-                <h2 style={{ margin: 0, fontFamily: fraunces, fontWeight: 700, color: P.cream, fontSize: fs.xl }}>
-                  {active.title}
-                </h2>
+                <div>
+                  <div style={{ fontFamily: mono, fontSize: fs.micro, letterSpacing: '0.24em', color: P.gold, textTransform: 'uppercase' }}>
+                    {active.comp.label} · {active.category.label}
+                  </div>
+                  <h2 style={{ margin: '6px 0 0', fontFamily: fraunces, fontWeight: 700, color: P.cream, fontSize: 'clamp(22px,4vw,30px)' }}>
+                    {active.title}
+                  </h2>
+                </div>
                 {active.duration_sec ? (
                   <span style={{ fontFamily: mono, fontSize: fs.tiny, color: P.faint, letterSpacing: '0.12em' }}>
                     {fmtTime(active.duration_sec)}
@@ -176,25 +208,46 @@ export default function WatchingZone() {
                 ) : null}
               </div>
 
+              {muted && (
+                <div style={{
+                  marginTop: sp[3], display: 'inline-flex', alignItems: 'center', gap: sp[2],
+                  fontFamily: mono, fontSize: fs.micro, letterSpacing: '0.14em', color: P.mute,
+                  border: `1px solid ${P.hair}`, borderRadius: radius.pill, padding: `${sp[1]}px ${sp[3]}px`,
+                }}>
+                  <MutedIcon /> AUDIO OFF · AT THE REQUEST OF THE CADETS IN THIS FILM
+                </div>
+              )}
+
+              {active.parts.length > 1 && (
+                <div role="tablist" aria-label="Parts" style={{ marginTop: sp[4], display: 'flex', gap: sp[2] }}>
+                  {active.parts.map((p, i) => (
+                    <button
+                      key={p.id}
+                      type="button"
+                      role="tab"
+                      aria-selected={i === partIdx}
+                      className="wz-speed"
+                      onClick={() => setPartIdx(i)}
+                      style={chipStyle(i === partIdx)}
+                    >
+                      PART {p.part ?? i + 1}{p.duration_sec ? ` · ${fmtTime(p.duration_sec)}` : ''}
+                    </button>
+                  ))}
+                </div>
+              )}
+
               {/* Slow-mo rail */}
               <div style={{ marginTop: sp[5] }}>
-                <div style={{ fontFamily: mono, fontSize: fs.micro, letterSpacing: '0.24em', color: P.mute, textTransform: 'uppercase', marginBottom: sp[2] }}>
-                  Slow&nbsp;Motion
-                </div>
+                <div style={labelStyle}>Slow&nbsp;Motion</div>
                 <div style={{ display: 'flex', gap: sp[2], flexWrap: 'wrap' }}>
                   {SPEED_PRESETS.map((s) => (
                     <button
                       key={s}
                       type="button"
+                      className="wz-speed"
+                      aria-pressed={rate === s}
                       onClick={() => setRate(s)}
-                      style={{
-                        fontFamily: mono, fontSize: fs.xs, fontWeight: 700, letterSpacing: '0.06em',
-                        padding: `${sp[2]}px ${sp[3]}px`, borderRadius: radius.sm, cursor: 'pointer',
-                        border: `1px solid ${rate === s ? P.gold : P.hair}`,
-                        background: rate === s ? P.gold : 'transparent',
-                        color: rate === s ? P.ink : P.mute,
-                        transition: `background ${'0.15s'} ${ease}`,
-                      }}
+                      style={chipStyle(rate === s)}
                     >
                       {s}&times;
                     </button>
@@ -203,44 +256,139 @@ export default function WatchingZone() {
               </div>
             </>
           )}
-        </div>
+        </section>
 
         {/* Library */}
-        <div>
-          <div style={{ fontFamily: mono, fontSize: fs.micro, letterSpacing: '0.24em', color: P.mute, textTransform: 'uppercase', marginBottom: sp[3] }}>
-            {ordered.length ? `${ordered.length} clip${ordered.length === 1 ? '' : 's'}` : 'LIBRARY'}
+        <aside className="wz-lib" aria-label="Film library">
+          <div style={labelStyle}>
+            {films.length ? `${films.length} film${films.length === 1 ? '' : 's'}` : 'LIBRARY'}
           </div>
+
+          {comps.length > 1 && (
+            <ChipRow
+              label="Competition"
+              options={[{ key: 'all', label: 'All Comps' }, ...comps.map((c) => ({ key: c.key, label: shortComp(c.label) }))]}
+              value={comp}
+              onChange={setComp}
+            />
+          )}
+
+          {categories.length > 1 && (
+            <ChipRow
+              label="Event"
+              options={[{ key: 'all', label: 'All' }, ...categories]}
+              value={category}
+              onChange={setCategory}
+            />
+          )}
+
+          {groups.length === 0 && !loading && (
+            <div style={{ fontFamily: mono, fontSize: fs.micro, color: P.faint, letterSpacing: '0.14em' }}>
+              NO FILM MATCHES THESE FILTERS
+            </div>
+          )}
+
+          {groups.map((g) => (
+          <section key={g.comp.key} aria-label={g.comp.label} style={{ marginTop: sp[4] }}>
+            <div style={{
+              display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', gap: sp[2],
+              borderBottom: `1px solid ${P.hair}`, paddingBottom: sp[2], marginBottom: sp[2],
+            }}>
+              <h3 style={{ margin: 0, fontFamily: fraunces, fontWeight: 700, fontSize: fs.md, color: P.cream }}>
+                {g.comp.label}
+              </h3>
+              {g.comp.date && (
+                <span style={{ fontFamily: mono, fontSize: fs.micro, color: P.gold, letterSpacing: '0.12em', whiteSpace: 'nowrap' }}>
+                  {g.comp.date.replace(/,\s*\d{4}$/, '').toUpperCase()}
+                </span>
+              )}
+            </div>
           <div style={{ display: 'flex', flexDirection: 'column', gap: sp[2] }}>
-            {ordered.map((v) => {
-              const isActive = v.id === activeId;
+            {g.films.map((f) => {
+              const isActive = f.key === activeKey;
               return (
                 <button
-                  key={v.id}
+                  key={f.key}
                   type="button"
-                  onClick={() => setActiveId(v.id)}
+                  className="wz-film"
+                  aria-current={isActive ? 'true' : undefined}
+                  onClick={() => selectFilm(f.key)}
                   style={{
                     textAlign: 'left', display: 'flex', flexDirection: 'column', gap: 4,
                     padding: `${sp[3]}px ${sp[4]}px`, borderRadius: radius.md, cursor: 'pointer',
                     border: `1px solid ${isActive ? P.gold : P.hair}`,
                     background: isActive ? P.goldWash : P.deep,
+                    transition: `border-color 0.15s ${ease}`,
                   }}
                 >
                   <span style={{
                     fontFamily: inter, fontSize: fs.sm, fontWeight: 600, color: isActive ? P.bright : P.cream,
                     overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
                   }}>
-                    {v.title}
+                    {f.title}
                   </span>
-                  <span style={{ fontFamily: mono, fontSize: fs.micro, color: P.faint, letterSpacing: '0.08em' }}>
-                    {v.duration_sec ? fmtTime(v.duration_sec) : 'unknown length'}
+                  <span style={{ display: 'flex', gap: sp[2], alignItems: 'center', fontFamily: mono, fontSize: fs.micro, color: P.faint, letterSpacing: '0.08em' }}>
+                    {f.duration_sec ? fmtTime(f.duration_sec) : 'unknown length'}
+                    {f.parts.length > 1 && <span style={{ color: P.gold }}>· {f.parts.length} PARTS</span>}
+                    {f.audioRestricted && <span aria-label="Audio off"><MutedIcon /></span>}
                   </span>
                 </button>
               );
             })}
           </div>
-        </div>
-      </div>
+          </section>
+          ))}
+        </aside>
+      </main>
     </div>
+  );
+}
+
+// "East Hamilton Raider Competition" → "East Hamilton"
+function shortComp(label) {
+  return label.replace(/\s+Raider\s+(Competition|Challenge)$/i, '');
+}
+
+function ChipRow({ label, options, value, onChange }) {
+  return (
+    <div role="group" aria-label={label} className="wz-chips" style={{ marginBottom: sp[3] }}>
+      {options.map((o) => (
+        <button
+          key={o.key}
+          type="button"
+          className="wz-chip"
+          aria-pressed={value === o.key}
+          onClick={() => onChange(o.key)}
+          style={{ ...chipStyle(value === o.key), whiteSpace: 'nowrap', flexShrink: 0 }}
+        >
+          {o.label}
+        </button>
+      ))}
+    </div>
+  );
+}
+
+const labelStyle = {
+  fontFamily: mono, fontSize: fs.micro, letterSpacing: '0.24em', color: P.mute,
+  textTransform: 'uppercase', marginBottom: sp[2],
+};
+
+function chipStyle(on) {
+  return {
+    fontFamily: mono, fontSize: fs.xs, fontWeight: 700, letterSpacing: '0.06em',
+    padding: `${sp[2]}px ${sp[3]}px`, borderRadius: radius.sm, cursor: 'pointer',
+    border: `1px solid ${on ? P.gold : P.hair}`,
+    background: on ? P.gold : 'transparent',
+    color: on ? P.ink : P.mute,
+    transition: `background 0.15s ${ease}`,
+  };
+}
+
+function MutedIcon() {
+  return (
+    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" aria-hidden="true">
+      <path d="M11 5 6 9H2v6h4l5 4V5zM23 9l-6 6M17 9l6 6" />
+    </svg>
   );
 }
 

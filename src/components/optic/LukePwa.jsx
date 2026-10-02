@@ -18,36 +18,51 @@ const TEAMS = [
 ];
 const TABS = ['tag', 'parents', 'subs'];
 
-// The stations every Raider comp runs, in running order. Both teams run
-// every one, separately, so each station is two sub-events: one MALE, one
-// COED. That keeps each team's photos in its own album, and tagging a photo
-// to one sets its team too. Added with one tap from EVENTS, and
-// automatically when switching to a comp that has no sub-events yet.
-const STATIONS = ['Team Run', 'CCR', 'PTT', 'One Rope', 'Gauntlet', 'Obstacle Course'];
-const STANDARD_EVENTS = STATIONS.flatMap((name) => [
-  { name, team: 'male' },
-  { name, team: 'coed' },
-]);
+// The stations every Raider comp runs, in running order. Both teams do all
+// of them, so each one is created as a MALE row + a COED row: tagging a
+// photo to a team-specific row stamps its raider_team, which is what the
+// public feed's MALE / COED filters read (a single 'both' row never did, so
+// those photos only ever showed under ALL). Added with one tap from EVENTS,
+// and automatically when switching to a comp that has no sub-events yet.
+const STANDARD_EVENTS = ['Team Run', 'CCR', 'PTT', 'One Rope', 'Gauntlet', 'Obstacle Course'];
+const PAIR_TEAMS = ['male', 'coed'];
 const normName = (n) => String(n || '').trim().toLowerCase().replace(/\s+/g, ' ');
-const eventKey = (e) => `${normName(e.name)}|${e.team}`;
-const standardLabel = (e) => `${e.name} ${e.team === 'male' ? 'M' : 'C'}`;
+const subKey = (name, team) => `${normName(name)}|${team}`;
 
 /**
- * Insert whichever standard events `eventId` doesn't have yet (matched on
- * name + team). One at a time so created_at keeps them in running order
- * (albums follow that order).
+ * Insert one row per team for `name` (team 'both' -> a MALE row + a COED
+ * row), skipping any (name, team) pair `have` already holds.
+ * @returns {Promise<{rows:object[], error:object|null}>}
+ */
+async function insertSubEvent(eventId, name, team, createdBy, have = new Set()) {
+  const teams = team === 'both' ? PAIR_TEAMS : [team];
+  const rows = [];
+  for (const t of teams) {
+    if (have.has(subKey(name, t))) continue;
+    // One at a time so created_at keeps running order (albums follow it).
+    // eslint-disable-next-line no-await-in-loop
+    const { data, error } = await SB.from('raider_sub_events')
+      .insert({ event_id: eventId, name, team: t, created_by: createdBy || null })
+      .select().single();
+    if (error) return { rows, error };
+    rows.push(data);
+  }
+  return { rows, error: null };
+}
+
+/**
+ * Insert whichever standard events (per team) `eventId` doesn't have yet.
+ * @param {{name:string, team:string}[]} existing
  * @returns {Promise<{added:number, error:object|null}>}
  */
 async function addStandardEvents(eventId, existing, createdBy) {
-  const have = new Set(existing.map(eventKey));
+  const have = new Set(existing.map((s) => subKey(s.name, s.team)));
   let added = 0;
-  for (const ev of STANDARD_EVENTS) {
-    if (have.has(eventKey(ev))) continue;
+  for (const name of STANDARD_EVENTS) {
     // eslint-disable-next-line no-await-in-loop
-    const { error } = await SB.from('raider_sub_events')
-      .insert({ event_id: eventId, name: ev.name, team: ev.team, created_by: createdBy || null });
+    const { rows, error } = await insertSubEvent(eventId, name, 'both', createdBy, have);
+    added += rows.length;
     if (error) return { added, error };
-    added += 1;
   }
   return { added, error: null };
 }
@@ -800,8 +815,8 @@ function SubEvents({ eventId, subEvents, counts, emailRef, refreshSubs, setActio
   const [alertText, setAlertText] = useState('');
   const [prefilling, setPrefilling] = useState(false);
 
-  const have = new Set(subEvents.map(eventKey));
-  const missingStandard = STANDARD_EVENTS.filter((e) => !have.has(eventKey(e)));
+  const have = new Set(subEvents.map((s) => subKey(s.name, s.team)));
+  const missingStandard = STANDARD_EVENTS.filter((n) => PAIR_TEAMS.some((t) => !have.has(subKey(n, t))));
 
   async function prefill() {
     if (!eventId || prefilling) return;
@@ -820,13 +835,12 @@ function SubEvents({ eventId, subEvents, counts, emailRef, refreshSubs, setActio
     if (!eventId) { setActionErr('No active event set. Set optic_config.active_event_id first.'); return; }
     setBusy(true); setActionErr('');
     haptic(14);
-    const { data, error } = await SB.from('raider_sub_events')
-      .insert({ event_id: eventId, name: n, team, created_by: emailRef.current || null })
-      .select().single();
+    // BOTH -> a MALE row + a COED row (see insertSubEvent).
+    const { rows, error } = await insertSubEvent(eventId, n, team, emailRef.current);
     setBusy(false);
-    if (error) { setActionErr(error.message || 'Could not create sub-event.'); haptic([8, 40, 8]); return; }
+    if (error) { setActionErr(error.message || 'Could not create sub-event.'); haptic([8, 40, 8]); refreshSubs(); return; }
     setName(''); setTeam('both');
-    if (data?.id) { setFreshId(data.id); setTimeout(() => setFreshId(null), 950); }
+    if (rows[0]?.id) { setFreshId(rows[0].id); setTimeout(() => setFreshId(null), 950); }
     refreshSubs();
   }
 
@@ -901,10 +915,8 @@ function SubEvents({ eventId, subEvents, counts, emailRef, refreshSubs, setActio
         <div className="lp-speed" style={{ marginBottom: 2 }}>
           <span style={{ flex: 1 }}>
             {missingStandard.length === STANDARD_EVENTS.length
-              ? `Add the ${STATIONS.length} standard events, one MALE + one COED each:`
-              : 'Missing standard events:'} {missingStandard.length === STANDARD_EVENTS.length
-              ? STATIONS.join(', ')
-              : missingStandard.map(standardLabel).join(', ')}
+              ? 'Add the standard events (male + coed):'
+              : 'Missing standard events:'} {missingStandard.join(', ')}
           </span>
           <button className="lp-btn lp-btn--sm" onClick={prefill} disabled={prefilling}>
             {prefilling ? 'ADDING…' : `ADD ${missingStandard.length}`}

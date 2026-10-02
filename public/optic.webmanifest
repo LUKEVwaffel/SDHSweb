@@ -1,7 +1,7 @@
 {
   "name": "OPTIC — SDHS JROTC",
   "short_name": "OPTIC",
-  "description": "Live photo feed for the SDHS JROTC comp beta.",
+  "description": "Live photo feed for the SDHS JROTC comps.",
   "id": "/optic",
   "start_url": "/optic",
   "scope": "/optic",

@@ -1,6 +1,7 @@
 import { useState, useRef, useEffect } from 'react';
 import { supabase as SB } from '../../../../lib/supabaseClient';
 import { resizeForUpload, isRawFile } from '../../../../lib/imageResize';
+import { r2Upload, r2GetPublicUrl, r2Remove } from '../../../../lib/r2Storage';
 import { P, mono, oswald, fs, sp, radius } from '../../theme';
 import { Btn, Card, Label, Input, PanelHeader, EmptyState } from '../../shared/ui';
 
@@ -87,9 +88,8 @@ export default function BetaFeaturesPanel({ adminId }) {
         const { full } = await resizeForUpload(file);
         const stamp = `${Date.now()}_${Math.random().toString(36).slice(2, 8)}`;
         const path = `${stamp}.jpg`;
-        const { error: upErr } = await SB.storage.from(BUCKET).upload(path, full, { contentType: 'image/jpeg' });
-        if (upErr) throw upErr;
-        const url = SB.storage.from(BUCKET).getPublicUrl(path).data.publicUrl;
+        await r2Upload(BUCKET, path, full, { contentType: 'image/jpeg' });
+        const url = r2GetPublicUrl(BUCKET, path).data.publicUrl;
         uploaded.push({ path, url });
       }
       await persist({ photos: [...photos, ...uploaded] });
@@ -102,7 +102,7 @@ export default function BetaFeaturesPanel({ adminId }) {
 
   async function removePhoto(photo) {
     try {
-      await SB.storage.from(BUCKET).remove([photo.path]);
+      await r2Remove(BUCKET, [photo.path]);
       await persist({ photos: photos.filter((p) => p.path !== photo.path) });
     } catch (err) {
       setUploadErr(err.message || String(err));

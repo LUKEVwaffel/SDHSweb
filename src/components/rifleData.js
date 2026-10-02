@@ -1,3 +1,5 @@
+import { analyzeShooter, analyzeTeam, matchCard } from './rifle/seasonStats.js';
+
 // ─────────────────────────────────────────────────────────────────────────────
 // Rifle team — 2026 National Air Rifle New Shooter League (JV / New Shooter).
 // Ten postal matches, decimal scoring, three positions (prone / standing /
@@ -9,6 +11,9 @@
 // cadet did not fire that match.
 // ─────────────────────────────────────────────────────────────────────────────
 
+// Static copy of the 2025-26 season. The live page reads rifle_matches /
+// rifle_scores instead (seasonStats.js); this is only the offline fallback
+// and the source of that season's league label.
 export const SEASON_META = {
   league: '2026 National Air Rifle New Shooter League',
   squad: 'JV / New Shooter',
@@ -34,7 +39,7 @@ export const WEEKS = [
 ];
 
 // [prone, standing, kneeling, aggregate, bullsEyes] per week, index 0 = week 1.
-const RAW = [
+export const RAW = [
   {
     name: 'Makaio Roos', rifle: 15,
     cards: [
@@ -112,215 +117,15 @@ const RAW = [
   },
 ];
 
-// ── Derived analysis ────────────────────────────────────────────────────────
-
-const mean = (xs) => xs.reduce((a, b) => a + b, 0) / xs.length;
-const round = (x, d = 1) => Number(x.toFixed(d));
-
-function stdev(xs) {
-  if (xs.length < 2) return 0;
-  const m = mean(xs);
-  return Math.sqrt(mean(xs.map((x) => (x - m) ** 2)));
-}
-
-// Least-squares slope of y over its own index (points gained per match fired).
-function slope(ys) {
-  const n = ys.length;
-  if (n < 2) return 0;
-  const xs = ys.map((_, i) => i);
-  const mx = mean(xs);
-  const my = mean(ys);
-  const num = xs.reduce((s, x, i) => s + (x - mx) * (ys[i] - my), 0);
-  const den = xs.reduce((s, x) => s + (x - mx) ** 2, 0);
-  return den === 0 ? 0 : num / den;
-}
-
-export function classify(avg) {
-  if (avg == null) return { tier: 'DNS', range: '—' };
-  if (avg >= 245) return { tier: 'Expert', range: '245+' };
-  if (avg >= 220) return { tier: 'Sharpshooter', range: '220–244' };
-  if (avg >= 200) return { tier: 'Marksman', range: '200–219' };
-  return { tier: 'Not Qualified', range: '0–199' };
-}
-
-export function analyzeShooter(raw) {
-  const weeks = raw.cards.map((c, i) => {
-    if (!c) return { week: i + 1, dates: WEEKS[i].dates, opp: WEEKS[i].opp, fired: false };
-    const [p, s, k, tot, b] = c;
-    return { week: i + 1, dates: WEEKS[i].dates, opp: WEEKS[i].opp, fired: true, p, s, k, tot, b };
-  });
-  const fired = weeks.filter((w) => w.fired);
-  const base = { name: raw.name, rifle: raw.rifle, weeks, firedCount: fired.length };
-
-  if (fired.length === 0) {
-    return { ...base, dns: true, classification: classify(null) };
-  }
-
-  const totals = fired.map((w) => w.tot);
-  const prone = mean(fired.map((w) => w.p));
-  const standing = mean(fired.map((w) => w.s));
-  const kneeling = mean(fired.map((w) => w.k));
-  const avg = mean(totals);
-
-  const bestW = fired.reduce((a, w) => (w.tot > a.tot ? w : a));
-  const worstW = fired.reduce((a, w) => (w.tot < a.tot ? w : a));
-
-  const positions = [
-    { key: 'prone', label: 'Prone', value: round(prone) },
-    { key: 'standing', label: 'Standing', value: round(standing) },
-    { key: 'kneeling', label: 'Kneeling', value: round(kneeling) },
-  ];
-  const posBest = positions.reduce((a, p) => (p.value > a.value ? p : a));
-  const posWorst = positions.reduce((a, p) => (p.value < a.value ? p : a));
-
-  // Largest match-to-match swing across consecutive fired matches.
-  let bestJump = null;
-  let worstDrop = null;
-  for (let i = 1; i < fired.length; i++) {
-    const d = round(fired[i].tot - fired[i - 1].tot);
-    const span = { delta: d, from: fired[i - 1].week, to: fired[i].week };
-    if (bestJump === null || d > bestJump.delta) bestJump = span;
-    if (worstDrop === null || d < worstDrop.delta) worstDrop = span;
-  }
-
-  let splitDelta = null;
-  if (fired.length >= 4) {
-    const half = Math.ceil(fired.length / 2);
-    splitDelta = round(mean(totals.slice(half)) - mean(totals.slice(0, half)));
-  }
-
-  const bulls = fired.reduce((s, w) => s + w.b, 0);
-
+// Same shape buildSeason() returns, from the static cards above.
+export function staticSeason() {
+  const weeks = WEEKS.map((w) => ({ ...w }));
+  const shooters = RAW.map((r) => analyzeShooter(r, weeks));
   return {
-    ...base,
-    dns: false,
-    avg: round(avg),
-    best: bestW.tot,
-    bestWeek: bestW.week,
-    worst: worstW.tot,
-    worstWeek: worstW.week,
-    first: totals[0],
-    firstWeek: fired[0].week,
-    last: totals[totals.length - 1],
-    lastWeek: fired[fired.length - 1].week,
-    delta: round(totals[totals.length - 1] - totals[0]),
-    range: round(bestW.tot - worstW.tot),
-    stdev: round(stdev(totals), 1),
-    trend: round(slope(totals), 1),
-    splitDelta,
-    prone: round(prone),
-    standing: round(standing),
-    kneeling: round(kneeling),
-    positions,
-    posBest,
-    posWorst,
-    bulls,
-    bullsPerMatch: round(bulls / fired.length, 1),
-    bestJump,
-    worstDrop,
-    // Classification is off best card (top shot), not season average.
-    classification: classify(bestW.tot),
+    meta: { season: '2025-2026', league: SEASON_META.league, squad: SEASON_META.squad, matches: weeks.length, window: SEASON_META.window, complete: true },
+    weeks,
+    shooters,
+    team: analyzeTeam(shooters, weeks.length),
+    latest: matchCard({ ...weeks[weeks.length - 1], idx: weeks.length }, shooters),
   };
-}
-
-export function analyzeTeam(shooters) {
-  const active = shooters.filter((s) => !s.dns);
-  const allCards = active.flatMap((s) => s.weeks.filter((w) => w.fired));
-
-  const ranked = [...active].sort((a, b) => b.avg - a.avg);
-  const improvers = active.filter((s) => s.firedCount >= 3);
-  const steady = active.filter((s) => s.firedCount >= 4);
-
-  const bestCard = active
-    .flatMap((s) => s.weeks.filter((w) => w.fired).map((w) => ({ ...w, name: s.name })))
-    .reduce((a, w) => (w.tot > a.tot ? w : a));
-  const worstCard = active
-    .flatMap((s) => s.weeks.filter((w) => w.fired).map((w) => ({ ...w, name: s.name })))
-    .reduce((a, w) => (w.tot < a.tot ? w : a));
-
-  const teamProne = mean(allCards.map((w) => w.p));
-  const teamStanding = mean(allCards.map((w) => w.s));
-  const teamKneeling = mean(allCards.map((w) => w.k));
-  const teamPositions = [
-    { key: 'prone', label: 'Prone', value: round(teamProne) },
-    { key: 'standing', label: 'Standing', value: round(teamStanding) },
-    { key: 'kneeling', label: 'Kneeling', value: round(teamKneeling) },
-  ];
-
-  return {
-    rosterCount: shooters.length,
-    activeCount: active.length,
-    dnsCount: shooters.length - active.length,
-    matchesFired: allCards.length,
-    teamAvg: round(mean(allCards.map((w) => w.tot))),
-    teamPositions,
-    teamPosBest: teamPositions.reduce((a, p) => (p.value > a.value ? p : a)),
-    teamPosWorst: teamPositions.reduce((a, p) => (p.value < a.value ? p : a)),
-    totalBulls: allCards.reduce((s, w) => s + w.b, 0),
-    ranked,
-    topShooter: ranked[0],
-    mostImproved: improvers.reduce((a, s) => (s.delta > a.delta ? s : a)),
-    mostConsistent: steady.reduce((a, s) => (s.stdev < a.stdev ? s : a)),
-    ironman: active.filter((s) => s.firedCount === SEASON_META.matches),
-    bestCard,
-    worstCard,
-  };
-}
-
-export const SHOOTERS = RAW.map(analyzeShooter);
-export const TEAM = analyzeTeam(SHOOTERS);
-
-// Auto-written scouting notes — every clause is driven by a computed value
-// above, no free-text claims.
-export function buildNarrative(s, team) {
-  if (s.dns) {
-    return [
-      `${s.name} (rifle ${s.rifle}) is on the 2026 roster but did not post a score in any of the ${SEASON_META.matches} postal matches — no card on file for the season.`,
-    ];
-  }
-  const out = [];
-  const pos = s.classification.tier;
-  const posArticle = pos === 'Expert' ? 'an' : 'a';
-
-  out.push(
-    `${s.name} fired ${s.firedCount} of ${SEASON_META.matches} matches, peaking at ${s.best} in week ${s.bestWeek} — ${posArticle} ${pos}-class top shot (${s.classification.range}). ` +
-      `Season aggregate average ${s.avg}; low card ${s.worst} in week ${s.worstWeek}, a ${s.range}-point spread.`,
-  );
-
-  const dir =
-    s.trend > 1.5 ? 'climbing hard' :
-    s.trend > 0.4 ? 'trending up' :
-    s.trend < -1.5 ? 'sliding' :
-    s.trend < -0.4 ? 'drifting down' : 'holding flat';
-  let trendLine = `Trajectory: ${dir} at ${s.trend >= 0 ? '+' : ''}${s.trend} pts per match`;
-  if (s.splitDelta != null) {
-    trendLine += `, with the back half of the season ${s.splitDelta >= 0 ? 'up' : 'down'} ${Math.abs(s.splitDelta)} pts on the front half`;
-  }
-  trendLine += `. Net first-to-last card: ${s.delta >= 0 ? '+' : ''}${s.delta} (${s.first} → ${s.last}).`;
-  out.push(trendLine);
-
-  out.push(
-    `Position profile: strongest in ${s.posBest.label.toLowerCase()} (${s.posBest.value}), weakest in ${s.posWorst.label.toLowerCase()} (${s.posWorst.value}). ` +
-      `Prone ${s.prone} / Standing ${s.standing} / Kneeling ${s.kneeling} — vs. team ${team.teamPositions[0].value} / ${team.teamPositions[1].value} / ${team.teamPositions[2].value}.`,
-  );
-
-  const consistency =
-    s.stdev < 12 ? `very consistent (±${s.stdev} match-to-match)` :
-    s.stdev < 20 ? `fairly steady (±${s.stdev})` :
-    `streaky (±${s.stdev} swing between matches)`;
-  let cLine = `Consistency: ${consistency}.`;
-  if (s.bestJump && s.bestJump.delta >= 10) {
-    cLine += ` Biggest jump +${s.bestJump.delta} from week ${s.bestJump.from} to ${s.bestJump.to}.`;
-  }
-  if (s.worstDrop && s.worstDrop.delta <= -10) {
-    cLine += ` Biggest drop ${s.worstDrop.delta} from week ${s.worstDrop.from} to ${s.worstDrop.to}.`;
-  }
-  out.push(cLine);
-
-  out.push(
-    `Bull's-eyes: ${s.bulls} on the season, ${s.bullsPerMatch} per match` +
-      (s.name === team.ranked[0]?.name ? ' — team-leading average.' : '.'),
-  );
-
-  return out;
 }

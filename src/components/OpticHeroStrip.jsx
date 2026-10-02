@@ -39,7 +39,7 @@ export default function OpticHeroStrip() {
         <span style={{
           fontFamily: "'JetBrains Mono', monospace", fontSize: 9, letterSpacing: '0.2em',
           color: P.ink, background: P.gold, padding: '5px 9px', flexShrink: 0,
-        }}>NEW</span>
+        }}>FINAL COMP</span>
 
         <span className="optic-strip-word" style={{
           fontFamily: 'Oswald, sans-serif', fontWeight: 700, fontSize: 22,
@@ -50,7 +50,7 @@ export default function OpticHeroStrip() {
           fontFamily: 'Inter, sans-serif', fontSize: 13.5, color: P.mute,
           flex: 1, minWidth: 200, lineHeight: 1.5,
         }}>
-          At the {eventTitle || 'Raider Competition'}. Upload from your phone, seen by every family there.
+          Last comp of the season: the {eventTitle || 'Raider Competition'} at Central. 3rd in state. Thank you, families.
         </span>
 
         <span className="optic-strip-cta" style={{

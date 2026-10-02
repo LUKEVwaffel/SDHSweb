@@ -65,16 +65,19 @@ import BallOpsPortal from './components/ball/ops/BallOpsPortal';
 import BallDressPortal from './components/ball/dress/BallDressPortal';
 import BallAttirePortal from './components/ball/attire/BallAttirePortal';
 import PortalHub from './components/portal/PortalHub';
+import BoardsApp from './components/boards/BoardsApp';
 import Optic from './components/optic/Optic';
 import LukeUploadRoute from './components/optic/LukeUpload';
 import LukePwaRoute from './components/optic/LukePwa';
 import RaiderTv from './components/raidertv/RaiderTv';
 import RaiderRemote from './components/raidertv/RaiderRemote';
 import WatchingZone from './components/watchzone/WatchingZone';
-// import WatchZonePopup from './components/WatchZonePopup'; — taken down 2026-09-26, see the homepage route.
+import WatchZonePopup from './components/WatchZonePopup';
 import BallTv from './components/balltv/BallTv';
 import VideoTv from './components/videotv/VideoTv';
 import RollCounter from './components/rolls/RollCounter';
+import BloodDrive from './components/blooddrive/BloodDrive';
+import LukeScience from './components/lukescience/LukeScience';
 
 const TABS = [
   { id: 'cadet-manual', label: 'Cadet Manual',  short: 'MANUAL' },
@@ -129,13 +132,18 @@ export default function App() {
   // /balltv — hallway-TV promo loop for the Military Ball. Read-only slideshow,
   // no remote; reads ball_config + ball_gallery like /ball.
   if (location.pathname === '/balltv') return <BallTv />;
-  // /videotv — hallway-TV loop of the East Hamilton OC run (both clips, muted,
-  // no remote) followed by the season trophy case. Reads raider_videos (same
-  // library /watchzone features from) + RaiderCompetitionResults' SEASON data.
+  // /videotv — hallway-TV loop of the whole Raider film library (muted, loop
+  // order set per TV via EDIT LOOP) with the trophy case between every film.
+  // Reads raider_videos (same library as /watchzone) + RaiderCompetitionResults' SEASON.
   if (location.pathname === '/videotv') return <VideoTv />;
   if (location.pathname === '/raiderparent') return <RaiderParentWelcome />;
   // /rolls — Texas Roadhouse roll counter, fun one-off group tracker.
   if (location.pathname === '/rolls') return <RollCounter />;
+  // /boards: company promotion boards (CO/XO/1SG laptop, SAI review, results).
+  if (location.pathname === '/boards' || location.pathname.startsWith('/boards/')) return <BoardsApp />;
+  if (location.pathname === '/blooddrive') return <BloodDrive />;
+  // /lukescience: Luke's case that fall starts October 1. Static page.
+  if (location.pathname === '/lukescience') return <LukeScience />;
   if (location.pathname === '/feedback') return <EventFeedbackPicker />;
   if (location.pathname.startsWith('/feedback/')) return <EventFeedbackForm />;
   // "Picture of the Comp" vote taken down 2026-09-08 — restore CompPhotoVote to bring it back.
@@ -159,9 +167,9 @@ export default function App() {
           <>
             {/* Homepage-only takeovers — mounted here, never on a standalone route.
                 BallSignupPopup + OpticPopup suppressed for now (see imports
-                above) so CongratsPopup is the only site-wide one.
-                WatchZonePopup (Raider OC film) taken down 2026-09-26 ahead of
-                Warren County — restore <WatchZonePopup /> to bring it back. */}
+                above). WatchZonePopup back 2026-09-27 for the full film library;
+                it fires after CongratsPopup (longer delay) and stacks on top. */}
+            <WatchZonePopup />
             <Hero />
             <OpticHeroStrip />
             {/* "Picture of the Comp" vote band taken down 2026-09-08 — restore <CompPhotoBand /> to bring it back. */}

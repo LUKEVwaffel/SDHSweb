@@ -1,19 +1,10 @@
 import { useState } from 'react';
 import { submitRifleSignup, lookupRifleCadet } from '../../lib/rifleApi';
 import { isSchoolEmail } from '../../lib/schoolEmail';
+import { SCHOOL_DOMAIN, normalizeSchoolUsername } from '../../lib/schoolUsername';
 import { P, mono, oswald } from './theme';
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-const SCHOOL_DOMAIN = '@students.hcde.org';
-
-// A pasted full email still works — strip the domain back off so the field
-// always holds just the username portion, same pattern as the Ball signup's
-// StepCadetVerify.jsx.
-function stripSchoolDomain(v) {
-  const at = v.indexOf('@');
-  return at < 0 ? v : v.slice(0, at);
-}
-
 function Field({ label, children }) {
   return (
     <div style={{ marginBottom: 20 }}>
@@ -61,8 +52,12 @@ export default function RifleSignup() {
   const set = (field) => (e) => setForm({ ...form, [field]: e.target.value });
 
   async function verify() {
-    const uname = username.trim();
-    if (!uname || verifyBusy) return;
+    if (!username.trim() || verifyBusy) return;
+    const uname = normalizeSchoolUsername(username);
+    if (!uname) {
+      setVerifyErr(`Use your school email — just the part before ${SCHOOL_DOMAIN}.`);
+      return;
+    }
     setVerifyBusy(true);
     setVerifyErr('');
     const { data, error } = await lookupRifleCadet(uname);
@@ -72,7 +67,7 @@ export default function RifleSignup() {
       return;
     }
     setVerified({
-      email: `${uname.toLowerCase()}${SCHOOL_DOMAIN}`,
+      email: `${uname}${SCHOOL_DOMAIN}`,
       name: data.name,
       let_level: data.let_level,
       company: data.company,
@@ -148,7 +143,11 @@ export default function RifleSignup() {
                   autoFocus
                   disabled={!!verified}
                   value={username}
-                  onChange={(e) => setUsername(stripSchoolDomain(e.target.value))}
+                  onChange={(e) => setUsername(e.target.value)}
+                  autoCapitalize="none"
+                  autoCorrect="off"
+                  spellCheck={false}
+                  inputMode="email"
                   onKeyDown={(e) => { if (e.key === 'Enter' && !verified) verify(); }}
                   placeholder="jsmith123"
                   style={{ borderRight: 'none', opacity: verified ? 0.6 : 1 }}

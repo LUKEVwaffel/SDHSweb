@@ -1,0 +1,141 @@
+.bd-page {
+  --bd-bg: oklch(17% 0.02 20);
+  --bd-surface: oklch(22% 0.03 20);
+  --bd-raised: oklch(27% 0.035 20);
+  --bd-red: oklch(58% 0.21 25);
+  --bd-red-hot: oklch(66% 0.22 25);
+  --bd-ok: oklch(72% 0.15 150);
+  --bd-text: oklch(96% 0.01 30);
+  --bd-dim: oklch(72% 0.03 30);
+  --bd-line: oklch(40% 0.03 25 / 0.5);
+
+  min-height: 100vh;
+  background: radial-gradient(ellipse at top, oklch(24% 0.06 25) 0%, var(--bd-bg) 55%);
+  color: var(--bd-text);
+  font-family: 'Inter', sans-serif;
+  padding: clamp(1.5rem, 4vw, 3rem) 16px 4rem;
+}
+
+.bd-screen { max-width: 960px; margin: 0 auto; }
+
+.bd-kicker { font-family: 'JetBrains Mono', monospace; font-size: 0.75rem; letter-spacing: 0.12em; color: var(--bd-dim); }
+.bd-header h1 { font-family: 'Oswald', sans-serif; font-weight: 600; font-size: clamp(2.4rem, 6vw, 4rem); line-height: 1; margin: 0.4rem 0; text-transform: uppercase; }
+.bd-header h1 span { color: var(--bd-red); }
+.bd-sub { color: var(--bd-dim); max-width: 60ch; margin-bottom: 2rem; }
+
+.bd-drop {
+  display: grid; place-items: center; gap: 0.5rem; text-align: center;
+  padding: 4rem 1rem; border: 2px dashed var(--bd-line); border-radius: 14px;
+  background: var(--bd-surface); cursor: pointer;
+  transition: border-color 150ms ease, transform 150ms ease;
+}
+.bd-drop:hover, .bd-drop:focus-within { border-color: var(--bd-red); transform: translateY(-2px); }
+.bd-drop.is-loading { opacity: 0.6; pointer-events: none; }
+.bd-drop input { position: absolute; opacity: 0; width: 1px; height: 1px; }
+.bd-drop strong { font-family: 'Oswald', sans-serif; font-size: 1.6rem; text-transform: uppercase; }
+.bd-drop span { color: var(--bd-dim); font-size: 0.9rem; }
+
+.bd-error { color: var(--bd-red-hot); margin-top: 1rem; }
+
+.bd-control {
+  display: flex; flex-wrap: wrap; justify-content: space-between; gap: 1rem; align-items: center;
+  padding: 1.25rem 1.5rem; margin-bottom: 1.5rem; border-radius: 14px;
+  background: var(--bd-raised); border: 1px solid var(--bd-line);
+  box-shadow: 0 12px 30px oklch(0% 0 0 / 0.35);
+}
+.bd-control.is-armed { border-color: var(--bd-red); box-shadow: 0 0 0 1px var(--bd-red), 0 12px 40px oklch(58% 0.21 25 / 0.25); }
+.bd-control-state { font-family: 'JetBrains Mono', monospace; font-weight: 500; letter-spacing: 0.1em; color: var(--bd-dim); }
+.is-armed .bd-control-state { color: var(--bd-red-hot); }
+.bd-control-next { font-size: 1.15rem; margin-top: 0.25rem; }
+.bd-file { color: var(--bd-dim); font-size: 0.8rem; margin-top: 0.25rem; }
+.bd-helper { font-family: 'JetBrains Mono', monospace; font-size: 0.75rem; margin-top: 0.4rem; color: var(--bd-red-hot); }
+.bd-helper.is-on { color: var(--bd-ok); }
+.bd-control-actions { display: flex; flex-wrap: wrap; gap: 0.5rem; }
+
+.bd-btn {
+  font: 600 0.9rem 'Inter', sans-serif; color: var(--bd-text);
+  background: var(--bd-surface); border: 1px solid var(--bd-line); border-radius: 8px;
+  padding: 0.6rem 1rem; cursor: pointer;
+  transition: background 150ms ease, border-color 150ms ease, transform 100ms ease;
+}
+.bd-btn:hover { border-color: var(--bd-dim); }
+.bd-btn:active { transform: scale(0.97); }
+.bd-btn:focus-visible { outline: 2px solid var(--bd-red-hot); outline-offset: 2px; }
+.bd-btn:disabled { opacity: 0.35; cursor: default; }
+.bd-btn-primary { background: var(--bd-red); border-color: var(--bd-red); }
+.bd-btn-primary:hover { background: var(--bd-red-hot); border-color: var(--bd-red-hot); }
+.bd-btn-ghost { background: transparent; }
+.bd-btn-small { padding: 0.35rem 0.75rem; font-size: 0.8rem; }
+
+.bd-slots { list-style: none; padding: 0; margin: 0; display: grid; gap: 0.4rem; }
+.bd-slot {
+  display: grid; grid-template-columns: 6.5rem 1fr auto auto; gap: 1rem; align-items: center;
+  padding: 0.7rem 1rem; border-radius: 10px; background: var(--bd-surface);
+  border-left: 3px solid transparent;
+}
+.bd-slot-time b { font-family: 'Oswald', sans-serif; font-size: 1.35rem; display: block; line-height: 1; }
+.bd-slot-time span { font-size: 0.72rem; color: var(--bd-dim); }
+.bd-slot-names { font-size: 0.92rem; }
+.bd-slot-names { display: flex; flex-wrap: wrap; gap: 0.3rem; align-items: center; }
+.bd-person {
+  font: 0.88rem 'Inter', sans-serif; color: var(--bd-text); cursor: pointer;
+  background: transparent; border: 1px solid var(--bd-line); border-radius: 999px; padding: 0.2rem 0.65rem;
+  transition: background 150ms ease, border-color 150ms ease, transform 100ms ease;
+}
+.bd-person:hover { border-color: var(--bd-red); background: oklch(58% 0.21 25 / 0.15); }
+.bd-person:hover::after { content: ' ⎙'; }
+.bd-person:active { transform: scale(0.96); }
+.bd-person:focus-visible { outline: 2px solid var(--bd-red-hot); outline-offset: 2px; }
+.bd-slot-names em { color: var(--bd-dim); }
+.bd-slot-status { font-family: 'JetBrains Mono', monospace; font-size: 0.7rem; letter-spacing: 0.08em; color: var(--bd-dim); }
+.bd-slot.is-printed { opacity: 0.55; border-left-color: var(--bd-ok); }
+.bd-slot.is-printed .bd-slot-status { color: var(--bd-ok); }
+.bd-slot.is-skipped { opacity: 0.4; }
+.bd-slot.is-due { border-left-color: var(--bd-red); }
+.bd-slot.is-due .bd-slot-status { color: var(--bd-red-hot); }
+
+.bd-extra { margin-top: 2rem; padding: 1rem 1.25rem; border: 1px solid var(--bd-line); border-radius: 12px; }
+.bd-extra h2 { font-family: 'Oswald', sans-serif; text-transform: uppercase; font-size: 1.1rem; margin-bottom: 0.5rem; }
+.bd-extra h2 small { font-family: 'Inter', sans-serif; text-transform: none; font-size: 0.75rem; color: var(--bd-dim); margin-left: 0.5rem; }
+.bd-extra-row { display: flex; justify-content: space-between; gap: 1rem; align-items: center; padding: 0.35rem 0; }
+
+@media (max-width: 640px) {
+  .bd-slot { grid-template-columns: 4.5rem 1fr; }
+  .bd-slot-status { grid-column: 1; }
+  .bd-slot .bd-btn { grid-column: 2; justify-self: end; }
+}
+
+/* ── Print: only the slip sheet. 4 slips per letter page, cut on the dashes. */
+.bd-print { display: none; }
+
+@media print {
+  @page { size: letter portrait; margin: 0.4in; }
+  /* Global html/body/#root are dark navy — whiten everything so no toner block prints. */
+  html, body, #root { background: #fff !important; min-height: 0 !important; }
+  * { print-color-adjust: economy; -webkit-print-color-adjust: economy; box-shadow: none !important; }
+  .bd-page { background: #fff !important; padding: 0; min-height: 0; }
+  .bd-screen { display: none; }
+  .bd-print { display: block; color: #000; font-family: 'Inter', sans-serif; }
+
+  /* One donor per sheet — top half of a letter page, big enough to read across a room. */
+  .bd-slip {
+    box-sizing: border-box; padding: 0.3in 0.4in; border: 2px solid #000;
+    break-inside: avoid; break-after: page;
+    display: flex; flex-direction: column; min-height: 5in;
+  }
+  .bd-slip:last-child { break-after: auto; }
+
+  .bd-slip header { display: flex; justify-content: space-between; align-items: baseline; border-bottom: 3px solid #000; padding-bottom: 0.1in; }
+  .bd-slip header p { font-family: 'JetBrains Mono', monospace; font-size: 11pt; letter-spacing: 0.1em; }
+  .bd-slip header h2 { font-family: 'Oswald', sans-serif; font-size: 28pt; text-transform: uppercase; margin: 0; }
+
+  .bd-slip dl { display: grid; grid-template-columns: 1fr 1fr; gap: 0.22in 0.4in; margin: 0.25in 0 0; }
+  .bd-slip dl > div { display: flex; flex-direction: column; }
+  .bd-slip-wide { grid-column: 1 / -1; }
+  .bd-slip dt { font-size: 10pt; text-transform: uppercase; letter-spacing: 0.08em; color: #555; }
+  .bd-slip dd { margin: 0.04in 0 0; font-size: 16pt; font-weight: 600; min-height: 0.35in; }
+  .bd-slip-name { font-family: 'Oswald', sans-serif; font-size: 36pt !important; line-height: 1.1; }
+  .bd-slip-blank { border-bottom: 1.5px solid #000; min-height: 0.55in !important; }
+
+  .bd-slip-note { margin-top: auto; padding-top: 0.25in; font-size: 11pt; color: #333; }
+}

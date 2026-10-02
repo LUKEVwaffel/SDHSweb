@@ -1,0 +1,150 @@
+/* ============================================================================
+   Final comp of the 2026 season: banner, thank-you card, the 2.2 beta
+   graduation, and the next-year poll sheet. Rides on optic.css tokens; all
+   scoped under .rhea so the reduced-motion collapse there covers it too.
+   ========================================================================= */
+
+/* ── condensed "3rd in state" strip ──────────────────────────────────── */
+.rhea .fin-strip {
+  width: 100%; margin-top: 22px; padding: 14px 16px;
+  display: flex; align-items: center; gap: 14px; text-align: left;
+  border: 1px solid var(--hair-strong); border-radius: 14px;
+  background: linear-gradient(120deg, rgba(201, 169, 97, 0.14) 0%, rgba(10, 22, 40, 0.6) 60%);
+}
+.rhea .fin-strip-medal {
+  flex-shrink: 0; width: 46px; height: 46px; border-radius: 50%;
+  display: flex; align-items: baseline; justify-content: center; padding-top: 10px; line-height: 1; white-space: nowrap; color: var(--ink);
+  font-family: var(--oswald); font-weight: 700; font-size: 19px;
+  background: radial-gradient(circle at 35% 30%, #F6DE9E 0%, var(--gold-bright) 40%, var(--gold) 75%, #9C7F3E 100%);
+  box-shadow: inset 0 0 0 2px rgba(246, 222, 158, 0.6), 0 8px 18px -8px rgba(201, 169, 97, 0.7);
+}
+.rhea .fin-strip-medal sup { font-size: 0.45em; line-height: 1; vertical-align: baseline; position: relative; top: -0.55em; margin-left: 1px; }
+.rhea .fin-strip-copy { flex: 1; min-width: 0; }
+.rhea .fin-strip-h { font-family: var(--oswald); font-weight: 600; font-size: 19px; color: var(--cream); line-height: 1.1; }
+.rhea .fin-strip-sub { font-family: var(--mono); font-size: 8.5px; letter-spacing: 0.18em; color: var(--gold); margin-top: 4px; }
+.rhea .fin-strip-replay {
+  flex-shrink: 0; background: none; cursor: pointer; border-radius: 999px;
+  border: 1px solid var(--hair-strong); color: var(--gold);
+  font-family: var(--mono); font-size: 9px; letter-spacing: 0.14em; padding: 8px 11px;
+}
+.rhea .fin-strip-replay:focus-visible { outline: 2px solid var(--gold-bright); outline-offset: 2px; }
+
+/* ── official 2.2 banner (resting frame of the graduation) ────────────── */
+.rhea .fin-official {
+  position: relative; width: 100%; margin-top: 12px; padding: 18px 18px 16px;
+  border: 1px solid var(--hair); border-radius: 14px; text-align: center; overflow: hidden;
+  background: linear-gradient(180deg, var(--navy) 0%, var(--navy-deep) 100%);
+}
+.rhea .fin-official::after {
+  content: ""; position: absolute; inset: 0; pointer-events: none;
+  background: linear-gradient(105deg, transparent 38%, rgba(246, 222, 158, 0.14) 50%, transparent 62%);
+  animation: fin-sweep 6s 1s ease-in-out infinite;
+}
+.rhea .fin-official-ver {
+  font-family: var(--oswald); font-weight: 700; font-size: 26px; letter-spacing: 0.14em; color: var(--cream);
+}
+.rhea .fin-official-ver span { color: var(--gold-bright); letter-spacing: 0.02em; text-shadow: 0 0 18px rgba(232, 199, 122, 0.45); }
+.rhea .fin-official-stamp {
+  display: inline-block; margin-top: 8px;
+  font-family: var(--mono); font-weight: 700; font-size: 8.5px; letter-spacing: 0.2em;
+  color: var(--gold-bright); border: 1.5px solid var(--gold-bright); border-radius: 4px; padding: 4px 7px;
+  transform: rotate(-3deg);
+}
+.rhea .fin-official-p { font-family: var(--inter); font-size: 12.5px; line-height: 1.5; color: var(--mute); margin: 10px 0 0; }
+
+/* ── 2.2 beta graduation ─────────────────────────────────────────────────── */
+.rhea .fin-grad { position: relative; width: 100%; }
+.rhea .fin-grad-stage {
+  position: relative; height: 130px; display: flex; align-items: center; justify-content: center; gap: 12px;
+}
+.rhea .fin-grad-word {
+  font-family: var(--oswald); font-weight: 700; font-size: 44px; letter-spacing: 0.14em; color: var(--cream);
+}
+.rhea .fin-grad-ver {
+  position: relative; font-family: var(--oswald); font-weight: 700; font-size: 44px; color: var(--cream);
+}
+.rhea .fin-grad-beta {
+  position: absolute; left: calc(100% + 10px); top: 50%; margin-top: -12px; line-height: 14px; font-family: var(--mono); font-weight: 700; font-size: 11px; letter-spacing: 0.2em;
+  color: var(--ink); background: var(--gold); padding: 5px 9px; border-radius: 6px;
+  transform-origin: 0% 100%;
+}
+.rhea .fin-grad-strike {
+  position: absolute; left: -3px; right: -3px; top: 50%; height: 2px; margin-top: -1px;
+  background: #C0392B; border-radius: 2px; transform: scaleX(0); transform-origin: left center;
+}
+.rhea .fin-spark {
+  position: absolute; left: calc(50% + 140px); top: 50%; width: 5px; height: 5px; margin: -2.5px;
+  border-radius: 50%; background: var(--gold-bright); opacity: 0;
+}
+.rhea .fin-grad-shine {
+  position: absolute; inset: 0; pointer-events: none;
+  background: linear-gradient(105deg, transparent 35%, rgba(246, 222, 158, 0.35) 50%, transparent 65%);
+  transform: translateX(-110%);
+}
+.rhea .fin-grad-stamp {
+  position: absolute; bottom: 4px; left: 0; right: 0; margin: 0 auto; width: max-content;
+  font-family: var(--mono); font-weight: 700; font-size: 8.5px; letter-spacing: 0.2em;
+  color: var(--gold-bright); border: 1.5px solid var(--gold-bright); border-radius: 4px; padding: 4px 7px;
+  opacity: 0; transform: rotate(-8deg) scale(1.8);
+}
+
+/* sequence: strike (0.3s) -> BETA knocked off + sparks (1.0s) -> 2.2 goes
+   gold + shine (1.5s) -> stamp (1.9s) -> body (2.1s) */
+.rhea .fin-grad[data-play="true"] .fin-grad-strike { animation: fin-strike 380ms calc(var(--grad-delay, 0ms) + 300ms) var(--ease-out) both; }
+.rhea .fin-grad[data-play="true"] .fin-grad-beta { animation: fin-knock 900ms calc(var(--grad-delay, 0ms) + 950ms) cubic-bezier(0.5, 0, 0.75, 0) both; }
+.rhea .fin-grad[data-play="true"] .fin-spark { animation: fin-spark 700ms calc(var(--grad-delay, 0ms) + 1000ms) var(--ease-out) both; }
+.rhea .fin-grad[data-play="true"] .fin-grad-ver { animation: fin-gold 700ms calc(var(--grad-delay, 0ms) + 1450ms) var(--ease-out) both; }
+.rhea .fin-grad[data-play="true"] .fin-grad-shine { animation: fin-shine 1100ms calc(var(--grad-delay, 0ms) + 1500ms) ease-in-out both; }
+.rhea .fin-grad[data-play="true"] .fin-grad-stamp { animation: fin-stamp 420ms calc(var(--grad-delay, 0ms) + 1900ms) var(--ease-spring) both; }
+
+/* ── next-year poll buttons ────────────────────────────────────────────────── */
+.rhea .fin-poll-opts { display: flex; flex-direction: column; gap: 10px; margin-top: 22px; }
+.rhea .fin-poll-opt {
+  min-height: 50px; padding: 14px 16px; cursor: pointer; border-radius: 12px;
+  font-family: var(--mono); font-weight: 700; font-size: 11.5px; letter-spacing: 0.16em; color: var(--cream);
+  background: var(--navy-deep); border: 1px solid var(--hair-strong);
+  transition: transform 130ms var(--ease-out), border-color 150ms, background 150ms;
+}
+.rhea .fin-poll-opt[data-primary="true"] {
+  color: var(--ink); border-color: transparent;
+  background: linear-gradient(180deg, var(--gold-bright), var(--gold));
+  box-shadow: 0 12px 26px -12px rgba(201, 169, 97, 0.7);
+}
+.rhea .fin-poll-opt:active { transform: scale(0.98); }
+.rhea .fin-poll-opt:disabled { opacity: 0.55; cursor: default; }
+.rhea .fin-poll-opt:focus-visible { outline: 2px solid var(--gold-bright); outline-offset: 2px; }
+@media (hover: hover) and (pointer: fine) {
+  .rhea .fin-poll-opt:hover { border-color: var(--gold); }
+}
+
+/* ── keyframes ───────────────────────────────────────────────────────────── */
+@keyframes fin-rise { from { opacity: 0; transform: translateY(14px); } to { opacity: 1; transform: translateY(0); } }
+@keyframes fin-sweep { 0% { transform: translateX(-100%); } 40%, 100% { transform: translateX(100%); } }
+@keyframes fin-ping {
+  0% { box-shadow: 0 0 0 0 rgba(232, 199, 122, 0.6); }
+  80%, 100% { box-shadow: 0 0 0 9px rgba(232, 199, 122, 0); }
+}
+@keyframes fin-medal-in {
+  from { opacity: 0; transform: scale(0.4) rotate(-25deg); }
+  to { opacity: 1; transform: scale(1) rotate(0); }
+}
+@keyframes fin-strike { to { transform: scaleX(1); } }
+@keyframes fin-knock {
+  0% { transform: translate(0, 0) rotate(0); opacity: 1; }
+  25% { transform: translate(4px, -10px) rotate(-14deg); opacity: 1; }
+  100% { transform: translate(40px, 90px) rotate(70deg); opacity: 0; }
+}
+@keyframes fin-spark {
+  0% { opacity: 1; transform: rotate(var(--a)) translateX(0) scale(1); }
+  100% { opacity: 0; transform: rotate(var(--a)) translateX(var(--d)) scale(0.3); }
+}
+@keyframes fin-gold {
+  0% { color: var(--cream); transform: scale(1); text-shadow: none; }
+  45% { transform: scale(1.18); }
+  100% { color: var(--gold-bright); transform: scale(1.08); text-shadow: 0 0 24px rgba(232, 199, 122, 0.55); }
+}
+@keyframes fin-shine { from { transform: translateX(-110%); } to { transform: translateX(110%); } }
+@keyframes fin-stamp {
+  from { opacity: 0; transform: rotate(-8deg) scale(1.8); }
+  to { opacity: 1; transform: rotate(-8deg) scale(1); }
+}

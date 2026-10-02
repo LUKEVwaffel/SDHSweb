@@ -4,6 +4,11 @@ import TeamGallery from './TeamGallery';
 import RifleAnalysis from './RifleAnalysis';
 import useIsMobile from '../hooks/useIsMobile';
 import { supabase as SB } from '../lib/supabaseClient';
+import { currentSchoolYear } from './rifle/portal/rifleStats';
+
+// Academic-year label ("2026–27") from today's date — rolls over each July,
+// so the header/commander card never go stale.
+const AY = (() => { const [a, b] = currentSchoolYear().split('-'); return `${a}–${b.slice(2)}`; })();
 
 const P = {
   ink: '#06101F', navy: '#142847', deep: '#0A1628',
@@ -158,7 +163,7 @@ function CommanderCard() {
           ['ROLE',    'Rifle Team Commander'],
           ['PROGRAM', 'AJROTC Rifle'],
           ['UNIT',    'Trojan Battalion · TN-051'],
-          ['AY',      '2025–26'],
+          ['AY',      AY],
         ].map(([label, value]) => (
           <div key={label} style={{ display: 'flex', alignItems: 'baseline', gap: 12, marginBottom: 10, borderBottom: `1px solid ${P.hair}`, paddingBottom: 10 }}>
             <div style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: 8, color: P.gold, letterSpacing: '0.22em', width: 60, flexShrink: 0, opacity: 0.8 }}>{label}</div>
@@ -371,7 +376,7 @@ export default function Rifle() {
             </div>
             <div style={{ flex: 1, height: 1, background: P.hair }} />
             <div style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: 8, color: `${P.gold}55`, letterSpacing: '0.2em' }}>
-              TN-051 · AY 2025-26
+              TN-051 · AY {AY}
             </div>
           </div>
           <h1 className="rifle-title" style={{ fontFamily: 'Oswald, sans-serif', fontWeight: 700, fontSize: 72, color: P.cream, letterSpacing: '0.04em', margin: '0 0 6px', lineHeight: 1 }}>
@@ -408,7 +413,7 @@ export default function Rifle() {
         >
           <div>
             <div style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: 11, color: P.gold, letterSpacing: '0.18em', marginBottom: 6 }}>
-              2026-27 SEASON · SIGNUPS OPEN
+              {AY} SEASON · SIGNUPS OPEN
             </div>
             <div style={{ fontFamily: 'Oswald, sans-serif', fontWeight: 600, fontSize: 20, color: P.cream }}>
               Interested in rifle? Sign up here.
@@ -440,7 +445,7 @@ export default function Rifle() {
           <div style={{ flex: 1, height: 1, background: P.hair }} />
         </div>
 
-        {/* ── Shooter analysis (last season) ── */}
+        {/* ── Shooter analysis — live: latest season + latest comp ── */}
         <div id="shooter-analysis" style={{ marginBottom: 72, scrollMarginTop: 24 }}>
           <RifleAnalysis />
         </div>

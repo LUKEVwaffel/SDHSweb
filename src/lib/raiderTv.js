@@ -1,4 +1,5 @@
 import { supabase as SB } from './supabaseClient';
+import { r2PublicUrl } from './r2Storage';
 
 // Shared constants + helpers for the Raider film-review surfaces:
 //   /raidertv       — the display (creates a session, shows a pair code)
@@ -48,7 +49,7 @@ export function normalizeCode(raw) {
 }
 
 export function videoUrl(storagePath) {
-  return SB.storage.from(VIDEO_BUCKET).getPublicUrl(storagePath).data.publicUrl;
+  return r2PublicUrl(VIDEO_BUCKET, storagePath);
 }
 
 export function clamp(n, lo, hi) {

@@ -15,6 +15,7 @@ export const NAV_GROUPS = [
       { id: 'aars',     icon: '▤', label: 'AAR Tracker' },
       { id: 'feedback', icon: '✎', label: 'Event Feedback' },
       { id: 'people',   icon: '☰', label: 'People' },
+      { id: 'boards',   icon: '★', label: 'Promotion Boards' },
       { id: 'photos',   icon: '⊞', label: 'Photos' },
       { id: 'questions', icon: '?', label: 'FAQ Questions' },
       { id: 'email',    icon: '✉', label: 'Email List' },

@@ -13,8 +13,11 @@
 // 45 min: the signup wizard has 4 steps incl. a roster search and a lot of
 // reading; 18 min was expiring on real (slow, distracted) users mid-form,
 // which surfaced as a confusing "start over" bounce. Still single-use (jti)
-// and identity-scoped, so a longer window is low-risk.
-const TOKEN_TTL_MS = 45 * 60 * 1000; // 45 minutes
+// and identity-scoped, so a longer window is low-risk. Raised to 2h after
+// 45 min was still bouncing kids who left the tab and came back (the wizard
+// restores its draft from sessionStorage, token and all). The client now also
+// re-mints silently before expiry (BallSignupWizard), so this is a backstop.
+const TOKEN_TTL_MS = 2 * 60 * 60 * 1000; // 2 hours
 
 function b64url(bytes: Uint8Array): string {
   return btoa(String.fromCharCode(...bytes)).replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/, "");

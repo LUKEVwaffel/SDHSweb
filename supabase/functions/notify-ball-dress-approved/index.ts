@@ -7,6 +7,9 @@
 // single toggle or bulk approve succeeds.
 //
 // Body: { kind: 'cadet' | 'guest' | 'vip' | 'vipdate', ids: uuid[] }
+// Ops backfill: called with a service_role JWT as the bearer, the staff gate
+// is skipped and { kind, backfill: true } mails every currently-approved row
+// of that kind (used once for approvals made before this fn existed).
 // Only rows that are CURRENTLY dress_approved get mailed, so a stale or
 // replayed call can't send an approval for something that was revoked.
 // Deploy WITH jwt verification (default):
@@ -18,11 +21,13 @@ import { ballEmailShell } from "../_shared/ballEmail.ts";
 import { loadBallTemplate, isDisabled, pick, paras } from "../_shared/ballTemplate.ts";
 
 // Where each kind lives and which column holds the address to notify.
-const KINDS: Record<string, { table: string; name: string; email: string }> = {
-  cadet: { table: "ball_signups", name: "cadet_name", email: "notification_email" },
-  guest: { table: "ball_guests", name: "name", email: "personal_email" },
-  vip: { table: "ball_vip_signups", name: "name", email: "personal_email" },
-  vipdate: { table: "ball_vip_dates", name: "name", email: "personal_email" },
+// `email` is tried in order — cadets who skipped the optional notification
+// email still get mailed at their school address.
+const KINDS: Record<string, { table: string; name: string; email: string[] }> = {
+  cadet: { table: "ball_signups", name: "cadet_name", email: ["notification_email", "cadet_school_email"] },
+  guest: { table: "ball_guests", name: "name", email: ["personal_email"] },
+  vip: { table: "ball_vip_signups", name: "name", email: ["personal_email"] },
+  vipdate: { table: "ball_vip_dates", name: "name", email: ["personal_email"] },
 };
 
 // Mirrors the column guards: male-guest attire (Weston) only ever approves guests.
@@ -33,36 +38,54 @@ const ROLE_KINDS: Record<string, string[]> = {
 
 const MAX_IDS = 200;
 
+// Role claim of the bearer JWT. Safe to trust without re-verifying: this fn
+// deploys WITH jwt verification, so the gateway already rejected bad signatures.
+function bearerRole(req: Request): string | null {
+  const token = (req.headers.get("Authorization") ?? "").replace(/^Bearer\s+/i, "");
+  const payload = token.split(".")[1];
+  if (!payload) return null;
+  try {
+    return JSON.parse(atob(payload.replace(/-/g, "+").replace(/_/g, "/"))).role ?? null;
+  } catch {
+    return null;
+  }
+}
+
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return preflight();
   if (req.method !== "POST") return json({ error: "method not allowed" }, 405);
 
   try {
-    const caller = await getCaller(req);
-    if (!caller) return json({ error: "not authorized" }, 403);
-
     const svc = serviceClient();
-    const { data: staff, error: staffErr } = await svc
-      .from("ball_dress_staff")
-      .select("role")
-      .eq("email", caller.email)
-      .eq("active", true)
-      .maybeSingle();
-    if (staffErr) { console.error("notify-ball-dress-approved staff", staffErr); return json({ error: "internal error" }, 500); }
-    if (!staff) return json({ error: "not authorized" }, 403);
+    const isService = bearerRole(req) === "service_role";
 
-    const { kind, ids } = await req.json().catch(() => ({}));
+    const { kind, ids, backfill } = await req.json().catch(() => ({}));
     const spec = KINDS[kind];
-    if (!spec || !Array.isArray(ids) || !ids.length || ids.length > MAX_IDS) {
+    const isBackfill = isService && backfill === true;
+    if (!spec || (!isBackfill && (!Array.isArray(ids) || !ids.length || ids.length > MAX_IDS))) {
       return json({ error: "kind and ids[] are required" }, 400);
     }
-    if (!(ROLE_KINDS[staff.role] ?? []).includes(kind)) return json({ error: "not authorized for this kind" }, 403);
 
-    const { data: rows, error } = await svc
+    if (!isService) {
+      const caller = await getCaller(req);
+      if (!caller) return json({ error: "not authorized" }, 403);
+      const { data: staff, error: staffErr } = await svc
+        .from("ball_dress_staff")
+        .select("role")
+        .eq("email", caller.email)
+        .eq("active", true)
+        .maybeSingle();
+      if (staffErr) { console.error("notify-ball-dress-approved staff", staffErr); return json({ error: "internal error" }, 500); }
+      if (!staff) return json({ error: "not authorized" }, 403);
+      if (!(ROLE_KINDS[staff.role] ?? []).includes(kind)) return json({ error: "not authorized for this kind" }, 403);
+    }
+
+    let query = svc
       .from(spec.table)
-      .select(`id, ${spec.name}, ${spec.email}`)
-      .in("id", ids)
+      .select(`id, ${spec.name}, ${spec.email.join(", ")}`)
       .eq("dress_approved", true);
+    if (!isBackfill) query = query.in("id", ids);
+    const { data: rows, error } = await query;
     if (error) { console.error("notify-ball-dress-approved lookup", error); return json({ error: "internal error" }, 500); }
 
     const t = await loadBallTemplate(svc, "dress_approved");
@@ -74,8 +97,9 @@ Deno.serve(async (req) => {
     const origin = siteOrigin();
 
     let notified = 0;
+    const sentTo: string[] = [];
     for (const row of (rows ?? []) as Record<string, string>[]) {
-      const to = (row[spec.email] || "").trim();
+      const to = spec.email.map((col) => (row[col] || "").trim()).find(Boolean);
       if (!to) continue;
       const name = row[spec.name] || "";
       const vars = { name: escapeHtml(name) };
@@ -101,11 +125,11 @@ Deno.serve(async (req) => {
           text: `${name}, your attire for the Trojan Battalion Military Ball has been approved. No further action is needed on attire.`,
         }),
       }).catch((e) => { console.error("notify-ball-dress-approved send", e); return null; });
-      if (res?.ok) notified += 1;
+      if (res?.ok) { notified += 1; sentTo.push(to); }
       else if (res) console.error("notify-ball-dress-approved resend", res.status, await res.text().catch(() => ""));
     }
 
-    return json({ ok: true, notified });
+    return json({ ok: true, notified, ...(isService ? { sentTo } : {}) });
   } catch (e) {
     console.error("notify-ball-dress-approved", e);
     return json({ error: "internal error" }, 500);

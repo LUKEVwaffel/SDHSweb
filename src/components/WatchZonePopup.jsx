@@ -11,7 +11,7 @@ const P = {
 
 const SHOW_DELAY_MS = 3400;
 
-// First-open takeover pointing visitors at the new Raider film. Fires after
+// First-open takeover pointing visitors at the Raider film library (/watchzone). Fires after
 // CongratsPopup's own 2600ms timer so it stacks on top if that's still up —
 // dismissing it reveals whatever's behind, same layering as
 // RemembrancePopup. Fires once per device (see watchZoneSeen.js).
@@ -48,7 +48,7 @@ export default function WatchZonePopup() {
     <div
       role="dialog"
       aria-modal="true"
-      aria-label="New Raider film"
+      aria-label="Raider film library"
       onClick={close}
       style={{
         position: 'fixed', inset: 0, zIndex: 9550,
@@ -101,22 +101,23 @@ export default function WatchZonePopup() {
             fontFamily: "'JetBrains Mono', monospace", fontSize: 10, letterSpacing: '0.3em',
             color: P.gold, textTransform: 'uppercase',
           }}>
-            New Raider Film
+            Raider Film Library
           </div>
 
           <h2 className="wz-row" style={{ '--d': '0.16s',
             fontFamily: "'Fraunces', serif", fontStyle: 'italic', fontWeight: 700, color: P.cream,
             fontSize: 'clamp(26px, 6vw, 36px)', lineHeight: 1.1, margin: '14px 0 14px',
           }}>
-            The OC film is up
+            Warren County film is up
           </h2>
 
           <p className="wz-row" style={{ '--d': '0.22s',
             fontFamily: 'Inter, sans-serif', fontSize: 14.5, lineHeight: 1.65,
             color: P.mute, maxWidth: 380, margin: '0 auto 26px',
           }}>
-            Full send from Male Raider — both parts, full screen, and a
-            slow-mo rail so you don&apos;t miss a thing.
+            14 new runs from Warren County: Obstacle Course, One Rope Bridge,
+            PTT, CCR and Gauntlet, Male and Co-ed, plus every run from earlier
+            this season. Full screen on your phone or computer, with slow-mo.
           </p>
 
           <div className="wz-row" style={{ '--d': '0.3s', display: 'flex', flexDirection: 'column', gap: 10 }}>
@@ -130,7 +131,7 @@ export default function WatchZonePopup() {
               }}
               onMouseEnter={(e) => { e.currentTarget.style.background = P.bright; }}
               onMouseLeave={(e) => { e.currentTarget.style.background = P.gold; }}
-            >WATCH NOW →</a>
+            >WATCH THE FILM →</a>
             <button
               type="button"
               onClick={close}

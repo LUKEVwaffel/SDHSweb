@@ -1,0 +1,324 @@
+/* ============================================================================
+   Season-finale launch show (OpticShow.jsx). A dark theatre: closed crimson
+   curtain with the Raider logo projected onto it, curtain parts onto a
+   spotlit stage, each act plays in, house lights fade into OPTIC.
+   Rides on optic.css tokens via the .rhea wrapper (so its reduced-motion
+   collapse applies: every act lands on its final frame instantly).
+   ========================================================================= */
+
+.rhea.show {
+  position: fixed; inset: 0; z-index: 200; overflow: hidden;
+  min-height: 0; background: #030609;
+  transition: opacity 650ms var(--ease-out), filter 650ms var(--ease-out);
+}
+.rhea.show::before { z-index: 3; }
+.rhea.show[data-leaving="true"] { opacity: 0; filter: brightness(2.2) blur(6px); pointer-events: none; }
+
+/* ── stage ───────────────────────────────────────────────────────────────── */
+.show-stage {
+  position: absolute; inset: 0; overflow-y: auto; overscroll-behavior: contain;
+  display: flex; flex-direction: column;
+  padding: calc(64px + env(safe-area-inset-top)) 20px calc(20px + env(safe-area-inset-bottom));
+}
+.show-spot {
+  position: fixed; inset: 0; pointer-events: none;
+  background:
+    radial-gradient(60% 55% at 50% 30%, rgba(246, 222, 158, 0.13) 0%, rgba(246, 222, 158, 0.04) 45%, transparent 70%),
+    radial-gradient(120% 70% at 50% -10%, #17325A 0%, transparent 60%);
+}
+.show-floor {
+  position: fixed; left: 0; right: 0; bottom: 0; height: 26%; pointer-events: none;
+  background: linear-gradient(180deg, transparent, rgba(201, 169, 97, 0.05) 60%, rgba(201, 169, 97, 0.09));
+  border-top: 1px solid rgba(201, 169, 97, 0.08);
+}
+.show-scene {
+  position: relative; z-index: 1; flex: 1;
+  width: 100%; max-width: 480px; margin: 0 auto;
+  display: flex; flex-direction: column;
+}
+/* auto margins, not justify-content: center, so an act taller than the
+   screen (the trophy case) overflows downward and stays scrollable */
+.show-scene > .act { margin: auto 0; }
+/* Under the closed curtain the first act waits on its opening frame. */
+.show-scene[data-live="false"] * { animation-play-state: paused !important; }
+
+/* ── controls ────────────────────────────────────────────────────────────── */
+.show-skip {
+  position: fixed; z-index: 6; top: calc(14px + env(safe-area-inset-top)); right: 14px;
+  background: rgba(3, 6, 9, 0.45); border: 1px solid rgba(244, 236, 216, 0.22); border-radius: 999px;
+  color: rgba(244, 236, 216, 0.75); cursor: pointer;
+  font-family: var(--mono); font-size: 9px; letter-spacing: 0.18em; padding: 8px 13px;
+  backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px);
+}
+.show-nav {
+  position: relative; z-index: 1; width: 100%; max-width: 480px; margin: 24px auto 0;
+  display: flex; flex-direction: column; align-items: center; gap: 14px;
+  animation: act-in 500ms var(--ease-out) both;
+}
+.show-dots { display: flex; gap: 7px; }
+.show-dot { width: 22px; height: 3px; border-radius: 2px; background: rgba(244, 236, 216, 0.16); transition: background 300ms; }
+.show-dot[data-done="true"] { background: rgba(201, 169, 97, 0.5); }
+.show-dot[data-on="true"] { background: var(--gold-bright); }
+.show-next {
+  width: 100%; border: none; cursor: pointer; border-radius: 12px; padding: 16px;
+  background: linear-gradient(180deg, var(--gold-bright), var(--gold)); color: var(--ink);
+  font-family: var(--mono); font-weight: 700; font-size: 11.5px; letter-spacing: 0.18em;
+  box-shadow: 0 14px 30px -12px rgba(201, 169, 97, 0.75);
+  transition: transform 130ms var(--ease-out);
+  animation: act-in 500ms both;
+}
+/* NEXT waits for each act's own choreography to land. */
+.show-next[data-scene="state"] { animation-delay: 2.2s; }
+.show-next[data-scene="thanks"] { animation-delay: 2.6s; }
+.show-next[data-scene="optic"] { animation-delay: 3.8s; }
+.show-next:active { transform: scale(0.98); }
+.show-next:focus-visible, .show-skip:focus-visible, .show-skipq:focus-visible { outline: 2px solid var(--gold-bright); outline-offset: 3px; }
+.show-skipq {
+  background: none; border: none; cursor: pointer; color: var(--faint);
+  font-family: var(--mono); font-size: 10px; letter-spacing: 0.16em; padding: 8px;
+}
+
+/* ── curtain ─────────────────────────────────────────────────────────────── */
+.show-curtain { position: absolute; inset: 0; z-index: 4; cursor: pointer; }
+.show-curtain[data-state="opening"] { cursor: default; pointer-events: none; }
+.show-drape {
+  position: absolute; top: 0; bottom: 0; width: 50.5%;
+  background:
+    linear-gradient(180deg, rgba(0, 0, 0, 0.55) 0%, transparent 18%, transparent 70%, rgba(0, 0, 0, 0.6) 100%),
+    repeating-linear-gradient(90deg,
+      #3E070D 0px, #6E0F19 9px, #9B1A26 17px, #B4232F 21px, #8A1522 27px, #5A0B13 34px, #3E070D 40px);
+  box-shadow: inset 0 0 80px rgba(0, 0, 0, 0.6);
+  transition: transform 1.9s cubic-bezier(0.65, 0, 0.35, 1), filter 1.9s ease;
+}
+.show-drape--l { left: 0; transform-origin: left center; }
+.show-drape--r { right: 0; transform-origin: right center; }
+.show-drape--l::after, .show-drape--r::after {
+  content: ""; position: absolute; top: 0; bottom: 0; width: 26px;
+  background: linear-gradient(90deg, rgba(0, 0, 0, 0.5), transparent);
+}
+.show-drape--l::after { right: 0; transform: scaleX(-1); }
+.show-drape--r::after { left: 0; }
+.show-curtain[data-state="opening"] .show-drape--l { transform: translateX(-92%) scaleX(0.35); filter: brightness(0.6); }
+.show-curtain[data-state="opening"] .show-drape--r { transform: translateX(92%) scaleX(0.35); filter: brightness(0.6); }
+.show-valance {
+  position: absolute; z-index: 2; top: 0; left: 0; right: 0; height: calc(52px + env(safe-area-inset-top));
+  background:
+    repeating-linear-gradient(90deg, #4A0910 0 14px, #7C121D 14px 26px, #4A0910 26px 40px);
+  box-shadow: 0 10px 24px rgba(0, 0, 0, 0.6);
+  border-bottom: 3px solid #C9A961;
+}
+.show-valance::after {
+  content: ""; position: absolute; left: 0; right: 0; bottom: -9px; height: 8px;
+  background: repeating-linear-gradient(90deg, #C9A961 0 2px, transparent 2px 6px);
+  opacity: 0.8;
+}
+
+/* projection, lives on the closed curtain and leaves with it */
+.show-projection {
+  position: absolute; z-index: 1; inset: 0;
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  pointer-events: none; transition: opacity 500ms ease;
+}
+.show-curtain[data-state="opening"] .show-projection { opacity: 0; }
+.show-beam {
+  position: absolute; left: 50%; bottom: -10%; width: 160vmax; height: 120%;
+  transform: translateX(-50%);
+  background: radial-gradient(ellipse 22% 40% at 50% 38%, rgba(255, 244, 214, 0.32) 0%, rgba(255, 244, 214, 0.08) 55%, transparent 75%);
+  mix-blend-mode: screen;
+  animation: show-beam-on 900ms 150ms ease-out both;
+}
+.show-logo {
+  position: relative; width: min(52vw, 230px); height: auto; aspect-ratio: 240 / 280; object-fit: contain;
+  color: #FFF1CC;
+  mix-blend-mode: screen;
+  filter: drop-shadow(0 0 14px rgba(255, 236, 190, 0.55)) blur(0.3px);
+  animation: show-project 1400ms 450ms steps(1, end) both, show-hum 3.2s 1.9s ease-in-out infinite;
+}
+img.show-logo { aspect-ratio: auto; }
+.show-presents, .show-presents-sub {
+  position: relative; font-family: var(--mono); color: #FFF1CC; mix-blend-mode: screen;
+  text-shadow: 0 0 10px rgba(255, 236, 190, 0.6);
+}
+.show-presents { margin-top: 26px; font-size: 11px; letter-spacing: 0.34em; animation: show-fade 700ms 1700ms both; }
+.show-presents-sub { margin-top: 8px; font-size: 9px; letter-spacing: 0.26em; opacity: 0.7; animation: show-fade 700ms 2100ms both; }
+.show-dust { position: absolute; inset: 0; z-index: 1; pointer-events: none; }
+.show-dust span {
+  position: absolute; left: var(--x); bottom: 10%; width: 2px; height: 2px; border-radius: 50%;
+  background: rgba(255, 244, 214, 0.7);
+  animation: show-dust 4.2s var(--t) linear infinite;
+}
+.show-curtain[data-state="opening"] .show-dust { opacity: 0; transition: opacity 400ms; }
+
+/* ── acts ────────────────────────────────────────────────────────────────── */
+.act { display: flex; flex-direction: column; align-items: center; text-align: center; }
+.act > * { animation: act-in 700ms var(--ease-out) both; }
+.act > *:nth-child(2) { animation-delay: 250ms; }
+.act > *:nth-child(3) { animation-delay: 500ms; }
+.act > *:nth-child(4) { animation-delay: 800ms; }
+.act > *:nth-child(5) { animation-delay: 1100ms; }
+.act-kick { font-family: var(--mono); font-size: 10px; letter-spacing: 0.3em; color: var(--gold); }
+.act-h {
+  font-family: var(--oswald); font-weight: 600; font-size: clamp(32px, 10vw, 46px);
+  line-height: 1.02; color: var(--cream); margin: 18px 0 0;
+}
+.act-h--big { font-size: clamp(52px, 17vw, 76px); }
+.act-h .accent { color: var(--gold-bright); }
+.act-p {
+  font-family: var(--inter); font-size: 15px; line-height: 1.6; color: var(--mute);
+  margin: 16px 0 0; max-width: 36ch;
+}
+
+/* act 1: state */
+.act-state .act-medal-wrap { position: relative; margin-top: 30px; animation: none; }
+.act-medal {
+  width: 156px; height: 156px; border-radius: 50%; color: var(--ink);
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  background: radial-gradient(circle at 35% 30%, #FBE7B0 0%, var(--gold-bright) 32%, var(--gold) 68%, #8E7236 100%);
+  box-shadow:
+    inset 0 0 0 4px rgba(6, 16, 31, 0.22), inset 0 0 0 9px rgba(251, 231, 176, 0.55),
+    0 30px 60px -18px rgba(201, 169, 97, 0.7), 0 0 90px rgba(232, 199, 122, 0.25);
+  animation: act-medal-drop 1100ms 300ms var(--ease-spring) both, act-medal-glow 3s 1.6s ease-in-out infinite;
+}
+.act-medal b { font-family: var(--oswald); font-weight: 700; font-size: 62px; line-height: 1; }
+.act-medal sup { font-size: 0.4em; vertical-align: top; position: relative; top: 0.3em; margin-left: 2px; }
+.act-medal i { font-family: var(--mono); font-style: normal; font-weight: 700; font-size: 11px; letter-spacing: 0.3em; margin-top: 6px; }
+.act-burst { position: absolute; left: 50%; top: 50%; width: 0; height: 0; }
+.act-burst span {
+  position: absolute; width: 6px; height: 6px; margin: -3px; border-radius: 1px;
+  background: var(--gold-bright); opacity: 0;
+  animation: act-burst 900ms 1050ms var(--ease-out) both;
+}
+.act-burst span:nth-child(3n) { background: var(--cream); width: 4px; height: 10px; }
+
+/* act 2: thanks */
+.act-shout {
+  position: relative; width: 100%; margin-top: 30px; padding: 22px 20px; overflow: hidden;
+  border: 1px solid var(--gold); border-radius: 16px;
+  background: linear-gradient(160deg, rgba(201, 169, 97, 0.16), rgba(10, 22, 40, 0.85));
+  box-shadow: 0 24px 60px -24px rgba(201, 169, 97, 0.45);
+}
+.act-thanks > .act-shout { animation-delay: 1300ms; }
+.act-shout-light {
+  position: absolute; inset: -40% -20% auto; height: 180%; pointer-events: none;
+  background: radial-gradient(closest-side, rgba(255, 241, 204, 0.22), transparent);
+  animation: act-spot-sweep 1600ms 1500ms var(--ease-out) both;
+}
+.act-shout-kick { position: relative; font-family: var(--mono); font-size: 9.5px; letter-spacing: 0.26em; color: var(--gold); }
+.act-shout-name {
+  position: relative; font-family: var(--oswald); font-weight: 600; font-size: clamp(28px, 8.5vw, 36px);
+  color: var(--gold-bright); margin-top: 8px; text-shadow: 0 0 22px rgba(232, 199, 122, 0.35);
+}
+.act-shout-p { position: relative; font-family: var(--inter); font-size: 14px; line-height: 1.6; color: var(--cream); margin: 10px 0 0; }
+
+/* act 3: optic */
+.act-optic .fin-grad { margin-top: 10px; --grad-delay: 800ms; }
+.act-optic > .act-optic-p { animation-delay: 3100ms; }
+.act-optic > .act-sign { animation-delay: 3400ms; color: var(--gold-bright); font-weight: 600; margin-top: 12px; }
+
+/* act 4: poll */
+.act-poll .fin-poll-opts { width: 100%; }
+.act-check {
+  width: 72px; height: 72px; border-radius: 50%; display: grid; place-items: center;
+  font-size: 32px; color: var(--ink);
+  background: linear-gradient(180deg, var(--gold-bright), var(--gold));
+  animation: act-medal-drop 700ms var(--ease-spring) both !important;
+}
+
+@media (min-width: 700px) {
+  .show-stage { padding-top: 90px; }
+}
+
+/* ── keyframes ───────────────────────────────────────────────────────────── */
+@keyframes show-beam-on { from { opacity: 0; } to { opacity: 1; } }
+/* projector flicker: stepped so it reads as a lamp striking, not a fade */
+@keyframes show-project {
+  0% { opacity: 0; } 8% { opacity: 0.5; } 12% { opacity: 0; } 20% { opacity: 0.75; }
+  26% { opacity: 0.2; } 34% { opacity: 0.9; } 40% { opacity: 0.55; } 52%, 100% { opacity: 0.92; }
+}
+@keyframes show-hum { 0%, 100% { opacity: 0.92; } 50% { opacity: 0.8; } }
+@keyframes show-fade { from { opacity: 0; } to { opacity: 0.9; } }
+@keyframes show-dust {
+  0% { transform: translate(0, 0); opacity: 0; } 15% { opacity: 0.8; }
+  100% { transform: translate(18px, -60vh); opacity: 0; }
+}
+@keyframes act-in { from { opacity: 0; transform: translateY(18px); } to { opacity: 1; transform: none; } }
+@keyframes act-medal-drop {
+  0% { opacity: 0; transform: translateY(-120px) scale(0.6) rotate(-30deg); }
+  100% { opacity: 1; transform: none; }
+}
+@keyframes act-medal-glow {
+  0%, 100% { filter: brightness(1); } 50% { filter: brightness(1.12); }
+}
+@keyframes act-burst {
+  0% { opacity: 1; transform: rotate(var(--a)) translateX(0); }
+  100% { opacity: 0; transform: rotate(var(--a)) translateX(var(--d)) rotate(160deg); }
+}
+@keyframes act-spot-sweep {
+  from { transform: translateX(-70%); opacity: 0; }
+  40% { opacity: 1; }
+  to { transform: translateX(0); opacity: 0.8; }
+}
+
+/* ── act: trophy case ────────────────────────────────────────────────────── */
+.act-trophies .act-h { font-size: clamp(40px, 13vw, 58px); }
+.tc-tally {
+  display: flex; flex-wrap: wrap; justify-content: center; gap: 8px 18px; margin-top: 12px;
+  font-family: var(--mono); font-size: 9.5px; letter-spacing: 0.18em; color: var(--faint);
+}
+.tc-tally b { color: var(--gold-bright); font-weight: 700; margin-right: 4px; }
+.tc-case {
+  position: relative; width: 100%; margin-top: 22px; padding: 14px 10px 6px;
+  border-radius: 10px 10px 4px 4px;
+  border: 6px solid #3A2614; border-top-width: 10px;
+  background:
+    radial-gradient(80% 50% at 50% 0%, rgba(255, 241, 204, 0.12), transparent 70%),
+    linear-gradient(180deg, #0D1A2E 0%, #08111F 100%);
+  box-shadow: inset 0 0 40px rgba(0, 0, 0, 0.7), 0 30px 60px -25px rgba(0, 0, 0, 0.9),
+    0 0 0 1px rgba(201, 169, 97, 0.25);
+}
+.tc-glass {
+  position: absolute; inset: 0; z-index: 2; pointer-events: none; border-radius: 4px;
+  background: linear-gradient(115deg, transparent 30%, rgba(255, 255, 255, 0.07) 38%, transparent 46%,
+    transparent 62%, rgba(255, 255, 255, 0.04) 66%, transparent 70%);
+}
+.tc-shelf { position: relative; padding-top: 6px; }
+.tc-shelf + .tc-shelf { margin-top: 10px; }
+.tc-row {
+  position: relative; z-index: 1;
+  display: flex; flex-wrap: wrap; justify-content: center; align-items: flex-end; gap: 4px 2px;
+}
+.tc-trophy {
+  width: 76px; display: flex; flex-direction: column; align-items: center;
+  animation: tc-place 700ms var(--ease-spring) both;
+}
+.tc-cup { width: 46px; height: auto; filter: drop-shadow(0 6px 8px rgba(0, 0, 0, 0.6)); }
+.tc-cup[data-big="true"] { width: 60px; }
+.tc-trophy[data-tier="1"] .tc-cup { filter: drop-shadow(0 6px 8px rgba(0, 0, 0, 0.6)) drop-shadow(0 0 10px rgba(232, 199, 122, 0.45)); }
+.tc-plaque {
+  margin-top: 4px; display: flex; flex-direction: column; align-items: center; text-align: center; min-height: 26px;
+}
+.tc-plaque b {
+  font-family: var(--oswald); font-weight: 600; font-size: 10px; line-height: 1.15;
+  color: var(--cream); letter-spacing: 0.02em;
+}
+.tc-plaque i {
+  font-family: var(--mono); font-style: normal; font-size: 7.5px; letter-spacing: 0.14em;
+  color: var(--gold); margin-top: 2px; text-transform: uppercase;
+}
+.tc-board {
+  height: 9px; margin: 4px -4px 0; border-radius: 2px;
+  background: linear-gradient(180deg, #7A5430 0%, #4A311A 60%, #2E1E0F 100%);
+  box-shadow: 0 6px 10px rgba(0, 0, 0, 0.6);
+}
+.tc-label {
+  display: flex; justify-content: space-between; align-items: baseline; gap: 8px;
+  padding: 5px 4px 0;
+  font-family: var(--mono); font-size: 8px; letter-spacing: 0.14em; color: var(--faint);
+}
+.tc-label b { color: var(--gold); font-weight: 700; }
+.tc-label span { white-space: nowrap; }
+@keyframes tc-place {
+  0% { opacity: 0; transform: translateY(-26px) scale(0.7); }
+  70% { opacity: 1; }
+  100% { opacity: 1; transform: none; }
+}

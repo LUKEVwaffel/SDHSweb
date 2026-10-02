@@ -12,9 +12,10 @@ import { putPhotoFile, removePhotoFiles, gridPathFor, publicUrlFor } from './pho
 // one comp until they're revisited). Bumped 2026-09-18 from Spring Hill ->
 // East Hamilton (comp 2026-09-19) — id/title match the `events` row Luke
 // created in DISPATCH's Events tab, and optic_config.active_event_id got the
-// same bump so the live /optic feed points here too.
-export const OPTIC_EVENT_ID = '0d0eef63-eff6-4988-bc4a-b9686ccc9dd4';
-export const OPTIC_EVENT_TITLE = 'East Hamilton Raider Competition';
+// same bump so the live /optic feed points here too. Bumped 2026-10-02 to
+// the season's final comp, Hamilton County Raider Championship at Central.
+export const OPTIC_EVENT_ID = '0d6f6a10-5cac-43c9-82eb-397b05e116a9';
+export const OPTIC_EVENT_TITLE = 'Hamilton County Raider Championship';
 
 // Feed-card image size. The feed renders `thumb_url`, full-width on a
 // phone, so it needs more than the 400px gallery default to look sharp.
