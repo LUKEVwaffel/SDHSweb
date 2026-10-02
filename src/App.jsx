@@ -65,6 +65,7 @@ import BallOpsPortal from './components/ball/ops/BallOpsPortal';
 import BallDressPortal from './components/ball/dress/BallDressPortal';
 import BallAttirePortal from './components/ball/attire/BallAttirePortal';
 import PortalHub from './components/portal/PortalHub';
+import BoardsApp from './components/boards/BoardsApp';
 import Optic from './components/optic/Optic';
 import LukeUploadRoute from './components/optic/LukeUpload';
 import LukePwaRoute from './components/optic/LukePwa';
@@ -138,6 +139,8 @@ export default function App() {
   if (location.pathname === '/raiderparent') return <RaiderParentWelcome />;
   // /rolls — Texas Roadhouse roll counter, fun one-off group tracker.
   if (location.pathname === '/rolls') return <RollCounter />;
+  // /boards: company promotion boards (CO/XO/1SG laptop, SAI review, results).
+  if (location.pathname === '/boards' || location.pathname.startsWith('/boards/')) return <BoardsApp />;
   if (location.pathname === '/blooddrive') return <BloodDrive />;
   // /lukescience: Luke's case that fall starts October 1. Static page.
   if (location.pathname === '/lukescience') return <LukeScience />;

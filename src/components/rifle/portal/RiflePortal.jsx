@@ -12,7 +12,6 @@ import ScoresTab from './ScoresTab';
 import StatsTab from './StatsTab';
 import HistoryTab from './HistoryTab';
 import AskAiTab from './AskAiTab';
-import CalendarTab from './CalendarTab';
 import DashboardTab from './DashboardTab';
 import ShooterTab from './ShooterTab';
 import LineupTab from './LineupTab';
@@ -27,7 +26,6 @@ const TABS = [
   { id: 'roster', label: 'Roster' },
   { id: 'signups', label: 'Signups' },
   { id: 'compupload', label: 'Comp Upload' },
-  { id: 'calendar', label: 'Calendar' },
   { id: 'stats', label: 'Stats' },
   { id: 'history', label: 'History' },
   { id: 'askai', label: 'Ask AI' },
@@ -278,7 +276,6 @@ export default function RiflePortal() {
         {tab === 'roster' && <RosterTab />}
         {tab === 'signups' && <SignupsTab />}
         {tab === 'compupload' && <CompUploadTab season={season} canUpload={RIFLE_UPLOAD_ALLOWLIST.includes((admin.email || '').toLowerCase())} />}
-        {tab === 'calendar' && <CalendarTab />}
         {tab === 'stats' && <StatsTab />}
         {tab === 'history' && <HistoryTab />}
         {tab === 'askai' && <AskAiTab />}
