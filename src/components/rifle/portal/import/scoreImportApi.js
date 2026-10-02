@@ -22,12 +22,20 @@ function friendly(error, fallback) {
   return error.message || fallback;
 }
 
+// Find-or-create: an identical match (same week, dates and opponent) is
+// reused rather than duplicated, so a retried or doubled publish can't
+// leave two copies of the same week behind.
 export async function createMatch({ week, dates, opponent, location }) {
   const w = Number(week);
   if (!Number.isInteger(w) || w < 1 || w > 99) throw new Error('Week number must be a whole number 1–99.');
-  const { data, error } = await SB.from('rifle_matches').insert({
-    week: w, dates: dates?.trim() || null, opponent: opponent?.trim() || null, location: location?.trim() || null,
-  }).select('*').single();
+  const rec = { week: w, dates: dates?.trim() || null, opponent: opponent?.trim() || null, location: location?.trim() || null };
+  let q = SB.from('rifle_matches').select('*').eq('week', w);
+  q = rec.dates ? q.eq('dates', rec.dates) : q.is('dates', null);
+  q = rec.opponent ? q.ilike('opponent', rec.opponent.replace(/[%_\\]/g, '\\$&')) : q.is('opponent', null);
+  const { data: same, error: findErr } = await q.limit(1);
+  if (findErr) throw new Error(friendly(findErr, 'Couldn\'t check for an existing match.'));
+  if (same?.length) return same[0];
+  const { data, error } = await SB.from('rifle_matches').insert(rec).select('*').single();
   if (error) throw new Error(friendly(error, 'Couldn\'t create the match.'));
   return data;
 }
@@ -84,6 +92,11 @@ export function publishScores(args) {
 async function publishScoresNow({ rows, matchId, uploadId, uploadRows, uploadDraft }) {
   if (!matchId) throw new Error('Pick which match these scores belong to.');
   if (!rows.length) throw new Error('No rows to publish.');
+  if (uploadId) {
+    // Same upload open in two places (importer + Comp Upload drafts list).
+    const { data: up } = await SB.from('rifle_comp_uploads').select('status').eq('id', uploadId).maybeSingle();
+    if (up?.status === 'published') throw new Error('This upload was already published — refresh to see it.');
+  }
 
   const { data: roster, error: rosterErr } = await SB.from('rifle_shooters').select('id, name');
   if (rosterErr) throw new Error(friendly(rosterErr, 'Couldn\'t load the roster.'));

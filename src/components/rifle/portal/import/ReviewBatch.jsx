@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { P, mono } from '../../theme';
 import { Badge, PrimaryBtn, DangerBtn, inputStyle } from '../ui';
 import { schoolYearOf } from '../rifleStats';
@@ -51,6 +51,10 @@ export default function ReviewBatch({ batch, matches, season, shooters, rosterNa
   const [err, setErr] = useState('');
   const [existing, setExisting] = useState(null); // Map(shooter_id → score) for the picked match
   const [existingErr, setExistingErr] = useState('');
+  // Synchronous re-entry guard: `busy` is React state, so a fast double
+  // click/tap can land before the re-render that disables the button — that
+  // published one batch twice (two duplicate matches) on 2026-10-02.
+  const inFlight = useRef(false);
 
   const realMatchId = batch.matchId && batch.matchId !== '__new__' ? batch.matchId : null;
   useEffect(() => {
@@ -87,11 +91,13 @@ export default function ReviewBatch({ batch, matches, season, shooters, rosterNa
   const setAll = (include) => onChange({ drafts: batch.drafts.map((d) => ({ ...d, include })) });
 
   async function publish() {
+    if (inFlight.current) return;
     setErr('');
     if (validation.errorCount) { setErr('Fix the rows marked in red first.'); return; }
     if (!batch.matchId) { setErr('Pick which match these scores belong to.'); return; }
     if (realMatchId && !existing) { setErr('Still checking this match\'s existing scores — try again in a second.'); return; }
     if (counts.update && !confirm(`${counts.update} shooter${counts.update === 1 ? ' already has' : 's already have'} different scores in this match. Overwrite with the imported values?`)) return;
+    inFlight.current = true;
     setBusy(true);
     try {
       let matchId = batch.matchId;
@@ -120,6 +126,7 @@ export default function ReviewBatch({ batch, matches, season, shooters, rosterNa
     } catch (e) {
       setErr(e.message || 'Publish failed.');
     } finally {
+      inFlight.current = false;
       setBusy(false);
     }
   }

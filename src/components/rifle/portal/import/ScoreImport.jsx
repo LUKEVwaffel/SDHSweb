@@ -158,6 +158,7 @@ export default function ScoreImport({ matches, shooters, season, defaultMatchId,
         </div>
         <div style={{ fontFamily: mono, fontSize: 10, color: P.mute, lineHeight: 1.6 }}>{FORMAT_LABEL}. Several files at once is fine.</div>
         <input ref={inputRef} type="file" multiple accept={ACCEPT} style={{ display: 'none' }}
+          onClick={(e) => e.stopPropagation()} /* its click would bubble to the drop zone and re-open the picker */
           onChange={(e) => { const fl = e.target.files; onFiles(fl).finally(() => { e.target.value = ''; }); }} />
       </div>
 
