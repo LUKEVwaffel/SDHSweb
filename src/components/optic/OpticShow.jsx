@@ -2,6 +2,7 @@ import { useCallback, useEffect, useState } from 'react';
 import {
   SEASON, PLACE, RaiderCrest, BetaGraduation, PollButtons, hasAnsweredPoll, markShowSeen,
 } from './OpticFinale';
+import { TrophyCase, trophyCaseDuration } from './OpticTrophies';
 import posthog from '../../lib/posthog';
 import './optic-show.css';
 
@@ -9,6 +10,7 @@ import './optic-show.css';
 // A theatre bill in five acts:
 //   curtain  Raider logo projected on a closed curtain, then it opens
 //   state    3rd in state
+//   trophies the full season trophy case, shelf by shelf
 //   thanks   thank you, families + the Amber & Jack Noblit spotlight
 //   optic    OPTIC 2.2 sheds its BETA tag
 //   poll     bring OPTIC back next year?   (skipped if already answered)
@@ -20,7 +22,7 @@ const EXIT_MS = 650; // house-lights fade into OPTIC
 
 /** @param {{ onDone: () => void }} props */
 export default function OpticShow({ onDone }) {
-  const [acts] = useState(() => ['state', 'thanks', 'optic', ...(hasAnsweredPoll() ? [] : ['poll'])]);
+  const [acts] = useState(() => ['state', 'trophies', 'thanks', 'optic', ...(hasAnsweredPoll() ? [] : ['poll'])]);
   const [act, setAct] = useState(0);
   const [curtain, setCurtain] = useState('projecting'); // projecting | opening | gone
   const [voted, setVoted] = useState(false);
@@ -66,6 +68,7 @@ export default function OpticShow({ onDone }) {
 
         <div className="show-scene" key={scene} data-live={stageLive}>
           {scene === 'state' && <ActState />}
+          {scene === 'trophies' && <TrophyCase />}
           {scene === 'thanks' && <ActThanks />}
           {scene === 'optic' && <ActOptic />}
           {scene === 'poll' && <ActPoll voted={voted} onVoted={() => setVoted(true)} />}
@@ -77,7 +80,13 @@ export default function OpticShow({ onDone }) {
               {acts.map((a, i) => <span key={a} className="show-dot" data-on={i === act} data-done={i < act} />)}
             </div>
             {!(scene === 'poll' && !voted) && (
-              <button className="show-next" key={`n-${scene}`} data-scene={scene} onClick={next}>
+              <button
+                className="show-next"
+                key={`n-${scene}`}
+                data-scene={scene}
+                style={scene === 'trophies' ? { animationDelay: `${trophyCaseDuration()}ms` } : undefined}
+                onClick={next}
+              >
                 {isLast ? 'ENTER OPTIC →' : 'NEXT →'}
               </button>
             )}

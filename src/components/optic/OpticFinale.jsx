@@ -15,7 +15,8 @@ export const PLACE = 'Central High School';
 // Real logo file wins when present; RaiderCrest falls back to the SVG below.
 const RAIDER_LOGO_SRC = '/images/raiders/raider-logo.png';
 
-const SHOW_KEY = 'optic_show_2026_final';
+// Bump to replay the show on every device (v2: trophy case act added).
+const SHOW_KEY = 'optic_show_2026_final_v2';
 const POLL_KEY = 'optic_next_year_v1';
 const POLL_CAMPAIGN = 'optic-next-year-2026';
 
