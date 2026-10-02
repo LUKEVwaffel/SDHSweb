@@ -1,11 +1,11 @@
 import { useState, useEffect, useCallback, useMemo } from 'react';
 import { supabase as SB } from '../../../lib/supabaseClient';
 import { P, mono } from '../theme';
-import { SectionLabel, Badge, EmptyState, th, td } from './ui';
+import { SectionLabel, Badge, EmptyState, DangerBtn, th, td } from './ui';
 import ScoreImport from './import/ScoreImport.jsx';
 import ReviewBatch from './import/ReviewBatch.jsx';
 import { toDrafts } from './import/review.js';
-import { discardUpload } from './import/scoreImportApi.js';
+import { discardUpload, uploadScoreRows, deleteUpload, matchScoreCount, deleteMatch } from './import/scoreImportApi.js';
 
 // Comp Upload — the full-page home of the score import (the Scores Editor's
 // IMPORT button opens the same ScoreImport in a modal). Kaz or Luke drop any
@@ -41,6 +41,7 @@ export default function CompUploadTab({ canUpload = true, season }) {
   const [openId, setOpenId] = useState(null);
   const [pendingBatches, setPendingBatches] = useState({}); // uploadId → batch under review
   const [activeUploadIds, setActiveUploadIds] = useState(() => new Set());
+  const [deletingId, setDeletingId] = useState(null);
 
   const load = useCallback(async () => {
     const [m, s, u] = await Promise.all([
@@ -80,6 +81,44 @@ export default function CompUploadTab({ canUpload = true, season }) {
     setPendingBatches((pb) => (pb[u.id] ? { ...pb, [u.id]: { ...pb[u.id], ...patch } } : pb));
   }
 
+  const matchLabel = (id) => {
+    const m = matches.find((x) => x.id === id);
+    return m ? `Week ${m.week}${m.opponent ? ` · ${m.opponent}` : ''}${m.dates ? ` (${m.dates})` : ''}` : 'a match';
+  };
+
+  // Delete = undo the import: its scores, then the record, then (asked
+  // separately) any match the delete left with zero scores — e.g. the
+  // duplicate "new match" a double-published upload created.
+  async function removeUpload(u) {
+    setErr('');
+    setDeletingId(u.id);
+    try {
+      const rows = await uploadScoreRows(u.id);
+      const matchIds = [...new Set(rows.map((r) => r.match_id))];
+      const where = matchIds.map(matchLabel).join(', ');
+      const ask = rows.length
+        ? `Delete this upload AND the ${rows.length} score${rows.length === 1 ? '' : 's'} it wrote to ${where}?\n\nIf it overwrote scores that were already there, those are removed too (restore them from History).`
+        : 'Delete this upload record? It has no scores on file.';
+      if (!confirm(ask)) return;
+      await deleteUpload(u.id, { removeScores: rows.length > 0 });
+      let removedMatches = 0;
+      for (const id of matchIds) {
+        if ((await matchScoreCount(id)) === 0 && confirm(`${matchLabel(id)} has no scores left. Delete that match too?`)) {
+          await deleteMatch(id);
+          removedMatches++;
+        }
+      }
+      if (openId === u.id) setOpenId(null);
+      await load();
+      flash(`Upload deleted${rows.length ? ` · ${rows.length} score${rows.length === 1 ? '' : 's'} removed` : ''}${removedMatches ? ` · ${removedMatches} empty match${removedMatches === 1 ? '' : 'es'} removed` : ''}`);
+    } catch (e) {
+      setErr(e.message);
+      await load();
+    } finally {
+      setDeletingId(null);
+    }
+  }
+
   async function discard(u) {
     if (!confirm('Discard this upload? Nothing gets written to scores.')) return;
     try {
@@ -116,7 +155,7 @@ export default function CompUploadTab({ canUpload = true, season }) {
         </div>
       )}
 
-      <SectionLabel tag="// PENDING DRAFTS" sub={pending.length ? 'Started but never published — finish or discard.' : undefined} />
+      <SectionLabel tag="// PENDING DRAFTS" sub={pending.length ? 'Started but never published — finish, or delete it.' : undefined} />
       {pending.length === 0 ? (
         <div style={{ marginBottom: 28 }}><EmptyState>No pending drafts.</EmptyState></div>
       ) : (
@@ -127,7 +166,8 @@ export default function CompUploadTab({ canUpload = true, season }) {
               onChange={(patch) => patchPending(u, patch)}
               onMatchCreated={() => load()}
               onPublished={async (msg) => { await load(); flash(msg); }}
-              onDiscard={() => discard(u)}
+              onDiscard={() => (canUpload ? removeUpload(u) : discard(u))}
+              discardLabel={canUpload ? 'DELETE' : 'DISCARD'}
             />
           ))}
         </div>
@@ -153,6 +193,14 @@ export default function CompUploadTab({ canUpload = true, season }) {
             {open && (
               <div style={{ padding: '0 14px 14px', overflowX: 'auto' }}>
                 {u.draft?.notes && <div style={{ fontFamily: mono, fontSize: 11, color: P.mute, marginBottom: 10, fontStyle: 'italic' }}>{u.draft.notes}</div>}
+                {canUpload && (
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 10, flexWrap: 'wrap', marginBottom: 10 }}>
+                    <span style={{ fontFamily: mono, fontSize: 10, color: P.faint }}>
+                      {u.status === 'published' ? 'Deleting removes this upload and the scores it published.' : 'Deleting removes this record.'}
+                    </span>
+                    <DangerBtn onClick={() => removeUpload(u)} disabled={deletingId === u.id}>{deletingId === u.id ? 'DELETING…' : 'DELETE UPLOAD'}</DangerBtn>
+                  </div>
+                )}
                 <table style={{ width: '100%', borderCollapse: 'collapse', fontFamily: mono, fontSize: 12 }}>
                   <thead>
                     <tr>{['On sheet', 'Shooter', 'Prone', 'Standing', 'Kneeling', 'Total', 'X'].map((h) => <th key={h} style={th()}>{h}</th>)}</tr>

@@ -144,3 +144,42 @@ export async function discardUpload(uploadId) {
   const { error } = await SB.from('rifle_comp_uploads').update({ status: 'discarded' }).eq('id', uploadId);
   if (error) throw new Error(friendly(error, 'Couldn\'t discard the upload.'));
 }
+
+// ── Deleting an upload ───────────────────────────────────────────────────
+// Scores carry upload_id, so "undo this import" = delete the scores it
+// wrote, then the record. Every rifle_scores / rifle_matches delete goes
+// through the audit trigger, so each one is still restorable from History.
+
+export async function uploadScoreRows(uploadId) {
+  const { data, error } = await SB.from('rifle_scores').select('id, match_id').eq('upload_id', uploadId);
+  if (error) throw new Error(friendly(error, 'Couldn\'t look up the scores from this upload.'));
+  return data || [];
+}
+
+export async function deleteUpload(uploadId, { removeScores }) {
+  if (removeScores) {
+    // Detach first: the audit log snapshots the row as deleted, and History's
+    // undo re-inserts that snapshot — with upload_id still pointing at the
+    // record we're about to delete, the restore would fail its foreign key.
+    const { data: rows, error: detachErr } = await SB.from('rifle_scores').update({ upload_id: null }).eq('upload_id', uploadId).select('id');
+    if (detachErr) throw new Error(friendly(detachErr, 'Couldn\'t delete the scores from this upload.'));
+    const ids = (rows || []).map((r) => r.id);
+    if (ids.length) {
+      const { error } = await SB.from('rifle_scores').delete().in('id', ids);
+      if (error) throw new Error(friendly(error, 'Couldn\'t delete the scores from this upload.'));
+    }
+  }
+  const { error } = await SB.from('rifle_comp_uploads').delete().eq('id', uploadId);
+  if (error) throw new Error(friendly(error, 'Couldn\'t delete the upload record.'));
+}
+
+export async function matchScoreCount(matchId) {
+  const { count, error } = await SB.from('rifle_scores').select('id', { count: 'exact', head: true }).eq('match_id', matchId);
+  if (error) throw new Error(friendly(error, 'Couldn\'t count the match\'s scores.'));
+  return count ?? 0;
+}
+
+export async function deleteMatch(matchId) {
+  const { error } = await SB.from('rifle_matches').delete().eq('id', matchId);
+  if (error) throw new Error(friendly(error, 'Couldn\'t delete the match.'));
+}

@@ -46,7 +46,7 @@ function MatchPicker({ batch, matches, season, onChange }) {
   );
 }
 
-export default function ReviewBatch({ batch, matches, season, shooters, rosterNames, onChange, onMatchCreated, onPublished, onDiscard }) {
+export default function ReviewBatch({ batch, matches, season, shooters, rosterNames, onChange, onMatchCreated, onPublished, onDiscard, discardLabel }) {
   const [busy, setBusy] = useState(false);
   const [err, setErr] = useState('');
   const [existing, setExisting] = useState(null); // Map(shooter_id → score) for the picked match
@@ -247,7 +247,7 @@ export default function ReviewBatch({ batch, matches, season, shooters, rosterNa
       <footer style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 10, padding: '10px 14px', borderTop: `1px solid ${P.hair}`, flexWrap: 'wrap' }}>
         <span style={{ fontFamily: mono, fontSize: 10, color: P.faint }}>Blank cells never erase stored values. Every change is logged to History.</span>
         <div style={{ display: 'flex', gap: 8 }}>
-          {onDiscard && <DangerBtn onClick={onDiscard} disabled={busy}>{batch.uploadId ? 'DISCARD' : 'SKIP'}</DangerBtn>}
+          {onDiscard && <DangerBtn onClick={onDiscard} disabled={busy}>{discardLabel || (batch.uploadId ? 'DISCARD' : 'SKIP')}</DangerBtn>}
           <PrimaryBtn onClick={publish} disabled={busy || validation.errorCount > 0 || !batch.matchId || (realMatchId && !existing)}>
             {busy ? 'PUBLISHING…' : realMatchId && !existing && !existingErr ? 'CHECKING…' : `PUBLISH ${validation.includedCount} SCORE${validation.includedCount === 1 ? '' : 'S'}`}
           </PrimaryBtn>
