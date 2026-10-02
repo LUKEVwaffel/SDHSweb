@@ -20,6 +20,7 @@ import {
 } from './pwa';
 import { usePwaUpdate, PwaUpdateBar } from './usePwaUpdate';
 import OpticOnboarding from './OpticOnboarding';
+import { FinaleBanner, ThankYouCard, BetaGraduation, NextYearPoll } from './OpticFinale';
 import posthog from '../../lib/posthog';
 import './optic.css';
 
@@ -64,6 +65,12 @@ const TEAM_FILTERS = [
 // Strict: a photo tagged 'both' only shows under ALL or BOTH, never under
 // MALE or COED, so each team chip is exactly that team's photos.
 const matchesTeam = (p, team) => team === 'all' || p.raider_team === team;
+// Station identity for the event chips: the sub-event's name, normalised,
+// so "PTT" (male row) and "PTT" (coed row) are one chip.
+const stationKey = (p) => {
+  const name = p.raider_sub_events?.name;
+  return p.sub_event_id && name ? name.trim().toLowerCase().replace(/\s+/g, ' ') : null;
+};
 const countTeams = (list) => Object.fromEntries(
   TEAM_FILTERS.map((t) => [t.id, list.filter((p) => matchesTeam(p, t.id)).length]),
 );
@@ -98,35 +105,37 @@ function OpticApp() {
   const teamCounts = useMemo(() => countTeams(photos), [photos]);
 
   // Filter by sub-event (Rope Bridge, CCR, etc.) alongside team — parent
-  // ask (Luke's mom), the natural complement to the team chips: a parent
-  // wants their cadet's specific event, not the whole day. Options are
-  // derived from whatever sub-events actually have tagged photos right now
-  // rather than a separate live query, same approach teamCounts already
-  // uses. Only rendered when there's more than one to choose from.
+  // ask (Luke's mom). Each station exists as one row per team (PTT male +
+  // PTT coed), so chips group by station NAME, not row id: one PTT chip, and
+  // the team picker below splits it. Options come from the photos actually
+  // present, same as teamCounts.
   const subEventOptions = useMemo(() => {
     const seen = new Map();
     for (const p of photos) {
-      if (p.sub_event_id && p.raider_sub_events?.name) seen.set(p.sub_event_id, p.raider_sub_events.name);
+      const key = stationKey(p);
+      if (key && !seen.has(key)) seen.set(key, p.raider_sub_events.name.trim());
     }
     return Array.from(seen, ([id, name]) => ({ id, name })).sort((a, b) => a.name.localeCompare(b.name));
   }, [photos]);
   const subEventCounts = useMemo(() => {
     const counts = { all: photos.length };
-    for (const opt of subEventOptions) counts[opt.id] = 0;
-    for (const p of photos) if (p.sub_event_id) counts[p.sub_event_id] = (counts[p.sub_event_id] || 0) + 1;
+    for (const p of photos) {
+      const key = stationKey(p);
+      if (key) counts[key] = (counts[key] || 0) + 1;
+    }
     return counts;
-  }, [photos, subEventOptions]);
+  }, [photos]);
 
   const visiblePhotos = useMemo(() => {
     let list = photos;
     if (teamFilter !== 'all') list = list.filter((p) => matchesTeam(p, teamFilter));
-    if (subEventFilter !== 'all') list = list.filter((p) => p.sub_event_id === subEventFilter);
+    if (subEventFilter !== 'all') list = list.filter((p) => stationKey(p) === subEventFilter);
     return list;
   }, [photos, teamFilter, subEventFilter]);
 
   // Tapping an event asks which team to show before filtering.
   const teamPickCounts = useMemo(
-    () => (teamPickFor ? countTeams(photos.filter((p) => p.sub_event_id === teamPickFor.id)) : null),
+    () => (teamPickFor ? countTeams(photos.filter((p) => stationKey(p) === teamPickFor.id)) : null),
     [photos, teamPickFor],
   );
   function pickEventTeam(team) {
@@ -221,9 +230,11 @@ function OpticApp() {
           <OpticLocked opensAt={gate.opensAt} eventId={config.eventId} />
         ) : (
           <div className="rhea-wrap">
+            <FinaleBanner compact />
             <InstallNudge />
             <NotificationCard eventId={config.eventId} />
             <UploadCard eventId={config.eventId} />
+            <ThankYouCard />
             <Feed
               photos={visiblePhotos}
               loading={loading}
@@ -292,6 +303,8 @@ function OpticApp() {
       {showWalk && (
         <Walkthrough onClose={() => { markWalkthroughOptic(); setWalk(false); }} />
       )}
+
+      <NextYearPoll hold={gate.loading || showWalk || !!teamPickFor || reel !== null} />
 
       <PwaUpdateBar show={updateReady} />
     </div>
@@ -425,6 +438,7 @@ function OpticLocked({ opensAt, eventId }) {
   return (
     <div className="rhea-lock">
       <OpticGlyph className="rhea-lock-glyph" />
+      <FinaleBanner />
       {paused ? (
         <>
           <h1 className="rhea-lock-h">The feed is <span className="accent">paused</span>.</h1>
@@ -432,6 +446,10 @@ function OpticLocked({ opensAt, eventId }) {
             Photos are on hold for a moment. Keep this page open, it comes back
             on its own the second it reopens, no refresh needed.
           </p>
+          <div className="rhea-lock-cards">
+            <ThankYouCard />
+            <BetaGraduation />
+          </div>
         </>
       ) : (
         <>
@@ -455,7 +473,8 @@ function OpticLocked({ opensAt, eventId }) {
           <div className="rhea-lock-cards">
             <InstallNudge />
             <NotificationCard eventId={eventId} />
-            <WhatsNew />
+            <ThankYouCard />
+            <BetaGraduation />
           </div>
 
           {!isStandalone() && (
@@ -469,40 +488,8 @@ function OpticLocked({ opensAt, eventId }) {
   );
 }
 
-// "What's new" card on the locked/countdown screen, newest release first.
-const RELEASES = [
-  {
-    version: 'OPTIC 2.2 · BETA',
-    note: 'Fixed this week, after East Hamilton.',
-    items: [
-      'Scrolling the feed is smooth now, no more lag',
-      'Closing a photo keeps your place instead of jumping to the top',
-      'Download several photos at once works on iPhone (tap DOWNLOAD, then SAVE)',
-      'Photos load faster, served from a new photo host',
-    ],
-  },
-];
-
-// Reveal panel on the locked/countdown screen — this is the surface almost
-// everyone actually sees before the feed opens, including everyone with the
-// app already on their home screen (isStandalone() skips onboarding
-// entirely), so the "we heard you" moment lives here, not buried in
-// onboarding.
-function WhatsNew() {
-  return (
-    <div className="rhea-card2">
-      {RELEASES.map((r, i) => (
-        <div key={r.version} style={i ? { marginTop: 14, opacity: 0.75 } : undefined}>
-          <div className="rhea-card2-kick">{r.version}</div>
-          <p className="rhea-card2-p">{r.note}</p>
-          <ul className="rhea-card2-list">
-            {r.items.map((text) => <li key={text}>{text}</li>)}
-          </ul>
-        </div>
-      ))}
-    </div>
-  );
-}
+// The old "what's new" release card is replaced by BetaGraduation
+// (OpticFinale.jsx) for the final comp: 2.2 comes out of beta.
 
 function Header({ onHelp }) {
   // Follows optic_config.active_event_id (switched from /lukepwa's SWITCH

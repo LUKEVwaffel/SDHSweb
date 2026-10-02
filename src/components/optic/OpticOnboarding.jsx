@@ -170,10 +170,10 @@ export default function OpticOnboarding({ onDone }) {
               <div className="rob-kicker">SDHS JROTC · OPTIC</div>
               <h1 className="rob-h">The whole day, <span className="accent">as it happens.</span></h1>
               <p className="rob-sub">
-                This is OPTIC, a beta photo feed we&apos;re running just for this
-                competition. Families and cadets post from the stands and the sideline,
+                This is OPTIC, our comp photo feed, built this season with your
+                feedback. Families and cadets post from the stands and the sideline,
                 and everyone sees it live. Nothing to sign into, nothing to download yet.
-                We may ask you for quick feedback after the event.
+                This is the last comp of the season, so make it count.
               </p>
               <div className="rob-vis">
                 <span className="rob-vis-glyph">📸</span>

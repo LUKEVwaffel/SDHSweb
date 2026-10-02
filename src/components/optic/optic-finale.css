@@ -1,0 +1,193 @@
+/* ============================================================================
+   Final comp of the 2026 season: banner, thank-you card, the 2.2 beta
+   graduation, and the next-year poll sheet. Rides on optic.css tokens; all
+   scoped under .rhea so the reduced-motion collapse there covers it too.
+   ========================================================================= */
+
+/* ── banner ──────────────────────────────────────────────────────────────── */
+.rhea .fin-banner {
+  position: relative; width: 100%; margin: 26px 0 0; padding: 22px 22px 24px;
+  border: 1px solid var(--gold); border-radius: 18px; overflow: hidden; text-align: left;
+  background:
+    radial-gradient(120% 140% at 0% 0%, rgba(232, 199, 122, 0.20) 0%, transparent 55%),
+    linear-gradient(160deg, #1B3762 0%, var(--navy-deep) 70%);
+  box-shadow: 0 30px 60px -30px rgba(0, 0, 0, 0.8), 0 0 0 4px rgba(201, 169, 97, 0.08);
+  animation: fin-rise 600ms var(--ease-out) both;
+}
+.rhea .fin-banner::after {
+  content: ""; position: absolute; inset: 0; pointer-events: none;
+  background: linear-gradient(105deg, transparent 38%, rgba(244, 236, 216, 0.10) 50%, transparent 62%);
+  transform: translateX(-100%);
+  animation: fin-sweep 5.5s 1.2s ease-in-out infinite;
+}
+.rhea .fin-banner[data-compact="true"] { margin: 16px 0 4px; padding: 16px 18px 18px; }
+.rhea .fin-banner-kick {
+  display: flex; align-items: center; gap: 8px;
+  font-family: var(--mono); font-size: 9.5px; letter-spacing: 0.24em; color: var(--gold-bright);
+}
+.rhea .fin-dot {
+  width: 7px; height: 7px; border-radius: 50%; background: var(--gold-bright);
+  box-shadow: 0 0 0 0 rgba(232, 199, 122, 0.6);
+  animation: fin-ping 2s ease-out infinite;
+}
+.rhea .fin-banner-row { display: flex; align-items: center; gap: 18px; margin-top: 16px; }
+.rhea .fin-medal {
+  flex-shrink: 0; width: 86px; height: 86px; border-radius: 50%;
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  color: var(--ink);
+  background: radial-gradient(circle at 35% 30%, #F6DE9E 0%, var(--gold-bright) 35%, var(--gold) 70%, #9C7F3E 100%);
+  box-shadow: inset 0 0 0 3px rgba(6, 16, 31, 0.25), inset 0 0 0 6px rgba(246, 222, 158, 0.6),
+    0 14px 30px -10px rgba(201, 169, 97, 0.6);
+  animation: fin-medal-in 900ms 250ms var(--ease-spring) both;
+}
+.rhea .fin-banner[data-compact="true"] .fin-medal { width: 66px; height: 66px; }
+.rhea .fin-medal b {
+  font-family: var(--oswald); font-weight: 700; font-size: 32px; line-height: 1;
+}
+.rhea .fin-banner[data-compact="true"] .fin-medal b { font-size: 25px; }
+.rhea .fin-medal sup { font-size: 0.42em; vertical-align: top; position: relative; top: 0.25em; margin-left: 1px; }
+.rhea .fin-medal i {
+  font-family: var(--mono); font-style: normal; font-weight: 700; font-size: 7.5px;
+  letter-spacing: 0.16em; margin-top: 4px;
+}
+.rhea .fin-banner-h {
+  font-family: var(--oswald); font-weight: 600; font-size: clamp(26px, 7.5vw, 34px);
+  line-height: 1; color: var(--cream); margin: 0;
+}
+.rhea .fin-banner[data-compact="true"] .fin-banner-h { font-size: clamp(21px, 6vw, 26px); }
+.rhea .fin-banner-h .accent { color: var(--gold-bright); }
+.rhea .fin-banner-p {
+  font-family: var(--inter); font-size: 13px; line-height: 1.55; color: var(--mute); margin: 8px 0 0;
+}
+
+/* ── thank-you card ──────────────────────────────────────────────────────── */
+.rhea .fin-thanks { border-color: var(--hair-strong); }
+.rhea .fin-thanks-h {
+  font-family: var(--oswald); font-weight: 600; font-size: 30px; line-height: 1;
+  color: var(--cream); margin: 10px 0 0;
+}
+.rhea .fin-shout {
+  position: relative; margin-top: 18px; padding: 16px 16px 16px 18px;
+  border-radius: 12px; border: 1px solid var(--hair-strong);
+  background: linear-gradient(135deg, rgba(201, 169, 97, 0.16) 0%, rgba(201, 169, 97, 0.03) 100%);
+}
+.rhea .fin-shout::before {
+  content: ""; position: absolute; left: 0; top: 14px; bottom: 14px; width: 3px;
+  border-radius: 0 3px 3px 0; background: var(--gold-bright);
+}
+.rhea .fin-shout-kick { font-family: var(--mono); font-size: 9px; letter-spacing: 0.22em; color: var(--gold); }
+.rhea .fin-shout-name {
+  font-family: var(--oswald); font-weight: 600; font-size: 22px; letter-spacing: 0.02em;
+  color: var(--gold-bright); margin-top: 6px;
+}
+.rhea .fin-shout-p {
+  font-family: var(--inter); font-size: 13px; line-height: 1.55; color: var(--cream); margin: 6px 0 0;
+}
+
+/* ── 2.2 beta graduation ─────────────────────────────────────────────────── */
+.rhea .fin-grad { position: relative; overflow: hidden; }
+.rhea .fin-grad-stage {
+  position: relative; height: 92px; display: flex; align-items: center; justify-content: center; gap: 10px;
+  border-bottom: 1px solid var(--hair); margin: -4px -4px 0; padding-bottom: 6px;
+}
+.rhea .fin-grad-word {
+  font-family: var(--oswald); font-weight: 700; font-size: 34px; letter-spacing: 0.14em; color: var(--cream);
+}
+.rhea .fin-grad-ver {
+  position: relative; font-family: var(--oswald); font-weight: 700; font-size: 34px; color: var(--cream);
+}
+.rhea .fin-grad-beta {
+  position: absolute; left: calc(100% + 10px); top: 50%; margin-top: -12px; line-height: 14px; font-family: var(--mono); font-weight: 700; font-size: 11px; letter-spacing: 0.2em;
+  color: var(--ink); background: var(--gold); padding: 5px 9px; border-radius: 6px;
+  transform-origin: 0% 100%;
+}
+.rhea .fin-grad-strike {
+  position: absolute; left: -3px; right: -3px; top: 50%; height: 2px; margin-top: -1px;
+  background: #C0392B; border-radius: 2px; transform: scaleX(0); transform-origin: left center;
+}
+.rhea .fin-spark {
+  position: absolute; left: calc(50% + 118px); top: 50%; width: 5px; height: 5px; margin: -2.5px;
+  border-radius: 50%; background: var(--gold-bright); opacity: 0;
+}
+.rhea .fin-grad-shine {
+  position: absolute; inset: 0; pointer-events: none;
+  background: linear-gradient(105deg, transparent 35%, rgba(246, 222, 158, 0.35) 50%, transparent 65%);
+  transform: translateX(-110%);
+}
+.rhea .fin-grad-stamp {
+  position: absolute; top: 14px; right: 14px;
+  font-family: var(--mono); font-weight: 700; font-size: 8.5px; letter-spacing: 0.2em;
+  color: var(--gold-bright); border: 1.5px solid var(--gold-bright); border-radius: 4px; padding: 4px 7px;
+  opacity: 0; transform: rotate(-8deg) scale(1.8);
+}
+.rhea .fin-grad-body { margin-top: 16px; opacity: 0; transform: translateY(10px); }
+.rhea .fin-grad-sign { color: var(--gold-bright); font-weight: 600; }
+
+/* sequence: strike (0.3s) -> BETA knocked off + sparks (1.0s) -> 2.2 goes
+   gold + shine (1.5s) -> stamp (1.9s) -> body (2.1s) */
+.rhea .fin-grad[data-play="true"] .fin-grad-strike { animation: fin-strike 380ms 300ms var(--ease-out) both; }
+.rhea .fin-grad[data-play="true"] .fin-grad-beta { animation: fin-knock 900ms 950ms cubic-bezier(0.5, 0, 0.75, 0) both; }
+.rhea .fin-grad[data-play="true"] .fin-spark { animation: fin-spark 700ms 1000ms var(--ease-out) both; }
+.rhea .fin-grad[data-play="true"] .fin-grad-ver { animation: fin-gold 700ms 1450ms var(--ease-out) both; }
+.rhea .fin-grad[data-play="true"] .fin-grad-shine { animation: fin-shine 1100ms 1500ms ease-in-out both; }
+.rhea .fin-grad[data-play="true"] .fin-grad-stamp { animation: fin-stamp 420ms 1900ms var(--ease-spring) both; }
+.rhea .fin-grad[data-play="true"] .fin-grad-body { animation: fin-rise 600ms 2100ms var(--ease-out) both; }
+
+/* ── next-year poll sheet ────────────────────────────────────────────────── */
+.rhea .fin-poll-opts { display: flex; flex-direction: column; gap: 10px; margin-top: 22px; }
+.rhea .fin-poll-opt {
+  min-height: 50px; padding: 14px 16px; cursor: pointer; border-radius: 12px;
+  font-family: var(--mono); font-weight: 700; font-size: 11.5px; letter-spacing: 0.16em; color: var(--cream);
+  background: var(--navy-deep); border: 1px solid var(--hair-strong);
+  transition: transform 130ms var(--ease-out), border-color 150ms, background 150ms;
+}
+.rhea .fin-poll-opt[data-primary="true"] {
+  color: var(--ink); border-color: transparent;
+  background: linear-gradient(180deg, var(--gold-bright), var(--gold));
+  box-shadow: 0 12px 26px -12px rgba(201, 169, 97, 0.7);
+}
+.rhea .fin-poll-opt:active { transform: scale(0.98); }
+.rhea .fin-poll-opt:disabled { opacity: 0.55; cursor: default; }
+.rhea .fin-poll-opt:focus-visible { outline: 2px solid var(--gold-bright); outline-offset: 2px; }
+.rhea .fin-poll-done { text-align: center; padding: 10px 0 6px; }
+.rhea .fin-poll-check {
+  width: 56px; height: 56px; margin: 0 auto 14px; border-radius: 50%;
+  display: grid; place-items: center; font-size: 26px; color: var(--ink);
+  background: linear-gradient(180deg, var(--gold-bright), var(--gold));
+  animation: fin-medal-in 600ms var(--ease-spring) both;
+}
+@media (hover: hover) and (pointer: fine) {
+  .rhea .fin-poll-opt:hover { border-color: var(--gold); }
+}
+
+/* ── keyframes ───────────────────────────────────────────────────────────── */
+@keyframes fin-rise { from { opacity: 0; transform: translateY(14px); } to { opacity: 1; transform: translateY(0); } }
+@keyframes fin-sweep { 0% { transform: translateX(-100%); } 40%, 100% { transform: translateX(100%); } }
+@keyframes fin-ping {
+  0% { box-shadow: 0 0 0 0 rgba(232, 199, 122, 0.6); }
+  80%, 100% { box-shadow: 0 0 0 9px rgba(232, 199, 122, 0); }
+}
+@keyframes fin-medal-in {
+  from { opacity: 0; transform: scale(0.4) rotate(-25deg); }
+  to { opacity: 1; transform: scale(1) rotate(0); }
+}
+@keyframes fin-strike { to { transform: scaleX(1); } }
+@keyframes fin-knock {
+  0% { transform: translate(0, 0) rotate(0); opacity: 1; }
+  25% { transform: translate(4px, -10px) rotate(-14deg); opacity: 1; }
+  100% { transform: translate(40px, 90px) rotate(70deg); opacity: 0; }
+}
+@keyframes fin-spark {
+  0% { opacity: 1; transform: rotate(var(--a)) translateX(0) scale(1); }
+  100% { opacity: 0; transform: rotate(var(--a)) translateX(var(--d)) scale(0.3); }
+}
+@keyframes fin-gold {
+  0% { color: var(--cream); transform: scale(1); text-shadow: none; }
+  45% { transform: scale(1.18); }
+  100% { color: var(--gold-bright); transform: scale(1.08); text-shadow: 0 0 24px rgba(232, 199, 122, 0.55); }
+}
+@keyframes fin-shine { from { transform: translateX(-110%); } to { transform: translateX(110%); } }
+@keyframes fin-stamp {
+  from { opacity: 0; transform: rotate(-8deg) scale(1.8); }
+  to { opacity: 1; transform: rotate(-8deg) scale(1); }
+}
