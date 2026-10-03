@@ -2,13 +2,17 @@ import { useState, useEffect, useCallback, useRef } from 'react';
 import { supabase } from '../../lib/supabaseClient';
 import './rolls.css';
 
-// /rolls — Texas Roadhouse roll counter. Sign up with a name once (kept in
-// localStorage so a reload/reopen picks the same person back up), tap to
-// count your own rolls, watch the whole table's live count. Self-contained
+// /breadsticks (alias /rolls) — Olive Garden breadstick counter. Sign up with
+// a name once (kept in localStorage so a reload/reopen picks the same person
+// back up), tap to count your own breadsticks, watch the whole table's live
+// count. Self-contained
 // anon route (App.jsx bypass), no auth — same pattern as /raidertv.
 
-const EVENT_KEY = 'texas-roadhouse-2026-09-19';
-const LS_KEY = 'rollCounterEntry';
+// Reuses the roll_counter_entries table; a new event key gives this outing
+// its own fresh leaderboard. LS key changed too so an old Roadhouse signup
+// doesn't linger.
+const EVENT_KEY = 'olive-garden-breadsticks';
+const LS_KEY = 'breadstickCounterEntry';
 
 function loadSaved() {
   try {
@@ -25,7 +29,7 @@ function clearSaved() {
   try { localStorage.removeItem(LS_KEY); } catch {}
 }
 
-const ROLL_EMOJI = ['🥖', '🍞', '🥐'];
+const ROLL_EMOJI = ['🥖', '🫒', '🍝'];
 
 export default function RollCounter() {
   const [saved, setSaved] = useState(loadSaved);
@@ -162,10 +166,10 @@ export default function RollCounter() {
       </div>
 
       <header className="rolls-header">
-        <p className="rolls-eyebrow">Texas Roadhouse · Tonight</p>
-        <h1 className="rolls-title">Roll Counter</h1>
-        <p className="rolls-sub">{totalRolls} roll{totalRolls === 1 ? '' : 's'} down as a group</p>
-        <p className="rolls-honor">Honor system: only tap <strong>after</strong> you've actually eaten the roll — no pre-counting.</p>
+        <p className="rolls-eyebrow">Olive Garden · Tonight</p>
+        <h1 className="rolls-title">Breadstick Counter</h1>
+        <p className="rolls-sub">{totalRolls} breadstick{totalRolls === 1 ? '' : 's'} down as a group</p>
+        <p className="rolls-honor">Honor system: only tap <strong>after</strong> you've actually eaten the breadstick — no pre-counting.</p>
       </header>
 
       {!saved || !mine ? (
@@ -188,7 +192,7 @@ export default function RollCounter() {
           {joinError && <p className="rolls-error">{joinError}</p>}
         </section>
       ) : (
-        <section className="rolls-me" aria-label="Your roll count">
+        <section className="rolls-me" aria-label="Your breadstick count">
           <p className="rolls-me-name">{mine.name}{rankOf ? <span className="rolls-me-rank">#{rankOf}</span> : null}</p>
           <div className="rolls-count-display">{mine.count}</div>
           <div className="rolls-controls">
@@ -197,16 +201,16 @@ export default function RollCounter() {
               className="rolls-minus"
               onClick={() => bump(-1)}
               disabled={mine.count === 0}
-              aria-label="Remove a roll"
+              aria-label="Remove a breadstick"
             >−</button>
             <button
               type="button"
               className="rolls-plus"
               onClick={() => bump(1)}
-              aria-label="Add a roll"
+              aria-label="Add a breadstick"
             >
               <span className="rolls-plus-emoji">🥖</span>
-              <span>Roll +1</span>
+              <span>Breadstick +1</span>
             </button>
           </div>
           <button type="button" className="rolls-switch" onClick={switchName}>Not you? Switch name</button>
