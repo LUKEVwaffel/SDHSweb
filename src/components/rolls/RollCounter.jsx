@@ -19,7 +19,7 @@ const BANNED_LS_KEY = 'breadstickCounterBanned';
 // Perma-banned names. The real enforcement is the DB trigger in
 // supabase/roll_counter_ban.sql; this mirror hides them from the board and
 // locks the device out without a round trip. Keep the two lists in sync.
-const BANNED_TERMS = ['cockmaster'];
+const BANNED_TERMS = ['cockmaster', 'blyane', 'blayne'];
 
 function normalizeName(name) {
   const swaps = { 0: 'o', 1: 'i', 3: 'e', 4: 'a', 5: 's', 7: 't', '@': 'a', $: 's', '!': 'i', '|': 'i' };
