@@ -323,8 +323,9 @@ function OpticApp({ onReplay }) {
 }
 
 // Rain at the final comp (Hamilton County, 2026-10-03): the expensive camera
-// gear had to stay covered for stretches of the day, so the official set is
-// thinner than usual and parent uploads (photos AND videos) carry the feed.
+// gear stays covered for stretches of the day, so the official set is thinner
+// than usual and parent uploads (photos AND videos) carry the feed. Shown
+// while the comp is live, so the copy stays in present tense.
 // Only shows once this device has played the awards show (OpticShow), so it
 // lands after the 3rd-in-state moment rather than on top of it. Rendered on
 // the locked / paused screen too, not just the open feed, so it's seen even
@@ -343,7 +344,7 @@ function WeatherNotice({ locked = false }) {
       <p className="rhea-card2-p">
         Because of the rain, there may be fewer official photos than
         normal today. Very expensive cameras and rain don&apos;t go well
-        together, so the big camera had to stay covered for parts of the day.
+        together, so the big camera has to stay covered for parts of the day.
       </p>
       <p className="rhea-weather-ask">
         That makes <b>your uploads</b> the most important part of the feed
@@ -351,7 +352,7 @@ function WeatherNotice({ locked = false }) {
       </p>
       <ul className="rhea-card2-list">
         <li><b>Videos upload now too.</b> MP4 or MOV, straight from your camera roll.</li>
-        <li>Post the photos and clips you took, even the ones from far away.</li>
+        <li>Post your photos and clips as you take them, even the ones from far away.</li>
         <li>No account needed. They&apos;re live for every family in seconds.</li>
       </ul>
       {locked ? (
