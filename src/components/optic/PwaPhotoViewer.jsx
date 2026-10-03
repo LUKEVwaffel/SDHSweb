@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef, useCallback, useLayoutEffect } from 'react';
 import { raiderTeamLabel, isBlurredPhoto, blurOpticPhoto } from '../../lib/opticComp';
+import { isVideoPhoto, isVideoUrl } from '../../lib/opticVideo';
 
 const haptic = (p) => { try { navigator.vibrate?.(p); } catch { /* unsupported */ } };
 const SWIPE_PX = 50;
@@ -62,7 +63,8 @@ export function PhotoViewer({ photos, id, onId, onClose, actions, onBlurred, gro
   useEffect(() => {
     let dead = false;
     const warm = (url) => {
-      if (!url) return Promise.resolve();
+      // Videos play in a <video>; never pull a whole clip through Image().
+      if (!url || isVideoUrl(url)) return Promise.resolve();
       const i = new Image();
       i.decoding = 'async';
       i.src = url;
@@ -126,14 +128,27 @@ export function PhotoViewer({ photos, id, onId, onClose, actions, onBlurred, gro
           else if (dy > SWIPE_PX * 2 && Math.abs(dy) > Math.abs(dx) * 1.4) onClose();
         }}
       >
-        <img
-          key={photo.id}
-          className="lp-view-img"
-          src={ready.has(photo.photo_url) ? photo.photo_url : (photo.grid_url || photo.thumb_url || photo.photo_url)}
-          data-full={ready.has(photo.photo_url)}
-          alt=""
-          draggable={false}
-        />
+        {isVideoPhoto(photo) ? (
+          <video
+            key={photo.id}
+            className="lp-view-img"
+            src={photo.photo_url}
+            poster={photo.thumb_url || undefined}
+            data-full="true"
+            controls
+            playsInline
+            preload="metadata"
+          />
+        ) : (
+          <img
+            key={photo.id}
+            className="lp-view-img"
+            src={ready.has(photo.photo_url) ? photo.photo_url : (photo.grid_url || photo.thumb_url || photo.photo_url)}
+            data-full={ready.has(photo.photo_url)}
+            alt=""
+            draggable={false}
+          />
+        )}
         {idx > 0 && (
           <button className="lp-view-nav" data-dir="prev" onClick={() => go(-1)} aria-label="Previous photo">‹</button>
         )}
@@ -145,9 +160,12 @@ export function PhotoViewer({ photos, id, onId, onClose, actions, onBlurred, gro
       <div className="lp-view-bar">
         {meta && <div className="lp-view-meta">{meta}</div>}
         <div className="lp-view-acts">
-          <button className="lp-btn lp-btn--sm" onClick={() => { haptic(12); setEditing(true); }}>
-            ◐ BLUR FACES
-          </button>
+          {/* Blur bakes into a still image; it can't edit a video clip. */}
+          {!isVideoPhoto(photo) && (
+            <button className="lp-btn lp-btn--sm" onClick={() => { haptic(12); setEditing(true); }}>
+              ◐ BLUR FACES
+            </button>
+          )}
           {actions(photo).map((a) => (
             <button
               key={a.label}

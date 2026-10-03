@@ -45,6 +45,11 @@ Worker), so leave the Worker running.
 - `PUT` a new photo: anonymous (same as the old Supabase bucket policy), JPEG
   only, 10 MB cap, key must look like `raiders/<event uuid>/<stamp>.jpg`, and
   it refuses to overwrite an existing file.
+- `PUT` a parent video: same key shape ending `.mp4` / `.mov` / `.webm`, the
+  matching `video/*` Content-Type, 95 MB cap. Streamed into R2, then the first
+  bytes are checked and the object deleted if it isn't really a video.
+- Video `GET`s answer byte-range requests (iOS Safari won't play without them)
+  and skip the edge cache.
 - `DELETE`: requires a signed-in Supabase session (DISPATCH / Luke's PWA).
 
 ## Moving existing photos over (`scripts/migrate-photos-to-r2.mjs`)

@@ -1,5 +1,6 @@
 import { useRef, useMemo } from 'react';
 import { raiderTeamLabel, isBlurredPhoto } from '../../lib/opticComp';
+import { isVideoPhoto } from '../../lib/opticVideo';
 
 // ── /lukepwa albums. Replaces the one flat grid: photos are grouped into one
 // album per sub-event (Rope Bridge, CCR, ...) in the order the events were
@@ -238,6 +239,7 @@ function Tile({ photo: p, index, eager, on, pulse, selecting, onToggleSel, onOpe
         )}
         {hidden && <span className="lp-tilepill" data-hidden="true">HIDDEN</span>}
         {isBlurredPhoto(p) && <span className="lp-tilepill" data-blur="true">BLURRED</span>}
+        {isVideoPhoto(p) && <span className="lp-tilepill">▶ VIDEO</span>}
       </span>
       <button
         className="lp-selbox"

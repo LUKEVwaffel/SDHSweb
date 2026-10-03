@@ -2,6 +2,7 @@ import { supabase as SB } from './supabaseClient';
 import { resizeForUpload, applyOvalBlurToUrl, gridThumbFromUrl } from './imageResize';
 import { adminDisplayName } from './admins';
 import { putPhotoFile, removePhotoFiles, gridPathFor, publicUrlFor } from './photoStorage';
+import { videoKind, videoPoster, mediaFilename, OPTIC_VIDEO_ACCEPT, MAX_VIDEO_LABEL } from './opticVideo';
 
 // ── OPTIC 2.0 — comp photo pipeline. Which event this targets is no longer a
 // hardcoded id: useOpticConfig() reads it from optic_config.active_event_id so
@@ -49,8 +50,9 @@ export const ACCEPT_ATTR = 'image/jpeg,image/png';
 // roll. Those are converted to JPEG in the browser (see lib/heicConvert.js)
 // before they hit the upload pipeline. Extensions are listed alongside the
 // MIME types because iOS often reports HEIC files with no usable type.
+// Parents can post short videos too (lib/opticVideo.js).
 export const OPTIC_ACCEPT_ATTR =
-  'image/jpeg,image/png,image/heic,image/heif,.jpg,.jpeg,.png,.heic,.heif';
+  `image/jpeg,image/png,image/heic,image/heif,.jpg,.jpeg,.png,.heic,.heif,${OPTIC_VIDEO_ACCEPT}`;
 const ALLOWED_TYPES = new Set(['image/jpeg', 'image/png']);
 
 export function isAllowedImage(file) {
@@ -63,6 +65,14 @@ export function isAllowedImage(file) {
 export const REJECT_MESSAGE =
   'Only JPG and PNG files are accepted. iPhone photos saved as HEIC will not upload , ' +
   'set Settings › Camera › Formats to "Most Compatible", or send a screenshot of the photo instead.';
+
+// /optic's version: videos are welcome there.
+export const OPTIC_REJECT_MESSAGE =
+  'Photos (JPG, PNG, iPhone HEIC) and videos (MP4, MOV) only. If an iPhone photo still will not ' +
+  'upload, set Settings › Camera › Formats to "Most Compatible", or send a screenshot instead.';
+export const VIDEO_TOO_BIG_MESSAGE =
+  `Videos over ${MAX_VIDEO_LABEL} are too big to post (about a minute of video). Trim it in your ` +
+  'Photos app first, then add it again.';
 
 // `.in('id', [...])` puts every id in the request URL (~40 chars per uuid),
 // and the Supabase gateway rejects URLs past roughly 8KB. A few hundred ids
@@ -135,6 +145,63 @@ export async function uploadOpticPhoto(file, {
     taken_at: takenAt || null,
     ...(raiderTeam ? { raider_team: raiderTeam } : {}),
     ...(subEventId ? { sub_event_id: subEventId } : {}),
+  };
+  const insert = (r) => SB.from('photos').insert(r).select('*, raider_sub_events(name, team)').single();
+  let { data, error } = await insert(gridUrl ? { ...row, grid_url: gridUrl } : row);
+  if (error && gridUrl && isMissingGridColumn(error)) ({ data, error } = await insert(row));
+  if (error) throw error;
+  return data;
+}
+
+/**
+ * Poster frame for a parent video: feed thumb + grid thumb JPEGs. Done when
+ * the clip is picked (so the upload tray can show it) and handed back to
+ * uploadOpticVideo.
+ * @returns {Promise<{thumb: Blob, grid: Blob}>}
+ */
+export const makeVideoPoster = (file) => videoPoster(file, { thumbMax: FEED_THUMB_MAX, gridMax: GRID_THUMB_MAX });
+
+/**
+ * Upload one parent video clip as-is (no transcode) plus its poster frame,
+ * and insert its photos row. Same row shape as uploadOpticPhoto, so likes,
+ * filters, realtime and moderation all just work; storage_path ending in a
+ * video extension is what marks it as a video (lib/opticVideo.js).
+ * @param {File} file
+ * @param {object} opts  same as uploadOpticPhoto, plus
+ * @param {{thumb: Blob, grid: Blob}} [opts.poster]  from makeVideoPoster
+ * @returns {Promise<object>} the inserted photos row
+ */
+export async function uploadOpticVideo(file, {
+  uploaderName = '', deviceFp = null, eventId, takenAt = null, raiderTeam = null, poster = null,
+}) {
+  if (!eventId) throw new Error('No active event set. optic_config.active_event_id is missing.');
+  const kind = videoKind(file);
+  if (!kind) throw new Error('That video type is not supported. Use MP4 or MOV.');
+  const { thumb, grid } = poster || await makeVideoPoster(file);
+  const stamp = `${Date.now()}_${Math.random().toString(36).slice(2, 8)}`;
+  const base = `${PHOTO_TEAM}/${eventId}/${stamp}`;
+  const storagePath = `${base}.${kind.ext}`;
+
+  // Poster first: it's small, and if it fails the big upload never starts.
+  const [thumbUrl, gridUrl] = await Promise.all([
+    putPhotoFile(`${base}_t.jpg`, thumb),
+    putGridThumb(storagePath, grid),
+  ]);
+  const videoUrl = await putPhotoFile(storagePath, file, kind.type);
+
+  const row = {
+    team: PHOTO_TEAM,
+    event_id: eventId,
+    storage_path: storagePath,
+    photo_url: videoUrl,
+    thumb_url: thumbUrl,
+    uploader_name: uploaderName.trim() || null,
+    uploader_fp: deviceFp,
+    source: 'parent',
+    visibility: 'public',
+    upload_status: 'done',
+    taken_at: takenAt || null,
+    ...(raiderTeam ? { raider_team: raiderTeam } : {}),
   };
   const insert = (r) => SB.from('photos').insert(r).select('*, raider_sub_events(name, team)').single();
   let { data, error } = await insert(gridUrl ? { ...row, grid_url: gridUrl } : row);
@@ -466,7 +533,7 @@ export async function prepareBatch(photos, onProgress) {
         const res = await fetch(p.photo_url);
         if (!res.ok) throw new Error(String(res.status));
         const blob = await res.blob();
-        const name = `optic_${p.id}.jpg`;
+        const name = mediaFilename(p);
         out[i] = { blob, name, url: p.photo_url, file: new File([blob], name, { type: blob.type || 'image/jpeg' }) };
       } catch { /* dropped, reported via failed count */ }
       done += 1;

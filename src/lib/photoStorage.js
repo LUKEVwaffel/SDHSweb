@@ -17,24 +17,30 @@ export const r2Enabled = !!R2_BASE;
 
 const isR2Url = (url) => !!R2_BASE && typeof url === 'string' && url.startsWith(`${R2_BASE}/`);
 
+// A row's main file is a JPEG, or (parent videos, lib/opticVideo.js) a clip;
+// its thumbnails are always <base>_t.jpg / <base>_s.jpg either way.
+const MAIN_EXT_RE = /\.(jpg|mp4|mov|m4v|webm)$/i;
+
 /** Storage key of a photo's small grid thumbnail: `<base>_s.jpg`. */
-export const gridPathFor = (storagePath) => storagePath.replace(/\.jpg$/i, '_s.jpg');
+export const gridPathFor = (storagePath) => storagePath.replace(MAIN_EXT_RE, '_s.jpg');
+/** Storage key of a photo's feed thumbnail (a video's poster): `<base>_t.jpg`. */
+export const thumbPathFor = (storagePath) => storagePath.replace(MAIN_EXT_RE, '_t.jpg');
 
 /** Public URL `path` has (or would have) on the backend putPhotoFile writes to. */
 export function publicUrlFor(path) {
   return r2Enabled ? `${R2_BASE}/${path}` : SB.storage.from(BUCKET).getPublicUrl(path).data.publicUrl;
 }
 
-/** Upload one JPEG blob at `path` and return its public URL. */
-export async function putPhotoFile(path, blob) {
+/** Upload one blob (a JPEG unless `contentType` says otherwise) at `path` and return its public URL. */
+export async function putPhotoFile(path, blob, contentType = 'image/jpeg') {
   if (!r2Enabled) {
-    const { error } = await SB.storage.from(BUCKET).upload(path, blob, { contentType: 'image/jpeg' });
+    const { error } = await SB.storage.from(BUCKET).upload(path, blob, { contentType });
     if (error) throw error;
     return SB.storage.from(BUCKET).getPublicUrl(path).data.publicUrl;
   }
   const res = await fetch(`${R2_BASE}/${path}`, {
     method: 'PUT',
-    headers: { 'Content-Type': 'image/jpeg' },
+    headers: { 'Content-Type': contentType },
     body: blob,
   });
   if (!res.ok) {
@@ -55,7 +61,7 @@ export async function removePhotoFiles(photos) {
   const r2Paths = [];
   for (const p of photos) {
     if (!p?.storage_path) continue;
-    const pair = [p.storage_path, p.storage_path.replace(/\.jpg$/i, '_t.jpg')];
+    const pair = [p.storage_path, thumbPathFor(p.storage_path)];
     (isR2Url(p.photo_url) ? r2Paths : sbPaths).push(...pair);
     // The grid thumb can live on a different backend than the photo (it may
     // have been backfilled to R2 for a photo still on Supabase).

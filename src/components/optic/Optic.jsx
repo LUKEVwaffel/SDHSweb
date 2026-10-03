@@ -6,12 +6,14 @@ import { useOpticLikes } from '../../hooks/useOpticLikes';
 import { useOpticGate } from '../../hooks/useOpticGate';
 import { useOpticConfig } from '../../hooks/useOpticConfig';
 import {
-  uploadOpticPhoto, isAllowedImage, OPTIC_ACCEPT_ATTR, REJECT_MESSAGE,
+  uploadOpticPhoto, uploadOpticVideo, makeVideoPoster, isAllowedImage, OPTIC_ACCEPT_ATTR,
+  OPTIC_REJECT_MESSAGE, VIDEO_TOO_BIG_MESSAGE,
   feedAttribution, feedChip, downloadPhoto, prepareBatch, saveBatchChunk, BATCH_CHUNK,
   hasOnboardedOptic, hasWalkthroughOptic, markWalkthroughOptic,
   hasInstallDismissedOptic, markInstallDismissedOptic,
 } from '../../lib/opticComp';
 import { readTakenAt } from '../../lib/opticExif';
+import { isAllowedVideo, isVideoTooBig, isVideoPhoto, mediaFilename } from '../../lib/opticVideo';
 import { pushSupported, hasDecidedPush, markPushDecided, subscribeToPush, syncPushSubscription } from '../../lib/opticPush';
 import { isHeic, convertHeicToJpeg } from '../../lib/heicConvert';
 import {
@@ -242,6 +244,7 @@ function OpticApp({ onReplay }) {
         ) : (
           <div className="rhea-wrap">
             <StateStrip />
+            <WeatherNotice />
             <InstallNudge />
             <NotificationCard eventId={config.eventId} />
             <UploadCard eventId={config.eventId} />
@@ -316,6 +319,44 @@ function OpticApp({ onReplay }) {
 
       <PwaUpdateBar show={updateReady} />
     </div>
+  );
+}
+
+// Rain at the final comp (Hamilton County, 2026-10-03): the expensive camera
+// gear had to stay covered for stretches of the day, so the official set is
+// thinner than usual and parent uploads (photos AND videos) carry the feed.
+// Only shows once this device has played the awards show (OpticShow), so it
+// lands after the 3rd-in-state moment rather than on top of it. Next comp:
+// drop this card.
+function WeatherNotice() {
+  if (!hasSeenShow()) return null;
+
+  function toUpload() {
+    posthog.capture('optic_weather_notice_cta');
+    document.getElementById('optic-upload')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }
+
+  return (
+    <section className="rhea-card2 rhea-weather" data-tone="alert" aria-label="Weather update">
+      <div className="rhea-weather-kick"><span aria-hidden="true">☂</span> WEATHER UPDATE</div>
+      <p className="rhea-card2-p">
+        Because of the rain, there may be fewer official photos than
+        normal today. Very expensive cameras and rain don&apos;t go well
+        together, so the big camera had to stay covered for parts of the day.
+      </p>
+      <p className="rhea-weather-ask">
+        That makes <b>your uploads</b> the most important part of the feed
+        today. Every shot from the stands counts.
+      </p>
+      <ul className="rhea-card2-list">
+        <li><b>Videos upload now too.</b> MP4 or MOV, straight from your camera roll.</li>
+        <li>Post the photos and clips you took, even the ones from far away.</li>
+        <li>No account needed. They&apos;re live for every family in seconds.</li>
+      </ul>
+      <div className="rhea-card2-row">
+        <button className="rhea-btn" style={{ flex: 1 }} onClick={toUpload}>ADD PHOTOS &amp; VIDEOS</button>
+      </div>
+    </section>
   );
 }
 
@@ -514,10 +555,21 @@ function Header({ onHelp }) {
   );
 }
 
+// "3 PHOTOS + 1 VIDEO" style count for the upload button / done line.
+function countLabel(list) {
+  const videos = list.filter((it) => it.kind === 'video').length;
+  const photos = list.length - videos;
+  const part = (n, word) => `${n} ${word}${n === 1 ? '' : 'S'}`;
+  if (videos && photos) return `${part(photos, 'PHOTO')} + ${part(videos, 'VIDEO')}`;
+  if (videos) return part(videos, 'VIDEO');
+  return part(photos, 'PHOTO');
+}
+
 function UploadCard({ eventId }) {
-  const [items, setItems] = useState([]); // {id,file,previewUrl,takenAt,status,error}
+  const [items, setItems] = useState([]); // {id,kind,file,previewUrl,poster,takenAt,status,error}
   const [name, setName] = useState('');
   const [rejected, setRejected] = useState([]);
+  const [tooBig, setTooBig] = useState([]);
   const [busy, setBusy] = useState(false);
   const [dragOver, setDragOver] = useState(false);
   const inputRef = useRef(null);
@@ -552,28 +604,49 @@ function UploadCard({ eventId }) {
     }
   }, []);
 
+  // Videos upload as-is; the only prep is grabbing a poster frame for the
+  // feed card and the tray preview. makeVideoPoster never throws (it falls
+  // back to a placeholder card), so every picked video ends up pending.
+  const processVideos = useCallback(async (batch) => {
+    for (const { id, file } of batch) {
+      const poster = await makeVideoPoster(file);
+      const previewUrl = URL.createObjectURL(poster.grid);
+      setItems((q) => {
+        if (!q.some((x) => x.id === id)) { URL.revokeObjectURL(previewUrl); return q; }
+        return q.map((x) => (x.id === id ? { ...x, poster, previewUrl, status: 'pending' } : x));
+      });
+    }
+  }, []);
+
   const addFiles = useCallback((fileList) => {
     const files = Array.from(fileList || []);
     const native = files.filter(isAllowedImage);
     const heic = files.filter((f) => !isAllowedImage(f) && isHeic(f));
-    const bad = files.filter((f) => !isAllowedImage(f) && !isHeic(f));
+    const videos = files.filter((f) => isAllowedVideo(f) && !isVideoTooBig(f));
+    const big = files.filter((f) => isAllowedVideo(f) && isVideoTooBig(f));
+    const bad = files.filter((f) => !isAllowedImage(f) && !isHeic(f) && !isAllowedVideo(f));
 
     setRejected(bad.map((f) => f.name));
+    setTooBig(big.map((f) => f.name));
 
     const nativeItems = native.map((file) => ({
-      id: nextId(), file, previewUrl: URL.createObjectURL(file), takenAt: null, status: 'pending', error: null,
+      id: nextId(), kind: 'photo', file, previewUrl: URL.createObjectURL(file), takenAt: null, status: 'pending', error: null,
     }));
     const heicItems = heic.map((file) => ({
-      id: nextId(), file, previewUrl: null, takenAt: null, status: 'converting', error: null,
+      id: nextId(), kind: 'photo', file, previewUrl: null, takenAt: null, status: 'converting', error: null,
+    }));
+    const videoItems = videos.map((file) => ({
+      id: nextId(), kind: 'video', file, previewUrl: null, poster: null, takenAt: null, status: 'converting', error: null,
     }));
 
-    if (nativeItems.length || heicItems.length) {
-      setItems((q) => [...q, ...nativeItems, ...heicItems]);
+    if (nativeItems.length || heicItems.length || videoItems.length) {
+      setItems((q) => [...q, ...nativeItems, ...heicItems, ...videoItems]);
     }
     if (heicItems.length) processHeic(heicItems);
+    if (videoItems.length) processVideos(videoItems);
 
     // EXIF must come off the ORIGINAL file — resize/HEIC-convert strip it.
-    // Read for every picked file (native + heic) in parallel; a slow/missing
+    // Read for every picked photo (native + heic) in parallel; a slow/missing
     // EXIF read never blocks the upload, it just leaves taken_at null.
     [...nativeItems, ...heicItems].forEach(({ id, file }) => {
       readTakenAt(file).then((takenAt) => {
@@ -581,45 +654,58 @@ function UploadCard({ eventId }) {
         setItems((q) => q.map((x) => (x.id === id ? { ...x, takenAt } : x)));
       });
     });
-  }, [processHeic]);
+  }, [processHeic, processVideos]);
 
   async function send() {
     const targets = itemsRef.current.filter((it) => it.status === 'pending' || it.status === 'failed');
     if (!targets.length || busy) return;
     setBusy(true);
     const deviceFp = await getDeviceId();
-    let ok = 0;
+    let photos = 0;
+    let videos = 0;
     for (const it of targets) {
       setItems((q) => q.map((x) => (x.id === it.id ? { ...x, status: 'uploading', error: null } : x)));
       try {
-        await uploadOpticPhoto(it.file, {
-          source: 'parent', uploaderName: name, deviceFp, eventId, takenAt: it.takenAt,
-        });
-        ok += 1;
+        if (it.kind === 'video') {
+          await uploadOpticVideo(it.file, {
+            uploaderName: name, deviceFp, eventId, takenAt: it.takenAt, poster: it.poster,
+          });
+          videos += 1;
+        } else {
+          await uploadOpticPhoto(it.file, {
+            source: 'parent', uploaderName: name, deviceFp, eventId, takenAt: it.takenAt,
+          });
+          photos += 1;
+        }
         setItems((q) => q.map((x) => (x.id === it.id ? { ...x, status: 'done' } : x)));
       } catch (err) {
         setItems((q) => q.map((x) => (x.id === it.id ? { ...x, status: 'failed', error: err?.message || 'Upload failed' } : x)));
       }
     }
     setBusy(false);
-    if (ok > 0) posthog.capture('optic_parent_upload', { photo_count: ok });
+    if (photos > 0) posthog.capture('optic_parent_upload', { photo_count: photos });
+    if (videos > 0) posthog.capture('optic_parent_video_upload', { video_count: videos });
   }
 
   function reset() {
     itemsRef.current.forEach((it) => URL.revokeObjectURL(it.previewUrl));
-    setItems([]); setRejected([]);
+    setItems([]); setRejected([]); setTooBig([]);
   }
 
   const pending = items.filter((it) => it.status === 'pending' || it.status === 'failed');
   const done = items.filter((it) => it.status === 'done');
   const converting = items.filter((it) => it.status === 'converting');
+  const convertingPhotos = converting.filter((it) => it.kind !== 'video').length;
+  const preparingVideos = converting.length - convertingPhotos;
+  const queuedVideos = items.some((it) => it.kind === 'video' && it.status !== 'done');
+  const failed = items.filter((it) => it.status === 'failed');
   const allDone = items.length > 0 && pending.length === 0 && converting.length === 0 && !busy;
 
   if (!eventId) {
     return (
-      <section className="rhea-card">
+      <section className="rhea-card" id="optic-upload">
         <div className="rhea-card-head">
-          <div className="rhea-eyebrow">ADD YOUR PHOTOS</div>
+          <div className="rhea-eyebrow">ADD YOUR PHOTOS &amp; VIDEOS</div>
           <div className="rhea-card-sub">
             Uploads aren&apos;t open yet. Check back shortly.
           </div>
@@ -629,11 +715,11 @@ function UploadCard({ eventId }) {
   }
 
   return (
-    <section className="rhea-card">
+    <section className="rhea-card" id="optic-upload">
       <div className="rhea-card-head">
-        <div className="rhea-eyebrow">ADD YOUR PHOTOS</div>
+        <div className="rhea-eyebrow">ADD YOUR PHOTOS &amp; VIDEOS</div>
         <div className="rhea-card-sub">
-          Shots from the stands go straight to the live feed below. No account needed.
+          Photos and videos from the stands go straight to the live feed below. No account needed.
         </div>
       </div>
 
@@ -653,8 +739,8 @@ function UploadCard({ eventId }) {
           {items.length === 0 ? (
             <>
               <div className="rhea-drop-plus">+</div>
-              <div className="rhea-drop-t">TAP TO CHOOSE PHOTOS</div>
-              <div className="rhea-drop-hint">JPG / PNG · PICK SEVERAL AT ONCE</div>
+              <div className="rhea-drop-t">TAP TO CHOOSE PHOTOS OR VIDEOS</div>
+              <div className="rhea-drop-hint">PHOTOS · VIDEOS · PICK SEVERAL AT ONCE</div>
             </>
           ) : (
             <div className="rhea-tray">
@@ -663,6 +749,7 @@ function UploadCard({ eventId }) {
                   {it.previewUrl
                     ? <img src={it.previewUrl} alt="" style={{ opacity: it.status === 'done' ? 0.5 : 1 }} />
                     : <span className="rhea-thumb-ph" />}
+                  {it.kind === 'video' && it.status === 'pending' && <span className="rhea-thumb-vid" aria-hidden="true">▶</span>}
                   {it.status === 'converting' && <span className="rhea-thumb-badge" data-kind="working">⟳</span>}
                   {it.status === 'uploading' && <span className="rhea-thumb-badge">…</span>}
                   {it.status === 'done' && <span className="rhea-thumb-badge" data-kind="done">✓</span>}
@@ -677,14 +764,31 @@ function UploadCard({ eventId }) {
           )}
         </div>
 
-        {converting.length > 0 && (
+        {convertingPhotos > 0 && (
           <div className="rhea-note">
-            Converting {converting.length} iPhone photo{converting.length === 1 ? '' : 's'}… this takes a
+            Converting {convertingPhotos} iPhone photo{convertingPhotos === 1 ? '' : 's'}… this takes a
             second. Keep the page open.
           </div>
         )}
+        {preparingVideos > 0 && (
+          <div className="rhea-note">
+            Getting {preparingVideos} video{preparingVideos === 1 ? '' : 's'} ready… one moment.
+          </div>
+        )}
+        {queuedVideos && !allDone && (
+          <div className="rhea-note">
+            Videos are bigger than photos, so they can take a minute to send on stadium signal.
+            Keep this page open until you see the ✓.
+          </div>
+        )}
 
-        {rejected.length > 0 && <div className="rhea-reject">{REJECT_MESSAGE}</div>}
+        {rejected.length > 0 && <div className="rhea-reject">{OPTIC_REJECT_MESSAGE}</div>}
+        {tooBig.length > 0 && <div className="rhea-reject">{VIDEO_TOO_BIG_MESSAGE}</div>}
+        {failed.length > 0 && !busy && (
+          <div className="rhea-reject">
+            {failed.length} didn&apos;t send ({failed[0].error}). Tap POST to try again.
+          </div>
+        )}
 
         <input
           className="rhea-name"
@@ -694,7 +798,7 @@ function UploadCard({ eventId }) {
         {allDone ? (
           <>
             <div className="rhea-ok">
-              ✓ {done.length} PHOTO{done.length === 1 ? '' : 'S'} ADDED. SCROLL DOWN TO SEE {done.length === 1 ? 'IT' : 'THEM'} IN THE FEED
+              ✓ {countLabel(done)} ADDED. SCROLL DOWN TO SEE {done.length === 1 ? 'IT' : 'THEM'} IN THE FEED
             </div>
             <button className="rhea-btn rhea-btn--ghost" onClick={reset}>ADD MORE</button>
           </>
@@ -707,8 +811,8 @@ function UploadCard({ eventId }) {
             {busy
               ? `UPLOADING… ${done.length}/${items.length}`
               : converting.length > 0
-                ? `CONVERTING ${converting.length} PHOTO${converting.length === 1 ? '' : 'S'}…`
-                : `POST ${pending.length || ''} PHOTO${pending.length === 1 ? '' : 'S'}`.trim()}
+                ? 'GETTING READY…'
+                : pending.length ? `POST ${countLabel(pending)}` : 'POST'}
           </button>
         )}
       </div>
@@ -861,18 +965,21 @@ function FeedItem({ photo, pos, liked, likeCount, onLike, onOpen, selectMode, se
   const chip = feedChip(photo);
   const who = feedAttribution(photo);
   const isLuke = photo.source === 'luke';
+  const isVideo = isVideoPhoto(photo);
+  const noun = isVideo ? 'video' : 'photo';
   return (
     <figure className="rhea-item" data-anim={pos < 8} style={{ '--d': `${pos * 45}ms` }}>
       <div className="rhea-shot-wrap">
         <button
           className="rhea-shot"
           onClick={selectMode ? onToggleSelected : onOpen}
-          aria-label={selectMode ? (selected ? 'Deselect photo' : 'Select photo') : 'Open photo reel'}
+          aria-label={selectMode ? (selected ? `Deselect ${noun}` : `Select ${noun}`) : `Open ${noun} reel`}
         >
           {/* Keyed by URL: when Luke blurs a photo the row's URLs change, and a
               remount drops the sharp bitmap at once instead of leaving it on
               screen until the blurred file finishes downloading. */}
           <img key={photo.thumb_url || photo.photo_url} src={photo.thumb_url || photo.photo_url} alt="" loading="lazy" decoding="async" />
+          {isVideo && <span className="rhea-play" aria-hidden="true">▶</span>}
         </button>
         {selectMode && (
           <span className="rhea-select-mark" data-on={selected} aria-hidden="true">
@@ -885,7 +992,7 @@ function FeedItem({ photo, pos, liked, likeCount, onLike, onOpen, selectMode, se
             data-on={liked}
             onClick={(e) => { e.stopPropagation(); onLike(); }}
             aria-pressed={liked}
-            aria-label={liked ? 'Unlike photo' : 'Like photo'}
+            aria-label={liked ? `Unlike ${noun}` : `Like ${noun}`}
           >
             <span className="rhea-like-ico">{liked ? '♥' : '♡'}</span>
             {likeCount > 0 && <span>{likeCount}</span>}
@@ -1080,7 +1187,7 @@ function Reel({ photos, index, likes, onIndex, onClose }) {
     const who = feedAttribution(photo);
     try {
       if (navigator.share) {
-        await navigator.share({ title: 'OPTIC', text: `Photo by ${who}`, url });
+        await navigator.share({ title: 'OPTIC', text: `${isVideoPhoto(photo) ? 'Video' : 'Photo'} by ${who}`, url });
         posthog.capture('optic_photo_share', { photo_id: photo.id });
         return;
       }
@@ -1107,6 +1214,7 @@ function Reel({ photos, index, likes, onIndex, onClose }) {
           const chip = feedChip(p);
           const isLiked = likes.isLiked(p.id);
           const isCur = i === cur;
+          const isVideo = isVideoPhoto(p);
           return (
             <div className="rhea-page" key={p.id} onClick={() => onPageTap(p)}>
               {near && (
@@ -1114,17 +1222,35 @@ function Reel({ photos, index, likes, onIndex, onClose }) {
                   {isCur && (
                     <div className="rhea-page-bg" style={{ backgroundImage: `url(${p.thumb_url || p.photo_url})` }} />
                   )}
-                  <img
-                    key={p.photo_url /* remount on blur, see FeedItem */}
-                    className="rhea-page-img"
-                    src={p.photo_url}
-                    alt=""
-                    decoding="async"
-                    draggable="false"
-                    style={isCur && zoom.scale !== 1
-                      ? { transform: `translate(${zoom.x}px, ${zoom.y}px) scale(${zoom.scale})` }
-                      : undefined}
-                  />
+                  {isVideo && isCur ? (
+                    // Only the on-screen page mounts the player, so swiping
+                    // away unmounts it and the clip stops. Taps on the
+                    // controls stay out of the double-tap-to-like handler.
+                    <video
+                      key={p.photo_url}
+                      className="rhea-page-img rhea-page-video"
+                      src={p.photo_url}
+                      poster={p.thumb_url || undefined}
+                      controls
+                      playsInline
+                      autoPlay
+                      muted
+                      preload="metadata"
+                      onClick={(e) => e.stopPropagation()}
+                    />
+                  ) : (
+                    <img
+                      key={p.photo_url /* remount on blur, see FeedItem */}
+                      className="rhea-page-img"
+                      src={isVideo ? (p.thumb_url || '') : p.photo_url}
+                      alt=""
+                      decoding="async"
+                      draggable="false"
+                      style={isCur && zoom.scale !== 1
+                        ? { transform: `translate(${zoom.x}px, ${zoom.y}px) scale(${zoom.scale})` }
+                        : undefined}
+                    />
+                  )}
                 </>
               )}
 
@@ -1148,7 +1274,7 @@ function Reel({ photos, index, likes, onIndex, onClose }) {
                 </button>
                 <button
                   className="rhea-rail-btn"
-                  onClick={(e) => { e.stopPropagation(); downloadPhoto(p.photo_url, `optic_${p.id}.jpg`); }}
+                  onClick={(e) => { e.stopPropagation(); downloadPhoto(p.photo_url, mediaFilename(p)); }}
                   aria-label="Save"
                 >
                   <span className="rhea-rail-ico">⬇</span><span>SAVE</span>
@@ -1194,7 +1320,7 @@ const WALK_STEPS = [
     glyph: '＋',
     step: 'STEP 3 / 3',
     h: <>See a moment? <span className="accent">Add it.</span></>,
-    p: 'Use “Add your photos” at the top. Your shot is in the feed for every other family within seconds. No login, ever.',
+    p: 'Use “Add your photos & videos” at the top. Your photo or clip is in the feed for every other family within seconds. No login, ever.',
   },
 ];
 

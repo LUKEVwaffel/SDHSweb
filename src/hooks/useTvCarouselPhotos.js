@@ -3,6 +3,7 @@ import { supabase as SB } from '../lib/supabaseClient';
 import { TV_PHOTOS } from '../lib/tvPhotos.js';
 import { getTeam } from '../lib/teams.js';
 import { resolveTvPhotoCaption } from '../lib/tvPhotoCaption.js';
+import { isVideoUrl } from '../lib/opticVideo.js';
 
 /**
  * Resolves today's carousel photo list + display title from the daily
@@ -35,7 +36,8 @@ export function useTvCarouselPhotos(settings) {
       SB.from('photos').select('id,photo_url,visibility').eq('event_id', eventId).eq('status', 'live')
         .order('created_at', { ascending: false }).limit(30)
         // Filter staged rows client-side so this works pre- and post-migration.
-        .then(({ data }) => { if (alive) setQueriedPhotos((data || []).filter((p) => p.visibility !== 'staged')); });
+        // Parent video clips (OPTIC) can't render in the kiosk's <img> slides.
+        .then(({ data }) => { if (alive) setQueriedPhotos((data || []).filter((p) => p.visibility !== 'staged' && !isVideoUrl(p.photo_url))); });
       return () => { alive = false; };
     }
 
