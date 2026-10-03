@@ -37,17 +37,53 @@ const nextId = () => `u${Date.now()}_${uid++}`;
 // realtime. Front-of-house, so this surface carries the full polish: layered
 // navy, a Shorts-style vertical photo reel, likes, and a first-launch
 // walkthrough for people who installed the app.
+// The season-finale awards show (OpticShow.jsx) no longer blocks launch:
+// parents land on the live feed first, and the show pops up over it once,
+// SHOW_DELAY_MS later, on any device that hasn't seen it. It's an overlay,
+// so the feed (and an upload in flight) stays mounted underneath. If the
+// parent is mid-task when the timer fires (reel open, picking photos to
+// save, an upload running) it waits and tries again. REPLAY on the locked
+// screen still plays it on demand.
+const SHOW_DELAY_MS = 20_000;
+const SHOW_RETRY_MS = 8_000;
+const BUSY_SELECTOR = '.rhea-lb, .rhea-batchbar, .rhea-wt, .rhea-thumb[data-status="uploading"], .rhea-thumb[data-status="converting"], .rhea-thumb[data-status="pending"]';
+const parentIsBusy = () => document.visibilityState !== 'visible' || !!document.querySelector(BUSY_SELECTOR);
+
 export default function Optic() {
   const [onboarded, setOnboarded] = useState(() => isStandalone() || hasOnboardedOptic());
-  // Season-finale show (OpticShow.jsx) plays first on launch, once per
-  // device; REPLAY on the locked screen brings it back.
-  const [showing, setShowing] = useState(() => !hasSeenShow());
+  const [showing, setShowing] = useState(false);
+  const [showSeen, setShowSeen] = useState(hasSeenShow);
 
   useEffect(() => { installOpticPwaHooks(); }, []);
 
-  if (showing) return <OpticShow onDone={() => setShowing(false)} />;
+  useEffect(() => {
+    if (!onboarded || showSeen || showing) return undefined;
+    let t = setTimeout(function tryShow() {
+      if (parentIsBusy()) { t = setTimeout(tryShow, SHOW_RETRY_MS); return; }
+      posthog.capture('optic_show_auto_popup');
+      setShowing(true);
+    }, SHOW_DELAY_MS);
+    return () => clearTimeout(t);
+  }, [onboarded, showSeen, showing]);
+
+  // The feed stays mounted under the show: keep swipes in the show from
+  // scrolling it.
+  useEffect(() => {
+    if (!showing) return undefined;
+    const prev = document.body.style.overflow;
+    document.body.style.overflow = 'hidden';
+    return () => { document.body.style.overflow = prev; };
+  }, [showing]);
+
   if (!onboarded) return <OpticOnboarding onDone={() => setOnboarded(true)} />;
-  return <OpticApp onReplay={() => setShowing(true)} />;
+  return (
+    <>
+      <OpticApp showSeen={showSeen} onReplay={() => setShowing(true)} />
+      {showing && (
+        <OpticShow onDone={() => { setShowing(false); setShowSeen(hasSeenShow()); }} />
+      )}
+    </>
+  );
 }
 
 function OpticGlyph({ className }) {
@@ -82,7 +118,7 @@ const countTeams = (list) => Object.fromEntries(
   TEAM_FILTERS.map((t) => [t.id, list.filter((p) => matchesTeam(p, t.id)).length]),
 );
 
-function OpticApp({ onReplay }) {
+function OpticApp({ onReplay, showSeen }) {
   const config = useOpticConfig();
   const gate = useOpticGate();
   const { photos, loading, error, pendingCount, showNew, refresh } = useOpticPhotos({
@@ -240,11 +276,11 @@ function OpticApp({ onReplay }) {
         {gate.loading ? (
           <div className="rhea-wrap"><div className="rhea-feed-msg">LOADING…</div></div>
         ) : !gate.open ? (
-          <OpticLocked opensAt={gate.opensAt} eventId={config.eventId} onReplay={onReplay} />
+          <OpticLocked opensAt={gate.opensAt} eventId={config.eventId} onReplay={onReplay} showSeen={showSeen} />
         ) : (
           <div className="rhea-wrap">
             <StateStrip />
-            <WeatherNotice />
+            <WeatherNotice ready={showSeen} />
             <InstallNudge />
             <NotificationCard eventId={config.eventId} />
             <UploadCard
@@ -338,8 +374,9 @@ function OpticApp({ onReplay }) {
 // gear stays covered for stretches of the day, so the official set is thinner
 // than usual and parent uploads (photos AND videos) carry the feed. Shown
 // while the comp is live, so the copy stays in present tense.
-// Only shows once this device has played the awards show (OpticShow), so it
-// lands after the 3rd-in-state moment rather than on top of it. Rendered on
+// Only shows once this device has played the awards show (OpticShow, which
+// now pops up over the feed shortly after launch), so it lands after the
+// 3rd-in-state moment rather than before it. Rendered on
 // the locked / paused screen too, not just the open feed, so it's seen even
 // while the feed is held. Next comp: drop this card.
 // "Viewed" = the full card sat at least half on screen for VIEWED_MS, or
@@ -351,8 +388,8 @@ const WEATHER_VIEWED_MS = 4000;
 const hasSeenWeather = () => { try { return !!localStorage.getItem(WEATHER_SEEN_KEY); } catch { return false; } };
 const markWeatherSeen = () => { try { localStorage.setItem(WEATHER_SEEN_KEY, '1'); } catch { /* private mode */ } };
 
-function WeatherNotice({ locked = false }) {
-  if (!hasSeenShow()) return null;
+function WeatherNotice({ ready, locked = false }) {
+  if (!ready) return null;
   return <WeatherCard locked={locked} />;
 }
 
@@ -540,7 +577,7 @@ function NotificationCard({ eventId }) {
 
 // Countdown hold shown until the gate opens (scheduled time or Luke's manual
 // override). uses a local 1 Hz tick; useOpticGate flips `open` when it lands.
-function OpticLocked({ opensAt, eventId, onReplay }) {
+function OpticLocked({ opensAt, eventId, onReplay, showSeen }) {
   const [now, setNow] = useState(() => Date.now());
   useEffect(() => {
     const t = setInterval(() => setNow(Date.now()), 1000);
@@ -573,7 +610,7 @@ function OpticLocked({ opensAt, eventId, onReplay }) {
             on its own the second it reopens, no refresh needed.
           </p>
           <StateStrip onReplay={onReplay} />
-          <WeatherNotice locked />
+          <WeatherNotice ready={showSeen} locked />
           <OfficialBanner />
         </>
       ) : (
@@ -592,7 +629,7 @@ function OpticLocked({ opensAt, eventId, onReplay }) {
           </div>
 
           <StateStrip onReplay={onReplay} />
-          <WeatherNotice locked />
+          <WeatherNotice ready={showSeen} locked />
           <OfficialBanner />
 
           <div className="rhea-lock-cards">
