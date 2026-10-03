@@ -1,24 +1,61 @@
--- Breadstick / roll counter permanent name bans.
--- The counter is anon read/write, so the ban has to live in the database:
--- a trigger rejects any insert or rename whose normalized name contains a
--- banned term. Normalizing (lowercase, common leetspeak swaps, strip
--- everything but letters) keeps "C0ck_Master 6000" from slipping through.
--- Banned terms live in a table anon can't read or write; add rows to ban more.
+-- Breadstick / roll counter permanent bans (by name and by IP).
+-- The counter is anon read/write, so bans have to live in the database. A
+-- trigger on roll_counter_entries:
+--   * logs the caller's IP for every signup / tap (private table),
+--   * silently drops any write from a banned IP,
+--   * drops any signup or rename to a banned name AND bans that caller's IP
+--     on the spot, so the next attempt under a clean name is dead too.
+-- Rejections return NULL instead of raising so the IP ban insert isn't rolled
+-- back with the failed write. None of these tables are readable by anon.
 
+-- ── Banned names ───────────────────────────────────────────────────────────
 create table if not exists roll_counter_banned_names (
   term text primary key check (term = lower(term) and term ~ '^[a-z]+$'),
   reason text,
   created_at timestamptz not null default now()
 );
-
 alter table roll_counter_banned_names enable row level security;
--- No policies: anon/authenticated get nothing. The trigger below reads it as
--- security definer.
 
 insert into roll_counter_banned_names (term, reason)
 values ('cockmaster', 'Perma ban: cockmaster6000')
 on conflict (term) do nothing;
 
+-- ── Banned IPs ─────────────────────────────────────────────────────────────
+create table if not exists roll_counter_banned_ips (
+  ip inet primary key,
+  reason text,
+  created_at timestamptz not null default now()
+);
+alter table roll_counter_banned_ips enable row level security;
+
+-- ── Per-request IP log ─────────────────────────────────────────────────────
+create table if not exists roll_counter_ip_log (
+  id bigint generated always as identity primary key,
+  entry_id uuid,
+  name text,
+  op text not null,
+  ip inet,
+  forwarded_for text,
+  blocked text,
+  seen_at timestamptz not null default now()
+);
+create index if not exists roll_counter_ip_log_entry_idx on roll_counter_ip_log (entry_id);
+create index if not exists roll_counter_ip_log_ip_idx on roll_counter_ip_log (ip);
+alter table roll_counter_ip_log enable row level security;
+
+-- Entries removed by a ban, kept so their ids can be matched against the
+-- Supabase API logs (taps are PATCH ...?id=eq.<id>) to recover the IP.
+create table if not exists roll_counter_banned_entries (
+  id uuid primary key,
+  event text,
+  name text,
+  count integer,
+  created_at timestamptz,
+  removed_at timestamptz not null default now()
+);
+alter table roll_counter_banned_entries enable row level security;
+
+-- ── Helpers ────────────────────────────────────────────────────────────────
 create or replace function roll_counter_normalize_name(raw text)
 returns text language sql immutable as $$
   select regexp_replace(
@@ -27,25 +64,96 @@ returns text language sql immutable as $$
   );
 $$;
 
-create or replace function roll_counter_reject_banned()
-returns trigger language plpgsql security definer set search_path = public as $$
-begin
-  if exists (
+create or replace function roll_counter_is_banned_name(raw text)
+returns boolean language sql stable security definer set search_path = public as $$
+  select exists (
     select 1 from roll_counter_banned_names b
-    where position(b.term in roll_counter_normalize_name(new.name)) > 0
-  ) then
-    raise exception 'banned' using errcode = 'P0001', hint = 'roll_counter_banned';
+    where position(b.term in roll_counter_normalize_name(raw)) > 0
+  );
+$$;
+
+-- Caller IP as PostgREST sees it. cf-connecting-ip is set by Supabase's edge
+-- and can't be spoofed by the client; x-forwarded-for's first hop is the
+-- fallback.
+create or replace function roll_counter_request_ip()
+returns inet language plpgsql stable as $$
+declare
+  headers json := nullif(current_setting('request.headers', true), '')::json;
+  raw text;
+begin
+  if headers is null then return null; end if;
+  raw := coalesce(
+    nullif(headers ->> 'cf-connecting-ip', ''),
+    nullif(headers ->> 'x-real-ip', ''),
+    nullif(trim(split_part(headers ->> 'x-forwarded-for', ',', 1)), '')
+  );
+  return raw::inet;
+exception when others then
+  return null;
+end;
+$$;
+
+-- ── Guard trigger ──────────────────────────────────────────────────────────
+drop trigger if exists roll_counter_ban_guard on roll_counter_entries;
+
+create or replace function roll_counter_ban_guard()
+returns trigger language plpgsql security definer set search_path = public as $$
+declare
+  caller_ip inet := roll_counter_request_ip();
+  fwd text := nullif(current_setting('request.headers', true), '')::json ->> 'x-forwarded-for';
+  name_changed boolean := tg_op = 'INSERT' or new.name is distinct from old.name;
+begin
+  if caller_ip is not null
+     and exists (select 1 from roll_counter_banned_ips where ip = caller_ip) then
+    insert into roll_counter_ip_log (entry_id, name, op, ip, forwarded_for, blocked)
+    values (new.id, new.name, tg_op, caller_ip, fwd, 'ip');
+    return null;
   end if;
+
+  if name_changed and roll_counter_is_banned_name(new.name) then
+    insert into roll_counter_ip_log (entry_id, name, op, ip, forwarded_for, blocked)
+    values (new.id, new.name, tg_op, caller_ip, fwd, 'name');
+    if caller_ip is not null then
+      insert into roll_counter_banned_ips (ip, reason)
+      values (caller_ip, 'Auto: tried banned name "' || new.name || '"')
+      on conflict (ip) do nothing;
+    end if;
+    return null;
+  end if;
+
+  insert into roll_counter_ip_log (entry_id, name, op, ip, forwarded_for)
+  values (new.id, new.name, tg_op, caller_ip, fwd);
   return new;
 end;
 $$;
 
-drop trigger if exists roll_counter_ban_guard on roll_counter_entries;
 create trigger roll_counter_ban_guard
-  before insert or update of name on roll_counter_entries
-  for each row execute function roll_counter_reject_banned();
+  before insert or update on roll_counter_entries
+  for each row execute function roll_counter_ban_guard();
 
--- Remove any existing banned entries from every leaderboard.
-delete from roll_counter_entries e
-using roll_counter_banned_names b
-where position(b.term in roll_counter_normalize_name(e.name)) > 0;
+-- ── Remove existing banned entries (keep their ids for the log lookup) ─────
+insert into roll_counter_banned_entries (id, event, name, count, created_at)
+select id, event, name, count, created_at
+from roll_counter_entries
+where roll_counter_is_banned_name(name)
+on conflict (id) do nothing;
+
+delete from roll_counter_entries
+where roll_counter_is_banned_name(name);
+
+-- ── Banning an IP by hand ──────────────────────────────────────────────────
+-- 1. Get the removed entry's id:
+--      select * from roll_counter_banned_entries;
+-- 2. Supabase dashboard → Logs → Logs Explorer, run (swap in the id):
+--      select timestamp, request.method, request.search, h.cf_connecting_ip, h.x_forwarded_for
+--      from edge_logs
+--        cross join unnest(metadata) as m
+--        cross join unnest(m.request) as request
+--        cross join unnest(request.headers) as h
+--      where request.path like '%roll_counter_entries%'
+--        and request.search like '%<entry id>%'
+--      order by timestamp desc
+--      limit 100;
+-- 3. Ban it:
+--      insert into roll_counter_banned_ips (ip, reason)
+--      values ('<ip>', 'Perma ban: cockmaster6000') on conflict do nothing;
