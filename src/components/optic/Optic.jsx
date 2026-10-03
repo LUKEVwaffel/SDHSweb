@@ -85,7 +85,7 @@ const countTeams = (list) => Object.fromEntries(
 function OpticApp({ onReplay }) {
   const config = useOpticConfig();
   const gate = useOpticGate();
-  const { photos, loading, error, pendingCount, showNew } = useOpticPhotos({
+  const { photos, loading, error, pendingCount, showNew, refresh } = useOpticPhotos({
     eventId: config.eventId, scope: 'public', enabled: gate.open, deferMidScroll: true,
   });
   const likes = useOpticLikes(photos);
@@ -247,7 +247,19 @@ function OpticApp({ onReplay }) {
             <WeatherNotice />
             <InstallNudge />
             <NotificationCard eventId={config.eventId} />
-            <UploadCard eventId={config.eventId} />
+            <UploadCard
+              eventId={config.eventId}
+              onUploaded={() => {
+                // Your own upload must show up right away: clear any
+                // team/event filter (untagged parent shots only match ALL)
+                // and reload straight into the feed, skipping the
+                // mid-scroll "N new" hold the reader would otherwise hit
+                // (the upload card sits below the fold).
+                setTeamFilter('all');
+                setSubEventFilter('all');
+                refresh();
+              }}
+            />
             <Feed
               photos={visiblePhotos}
               loading={loading}
@@ -575,7 +587,7 @@ function countLabel(list) {
   return part(photos, 'PHOTO');
 }
 
-function UploadCard({ eventId }) {
+function UploadCard({ eventId, onUploaded }) {
   const [items, setItems] = useState([]); // {id,kind,file,previewUrl,poster,takenAt,status,error}
   const [name, setName] = useState('');
   const [rejected, setRejected] = useState([]);
@@ -693,6 +705,7 @@ function UploadCard({ eventId }) {
       }
     }
     setBusy(false);
+    if (photos + videos > 0) onUploaded?.();
     if (photos > 0) posthog.capture('optic_parent_upload', { photo_count: photos });
     if (videos > 0) posthog.capture('optic_parent_video_upload', { video_count: videos });
   }

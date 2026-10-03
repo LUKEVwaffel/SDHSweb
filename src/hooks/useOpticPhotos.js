@@ -8,7 +8,15 @@ const DEBOUNCE_MS = 350;
 const TOP_THRESHOLD_PX = 48;
 
 const capturedAt = (p) => new Date(p.taken_at || p.created_at).getTime();
-const sortNewestFirst = (rows) => rows.slice().sort((a, b) => capturedAt(b) - capturedAt(a));
+// Public feed: parent uploads sort by when they were POSTED, not when they
+// were taken. A parent's shot from this morning (or from a phone with a
+// wrong clock) otherwise lands deep in the feed the moment it's uploaded and
+// looks like it never posted. Luke's card keeps capture order.
+const feedAt = (p) => (p.source === 'parent' ? new Date(p.created_at).getTime() : capturedAt(p));
+const sortNewestFirst = (rows, scope) => {
+  const at = scope === 'public' ? feedAt : capturedAt;
+  return rows.slice().sort((a, b) => at(b) - at(a));
+};
 const isAtTop = () => typeof window === 'undefined' || window.scrollY <= TOP_THRESHOLD_PX;
 const inPublicScope = (row) => row.visibility === 'public' && row.status === 'live';
 const uniq = () => Math.random().toString(36).slice(2, 10);
@@ -120,7 +128,7 @@ export function useOpticPhotos({
       const q = SB.from('photos').select(SELECT).eq('event_id', eventId);
       return scope === 'public' ? q.eq('visibility', 'public').eq('status', 'live') : q;
     });
-    return qErr ? { rows: null, qErr } : { rows: sortNewestFirst(data || []), qErr: null };
+    return qErr ? { rows: null, qErr } : { rows: sortNewestFirst(data || [], scope), qErr: null };
   }, [eventId, scope]);
 
   // Direct load: mount, eventId/scope change, or the consumer's own
@@ -205,7 +213,7 @@ export function useOpticPhotos({
     const merged = sortNewestFirst([
       ...base.filter((p) => !incoming.has(p.id)),
       ...incoming.values(),
-    ]);
+    ], scope);
     applyReorder(merged);
   }, [scope, applyReorder]);
 
@@ -233,7 +241,7 @@ export function useOpticPhotos({
 
     const merged = { ...existing, ...row, raider_sub_events: existing.raider_sub_events };
     if (capturedAt(merged) !== capturedAt(existing)) {
-      applyReorder(sortNewestFirst(current.map((p) => (p.id === row.id ? merged : p))));
+      applyReorder(sortNewestFirst(current.map((p) => (p.id === row.id ? merged : p)), scope));
       return;
     }
     applyInPlace((list) => (list.some((p) => p.id === row.id)
