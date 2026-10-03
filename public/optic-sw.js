@@ -62,6 +62,7 @@ self.addEventListener('push', (event) => {
       badge: '/optic-icon-v2-192.png',
       data: { url: data.url || '/optic' },
       tag: 'optic-photos', // collapses rapid-fire sends into one notification
+      renotify: true, // ...but still buzz/sound for each one (Android was silently replacing)
     }),
   );
 });

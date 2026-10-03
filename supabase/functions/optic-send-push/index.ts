@@ -16,8 +16,13 @@
 //      before shipping this), so comparing pg_net's bearer against it can
 //      never match — a dedicated secret sidesteps depending on which
 //      Supabase key format happens to be injected at all.
-// Sends one web-push notification to every device subscribed for the given
-// event. Dead subscriptions (410/404 from the push service — the browser
+// Sends one web-push notification to EVERY subscribed device. Subscriptions
+// are comp-agnostic: OPTIC runs one comp at a time, and filtering by the
+// event a device happened to subscribe during (the old behaviour) silently
+// dropped everyone once the active comp moved on — found 2026-10-03, every
+// row was pinned to Spring Hill / East Hamilton, so Warren County and
+// Hamilton County got zero alerts. event_id is accepted (logging) but no
+// longer narrows the audience. Dead subscriptions (410/404 from the push service — the browser
 // uninstalled or the user cleared data) are deleted so the table stays clean
 // without a separate sweep job.
 //
@@ -94,13 +99,11 @@ Deno.serve(async (req) => {
 
   try {
     const { event_id, title, body, url } = await req.json().catch(() => ({}));
-    if (!event_id) return json({ error: "event_id required" }, 400);
 
     const svc = serviceClient();
     const { data: subs, error } = await svc
       .from("push_subscriptions")
-      .select("id, endpoint, p256dh, auth")
-      .eq("event_id", event_id);
+      .select("id, endpoint, p256dh, auth");
     if (error) { console.error("optic-send-push lookup", error); return json({ error: "internal error" }, 500); }
     if (!subs?.length) return json({ ok: true, sent: 0, failed: 0 });
 
@@ -128,6 +131,7 @@ Deno.serve(async (req) => {
 
     if (dead.length) await svc.from("push_subscriptions").delete().in("id", dead);
 
+    console.log("optic-send-push", { event_id: event_id ?? null, total: subs.length, sent, pruned: dead.length });
     return json({ ok: true, sent, failed: subs.length - sent, pruned: dead.length });
   } catch (e) {
     console.error("optic-send-push", e);

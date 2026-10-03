@@ -46,14 +46,22 @@ export async function subscribeToPush(eventId) {
   }
 
   const reg = await navigator.serviceWorker.ready;
-  let sub = await reg.pushManager.getSubscription();
-  if (!sub) {
-    sub = await reg.pushManager.subscribe({
-      userVisibleOnly: true,
-      applicationServerKey: urlBase64ToUint8Array(VAPID_PUBLIC_KEY),
-    });
-  }
+  const sub = await ensureSubscription(reg);
+  await saveSubscription(sub, eventId);
+  markPushDecided('granted');
+  return 'granted';
+}
 
+async function ensureSubscription(reg) {
+  const existing = await reg.pushManager.getSubscription();
+  if (existing) return existing;
+  return reg.pushManager.subscribe({
+    userVisibleOnly: true,
+    applicationServerKey: urlBase64ToUint8Array(VAPID_PUBLIC_KEY),
+  });
+}
+
+async function saveSubscription(sub, eventId) {
   const json = sub.toJSON();
   const deviceFp = await getDeviceId();
   const row = {
@@ -82,9 +90,29 @@ export async function subscribeToPush(eventId) {
       .update(row).eq('endpoint', row.endpoint);
     if (updateErr) throw updateErr;
   }
+}
 
-  markPushDecided('granted');
-  return 'granted';
+/**
+ * Silent re-sync on every OPTIC open, no prompt. A device that already
+ * granted permission re-saves its current subscription (endpoints rotate,
+ * and rows used to stay pinned to whichever comp they signed up during).
+ * If permission was lost (reinstall, cleared in settings), forget the old
+ * decision so the alert card offers it again.
+ * @param {string|null} eventId
+ */
+export async function syncPushSubscription(eventId) {
+  if (!pushSupported()) return;
+  if (Notification.permission !== 'granted') {
+    if (Notification.permission === 'default' && localStorage.getItem(DECIDED_KEY) === 'granted') {
+      try { localStorage.removeItem(DECIDED_KEY); } catch { /* private mode */ }
+    }
+    return;
+  }
+  const reg = await navigator.serviceWorker.getRegistration('/optic');
+  if (!reg) return;
+  const sub = await ensureSubscription(reg);
+  await saveSubscription(sub, eventId);
+  if (!hasDecidedPush()) markPushDecided('granted');
 }
 
 /** Unsubscribe this device — used by a settings toggle, not wired into the UI yet. */

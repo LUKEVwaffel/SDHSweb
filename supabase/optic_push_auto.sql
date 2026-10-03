@@ -75,9 +75,13 @@ begin
            max(p.created_at) as latest_at
       from public.photos p
       left join public.optic_push_notify_state s on s.event_id = p.event_id
-     where p.event_id is not null
+     -- Active comp only, and anyone subscribed at all. Subscriptions are
+     -- comp-agnostic (2026-10-03 fix): the old `ps.event_id = p.event_id`
+     -- test matched nobody once the comp switched, because every device
+     -- subscribed during an earlier comp, so no alert ever fired again.
+     where p.event_id = (select active_event_id from public.optic_config where id = 'default')
        and p.visibility = 'public' and p.status = 'live'
-       and exists (select 1 from public.push_subscriptions ps where ps.event_id = p.event_id)
+       and exists (select 1 from public.push_subscriptions)
      group by p.event_id, s.last_notified_at
     having count(*) filter (
              where p.created_at > coalesce(s.last_notified_at, 'epoch'::timestamptz)

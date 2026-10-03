@@ -12,7 +12,7 @@ import {
   hasInstallDismissedOptic, markInstallDismissedOptic,
 } from '../../lib/opticComp';
 import { readTakenAt } from '../../lib/opticExif';
-import { pushSupported, hasDecidedPush, markPushDecided, subscribeToPush } from '../../lib/opticPush';
+import { pushSupported, hasDecidedPush, markPushDecided, subscribeToPush, syncPushSubscription } from '../../lib/opticPush';
 import { isHeic, convertHeicToJpeg } from '../../lib/heicConvert';
 import {
   installOpticPwaHooks, isStandalone, isIos,
@@ -102,6 +102,12 @@ function OpticApp({ onReplay }) {
   const [batchMsg, setBatchMsg] = useState('');
   const [batch, setBatch] = useState({ items: [], pos: 0 }); // fetched files + next chunk start
   const updateReady = usePwaUpdate();
+
+  // Keep this device's push subscription current on every open (see
+  // syncPushSubscription). Fire-and-forget: alerts are a bonus, never block.
+  useEffect(() => {
+    syncPushSubscription(config.eventId).catch(() => {});
+  }, [config.eventId]);
 
   const showWalk = walk && gate.open;
 
