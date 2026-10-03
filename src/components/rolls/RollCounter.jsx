@@ -13,11 +13,44 @@ import './rolls.css';
 // doesn't linger.
 const EVENT_KEY = 'olive-garden-breadsticks';
 const LS_KEY = 'breadstickCounterEntry';
+const BANNED_LS_KEY = 'breadstickCounterBanned';
+
+// Perma-banned names. The real enforcement is the DB trigger in
+// supabase/roll_counter_ban.sql; this mirror hides them from the board and
+// locks the device out without a round trip. Keep the two lists in sync.
+const BANNED_TERMS = ['cockmaster'];
+
+function normalizeName(name) {
+  const swaps = { 0: 'o', 1: 'i', 3: 'e', 4: 'a', 5: 's', 7: 't', '@': 'a', $: 's', '!': 'i', '|': 'i' };
+  return String(name || '')
+    .toLowerCase()
+    .replace(/[013457@$!|]/g, (c) => swaps[c])
+    .replace(/[^a-z]/g, '');
+}
+
+function isBannedName(name) {
+  const n = normalizeName(name);
+  return BANNED_TERMS.some((t) => n.includes(t));
+}
+
+function loadBanned() {
+  try { return localStorage.getItem(BANNED_LS_KEY) === '1'; } catch { return false; }
+}
+
+function markBanned() {
+  try { localStorage.setItem(BANNED_LS_KEY, '1'); } catch {}
+}
 
 function loadSaved() {
   try {
     const raw = localStorage.getItem(LS_KEY);
-    return raw ? JSON.parse(raw) : null;
+    const parsed = raw ? JSON.parse(raw) : null;
+    if (parsed && isBannedName(parsed.name)) {
+      markBanned();
+      localStorage.removeItem(LS_KEY);
+      return null;
+    }
+    return parsed;
   } catch { return null; }
 }
 
@@ -33,6 +66,7 @@ const ROLL_EMOJI = ['🥖', '🫒', '🍝'];
 
 export default function RollCounter() {
   const [saved, setSaved] = useState(loadSaved);
+  const [banned, setBanned] = useState(loadBanned);
   const [entries, setEntries] = useState([]);
   const [loading, setLoading] = useState(true);
   const [nameInput, setNameInput] = useState('');
@@ -47,7 +81,7 @@ export default function RollCounter() {
       .eq('event', EVENT_KEY)
       .order('count', { ascending: false })
       .order('created_at', { ascending: true });
-    setEntries(data || []);
+    setEntries((data || []).filter((e) => !isBannedName(e.name)));
     setLoading(false);
   }, []);
 
@@ -64,6 +98,7 @@ export default function RollCounter() {
             return prev.filter((e) => e.id !== payload.old.id);
           }
           const row = payload.new;
+          if (isBannedName(row.name)) return prev.filter((e) => e.id !== row.id);
           const next = prev.filter((e) => e.id !== row.id);
           next.push({ id: row.id, name: row.name, count: row.count });
           next.sort((a, b) => b.count - a.count);
@@ -86,7 +121,12 @@ export default function RollCounter() {
   async function handleJoin(e) {
     e.preventDefault();
     const name = nameInput.trim();
-    if (!name) return;
+    if (!name || banned) return;
+    if (isBannedName(name)) {
+      markBanned();
+      setBanned(true);
+      return;
+    }
     setJoining(true);
     setJoinError('');
     const { data, error } = await supabase
@@ -172,7 +212,12 @@ export default function RollCounter() {
         <p className="rolls-honor">Honor system: only tap <strong>after</strong> you've actually eaten the breadstick — no pre-counting.</p>
       </header>
 
-      {!saved || !mine ? (
+      {banned ? (
+        <section className="rolls-join" aria-labelledby="rolls-banned-heading">
+          <h2 id="rolls-banned-heading">You're banned</h2>
+          <p className="rolls-error">This device is permanently banned from the breadstick counter.</p>
+        </section>
+      ) : !saved || !mine ? (
         <section className="rolls-join" aria-labelledby="rolls-join-heading">
           <h2 id="rolls-join-heading">What's your name?</h2>
           <form onSubmit={handleJoin} className="rolls-join-form">
