@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { supabase } from '../../lib/supabaseClient';
+import { getDeviceId } from '../../lib/fingerprint';
 import './rolls.css';
 
 // /breadsticks (alias /rolls) — Olive Garden breadstick counter. Sign up with
@@ -39,6 +40,67 @@ function loadBanned() {
 
 function markBanned() {
   try { localStorage.setItem(BANNED_LS_KEY, '1'); } catch {}
+  // Same cookie middleware.js checks, so the next full load is a 403 at the
+  // edge and never reaches the app.
+  try { document.cookie = `bs_ban=1; path=/; max-age=${60 * 60 * 24 * 365 * 10}; secure; samesite=lax`; } catch {}
+}
+
+// Server-side check-in: logs the view and answers whether this IP or device
+// fingerprint is banned. A flagged device also gets its current IP and
+// fingerprint banned server-side. Fails open after a short wait.
+async function checkIn(flagged) {
+  try {
+    const device = await Promise.race([
+      getDeviceId(),
+      new Promise((resolve) => setTimeout(() => resolve(null), 2000)),
+    ]);
+    const { data, error } = await supabase.rpc('roll_counter_check_in', {
+      p_device: device,
+      p_flagged: flagged,
+    });
+    return !error && data === true;
+  } catch { return flagged; }
+}
+
+function BannedScreen() {
+  return (
+    <div className="rolls-page">
+      <section className="rolls-join" aria-labelledby="rolls-banned-heading">
+        <h2 id="rolls-banned-heading">You're banned</h2>
+        <p className="rolls-error">You are permanently banned from the breadstick counter.</p>
+      </section>
+    </div>
+  );
+}
+
+// Gate: nothing of the counter (leaderboard included) renders until the
+// check-in clears this visitor.
+export default function RollCounter() {
+  const [status, setStatus] = useState(() => {
+    loadSaved(); // flags the device if its saved signup is a banned name
+    return loadBanned() ? 'banned' : 'checking';
+  });
+
+  const ban = useCallback(() => {
+    markBanned();
+    setStatus('banned');
+    checkIn(true);
+  }, []);
+
+  useEffect(() => {
+    let cancelled = false;
+    const flagged = loadBanned();
+    checkIn(flagged).then((isBanned) => {
+      if (cancelled) return;
+      if (isBanned || flagged) ban();
+      else setStatus('ok');
+    });
+    return () => { cancelled = true; };
+  }, [ban]);
+
+  if (status === 'banned') return <BannedScreen />;
+  if (status === 'checking') return <div className="rolls-page" aria-busy="true" />;
+  return <RollCounterPage onBanned={ban} />;
 }
 
 function loadSaved() {
@@ -64,9 +126,8 @@ function clearSaved() {
 
 const ROLL_EMOJI = ['🥖', '🫒', '🍝'];
 
-export default function RollCounter() {
+function RollCounterPage({ onBanned }) {
   const [saved, setSaved] = useState(loadSaved);
-  const [banned, setBanned] = useState(loadBanned);
   const [entries, setEntries] = useState([]);
   const [loading, setLoading] = useState(true);
   const [nameInput, setNameInput] = useState('');
@@ -121,10 +182,9 @@ export default function RollCounter() {
   async function handleJoin(e) {
     e.preventDefault();
     const name = nameInput.trim();
-    if (!name || banned) return;
+    if (!name) return;
     if (isBannedName(name)) {
-      markBanned();
-      setBanned(true);
+      onBanned();
       return;
     }
     setJoining(true);
@@ -212,12 +272,7 @@ export default function RollCounter() {
         <p className="rolls-honor">Honor system: only tap <strong>after</strong> you've actually eaten the breadstick — no pre-counting.</p>
       </header>
 
-      {banned ? (
-        <section className="rolls-join" aria-labelledby="rolls-banned-heading">
-          <h2 id="rolls-banned-heading">You're banned</h2>
-          <p className="rolls-error">This device is permanently banned from the breadstick counter.</p>
-        </section>
-      ) : !saved || !mine ? (
+      {!saved || !mine ? (
         <section className="rolls-join" aria-labelledby="rolls-join-heading">
           <h2 id="rolls-join-heading">What's your name?</h2>
           <form onSubmit={handleJoin} className="rolls-join-form">
