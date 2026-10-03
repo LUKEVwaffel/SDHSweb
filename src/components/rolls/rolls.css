@@ -1,16 +1,16 @@
 .rolls-page {
-  --rolls-bg: oklch(20% 0.03 45);
-  --rolls-surface: oklch(26% 0.035 45);
-  --rolls-surface-raised: oklch(31% 0.04 45);
+  --rolls-bg: oklch(20% 0.035 125);
+  --rolls-surface: oklch(26% 0.04 125);
+  --rolls-surface-raised: oklch(31% 0.045 125);
   --rolls-crust: oklch(74% 0.14 60);
   --rolls-crust-hot: oklch(80% 0.16 55);
   --rolls-text: oklch(96% 0.02 70);
-  --rolls-text-dim: oklch(75% 0.03 60);
-  --rolls-accent: oklch(62% 0.19 25);
-  --rolls-line: oklch(40% 0.03 50 / 0.5);
+  --rolls-text-dim: oklch(78% 0.03 110);
+  --rolls-accent: oklch(52% 0.16 15);
+  --rolls-line: oklch(42% 0.04 120 / 0.5);
 
   min-height: 100vh;
-  background: radial-gradient(ellipse at top, oklch(24% 0.035 48) 0%, var(--rolls-bg) 60%);
+  background: radial-gradient(ellipse at top, oklch(25% 0.045 122) 0%, var(--rolls-bg) 60%);
   color: var(--rolls-text);
   font-family: 'Inter', sans-serif;
   padding: clamp(1.5rem, 5vw, 3rem) clamp(1rem, 5vw, 2rem) 4rem;

@@ -137,8 +137,9 @@ export default function App() {
   // Reads raider_videos (same library as /watchzone) + RaiderCompetitionResults' SEASON.
   if (location.pathname === '/videotv') return <VideoTv />;
   if (location.pathname === '/raiderparent') return <RaiderParentWelcome />;
-  // /rolls — Texas Roadhouse roll counter, fun one-off group tracker.
-  if (location.pathname === '/rolls') return <RollCounter />;
+  // /breadsticks (old /rolls link still works) — Olive Garden breadstick
+  // counter, fun one-off group tracker.
+  if (location.pathname === '/breadsticks' || location.pathname === '/rolls') return <RollCounter />;
   // /boards: company promotion boards (CO/XO/1SG laptop, SAI review, results).
   if (location.pathname === '/boards' || location.pathname.startsWith('/boards/')) return <BoardsApp />;
   if (location.pathname === '/blooddrive') return <BloodDrive />;
