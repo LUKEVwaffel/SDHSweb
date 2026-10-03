@@ -326,9 +326,10 @@ function OpticApp({ onReplay }) {
 // gear had to stay covered for stretches of the day, so the official set is
 // thinner than usual and parent uploads (photos AND videos) carry the feed.
 // Only shows once this device has played the awards show (OpticShow), so it
-// lands after the 3rd-in-state moment rather than on top of it. Next comp:
-// drop this card.
-function WeatherNotice() {
+// lands after the 3rd-in-state moment rather than on top of it. Rendered on
+// the locked / paused screen too, not just the open feed, so it's seen even
+// while the feed is held. Next comp: drop this card.
+function WeatherNotice({ locked = false }) {
   if (!hasSeenShow()) return null;
 
   function toUpload() {
@@ -353,9 +354,15 @@ function WeatherNotice() {
         <li>Post the photos and clips you took, even the ones from far away.</li>
         <li>No account needed. They&apos;re live for every family in seconds.</li>
       </ul>
-      <div className="rhea-card2-row">
-        <button className="rhea-btn" style={{ flex: 1 }} onClick={toUpload}>ADD PHOTOS &amp; VIDEOS</button>
-      </div>
+      {locked ? (
+        <p className="rhea-card2-p">
+          Uploads open again with the feed. Keep your photos and videos ready.
+        </p>
+      ) : (
+        <div className="rhea-card2-row">
+          <button className="rhea-btn" style={{ flex: 1 }} onClick={toUpload}>ADD PHOTOS &amp; VIDEOS</button>
+        </div>
+      )}
     </section>
   );
 }
@@ -495,6 +502,7 @@ function OpticLocked({ opensAt, eventId, onReplay }) {
             on its own the second it reopens, no refresh needed.
           </p>
           <StateStrip onReplay={onReplay} />
+          <WeatherNotice locked />
           <OfficialBanner />
         </>
       ) : (
@@ -513,6 +521,7 @@ function OpticLocked({ opensAt, eventId, onReplay }) {
           </div>
 
           <StateStrip onReplay={onReplay} />
+          <WeatherNotice locked />
           <OfficialBanner />
 
           <div className="rhea-lock-cards">
