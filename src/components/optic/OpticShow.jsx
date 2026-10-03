@@ -13,7 +13,7 @@ import './optic-show.css';
 //   state    3rd in state, tap the medal to spin it
 //   trophies the season trophy case, tap any trophy to inspect it
 //   thanks   thank you, families: applause meter + Noblit spotlight
-//   optic    drag the BETA tag off OPTIC 2.2 yourself
+//   optic    OPTIC 2.2 knocks its own BETA tag off
 //   poll     bring OPTIC back next year?   (skipped if already answered)
 // The spotlight follows your finger, swipe left/right moves between acts,
 // then the house lights come up on OPTIC.
@@ -25,6 +25,7 @@ const EXIT_MS = 900; // house-lights fade into OPTIC
 const OPEN_AT_PULL = 0.28; // fraction of a half-screen drag that commits
 const SWIPE_PX = 70;
 const OVATION_TAPS = 24;
+const GRAD_START_MS = 800; // BETA knock-off begins after the act fades in
 
 /** @param {{ onDone: () => void }} props */
 export default function OpticShow({ onDone }) {
@@ -109,7 +110,7 @@ export default function OpticShow({ onDone }) {
   // Horizontal swipe between acts; ignores drags that start on interactive
   // pieces (the BETA tag, the curtain) and mostly-vertical scrolls.
   function onTouchStart(e) {
-    if (e.target.closest('.fin-grad-beta, .show-curtain, .tc-inspect')) { swipe.current = null; return; }
+    if (e.target.closest('.show-curtain, .tc-inspect')) { swipe.current = null; return; }
     const t = e.touches[0];
     swipe.current = { x: t.clientX, y: t.clientY };
   }
@@ -372,6 +373,12 @@ function ActThanks() {
 
 function ActOptic() {
   const ref = useRef(null);
+  const [play, setPlay] = useState(false);
+  // Plays on its own once the act has faded in (no user gesture needed).
+  useEffect(() => {
+    const t = setTimeout(() => setPlay(true), GRAD_START_MS);
+    return () => clearTimeout(t);
+  }, []);
   const graduate = useCallback(() => {
     const r = ref.current?.querySelector('.fin-grad-ver')?.getBoundingClientRect();
     if (r) burst(r.left + r.width / 2, r.top + r.height / 2, { count: 110, power: 12, shapes: ['star', 'rect', 'circle'] });
@@ -380,7 +387,7 @@ function ActOptic() {
   return (
     <section className="act act-optic" ref={ref}>
       <div className="act-kick">AND ONE MORE THING</div>
-      <BetaGraduation interactive onGraduate={graduate} />
+      <BetaGraduation play={play} onGraduate={graduate} />
       <p className="act-p act-optic-p">
         OPTIC started this season as a beta. Every fix since came from you: team
         and event filters, photo alerts, saving on iPhone, a smoother feed. You

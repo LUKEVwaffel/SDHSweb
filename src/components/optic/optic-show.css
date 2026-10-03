@@ -234,7 +234,7 @@ img.show-logo { aspect-ratio: auto; }
 .act-shout-p { position: relative; font-family: var(--inter); font-size: 14px; line-height: 1.6; color: var(--cream); margin: 10px 0 0; }
 
 /* act 3: optic */
-.act-optic .fin-grad { margin-top: 10px; --grad-delay: 800ms; }
+.act-optic .fin-grad { margin-top: 10px; }
 .act-optic > .act-optic-p { animation-delay: 3100ms; }
 .act-optic > .act-sign { animation-delay: 3400ms; color: var(--gold-bright); font-weight: 600; margin-top: 12px; }
 
