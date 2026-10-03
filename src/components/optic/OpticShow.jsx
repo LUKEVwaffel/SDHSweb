@@ -114,7 +114,7 @@ function Curtain({ state, onSkip }) {
       <div className="show-projection">
         <div className="show-beam" aria-hidden="true" />
         <RaiderCrest className="show-logo" />
-        <div className="show-presents">SDHS JROTC PRESENTS</div>
+        <div className="show-presents">PRESENTS</div>
         <div className="show-presents-sub">THE {SEASON} RAIDER SEASON</div>
       </div>
       <div className="show-dust" aria-hidden="true">

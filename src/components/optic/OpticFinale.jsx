@@ -12,11 +12,13 @@ import './optic-finale.css';
 
 export const SEASON = '2026';
 export const PLACE = 'Central High School';
-// Real logo file wins when present; RaiderCrest falls back to the SVG below.
-const RAIDER_LOGO_SRC = '/images/raiders/raider-logo.png';
+// SDHS JROTC Trojan-helmet logo, yellow knocked out of its white background
+// to transparent so it projects as light. SVG crest below is the fallback.
+const RAIDER_LOGO_WEBP = '/images/raiders/raider-logo.webp';
+const RAIDER_LOGO_PNG = '/images/raiders/raider-logo.png';
 
-// Bump to replay the show on every device (v2: trophy case act added).
-const SHOW_KEY = 'optic_show_2026_final_v2';
+// Bump to replay the show on every device (v2: trophy case, v3: real logo).
+const SHOW_KEY = 'optic_show_2026_final_v3';
 const POLL_KEY = 'optic_next_year_v1';
 const POLL_CAMPAIGN = 'optic-next-year-2026';
 
@@ -27,19 +29,23 @@ export const hasSeenShow = () => !!readFlag(SHOW_KEY);
 export const markShowSeen = () => writeFlag(SHOW_KEY, '1');
 export const hasAnsweredPoll = () => !!readFlag(POLL_KEY);
 
-/** Raider team logo: the real image if it's in /public, else an SVG crest. */
+/** SDHS JROTC logo, with an SVG crest if the image fails to load. */
 export function RaiderCrest({ className }) {
   const [useImg, setUseImg] = useState(true);
   if (useImg) {
     return (
-      <img
-        className={className}
-        src={RAIDER_LOGO_SRC}
-        alt="SDHS Raiders"
-        width="512"
-        height="512"
-        onError={() => setUseImg(false)}
-      />
+      <picture>
+        <source srcSet={RAIDER_LOGO_WEBP} type="image/webp" />
+        <img
+          className={className}
+          src={RAIDER_LOGO_PNG}
+          alt="SDHS JROTC"
+          width="472"
+          height="500"
+          fetchPriority="high"
+          onError={() => setUseImg(false)}
+        />
+      </picture>
     );
   }
   return (
