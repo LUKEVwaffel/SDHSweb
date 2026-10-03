@@ -342,16 +342,68 @@ function OpticApp({ onReplay }) {
 // lands after the 3rd-in-state moment rather than on top of it. Rendered on
 // the locked / paused screen too, not just the open feed, so it's seen even
 // while the feed is held. Next comp: drop this card.
+// "Viewed" = the full card sat at least half on screen for VIEWED_MS, or
+// the parent tapped GOT IT / ADD. From then on (this visit's later renders
+// and every return visit) it condenses to a one-line bar that taps open.
+// It never collapses mid-read: a passive view only takes effect next load.
+const WEATHER_SEEN_KEY = 'optic_weather_seen_2026_final';
+const WEATHER_VIEWED_MS = 4000;
+const hasSeenWeather = () => { try { return !!localStorage.getItem(WEATHER_SEEN_KEY); } catch { return false; } };
+const markWeatherSeen = () => { try { localStorage.setItem(WEATHER_SEEN_KEY, '1'); } catch { /* private mode */ } };
+
 function WeatherNotice({ locked = false }) {
   if (!hasSeenShow()) return null;
+  return <WeatherCard locked={locked} />;
+}
+
+function WeatherCard({ locked }) {
+  const [open, setOpen] = useState(() => !hasSeenWeather());
+  const ref = useRef(null);
+
+  // Passive view: flag it once it has really been read, collapse next load.
+  useEffect(() => {
+    const el = ref.current;
+    if (!open || !el || hasSeenWeather() || typeof IntersectionObserver === 'undefined') return undefined;
+    let t = null;
+    const io = new IntersectionObserver(([entry]) => {
+      if (entry.isIntersecting) {
+        if (!t) t = setTimeout(() => { markWeatherSeen(); io.disconnect(); }, WEATHER_VIEWED_MS);
+      } else if (t) { clearTimeout(t); t = null; }
+    }, { threshold: 0.5 });
+    io.observe(el);
+    return () => { io.disconnect(); if (t) clearTimeout(t); };
+  }, [open]);
+
+  function collapse() {
+    markWeatherSeen();
+    setOpen(false);
+  }
 
   function toUpload() {
     posthog.capture('optic_weather_notice_cta');
+    collapse();
     document.getElementById('optic-upload')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
   }
 
+  if (!open) {
+    return (
+      <button
+        className="rhea-weather-mini"
+        onClick={() => { setOpen(true); posthog.capture('optic_weather_notice_reopen'); }}
+        aria-expanded="false"
+        aria-label="Weather update: fewer official photos today, parent photos and videos wanted. Tap to read."
+      >
+        <span className="rhea-weather-mini-ico" aria-hidden="true">☂</span>
+        <span className="rhea-weather-mini-t">
+          Rain day: fewer official photos. <b>Post yours, videos too.</b>
+        </span>
+        <span className="rhea-weather-mini-more" aria-hidden="true">MORE</span>
+      </button>
+    );
+  }
+
   return (
-    <section className="rhea-card2 rhea-weather" data-tone="alert" aria-label="Weather update">
+    <section ref={ref} className="rhea-card2 rhea-weather" data-tone="alert" aria-label="Weather update">
       <div className="rhea-weather-kick"><span aria-hidden="true">☂</span> WEATHER UPDATE</div>
       <p className="rhea-card2-p">
         Because of the rain, there may be fewer official photos than
@@ -368,12 +420,18 @@ function WeatherNotice({ locked = false }) {
         <li>No account needed. They&apos;re live for every family in seconds.</li>
       </ul>
       {locked ? (
-        <p className="rhea-card2-p">
-          Uploads open again with the feed. Keep your photos and videos ready.
-        </p>
+        <>
+          <p className="rhea-card2-p">
+            Uploads open again with the feed. Keep your photos and videos ready.
+          </p>
+          <div className="rhea-card2-row">
+            <button className="rhea-btn rhea-btn--ghost" style={{ flex: 1 }} onClick={collapse}>GOT IT</button>
+          </div>
+        </>
       ) : (
         <div className="rhea-card2-row">
           <button className="rhea-btn" style={{ flex: 1 }} onClick={toUpload}>ADD PHOTOS &amp; VIDEOS</button>
+          <button className="rhea-btn rhea-btn--ghost" onClick={collapse}>GOT IT</button>
         </div>
       )}
     </section>

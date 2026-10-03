@@ -647,6 +647,21 @@
 .rhea-weather-ask b { color: var(--gold-bright); font-weight: 600; }
 .rhea-weather .rhea-card2-list b { color: var(--gold-bright); font-weight: 600; }
 
+/* condensed bar once the notice has been read */
+.rhea-weather-mini {
+  width: 100%; margin-top: 14px; display: flex; align-items: center; gap: 10px;
+  padding: 11px 14px; border-radius: 12px; cursor: pointer; text-align: left;
+  border: 1px solid var(--hair-strong);
+  background: linear-gradient(180deg, rgba(201, 169, 97, 0.1) 0%, rgba(201, 169, 97, 0.04) 100%);
+  color: var(--cream); font-family: var(--inter);
+}
+.rhea-weather-mini-ico { font-size: 15px; color: var(--gold-bright); flex-shrink: 0; }
+.rhea-weather-mini-t { flex: 1; min-width: 0; font-size: 12.5px; line-height: 1.4; color: var(--mute); }
+.rhea-weather-mini-t b { color: var(--gold-bright); font-weight: 600; }
+.rhea-weather-mini-more {
+  flex-shrink: 0; font-family: var(--mono); font-size: 8.5px; letter-spacing: 0.16em; color: var(--gold);
+}
+
 /* ── parent videos: play mark on feed cards + tray, player in the reel ── */
 .rhea-play {
   position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%);
