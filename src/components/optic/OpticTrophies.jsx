@@ -1,4 +1,6 @@
+import { useEffect, useState } from 'react';
 import { SEASON } from '../RaiderCompetitionResults';
+import { burst, haptic, rain } from './showFx';
 import { SEASON as SEASON_YEAR } from './OpticFinale';
 
 // ── The season's trophy case, one shelf per meet (oldest at the top, like a
@@ -73,8 +75,54 @@ function Gradients() {
   );
 }
 
+const PLACE_WORD = { 1: 'FIRST PLACE', 2: 'SECOND PLACE', 3: 'THIRD PLACE' };
+const FX_COLORS = {
+  1: ['#FFF0BE', '#E8C77A', '#C9A961', '#FFFFFF'],
+  2: ['#FFFFFF', '#D5DAE2', '#9AA3B0', '#E8C77A'],
+  3: ['#F6CFA4', '#C98B55', '#E8C77A', '#FFFFFF'],
+};
+
+/** Full-screen "pulled off the shelf" view of one trophy. */
+function TrophyInspect({ trophy, onClose }) {
+  const tier = TIER[trophy.place];
+  useEffect(() => {
+    const onKey = (e) => { if (e.key === 'Escape') onClose(); };
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  }, [onClose]);
+  return (
+    <div className="tc-inspect" role="dialog" aria-modal="true" aria-label={`${trophy.place} place, ${trophy.event}`} onClick={onClose}>
+      <div className="tc-inspect-rays" aria-hidden="true" />
+      <div className="tc-inspect-card" data-tier={tier}>
+        <div className="tc-inspect-spin"><Cup tier={tier} big /></div>
+        <div className="tc-inspect-place">{PLACE_WORD[tier]}</div>
+        <div className="tc-inspect-event">{trophy.event}</div>
+        {trophy.team && <div className="tc-inspect-team">{trophy.team.toUpperCase()}</div>}
+        <div className="tc-inspect-meet">{trophy.meet} · {trophy.date}</div>
+        <button className="tc-inspect-close" onClick={onClose}>PUT IT BACK</button>
+      </div>
+    </div>
+  );
+}
+
 export function TrophyCase() {
   const shelves = seasonShelves();
+  const [inspect, setInspect] = useState(null);
+  const [seen, setSeen] = useState(() => new Set());
+
+  const total = shelves.reduce((n, sh) => n + sh.trophies.length, 0);
+  // Inspected the whole case: confetti rain.
+  useEffect(() => {
+    if (seen.size === total && total > 0) { rain(180); haptic([20, 40, 20, 40, 60]); }
+  }, [seen.size, total]);
+
+  function open(t, el) {
+    const r = el.getBoundingClientRect();
+    burst(r.left + r.width / 2, r.top + r.height / 3, { count: 46, power: 8, colors: FX_COLORS[TIER[t.place]] });
+    haptic(TIER[t.place] === 1 ? [10, 30, 10] : 12);
+    setSeen((prev) => new Set([...prev, `${t.meet}-${t.event}-${t.team}-${t.place}`]));
+    setInspect(t);
+  }
   const all = shelves.flatMap((s) => s.trophies);
   const firsts = all.filter((t) => t.place === '1st').length;
   let n = 0;
@@ -89,30 +137,35 @@ export function TrophyCase() {
         <span><b>{firsts}</b> FIRST PLACE</span>
         <span><b>3RD</b> IN STATE</span>
       </div>
+      <div className="tc-hint" data-done={seen.size === all.length}>
+        {seen.size === all.length ? 'EVERY TROPHY INSPECTED' : `TAP ANY TROPHY · ${seen.size}/${all.length} INSPECTED`}
+      </div>
 
       <div className="tc-case">
         <div className="tc-glass" aria-hidden="true" />
         {shelves.map((s, si) => (
           <div className="tc-shelf" key={s.meet}>
-            <div className="tc-row" role="list" aria-label={`${s.meet} trophies`}>
+            <div className="tc-row" role="group" aria-label={`${s.meet} trophies`}>
               {s.trophies.map((t) => {
                 const delay = CASE_LEAD_MS + si * SHELF_STAGGER_MS + n * TROPHY_STAGGER_MS;
                 n += 1;
                 return (
-                  <div
+                  <button
+                    type="button"
                     className="tc-trophy"
-                    role="listitem"
                     key={`${t.event}-${t.team}-${t.place}`}
                     data-tier={TIER[t.place]}
+                    data-seen={seen.has(`${s.meet}-${t.event}-${t.team}-${t.place}`)}
                     style={{ animationDelay: `${delay}ms` }}
-                    aria-label={`${t.place} place, ${t.event}${t.team ? `, ${t.team}` : ''}`}
+                    aria-label={`${t.place} place, ${t.event}${t.team ? `, ${t.team}` : ''}. Tap to inspect`}
+                    onClick={(e) => open({ ...t, meet: s.meet, date: s.date }, e.currentTarget)}
                   >
                     <Cup tier={TIER[t.place]} big={t.big} />
                     <div className="tc-plaque">
                       <b>{t.event}</b>
                       {t.team && <i>{t.team}</i>}
                     </div>
-                  </div>
+                  </button>
                 );
               })}
             </div>
@@ -124,6 +177,7 @@ export function TrophyCase() {
           </div>
         ))}
       </div>
+      {inspect && <TrophyInspect trophy={inspect} onClose={() => setInspect(null)} />}
     </section>
   );
 }

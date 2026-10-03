@@ -311,7 +311,7 @@ export default function OpticOnboarding({ onDone }) {
 
           {step === 'install' && (
             <>
-              <img className="rob-appicon" src="/optic-icon-192.png" alt="OPTIC app icon" width="96" height="96" />
+              <img className="rob-appicon" src="/optic-icon-v2-192.png" alt="OPTIC app icon" width="96" height="96" />
               <div style={{ textAlign: 'center' }}>
                 <span className="rob-badge">OFFICIAL EVENT VIEWER</span>
               </div>
@@ -333,7 +333,7 @@ export default function OpticOnboarding({ onDone }) {
 
           {step === 'done' && (
             <>
-              <img className="rob-appicon" src="/optic-icon-192.png" alt="OPTIC app icon" width="96" height="96" />
+              <img className="rob-appicon" src="/optic-icon-v2-192.png" alt="OPTIC app icon" width="96" height="96" />
               <div style={{ textAlign: 'center' }}>
                 <span className="rob-badge rob-badge--ok">✓ ADDED TO YOUR HOME SCREEN</span>
               </div>

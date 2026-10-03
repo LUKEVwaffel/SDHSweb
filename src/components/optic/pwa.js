@@ -5,7 +5,7 @@
 // identity — only while that route is mounted.
 
 const THEME = '#06101F';
-const APPLE_ICON = '/optic-icon-apple-180.png';
+const APPLE_ICON = '/optic-icon-v2-apple-180.png';
 
 function headTags({ ns, manifest, appleTitle }) {
   return [

@@ -58,8 +58,8 @@ self.addEventListener('push', (event) => {
   event.waitUntil(
     self.registration.showNotification(data.title, {
       body: data.body,
-      icon: '/optic-icon-192.png',
-      badge: '/optic-icon-192.png',
+      icon: '/optic-icon-v2-192.png',
+      badge: '/optic-icon-v2-192.png',
       data: { url: data.url || '/optic' },
       tag: 'optic-photos', // collapses rapid-fire sends into one notification
     }),

@@ -17,8 +17,8 @@ export const PLACE = 'Central High School';
 const RAIDER_LOGO_WEBP = '/images/raiders/raider-logo.webp';
 const RAIDER_LOGO_PNG = '/images/raiders/raider-logo.png';
 
-// Bump to replay the show on every device (v2: trophy case, v3: real logo).
-const SHOW_KEY = 'optic_show_2026_final_v3';
+// Bump to replay the show on every device (v2 trophy case, v3 real logo, v4 interactive).
+const SHOW_KEY = 'optic_show_2026_final_v4';
 const POLL_KEY = 'optic_next_year_v1';
 const POLL_CAMPAIGN = 'optic-next-year-2026';
 
@@ -95,26 +95,109 @@ export function OfficialBanner() {
 }
 
 // BETA gets struck through, knocked off with sparks, and 2.2 settles in gold.
-// `play` comes from the show's scene clock; reduced motion lands on the final
-// frame (optic.css collapses every .rhea animation to ~0ms, fill: both).
-export function BetaGraduation({ play }) {
+// Interactive mode (the show): the viewer drags / flicks the BETA tag off
+// themselves; untouched, it knocks itself off after GRAD_AUTO_MS. Reduced
+// motion lands on the final frame (optic.css collapses .rhea animations).
+const GRAD_AUTO_MS = 7500;
+const THROW_PX = 60;
+const GOLD_AT_MS = 1450; // fin-gold delay in optic-finale.css
+const THROWN_SKIP_MS = 900; // thrown: jump the sequence past strike + knock
+
+/**
+ * @param {{ play?: boolean, interactive?: boolean, onGraduate?: () => void }} props
+ */
+export function BetaGraduation({ play = false, interactive = false, onGraduate }) {
+  const [auto, setAuto] = useState(false);
+  const [thrown, setThrown] = useState(null); // {tx, ty} once flicked off
+  const pillRef = useRef(null);
+  const drag = useRef(null);
+  const live = play || auto || !!thrown;
+
+  useEffect(() => {
+    if (!interactive) return undefined;
+    const t = setTimeout(() => setAuto(true), GRAD_AUTO_MS);
+    return () => clearTimeout(t);
+  }, [interactive]);
+
+  useEffect(() => {
+    if (!live || !onGraduate) return undefined;
+    const t = setTimeout(onGraduate, thrown ? GOLD_AT_MS - THROWN_SKIP_MS : GOLD_AT_MS);
+    return () => clearTimeout(t);
+  }, [live, thrown, onGraduate]);
+
+  function throwOff(dx, dy) {
+    const len = Math.hypot(dx, dy) || 1;
+    const k = 520 / len;
+    setThrown({ tx: dx * k, ty: Math.max(dy * k, 120) });
+  }
+
+  const handlers = interactive && !live ? {
+    onPointerDown: (e) => {
+      drag.current = { x: e.clientX, y: e.clientY, moved: false };
+      e.currentTarget.setPointerCapture?.(e.pointerId);
+      pillRef.current.style.transition = 'none';
+    },
+    onPointerMove: (e) => {
+      if (!drag.current) return;
+      const dx = e.clientX - drag.current.x;
+      const dy = e.clientY - drag.current.y;
+      if (Math.hypot(dx, dy) > 4) drag.current.moved = true;
+      pillRef.current.style.transform = `translate(${dx}px, ${dy}px) rotate(${dx * 0.25}deg)`;
+    },
+    onPointerUp: (e) => {
+      const d = drag.current;
+      drag.current = null;
+      if (!d) return;
+      const dx = e.clientX - d.x;
+      const dy = e.clientY - d.y;
+      const pill = pillRef.current;
+      pill.style.transition = '';
+      if (!d.moved || Math.hypot(dx, dy) > THROW_PX) {
+        pill.style.transform = `translate(${dx}px, ${dy}px)`;
+        throwOff(d.moved ? dx : 30, d.moved ? dy : 40);
+      } else {
+        pill.style.transform = '';
+      }
+    },
+    onPointerCancel: () => {
+      drag.current = null;
+      pillRef.current.style.transition = '';
+      pillRef.current.style.transform = '';
+    },
+  } : {};
+
   return (
-    <div className="fin-grad" data-play={play}>
-      <div className="fin-grad-stage" aria-hidden="true">
-        <span className="fin-grad-word">OPTIC</span>
-        <span className="fin-grad-ver">
+    <div
+      className="fin-grad"
+      data-play={live}
+      data-thrown={!!thrown}
+      data-interactive={interactive && !live}
+      style={thrown ? { '--grad-delay': `-${THROWN_SKIP_MS}ms`, '--tx': `${thrown.tx}px`, '--ty': `${thrown.ty}px` } : undefined}
+    >
+      <div className="fin-grad-stage">
+        <span className="fin-grad-word" aria-hidden="true">OPTIC</span>
+        <span className="fin-grad-ver" aria-hidden="true">
           2.2
-          <span className="fin-grad-beta">
+          <span
+            ref={pillRef}
+            className="fin-grad-beta"
+            role={interactive && !live ? 'button' : undefined}
+            tabIndex={interactive && !live ? 0 : undefined}
+            aria-label={interactive && !live ? 'Knock the beta tag off' : undefined}
+            onKeyDown={interactive && !live ? (e) => { if (e.key === 'Enter' || e.key === ' ') throwOff(30, 40); } : undefined}
+            {...handlers}
+          >
             BETA
             <span className="fin-grad-strike" />
           </span>
         </span>
         {Array.from({ length: 10 }, (_, i) => (
-          <span key={i} className="fin-spark" style={{ '--a': `${i * 36}deg`, '--d': `${i % 2 ? 46 : 64}px` }} />
+          <span key={i} className="fin-spark" aria-hidden="true" style={{ '--a': `${i * 36}deg`, '--d': `${i % 2 ? 46 : 64}px` }} />
         ))}
-        <span className="fin-grad-shine" />
-        <span className="fin-grad-stamp">OFFICIAL RELEASE</span>
+        <span className="fin-grad-shine" aria-hidden="true" />
+        <span className="fin-grad-stamp" aria-hidden="true">OFFICIAL RELEASE</span>
       </div>
+      {interactive && !live && <div className="fin-grad-hint">← DRAG THE BETA TAG OFF</div>}
     </div>
   );
 }
