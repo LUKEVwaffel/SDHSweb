@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { supabase } from '../../lib/supabaseClient';
+import { getDeviceId } from '../../lib/fingerprint';
 import './rolls.css';
 
 // /breadsticks (alias /rolls) — Olive Garden breadstick counter. Sign up with
@@ -13,11 +14,105 @@ import './rolls.css';
 // doesn't linger.
 const EVENT_KEY = 'olive-garden-breadsticks';
 const LS_KEY = 'breadstickCounterEntry';
+const BANNED_LS_KEY = 'breadstickCounterBanned';
+
+// Perma-banned names. The real enforcement is the DB trigger in
+// supabase/roll_counter_ban.sql; this mirror hides them from the board and
+// locks the device out without a round trip. Keep the two lists in sync.
+const BANNED_TERMS = ['cockmaster'];
+
+function normalizeName(name) {
+  const swaps = { 0: 'o', 1: 'i', 3: 'e', 4: 'a', 5: 's', 7: 't', '@': 'a', $: 's', '!': 'i', '|': 'i' };
+  return String(name || '')
+    .toLowerCase()
+    .replace(/[013457@$!|]/g, (c) => swaps[c])
+    .replace(/[^a-z]/g, '');
+}
+
+function isBannedName(name) {
+  const n = normalizeName(name);
+  return BANNED_TERMS.some((t) => n.includes(t));
+}
+
+function loadBanned() {
+  try { return localStorage.getItem(BANNED_LS_KEY) === '1'; } catch { return false; }
+}
+
+function markBanned() {
+  try { localStorage.setItem(BANNED_LS_KEY, '1'); } catch {}
+  // Same cookie middleware.js checks, so the next full load is a 403 at the
+  // edge and never reaches the app.
+  try { document.cookie = `bs_ban=1; path=/; max-age=${60 * 60 * 24 * 365 * 10}; secure; samesite=lax`; } catch {}
+}
+
+// Server-side check-in: logs the view and answers whether this IP or device
+// fingerprint is banned. A flagged device also gets its current IP and
+// fingerprint banned server-side. Fails open after a short wait.
+async function checkIn(flagged) {
+  try {
+    const device = await Promise.race([
+      getDeviceId(),
+      new Promise((resolve) => setTimeout(() => resolve(null), 2000)),
+    ]);
+    const { data, error } = await supabase.rpc('roll_counter_check_in', {
+      p_device: device,
+      p_flagged: flagged,
+    });
+    return !error && data === true;
+  } catch { return flagged; }
+}
+
+function BannedScreen() {
+  return (
+    <div className="rolls-page">
+      <section className="rolls-join" aria-labelledby="rolls-banned-heading">
+        <h2 id="rolls-banned-heading">You're banned</h2>
+        <p className="rolls-error">You are permanently banned from the breadstick counter.</p>
+      </section>
+    </div>
+  );
+}
+
+// Gate: nothing of the counter (leaderboard included) renders until the
+// check-in clears this visitor.
+export default function RollCounter() {
+  const [status, setStatus] = useState(() => {
+    loadSaved(); // flags the device if its saved signup is a banned name
+    return loadBanned() ? 'banned' : 'checking';
+  });
+
+  const ban = useCallback(() => {
+    markBanned();
+    setStatus('banned');
+    checkIn(true);
+  }, []);
+
+  useEffect(() => {
+    let cancelled = false;
+    const flagged = loadBanned();
+    checkIn(flagged).then((isBanned) => {
+      if (cancelled) return;
+      if (isBanned || flagged) ban();
+      else setStatus('ok');
+    });
+    return () => { cancelled = true; };
+  }, [ban]);
+
+  if (status === 'banned') return <BannedScreen />;
+  if (status === 'checking') return <div className="rolls-page" aria-busy="true" />;
+  return <RollCounterPage onBanned={ban} />;
+}
 
 function loadSaved() {
   try {
     const raw = localStorage.getItem(LS_KEY);
-    return raw ? JSON.parse(raw) : null;
+    const parsed = raw ? JSON.parse(raw) : null;
+    if (parsed && isBannedName(parsed.name)) {
+      markBanned();
+      localStorage.removeItem(LS_KEY);
+      return null;
+    }
+    return parsed;
   } catch { return null; }
 }
 
@@ -31,7 +126,7 @@ function clearSaved() {
 
 const ROLL_EMOJI = ['🥖', '🫒', '🍝'];
 
-export default function RollCounter() {
+function RollCounterPage({ onBanned }) {
   const [saved, setSaved] = useState(loadSaved);
   const [entries, setEntries] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -47,7 +142,7 @@ export default function RollCounter() {
       .eq('event', EVENT_KEY)
       .order('count', { ascending: false })
       .order('created_at', { ascending: true });
-    setEntries(data || []);
+    setEntries((data || []).filter((e) => !isBannedName(e.name)));
     setLoading(false);
   }, []);
 
@@ -64,6 +159,7 @@ export default function RollCounter() {
             return prev.filter((e) => e.id !== payload.old.id);
           }
           const row = payload.new;
+          if (isBannedName(row.name)) return prev.filter((e) => e.id !== row.id);
           const next = prev.filter((e) => e.id !== row.id);
           next.push({ id: row.id, name: row.name, count: row.count });
           next.sort((a, b) => b.count - a.count);
@@ -87,6 +183,10 @@ export default function RollCounter() {
     e.preventDefault();
     const name = nameInput.trim();
     if (!name) return;
+    if (isBannedName(name)) {
+      onBanned();
+      return;
+    }
     setJoining(true);
     setJoinError('');
     const { data, error } = await supabase
