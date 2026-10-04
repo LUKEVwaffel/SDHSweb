@@ -1,7 +1,9 @@
 import posthog from 'posthog-js'
 
-const apiKey = import.meta.env.VITE_PUBLIC_POSTHOG_KEY
-const apiHost = import.meta.env.VITE_PUBLIC_POSTHOG_HOST || 'https://d.sdhsjrotc.com'
+// Remove whitespace from the env values. A tab or space in the key makes
+// PostHog drop all events without an error.
+const apiKey = import.meta.env.VITE_PUBLIC_POSTHOG_KEY?.trim()
+const apiHost = import.meta.env.VITE_PUBLIC_POSTHOG_HOST?.trim() || 'https://d.sdhsjrotc.com'
 
 if (apiKey && typeof window !== 'undefined') {
   posthog.init(apiKey, {
