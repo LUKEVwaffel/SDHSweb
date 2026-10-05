@@ -78,7 +78,7 @@ export default function Optic() {
   if (!onboarded) return <OpticOnboarding onDone={() => setOnboarded(true)} />;
   return (
     <>
-      <OpticApp showSeen={showSeen} onReplay={() => setShowing(true)} />
+      <OpticApp onReplay={() => setShowing(true)} />
       {showing && (
         <OpticShow onDone={() => { setShowing(false); setShowSeen(hasSeenShow()); }} />
       )}
@@ -118,7 +118,7 @@ const countTeams = (list) => Object.fromEntries(
   TEAM_FILTERS.map((t) => [t.id, list.filter((p) => matchesTeam(p, t.id)).length]),
 );
 
-function OpticApp({ onReplay, showSeen }) {
+function OpticApp({ onReplay }) {
   const config = useOpticConfig();
   const gate = useOpticGate();
   const { photos, loading, error, pendingCount, showNew, refresh } = useOpticPhotos({
@@ -128,6 +128,7 @@ function OpticApp({ onReplay, showSeen }) {
   const [reel, setReel] = useState(null); // index into visiblePhotos, or null
   const [teamFilter, setTeamFilter] = useState('all');
   const [subEventFilter, setSubEventFilter] = useState('all');
+  const [justAddedOnly, setJustAddedOnly] = useState(false);
   const [teamPickFor, setTeamPickFor] = useState(null); // sub-event awaiting a team choice
   const [walk, setWalk] = useState(() => isStandalone() && !hasWalkthroughOptic());
   const [selectMode, setSelectMode] = useState(false);
@@ -175,12 +176,21 @@ function OpticApp({ onReplay, showSeen }) {
     return counts;
   }, [photos]);
 
+  const justAdded = useMemo(() => {
+    const now = Date.now();
+    return photos
+      .filter((p) => isJustAdded(p, now))
+      .sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
+  }, [photos]);
+  const justAddedCount = justAdded.length;
+  const justAddedActive = justAddedOnly && justAddedCount > 0;
+
   const visiblePhotos = useMemo(() => {
-    let list = photos;
+    let list = justAddedActive ? justAdded : photos;
     if (teamFilter !== 'all') list = list.filter((p) => matchesTeam(p, teamFilter));
     if (subEventFilter !== 'all') list = list.filter((p) => stationKey(p) === subEventFilter);
     return list;
-  }, [photos, teamFilter, subEventFilter]);
+  }, [photos, justAdded, justAddedActive, teamFilter, subEventFilter]);
 
   // Tapping an event asks which team to show before filtering.
   const teamPickCounts = useMemo(
@@ -276,11 +286,21 @@ function OpticApp({ onReplay, showSeen }) {
         {gate.loading ? (
           <div className="rhea-wrap"><div className="rhea-feed-msg">LOADING…</div></div>
         ) : !gate.open ? (
-          <OpticLocked opensAt={gate.opensAt} eventId={config.eventId} onReplay={onReplay} showSeen={showSeen} />
+          <OpticLocked opensAt={gate.opensAt} eventId={config.eventId} onReplay={onReplay} />
         ) : (
           <div className="rhea-wrap">
             <StateStrip />
-            <WeatherNotice ready={showSeen} />
+            <JustAddedBar
+              count={justAddedCount}
+              on={justAddedOnly}
+              onToggle={() => {
+                posthog.capture('optic_just_added_toggle', { on: !justAddedOnly, count: justAddedCount });
+                setJustAddedOnly((v) => !v);
+                setTeamFilter('all');
+                setSubEventFilter('all');
+                document.getElementById('optic-feed')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+              }}
+            />
             <InstallNudge />
             <NotificationCard eventId={config.eventId} />
             <UploadCard
@@ -317,6 +337,7 @@ function OpticApp({ onReplay, showSeen }) {
                 showNew();
                 window.scrollTo({ top: 0, behavior: 'smooth' });
               }}
+              justAddedOnly={justAddedActive}
               selectMode={selectMode}
               onToggleSelectMode={toggleSelectMode}
               selected={selected}
@@ -370,108 +391,37 @@ function OpticApp({ onReplay, showSeen }) {
   );
 }
 
-// Rain at the final comp (Hamilton County, 2026-10-03): the expensive camera
-// gear stays covered for stretches of the day, so the official set is thinner
-// than usual and parent uploads (photos AND videos) carry the feed. Shown
-// while the comp is live, so the copy stays in present tense.
-// Only shows once this device has played the awards show (OpticShow, which
-// now pops up over the feed shortly after launch), so it lands after the
-// 3rd-in-state moment rather than before it. Rendered on
-// the locked / paused screen too, not just the open feed, so it's seen even
-// while the feed is held. Next comp: drop this card.
-// "Viewed" = the full card sat at least half on screen for VIEWED_MS, or
-// the parent tapped GOT IT / ADD. From then on (this visit's later renders
-// and every return visit) it condenses to a one-line bar that taps open.
-// It never collapses mid-read: a passive view only takes effect next load.
-const WEATHER_SEEN_KEY = 'optic_weather_seen_2026_final';
-const WEATHER_VIEWED_MS = 4000;
-const hasSeenWeather = () => { try { return !!localStorage.getItem(WEATHER_SEEN_KEY); } catch { return false; } };
-const markWeatherSeen = () => { try { localStorage.setItem(WEATHER_SEEN_KEY, '1'); } catch { /* private mode */ } };
+// Luke's card gets uploaded in batches after the comp too (2026-10-05: 37
+// shots two days later). The feed sorts his photos by capture time, so a
+// late batch lands deep among comp-day shots and reads as "nothing new
+// posted". A late upload = posted on a later calendar day than it was taken
+// (same-day parent uploads from the stands don't count), within the last
+// FRESH_MS. JustAddedBar surfaces them and filters the feed to just those,
+// newest upload first.
+const FRESH_MS = 7 * 86_400_000;
+const dayOf = (iso) => new Date(iso).toDateString();
+const isJustAdded = (p, now) => !!p.taken_at
+  && dayOf(p.created_at) !== dayOf(p.taken_at)
+  && new Date(p.created_at) > new Date(p.taken_at)
+  && now - new Date(p.created_at).getTime() <= FRESH_MS;
 
-function WeatherNotice({ ready, locked = false }) {
-  if (!ready) return null;
-  return <WeatherCard locked={locked} />;
-}
-
-function WeatherCard({ locked }) {
-  const [open, setOpen] = useState(() => !hasSeenWeather());
-  const ref = useRef(null);
-
-  // Passive view: flag it once it has really been read, collapse next load.
-  useEffect(() => {
-    const el = ref.current;
-    if (!open || !el || hasSeenWeather() || typeof IntersectionObserver === 'undefined') return undefined;
-    let t = null;
-    const io = new IntersectionObserver(([entry]) => {
-      if (entry.isIntersecting) {
-        if (!t) t = setTimeout(() => { markWeatherSeen(); io.disconnect(); }, WEATHER_VIEWED_MS);
-      } else if (t) { clearTimeout(t); t = null; }
-    }, { threshold: 0.5 });
-    io.observe(el);
-    return () => { io.disconnect(); if (t) clearTimeout(t); };
-  }, [open]);
-
-  function collapse() {
-    markWeatherSeen();
-    setOpen(false);
-  }
-
-  function toUpload() {
-    posthog.capture('optic_weather_notice_cta');
-    collapse();
-    document.getElementById('optic-upload')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
-  }
-
-  if (!open) {
-    return (
-      <button
-        className="rhea-weather-mini"
-        onClick={() => { setOpen(true); posthog.capture('optic_weather_notice_reopen'); }}
-        aria-expanded="false"
-        aria-label="Weather update: fewer official photos today, parent photos and videos wanted. Tap to read."
-      >
-        <span className="rhea-weather-mini-ico" aria-hidden="true">☂</span>
-        <span className="rhea-weather-mini-t">
-          Rain day: fewer official photos. <b>Post yours, videos too.</b>
-        </span>
-        <span className="rhea-weather-mini-more" aria-hidden="true">MORE</span>
-      </button>
-    );
-  }
-
+function JustAddedBar({ count, on, onToggle }) {
+  if (!count) return null;
   return (
-    <section ref={ref} className="rhea-card2 rhea-weather" data-tone="alert" aria-label="Weather update">
-      <div className="rhea-weather-kick"><span aria-hidden="true">☂</span> WEATHER UPDATE</div>
-      <p className="rhea-card2-p">
-        Because of the rain, there may be fewer official photos than
-        normal today. Very expensive cameras and rain don&apos;t go well
-        together, so the big camera has to stay covered for parts of the day.
-      </p>
-      <p className="rhea-weather-ask">
-        That makes <b>your uploads</b> the most important part of the feed
-        today. Every shot from the stands counts.
-      </p>
-      <ul className="rhea-card2-list">
-        <li><b>Videos upload now too.</b> MP4 or MOV, straight from your camera roll.</li>
-        <li>Post your photos and clips as you take them, even the ones from far away.</li>
-        <li>No account needed. They&apos;re live for every family in seconds.</li>
-      </ul>
-      {locked ? (
-        <>
-          <p className="rhea-card2-p">
-            Uploads open again with the feed. Keep your photos and videos ready.
-          </p>
-          <div className="rhea-card2-row">
-            <button className="rhea-btn rhea-btn--ghost" style={{ flex: 1 }} onClick={collapse}>GOT IT</button>
-          </div>
-        </>
-      ) : (
-        <div className="rhea-card2-row">
-          <button className="rhea-btn" style={{ flex: 1 }} onClick={toUpload}>ADD PHOTOS &amp; VIDEOS</button>
-          <button className="rhea-btn rhea-btn--ghost" onClick={collapse}>GOT IT</button>
-        </div>
-      )}
-    </section>
+    <button
+      className="rhea-justadded"
+      data-on={on}
+      aria-pressed={on}
+      onClick={onToggle}
+    >
+      <span className="rhea-justadded-dot" aria-hidden="true" />
+      <span className="rhea-justadded-t">
+        {on
+          ? <>Showing <b>{count} new photo{count === 1 ? '' : 's'}</b> only</>
+          : <><b>{count} new photo{count === 1 ? '' : 's'}</b> just added</>}
+      </span>
+      <span className="rhea-justadded-cta" aria-hidden="true">{on ? 'SHOW ALL' : 'VIEW'}</span>
+    </button>
   );
 }
 
@@ -577,7 +527,7 @@ function NotificationCard({ eventId }) {
 
 // Countdown hold shown until the gate opens (scheduled time or Luke's manual
 // override). uses a local 1 Hz tick; useOpticGate flips `open` when it lands.
-function OpticLocked({ opensAt, eventId, onReplay, showSeen }) {
+function OpticLocked({ opensAt, eventId, onReplay }) {
   const [now, setNow] = useState(() => Date.now());
   useEffect(() => {
     const t = setInterval(() => setNow(Date.now()), 1000);
@@ -610,7 +560,6 @@ function OpticLocked({ opensAt, eventId, onReplay, showSeen }) {
             on its own the second it reopens, no refresh needed.
           </p>
           <StateStrip onReplay={onReplay} />
-          <WeatherNotice ready={showSeen} locked />
           <OfficialBanner />
         </>
       ) : (
@@ -629,7 +578,6 @@ function OpticLocked({ opensAt, eventId, onReplay, showSeen }) {
           </div>
 
           <StateStrip onReplay={onReplay} />
-          <WeatherNotice ready={showSeen} locked />
           <OfficialBanner />
 
           <div className="rhea-lock-cards">
@@ -973,13 +921,13 @@ function EventTeamPicker({ event, counts, onPick, onClose }) {
 function Feed({
   photos, loading, error, likes, onOpen, filter, onFilterChange, counts, pendingCount = 0, onShowNew,
   subEventOptions = [], subEventFilter = 'all', onSubEventFilterChange, subEventCounts = {},
-  selectMode = false, onToggleSelectMode, selected, onToggleSelected,
+  selectMode = false, onToggleSelectMode, selected, onToggleSelected, justAddedOnly = false,
 }) {
   return (
-    <section>
+    <section id="optic-feed">
       <div className="rhea-live">
         <span className="rhea-live-dot" />
-        <span className="rhea-live-label">LIVE FEED</span>
+        <span className="rhea-live-label">{justAddedOnly ? 'JUST ADDED' : 'LIVE FEED'}</span>
         <span className="rhea-live-count">
           {photos.length} PHOTO{photos.length === 1 ? '' : 'S'}
         </span>
