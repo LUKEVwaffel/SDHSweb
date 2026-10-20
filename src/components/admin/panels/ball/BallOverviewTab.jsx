@@ -4,6 +4,7 @@ import '../../../review/review.css';
 import '../../../ball/portal.css';
 import BallVipList from './BallVipList';
 import { openBallGuestVerifyPdf } from '../../../../lib/ballGuestVerifyPdf';
+import { openBallReservationChoicePdf } from '../../../../lib/ballReservationChoicePdf';
 
 // S-6 full-visibility overview of the Military Ball. Deliberately built on the
 // warm-paper review/portal CSS (.rv / .bp-*), NOT the dark DISPATCH theme —
@@ -40,6 +41,21 @@ const val = { fontFamily: "'JetBrains Mono', monospace", fontSize: 12, color: 'v
 const grid = { display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(150px, 1fr))', gap: 12 };
 const groupHead = { fontFamily: "'JetBrains Mono', monospace", fontSize: 10, letterSpacing: '0.16em', textTransform: 'uppercase', color: 'var(--rv-accent)', margin: '0 0 8px' };
 const detailWrap = { padding: '14px 16px 16px', borderTop: '1px solid var(--rv-border)', display: 'flex', flexDirection: 'column', gap: 16 };
+
+// This conflict is one-off per cadet (who the third person is, what credit
+// already applies) — not data the DB tracks — so S-6 fills it in at print
+// time instead of a form. Defaults are Grace Bright's actual numbers.
+function printReservationChoice(r, guest) {
+  const thirdName = window.prompt('Name of the person they want to add?', 'McKenzie Kebble');
+  if (!thirdName) return;
+  const soloPrice = window.prompt('Solo price (full price, one person)?', '$75');
+  if (!soloPrice) return;
+  const splitPrice = window.prompt(`Split-couple price (what ${r.cadet_name} and ${thirdName} would each pay)?`, '$55');
+  if (!splitPrice) return;
+  const guestCredit = window.prompt(`Amount already covered by ${guest.name}'s payment?`, '$20');
+  if (!guestCredit) return;
+  openBallReservationChoicePdf(r, { guestName: guest.name, thirdName, soloPrice, splitPrice, guestCredit });
+}
 
 function Field({ label, value }) {
   return <div style={{ minWidth: 0 }}><div style={lbl}>{label}</div><div style={val}>{value ?? '—'}</div></div>;
@@ -369,6 +385,9 @@ function SignupItem({ r, guest, open, onToggle, onChanged }) {
             {guest && <ResendGuestButton r={r} guest={guest} />}
             {guest && !guest.verified_at && (
               <button className="rv-btn ghost" onClick={() => openBallGuestVerifyPdf(r, guest)}>Print guest paper</button>
+            )}
+            {guest && (
+              <button className="rv-btn ghost" onClick={() => printReservationChoice(r, guest)}>Print reservation choice</button>
             )}
             <DeleteButton r={r} guest={guest} onChanged={onChanged} />
           </div>

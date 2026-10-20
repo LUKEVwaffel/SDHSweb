@@ -230,6 +230,20 @@ Deno.serve(async (req) => {
       .maybeSingle();
     if (!cadet) return json({ error: "cadet not found" }, 401);
 
+    // Belt-and-suspenders dupe guard: the unique(lower(cadet_school_email))
+    // index (ball_hardening.sql) is the real backstop for concurrent
+    // double-submits, but it's a hand-pasted migration, easy to forget to
+    // run (see BALL_DEPLOY_ORDER.md) — a sequential retry or resent signup
+    // link must not slip through just because that index was never applied.
+    const { data: existingSignup } = await svc
+      .from("ball_signups")
+      .select("id")
+      .eq("cadet_school_email", payload.email)
+      .maybeSingle();
+    if (existingSignup) {
+      return json({ error: "You already have a Ball signup on file. See Chief to change it." }, 409);
+    }
+
     const { data: cfg } = await svc
       .from("ball_config")
       .select("signup_deadline, ball_date, event_time_text, venue_address, price_cadet, price_couple, field_trip_form_pdf_url")
