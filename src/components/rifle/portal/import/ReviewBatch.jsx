@@ -55,6 +55,9 @@ export default function ReviewBatch({ batch, matches, season, shooters, rosterNa
   // every older table in it already matches what's on file. Collapse those
   // instead of making Kaz/Luke re-review and re-publish them each time.
   const [forceOpen, setForceOpen] = useState(false);
+  // Default view is a decision, not a spreadsheet: what it read, what it's
+  // about to do, and anything wrong — not every shooter's raw numbers.
+  const [showRows, setShowRows] = useState(false);
   // Synchronous re-entry guard: `busy` is React state, so a fast double
   // click/tap can land before the re-render that disables the button — that
   // published one batch twice (two duplicate matches) on 2026-10-02.
@@ -168,6 +171,22 @@ export default function ReviewBatch({ batch, matches, season, shooters, rosterNa
   issueList.sort((a, b) => (a.level === 'error' ? 0 : 1) - (b.level === 'error' ? 0 : 1));
   const allOn = batch.drafts.every((d) => d.include);
 
+  // Plain-English read of what this batch is about to do — no scores shown.
+  const excludedCount = batch.drafts.length - validation.includedCount;
+  const decisionParts = [];
+  if (existing) {
+    if (counts.new) decisionParts.push(`${counts.new} new`);
+    if (counts.update) decisionParts.push(`${counts.update} to overwrite`);
+    if (counts.same) decisionParts.push(`${counts.same} already on file`);
+  }
+  let decision = `Found ${batch.drafts.length} shooter${batch.drafts.length === 1 ? '' : 's'}`;
+  if (decisionParts.length) decision += ` — ${decisionParts.join(', ')}`;
+  if (excludedCount) decision += `. ${excludedCount} row${excludedCount === 1 ? '' : 's'} not on roster, excluded`;
+  decision += '.';
+  if (!batch.matchId) decision += ' Pick which match these belong to.';
+  else if (validation.errorCount) decision += ` ${validation.errorCount} error${validation.errorCount === 1 ? '' : 's'} to fix before this can publish.`;
+  else decision += ' Ready to publish.';
+
   return (
     <section aria-label={batch.title} style={{ border: `1px solid ${P.hairStrong}`, marginBottom: 16, background: 'rgba(10,22,40,0.6)' }}>
       <header style={{ padding: '12px 14px', background: P.ink, display: 'flex', flexDirection: 'column', gap: 10 }}>
@@ -188,6 +207,14 @@ export default function ReviewBatch({ batch, matches, season, shooters, rosterNa
 
       {batch.notes && <div style={{ fontFamily: mono, fontSize: 11, color: P.mute, padding: '10px 14px 0', fontStyle: 'italic' }}>AI note: {batch.notes}</div>}
 
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: 10, flexWrap: 'wrap', padding: '12px 14px 0' }}>
+        <p style={{ fontFamily: mono, fontSize: 12, color: validation.errorCount ? P.warn : P.cream, margin: 0, lineHeight: 1.6, maxWidth: 520 }}>{decision}</p>
+        <button type="button" onClick={() => setShowRows((v) => !v)} style={{ background: 'none', border: 'none', color: P.gold, cursor: 'pointer', fontFamily: mono, fontSize: 10, letterSpacing: '0.12em', textDecoration: 'underline', padding: 0, whiteSpace: 'nowrap' }}>
+          {showRows ? 'HIDE ROWS' : 'SHOW ROWS'}
+        </button>
+      </div>
+
+      {showRows && (
       <div style={{ overflowX: 'auto', padding: '8px 0' }}>
         <table style={{ borderCollapse: 'collapse', width: '100%', minWidth: 720, fontFamily: mono, fontSize: 12 }}>
           <thead>
@@ -251,6 +278,7 @@ export default function ReviewBatch({ batch, matches, season, shooters, rosterNa
           </tbody>
         </table>
       </div>
+      )}
 
       {(issueList.length > 0 || validation.batch.length > 0) && (
         <ul style={{ listStyle: 'none', margin: 0, padding: '4px 14px 10px', maxHeight: 160, overflowY: 'auto' }}>
