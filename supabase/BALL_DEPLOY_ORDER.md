@@ -26,6 +26,7 @@ them **in this exact order**, top to bottom, and only deploy the edge functions
 | `ball_guest_form_split.sql` | `ball_guests.field_trip_form_received` — separate field-trip-form toggle for the GUEST, distinct from the host's `field_trip_form_received` on `ball_signups`. Widens `ball_guests_ops_view`. **Must be followed by re-running `ball_guards.sql` (now v7)**. | `ball_guest_cash_split.sql`, then `ball_guards.sql` v7 |
 | `ball_reminder_deadlines.sql` | `ball_config.payment_deadline` / `ball_config.dress_deadline` — S-6-editable dates (SETTINGS tab) feeding the manual reminder email's copy. Not enforced anywhere, purely reminder-copy input. | `ball_signup.sql` |
 | `ball_email_templates.sql` | (re-run) adds the `payment_reminder` template row for the new reminder blast. Safe to re-run — existing rows' prose is `on conflict` preserved, only label/description/placeholders refresh. | already deployed once; re-run for the new row |
+| `ball_tv_roster_view.sql` | `ball_signups_tv_view` — anon-readable, 4 columns only (cadet_name/cadet_company/status/cash_received), feeds the roster slides on `/balltv` so a cadet can check their own status on the hallway screen. | `ball_signup.sql` |
 
 Run any time; order vs. the ball chain does not matter. The tab degrades
 gracefully (roster only, no PIN status) if this file has not been run yet.

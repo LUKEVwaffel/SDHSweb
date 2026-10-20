@@ -33,18 +33,59 @@ function money(n) {
   return n == null ? null : `$${Number(n).toFixed(0)}`;
 }
 
+// "First Middle Last" -> "First Last". Leaves 1- and 2-word names alone.
+// Public kiosk, so middle names never render — first + last is enough for a
+// cadet to find themselves on the hallway screen.
+function displayName(fullName) {
+  if (!fullName) return '';
+  const parts = fullName.trim().split(/\s+/).filter(Boolean);
+  if (parts.length <= 2) return parts.join(' ');
+  return `${parts[0]} ${parts[parts.length - 1]}`;
+}
+
+const ROSTER_PAGE_SIZE = 14;
+function chunk(arr, size) {
+  const out = [];
+  for (let i = 0; i < arr.length; i += size) out.push(arr.slice(i, i + size));
+  return out;
+}
+
+// Group ball_signups_tv_view rows by company, alpha-sorted inside and out.
+// 'status' / 'cash_received' come straight off the view — no mapping needed,
+// 'fully_verified' IS the verified flag, cash_received IS the paid flag.
+function groupRosterByCompany(roster) {
+  const groups = new Map();
+  roster.forEach((r) => {
+    const company = (r.cadet_company || '').trim() || 'Unassigned';
+    const key = company.toLowerCase();
+    if (!groups.has(key)) groups.set(key, { company: company.toUpperCase(), rows: [] });
+    groups.get(key).rows.push({
+      name: displayName(r.cadet_name),
+      verified: r.status === 'fully_verified',
+      paid: !!r.cash_received,
+    });
+  });
+  return [...groups.values()]
+    .map((g) => ({ ...g, rows: g.rows.sort((a, b) => a.name.localeCompare(b.name)) }))
+    .sort((a, b) => a.company.localeCompare(b.company));
+}
+
 function useBallData() {
-  const [state, setState] = useState({ config: undefined, gallery: [] });
+  const [state, setState] = useState({ config: undefined, gallery: [], roster: [] });
   useEffect(() => {
     let cancelled = false;
     const load = async () => {
-      const [{ data: cfg }, { data: photos }] = await Promise.all([
+      const [{ data: cfg }, { data: photos }, { data: roster }] = await Promise.all([
         SB.from('ball_config')
           .select('ball_date, event_time_text, venue_address, venue_phone, dinner_caterer, dinner_menu, price_cadet, price_couple, signup_deadline, dress_code_text')
           .maybeSingle(),
         SB.from('ball_gallery').select('photo_url, caption').order('sort_order', { ascending: true }),
+        // ball_signups_tv_view: anon-readable, 4 columns only (see
+        // ball_tv_roster_view.sql). Missing/undeployed -> data comes back
+        // undefined and the roster slides just don't build.
+        SB.from('ball_signups_tv_view').select('cadet_name, cadet_company, status, cash_received'),
       ]);
-      if (!cancelled) setState({ config: cfg || null, gallery: photos || [] });
+      if (!cancelled) setState({ config: cfg || null, gallery: photos || [], roster: roster || [] });
     };
     load();
     const id = setInterval(load, RELOAD_MS);
@@ -54,7 +95,7 @@ function useBallData() {
 }
 
 export default function BallTv() {
-  const { config, gallery } = useBallData();
+  const { config, gallery, roster } = useBallData();
 
   const ballUrl = `${window.location.origin}/ball`;
   const qr = useQrDataUrl(ballUrl);
@@ -194,6 +235,76 @@ export default function BallTv() {
       });
     }
 
+    const companies = groupRosterByCompany(roster);
+    if (companies.length > 0) {
+      const totalSignups = companies.reduce((n, c) => n + c.rows.length, 0);
+      const totalVerified = companies.reduce((n, c) => n + c.rows.filter((r) => r.verified).length, 0);
+      const totalPaid = companies.reduce((n, c) => n + c.rows.filter((r) => r.paid).length, 0);
+
+      deck.push({
+        key: 'roster-summary',
+        ms: SLIDE_MS,
+        render: () => (
+          <>
+            <div style={eyebrow}>Signed Up By Company</div>
+            <div style={rosterSummaryGrid}>
+              {companies.map((c) => {
+                const v = c.rows.filter((r) => r.verified).length;
+                const p = c.rows.filter((r) => r.paid).length;
+                return (
+                  <div key={c.company} style={summaryCard}>
+                    <div style={summaryCompany}>{c.company}</div>
+                    <div style={summaryCount}>{c.rows.length}</div>
+                    <div style={summarySub}>signed up</div>
+                    <div style={summarySplit}>
+                      <span style={{ color: P.green }}>{v} verified</span>
+                      <span style={{ color: P.mute }}>·</span>
+                      <span style={{ color: P.gold }}>{p} paid</span>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+            <div style={{ fontFamily: mono, fontSize: 'clamp(11px,1.1vw,16px)', color: P.mute, letterSpacing: '0.08em', marginTop: '2.4vh' }}>
+              {totalSignups} total · {totalVerified} verified · {totalPaid} paid
+            </div>
+          </>
+        ),
+      });
+
+      companies.forEach((c) => {
+        const pages = chunk(c.rows, ROSTER_PAGE_SIZE);
+        pages.forEach((pageRows, pi) => {
+          deck.push({
+            key: `roster-${c.company}-${pi}`,
+            ms: SLIDE_MS,
+            render: () => (
+              <>
+                <div style={eyebrow}>
+                  {c.company}{pages.length > 1 ? ` · Page ${pi + 1} of ${pages.length}` : ''}
+                </div>
+                <div style={rosterGrid}>
+                  {pageRows.map((r, ri) => (
+                    <div key={`${r.name}-${ri}`} style={rosterRow}>
+                      <span style={rosterName}>{r.name}</span>
+                      <span style={{ display: 'flex', gap: '0.5em' }}>
+                        <span style={{ ...rosterPill, color: r.verified ? P.green : P.mute, borderColor: r.verified ? P.green : P.hairStrong }}>
+                          {r.verified ? 'Verified' : 'Pending'}
+                        </span>
+                        <span style={{ ...rosterPill, color: r.paid ? P.gold : P.mute, borderColor: r.paid ? P.gold : P.hairStrong }}>
+                          {r.paid ? 'Paid' : 'Due'}
+                        </span>
+                      </span>
+                    </div>
+                  ))}
+                </div>
+              </>
+            ),
+          });
+        });
+      });
+    }
+
     gallery.slice(0, MAX_GALLERY_SLIDES).forEach((g, i) => {
       deck.push({
         key: `photo-${i}`,
@@ -213,7 +324,7 @@ export default function BallTv() {
     });
 
     return deck;
-  }, [config, gallery, detailsReady, eventDate, deadlineDate, mon, day, yr, weekday, timeText, closed, daysLeft]);
+  }, [config, gallery, roster, detailsReady, eventDate, deadlineDate, mon, day, yr, weekday, timeText, closed, daysLeft]);
 
   // ── Advance ──────────────────────────────────────────────────────────────
   const [idx, setIdx] = useState(0);
@@ -380,4 +491,40 @@ const qrCard = {
 };
 const photoCaption = {
   position: 'absolute', left: '5vw', bottom: '22vh', textAlign: 'left', maxWidth: '60vw',
+};
+const rosterSummaryGrid = {
+  display: 'flex', gap: '1.4vw', flexWrap: 'wrap', justifyContent: 'center', maxWidth: '82vw',
+};
+const summaryCard = {
+  border: `1px solid ${P.hairStrong}`, background: P.navy, padding: '1.6vw 1.8vw',
+  minWidth: 'min(220px, 20vw)', display: 'flex', flexDirection: 'column', alignItems: 'center',
+};
+const summaryCompany = {
+  fontFamily: mono, fontSize: 'clamp(11px,1.1vw,16px)', color: P.gold,
+  letterSpacing: '0.2em', marginBottom: '0.5em',
+};
+const summaryCount = {
+  fontFamily: oswald, fontWeight: 600, fontSize: 'clamp(2.2rem,4vw,3.6rem)', color: P.cream, lineHeight: 1,
+};
+const summarySub = {
+  fontFamily: mono, fontSize: 'clamp(10px,1vw,14px)', color: P.mute, letterSpacing: '0.1em', marginTop: '0.3em',
+};
+const summarySplit = {
+  display: 'flex', gap: '0.6em', fontFamily: mono, fontSize: 'clamp(10px,1vw,14px)',
+  letterSpacing: '0.04em', marginTop: '0.8em',
+};
+const rosterGrid = {
+  display: 'grid', gridTemplateColumns: 'repeat(2, minmax(0, 1fr))', columnGap: '3vw', rowGap: '0.9vh',
+  width: '82vw', maxWidth: 1400,
+};
+const rosterRow = {
+  display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '1vw',
+  padding: '0.6em 0', borderBottom: `1px solid ${P.hair}`,
+};
+const rosterName = {
+  fontFamily: oswald, fontSize: 'clamp(15px,1.5vw,22px)', color: P.cream, textAlign: 'left',
+};
+const rosterPill = {
+  fontFamily: mono, fontSize: 'clamp(9px,0.85vw,12px)', letterSpacing: '0.1em', textTransform: 'uppercase',
+  border: '1px solid', borderRadius: 999, padding: '0.25em 0.7em', whiteSpace: 'nowrap',
 };
