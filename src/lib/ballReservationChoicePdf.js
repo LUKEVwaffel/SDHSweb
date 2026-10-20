@@ -113,19 +113,25 @@ export function openBallReservationChoicePdf(r, { guestName, thirdName, soloPric
   const win = window.open('', '_blank');
   if (!win) { alert('Popup blocked, allow popups to print.'); return; }
 
+  // Deliberately says nothing about who is the "host" or whose reservation
+  // it originally was — a cadet can be the guest on someone else's
+  // reservation just as easily as the host of their own, and this sheet
+  // can't know which from the row it was printed off of. Only the end
+  // state (who ends up on a reservation with whom, who pays what) is
+  // stated as fact.
   const options = [
     {
       title: 'Go alone',
-      body: `Drop ${guestName} and ${thirdName} from your reservation. You attend solo and pay the full solo price (${soloPrice}) yourself.`,
+      body: `${guestName} and ${thirdName} are not on your reservation. You attend solo and pay the full solo price (${soloPrice}) yourself.`,
     },
     {
-      title: `Split into separate reservations — bring ${thirdName}`,
-      body: `${guestName} gets a separate solo reservation and pays ${soloPrice} on it. You and ${thirdName} each pay ${soloPrice} too — ` +
-        `nobody gets the couple discount in this option, all three of you pay the full solo price.`,
+      title: `Split — bring ${thirdName} instead`,
+      body: `You and ${thirdName} are on a reservation together. ${guestName} is on a separate reservation, by themself. ` +
+        `Nobody gets the couple discount in this option — you, ${guestName}, and ${thirdName} each pay the full solo price (${soloPrice}).`,
     },
     {
-      title: `Keep the original couple reservation with ${guestName}`,
-      body: `${thirdName} does not come to the Ball. Nothing changes — you and ${guestName} stay on the couple reservation you already have, at the discounted price already on file.`,
+      title: `Keep the couple reservation with ${guestName}`,
+      body: `${thirdName} is not on your reservation. You and ${guestName} stay on the couple reservation already on file, at the discounted price already set.`,
     },
   ];
 
