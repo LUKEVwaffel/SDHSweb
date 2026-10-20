@@ -42,14 +42,21 @@ const grid = { display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(1
 const groupHead = { fontFamily: "'JetBrains Mono', monospace", fontSize: 10, letterSpacing: '0.16em', textTransform: 'uppercase', color: 'var(--rv-accent)', margin: '0 0 8px' };
 const detailWrap = { padding: '14px 16px 16px', borderTop: '1px solid var(--rv-border)', display: 'flex', flexDirection: 'column', gap: 16 };
 
-// This conflict is one-off per cadet (who the third person is) — not data
-// the DB tracks — so S-6 fills it in at print time instead of a form.
+// This conflict spans more than one row — the cadet's existing partner is
+// often on a DIFFERENT signup than the one open here (e.g. the cadet is the
+// GUEST on someone else's reservation, not the host), so neither name can be
+// assumed from `guest` on the open row. Only the new/third person tends to
+// match this row's own guest (a pending signup filed specifically to add
+// them) — offered as a default, not assumed. Nothing here is DB-tracked, so
+// S-6 fills it in at print time instead of a form.
 function printReservationChoice(r, guest) {
-  const thirdName = window.prompt('Name of the person they want to add?', 'McKenzie Kebble');
+  const guestName = window.prompt("Name of the cadet's existing reservation partner (the one who'd split off into their own solo reservation)?");
+  if (!guestName) return;
+  const thirdName = window.prompt('Name of the new person being added?', guest?.name || '');
   if (!thirdName) return;
   const soloPrice = window.prompt('Solo price (full price, one person, no couple discount)?', '$35');
   if (!soloPrice) return;
-  openBallReservationChoicePdf(r, { guestName: guest.name, thirdName, soloPrice });
+  openBallReservationChoicePdf(r, { guestName, thirdName, soloPrice });
 }
 
 function Field({ label, value }) {
