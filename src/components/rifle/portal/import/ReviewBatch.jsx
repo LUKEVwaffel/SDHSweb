@@ -51,6 +51,10 @@ export default function ReviewBatch({ batch, matches, season, shooters, rosterNa
   const [err, setErr] = useState('');
   const [existing, setExisting] = useState(null); // Map(shooter_id → score) for the picked match
   const [existingErr, setExistingErr] = useState('');
+  // The same sheet gets re-dropped every week with one more comp added —
+  // every older table in it already matches what's on file. Collapse those
+  // instead of making Kaz/Luke re-review and re-publish them each time.
+  const [forceOpen, setForceOpen] = useState(false);
   // Synchronous re-entry guard: `busy` is React state, so a fast double
   // click/tap can land before the re-render that disables the button — that
   // published one batch twice (two duplicate matches) on 2026-10-02.
@@ -79,6 +83,9 @@ export default function ReviewBatch({ batch, matches, season, shooters, rosterNa
   };
   const counts = { new: 0, update: 0, same: 0 };
   batch.drafts.forEach((d) => { const s = statusOf(d); if (s) counts[s]++; });
+  // Every included row already on file, unchanged — nothing here needs a
+  // human or a write.
+  const allUnchanged = !!existing && validation.includedCount > 0 && counts.same === validation.includedCount;
 
   function editDraft(key, patch) {
     onChange({ drafts: batch.drafts.map((d) => {
@@ -136,6 +143,20 @@ export default function ReviewBatch({ batch, matches, season, shooters, rosterNa
       <div style={{ border: `1px solid ${P.hair}`, padding: '10px 14px', marginBottom: 10, display: 'flex', justifyContent: 'space-between', gap: 10, flexWrap: 'wrap', opacity: 0.75 }}>
         <span style={{ fontFamily: mono, fontSize: 11, color: P.cream }}>{batch.title}</span>
         <span style={{ fontFamily: mono, fontSize: 11, color: batch.status === 'published' ? P.win : P.mute }}>{batch.status === 'published' ? `✓ ${batch.resultMsg}` : 'Skipped'}</span>
+      </div>
+    );
+  }
+
+  if (allUnchanged && !forceOpen) {
+    return (
+      <div style={{ border: `1px solid ${P.hair}`, padding: '10px 14px', marginBottom: 10, display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 10, flexWrap: 'wrap', opacity: 0.75 }}>
+        <span style={{ fontFamily: mono, fontSize: 11, color: P.cream }}>{batch.title}</span>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+          <Badge tone="mute">already on file · {counts.same} unchanged</Badge>
+          <button type="button" onClick={() => setForceOpen(true)} style={{ background: 'none', border: 'none', color: P.gold, cursor: 'pointer', fontFamily: mono, fontSize: 10, letterSpacing: '0.12em', textDecoration: 'underline', padding: 0 }}>
+            REVIEW ANYWAY
+          </button>
+        </div>
       </div>
     );
   }

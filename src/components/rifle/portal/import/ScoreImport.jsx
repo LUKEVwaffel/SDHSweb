@@ -17,15 +17,35 @@ const label = { fontFamily: mono, fontSize: 9, color: P.gold, letterSpacing: '0.
 const emptyMatch = (week) => ({ week: week ? String(week) : '', dates: '', opponent: '', location: '' });
 let batchSeq = 0;
 
-function autoMatchId(week, matches, season, defaultMatchId, groupCount) {
+// Strip "Week N" off a group/sheet/file label so what's left is just the
+// comp's own name ("vs Bay", "Sandy Hook Invitational") to search for.
+const normalizeComp = (s) => String(s || '').toLowerCase()
+  .replace(/\b(?:week|wk)\s*#?\s*\d{1,2}\b/gi, ' ').replace(/[^a-z0-9]+/g, ' ').trim();
+
+// Same comp, re-uploaded: find the one in-season match whose opponent name
+// shows up in (or contains) the sheet's own label/sheet-tab/file name.
+function matchByCompName(compText, matches, season) {
+  const norm = normalizeComp(compText);
+  if (norm.length < 3) return null;
+  const inSeason = season ? matches.filter((m) => schoolYearOf(m) === season) : matches;
+  const hits = inSeason.filter((m) => {
+    const opp = normalizeComp(m.opponent);
+    return opp && opp.length >= 3 && (norm.includes(opp) || opp.includes(norm));
+  });
+  return hits.length === 1 ? hits[0].id : null;
+}
+
+function autoMatchId(week, matches, season, defaultMatchId, groupCount, compText) {
   if (week != null) {
     const hits = matches.filter((m) => m.week === week);
     const inSeason = season ? hits.filter((m) => schoolYearOf(m) === season) : hits;
     if (inSeason.length === 1) return inSeason[0].id;
     if (!season && hits.length === 1) return hits[0].id;
-    return '';
   }
-  return groupCount === 1 && defaultMatchId ? defaultMatchId : '';
+  const byComp = matchByCompName(compText, matches, season);
+  if (byComp) return byComp;
+  if (week == null) return groupCount === 1 && defaultMatchId ? defaultMatchId : '';
+  return '';
 }
 
 export default function ScoreImport({ matches, shooters, season, defaultMatchId, canUseAi = true, onPublished, onMatchCreated, onBatchesChange }) {
@@ -66,7 +86,7 @@ export default function ScoreImport({ matches, shooters, season, defaultMatchId,
       return {
         key: `b${++batchSeq}`, title: parts.join(' › '), parser: 'sheet', status: 'review',
         drafts: toDrafts(g.rows, rosterNames),
-        matchId: autoMatchId(g.week, matches, season, defaultMatchId, groups.length),
+        matchId: autoMatchId(g.week, matches, season, defaultMatchId, groups.length, g.label || g.sheet || sourceName),
         newMatch: emptyMatch(g.week), notes: '', uploadId: null, uploadDraft: null,
         rawText: g.grid ? gridToCsv(g.grid) : rawText,
         source: { name: sourceName, sheet: g.sheet || null, label: g.label || null, week: g.week ?? null, parser: 'sheet' },
@@ -78,7 +98,7 @@ export default function ScoreImport({ matches, shooters, season, defaultMatchId,
     return {
       key: `b${++batchSeq}`, title: `${sourceName} › AI read`, parser: 'ai', status: 'review',
       drafts: toDrafts(upload.draft?.rows || [], rosterNames),
-      matchId: autoMatchId(null, matches, season, defaultMatchId, 1),
+      matchId: autoMatchId(null, matches, season, defaultMatchId, 1, sourceName),
       newMatch: emptyMatch(null), notes: upload.draft?.notes || '',
       uploadId: upload.id, uploadDraft: upload.draft, rawText: upload.raw_csv, source: { name: sourceName, parser: 'ai' },
     };
