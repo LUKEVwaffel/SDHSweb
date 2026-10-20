@@ -3,7 +3,7 @@ import { supabase as SB } from '../../../../lib/supabaseClient';
 import '../../../review/review.css';
 import '../../../ball/portal.css';
 import BallVipList from './BallVipList';
-import { openBallGuestVerifyPdf } from '../../../../lib/ballGuestVerifyPdf';
+import { openBallGuestVerifyPdf, openBallGuestVerifyPdfBatch } from '../../../../lib/ballGuestVerifyPdf';
 import { openBallReservationChoicePdf } from '../../../../lib/ballReservationChoicePdf';
 
 // S-6 full-visibility overview of the Military Ball. Deliberately built on the
@@ -197,6 +197,16 @@ export default function BallOverviewTab() {
     setReminderFlash({ tone: 'ok', msg: `Sent ${data.sent} reminder${data.sent === 1 ? '' : 's'}${data.failed ? ` (${data.failed} failed)` : ''}.` });
   }
 
+  // Reuses the "Awaiting guest" tab's own test — not a second definition of
+  // what counts as unverified — so the button always matches that tab's
+  // count regardless of whatever filter/search is active right now.
+  const awaitingPairs = useMemo(() => {
+    const test = FILTERS.find((f) => f.key === 'awaiting').test;
+    return (signups || [])
+      .filter((r) => test(r, guestBySignup[r.id]))
+      .map((r) => ({ r, guest: guestBySignup[r.id] }));
+  }, [signups, guestBySignup]);
+
   const { list, filterCounts } = useMemo(() => {
     const rows = signups || [];
     const term = q.trim().toLowerCase();
@@ -233,6 +243,13 @@ export default function BallOverviewTab() {
           <div style={{ display: 'flex', gap: 8 }}>
             <button className="bp-refresh" onClick={sendReminders} disabled={reminderBusy}>
               {reminderBusy ? 'Working…' : 'Send Reminders'}
+            </button>
+            <button
+              className="bp-refresh"
+              disabled={!awaitingPairs.length}
+              onClick={() => openBallGuestVerifyPdfBatch(awaitingPairs)}
+            >
+              Print awaiting guest forms ({awaitingPairs.length})
             </button>
             <button className="bp-refresh" onClick={load}>Refresh</button>
           </div>

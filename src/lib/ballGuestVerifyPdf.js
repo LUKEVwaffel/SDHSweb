@@ -44,18 +44,17 @@ const DOC_STYLE = `
   .correction .line { border-bottom: 1.5px solid #000000; height: 32px; margin-bottom: 10px; }
   .correction .sub { font-family: 'Courier New', monospace; font-weight: 700; font-size: 10px; color: #000000; display: flex; justify-content: space-between; }
   .foot { text-align: center; padding: 18px 16px; font-family: Arial, Helvetica, sans-serif; font-weight: 700; font-size: 13px; color: #000000; border: 2px solid #000000; margin-top: 18px; }
+  .page-break { page-break-after: always; }
   @media print {
     .no-print { display: none; }
     * { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
   }
 `;
 
-function documentHtml({ companyLabel, generatedOn, cadetName, letLevel, guestName, sentTo }) {
-  return `<!doctype html><html><head><meta charset="utf-8">
-<title>Guest Not Verified — ${escapeHtml(cadetName)}</title>
-<style>${DOC_STYLE}</style>
-</head>
-<body>
+// One cadet's sheet — shared by the single-print and bulk-print paths so
+// they can never drift apart.
+function sheetHtml({ companyLabel, generatedOn, cadetName, letLevel, guestName, sentTo }) {
+  return `
   <div class="sheet">
     <div class="company-banner">
       <div class="lbl">Company</div>
@@ -98,8 +97,15 @@ function documentHtml({ companyLabel, generatedOn, cadetName, letLevel, guestNam
     </div>
 
     <div class="foot">Once complete, return this sheet to the S-6 desk.</div>
-  </div>
-</body></html>`;
+  </div>`;
+}
+
+function documentHtml({ title, bodyHtml }) {
+  return `<!doctype html><html><head><meta charset="utf-8">
+<title>${escapeHtml(title)}</title>
+<style>${DOC_STYLE}</style>
+</head>
+<body>${bodyHtml}</body></html>`;
 }
 
 // r: a row from ball_signups. guest: its matching ball_guests row (must exist —
@@ -117,6 +123,37 @@ export function openBallGuestVerifyPdf(r, guest) {
     guestName: guest?.name || '—',
     sentTo: guest?.personal_email || 'no email on file',
   });
+
+  win.document.write(html);
+  win.document.close();
+  win.focus();
+  setTimeout(() => win.print(), 350);
+}
+
+// pairs: [{ r, guest }, ...] — every signup with an unverified guest. One
+// print job, one sheet per cadet, each on its own page.
+export function openBallGuestVerifyPdfBatch(pairs) {
+  if (!pairs.length) { alert('No unverified guests to print.'); return; }
+
+  const win = window.open('', '_blank');
+  if (!win) { alert('Popup blocked, allow popups to print.'); return; }
+
+  const generatedOn = new Date().toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' });
+  const bodyHtml = pairs
+    .map(({ r, guest }, i) => {
+      const sheet = sheetHtml({
+        companyLabel: (r.cadet_company || 'No company on file').toUpperCase(),
+        generatedOn,
+        cadetName: r.cadet_name || '—',
+        letLevel: r.cadet_let_level,
+        guestName: guest?.name || '—',
+        sentTo: guest?.personal_email || 'no email on file',
+      });
+      return i < pairs.length - 1 ? `${sheet}<div class="page-break"></div>` : sheet;
+    })
+    .join('');
+
+  const html = documentHtml({ title: `Guests Not Verified — ${pairs.length}`, bodyHtml });
 
   win.document.write(html);
   win.document.close();
