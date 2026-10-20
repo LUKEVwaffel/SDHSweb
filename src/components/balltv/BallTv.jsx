@@ -247,6 +247,7 @@ export default function BallTv() {
         render: () => (
           <>
             <div style={eyebrow}>Signed Up By Company</div>
+            <div style={warnBanner}>Not signed up, or not on this screen? You may not be admitted to the Ball.</div>
             <div style={rosterSummaryGrid}>
               {companies.map((c) => {
                 const v = c.rows.filter((r) => r.verified).length;
@@ -283,6 +284,7 @@ export default function BallTv() {
                 <div style={eyebrow}>
                   {c.company}{pages.length > 1 ? ` · Page ${pi + 1} of ${pages.length}` : ''}
                 </div>
+                <div style={warnBanner}>Not on this list? You may not be admitted to the Ball.</div>
                 <div style={rosterGrid}>
                   {pageRows.map((r, ri) => (
                     <div key={`${r.name}-${ri}`} style={rosterRow}>
@@ -491,6 +493,12 @@ const qrCard = {
 };
 const photoCaption = {
   position: 'absolute', left: '5vw', bottom: '22vh', textAlign: 'left', maxWidth: '60vw',
+};
+const warnBanner = {
+  display: 'inline-flex', alignItems: 'center', border: `1px solid ${P.red}`,
+  background: 'rgba(192,57,43,0.14)', padding: '0.7em 1.4em', marginBottom: '2vh',
+  fontFamily: mono, fontSize: 'clamp(11px,1.15vw,16px)', color: P.cream,
+  letterSpacing: '0.03em', maxWidth: '68vw', textAlign: 'center',
 };
 const rosterSummaryGrid = {
   display: 'flex', gap: '1.4vw', flexWrap: 'wrap', justifyContent: 'center', maxWidth: '82vw',
