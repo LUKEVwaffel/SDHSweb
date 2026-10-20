@@ -104,10 +104,12 @@ function documentHtml({ companyLabel, generatedOn, cadetName, letLevel, options 
 }
 
 // r: a row from the Ball Overview tab (cadet_name, cadet_let_level,
-// cadet_company). guestName / thirdName / amounts describe the specific
+// cadet_company). guestName / thirdName / soloPrice describe the specific
 // conflict in plain language — this sheet doesn't touch the database, it's
-// just the paper S-6 hands the cadet to get a decision in writing.
-export function openBallReservationChoicePdf(r, { guestName, thirdName, soloPrice, splitPrice, guestCredit }) {
+// just the paper S-6 hands the cadet to get a decision in writing. Nobody's
+// gender/relationship is assumed here — names only, no pronouns — since
+// that's cadet-specific context this sheet has no business guessing at.
+export function openBallReservationChoicePdf(r, { guestName, thirdName, soloPrice }) {
   const win = window.open('', '_blank');
   if (!win) { alert('Popup blocked, allow popups to print.'); return; }
 
@@ -117,13 +119,13 @@ export function openBallReservationChoicePdf(r, { guestName, thirdName, soloPric
       body: `Drop ${guestName} and ${thirdName} from your reservation. You attend solo and pay the full solo price (${soloPrice}) yourself.`,
     },
     {
-      title: `Split into two reservations — bring ${thirdName}`,
-      body: `${guestName} becomes his own solo reservation and pays ${soloPrice} himself. You and ${thirdName} become a new couple reservation together. ` +
-        `Because ${guestCredit} of your cost was already paid under the old reservation, you only owe ${splitPrice} more. ${thirdName} has no credit on file and pays ${splitPrice} in full.`,
+      title: `Split into separate reservations — bring ${thirdName}`,
+      body: `${guestName} gets a separate solo reservation and pays ${soloPrice} on it. You and ${thirdName} each pay ${soloPrice} too — ` +
+        `nobody gets the couple discount in this option, all three of you pay the full solo price.`,
     },
     {
       title: `Keep the original couple reservation with ${guestName}`,
-      body: `${thirdName} does not come to the Ball. Nothing changes — you and ${guestName} stay on the couple reservation you already have, at the price already on file.`,
+      body: `${thirdName} does not come to the Ball. Nothing changes — you and ${guestName} stay on the couple reservation you already have, at the discounted price already on file.`,
     },
   ];
 

@@ -42,19 +42,14 @@ const grid = { display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(1
 const groupHead = { fontFamily: "'JetBrains Mono', monospace", fontSize: 10, letterSpacing: '0.16em', textTransform: 'uppercase', color: 'var(--rv-accent)', margin: '0 0 8px' };
 const detailWrap = { padding: '14px 16px 16px', borderTop: '1px solid var(--rv-border)', display: 'flex', flexDirection: 'column', gap: 16 };
 
-// This conflict is one-off per cadet (who the third person is, what credit
-// already applies) — not data the DB tracks — so S-6 fills it in at print
-// time instead of a form. Defaults are Grace Bright's actual numbers.
+// This conflict is one-off per cadet (who the third person is) — not data
+// the DB tracks — so S-6 fills it in at print time instead of a form.
 function printReservationChoice(r, guest) {
   const thirdName = window.prompt('Name of the person they want to add?', 'McKenzie Kebble');
   if (!thirdName) return;
-  const soloPrice = window.prompt('Solo price (full price, one person)?', '$75');
+  const soloPrice = window.prompt('Solo price (full price, one person, no couple discount)?', '$35');
   if (!soloPrice) return;
-  const splitPrice = window.prompt(`Split-couple price (what ${r.cadet_name} and ${thirdName} would each pay)?`, '$55');
-  if (!splitPrice) return;
-  const guestCredit = window.prompt(`Amount already covered by ${guest.name}'s payment?`, '$20');
-  if (!guestCredit) return;
-  openBallReservationChoicePdf(r, { guestName: guest.name, thirdName, soloPrice, splitPrice, guestCredit });
+  openBallReservationChoicePdf(r, { guestName: guest.name, thirdName, soloPrice });
 }
 
 function Field({ label, value }) {
