@@ -3,6 +3,10 @@ import { supabase as SB } from '../../lib/supabaseClient';
 import { P, mono, oswald, fraunces } from '../admin/theme.js';
 import { useQrDataUrl } from '../raidertv/useQrDataUrl.js';
 import { FALLBACK_MENU, ALLERGY_NOTE } from '../../lib/ballMenu.js';
+import { useNowTicker } from '../../hooks/useNowTicker.js';
+import { useTvDailySettings } from '../../hooks/useTvDailySettings.js';
+import { resolveBellSchedule } from '../../lib/bellSchedules.js';
+import { getBallPhase } from '../../lib/tvBallSchedule.js';
 import './balltv.css';
 
 // /balltv — the hallway-TV promo loop for the Military Ball. Read-only, no
@@ -19,6 +23,12 @@ const SLIDE_MS = 10000;       // hero / venue / details / dinner
 const PHOTO_MS = 8000;        // past-ball gallery frames
 const MAX_GALLERY_SLIDES = 6; // cap so the loop stays a reasonable length
 const RELOAD_MS = 15 * 60 * 1000; // pick up config edits without a manual refresh
+
+// Falls back to Range's Schedule Editor default (supabase/tv_screens.sql seed)
+// if tv_daily_settings('range').range_schedule_config.period_company hasn't
+// loaded yet or is null — same companies rotate the same periods for the
+// range, so this screen reads that mapping instead of duplicating it.
+const DEFAULT_PERIOD_COMPANY = { '2': 'Alpha', '3': 'Staff/Command', '4': 'Bravo', '5': 'Charlie', '6': 'Delta' };
 
 function parseDate(d) {
   return d ? new Date(`${d}T00:00:00`) : null;
@@ -96,6 +106,18 @@ function useBallData() {
 
 export default function BallTv() {
   const { config, gallery, roster } = useBallData();
+
+  // Schedule state — same bell clock as /tv/range, borrowing its
+  // period->company map (see DEFAULT_PERIOD_COMPANY above) instead of a
+  // ball-specific settings row.
+  const now = useNowTicker();
+  const { settings: rangeSettings } = useTvDailySettings('range');
+  const scheduleKey = resolveBellSchedule(rangeSettings, now);
+  const periodCompany = rangeSettings?.range_schedule_config?.period_company ?? DEFAULT_PERIOD_COMPANY;
+  const ballPhase = useMemo(
+    () => getBallPhase(scheduleKey, now, periodCompany),
+    [scheduleKey, now, periodCompany]
+  );
 
   const ballUrl = `${window.location.origin}/ball`;
   const qr = useQrDataUrl(ballUrl);
@@ -328,25 +350,43 @@ export default function BallTv() {
     return deck;
   }, [config, gallery, roster, detailsReady, eventDate, deadlineDate, mon, day, yr, weekday, timeText, closed, daysLeft]);
 
+  // ── Deck selection ───────────────────────────────────────────────────────
+  // 'company' phase narrows the full deck to just that company's info +
+  // roster pages, falling back to the full deck if that company has no rows
+  // yet (never show a blank screen). 'lunch' and 'rotation' (no company
+  // assigned this block) run the full deck, per spec.
+  const companyDeck = useMemo(() => {
+    if (ballPhase.phase !== 'company') return null;
+    const tag = ballPhase.company.toUpperCase();
+    return slides.filter((s) => s.key === 'details' || s.key.startsWith(`roster-${tag}-`));
+  }, [ballPhase.phase, ballPhase.company, slides]);
+  const activeDeck = companyDeck && companyDeck.length > 0 ? companyDeck : slides;
+
   // ── Advance ──────────────────────────────────────────────────────────────
   const [idx, setIdx] = useState(0);
   const idxRef = useRef(0);
   idxRef.current = idx;
 
-  useEffect(() => {
-    if (idx >= slides.length && slides.length > 0) setIdx(0);
-  }, [slides.length, idx]);
+  // Jump back to the first slide whenever the deck changes shape (phase
+  // switch, or a different company's roster) instead of resuming mid-deck.
+  const deckKey = `${ballPhase.phase}:${ballPhase.company ?? ''}`;
+  useEffect(() => { setIdx(0); }, [deckKey]);
 
   useEffect(() => {
-    if (slides.length === 0) return undefined;
-    const cur = slides[Math.min(idx, slides.length - 1)];
+    if (idx >= activeDeck.length && activeDeck.length > 0) setIdx(0);
+  }, [activeDeck.length, idx]);
+
+  useEffect(() => {
+    if (ballPhase.phase === 'off' || ballPhase.phase === 'welcome') return undefined;
+    if (activeDeck.length === 0) return undefined;
+    const cur = activeDeck[Math.min(idx, activeDeck.length - 1)];
     const id = setTimeout(() => {
-      setIdx((n) => (n + 1) % slides.length);
+      setIdx((n) => (n + 1) % activeDeck.length);
     }, cur?.ms || SLIDE_MS);
     return () => clearTimeout(id);
-  }, [idx, slides]);
+  }, [idx, activeDeck, ballPhase.phase]);
 
-  const active = slides.length ? slides[Math.min(idx, slides.length - 1)] : null;
+  const active = activeDeck.length ? activeDeck[Math.min(idx, activeDeck.length - 1)] : null;
 
   const countdownLabel = closed
     ? 'Registration closed'
@@ -356,13 +396,19 @@ export default function BallTv() {
         ? `${daysLeft} day${daysLeft === 1 ? '' : 's'} left to sign up`
         : 'Sign up now';
 
+  // Shut off entirely outside the school day (after the last bell until the
+  // next morning's first period) — no rails, no data, just a dark screen.
+  if (ballPhase.phase === 'off') {
+    return <div className="btv-root" style={{ background: P.ink }} />;
+  }
+
   return (
     <div className="btv-root">
       <div className="btv-grid" />
 
       {/* progress ticks */}
       <div className="btv-ticks">
-        {slides.map((s, i) => (
+        {ballPhase.phase !== 'welcome' && activeDeck.map((s, i) => (
           <div key={s.key} className={`btv-tick${i === idx ? ' is-active' : ''}${i < idx ? ' is-done' : ''}`}>
             <span style={i === idx ? { animationDuration: `${(s.ms || SLIDE_MS)}ms` } : undefined} />
           </div>
@@ -383,7 +429,13 @@ export default function BallTv() {
 
       {/* slide stage */}
       <div className="btv-stage">
-        {active && (
+        {ballPhase.phase === 'welcome' ? (
+          <div className="btv-slide">
+            <div style={kicker}>Trojan Battalion · JROTC · Annual</div>
+            <h1 style={heroTitle}>Welcome<br />{ballPhase.company} Company</h1>
+            <p style={leadText}>{countdownLabel} — scan the QR below to sign up for the Ball.</p>
+          </div>
+        ) : active && (
           <div key={active.key} className={active.photo ? 'btv-photo-slide' : 'btv-slide'}>
             {active.render()}
           </div>
