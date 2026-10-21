@@ -34,6 +34,8 @@ function fmtLongDate(d: string): string {
 
 interface SignupRow {
   id: string;
+  cadet_school_email: string | null;
+  created_at: string;
   cadet_name: string;
   notification_email: string | null;
   amount_due: number | null;
@@ -45,6 +47,7 @@ interface SignupRow {
 interface GuestRow {
   signup_id: string;
   name: string | null;
+  sdhs_matched_cadet_id: string | null;
   guest_type: string | null;
   friend_payment_method: string | null;
   friend_amount_due: number | null;
@@ -72,10 +75,10 @@ Deno.serve(async (req) => {
     const svc = serviceClient();
     const [{ data: signups, error: sErr }, { data: guests, error: gErr }, { data: cfg }] = await Promise.all([
       svc.from("ball_signups")
-        .select("id, cadet_name, notification_email, amount_due, cash_received, field_trip_form_required, field_trip_form_received")
+        .select("id, cadet_school_email, created_at, cadet_name, notification_email, amount_due, cash_received, field_trip_form_required, field_trip_form_received")
         .eq("status", "fully_verified"),
       svc.from("ball_guests")
-        .select("signup_id, name, guest_type, friend_payment_method, friend_amount_due, friend_cash_received, field_trip_form_required, field_trip_form_received"),
+        .select("signup_id, name, sdhs_matched_cadet_id, guest_type, friend_payment_method, friend_amount_due, friend_cash_received, field_trip_form_required, field_trip_form_received"),
       svc.from("ball_config").select("payment_deadline, dress_deadline, field_trip_form_pdf_url").maybeSingle(),
     ]);
     if (sErr || gErr) return json({ error: (sErr || gErr)?.message }, 500);
@@ -83,12 +86,46 @@ Deno.serve(async (req) => {
     const guestBySignup = new Map<string, GuestRow>();
     (guests || []).forEach((g: GuestRow) => guestBySignup.set(g.signup_id, g));
 
+    // Duplicate signups for the same cadet (same school email) are ONE
+    // person: whatever ops marked on either row counts. Without this merge a
+    // cadet whose form was checked off on their older row got a "form still
+    // needed" reminder off the newer one (Peyton Hodge, 2026-10-07).
+    const groups = new Map<string, SignupRow[]>();
+    for (const r of (signups || []) as SignupRow[]) {
+      const key = (r.cadet_school_email || r.id).toLowerCase();
+      groups.set(key, [...(groups.get(key) || []), r]);
+    }
+    const merged: SignupRow[] = [...groups.values()].map((rows) => {
+      // Primary = the row carrying the guest, else the newest.
+      const sorted = [...rows].sort((a, b) => b.created_at.localeCompare(a.created_at));
+      const primary = sorted.find((r) => guestBySignup.has(r.id)) || sorted[0];
+      return {
+        ...primary,
+        notification_email: primary.notification_email || sorted.find((r) => r.notification_email)?.notification_email || null,
+        cash_received: rows.some((r) => r.cash_received),
+        field_trip_form_received: rows.some((r) => r.field_trip_form_received),
+      };
+    });
+
+    // A date who is an SDHS cadet with their OWN signup turns their form in
+    // on that signup — don't also chase it from the host's reminder.
+    const matchedIds = [...new Set((guests || []).map((g: GuestRow) => g.sdhs_matched_cadet_id).filter(Boolean))] as string[];
+    const { data: matchedCadets } = matchedIds.length
+      ? await svc.from("cadet_consent").select("id, school_email").in("id", matchedIds)
+      : { data: [] };
+    const signupFormByEmail = new Map(merged.map((r) => [(r.cadet_school_email || "").toLowerCase(), r.field_trip_form_received]));
+    const guestOwnSignupForm = new Map<string, boolean>();
+    (matchedCadets || []).forEach((c: { id: string; school_email: string | null }) => {
+      const k = (c.school_email || "").toLowerCase();
+      if (signupFormByEmail.has(k)) guestOwnSignupForm.set(c.id, signupFormByEmail.get(k)!);
+    });
+
     const deadlinePretty = cfg?.payment_deadline ? fmtLongDate(cfg.payment_deadline) : null;
     const dressDeadlinePretty = cfg?.dress_deadline ? fmtLongDate(cfg.dress_deadline) : null;
 
     type Candidate = { row: SignupRow; guest: GuestRow | undefined; todo: string[]; needsForm: boolean };
     const candidates: Candidate[] = [];
-    for (const row of (signups || []) as SignupRow[]) {
+    for (const row of merged) {
       if (!row.notification_email) continue;
       const guest = guestBySignup.get(row.id);
       const todo: string[] = [];
@@ -109,7 +146,8 @@ Deno.serve(async (req) => {
       // Guest's own field-trip form need is tracked on the guest row itself
       // (whether THEY are an SDHS student), independent of the host's own
       // field_trip_form_required — see ball_guest_form_required_split.sql.
-      if (guest?.field_trip_form_required && !guest.field_trip_form_received) {
+      const guestHasOwnSignup = !!guest?.sdhs_matched_cadet_id && guestOwnSignupForm.has(guest.sdhs_matched_cadet_id);
+      if (guest?.field_trip_form_required && !guest.field_trip_form_received && !guestHasOwnSignup) {
         const attachedNote = cfg?.field_trip_form_pdf_url ? " (attached to this email)" : "";
         todo.push(`<strong>${escapeHtml(guest.name || "Your guest")}</strong>'s own field trip permission form is also still needed${attachedNote} — hand it to <strong>Kaz and Chief ONLY</strong>.`);
         needsForm = true;
@@ -117,7 +155,7 @@ Deno.serve(async (req) => {
       if (todo.length) candidates.push({ row, guest, todo, needsForm });
     }
 
-    if (dry_run) return json({ ok: true, dry_run: true, candidates: candidates.length });
+    if (dry_run) return json({ ok: true, dry_run: true, candidates: candidates.length, recipients: candidates.map((c) => ({ name: c.row.cadet_name, outstanding: c.todo.map((li) => li.replace(/<[^>]+>/g, "")) })) });
     if (!candidates.length) return json({ ok: true, sent: 0, failed: 0, total: 0 });
 
     const RESEND_API_KEY = Deno.env.get("RESEND_API_KEY");
