@@ -3,7 +3,7 @@ import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import {
   promotionOptions, promotionEligibility, totalScore, allScored,
-  normalizeLet, rankFromRoleTitle, defaultPromotion, quarterLabel, MAX_TOTAL,
+  normalizeLet, rankFromRoleTitle, defaultPromotion, quarterLabel, MAX_TOTAL, SCORE_GUIDE, RANKS,
 } from './boardRules.js';
 
 const full = (n) => ({ score_facing: n, score_creed: n, score_uniform: n, score_jrotc: n, score_class: n });
@@ -78,4 +78,18 @@ test('quarterLabel follows the school year', () => {
   assert.equal(quarterLabel(new Date(2027, 0, 10)), '2026-27 Q2');
   assert.equal(quarterLabel(new Date(2027, 2, 1)), '2026-27 Q3');
   assert.equal(quarterLabel(new Date(2027, 4, 1)), '2026-27 Q4');
+});
+
+test('a perfect-scoring cadet officer gets the officer reason, not the LET cap', () => {
+  const r = promotionEligibility({ scores: full(3), currentRank: 'CPT', letLevel: 3 });
+  assert.equal(r.eligible, false);
+  assert.match(r.reason, /officer/i);
+});
+
+test('scoring guide covers every point value once', () => {
+  assert.deepEqual(SCORE_GUIDE.map((g) => g.value).sort(), [0, 1, 2, 3]);
+});
+
+test('every rank in the ladder has a full name', () => {
+  RANKS.forEach((r) => assert.ok(r.name.length > 3, r.code));
 });

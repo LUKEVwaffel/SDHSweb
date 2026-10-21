@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { boardApi, pinErrorText } from '../boardApi';
 import { usePrintSheets } from '../PrintSheets';
-import { COMPANY_LABEL, Modal, PinPad, SheetChip, fmtTime } from '../ui';
+import { COMPANY_LABEL, Modal, PinPad, RankTag, SheetChip, fmtTime } from '../ui';
 import { CATEGORIES, MAX_TOTAL, promotionOptions } from '../../../lib/boardRules';
 import RankInsignia from '../RankInsignia';
 
@@ -13,6 +13,7 @@ export default function SaiCompanyReview({ company, quarter, rows, notBoarded, s
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState('');
   const [note, setNote] = useState('');
+  const [ackMissing, setAckMissing] = useState(false);
   const [resetKey, setResetKey] = useState(0);
   const [printNode, print] = usePrintSheets();
 
@@ -58,7 +59,7 @@ export default function SaiCompanyReview({ company, quarter, rows, notBoarded, s
         <button type="button" className="tb-btn tb-btn--ghost" onClick={onBack}>← All companies</button>
         <div style={{ display: 'flex', gap: 8 }}>
           <button type="button" className="tb-btn tb-btn--sm" disabled={!signedRows.length} onClick={() => print(signedRows)}>Print all {signedRows.length}</button>
-          {!signoff && !readOnly && <button type="button" className="tb-btn tb-btn--gold" disabled={!canSign} onClick={() => { setError(''); setSigning(true); }}>Sign off {COMPANY_LABEL[company]}</button>}
+          {!signoff && !readOnly && <button type="button" className="tb-btn tb-btn--gold" disabled={!canSign} onClick={() => { setError(''); setAckMissing(false); setSigning(true); }}>Sign off {COMPANY_LABEL[company]}</button>}
         </div>
       </div>
 
@@ -84,7 +85,7 @@ export default function SaiCompanyReview({ company, quarter, rows, notBoarded, s
       {notBoarded.length > 0 && !signoff && (
         <div className="tb-banner" style={{ marginBottom: 16 }}>
           <span>⚠</span>
-          <span><b>{notBoarded.length} cadet{notBoarded.length === 1 ? '' : 's'} not boarded:</b> {notBoarded.map((c) => c.name).join(', ')}. You can still sign — they&rsquo;ll show as not boarded this quarter.</span>
+          <span><b>{notBoarded.length} cadet{notBoarded.length === 1 ? '' : 's'} not boarded yet:</b> {notBoarded.map((c) => c.name).join(', ')}. Wait for the company to finish — once you sign, the company is closed for {quarter.label} and they can&rsquo;t be boarded.</span>
         </div>
       )}
       {error && !signing && !overturn && <div className="tb-banner tb-banner--error" style={{ marginBottom: 16 }}>{error}</div>}
@@ -103,14 +104,14 @@ export default function SaiCompanyReview({ company, quarter, rows, notBoarded, s
               <tr key={r.id}>
                 <td><b>{r.cadet_name}</b>{r.comment && <div className="tb-qrow-meta" style={{ whiteSpace: 'normal', maxWidth: 280 }}>“{r.comment}”</div>}</td>
                 <td className="num">{r.let_level}</td>
-                <td className="tb-mono">{r.rank_before}</td>
+                <td><RankTag rank={r.rank_before} /></td>
                 {CATEGORIES.map((c) => <td key={c.key} className="num">{r.decision === 'absent' ? '—' : <span className="tb-pip" data-v={r[c.key]}>{r[c.key]}</span>}</td>)}
                 <td className="total">{r.decision === 'absent' ? '—' : r.total}</td>
                 <td><SheetChip sheet={{ ...r, sai_decision: null }} /></td>
                 <td>
                   {r.final_decision === 'promote'
-                    ? <span className="tb-mono" style={{ color: 'var(--green)' }}>→ {r.final_promote_to}</span>
-                    : <span className="tb-mono" style={{ color: 'var(--mute)' }}>{r.final_decision === 'absent' ? 'absent' : 'hold'}</span>}
+                    ? <span style={{ color: 'var(--green)' }}>→ <RankTag rank={r.final_promote_to} /></span>
+                    : <span className="tb-mono" style={{ color: 'var(--mute)' }}>{r.final_decision === 'absent' ? 'absent' : 'no promote'}</span>}
                   {r.sai_decision && <span className="tb-chip tb-chip--signed" style={{ marginLeft: 6 }}>Overturned</span>}
                 </td>
                 <td>
@@ -140,7 +141,17 @@ export default function SaiCompanyReview({ company, quarter, rows, notBoarded, s
             <span className="tb-label">Note (optional)</span>
             <input className="tb-input" value={note} maxLength={500} onChange={(e) => setNote(e.target.value)} />
           </label>
-          <PinPad onComplete={sign} busy={busy} resetKey={resetKey} error={error} />
+          {notBoarded.length > 0 && (
+            <label className="tb-banner" style={{ margin: '10px 0 4px', cursor: 'pointer', alignItems: 'center' }}>
+              <input type="checkbox" checked={ackMissing} onChange={(e) => setAckMissing(e.target.checked)} />
+              <span>
+                <b>{notBoarded.length} cadet{notBoarded.length === 1 ? ' has' : 's have'} not been boarded.</b> Signing closes {COMPANY_LABEL[company]} for {quarter.label} — they can&rsquo;t be boarded after this.
+              </span>
+            </label>
+          )}
+          {notBoarded.length > 0 && !ackMissing
+            ? <p className="tb-sub" style={{ fontSize: 13, textAlign: 'center', marginTop: 14 }}>Check the box to continue.</p>
+            : <PinPad onComplete={sign} busy={busy} resetKey={resetKey} error={error} />}
         </Modal>
       )}
       {printNode}

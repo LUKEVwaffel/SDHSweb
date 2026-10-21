@@ -14,6 +14,8 @@ const FILTERS = [
   { id: 'all', label: 'All' },
 ];
 
+const STATE_LABEL = { todo: 'not boarded', draft: 'draft', done: 'boarded', absent: 'absent' };
+
 export function cadetState(sheet) {
   if (!sheet) return 'todo';
   if (sheet.status === 'draft') return 'draft';
@@ -29,14 +31,14 @@ export default function BoardQueue({ cadets, sheetFor, onOpen }) {
   const counts = useMemo(() => {
     const c = { todo: 0, draft: 0, done: 0, absent: 0, all: cadets.length };
     cadets.forEach((cadet) => { c[cadetState(sheetFor(cadet.id))] += 1; });
-    // Absent cadets still need boarding, so they also count as "to board".
-    c.todo += c.absent;
+    // Drafts and absent cadets still need boarding, so they count as "to board" too.
+    c.todo += c.absent + c.draft;
     return c;
   }, [cadets, sheetFor]);
 
   const rows = cadets.filter((cadet) => {
     const state = cadetState(sheetFor(cadet.id));
-    if (filter === 'todo' && state !== 'todo' && state !== 'absent') return false;
+    if (filter === 'todo' && state === 'done') return false;
     if (filter !== 'todo' && filter !== 'all' && state !== filter) return false;
     if (letFilter !== 'all' && String(normalizeLet(cadet.let_level)) !== letFilter) return false;
     return !q || cadet.name.toLowerCase().includes(q.toLowerCase());
@@ -70,7 +72,10 @@ export default function BoardQueue({ cadets, sheetFor, onOpen }) {
             const sheet = sheetFor(cadet.id);
             const scored = sheet && sheet.decision !== 'absent' && sheet.status === 'complete';
             return (
-              <button type="button" key={cadet.id} className="tb-qrow" onClick={() => onOpen(cadet)} disabled={sheet?.locked && sheet.decision !== 'absent'}>
+              <button
+                type="button" key={cadet.id} className="tb-qrow" onClick={() => onOpen(cadet)} disabled={sheet?.locked && sheet.decision !== 'absent'}
+                aria-label={`${cadet.name}, LET ${normalizeLet(cadet.let_level) ?? 'unknown'}, ${STATE_LABEL[cadetState(sheet)]}`}
+              >
                 <RankInsignia rank={sheet?.rank_before ?? cadet.cadet_rank} size={34} />
                 <div style={{ minWidth: 0 }}>
                   <div className="tb-qrow-name">{cadet.name}</div>

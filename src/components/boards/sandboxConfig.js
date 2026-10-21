@@ -1,6 +1,6 @@
 // Tiny, eagerly-loaded sandbox constants. The fake-data API itself
 // (boardApi.demo.js) stays a lazy chunk that only loads on /boards/sandbox.
-export const STORE_KEY = 'tb-sandbox-v1';
+export const STORE_KEY = 'tb-sandbox-v2';
 
 export const SANDBOX_ROLES = [
   { id: 'alpha', label: 'Alpha laptop' },

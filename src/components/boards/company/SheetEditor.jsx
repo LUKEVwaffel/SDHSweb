@@ -1,7 +1,7 @@
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import {
   CATEGORIES, MAX_TOTAL, allScored, totalScore, promotionOptions, promotionEligibility,
-  defaultPromotion, rankInfo, normalizeLet,
+  defaultPromotion, rankInfo, normalizeLet, SCORE_GUIDE,
 } from '../../../lib/boardRules';
 import RankInsignia from '../RankInsignia';
 import RankPicker from './RankPicker';
@@ -13,41 +13,61 @@ import { Modal } from '../ui';
 // with insignia preview, comment, save). Rules come from boardRules.js and
 // are re-enforced by board_validate_sheet() in the database.
 
+const GUIDE_BY_VALUE = Object.fromEntries(SCORE_GUIDE.map((g) => [g.value, `${g.value} — ${g.label}`]));
+
 function initialScores(sheet) {
   return Object.fromEntries(CATEGORIES.map((c) => [c.key, sheet?.[c.key] ?? null]));
 }
 
-export default function SheetEditor({ cadet, sheet, onSaved, onClose, hasNext }) {
+export default function SheetEditor({ cadet, sheet, onSaved, onDiscarded, onClose }) {
   const [rank, setRank] = useState(sheet?.rank_before ?? cadet.cadet_rank ?? null);
   const [askRank, setAskRank] = useState(!(sheet?.rank_before ?? cadet.cadet_rank));
   const [scores, setScores] = useState(() => initialScores(sheet));
-  const [decision, setDecision] = useState(sheet?.decision === 'absent' ? null : sheet?.decision ?? null);
-  const [promoteTo, setPromoteTo] = useState(sheet?.promote_to ?? null);
+  const [pickedDecision, setDecision] = useState(sheet?.decision === 'absent' ? null : sheet?.decision ?? null);
+  const [pickedPromoteTo, setPromoteTo] = useState(sheet?.promote_to ?? null);
   const [comment, setComment] = useState(sheet?.comment ?? '');
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState('');
   const [confirmAbsent, setConfirmAbsent] = useState(false);
+  const [confirmDiscard, setConfirmDiscard] = useState(false);
+
+  // Each cadet's sheet starts at the top (the editor remounts per cadet).
+  useEffect(() => { window.scrollTo({ top: 0 }); }, []);
 
   const letLevel = normalizeLet(cadet.let_level);
   const total = totalScore(scores);
   const scored = allScored(scores);
   const options = useMemo(() => promotionOptions(rank, letLevel), [rank, letLevel]);
   const elig = promotionEligibility({ scores, currentRank: rank, letLevel });
+  // A pick stops counting the moment it is no longer allowed (a score was
+  // lowered or cleared, or the rank changed) — never leave a greyed-out
+  // button looking selected.
+  const decision = (pickedDecision === 'promote' && !elig.eligible)
+    || (pickedDecision === 'no_promote' && (!scored || !rank)) ? null : pickedDecision;
+  // Same idea for the target rank: if the pick fell out of range, fall back
+  // to the next rank up (the one the card shows as selected).
+  const promoteTo = options.includes(pickedPromoteTo) ? pickedPromoteTo : defaultPromotion(rank, letLevel);
   const promoteInvalid = decision === 'promote' && (!elig.eligible || !options.includes(promoteTo));
   const canComplete = scored && !!rank && !!decision && !promoteInvalid;
+  const unscored = CATEGORIES.filter((c) => !Number.isInteger(scores[c.key])).length;
+  const missing = !rank ? 'Enter the cadet’s current rank'
+    : unscored ? `Score ${unscored} more categor${unscored === 1 ? 'y' : 'ies'}`
+      : !decision ? 'Choose Promote or Do not promote'
+        : null;
 
   function setScore(key, v) {
-    setScores((s) => ({ ...s, [key]: s[key] === v ? null : v }));
+    // Always set, never toggle off: a double-tap on the board laptop must not
+    // silently clear a category.
+    setScores((s) => ({ ...s, [key]: v }));
     setError('');
   }
 
   function choose(d) {
     setDecision(d);
-    if (d === 'promote' && !options.includes(promoteTo)) setPromoteTo(defaultPromotion(rank, letLevel));
     setError('');
   }
 
-  async function save(status, { next = false, absent = false } = {}) {
+  async function save(status, { absent = false } = {}) {
     setSaving(true);
     setError('');
     try {
@@ -61,9 +81,23 @@ export default function SheetEditor({ cadet, sheet, onSaved, onClose, hasNext })
         comment,
         status,
       });
-      onSaved(saved, { next });
+      onSaved(saved);
     } catch (err) {
       setError(err.message);
+    } finally {
+      setSaving(false);
+    }
+  }
+
+  async function discard() {
+    setSaving(true);
+    setError('');
+    try {
+      await boardApi.discardSheet(sheet.id);
+      onDiscarded(cadet);
+    } catch (err) {
+      setError(err.message);
+      setConfirmDiscard(false);
     } finally {
       setSaving(false);
     }
@@ -76,6 +110,7 @@ export default function SheetEditor({ cadet, sheet, onSaved, onClose, hasNext })
       <div className="tb-toolbar" style={{ justifyContent: 'space-between' }}>
         <button type="button" className="tb-btn tb-btn--ghost" onClick={onClose}>← Back to roster</button>
         <div style={{ display: 'flex', gap: 8 }}>
+          {sheet?.status === 'draft' && <button type="button" className="tb-btn tb-btn--danger tb-btn--sm" onClick={() => setConfirmDiscard(true)} disabled={saving}>Discard draft</button>}
           {!sheet?.locked && <button type="button" className="tb-btn tb-btn--sm" onClick={() => setConfirmAbsent(true)} disabled={saving}>Mark absent</button>}
         </div>
       </div>
@@ -88,7 +123,7 @@ export default function SheetEditor({ cadet, sheet, onSaved, onClose, hasNext })
               <h2>Trojan Battalion</h2>
               <p>ARMY JROTC</p>
             </div>
-            <img src="/assets/army-jrotc.png" alt="" width="64" height="64" />
+            <img src="/assets/army-jrotc.png" alt="" width="64" height="52" style={{ objectFit: 'contain' }} />
           </header>
           <div className="tb-paper-title">Boards</div>
 
@@ -106,15 +141,19 @@ export default function SheetEditor({ cadet, sheet, onSaved, onClose, hasNext })
             <div className="tb-pf"><small>Date</small><b>{today}</b></div>
           </div>
 
+          <div className="tb-guide" aria-label="Scoring guide">
+            {SCORE_GUIDE.map((g) => <span key={g.value}><b>{g.value}</b> {g.label}</span>)}
+          </div>
+
           {CATEGORIES.map((c) => (
             <div className="tb-cat" key={c.key}>
               <div>
                 <h4>{c.label}</h4>
-                <p>{c.sub}</p>
+                {c.sub && <p>{c.sub}</p>}
               </div>
               <div className="tb-score" role="group" aria-label={`${c.label} score`}>
                 {[0, 1, 2, 3].map((v) => (
-                  <button key={v} type="button" data-v={v} aria-pressed={scores[c.key] === v} onClick={() => setScore(c.key, v)}>{v}</button>
+                  <button key={v} type="button" data-v={v} aria-pressed={scores[c.key] === v} onClick={() => setScore(c.key, v)} title={GUIDE_BY_VALUE[v]}>{v}</button>
                 ))}
               </div>
             </div>
@@ -167,13 +206,9 @@ export default function SheetEditor({ cadet, sheet, onSaved, onClose, hasNext })
           {error && <div className="tb-banner tb-banner--error" role="alert">{error}</div>}
 
           <div style={{ display: 'grid', gap: 8 }}>
-            {hasNext && (
-              <button type="button" className="tb-btn tb-btn--gold tb-btn--lg" disabled={!canComplete || saving} onClick={() => save('complete', { next: true })}>
-                {saving ? <span className="tb-spin" /> : 'Complete & next cadet →'}
-              </button>
-            )}
-            <button type="button" className={`tb-btn ${hasNext ? '' : 'tb-btn--gold tb-btn--lg'}`} disabled={!canComplete || saving} onClick={() => save('complete')}>
-              Complete sheet
+            {missing && <p className="tb-decide-note" role="status">● {missing} to complete this sheet</p>}
+            <button type="button" className="tb-btn tb-btn--gold tb-btn--lg" disabled={!canComplete || saving} onClick={() => save('complete')}>
+              {saving ? <span className="tb-spin" /> : 'Complete sheet'}
             </button>
             <button type="button" className="tb-btn tb-btn--ghost" disabled={saving} onClick={() => save('draft')}>Save as draft</button>
           </div>
@@ -192,6 +227,18 @@ export default function SheetEditor({ cadet, sheet, onSaved, onClose, hasNext })
         </Modal>
       )}
 
+      {confirmDiscard && (
+        <Modal label="Discard draft" onClose={() => setConfirmDiscard(false)}>
+          <div className="tb-eyebrow">Confirm</div>
+          <h3 className="tb-h1" style={{ fontSize: 28 }}>Discard {cadet.name}&rsquo;s draft?</h3>
+          <p className="tb-sub">The scores on this draft are deleted. {cadet.name.split(' ')[0]} goes back to &ldquo;Not boarded&rdquo;.</p>
+          <div style={{ display: 'flex', gap: 8, justifyContent: 'flex-end', marginTop: 18 }}>
+            <button type="button" className="tb-btn tb-btn--ghost" onClick={() => setConfirmDiscard(false)}>Keep draft</button>
+            <button type="button" className="tb-btn tb-btn--danger" disabled={saving} onClick={discard}>Discard</button>
+          </div>
+        </Modal>
+      )}
+
       {confirmAbsent && (
         <Modal label="Mark absent" onClose={() => setConfirmAbsent(false)}>
           <div className="tb-eyebrow">Confirm</div>
@@ -199,7 +246,7 @@ export default function SheetEditor({ cadet, sheet, onSaved, onClose, hasNext })
           <p className="tb-sub">Recorded on this session&rsquo;s sheets. They can still be boarded later this quarter.</p>
           <div style={{ display: 'flex', gap: 8, justifyContent: 'flex-end', marginTop: 18 }}>
             <button type="button" className="tb-btn tb-btn--ghost" onClick={() => setConfirmAbsent(false)}>Cancel</button>
-            <button type="button" className="tb-btn tb-btn--gold" disabled={saving} onClick={() => save('complete', { absent: true, next: hasNext })}>Mark absent</button>
+            <button type="button" className="tb-btn tb-btn--gold" disabled={saving} onClick={() => save('complete', { absent: true })}>Mark absent</button>
           </div>
         </Modal>
       )}

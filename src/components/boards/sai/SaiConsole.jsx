@@ -115,8 +115,15 @@ export default function SaiConsole({ canManageQuarters = true, readOnly = false 
         <div className="tb-grid tb-grid-4">
           {COMPANIES.map((c) => {
             const s = companyStats(c);
-            const status = s.signoff ? 'Signed off' : s.unsigned ? `${s.unsigned} awaiting board signatures` : s.boarded ? 'Ready for your signature' : 'Not started';
-            const chip = s.signoff ? 'tb-chip--signed' : s.unsigned ? 'tb-chip--draft' : s.boarded ? 'tb-chip--promote' : 'tb-chip--todo';
+            const left = s.notBoarded.length;
+            const status = s.signoff ? 'Signed off'
+              : s.unsigned ? `${s.unsigned} awaiting board signatures`
+                : !s.boarded ? 'Not started'
+                  : left ? `Still boarding · ${left} left`
+                    : 'Ready for your signature';
+            const chip = s.signoff ? 'tb-chip--signed'
+              : s.unsigned || (s.boarded && left) ? 'tb-chip--draft'
+                : s.boarded ? 'tb-chip--promote' : 'tb-chip--todo';
             return (
               <button key={c} type="button" className="tb-card tb-co-card" onClick={() => setOpen(c)}>
                 <span className="tb-co-letter" aria-hidden="true">{c[0].toUpperCase()}</span>
@@ -131,7 +138,7 @@ export default function SaiConsole({ canManageQuarters = true, readOnly = false 
                   <span style={{ width: `${s.roster.length ? (s.promote / s.roster.length) * 100 : 0}%`, background: 'var(--green)' }} />
                   <span style={{ width: `${s.roster.length ? ((s.boarded - s.promote) / s.roster.length) * 100 : 0}%`, background: 'var(--red)' }} />
                 </div>
-                <div className="tb-qrow-meta">{s.promote} PROMOTE · {s.boarded - s.promote} HOLD · {s.notBoarded.length} NOT BOARDED</div>
+                <div className="tb-qrow-meta">{s.promote} PROMOTE · {s.boarded - s.promote} NO PROMOTE · {s.notBoarded.length} NOT BOARDED</div>
                 <div style={{ marginTop: 14 }}><span className={`tb-chip ${chip}`}>{status}</span></div>
               </button>
             );

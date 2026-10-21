@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
+import RankInsignia from './RankInsignia';
 
 // Small shared pieces for /boards. Kept together — each is tiny and only
 // used inside this feature.
@@ -124,4 +125,15 @@ export function SheetChip({ sheet }) {
   if (d === 'absent') return <span className="tb-chip tb-chip--absent">Absent</span>;
   if (d === 'promote') return <span className="tb-chip tb-chip--promote">Promote{sheet.locked ? ' · signed' : ''}</span>;
   return <span className="tb-chip tb-chip--hold">No promote{sheet.locked ? ' · signed' : ''}</span>;
+}
+
+/** Compact rank for tables: tiny insignia + code (full name on hover). */
+export function RankTag({ rank }) {
+  if (!rank) return <span className="tb-mono" style={{ color: 'var(--faint)' }}>—</span>;
+  return (
+    <span className="tb-ranktag">
+      <RankInsignia rank={rank} size={15} />
+      <span className="tb-mono">{rank}</span>
+    </span>
+  );
 }

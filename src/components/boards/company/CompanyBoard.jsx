@@ -60,14 +60,15 @@ export default function CompanyBoard({ me }) {
     setEditing({ cadet, sheet: s && !s.locked ? s : null });
   }
 
-  async function onSaved(saved, { next }) {
-    toast(saved.decision === 'absent' ? `${saved.cadet_name} marked absent` : `${saved.cadet_name} saved`);
-    await load();
-    if (next) {
-      const after = queueOrder.filter((c) => c.id !== saved.cadet_id);
-      if (after.length) { openCadet(after[0]); return; }
-    }
+  // Every save (complete, draft, absent) lands back on the company's
+  // "To board" list so the board picks the next cadet themselves.
+  async function onSaved(saved) {
+    toast(saved.decision === 'absent' ? `${saved.cadet_name} marked absent`
+      : saved.status === 'draft' ? `${saved.cadet_name} saved as draft` : `${saved.cadet_name} boarded`);
     setEditing(null);
+    setTab('board');
+    window.scrollTo({ top: 0 });
+    await load();
   }
 
   if (state.loading) return <div className="tb-shell"><p className="tb-sub" style={{ padding: 40 }}><span className="tb-spin" /> Loading {COMPANY_LABEL[company]} Company…</p></div>;
@@ -94,8 +95,8 @@ export default function CompanyBoard({ me }) {
           key={editing.cadet.id}
           cadet={editing.cadet}
           sheet={editing.sheet}
-          hasNext={queueOrder.some((c) => c.id !== editing.cadet.id)}
           onSaved={onSaved}
+          onDiscarded={async (cadet) => { toast(`${cadet.name}'s draft discarded`); setEditing(null); await load(); }}
           onClose={() => setEditing(null)}
         />
         {toastNode}
@@ -131,7 +132,7 @@ export default function CompanyBoard({ me }) {
         ? <BoardQueue cadets={cadets} sheetFor={sheetFor} onOpen={openCadet} />
         : <div className="tb-empty"><b>{signoff ? 'Boards complete' : 'Waiting on Chief'}</b>{signoff ? 'See Signed sheets.' : 'No board quarter is open.'}</div>)}
       {tab === 'ranks' && <RanksTab cadets={cadets} onChanged={load} toast={toast} />}
-      {tab === 'sign' && <SignTab session={openSession} lastSealed={lastSealed} sheets={sheets} members={members} onSigned={() => { toast('Signature recorded'); load(); }} />}
+      {tab === 'sign' && <SignTab session={openSession} lastSealed={lastSealed} sheets={sheets} members={members} remaining={queueOrder.length} onSigned={() => { toast('Signature recorded'); load(); }} onOpenDraft={(id) => { const c = cadets.find((x) => x.id === id); if (c) openCadet(c); }} onEditSheet={(id) => { const c = cadets.find((x) => x.id === id); if (c) openCadet(c); }} />}
       {tab === 'archive' && <ArchiveTab quarterId={quarter?.id} sessions={sessions} />}
       {toastNode}
     </div>

@@ -3,13 +3,24 @@
 // supabase/company_boards.sql; if a rule changes here it MUST change there too
 // (the database is what actually enforces it, this module drives the UI).
 
-/** The five scored categories, in paper-sheet order. Each is scored 0–3. */
+/**
+ * The five scored categories, in paper-sheet order, worded exactly as the
+ * paper sheet words them. Each is scored 0–3.
+ */
 export const CATEGORIES = [
   { key: 'score_facing',  label: 'Facing Movements', sub: 'Left, Right, About' },
-  { key: 'score_creed',   label: 'Cadet Creed',      sub: 'Recited from memory' },
-  { key: 'score_uniform', label: 'Wear of Uniform',  sub: 'Khakis + polo, worn to standard' },
-  { key: 'score_jrotc',   label: 'JROTC Knowledge',  sub: 'Program, chain of command, history' },
-  { key: 'score_class',   label: 'Class Knowledge',  sub: 'Current LET curriculum' },
+  { key: 'score_creed',   label: 'Cadet Creed',      sub: null },
+  { key: 'score_uniform', label: 'Wear of Uniform',  sub: null },
+  { key: 'score_jrotc',   label: 'JROTC Knowledge',  sub: null },
+  { key: 'score_class',   label: 'Class Knowledge',  sub: null },
+];
+
+/** Shared meaning of each point value, so every company scores alike. */
+export const SCORE_GUIDE = [
+  { value: 3, label: 'To standard' },
+  { value: 2, label: 'Minor errors' },
+  { value: 1, label: 'Major errors' },
+  { value: 0, label: 'Could not perform' },
 ];
 
 export const MAX_PER_CATEGORY = 3;
@@ -110,6 +121,9 @@ export function promotionEligibility({ scores, currentRank, letLevel }) {
   if (!let_) return { eligible: false, reason: 'LET level missing — fix it on the roster first' };
   if (!currentRank) return { eligible: false, reason: 'Enter current rank first' };
   if (!allScored(scores)) return { eligible: false, reason: 'Score all five categories' };
+  if (rankInfo(currentRank)?.kind === 'officer') {
+    return { eligible: false, reason: 'Cadet officers aren’t promoted by company boards' };
+  }
   if (promotionOptions(currentRank, let_).length === 0) {
     return { eligible: false, reason: `Already at or above the LET ${let_} maximum` };
   }

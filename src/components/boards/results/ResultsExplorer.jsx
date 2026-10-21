@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import { boardApi } from '../boardApi';
 import { usePrintSheets } from '../PrintSheets';
-import { COMPANY_LABEL, SheetChip, Modal, fmtTime } from '../ui';
+import { COMPANY_LABEL, RankTag, SheetChip, Modal, fmtTime } from '../ui';
 import { downloadCsv } from './csv';
 import { CATEGORIES, MAX_TOTAL } from '../../../lib/boardRules';
 import RankInsignia from '../RankInsignia';
@@ -70,7 +70,7 @@ function Insights({ rows }) {
         <div style={{ display: 'flex', alignItems: 'flex-end', gap: 3, height: 96 }} aria-label="Histogram of total scores">
           {hist.map((n, i) => (
             <div key={i} title={`${i}/${MAX_TOTAL}: ${n} cadet${n === 1 ? '' : 's'}`} style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 4 }}>
-              <div style={{ width: '100%', height: `${(n / peak) * 80}px`, minHeight: n ? 3 : 1, borderRadius: 3, background: n ? (i >= 12 ? 'var(--green)' : i >= 10 ? 'var(--blue)' : 'var(--amber)') : 'rgba(255,255,255,0.06)', transition: 'height 700ms var(--ease)' }} />
+              <div style={{ width: '100%', height: `${(n / peak) * 80}px`, minHeight: n ? 3 : 1, borderRadius: 3, background: n ? 'linear-gradient(180deg, var(--gold-hi), var(--gold))' : 'rgba(255,255,255,0.06)', transition: 'height 700ms var(--ease)' }} />
               <span className="tb-mono" style={{ fontSize: 9, color: 'var(--faint)' }}>{i}</span>
             </div>
           ))}
@@ -193,7 +193,7 @@ export default function ResultsExplorer({ initialQuarterId = null }) {
                   <td><b>{r.cadet_name}</b>{r.comment && <span title="Has comment" style={{ color: 'var(--gold)', marginLeft: 6 }}>✎</span>}</td>
                   <td>{COMPANY_LABEL[r.company]}</td>
                   <td className="num">{r.let_level}</td>
-                  <td className="tb-mono">{r.rank_before}{r.final_promote_to && <span style={{ color: 'var(--green)' }}> → {r.final_promote_to}</span>}</td>
+                  <td style={{ whiteSpace: 'nowrap' }}><RankTag rank={r.rank_before} />{r.final_promote_to && <span style={{ color: 'var(--green)' }}> → <RankTag rank={r.final_promote_to} /></span>}</td>
                   {CATEGORIES.map((c) => <td key={c.key} className="num">{r.decision === 'absent' ? '—' : <span className="tb-pip" data-v={r[c.key]}>{r[c.key] ?? '·'}</span>}</td>)}
                   <td className="total">{r.decision === 'absent' ? '—' : r.total}</td>
                   <td><SheetChip sheet={r} />{r.sai_decision && <span className="tb-chip tb-chip--signed" style={{ marginLeft: 6 }}>SAI</span>}</td>

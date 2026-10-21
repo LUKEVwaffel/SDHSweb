@@ -25,12 +25,18 @@ function makeRoster() {
         cadet_rank: ranks[i % ranks.length], is_board_seat: false,
       });
     }
+    // Delta carries a second Captain who is NOT on the board (like the real
+    // roster) — boarded, but already above any LET max, so never promotable.
+    if (company === 'delta') {
+      out.push({ id: uid(), company, name: 'Harper Vance', let_level: '3', grade: '11', gender: 'F', cadet_rank: 'CPT', is_board_seat: false });
+    }
     ['co', 'xo', '1sg'].forEach((seat, k) => out.push({
       id: uid(), company, name: `${['Cpt', '1Lt', '1Sg'][k]} ${LAST[(ci * 4 + k) % LAST.length]} (${seat.toUpperCase()})`,
       let_level: '3', grade: '11', cadet_rank: ['CPT', '1LT', '1SG'][k], is_board_seat: true,
     }));
   });
-  return out;
+  const lastName = (n) => n.split(' ').at(-1).toLowerCase();
+  return out.sort((a, b) => lastName(a.name).localeCompare(lastName(b.name)) || a.name.localeCompare(b.name));
 }
 
 function loadStored() {
@@ -114,7 +120,7 @@ export function createDemoApi(roleParam) {
     signIn: () => Promise.resolve(),
     signOut: () => { window.location.href = '/boards/sandbox'; return Promise.resolve(); },
     session: () => Promise.resolve({ demo: true }),
-    whoami: () => delay([{ ...me, is_s6: role === 'viewer' }]),
+    whoami: () => delay([{ ...me, is_s6: false }]),
     roster: (company) => delay(db.roster.filter((c) => c.company === company)),
     setRank: (id, rank) => { db.roster.find((c) => c.id === id).cadet_rank = rank; return delay(null); },
     currentSession: () => delay(openSession(me.company)),
@@ -155,8 +161,13 @@ export function createDemoApi(roleParam) {
     },
     saiSignoff: (_q, company, pin) => {
       if (pin !== '1234') return fail('invalid', { error: 'invalid', remaining: 4 });
-      const promos = results().filter((r) => r.company === company && r.final_decision === 'promote').length;
-      const so = { id: uid(), company, signed_name: 'Chief (SAI)', signed_at: now(), promotions_applied: promos };
+      // Same as board-sai-signoff: write each final promotion to the roster.
+      const promoted = results().filter((r) => r.company === company && r.final_decision === 'promote');
+      promoted.forEach((r) => {
+        const cadet = db.roster.find((c) => c.id === r.cadet_id);
+        if (cadet) cadet.cadet_rank = r.final_promote_to;
+      });
+      const so = { id: uid(), company, signed_name: 'Chief (SAI)', signed_at: now(), promotions_applied: promoted.length };
       db.signoffs.push(so);
       return delay({ ok: true, signoff: so });
     },
