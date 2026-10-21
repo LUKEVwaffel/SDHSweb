@@ -99,6 +99,18 @@ function AuthRow({ r, open, onToggle, onChanged }) {
   const [flash, setFlash] = useState('');
   const [tempPassword, setTempPassword] = useState('');
   const [confirmDelete, setConfirmDelete] = useState('');
+  const [nameInput, setNameInput] = useState('');
+
+  async function setName() {
+    const trimmed = nameInput.trim();
+    if (!trimmed) return;
+    setBusy('name'); setFlash('');
+    const { data, error } = await SB.functions.invoke('admin-set-auth-display-name', { body: { user_id: r.id, display_name: trimmed } });
+    setBusy('');
+    if (error || data?.error) { setFlash(`Failed: ${data?.error || error.message}`); return; }
+    setNameInput('');
+    onChanged();
+  }
 
   async function resetPassword() {
     setBusy('reset'); setFlash(''); setTempPassword('');
@@ -156,6 +168,18 @@ function AuthRow({ r, open, onToggle, onChanged }) {
           <div style={{ fontFamily: mono, fontSize: 11, color: P.mute, lineHeight: 1.7 }}>
             created {fmtTime(r.created_at)} · confirmed {r.email_confirmed_at ? 'yes' : 'no'} · last sign-in {fmtTime(r.last_sign_in_at)}
           </div>
+
+          {!r.display_name && (
+            <div>
+              <Label>NAME THIS LOGIN</Label>
+              <div style={{ display: 'flex', gap: sp[2], alignItems: 'center', marginTop: sp[1] }}>
+                <Input value={nameInput} onChange={(e) => setNameInput(e.target.value)} placeholder="Full name" style={{ maxWidth: 260 }} />
+                <Btn size="sm" variant="gold" disabled={busy === 'name' || !nameInput.trim()} onClick={setName}>
+                  {busy === 'name' ? 'SAVING…' : 'SET NAME'}
+                </Btn>
+              </div>
+            </div>
+          )}
 
           <div>
             <Label>REVOKE A PORTAL</Label>

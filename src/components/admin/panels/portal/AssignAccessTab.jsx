@@ -1,4 +1,4 @@
-import { useState, useCallback, useRef } from 'react';
+import { useState, useEffect } from 'react';
 import { supabase as SB } from '../../../../lib/supabaseClient';
 import { P, mono, sp } from '../../theme';
 import { Btn, Input, Label } from '../../shared/ui';
@@ -11,6 +11,12 @@ import { Btn, Input, Label } from '../../shared/ui';
 // over the three that already exist. Each portal's own tab in this panel
 // remains the place to view rosters, deactivate, or delete an account; this
 // tab only grants (never revokes) — see AUTH tab for that.
+//
+// The person picked here MUST already have a Supabase Auth login — the
+// picker below is admin_auth_directory(), not a free-text name+email form.
+// Creating a brand-new login (and naming it, if it doesn't have a name yet)
+// only happens on the AUTH tab; this tab can only grant more portals to
+// someone who already exists there.
 //
 // Email Review / Ball Payments / Rifle Signups used to be ONE bundled
 // "Reviewer Portal" checkbox — one grant meant all three, with no way to
@@ -52,12 +58,11 @@ const resultRow = (tone) => ({
 const INITIAL_CHECKED = { email_review: false, ball_ops: false, rifle_signups: false, female_dress: false, male_guest_attire: false, rifle_admin: false };
 
 export default function AssignAccessTab() {
-  const [name, setName] = useState('');
-  const [email, setEmail] = useState('');
+  const [directory, setDirectory] = useState(null);
+  const [dirErr, setDirErr] = useState('');
   const [search, setSearch] = useState('');
-  const [matches, setMatches] = useState([]);
   const [showMatches, setShowMatches] = useState(false);
-  const searchTimer = useRef(null);
+  const [selected, setSelected] = useState(null);
   const [checked, setChecked] = useState(INITIAL_CHECKED);
   const [title, setTitle] = useState('');
   const [pin, setPin] = useState('');
@@ -66,38 +71,40 @@ export default function AssignAccessTab() {
   const [results, setResults] = useState(null);
   const [formErr, setFormErr] = useState('');
 
+  useEffect(() => {
+    (async () => {
+      const { data, error } = await SB.rpc('admin_auth_directory');
+      if (error) { setDirErr(error.message); setDirectory([]); return; }
+      setDirectory(data || []);
+    })();
+  }, []);
+
   const toggle = (key) => setChecked((c) => ({ ...c, [key]: !c[key] }));
   const anyChecked = Object.values(checked).some(Boolean);
   const anyReviewer = checked.email_review || checked.ball_ops || checked.rifle_signups;
 
-  const runSearch = useCallback((term) => {
-    clearTimeout(searchTimer.current);
-    if (!term.trim()) { setMatches([]); return; }
-    searchTimer.current = setTimeout(async () => {
-      const { data } = await SB.from('cadet_consent')
-        .select('id, name, school_email')
-        .ilike('name', `%${term.trim()}%`)
-        .order('name')
-        .limit(8);
-      setMatches(data || []);
-    }, 200);
-  }, []);
+  const term = search.trim().toLowerCase();
+  const matches = term && directory
+    ? directory.filter((d) => (d.display_name || '').toLowerCase().includes(term) || d.email.toLowerCase().includes(term)).slice(0, 8)
+    : [];
 
-  function pickPerson(person) {
-    setName(person.name || '');
-    setEmail(person.school_email || '');
+  function pickPerson(account) {
+    setSelected(account);
     setSearch('');
-    setMatches([]);
     setShowMatches(false);
   }
 
   async function submit() {
     setFormErr('');
     setResults(null);
-    const trimmedName = name.trim();
-    const trimmedEmail = email.trim();
-    if (!trimmedName || !trimmedEmail || !trimmedEmail.includes('@')) {
-      setFormErr('Name and a valid email are both required.');
+    if (!selected) {
+      setFormErr('Pick an existing login above — new people are added on the AUTH tab.');
+      return;
+    }
+    const trimmedName = (selected.display_name || '').trim();
+    const trimmedEmail = selected.email.trim();
+    if (!trimmedName) {
+      setFormErr(`${trimmedEmail} has no name yet — name it on the AUTH tab first.`);
       return;
     }
     if (!anyChecked) {
@@ -158,27 +165,29 @@ export default function AssignAccessTab() {
     if (settled.every((r) => r.ok)) {
       setChecked(INITIAL_CHECKED);
       setPin(''); setTitle(''); setActivateNow(false);
+      setSelected(null);
     }
   }
 
   return (
     <div style={{ maxWidth: 640 }}>
       <p style={{ fontFamily: mono, fontSize: 12, color: P.mute, margin: `0 0 ${sp[4]}px`, maxWidth: 520 }}>
-        Grant one person any combination of the small staff portals in a single submit. The three Reviewer boxes share one
-        login+PIN but are independently grantable — checking Ball Payments does not also grant Email Review. Reviewer
-        needs the person to already have a login — create one on the AUTH tab first if they don't. Dress/Attire and
-        Rifle Team Admin create the sign-in account for you.
+        Grant an existing login any combination of the small staff portals in a single submit. The three Reviewer boxes
+        share one login+PIN but are independently grantable — checking Ball Payments does not also grant Email Review.
+        This tab never creates a new person — pick a login that already exists below, or create one on the AUTH tab first.
       </p>
 
       <div style={{ position: 'relative', marginBottom: sp[3] }}>
-        <Label>FIND IN ROSTER (optional — picks name + email for you)</Label>
+        <Label>FIND AN EXISTING LOGIN</Label>
         <Input
           value={search}
-          onChange={(e) => { setSearch(e.target.value); setShowMatches(true); runSearch(e.target.value); }}
+          onChange={(e) => { setSearch(e.target.value); setShowMatches(true); }}
           onFocus={() => setShowMatches(true)}
           onBlur={() => setTimeout(() => setShowMatches(false), 150)}
-          placeholder="Type a cadet's name…"
+          placeholder="Type a name or email…"
+          disabled={directory === null}
         />
+        {dirErr && <div style={{ fontFamily: mono, fontSize: 11, color: P.red, marginTop: sp[1] }}>{dirErr}</div>}
         {showMatches && matches.length > 0 && (
           <div style={{
             position: 'absolute', top: '100%', left: 0, right: 0, zIndex: 5, marginTop: 4,
@@ -192,20 +201,20 @@ export default function AssignAccessTab() {
                 onMouseEnter={(e) => { e.currentTarget.style.background = P.deep; }}
                 onMouseLeave={(e) => { e.currentTarget.style.background = 'transparent'; }}
               >
-                <div style={{ fontFamily: mono, fontSize: 13, color: P.cream }}>{m.name}</div>
-                <div style={{ fontFamily: mono, fontSize: 11, color: P.mute, marginTop: 1 }}>{m.school_email || 'no school email on file'}</div>
+                <div style={{ fontFamily: mono, fontSize: 13, color: P.cream }}>{m.display_name || <span style={{ color: P.faint }}>Unnamed</span>}</div>
+                <div style={{ fontFamily: mono, fontSize: 11, color: P.mute, marginTop: 1 }}>{m.email}</div>
               </div>
             ))}
           </div>
         )}
       </div>
 
-      {name && email && (
+      {selected && (
         <div style={{ display: 'flex', alignItems: 'center', gap: sp[2], marginBottom: sp[4], fontFamily: mono, fontSize: 12, color: P.mute }}>
-          Selected: <span style={{ color: P.cream }}>{name}</span> — {email}
+          Selected: <span style={{ color: P.cream }}>{selected.display_name || 'Unnamed'}</span> — {selected.email}
           <button
             type="button"
-            onClick={() => { setName(''); setEmail(''); }}
+            onClick={() => setSelected(null)}
             style={{ background: 'none', border: 'none', color: P.gold, fontFamily: mono, fontSize: 11, cursor: 'pointer', padding: 0 }}
           >
             change

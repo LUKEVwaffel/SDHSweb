@@ -22,7 +22,17 @@
 -- actions do not touch it. DISPATCH access stays the more guarded population
 -- managed from the People panel, same separation every other file in this
 -- system already keeps.
+--
+-- u.raw_user_meta_data->>'display_name' is the LAST fallback in the coalesce
+-- below — admin-set-auth-display-name.ts writes it for a login that has no
+-- portal row yet (otherwise shown as "Unnamed" on the AUTH tab). A portal's
+-- own display_name always wins once one exists.
 -- ============================================================================
+
+-- Drop first: the return columns have changed across versions, and Postgres
+-- refuses CREATE OR REPLACE when the OUT row type differs (42P13). The
+-- revoke/grant below re-applies permissions. Safe to re-run.
+drop function if exists public.admin_auth_directory();
 
 create or replace function public.admin_auth_directory()
 returns table (
@@ -47,7 +57,7 @@ returns table (
 language sql stable security definer set search_path = public as $$
   select
     u.id, u.email,
-    coalesce(ar.display_name, er.display_name, ra.display_name, bds.name) as display_name,
+    coalesce(ar.display_name, er.display_name, ra.display_name, bds.name, u.raw_user_meta_data->>'display_name') as display_name,
     u.created_at, u.email_confirmed_at, u.last_sign_in_at,
     ar.role, ar.must_change_password,
     er.active, er.must_change_password,
