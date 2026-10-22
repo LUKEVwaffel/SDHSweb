@@ -7,7 +7,7 @@ import { OPTIC_EVENT_TITLE, chunkIds, backfillGridThumbs } from '../../lib/optic
 import { removePhotoFiles } from '../../lib/photoStorage';
 import { installPwaHooks, isStandalone, isIos } from './pwa';
 import { usePwaUpdate, PwaUpdateBar } from './usePwaUpdate';
-import { Albums, AlbumJump, groupByEvent, groupByTeam, matchesTeam, albumAnchor, TEAM_FILTERS } from './PwaAlbums';
+import { Albums, AlbumJump, subEventLabel, groupByEvent, groupByTeam, matchesTeam, albumAnchor, TEAM_FILTERS } from './PwaAlbums';
 import { PhotoViewer } from './PwaPhotoViewer';
 import './lukepwa.css';
 
@@ -452,7 +452,7 @@ function LukePwa() {
   const viewerList = useMemo(() => viewerGroups.flatMap((g) => g.photos), [viewerGroups]);
   const groupNameOf = useMemo(() => {
     const m = new Map();
-    for (const g of viewerGroups) for (const p of g.photos) m.set(p.id, g.name);
+    for (const g of viewerGroups) for (const p of g.photos) m.set(p.id, subEventLabel(g));
     return (p) => m.get(p.id);
   }, [viewerGroups]);
   const closeViewer = useCallback(() => setViewer(null), []);
@@ -1046,7 +1046,7 @@ function BulkDrawer({ open, count, subEvents, onTeam, onSubEvent, onClearSub, on
           </span>
         )}
         {subEvents.map((s) => (
-          <button key={s.id} className="lp-chip" onClick={() => onSubEvent(s)}>{s.name}</button>
+          <button key={s.id} className="lp-chip" onClick={() => onSubEvent(s)}>{subEventLabel(s)}</button>
         ))}
         {subEvents.length > 0 && <button className="lp-chip" onClick={onClearSub}>✕ CLEAR</button>}
       </div>
@@ -1114,7 +1114,7 @@ function CompControl({ eventId, eventTitle }) {
       // Fresh comp with no stations yet: set up the standard ones. A comp
       // that already has its own list is left alone. Best-effort; the
       // EVENTS tab offers the same button if this doesn't land.
-      const subs = await SB.from('raider_sub_events').select('name').eq('event_id', ev.id);
+      const subs = await SB.from('raider_sub_events').select('name, team').eq('event_id', ev.id);
       if (!subs.error && !(subs.data || []).length) {
         const { data: sess } = await SB.auth.getSession();
         await addStandardEvents(ev.id, [], sess.session?.user?.email);
