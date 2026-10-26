@@ -84,7 +84,7 @@ export default function TvRifleTeamScreen() {
             fontFamily: mono, fontSize: fs.sm, color: P.gold,
             letterSpacing: '0.34em', textTransform: 'uppercase',
           }}>
-            {RIFLE_TEAM_SEASON} Rifle Team
+            {RIFLE_TEAM_SEASON} JV Rifle Team
           </div>
 
           <h1 className="rifle-rise" style={{
@@ -93,7 +93,7 @@ export default function TvRifleTeamScreen() {
             lineHeight: 0.98, color: P.cream, letterSpacing: '-0.02em',
           }}>
             Congratulations,<br />
-            <span style={{ color: P.bright }}>Sharpshooters</span>
+            <span style={{ color: P.bright }}>New JV Shooters</span>
           </h1>
 
           <div className="rifle-rise" style={{

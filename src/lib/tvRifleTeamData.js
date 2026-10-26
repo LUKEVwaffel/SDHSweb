@@ -1,4 +1,4 @@
-// 2026-2027 Rifle Team selections — drives the /tv rifle congrats takeover
+// 2026-2027 JV Rifle Team selections — drives the /tv rifle congrats takeover
 // (TvRifleTeamScreen). First name + last initial only, as announced.
 
 export const RIFLE_TEAM_SEASON = '2026–2027';

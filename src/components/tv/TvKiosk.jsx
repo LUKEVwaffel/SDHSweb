@@ -19,7 +19,7 @@ const TAKEOVER_MODE = true;
 // to restore the rafting takeover.
 const RAIDER_CONGRATS_OUTSIDE_OVERRIDE = true;
 
-// 2026-2027 Rifle Team selections: /tv congratulates the new roster. Takes
+// 2026-2027 JV Rifle Team selections: /tv congratulates the new roster. Takes
 // precedence over the Raider congrats board; flip to false (or delete) to
 // restore it.
 const RIFLE_TEAM_CONGRATS_OVERRIDE = true;
