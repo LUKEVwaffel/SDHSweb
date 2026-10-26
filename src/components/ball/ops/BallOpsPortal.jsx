@@ -41,7 +41,7 @@ function csvCell(v) {
 // though the DB column name is the same on the guest side.
 const FIELD_TARGETS = {
   cash_received: { table: 'ball_signups', column: 'cash_received', label: 'cash payment', notify: 'cash' },
-  field_trip_form_received: { table: 'ball_signups', column: 'field_trip_form_received', label: 'field trip form', notify: 'form' },
+  field_trip_form_received: { table: 'ball_signups', column: 'field_trip_form_received', label: 'host field trip form', notify: 'form' },
   friend_cash_received: { table: 'ball_guests', column: 'friend_cash_received', label: "guest's cash payment", notify: 'friend_cash' },
   guest_field_trip_form_received: { table: 'ball_guests', column: 'field_trip_form_received', label: "guest's field trip form", notify: 'guest_form' },
 };
@@ -183,7 +183,7 @@ export default function BallOpsPortal() {
     const onGuest = target.table === 'ball_guests';
     const current = onGuest ? guest?.[target.column] : row[target.column];
     const turningOn = !current;
-    const who = onGuest ? (guest?.name || 'guest') : `${row.cadet_name}${guest?.name ? ` (+ ${guest.name})` : ''}`;
+    const who = onGuest ? (guest?.name || 'guest') : row.cadet_name;
 
     setConfirmTarget(null);
     setBusyId(row.id);
@@ -400,7 +400,8 @@ function LookupRow({ r, guest, onOpen, tone }) {
   const friendPaysOwnCash = guest?.guest_type === 'friend' && guest?.friend_payment_method === 'self_pays';
   const cashDone = r.cash_received && (!friendPaysOwnCash || guest.friend_cash_received);
   const guestNeedsOwnForm = !!guest && guest.field_trip_form_required;
-  const formDone = !r.field_trip_form_required || (r.field_trip_form_received && (!guestNeedsOwnForm || guest.field_trip_form_received));
+  const hostFormDone = !!r.field_trip_form_received;
+  const guestFormDone = !!guest?.field_trip_form_received;
   const awaitingGuest = r.status === 'guest_pending';
 
   return (
@@ -418,7 +419,8 @@ function LookupRow({ r, guest, onOpen, tone }) {
       <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap', justifyContent: 'flex-end', flexShrink: 0 }}>
         {awaitingGuest && <span style={chip('mute')}>awaiting guest</span>}
         <span style={chip(cashDone ? 'green' : 'accent')}>{cashDone ? 'paid' : `owes ${money(r.amount_due) || '?'}`}</span>
-        {r.field_trip_form_required && <span style={chip(formDone ? 'green' : 'accent')}>{formDone ? 'form in' : 'form out'}</span>}
+        {r.field_trip_form_required && <span style={chip(hostFormDone ? 'green' : 'accent')}>{guest ? 'host ' : ''}form {hostFormDone ? 'in' : 'out'}</span>}
+        {guestNeedsOwnForm && <span style={chip(guestFormDone ? 'green' : 'accent')}>guest form {guestFormDone ? 'in' : 'out'}</span>}
       </div>
     </button>
   );
@@ -449,7 +451,7 @@ function PersonDetail({ r, guest, busy, confirming, onRequestToggle, onConfirm, 
   const confirmOnGuest = confirmTarget?.table === 'ball_guests';
   const confirmCurrent = confirmTarget ? (confirmOnGuest ? guest?.[confirmTarget.column] : r[confirmTarget.column]) : false;
   const confirmTurningOn = confirming ? !confirmCurrent : false;
-  const who = confirmOnGuest ? (guest?.name || 'guest') : `${r.cadet_name}${guest?.name ? ` (+ ${guest.name})` : ''}`;
+  const who = confirmOnGuest ? (guest?.name || 'guest') : r.cadet_name;
 
   return (
     <div>
@@ -491,11 +493,8 @@ function PersonDetail({ r, guest, busy, confirming, onRequestToggle, onConfirm, 
         <div style={{ marginTop: 20, paddingTop: 18, borderTop: '1px dashed var(--rv-border)' }}>
           <div className="bp-section-head" style={{ marginBottom: 12 }}>Options</div>
 
-          {awaitingGuest ? (
-            <p className="rv-sub" style={{ margin: 0, fontSize: 13 }}>
-              Waiting on the guest to finish their part — nothing to record yet.
-            </p>
-          ) : confirming ? (
+          {awaitingGuest && <p className="rv-sub" style={{ margin: '0 0 14px', fontSize: 13 }}>The guest is still completing registration. You can receive the host’s form now; each person’s paperwork is recorded separately.</p>}
+          {confirming ? (
             <div className="bp-confirm" style={{ justifyContent: 'flex-start' }}>
               <span className="bp-confirm-msg">
                 {confirmTurningOn ? `Mark ${confirmTarget.label} received for ${who}?` : `Revoke ${confirmTarget.label} for ${who}?`}
@@ -511,14 +510,14 @@ function PersonDetail({ r, guest, busy, confirming, onRequestToggle, onConfirm, 
             </div>
           ) : (
             <div className="bp-options">
-              <button
+              {!awaitingGuest && <button
                 className={`bp-toggle ${r.cash_received ? 'is-on' : ''}`}
                 disabled={busy}
                 onClick={() => onRequestToggle(r, 'cash_received')}
               >
                 {r.cash_received ? '✓ Cash received — tap to revoke' : 'Mark cash received'}
-              </button>
-              {guest?.guest_type === 'friend' && (
+              </button>}
+              {!awaitingGuest && guest?.guest_type === 'friend' && (
                 <button
                   className={`bp-toggle ${guest.friend_cash_received ? 'is-on' : ''}`}
                   disabled={busy}
@@ -534,8 +533,8 @@ function PersonDetail({ r, guest, busy, confirming, onRequestToggle, onConfirm, 
                   onClick={() => onRequestToggle(r, 'field_trip_form_received')}
                 >
                   {r.field_trip_form_received
-                    ? `✓ ${guestNeedsOwnForm ? 'Host form' : 'Field trip form'} received — tap to revoke`
-                    : `Mark ${guestNeedsOwnForm ? 'host form' : 'field trip form'} received`}
+                    ? `✓ ${guest ? 'Host form' : 'Field trip form'} received — tap to revoke`
+                    : `Mark ${guest ? 'host form' : 'field trip form'} received`}
                 </button>
               )}
               {guestNeedsOwnForm && (
