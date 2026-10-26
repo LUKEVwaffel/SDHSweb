@@ -4,6 +4,7 @@ import { useStayAwake } from '../../hooks/useStayAwake.js';
 import TvStandardLayout from './TvStandardLayout.jsx';
 import TvRaftingScreen from './TvRaftingScreen.jsx';
 import TvCongratsScreen from './TvCongratsScreen.jsx';
+import TvRifleTeamScreen from './TvRifleTeamScreen.jsx';
 import TvPreviewBadge from './TvPreviewBadge.jsx';
 import TvRefreshNotice from './TvRefreshNotice.jsx';
 
@@ -17,6 +18,11 @@ const TAKEOVER_MODE = true;
 // Congrats board instead of the rafting takeover. Flip to false (or delete)
 // to restore the rafting takeover.
 const RAIDER_CONGRATS_OUTSIDE_OVERRIDE = true;
+
+// 2026-2027 Rifle Team selections: /tv congratulates the new roster. Takes
+// precedence over the Raider congrats board; flip to false (or delete) to
+// restore it.
+const RIFLE_TEAM_CONGRATS_OVERRIDE = true;
 
 /**
  * Outside — the original public kiosk, mounted at /tv. Thin per-screen
@@ -37,7 +43,9 @@ export default function TvKiosk() {
 
   return (
     <>
-      {RAIDER_CONGRATS_OUTSIDE_OVERRIDE ? (
+      {RIFLE_TEAM_CONGRATS_OVERRIDE ? (
+        <TvRifleTeamScreen />
+      ) : RAIDER_CONGRATS_OUTSIDE_OVERRIDE ? (
         <TvCongratsScreen />
       ) : TAKEOVER_MODE ? (
         <TvRaftingScreen />
