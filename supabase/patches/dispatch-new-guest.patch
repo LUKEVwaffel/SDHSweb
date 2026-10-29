@@ -1,0 +1,42 @@
+--- a/supabase/functions/dispatch-ai-chat/index.ts
++++ b/supabase/functions/dispatch-ai-chat/index.ts
+@@ -1,3 +1,4 @@
++import {BALL_ADD_GUEST_TOOL,NEW_GUEST_INSTRUCTIONS} from '../_shared/ballGuestAdditionTool.ts';
+ // Edge function: dispatch-ai-chat
+ // DISPATCH AI, Phase 1. S-6 and S-5 only (is_admin() server side, caller.role
+ // check here as the first gate) — matches analyze-event-feedback's role
+@@ -260,8 +261,8 @@
+       const evt of streamAnthropic(apiKey, {
+         model: CLAUDE_MODEL,
+         max_tokens: 4096,
+-        system: systemPrompt,
+-        tools: [...(canChangeBall ? [RUN_QUERY_TOOL, BALL_CHANGE_TOOL, BALL_ADD_DATE_TOOL, BALL_RESTORE_DATE_TOOL, ADMIN_CHANGE_TOOL] : [RUN_QUERY_TOOL, ADMIN_CHANGE_TOOL]), ...toolsForRole(canChangeBall ? "s6" : "s5", adminEmail)],
++        system: systemPrompt+(canChangeBall?"\n\n"+NEW_GUEST_INSTRUCTIONS:""),
++        tools: [...(canChangeBall ? [RUN_QUERY_TOOL, BALL_CHANGE_TOOL, BALL_ADD_DATE_TOOL, BALL_RESTORE_DATE_TOOL, BALL_ADD_GUEST_TOOL, ADMIN_CHANGE_TOOL] : [RUN_QUERY_TOOL, ADMIN_CHANGE_TOOL]), ...toolsForRole(canChangeBall ? "s6" : "s5", adminEmail)],
+         ...(toolCallCount >= MAX_TOOL_CALLS || Date.now()-startTime > BUDGET_MS-25_000 ? { tool_choice: { type: "none" } } : {}),
+         messages,
+         stream: true,
+@@ -337,7 +338,11 @@
+       send({ type: "tool_start", label });
+       let resultText: string;
+       try {
+-        if (tu.name === "prepare_ball_date_restoration" && canChangeBall) {
++        if(tu.name==='prepare_ball_guest_addition'&&canChangeBall){
++          const {data,error}=await serviceClient().rpc('prepare_ball_guest_addition',{p_admin:adminEmail,p_signup:tu.input.signup_id,p_guest:tu.input.guest});
++          resultText=error?`error: ${error.message}`:JSON.stringify({proposal:data,applied:false});
++          if(!error){proposals.push(data);send({type:'proposal',proposal:data});}
++        } else if (tu.name === "prepare_ball_date_restoration" && canChangeBall) {
+           const { data, error } = await serviceClient().rpc("prepare_ball_date_restoration", {
+             p_admin: adminEmail, p_signup: tu.input.signup_id, p_removal: tu.input.removal_id,
+           });
+--- a/supabase/functions/_shared/dispatchTools.ts
++++ b/supabase/functions/_shared/dispatchTools.ts
+@@ -71,7 +71,7 @@
+ export async function runIntelligenceTool(name:string,input:Input,scoped:SupabaseClient,role:string,email:string):Promise<unknown> {
+   if (REMINDER_TOOLS.some(tool=>tool.name===name)) return runReminderTool(name,input,scoped);
+   switch(name) {
+-    case 'get_dispatch_capabilities':return{role,lookup_tools:toolsForRole(role,email).map(item=>({name:item.name,purpose:item.description})),action_tools:['prepare_admin_action',...(role==='s6'?['prepare_ball_reservation_change']:[]),...toolsForRole(role,email).filter(item=>item.name.startsWith('prepare_')).map(item=>item.name)],notification_functions:ADMIN_FUNCTIONS,permissions:'All reads and record writes use your current database role. Preparing a card is not executing it. The model cannot click Apply.'};
++    case 'get_dispatch_capabilities':return{role,lookup_tools:toolsForRole(role,email).map(item=>({name:item.name,purpose:item.description})),action_tools:['prepare_admin_action',...(role==='s6'?['prepare_ball_reservation_change','prepare_ball_date_addition','prepare_ball_date_restoration','prepare_ball_guest_addition']:[]),...toolsForRole(role,email).filter(item=>item.name.startsWith('prepare_')).map(item=>item.name)],notification_functions:ADMIN_FUNCTIONS,permissions:'All reads and record writes use your current database role. Preparing a card is not executing it. The model cannot click Apply.'};
+     case 'get_current_time':return currentDispatchTime();
+     case 'get_ui_design_guidance':{
+       const section=KNOWLEDGE_SECTIONS.find(item=>item.name==='interface-design.md');

@@ -1,0 +1,38 @@
+begin;
+set test.role='service_role';set test.admin='true';
+insert into admin_roles(email,role,must_change_password) values('guest-test@example.invalid','s6',false);
+insert into ball_config values(true,35,50);
+do $$
+declare h uuid;other uuid;p jsonb;r jsonb;body jsonb;g public.ball_guests;before_host jsonb;failed boolean;
+begin
+ insert into ball_signups(cadet_name,cadet_school_email,notification_email,cadet_gender,status,amount_due,amount_paid,cash_received,standalone_guest,field_trip_form_required,field_trip_form_received,dress_approved) values('Test Host','host@school.invalid','host@example.invalid','female','fully_verified',35,20,false,false,true,true,true) returning id into h;
+ body:='{"name":"Test New Guest","personal_email":"newguest@example.invalid","guest_type":"date","age":17,"gender":"female","attends_sdhs":false,"school_attended":"Sequoyah High School","poc_name":"Test Contact","poc_email":"contact@example.invalid","poc_phone":"4235550100"}'::jsonb;
+ failed:=false;begin perform prepare_ball_guest_addition('not-admin@example.invalid',h,body);exception when others then failed:=true;end;assert failed,'Non-S6 prepared a guest';
+ failed:=false;begin perform prepare_ball_guest_addition('guest-test@example.invalid',h,body-'personal_email');exception when others then failed:=true;end;assert failed,'Missing email was invented';
+ failed:=false;begin perform prepare_ball_guest_addition('guest-test@example.invalid',h,body-'attends_sdhs');exception when others then failed:=true;end;assert failed,'Unknown school status was assumed';
+ p:=prepare_ball_guest_addition('guest-test@example.invalid',h,body);
+ assert (p->>'host_total')::numeric=50 and (p->>'host_paid')::numeric=20 and (p->>'host_balance')::numeric=30;
+ assert not exists(select 1 from ball_guests where signup_id=h),'Prepare created an attendee';
+ update ball_signups set field_trip_form_received=false where id=h;
+ failed:=false;begin perform apply_ball_guest_addition('guest-test@example.invalid',(p->>'id')::uuid);exception when others then failed:=position('changed' in sqlerrm)>0;end;assert failed,'Stale proposal applied';
+ update ball_signups set field_trip_form_received=true where id=h;
+ p:=prepare_ball_guest_addition('guest-test@example.invalid',h,body);
+ r:=apply_ball_guest_addition('guest-test@example.invalid',(p->>'id')::uuid);
+ select * into g from ball_guests where signup_id=h;
+ assert g.verified_at is null and g.dress_approved is null and not g.field_trip_form_received and not g.friend_cash_received,'New guest falsely completed';
+ assert nullif(g.verification_token,'') is not null,'Guest invitation token missing';
+ assert (select amount_paid=20 and amount_due=50 and status='guest_pending' and field_trip_form_received and dress_approved from ball_signups where id=h),'Host requirements/payment were lost';
+ assert apply_ball_guest_addition('guest-test@example.invalid',(p->>'id')::uuid)=r,'Retry was not idempotent';
+ assert (select count(*)=1 from ball_guests where signup_id=h),'Duplicate guest created on retry';
+ insert into ball_signups(cadet_name,cadet_school_email,notification_email,cadet_gender,status,amount_due,amount_paid,cash_received,standalone_guest,field_trip_form_required,field_trip_form_received,dress_approved) values('Second Host','second@school.invalid','second@example.invalid','male','fully_verified',35,35,true,false,true,true,true) returning id into other;
+ failed:=false;begin perform prepare_ball_guest_addition('guest-test@example.invalid',other,body);exception when others then failed:=true;end;assert failed,'Duplicate personal email accepted';
+ body:=body||'{"name":"Test Friend","personal_email":"friend@example.invalid","guest_type":"friend","attends_sdhs":true}'::jsonb;
+ p:=prepare_ball_guest_addition('guest-test@example.invalid',other,body);r:=apply_ball_guest_addition('guest-test@example.invalid',(p->>'id')::uuid);
+ select * into g from ball_guests where signup_id=other;
+ assert g.guest_type='friend' and g.friend_amount_due=35 and not g.friend_cash_received and g.friend_payment_method='self_pays','Old host payment was incorrectly allocated to new friend';
+ assert g.field_trip_form_required,'SDHS guest form was waived';
+ assert (select amount_paid=35 and amount_due=35 from ball_signups where id=other),'Friend addition changed existing host ticket price/payment';
+ assert not has_function_privilege('authenticated','public.apply_ball_guest_addition(text,uuid)','execute');
+ raise notice 'New guest: preview-only, price/payment preservation, pending verification, per-person requirements, duplicates, stale proposals and idempotency passed.';
+end $$;
+rollback;

@@ -1,0 +1,6 @@
+create table if not exists public.admin_roles(email text primary key,role text,must_change_password boolean default false);
+create table if not exists public.ball_config(id boolean primary key,price_cadet numeric,price_couple numeric);
+alter table public.ball_signups add column if not exists cadet_school_email text,add column if not exists notification_email text;
+alter table public.cadet_consent add column if not exists school_email text;
+alter table public.ball_guests add column if not exists age integer,add column if not exists poc_name text,add column if not exists poc_email text,add column if not exists poc_phone text,add column if not exists personal_email text,add column if not exists verification_token text;
+create table if not exists public.ball_reservation_changes(id uuid primary key default gen_random_uuid(),admin_email text not null,signup_id uuid not null,action text not null constraint ball_reservation_changes_action_check check(action in('split_date','remove_date','remove_friend','add_date','restore_date')),status text default 'pending',before_state jsonb,preview jsonb,result jsonb,email_state jsonb default '{}',created_at timestamptz default now(),applied_at timestamptz);

@@ -1,0 +1,14 @@
+// Creates an invitation proposal, never a verified attendee or an immediate attendee change.
+export const BALL_ADD_GUEST_TOOL={
+ name:'prepare_ball_guest_addition',
+ description:"S-6 only. Prepare adding a BRAND-NEW, UNVERIFIED date or friend to an existing verified solo host reservation. The guest does NOT need a solo signup or cadet roster record. Look up the exact host and search existing/removed guests first; use merge/restoration for those existing identities. Ask for all missing required details together: date vs friend, full name, personal email, age, gender, SDHS enrollment/school, and outside-program point-of-contact name/email/phone. Do not invent missing details. Use roster_id only for an exact existing cadet date identity. A new date uses current couple price and preserves the host payment; a friend has a separate current solo-price charge with a separate payment entry, even if the host brings it. Existing host payment never pays a newly added friend automatically. Neither guest verification nor forms, money or attire is approved. Returns a review card; only the admin's Add guest & send invitation button applies the change and sends the normal verification invitation. Never say the guest was added before Apply.",
+ input_schema:{type:'object',additionalProperties:false,properties:{
+  signup_id:{type:'string',description:'Exact verified solo host reservation UUID'},
+  guest:{type:'object',additionalProperties:false,properties:{
+   name:{type:'string'},personal_email:{type:'string'},guest_type:{type:'string',enum:['date','friend']},age:{type:'integer'},gender:{type:'string',enum:['male','female']},
+   attends_sdhs:{type:'boolean',description:'Current SDHS student, independent of JROTC enrollment'},school_attended:{type:'string',description:'Required for non-SDHS guests; identify their school or explicitly not currently a student'},
+   roster_id:{type:'string',description:'Optional exact cadet roster UUID for an in-program date'},poc_name:{type:'string'},poc_email:{type:'string'},poc_phone:{type:'string'},
+  },required:['name','personal_email','guest_type','age','gender','attends_sdhs']},
+ },required:['signup_id','guest']},
+};
+export const NEW_GUEST_INSTRUCTIONS=`New guests are supported: when an admin asks to add someone who has never registered, use prepare_ball_guest_addition. Do not require a prior solo reservation or roster record. Do not claim the system cannot create a new guest. Gather the missing invitation/identity details in one concise question, then prepare the review card. Existing verified solo attendees still use date merge, and removed guests use restoration. Only the human applies the card; a new guest starts unverified and receives the normal invitation, never a fabricated verification or approval. Do not use generic guest inserts to bypass this workflow.`;

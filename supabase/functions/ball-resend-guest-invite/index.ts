@@ -1,3 +1,5 @@
+import {isBallGuestFormRequired} from '../_shared/ballTicketEligibility.js';
+import {invitationMatchesAddition} from '../_shared/ballGuestInvitation.ts';
 // Edge function: ball-resend-guest-invite
 // AUTHENTICATED, S-6-only (getCaller + role === "s6", same gate as
 // admin-set-reviewer-pin — S-6 is NOT in the email_reviewers population, so
@@ -53,9 +55,7 @@ function fieldTripAttachment(cfg: BallCfg | null): Array<{ filename: string; pat
 
 // A stored guest counts as an SDHS student (→ needs the field trip form) when
 // they're an in-program cadet OR their school is Soddy Daisy High School.
-function guestIsSdhs(guest: { is_sdhs_jrotc: boolean | null; school_attended: string | null }): boolean {
-  return !!guest.is_sdhs_jrotc || /soddy\s*daisy/i.test(guest.school_attended ?? "");
-}
+
 
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return preflight();
@@ -68,7 +68,7 @@ Deno.serve(async (req) => {
     // here, same as admin-set-reviewer-pin / ball-dress-set-pin.
     if (caller.mustChangePassword) return json({ error: "set your own password first" }, 403);
 
-    const { signup_id } = await req.json().catch(() => ({}));
+    const { signup_id, change_id } = await req.json().catch(() => ({}));
     if (!signup_id) return json({ error: "signup_id is required" }, 400);
 
     const svc = serviceClient();
@@ -83,7 +83,7 @@ Deno.serve(async (req) => {
 
     const { data: guest, error: gErr } = await svc
       .from("ball_guests")
-      .select("name, gender, personal_email, verification_token, is_sdhs_jrotc, school_attended, verified_at")
+      .select("id, name, gender, personal_email, verification_token, is_sdhs_jrotc, school_attended, field_trip_form_required, sdhs_matched_cadet_id, verified_at")
       .eq("signup_id", signup_id)
       .maybeSingle();
     if (gErr) { console.error("ball-resend-guest-invite guest lookup", gErr); return json({ error: "internal error" }, 500); }
@@ -91,6 +91,10 @@ Deno.serve(async (req) => {
     if (!guest.personal_email) return json({ error: "no guest email on file" }, 400);
     if (!guest.verification_token) return json({ error: "guest has no verification link" }, 400);
 
+    if(change_id){
+      const {data:change,error}=await svc.from('ball_reservation_changes').select('action,status,signup_id,result').eq('id',change_id).eq('admin_email',caller.email).maybeSingle();
+      if(error||!invitationMatchesAddition(change,guest,signup_id))return json({error:'The guest or proposal changed. Review the invitation before retrying.'},409);
+    }
     const { data: cfg } = await svc
       .from("ball_config")
       .select("ball_date, event_time_text, venue_address, field_trip_form_pdf_url")
@@ -103,7 +107,7 @@ Deno.serve(async (req) => {
     if (!origin) return json({ error: "WEBAUTHN_ORIGIN not configured" }, 500);
 
     const link = `${origin}/ball/guest/${guest.verification_token}`;
-    const needsForm = guestIsSdhs(guest);
+    const needsForm = isBallGuestFormRequired(guest);
     const formAttach = needsForm ? fieldTripAttachment(cfg ?? null) : [];
     const formHtml = needsForm
       ? (cfg?.field_trip_form_pdf_url
@@ -147,7 +151,7 @@ ${formHtml}<p style="margin:0;font-size:12px;color:#8A8266;">If the button does 
 
     const res = await fetch("https://api.resend.com/emails", {
       method: "POST",
-      headers: { Authorization: `Bearer ${RESEND_API_KEY}`, "Content-Type": "application/json" },
+      headers: { Authorization: `Bearer ${RESEND_API_KEY}`, "Content-Type": "application/json",...(change_id?{"Idempotency-Key":`ball-change/${change_id}/guest-invitation`}:{}) },
       body: JSON.stringify({
         from: FROM,
         bcc: BALL_NOTIFY_BCC,
@@ -177,8 +181,10 @@ ${attireLineText(guest.gender)}${formText}`,
       return json({ error: "the email service rejected the send" }, 502);
     }
 
+    const accepted=await res.json().catch(()=>({}));
     return json({
       ok: true,
+      provider_id:accepted.id,
       sent_to: guest.personal_email,
       attached_form: formAttach.length > 0,
       already_verified: !!guest.verified_at,
