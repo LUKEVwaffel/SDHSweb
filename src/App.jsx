@@ -51,6 +51,8 @@ import EventFeedbackForm from './components/EventFeedbackForm';
 import EventFeedbackPicker from './components/EventFeedbackPicker';
 import OpticSurvey from './components/OpticSurvey';
 import HalloweenMoviePoll from './components/HalloweenMoviePoll';
+import ChristmasMusicPoll from './components/poll/ChristmasMusicPoll';
+import GuestPollResults from './components/poll/GuestPollResults';
 import BallLanding from './components/ball/BallLanding';
 // BallSignupPopup + OpticPopup suppressed 2026-09-12 so the Spring Hill
 // Raider Congrats popup (CongratsPopup, always-on) is the only homepage
@@ -150,6 +152,8 @@ export default function App() {
   // "Picture of the Comp" vote taken down 2026-09-08 — restore CompPhotoVote to bring it back.
   // if (location.pathname === '/vote') return <CompPhotoVote />;
   if (location.pathname === '/survey') return <OpticSurvey />;
+  if (location.pathname === '/poll/results' || location.pathname === '/poll/results/') return <GuestPollResults />;
+  if (location.pathname === '/poll' || location.pathname === '/poll/') return <ChristmasMusicPoll />;
   if (location.pathname === '/halloween') return <HalloweenMoviePoll />;
   if (location.pathname.startsWith('/ball/guest/')) return <BallGuestVerify />;
   if (location.pathname === '/ball/ops' || location.pathname.startsWith('/ball/ops/')) return <BallOpsPortal />;
