@@ -1,0 +1,37 @@
+begin;
+set test.admin='true';set test.role='authenticated';
+create table if not exists public.ball_door_attire(person_kind text,person_id uuid,approved boolean,primary key(person_kind,person_id));
+do $$
+declare h uuid;g uuid;other uuid;cadet uuid;batch jsonb;failed boolean;
+begin
+ insert into ball_signups(cadet_name,cadet_company,cadet_gender,status,amount_due,amount_paid,cash_received,standalone_guest,field_trip_form_required,field_trip_form_received,dress_approved) values('Complete Host','Alpha','male','fully_verified',35,35,true,false,true,true,null) returning id into h;
+ batch:=public.ball_label_print_batch(array[h],false);assert jsonb_array_length(batch->'labels')=1;
+ insert into ball_signups(cadet_name,cadet_company,cadet_gender,status,amount_due,amount_paid,cash_received,standalone_guest,field_trip_form_required,field_trip_form_received,dress_approved) values('Incomplete Host','Alpha','female','fully_verified',35,35,true,false,true,true,null) returning id into other;
+ failed:=false;begin perform public.ball_label_print_batch(array[h,other],false);exception when others then failed:=true;end;assert failed,'Mixed batch printed incomplete booking';
+ insert into ball_guests(signup_id,name,gender,guest_type,verified_at,field_trip_form_required,field_trip_form_received,dress_approved,friend_amount_due,friend_cash_received,friend_payment_method) values(h,'Unpaid Friend','female','friend',now(),true,true,true,35,false,null) returning id into g;
+ failed:=false;begin perform public.ball_label_print_batch(array[h],false);exception when others then failed:=true;end;assert failed,'NULL friend payment method bypassed print guard';
+ failed:=false;begin insert into ball_ticket_deliveries(signup_id,recipient_type,recipient_name,recipient_company,distributed,distributed_at,distributed_by) values(h,'host','Complete Host','Alpha',true,now(),'test@example.invalid');exception when others then failed:=true;end;assert failed,'NULL friend payment method bypassed delivery guard';
+ update ball_guests set friend_cash_received=true where id=g;
+ batch:=public.ball_label_print_batch(array[h],false);assert jsonb_array_length(batch->'labels')=1;
+ insert into ball_door_attire values('cadet',h,false);
+ failed:=false;begin perform public.ball_label_print_batch(array[h],false);exception when others then failed:=true;end;assert failed,'On-site denial bypassed standard uniform exemption';
+ update ball_door_attire set approved=true where person_id=h;
+ batch:=public.ball_label_print_batch(array[h],false);assert jsonb_array_length(batch->'labels')=1;
+ insert into ball_ticket_deliveries(signup_id,recipient_type,recipient_name,recipient_company,distributed,distributed_at,distributed_by) values(h,'host','Complete Host','Alpha',true,now(),'test@example.invalid');
+ failed:=false;begin perform public.ball_label_print_batch(array[h],true);exception when others then failed:=true;end;assert failed,'Undelivered-only batch reprinted delivered booking';
+ failed:=false;begin perform public.ball_label_print_batch(array[h,h],false);exception when others then failed:=true;end;assert failed,'Duplicate reservation accepted';
+ insert into cadet_consent(name,company,let_level,gender) values('Date Pickup','Bravo','3','male') returning id into cadet;
+ update ball_signups set cadet_gender='female',dress_approved=true where id=h;
+ update ball_guests set guest_type='date',name='Current Pickup Name',gender='male',sdhs_matched_cadet_id=cadet,field_trip_form_received=true where id=g;
+ batch:=public.ball_label_print_batch(array[h],false);
+ assert batch->'labels'->0->>'cadetName'='Current Pickup Name','Label used old host recipient';
+ assert batch->'labels'->0->>'company'='Bravo','Label used stale roster company';
+ update cadet_consent set company='Charlie' where id=cadet;
+ batch:=public.ball_label_print_batch(array[h],false);
+ assert batch->'labels'->0->>'company'='Charlie','Changed company was not re-read';
+ failed:=false;begin perform public.ball_ticket_snapshot();exception when others then failed:=position('Reload Dispatch' in sqlerrm)>0;end;assert failed,'Cached policy client was not retired';
+ assert not has_function_privilege('anon','public.ball_label_print_batch(uuid[],boolean)','execute');
+ perform set_config('test.admin','false',true);failed:=false;begin perform public.ball_label_print_batch(array[h],false);exception when others then failed:=true;end;assert failed,'Non-S6 printed labels';
+ raise notice 'Verified print batch, unpaid friend, denial, delivery, mixed selection and authorization checks passed.';
+end $$;
+rollback;

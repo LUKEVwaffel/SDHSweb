@@ -2,7 +2,7 @@ export type Row = Record<string, unknown>;
 const sdhsSchool = (value:unknown)=>/\bsoddy[\s-]*daisy\b|\bsdhs\b/i.test(String(value??''));
 const cents = (value: unknown) => Math.round(Number(value ?? 0) * 100);
 const dollars = (value: number) => value / 100;
-import {isBallHostFormRequired,isBallGuestFormRequired} from './ballTicketEligibility.js';
+import {isBallHostFormRequired,isBallGuestFormRequired,isBallGuestSchoolUnknown} from './ballTicketEligibility.js';
 export const hostFormRequired=isBallHostFormRequired;
 export const guestFormRequired=isBallGuestFormRequired;
 export function paymentState(row: Row, totalKey = 'amount_due', paidKey = 'amount_paid', cashKey = 'cash_received') {
@@ -26,9 +26,10 @@ export function reservationStatus(host: Row, guest?: Row) {
   }
   if (host.status !== 'fully_verified' || (guest && !guest.verified_at)) issues.push('verification_incomplete');
   const standardUniform = String(host.cadet_gender || '').trim().toLowerCase() === 'male' && host.standalone_guest !== true;
-  if (!standardUniform && host.dress_approved !== true) issues.push('host_dress_unapproved');
+  if ((!standardUniform || host.door_attire_denied === true) && host.dress_approved !== true) issues.push('host_dress_unapproved');
   if (host.cadet_has_allergy && host.allergy_status !== 'contacted') issues.push('allergy_follow_up');
   if (guest) {
+    if(isBallGuestSchoolUnknown(guest))issues.push('guest_school_unconfirmed');
     if (guestFormRequired(guest) && guest.field_trip_form_received !== true) {
       issues.push(guest.field_trip_form_required === true || guest.is_sdhs_jrotc === true || sdhsSchool(guest.school_attended)
         ? 'guest_form_missing'

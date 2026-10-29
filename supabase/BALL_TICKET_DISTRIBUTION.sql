@@ -52,22 +52,10 @@ begin
       or coalesce(g.school_attended ~* '(soddy[[:space:]-]*daisy|\msdhs\M)',false);
   end if;
 
-  -- Require the same complete reservation state as the live Ball label tool.
-  if h.status is distinct from 'fully_verified' then raise exception 'Reservation verification is incomplete'; end if;
-  if has_guest and g.verified_at is null then raise exception 'Guest verification is incomplete'; end if;
-  if (h.standalone_guest is distinct from true or h.field_trip_form_required is distinct from false) and h.field_trip_form_received is distinct from true then raise exception 'Cadet field-trip form is not complete'; end if;
-  if has_guest and guest_form_required and g.field_trip_form_received is distinct from true then raise exception 'Guest field-trip form is not complete'; end if;
-  if h.amount_due is null or h.amount_due<0 then raise exception 'Ticket amount is unknown'; end if;
-  paid:=coalesce(h.amount_paid,case when h.cash_received then h.amount_due else 0 end);
-  if paid is null or paid<h.amount_due then raise exception 'Cadet ticket balance is not paid'; end if;
-  if has_guest and g.guest_type='friend' then
-    if g.friend_amount_due is null or g.friend_amount_due<0 then raise exception 'Friend ticket amount is unknown'; end if;
-    friend_paid:=g.friend_cash_received or (g.friend_payment_method='host_delivers' and h.cash_received);
-    if g.friend_amount_due>0 and not friend_paid then raise exception 'Friend ticket is not paid'; end if;
+  -- One authoritative predicate for server label generation and delivery writes.
+  if cardinality(public.ball_ticket_blockers(public.ball_effective_ticket_row(to_jsonb(h),'cadet'),case when has_guest then public.ball_effective_ticket_row(to_jsonb(g),'guest') else null end))>0 then
+    raise exception 'Reservation is incomplete: %',array_to_string(public.ball_ticket_blockers(public.ball_effective_ticket_row(to_jsonb(h),'cadet'),case when has_guest then public.ball_effective_ticket_row(to_jsonb(g),'guest') else null end),', ');
   end if;
-  standard_uniform:=lower(trim(h.cadet_gender))='male' and h.standalone_guest is distinct from true;
-  if not standard_uniform and h.dress_approved is distinct from true then raise exception 'Cadet dress approval is incomplete'; end if;
-  if has_guest and g.dress_approved is distinct from true then raise exception 'Guest dress approval is incomplete'; end if;
 
   -- One reservation has one pickup person: a friend ticket goes to the host;
   -- for a female cadet with a male date, the male date is the pickup person.

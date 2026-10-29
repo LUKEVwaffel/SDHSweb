@@ -114,7 +114,9 @@ export function ballLabelDocumentHtml(labels, startIndex = 0) {
 // cadetName/letLevel/company/guestName come straight off the approved
 // ball_signups/ball_guests row — never freehand, so the sticker always
 // matches what was actually verified. index: 0-29, which cell on the sheet.
-export function printBallEnvelopeLabels(labels, startIndex = 0, printWindow = null) {
+export function printBallEnvelopeLabels(batch, startIndex = 0, printWindow = null) {
+  if(batch?.policy_version!==2||!batch?.snapshot_version||!batch.checked_at||!Array.isArray(batch.labels)||!batch.labels.every(label=>label.signupId))throw new Error('Labels require a current database-verified batch. Nothing was printed.');
+  const labels=batch.labels;
   let html;
   try { html = ballLabelDocumentHtml(labels, startIndex); }
   catch (error) { alert(error.message); return false; }
@@ -127,6 +129,5 @@ export function printBallEnvelopeLabels(labels, startIndex = 0, printWindow = nu
   return true;
 }
 
-export function printBallEnvelopeLabel({ cadetName, letLevel, company, guestName, index }) {
-  return printBallEnvelopeLabels([{cadetName, letLevel, company, guestName}], index);
-}
+// Raw names cannot bypass the live completion check.
+export function printBallEnvelopeLabel(){throw new Error('Select the reservation in Ticket Delivery to verify it before printing.');}

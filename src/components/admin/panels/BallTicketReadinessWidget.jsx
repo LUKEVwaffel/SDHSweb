@@ -2,7 +2,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { supabase as SB } from '../../../lib/supabaseClient';
 import { getBallTicketReadinessIssues, isBallLabelEligible } from '../../../lib/ballLabelEligibility';
 import {invokeError} from '../../../lib/supabaseFnError';
-import {readBallLiveSnapshot} from '../../../lib/ballLiveSnapshot';
+import {readBallLiveSnapshot,readBallLabelBatch} from '../../../lib/ballLiveSnapshot';
 import { AVERY_5160, printBallEnvelopeLabels } from '../../../lib/ballLabelPrint';
 import { P, mono, oswald, inter, radius } from '../theme';
 
@@ -203,23 +203,9 @@ export default function BallTicketReadinessWidget() {
     if (!printWindow) { setError('Allow popups to print Ball labels.'); return; }
     setBusy('printing'); setError('');
     try {
-      const snapshot=await readBallLiveSnapshot();
-      const hosts=new Map(snapshot.hosts.map(row=>[row.id,row]));
-      const guestsBySignup=new Map(snapshot.guests.map(row=>[row.signup_id,row]));
-      const rosterById=new Map(snapshot.roster.map(row=>[row.id,row]));
-      const delivered=new Set(snapshot.deliveries.filter(row=>row.distributed).map(row=>row.signup_id));
-      const live=reservations.filter(row=>!undeliveredOnly||!delivered.has(row.host.id));
-      if(!live.length)throw new Error('These tickets have already been delivered. No labels were printed.');
-      if(live.some(row=>!hosts.has(row.host.id)||!isBallLabelEligible(hosts.get(row.host.id),guestsBySignup.get(row.host.id))))throw new Error('A selected reservation changed. Refresh and review its current requirements. No labels were printed.');
-      const labels=live.map(row=>{
-        const host=hosts.get(row.host.id),guest=guestsBySignup.get(row.host.id)||null;
-        const recipient=recipientFor(host,guest,rosterById);
-        return {cadetName:recipient.name,letLevel:recipient.letLevel,company:recipient.company==='Unassigned'?'':recipient.company,guestName:recipient.type==='guest'?host.cadet_name:guest?.name||''};
-      });
-      const check=await readBallLiveSnapshot();
-      if(check.version!==snapshot.version)throw new Error('Ball records changed while preparing these labels. Retry for current labels. Nothing was printed.');
-      if (!printBallEnvelopeLabels(labels, labelIndex, printWindow)) { printWindow.close(); return; }
-      const nextIndex = (labelIndex + labels.length) % AVERY_5160.count;
+      const batch=await readBallLabelBatch(reservations.map(row=>row.host.id),undeliveredOnly);
+      if (!printBallEnvelopeLabels(batch, labelIndex, printWindow)) { printWindow.close(); return; }
+      const nextIndex = (labelIndex + batch.labels.length) % AVERY_5160.count;
       setLabelIndex(nextIndex);
       try { localStorage.setItem(LAST_INDEX_KEY, String(nextIndex)); } catch { /* optional print preference */ }
     } catch (e) {

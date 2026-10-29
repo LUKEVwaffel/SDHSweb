@@ -1,3 +1,4 @@
+import {getBallPaymentFacts,isBallHostFormRequired,isBallGuestFormRequired} from '../_shared/ballTicketEligibility.js';
 // Edge function: send-ball-reminders
 // S-6 ONLY, manual trigger — the "Send Reminders" button on the Ball
 // Overview tab (BallOverviewTab.jsx). NOT automated, NOT on a schedule.
@@ -37,6 +38,7 @@ interface SignupRow {
   cadet_name: string;
   notification_email: string | null;
   amount_due: number | null;
+  amount_paid: number | null;
   cash_received: boolean;
   field_trip_form_required: boolean;
   field_trip_form_received: boolean;
@@ -70,16 +72,20 @@ Deno.serve(async (req) => {
     const { dry_run } = await req.json().catch(() => ({}));
 
     const svc = serviceClient();
-    const [{ data: signups, error: sErr }, { data: guests, error: gErr }, { data: cfg }] = await Promise.all([
-      svc.from("ball_signups")
-        .select("id, cadet_name, notification_email, amount_due, cash_received, field_trip_form_required, field_trip_form_received")
-        .eq("status", "fully_verified"),
-      svc.from("ball_guests")
-        .select("signup_id, name, guest_type, friend_payment_method, friend_amount_due, friend_cash_received, field_trip_form_required, field_trip_form_received"),
-      svc.from("ball_config").select("payment_deadline, dress_deadline, field_trip_form_pdf_url").maybeSingle(),
+    const [{data:snapshot,error:snapshotError},{data:cfg}]=await Promise.all([
+      svc.rpc('ball_ticket_snapshot',{p_policy_version:2}),
+      svc.from('ball_config').select('payment_deadline,dress_deadline,field_trip_form_pdf_url').maybeSingle(),
     ]);
-    if (sErr || gErr) return json({ error: (sErr || gErr)?.message }, 500);
-
+    if(snapshotError||!snapshot?.version)return json({error:'Could not verify the live Ball ledger. No reminders were sent.'},503);
+    const contactById=new Map();
+    for(let offset=0;;offset+=500){
+      const {data:contacts,error}=await svc.from('ball_signups').select('id,notification_email').order('id').range(offset,offset+499);
+      if(error)return json({error:'Could not verify notification contacts. No reminders were sent.'},503);
+      for(const contact of contacts||[])contactById.set(contact.id,contact.notification_email);
+      if(!contacts||contacts.length<500)break;
+    }
+    const signups=snapshot.hosts.filter((row:{status:string})=>row.status==='fully_verified').map((row:{id:string})=>({...row,notification_email:contactById.get(row.id)}));
+    const guests=snapshot.guests;
     const guestBySignup = new Map<string, GuestRow>();
     (guests || []).forEach((g: GuestRow) => guestBySignup.set(g.signup_id, g));
 
@@ -93,25 +99,26 @@ Deno.serve(async (req) => {
       const guest = guestBySignup.get(row.id);
       const todo: string[] = [];
       let needsForm = false;
-      if (!row.cash_received) {
-        const amt = money(row.amount_due);
+      const payment=getBallPaymentFacts(row,guest);
+      if (payment.hostBalance!==0) {
+        const amt = money(payment.hostBalance);
         todo.push(amt ? `Render payment of <strong>${amt}</strong> in full, by cash or check, to <strong>Kaz and Chief ONLY</strong>.` : "Render payment <strong>in full</strong>, by cash or check, to <strong>Kaz and Chief ONLY</strong>.");
       }
-      if (row.field_trip_form_required && !row.field_trip_form_received) {
+      if (isBallHostFormRequired(row) && row.field_trip_form_received!==true) {
         const attachedNote = cfg?.field_trip_form_pdf_url ? ", attached to this email" : "";
         todo.push(`Submit your <strong>signed field trip permission form</strong> (physical signature only${attachedNote}) to <strong>Kaz and Chief ONLY</strong>.`);
         needsForm = true;
       }
-      if (guest?.guest_type === "friend" && guest.friend_payment_method === "self_pays" && !guest.friend_cash_received) {
-        const fa = money(guest.friend_amount_due);
+      if (guest?.guest_type === "friend" && payment.friendBalance!==0) {
+        const fa = money(payment.friendBalance);
         todo.push(`Your friend <strong>${escapeHtml(guest.name || "")}</strong> still owes${fa ? ` <strong>${fa}</strong>` : ""} of their own, which they pay or deliver themselves to <strong>Kaz and Chief ONLY</strong>.`);
       }
       // Guest's own field-trip form need is tracked on the guest row itself
       // (whether THEY are an SDHS student), independent of the host's own
       // field_trip_form_required — see ball_guest_form_required_split.sql.
-      if (guest?.field_trip_form_required && !guest.field_trip_form_received) {
+      if (isBallGuestFormRequired(guest) && guest?.field_trip_form_received!==true) {
         const attachedNote = cfg?.field_trip_form_pdf_url ? " (attached to this email)" : "";
-        todo.push(`<strong>${escapeHtml(guest.name || "Your guest")}</strong>'s own field trip permission form is also still needed${attachedNote} — hand it to <strong>Kaz and Chief ONLY</strong>.`);
+        todo.push(`<strong>${escapeHtml(guest?.name || "Your guest")}</strong>'s own field trip permission form is also still needed${attachedNote} — hand it to <strong>Kaz and Chief ONLY</strong>.`);
         needsForm = true;
       }
       if (todo.length) candidates.push({ row, guest, todo, needsForm });
@@ -133,6 +140,8 @@ Deno.serve(async (req) => {
 
     let sent = 0, failed = 0;
     for (const { row, todo, needsForm } of candidates) {
+      const live=await svc.rpc('ball_ticket_snapshot',{p_policy_version:2});
+      if(live.error||live.data?.version!==snapshot.version)return json({ok:false,sent,failed,total:candidates.length,error:'The Ball ledger changed. Remaining reminders were stopped; refresh and review before trying again.'},409);
       const formAttach = needsForm ? fieldTripAttachment(cfg?.field_trip_form_pdf_url ?? null) : [];
       const vars: Record<string, string> = {
         cadet_name: escapeHtml(row.cadet_name),

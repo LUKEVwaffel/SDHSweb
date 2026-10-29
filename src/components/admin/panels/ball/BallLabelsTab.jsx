@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback, useMemo, useRef } from 'react';
-import {readBallLiveSnapshot} from '../../../../lib/ballLiveSnapshot';
+import {readBallLiveSnapshot,readBallLabelBatch} from '../../../../lib/ballLiveSnapshot';
 import { supabase as SB } from '../../../../lib/supabaseClient';
 import { P, mono, inter, sp, radius } from '../../theme';
 import { Btn, Label } from '../../shared/ui';
@@ -90,14 +90,9 @@ export default function BallLabelsTab() {
     setErr('');
     const startIndex = labelIndex;
     try {
-      const snapshot=await readBallLiveSnapshot();
-      const bySignup=Object.fromEntries(snapshot.guests.map(g=>[g.signup_id,g]));
-      const hosts=snapshot.hosts.filter(row=>ids.includes(row.id)).sort((a,b)=>a.cadet_name.localeCompare(b.cadet_name));
-      if(hosts.length!==ids.length||hosts.some(row=>!isBallLabelEligible(row,bySignup[row.id])))throw new Error('A selected reservation changed. Review the refreshed list before printing.');
-      const labels=hosts.map(r=>({cadetName:r.cadet_name||'',letLevel:r.cadet_let_level||'',company:r.cadet_company||'',guestName:bySignup[r.id]?.name||''}));
-      if((await readBallLiveSnapshot()).version!==snapshot.version)throw new Error('Ball records changed while preparing these labels. Retry. Nothing was printed.');
-      if (!printBallEnvelopeLabels(labels, startIndex, win)) { win.close(); return; }
-      pickIndex((startIndex + labels.length) % AVERY_5160.count);
+      const batch=await readBallLabelBatch(ids,false);
+      if (!printBallEnvelopeLabels(batch, startIndex, win)) { win.close(); return; }
+      pickIndex((startIndex + batch.labels.length) % AVERY_5160.count);
     } catch (error) {
       win.close();
       await load();

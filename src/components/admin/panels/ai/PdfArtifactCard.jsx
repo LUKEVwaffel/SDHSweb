@@ -21,7 +21,7 @@ export default function PdfArtifactCard({ artifact }) {
       const {data,error:problem}=await SB.functions.invoke('ball-receipts',{body:{filters:artifact.receipt_filters||{}}});
       if(problem||data?.error)throw new Error(await invokeError(data,problem,'Could not refresh receipts. Nothing was printed.'));
       const current=data.artifact;
-      const check=await SB.rpc('ball_ticket_snapshot');
+      const check=await SB.rpc('ball_ticket_snapshot',{p_policy_version:2});
       if(check.error||!current.ball_snapshot_version||check.data?.version!==current.ball_snapshot_version)throw new Error('The ledger changed while this packet was generated. Retry to use the latest records. Nothing was printed.');
       const bytes=Uint8Array.from(atob(current.base64),c=>c.charCodeAt(0));
       const liveUrl=URL.createObjectURL(new Blob([bytes],{type:'application/pdf'}));

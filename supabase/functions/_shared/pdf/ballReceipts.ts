@@ -8,12 +8,12 @@ import * as fontkit from "https://esm.sh/@pdf-lib/fontkit@1.1.1";
 import { FONT_BASE64 } from "./font.ts";
 import { guestFormRequired, hostFormRequired, reservationStatus, type Row } from "../ballIntelligence.ts";
 import { type PdfArtifact, type PdfPlan, wrapText } from "./render.ts";
-import { isBallLabelEligible } from "../ballTicketEligibility.js";
+import { isBallLabelEligible,isBallGuestSchoolUnknown } from "../ballTicketEligibility.js";
 export function buildBallReceipt(host: Row, guest?: Row) {
   const status = reservationStatus(host, guest);
   const standardUniform = String(host.cadet_gender || "").trim().toLowerCase() === "male" &&
     host.standalone_guest !== true;
-  const hostDressRequired = !standardUniform;
+  const hostDressRequired = !standardUniform || host.door_attire_denied === true;
   const hostNeedsForm = hostFormRequired(host);
   const guestNeedsForm = guestFormRequired(guest);
   const hostForm = !hostNeedsForm
@@ -70,6 +70,7 @@ export function buildBallReceipt(host: Row, guest?: Row) {
     guest: guest ? String(guest.name || "Not on file") : null,
     guest_type: guest ? String(guest.guest_type || "guest") : null,
     requirements: [
+      ...(isBallGuestSchoolUnknown(guest)?[{label:"Guest school status",checked:false,detail:"Confirm whether the guest currently attends SDHS before ticket delivery. SDHS students need their own signed permission form."}]:[]),
       {
         label: "Cadet field-trip form",
         checked: formSatisfied(hostForm),
@@ -107,7 +108,7 @@ export function buildBallReceipt(host: Row, guest?: Row) {
     verification_complete: verified,
     guest_verification_pending: guestVerificationPending,
     complete,
-    paperwork_payment_complete: formSatisfied(hostForm) && formSatisfied(guestForm) && cashDone && verified,
+    paperwork_payment_complete: formSatisfied(hostForm) && formSatisfied(guestForm) && cashDone && verified && !isBallGuestSchoolUnknown(guest),
     total,
     paid,
     balance,

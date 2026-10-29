@@ -28,7 +28,7 @@ test('each required form and verification is checked independently',()=>{
   assert.equal(isBallLabelEligible(host,{...guest,verified_at:null}),false);
   assert.equal(isBallLabelEligible(host,{...guest,field_trip_form_required:false,field_trip_form_received:false,is_sdhs_jrotc:false,school_attended:'Central High School'}),true);
 });
-test('school identity overrides a stale form exemption while an explicit waiver is honored',()=>{
+test('school identity overrides a stale form exemption while known outside-school identity is honored',()=>{
   assert.equal(isBallHostFormRequired({...host,cadet_gender:'male',standalone_guest:false,field_trip_form_required:false}),true);
   assert.equal(isBallGuestFormRequired({...guest,field_trip_form_required:false,is_sdhs_jrotc:true}),true);
   const cadetHost={...host,cadet_gender:'male',dress_approved:false};
@@ -36,7 +36,7 @@ test('school identity overrides a stale form exemption while an explicit waiver 
   assert.equal(isBallLabelEligible(cadetHost,sdhsGuest),false);
   assert.ok(getBallTicketReadinessIssues(cadetHost,sdhsGuest).includes("Guest's field-trip form is not marked received."));
   const explicitlyWaived={...guest,field_trip_form_required:false,is_sdhs_jrotc:false,school_attended:null,field_trip_form_received:false};
-  assert.equal(isBallLabelEligible(cadetHost,explicitlyWaived),true);
+  assert.equal(isBallLabelEligible(cadetHost,explicitlyWaived),false);
   const knownOutsideGuest={...guest,field_trip_form_required:false,is_sdhs_jrotc:false,school_attended:'Central High School',field_trip_form_received:false};
   assert.equal(isBallLabelEligible(cadetHost,knownOutsideGuest),true);
 });

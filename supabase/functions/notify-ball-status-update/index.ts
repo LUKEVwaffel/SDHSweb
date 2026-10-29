@@ -6,6 +6,7 @@
 // afterward, since RESEND_API_KEY must stay server-side. Fired
 // fire-and-forget by BallOpsPortal.jsx right after each toggle succeeds.
 // Deploy WITH jwt verification (default).
+import {isBallStatusReceiptCurrent} from '../_shared/ballTicketEligibility.js';
 import { json, preflight, escapeHtml, siteOrigin } from "../_shared/http.ts";
 import { BALL_NOTIFY_BCC } from "../_shared/ballNotify.ts";
 import { serviceClient, getReviewer } from "../_shared/supabase.ts";
@@ -25,7 +26,7 @@ Deno.serve(async (req) => {
 
   try {
     const reviewer = await getReviewer(req);
-    if (!reviewer) return json({ error: "not authorized" }, 403);
+    if (!reviewer || reviewer.mustChangePassword) return json({ error: "not authorized" }, 403);
     // Ball Ops is its own grantable capability (can_ball_ops), independent
     // of Email Review / Rifle Signups — see email_reviewer_capability_split.sql.
     if (!reviewer.canBallOps) return json({ error: "not authorized for ball ops" }, 403);
@@ -36,11 +37,15 @@ Deno.serve(async (req) => {
     const svc = serviceClient();
     const { data: signup, error } = await svc
       .from("ball_signups")
-      .select("cadet_name, notification_email")
+      .select("id,cadet_name,notification_email,amount_due,amount_paid,cash_received,field_trip_form_received")
       .eq("id", signup_id)
       .maybeSingle();
     if (error) { console.error("notify-ball-status-update lookup", error); return json({ error: "internal error" }, 500); }
     if (!signup) return json({ error: "not_found" }, 404);
+    const {data:guest,error:guestError}=await svc.from('ball_guests').select('guest_type,friend_cash_received,friend_payment_method,friend_amount_due,field_trip_form_received').eq('signup_id',signup_id).maybeSingle();
+    if(guestError)return json({error:'Could not verify current guest status'},503);
+    const confirmed=isBallStatusReceiptCurrent(field,signup,guest);
+    if(!confirmed)return json({ok:true,notified:false,skipped:true,reason:'This status is no longer marked received. No confirmation was sent.'});
     if (!signup.notification_email) return json({ ok: true, notified: false });
 
     const t = await loadBallTemplate(svc, "signup_update");

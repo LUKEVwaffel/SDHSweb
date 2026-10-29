@@ -1,4 +1,6 @@
-import { useState, useEffect, useCallback, useMemo } from 'react';
+import {isBallGuestSchoolUnknown,getBallPaymentFacts,isBallHostFormRequired,isBallGuestFormRequired,isBallLabelEligible,getBallTicketReadinessIssues} from '../../../../lib/ballLabelEligibility';
+import {readBallLiveSnapshot} from '../../../../lib/ballLiveSnapshot';
+import { useState, useEffect, useCallback, useMemo, useRef } from 'react';
 import { supabase as SB } from '../../../../lib/supabaseClient';
 import '../../../review/review.css';
 import '../../../ball/portal.css';
@@ -108,24 +110,21 @@ const FPAY_OPTS = [{ value: null, label: '—' }, { value: 'host_delivers', labe
 // --- status filters ---------------------------------------------------------
 // Shared with the stats row so the count shown on a chip always matches what
 // clicking it will actually list.
-const needsFriendCash = (g) => g?.guest_type === 'friend' && g.friend_payment_method === 'self_pays';
 
 const FILTERS = [
   { key: 'all', label: 'All', test: () => true },
   { key: 'awaiting', label: 'Awaiting guest', test: (r) => r.status === 'guest_pending' },
+  {key:'ticket_ready',label:'Ticket ready',test:isBallLabelEligible},
   { key: 'verified', label: 'Verified', test: (r) => r.status === 'fully_verified' },
   {
     key: 'cash',
     label: 'Cash outstanding',
-    test: (r, g) => r.status === 'fully_verified' && (!r.cash_received || (needsFriendCash(g) && !g.friend_cash_received)),
+    test: (r, g) => !getBallPaymentFacts(r,g).complete,
   },
   {
     key: 'form',
     label: 'Form outstanding',
-    test: (r, g) => r.status === 'fully_verified' && (
-      (r.field_trip_form_required && !r.field_trip_form_received)
-      || (!!g && g.field_trip_form_required && !g.field_trip_form_received)
-    ),
+    test: (r,g)=>(isBallHostFormRequired(r)&&r.field_trip_form_received!==true)||(isBallGuestFormRequired(g)&&g.field_trip_form_received!==true),
   },
   { key: 'allergy', label: 'Allergy flagged', test: (r) => !!r.cadet_has_allergy },
 ];
@@ -133,6 +132,7 @@ const FILTERS = [
 // ------------------------------------------------------------------------
 
 export default function BallOverviewTab() {
+  const generation=useRef(0);
   const [signups, setSignups] = useState(null);
   const [guestBySignup, setGuestBySignup] = useState({});
   const [err, setErr] = useState('');
@@ -143,19 +143,28 @@ export default function BallOverviewTab() {
   const [reminderFlash, setReminderFlash] = useState(null); // { tone: 'ok' | 'err', msg }
 
   const load = useCallback(async () => {
-    const [{ data: s, error: sErr }, { data: g, error: gErr }] = await Promise.all([
+    const sequence=++generation.current;
+    const [{ data: s, error: sErr }, { data: g, error: gErr }, snapshot] = await Promise.all([
       SB.from('ball_signups').select('*').order('created_at', { ascending: false }),
       SB.from('ball_guests').select('*'),
+      readBallLiveSnapshot().catch(()=>null),
     ]);
-    if (sErr || gErr) { setErr((sErr || gErr).message); setSignups([]); return; }
+    if(sequence!==generation.current)return;
+    if (sErr || gErr || !snapshot) { setErr((sErr || gErr)?.message||'Current ticket status could not be verified. Refresh to retry.'); setSignups([]); return; }
     setErr('');
     const by = {};
-    (g || []).forEach((row) => { by[row.signup_id] = row; });
+    const rawGuests=new Map((g||[]).map(row=>[row.id,row]));
+    snapshot.guests.forEach(row=>{by[row.signup_id]={...rawGuests.get(row.id),...row};});
     setGuestBySignup(by);
-    setSignups(s || []);
+    const rawHosts=new Map((s||[]).map(row=>[row.id,row]));
+    setSignups(snapshot.hosts.map(row=>({...rawHosts.get(row.id),...row})));
   }, []);
 
-  useEffect(() => { load(); }, [load]);
+  useEffect(()=>{
+    load();const timer=setInterval(load,15000);const focus=()=>load();window.addEventListener('focus',focus);
+    const invalidate=()=>{generation.current++;};
+    return()=>{invalidate();clearInterval(timer);window.removeEventListener('focus',focus);};
+  },[load]);
 
   // Live refresh — without this, a payment/form marked in /ball/ops (Kaz/
   // Chief) never shows here until someone hits Refresh or reopens the tab.
@@ -321,13 +330,14 @@ export default function BallOverviewTab() {
 
 function SignupItem({ r, guest, open, onToggle, onChanged }) {
   const [editing, setEditing] = useState(false);
-  const verified = r.status === 'fully_verified';
-  const needsFriendCash = guest?.guest_type === 'friend' && guest.friend_payment_method === 'self_pays';
-  const needsGuestForm = !!guest && guest.field_trip_form_required;
-  const cashDone = r.cash_received && (!needsFriendCash || guest.friend_cash_received);
-  const formNeeded = r.field_trip_form_required;
-  const formDone = !formNeeded || (r.field_trip_form_received && (!needsGuestForm || guest.field_trip_form_received));
-  const settled = verified && cashDone && formDone;
+  const verified=r.status==='fully_verified'&&(!guest||!!guest.verified_at);
+  const payment=getBallPaymentFacts(r,guest);
+  const cashDone=payment.complete;
+  const formNeeded=isBallHostFormRequired(r);
+  const settled=isBallLabelEligible(r,guest);
+  const issues=getBallTicketReadinessIssues(r,guest);
+  const standardUniform=String(r.cadet_gender||'').trim().toLowerCase()==='male'&&r.standalone_guest!==true;
+
 
   return (
     <div style={{ background: 'var(--rv-surface)', border: '1px solid var(--rv-border)', borderLeft: `3px solid ${settled ? 'var(--rv-green)' : verified ? 'var(--rv-accent)' : 'var(--rv-faint)'}`, borderRadius: 'var(--rv-radius)', overflow: 'hidden' }}>
@@ -344,13 +354,15 @@ function SignupItem({ r, guest, open, onToggle, onChanged }) {
           </div>
         </div>
         <div style={{ display: 'flex', gap: 5, flexWrap: 'wrap', justifyContent: 'flex-end' }}>
-          <span style={chip(verified ? 'green' : 'mute')}>{verified ? 'verified' : 'awaiting guest'}</span>
-          <span style={chip(cashDone ? 'green' : 'accent')}>{cashDone ? 'paid' : `owes ${money(r.amount_due)}`}</span>
+          <span style={chip(verified ? 'green' : 'mute')}>{verified ? 'registration verified' : 'verification pending'}</span>
+          <span style={chip(cashDone ? 'green' : 'accent')}>{cashDone ? 'paid' : payment.hostBalance==null||payment.friendBalance==null?'payment unknown':`owes ${money(payment.hostBalance+payment.friendBalance)}`}</span>
           {formNeeded && <span style={chip(r.field_trip_form_received ? 'green' : 'accent')}>{r.field_trip_form_received ? 'form in' : 'form out'}</span>}
+          <span style={chip(settled?'green':'accent')}>{settled?'ticket ready':'ticket requirements pending'}</span>
           {r.cadet_has_allergy && <span style={chip(r.allergy_status === 'contacted' ? 'green' : 'red')}>allergy</span>}
         </div>
       </button>
 
+      {open&&!editing&&issues.length>0&&<div style={{padding:'12px 16px',color:'var(--rv-accent)',fontSize:12}}><strong>Ticket not ready:</strong> {issues.join(' ')}</div>}
       {open && !editing && (
         <div style={detailWrap}>
           <div>
@@ -362,8 +374,8 @@ function SignupItem({ r, guest, open, onToggle, onChanged }) {
               <Field label="Age" value={r.cadet_age} />
               <Field label="Amount due" value={money(r.amount_due)} />
               <Field label="Cash received (host)" value={r.cash_received ? 'yes' : 'no'} />
-              <Field label="Field-trip form (host)" value={!r.field_trip_form_required ? 'not required' : r.field_trip_form_received ? 'received' : 'outstanding'} />
-              <Field label="Dress approved" value={r.dress_approved == null ? 'n/a' : r.dress_approved ? `yes — ${r.dress_approved_by?.split('@')[0] || ''}` : 'no'} />
+              <Field label="Field-trip form (host)" value={!isBallHostFormRequired(r)?'not required':r.field_trip_form_received===true?'received':'outstanding'} />
+              <Field label="Dress approved" value={r.door_attire_denied===true?'DENIED ON SITE':standardUniform?'Standard uniform — individual approval not required':r.dress_approved == null ? 'Approval not recorded; on-site review available' : r.dress_approved ? `yes — ${r.dress_approved_by?.split('@')[0] || ''}` : 'no'} />
               <Field label="Allergy" value={!r.cadet_has_allergy ? 'none flagged' : `${r.allergy_status}${r.allergy_contacted_at ? ` ${fmt(r.allergy_contacted_at)}` : ''}`} />
               {r.cadet_has_allergy && <Field label="Allergy email" value={r.cadet_allergy_email} />}
               {r.cadet_allergies && <Field label="Allergy notes (legacy)" value={r.cadet_allergies} />}
@@ -385,11 +397,11 @@ function SignupItem({ r, guest, open, onToggle, onChanged }) {
                 {guest.guest_type === 'friend' && <Field label="Friend owes" value={money(guest.friend_amount_due)} />}
                 {guest.guest_type === 'friend' && <Field label="Friend pays via" value={guest.friend_payment_method === 'host_delivers' ? 'host brings it' : 'friend pays direct'} />}
                 {guest.guest_type === 'friend' && <Field label="Guest cash received" value={guest.friend_cash_received ? 'yes' : 'no'} />}
-                {guest.field_trip_form_required && <Field label="Field-trip form (guest)" value={guest.field_trip_form_received ? 'received' : 'outstanding'} />}
+                <Field label="Field-trip form (guest)" value={isBallGuestSchoolUnknown(guest)?'Confirm current school enrollment':!isBallGuestFormRequired(guest)?'not required':guest.field_trip_form_received===true?'received':'outstanding'} />
                 <Field label="POC" value={guest.poc_name} />
                 <Field label="POC email" value={guest.poc_email} />
                 <Field label="POC phone" value={guest.poc_phone} />
-                <Field label="Dress approved" value={guest.dress_approved == null ? 'n/a' : guest.dress_approved ? `yes — ${guest.dress_approved_by?.split('@')[0] || ''}` : 'no'} />
+                <Field label="Dress approved" value={guest.dress_approved == null ? 'Approval not recorded; on-site review available' : guest.dress_approved ? `yes — ${guest.dress_approved_by?.split('@')[0] || ''}` : 'no'} />
                 <Field label="Dress code accepted" value={fmt(guest.dress_code_accepted_at)} />
                 <Field label="Verified" value={fmt(guest.verified_at)} />
                 {guest.allergies && <Field label="Guest allergies" value={guest.allergies} />}

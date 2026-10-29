@@ -399,7 +399,7 @@ export async function buildPdfPlan(
   if (
     name === "generate_ball_packet_pdf" || name === "generate_ball_receipts_pdf"
   ) {
-    const {data:snapshot,error:snapshotError}=await scoped.rpc("ball_ticket_snapshot");
+    const {data:snapshot,error:snapshotError}=await scoped.rpc("ball_ticket_snapshot",{p_policy_version:2});
     if(snapshotError || !snapshot?.version) throw new Error("Could not read the current Ball ledger. No PDF was generated.");
     const hosts:Row[]=snapshot.hosts, guests:Row[]=snapshot.guests;
     if (name === "generate_ball_receipts_pdf") {

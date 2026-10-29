@@ -1,3 +1,4 @@
+import {getBallPaymentFacts,isBallHostFormRequired,isBallGuestFormRequired} from '../../../lib/ballLabelEligibility';
 import { useState, useEffect, useCallback, useMemo } from 'react';
 import { Navigate } from 'react-router-dom';
 import { supabase as SB } from '../../../lib/supabaseClient';
@@ -214,7 +215,7 @@ export default function BallOpsPortal() {
         return;
       }
       // Notification is fire-and-forget — a failed email must not block the flip.
-      await SB.functions
+      if(turningOn) await SB.functions
         .invoke('notify-ball-status-update', { body: { signup_id: row.id, field: target.notify } })
         .catch(() => {});
       await loadAll();
@@ -245,14 +246,11 @@ export default function BallOpsPortal() {
   // needs their own (guest.field_trip_form_required, set at signup from
   // whether THEY are an SDHS student) independent of whatever the host's own
   // flag is — this applies to date AND friend guests alike.
-  const needsFriendCash = (r, g) => g?.guest_type === 'friend' && g?.friend_payment_method === 'self_pays';
-  const needsGuestForm = (r, g) => !!g && g.field_trip_form_required;
   const settled = useCallback((r) => {
     const g = guestsBySignup[r.id];
-    return r.cash_received
-      && (!needsFriendCash(r, g) || g.friend_cash_received)
-      && (!r.field_trip_form_required || r.field_trip_form_received)
-      && (!needsGuestForm(r, g) || g.field_trip_form_received);
+    return getBallPaymentFacts(r,g).complete
+      && (!isBallHostFormRequired(r)||r.field_trip_form_received===true)
+      && (!isBallGuestFormRequired(g)||g.field_trip_form_received===true);
   }, [guestsBySignup]);
 
   const { needsAction, awaiting, done } = useMemo(() => {
@@ -332,7 +330,7 @@ export default function BallOpsPortal() {
           <div className="bp-stats">
             <span className={`bp-stat ${needsAction.length ? 'is-alert' : ''}`}><b>{needsAction.length}</b> need action</span>
             <span className="bp-stat"><b>{awaiting.length}</b> awaiting guest</span>
-            <span className={`bp-stat ${done.length === totalVerified && totalVerified > 0 ? 'is-done' : ''}`}><b>{done.length}</b> settled</span>
+            <span className={`bp-stat ${done.length === totalVerified && totalVerified > 0 ? 'is-done' : ''}`}><b>{done.length}</b> cash/forms complete</span>
             <span className="bp-stat"><b>{totalGuests}</b> guests</span>
           </div>
 
@@ -368,7 +366,7 @@ export default function BallOpsPortal() {
                   <LookupRow key={r.id} r={r} guest={guestsBySignup[r.id]} onOpen={openPerson} tone="wait" />
                 ))}
               </Section>
-              <Section title={`Settled · ${done.length}`} hide={!done.length}>
+              <Section title={`Cash & forms complete · ${done.length}`} hide={!done.length}>
                 {done.map((r) => (
                   <LookupRow key={r.id} r={r} guest={guestsBySignup[r.id]} onOpen={openPerson} tone="done" />
                 ))}
@@ -397,9 +395,9 @@ function Section({ title, hide, children }) {
 // Compact, click-to-open row — no action buttons here on purpose. Status at
 // a glance via chips; the options live one tap away in PersonDetail.
 function LookupRow({ r, guest, onOpen, tone }) {
-  const friendPaysOwnCash = guest?.guest_type === 'friend' && guest?.friend_payment_method === 'self_pays';
-  const cashDone = r.cash_received && (!friendPaysOwnCash || guest.friend_cash_received);
-  const guestNeedsOwnForm = !!guest && guest.field_trip_form_required;
+  const payment=getBallPaymentFacts(r,guest);
+  const cashDone = payment.complete;
+  const guestNeedsOwnForm = isBallGuestFormRequired(guest);
   const hostFormDone = !!r.field_trip_form_received;
   const guestFormDone = !!guest?.field_trip_form_received;
   const awaitingGuest = r.status === 'guest_pending';
@@ -418,7 +416,7 @@ function LookupRow({ r, guest, onOpen, tone }) {
       </div>
       <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap', justifyContent: 'flex-end', flexShrink: 0 }}>
         {awaitingGuest && <span style={chip('mute')}>awaiting guest</span>}
-        <span style={chip(cashDone ? 'green' : 'accent')}>{cashDone ? 'paid' : `owes ${money(r.amount_due) || '?'}`}</span>
+        <span style={chip(cashDone ? 'green' : 'accent')}>{cashDone ? 'paid' : payment.hostBalance==null||payment.friendBalance==null?'payment unknown':`owes ${money(payment.hostBalance+payment.friendBalance)}`}</span>
         {r.field_trip_form_required && <span style={chip(hostFormDone ? 'green' : 'accent')}>{guest ? 'host ' : ''}form {hostFormDone ? 'in' : 'out'}</span>}
         {guestNeedsOwnForm && <span style={chip(guestFormDone ? 'green' : 'accent')}>guest form {guestFormDone ? 'in' : 'out'}</span>}
       </div>
@@ -442,7 +440,7 @@ function ContactLine({ label, name, phone, email }) {
 // lives here instead of cluttering every row in the list.
 function PersonDetail({ r, guest, busy, confirming, onRequestToggle, onConfirm, onCancel, onBack }) {
   const friend = guest?.guest_type === 'friend';
-  const guestNeedsOwnForm = !!guest && guest.field_trip_form_required;
+  const guestNeedsOwnForm = isBallGuestFormRequired(guest);
   const awaitingGuest = r.status === 'guest_pending';
   const hasContact = guest?.poc_name || guest?.poc_phone || guest?.poc_email
     || guest?.personal_email || r.notification_email;
