@@ -196,14 +196,15 @@ export default function BallTicketReadinessWidget() {
     finally{setBusy('');}
   }
 
-  async function printLabels(undeliveredOnly) {
-    const reservations = visible.filter(row => !undeliveredOnly || !row.distribution?.distributed);
+  async function printLabels(undeliveredOnly, selectedRecord = null) {
+    const reservations = selectedRecord ? [selectedRecord] : visible.filter(row => !undeliveredOnly || !row.distribution?.distributed);
     if (!reservations.length || busy || refreshing || error) return;
     const printWindow = window.open('', '_blank');
     if (!printWindow) { setError('Allow popups to print Ball labels.'); return; }
     setBusy('printing'); setError('');
     try {
       const batch=await readBallLabelBatch(reservations.map(row=>row.host.id),undeliveredOnly);
+      if(selectedRecord&&(batch.labels.length!==1||batch.labels[0].signupId!==selectedRecord.host.id))throw new Error('The selected label could not be verified. Nothing was printed.');
       if (!printBallEnvelopeLabels(batch, labelIndex, printWindow)) { printWindow.close(); return; }
       const nextIndex = (labelIndex + batch.labels.length) % AVERY_5160.count;
       setLabelIndex(nextIndex);
@@ -285,6 +286,7 @@ export default function BallTicketReadinessWidget() {
                     <span style={{ display: 'block', color: P.faint, fontFamily: inter, fontSize: 10, marginTop: 3 }}>Ticket pickup: <b style={{ color: P.mute, fontWeight: 500 }}>{delivered ? record.distribution?.recipient_name || record.name : record.name}</b></span>
                     {delivered && <span style={{ display: 'block', color: P.faint, fontFamily: mono, fontSize: 9, marginTop: 3 }}>Delivered{record.distribution?.distributed_at ? ` · ${new Date(record.distribution.distributed_at).toLocaleDateString()}` : ''}</span>}
                   </span>
+                  <button type="button" disabled={!!busy||refreshing||!!error} onClick={()=>printLabels(false,record)} aria-label={`${delivered?'Reprint':'Print'} one label for ${record.displayNames}`} style={{...buttonStyle,minHeight:40}}>{delivered?'Reprint one label':'Print one label'}</button>
                   <span style={{ ...statusPill(delivered), flex: '0 0 auto' }}>{delivered ? 'DELIVERED' : 'READY'}</span>
                   {delivered && <button type="button" disabled={!!busy||refreshing||!!error} onClick={() => { if (window.confirm(`Revoke the delivered status for ${record.displayNames}?`)) markDistributed(record, false); }} style={{ ...buttonStyle, padding: '6px 8px', color: P.mute, opacity: busy ? 0.55 : 1, cursor: busy ? 'wait' : 'pointer' }}>Revoke</button>}
                 </div>;
