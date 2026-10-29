@@ -14,11 +14,12 @@ function escapeHtml(s) {
 
 export const AVERY_5160 = { cols: 3, rows: 10, count: 30 };
 
-const LABEL_W_IN = 2.625;
-const LABEL_H_IN = 1;
-const COL_PITCH_IN = 2.75; // label width + 0.125in horizontal gap
-const LEFT_MARGIN_IN = 0.1875;
-const TOP_MARGIN_IN = 0.5;
+export const AVERY_5160_GEOMETRY = {labelWidth:2.625,labelHeight:1,columnPitch:2.75,leftMargin:0.1875,topMargin:0.5,pageWidth:8.5,pageHeight:11};
+const LABEL_W_IN = AVERY_5160_GEOMETRY.labelWidth;
+const LABEL_H_IN = AVERY_5160_GEOMETRY.labelHeight;
+const COL_PITCH_IN = AVERY_5160_GEOMETRY.columnPitch; // label width + 0.125in horizontal gap
+const LEFT_MARGIN_IN = AVERY_5160_GEOMETRY.leftMargin;
+const TOP_MARGIN_IN = AVERY_5160_GEOMETRY.topMargin;
 
 // index: 0-based, numbered left-to-right then top-to-bottom (position 1 on
 // the physical sheet = index 0), matching how Avery itself numbers 5160.
@@ -131,3 +132,26 @@ export function printBallEnvelopeLabels(batch, startIndex = 0, printWindow = nul
 
 // Raw names cannot bypass the live completion check.
 export function printBallEnvelopeLabel(){throw new Error('Select the reservation in Ticket Delivery to verify it before printing.');}
+
+// Generic decorative seals carry no attendee names or completion claims.
+export function ballSealDocumentHtml(count=30,startIndex=0){
+ if(!Number.isInteger(count)||count<1||count>300)throw new Error('Choose 1 to 300 envelope seals.');
+ const {sheets}=ballLabelBatchLayout(Array.from({length:count},()=>({cadetName:'Envelope seal'})),startIndex);
+ const star='<svg viewBox="0 0 20 20" aria-hidden="true"><path d="M10 0 12 8 20 10 12 12 10 20 8 12 0 10 8 8Z" fill="black"/></svg>';
+ return `<!doctype html><html><head><meta charset="utf-8"><title>Military Ball Envelope Seals (${count})</title><style>
+ @page{size:letter;margin:0}*{box-sizing:border-box}html,body{margin:0;background:white;color:black}
+ .sheet{position:relative;width:8.5in;height:11in;break-after:page;overflow:hidden}.sheet:last-child{break-after:auto}
+ .seal{position:absolute;width:${LABEL_W_IN}in;height:${LABEL_H_IN}in;display:grid;place-items:center}
+ .seal-border{position:relative;width:2.38in;height:.82in;border:1px solid black;border-radius:50%;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px}
+ .seal-border:after{content:"";position:absolute;inset:3px;border:0.5px solid black;border-radius:50%;pointer-events:none}
+ .school{font:700 8px Arial,sans-serif;letter-spacing:2.2px}.title{font:italic 700 21px Georgia,serif;line-height:1.1}.theme{font:700 7.5px Arial,sans-serif;letter-spacing:1.25px}
+ .star{position:absolute;top:calc(50% - 7px);width:14px;height:14px}.star.left{left:12px}.star.right{right:12px}.star svg{display:block;width:100%;height:100%}
+ @media print{*{-webkit-print-color-adjust:exact;print-color-adjust:exact}}
+ </style></head><body>${sheets.map(sheet=>`<div class="sheet">${sheet.map(({index})=>{const p=cellOffset(index);return `<div class="seal" style="left:${p.left}in;top:${p.top}in"><div class="seal-border"><span class="star left">${star}</span><div class="school">SDHS AJROTC</div><div class="title">Military Ball</div><div class="theme">2026 · CELESTIAL NIGHTS</div><span class="star right">${star}</span></div></div>`;}).join('')}</div>`).join('')}</body></html>`;
+}
+export function printBallEnvelopeSeals(count=30,startIndex=0){
+ const html=ballSealDocumentHtml(count,startIndex);
+ const win=window.open('','_blank');
+ if(!win){alert('Allow popups to print envelope seals.');return false;}
+ win.document.write(html);win.document.close();win.focus();setTimeout(()=>win.print(),350);return true;
+}

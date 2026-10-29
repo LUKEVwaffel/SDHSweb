@@ -3,7 +3,7 @@ import { supabase as SB } from '../../../lib/supabaseClient';
 import { getBallTicketReadinessIssues, isBallLabelEligible } from '../../../lib/ballLabelEligibility';
 import {invokeError} from '../../../lib/supabaseFnError';
 import {readBallLiveSnapshot,readBallLabelBatch} from '../../../lib/ballLiveSnapshot';
-import { AVERY_5160, printBallEnvelopeLabels } from '../../../lib/ballLabelPrint';
+import { AVERY_5160, printBallEnvelopeLabels, printBallEnvelopeSeals } from '../../../lib/ballLabelPrint';
 import { P, mono, oswald, inter, radius } from '../theme';
 
 const collator = new Intl.Collator(undefined, { sensitivity: 'base', numeric: true });
@@ -232,6 +232,7 @@ export default function BallTicketReadinessWidget() {
             {companies.map(c => <option key={c} value={c}>{c}</option>)}
           </select>
           <button type="button" onClick={load} disabled={refreshing} style={buttonStyle}>{refreshing?'Checking…':'Refresh'}</button>
+          <button type="button" onClick={()=>printBallEnvelopeSeals()} style={buttonStyle}>Print envelope seals · 30</button>
           <button type="button" onClick={printReceipts} disabled={refreshing||!!error||!!busy} style={buttonStyle}>{busy==='receipts'?'Generating current receipts…':'Print current receipts'}</button>
           <button type="button" onClick={() => printLabels(true)} disabled={refreshing||!!error||!visible.some(r => !r.distribution?.distributed)} style={goldButtonStyle}>Print undelivered labels</button>
           <button type="button" onClick={() => printLabels(false)} disabled={refreshing||!!error||!visible.length} style={buttonStyle}>Print ready labels</button>
