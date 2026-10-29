@@ -31,6 +31,7 @@ export const NAV_GROUPS = [
       { id: 'media', icon: '⊡', label: 'Media' },
       { id: 'raidertv', icon: '▶', label: 'Raider TV' },
       { id: 'ball', icon: '♛', label: 'Military Ball' },
+      { id: 'ticketdelivery', icon: '✓', label: 'Ticket Delivery' },
       { id: 'ballallergy', icon: '⚕', label: 'Ball Allergies' },
       { id: 'riflesignups', icon: '⊙', label: 'Rifle Signups' },
       { id: 'halloween', icon: '🎃', label: 'Halloween Movie Poll' },

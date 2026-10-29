@@ -27,6 +27,7 @@ import RifleSignupsPanel from './panels/RifleSignupsPanel';
 import PortalAccessPanel from './panels/portal/PortalAccessPanel';
 import HalloweenMoviePollPanel from './panels/HalloweenMoviePollPanel';
 import ChristmasMusicPollPanel from './panels/ChristmasMusicPollPanel';
+import TicketDeliveryPanel from './panels/TicketDeliveryPanel';
 import BoardsPanel from './panels/boards/BoardsPanel';
 
 // Push-to-TV / TV Photos is intentionally restricted to this one account —
@@ -43,7 +44,7 @@ const SECTION_LABEL = {
   media: 'MEDIA', advanced: 'ADVANCED', account: 'MY ACCOUNT', messages: 'MESSAGES',
   tvremote: 'TV REMOTE', beta: 'BETA FEATURES', rafting: 'RAFTING TRIP', checkin: 'SITE CHECK-IN',
   feedback: 'EVENT FEEDBACK', ball: 'MILITARY BALL', ballallergy: 'BALL ALLERGIES', raidertv: 'RAIDER TV',
-  opticsurvey: 'OPTIC SURVEY', riflesignups: 'RIFLE SIGNUPS', poll: 'CHRISTMAS MUSIC POLL', halloween: 'HALLOWEEN MOVIE POLL', boards: 'PROMOTION BOARDS',
+  opticsurvey: 'OPTIC SURVEY', riflesignups: 'RIFLE SIGNUPS', ticketdelivery: 'TICKET DELIVERY', poll: 'CHRISTMAS MUSIC POLL', halloween: 'HALLOWEEN MOVIE POLL', boards: 'PROMOTION BOARDS',
 };
 
 // Which sections each role may see. s5 is scoped to the battalion calendar
@@ -85,7 +86,7 @@ const SECTION_LABEL = {
 // tv_daily_settings emergency guard to accept is_bc(); is_admin()/is_s6()/
 // is_s5() are untouched, so every other admin table stays locked to him.
 const ROLE_SECTIONS = {
-  s6: ['overview', 'events', 'people', 'photos', 'questions', 'email', 'media', 'messages', 'advanced', 'tvremote', 'raidertv', 'beta', 'feedback', 'ball', 'ballallergy', 'riflesignups', 'portalaccess', 'halloween', 'boards', 'poll'],
+  s6: ['overview', 'events', 'people', 'photos', 'questions', 'email', 'media', 'messages', 'advanced', 'tvremote', 'raidertv', 'beta', 'feedback', 'ball', 'ballallergy', 'riflesignups', 'portalaccess', 'halloween', 'boards', 'poll', 'ticketdelivery'],
   s5: ['events', 'aars', 'feedback', 'messages', 'account', 'tvremote', 'ballallergy', 'poll'],
   bc: ['tvremote'],
 };
@@ -138,6 +139,7 @@ export default function Dashboard({ onLogout, adminId, role = 's6' }) {
           {section === 'riflesignups' && <RifleSignupsPanel />}
           {section === 'boards' && <BoardsPanel />}
           {section === 'portalaccess' && <PortalAccessPanel />}
+          {section === 'ticketdelivery' && <TicketDeliveryPanel />}
           {section === 'poll' && <ChristmasMusicPollPanel canManage={role === 's6'} />}
           {section === 'halloween' && <HalloweenMoviePollPanel />}
         </div>

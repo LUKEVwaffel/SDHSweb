@@ -3,10 +3,9 @@
 // margin, no vertical gap between rows). Same window.open + document.write +
 // print() pattern as ballGuestVerifyPdf.js / consentPdfPrint.js.
 //
-// Only ONE label on the sheet is ever printed at a time (position picked by
-// the caller), because these are hand-fed partially-used Avery sheets — the
-// other 29 cells must render as nothing, not as blank boxes, so ink isn't
-// wasted and alignment on an already-printed sheet stays clean.
+// Single-label and batch printing share the same stock and label design.
+// Batch jobs start at the chosen open cell, then continue on fresh sheets.
+// Unused cells stay blank.
 function escapeHtml(s) {
   return String(s || '')
     .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
@@ -37,18 +36,43 @@ function metaLine(letLevel, company) {
     .filter(Boolean).join(' · ');
 }
 
-function documentHtml({ cadetName, letLevel, company, guestName, index }) {
+function labelHtml({ cadetName, letLevel, company, guestName }, index) {
   const { left, top } = cellOffset(index);
   const meta = metaLine(letLevel, company);
+  return `<div class="label" style="left:${left}in;top:${top}in">
+    <div class="brand">Trojan Battalion &middot; Military Ball</div>
+    <div class="body">
+      <div class="name">${escapeHtml(cadetName)}</div>
+      ${meta ? `<div class="meta">${escapeHtml(meta)}</div>` : ''}
+      ${guestName ? `<div class="guest">+ ${escapeHtml(guestName)}</div>` : ''}
+    </div>
+  </div>`;
+}
+
+export function ballLabelBatchLayout(labels, startIndex = 0) {
+  if (!Number.isInteger(startIndex) || startIndex < 0 || startIndex >= AVERY_5160.count) throw new Error('Pick a label position on the sheet first.');
+  if (!Array.isArray(labels) || !labels.length || labels.some(label => !label?.cadetName)) throw new Error('Select available tags to print.');
+  const sheets = [];
+  labels.forEach((label, i) => {
+    const position = startIndex + i;
+    const sheet = Math.floor(position / AVERY_5160.count);
+    (sheets[sheet] ||= []).push({ label, index: position % AVERY_5160.count });
+  });
+  return { sheets, nextIndex: (startIndex + labels.length) % AVERY_5160.count };
+}
+
+export function ballLabelDocumentHtml(labels, startIndex = 0) {
+  const { sheets } = ballLabelBatchLayout(labels, startIndex);
   return `<!doctype html><html><head><meta charset="utf-8">
-<title>Ball Envelope Label</title>
+<title>Ball Envelope Labels (${labels.length})</title>
 <style>
   @page { size: letter; margin: 0; }
   * { box-sizing: border-box; }
   html, body { background: #ffffff; margin: 0; padding: 0; }
+  .sheet { position: relative; width: 8.5in; height: 11in; break-after: page; page-break-after: always; overflow: hidden; }
+  .sheet:last-child { break-after: auto; page-break-after: auto; }
   .label {
     position: absolute;
-    left: ${left}in; top: ${top}in;
     width: ${LABEL_W_IN}in; height: ${LABEL_H_IN}in;
     display: flex; flex-direction: column; align-items: center;
     padding: 0.05in 0.16in 0.07in;
@@ -83,28 +107,26 @@ function documentHtml({ cadetName, letLevel, company, guestName, index }) {
 </style>
 </head>
 <body>
-  <div class="label">
-    <div class="brand">Trojan Battalion &middot; Military Ball</div>
-    <div class="body">
-      <div class="name">${escapeHtml(cadetName)}</div>
-      ${meta ? `<div class="meta">${escapeHtml(meta)}</div>` : ''}
-      ${guestName ? `<div class="guest">+ ${escapeHtml(guestName)}</div>` : ''}
-    </div>
-  </div>
+  ${sheets.map(sheet => `<div class="sheet">${sheet.map(({label,index}) => labelHtml(label,index)).join('')}</div>`).join('')}
 </body></html>`;
 }
 
 // cadetName/letLevel/company/guestName come straight off the approved
 // ball_signups/ball_guests row — never freehand, so the sticker always
 // matches what was actually verified. index: 0-29, which cell on the sheet.
-export function printBallEnvelopeLabel({ cadetName, letLevel, company, guestName, index }) {
-  if (index < 0 || index >= AVERY_5160.count) { alert('Pick a label position on the sheet first.'); return; }
-  if (!cadetName) { alert('Select an approved signup first.'); return; }
-  const win = window.open('', '_blank');
-  if (!win) { alert('Popup blocked, allow popups to print.'); return; }
-
-  win.document.write(documentHtml({ cadetName, letLevel, company, guestName, index }));
+export function printBallEnvelopeLabels(labels, startIndex = 0, printWindow = null) {
+  let html;
+  try { html = ballLabelDocumentHtml(labels, startIndex); }
+  catch (error) { alert(error.message); return false; }
+  const win = printWindow || window.open('', '_blank');
+  if (!win) { alert('Popup blocked, allow popups to print.'); return false; }
+  win.document.write(html);
   win.document.close();
   win.focus();
   setTimeout(() => win.print(), 350);
+  return true;
+}
+
+export function printBallEnvelopeLabel({ cadetName, letLevel, company, guestName, index }) {
+  return printBallEnvelopeLabels([{cadetName, letLevel, company, guestName}], index);
 }

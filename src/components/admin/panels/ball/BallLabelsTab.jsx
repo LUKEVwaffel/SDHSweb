@@ -1,8 +1,9 @@
-import { useState, useEffect, useCallback, useMemo } from 'react';
+import { useState, useEffect, useCallback, useMemo, useRef } from 'react';
+import {readBallLiveSnapshot} from '../../../../lib/ballLiveSnapshot';
 import { supabase as SB } from '../../../../lib/supabaseClient';
 import { P, mono, inter, sp, radius } from '../../theme';
 import { Btn, Label } from '../../shared/ui';
-import { printBallEnvelopeLabel, AVERY_5160 } from '../../../../lib/ballLabelPrint';
+import { printBallEnvelopeLabels, AVERY_5160 } from '../../../../lib/ballLabelPrint';
 
 // Envelope sticker labels for the Military Ball. "Fully approved" mirrors the
 // settled/green-dot condition on the Overview tab (verified + cash + field
@@ -10,19 +11,10 @@ import { printBallEnvelopeLabel, AVERY_5160 } from '../../../../lib/ballLabelPri
 // envelope is actually ready to seal and address. Label content is read
 // straight off the picked signup/guest row — no freehand text field — so the
 // sticker can never drift from what was actually verified.
+import { isBallLabelEligible } from '../../../../lib/ballLabelEligibility';
+
 const LAST_INDEX_KEY = 'ballLabelLastIndex';
 
-function isFullyApproved(r, guest) {
-  const verified = r.status === 'fully_verified';
-  const needsFriendCash = guest?.guest_type === 'friend' && guest.friend_payment_method === 'self_pays';
-  const needsGuestForm = !!guest && guest.field_trip_form_required;
-  const cashDone = r.cash_received && (!needsFriendCash || guest.friend_cash_received);
-  const formNeeded = r.field_trip_form_required;
-  const formDone = !formNeeded || (r.field_trip_form_received && (!needsGuestForm || guest.field_trip_form_received));
-  const hostDressOk = r.dress_approved !== false;
-  const guestDressOk = !guest || guest.dress_approved !== false;
-  return verified && cashDone && formDone && hostDressOk && guestDressOk;
-}
 
 function readLastIndex() {
   try {
@@ -36,39 +28,39 @@ function metaLine(letLevel, company) {
 }
 
 export default function BallLabelsTab() {
+  const generation=useRef(0);
+  const [refreshing,setRefreshing]=useState(false);
+  const [checkedAt,setCheckedAt]=useState('');
   const [signups, setSignups] = useState(null);
   const [guestBySignup, setGuestBySignup] = useState({});
   const [err, setErr] = useState('');
+  const [printing, setPrinting] = useState(false);
   const [selectedId, setSelectedId] = useState(null);
   const [labelIndex, setLabelIndex] = useState(readLastIndex);
 
   const load = useCallback(async () => {
-    const [{ data: s, error: sErr }, { data: g, error: gErr }] = await Promise.all([
-      SB.from('ball_signups').select('*').order('cadet_name', { ascending: true }),
-      SB.from('ball_guests').select('*'),
-    ]);
-    if (sErr || gErr) { setErr((sErr || gErr).message); setSignups([]); return; }
-    setErr('');
-    const by = {};
-    (g || []).forEach((row) => { by[row.signup_id] = row; });
-    setGuestBySignup(by);
-    setSignups(s || []);
+    const sequence=++generation.current;setRefreshing(true);
+    try{
+      const snapshot=await readBallLiveSnapshot();
+      if(sequence!==generation.current)return;
+      setGuestBySignup(Object.fromEntries(snapshot.guests.map(g=>[g.signup_id,g])));
+      setSignups(snapshot.hosts);setCheckedAt(snapshot.checked_at);setErr('');
+    }catch(error){if(sequence===generation.current){setErr(error.message||'Could not verify current records. Printing is paused.');setSignups(previous=>previous||[]);}}
+    finally{if(sequence===generation.current)setRefreshing(false);}
   }, []);
-
-  useEffect(() => { load(); }, [load]);
-
-  useEffect(() => {
-    const channel = SB.channel('ball-labels-tab')
-      .on('postgres_changes', { event: '*', schema: 'public', table: 'ball_signups' }, load)
-      .on('postgres_changes', { event: '*', schema: 'public', table: 'ball_guests' }, load)
-      .subscribe();
-    return () => { SB.removeChannel(channel); };
-  }, [load]);
+  useEffect(()=>{
+    load();const timer=setInterval(load,15000);
+    const focus=()=>load();window.addEventListener('focus',focus);
+    const visible=()=>{if(document.visibilityState==='visible')load();};document.addEventListener('visibilitychange',visible);
+    const channel=SB.channel('ball-labels-tab').on('postgres_changes',{event:'*',schema:'public',table:'ball_signups'},load).on('postgres_changes',{event:'*',schema:'public',table:'ball_guests'},load).subscribe();
+    const invalidatePending=()=>{generation.current++;};
+    return()=>{invalidatePending();clearInterval(timer);window.removeEventListener('focus',focus);document.removeEventListener('visibilitychange',visible);SB.removeChannel(channel);};
+  },[load]);
 
   const approved = useMemo(() => {
     const rows = signups || [];
     return rows
-      .filter((r) => isFullyApproved(r, guestBySignup[r.id]))
+      .filter((r) => isBallLabelEligible(r, guestBySignup[r.id]))
       .map((r) => ({ r, guest: guestBySignup[r.id] }));
   }, [signups, guestBySignup]);
 
@@ -87,12 +79,30 @@ export default function BallLabelsTab() {
     try { localStorage.setItem(LAST_INDEX_KEY, String(i)); } catch { /* private browsing — non-fatal */ }
   }
 
-  function print() {
-    if (!fields) return;
-    printBallEnvelopeLabel({ ...fields, index: labelIndex });
-    // Sheets get fed one label at a time — advance to the next open cell so
-    // the very next print doesn't reprint the same spot by accident.
-    pickIndex((labelIndex + 1) % AVERY_5160.count);
+  async function printLabels(all) {
+    if (printing || refreshing || err) return;
+    const ids = all ? approved.map(({r}) => r.id) : selected ? [selected.r.id] : [];
+    if (!ids.length) return;
+    // Reserve the popup during the click, before waiting for live approval checks.
+    const win = window.open('', '_blank');
+    if (!win) { setErr('Allow popups to open the label print window.'); return; }
+    setPrinting(true);
+    setErr('');
+    const startIndex = labelIndex;
+    try {
+      const snapshot=await readBallLiveSnapshot();
+      const bySignup=Object.fromEntries(snapshot.guests.map(g=>[g.signup_id,g]));
+      const hosts=snapshot.hosts.filter(row=>ids.includes(row.id)).sort((a,b)=>a.cadet_name.localeCompare(b.cadet_name));
+      if(hosts.length!==ids.length||hosts.some(row=>!isBallLabelEligible(row,bySignup[row.id])))throw new Error('A selected reservation changed. Review the refreshed list before printing.');
+      const labels=hosts.map(r=>({cadetName:r.cadet_name||'',letLevel:r.cadet_let_level||'',company:r.cadet_company||'',guestName:bySignup[r.id]?.name||''}));
+      if((await readBallLiveSnapshot()).version!==snapshot.version)throw new Error('Ball records changed while preparing these labels. Retry. Nothing was printed.');
+      if (!printBallEnvelopeLabels(labels, startIndex, win)) { win.close(); return; }
+      pickIndex((startIndex + labels.length) % AVERY_5160.count);
+    } catch (error) {
+      win.close();
+      await load();
+      setErr(error.message || 'Could not verify ticket approval. No labels were printed.');
+    } finally { setPrinting(false); }
   }
 
   if (signups === null) {
@@ -104,9 +114,10 @@ export default function BallLabelsTab() {
       <div>
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: sp[3] }}>
           <Label style={{ marginBottom: 0 }}>FULLY APPROVED ({approved.length})</Label>
-          <Btn size="sm" variant="ghost" onClick={load}>RESCAN</Btn>
+          <Btn size="sm" variant="ghost" onClick={load} disabled={refreshing}>{refreshing?'CHECKING…':'RESCAN'}</Btn>
         </div>
 
+        <p style={{fontSize:12,color:P.mute}}>Live check every 15 seconds · {checkedAt?new Date(checkedAt).toLocaleTimeString():'Checking…'}</p>
         {err && <div style={{ fontFamily: mono, fontSize: 12, color: P.red, marginBottom: sp[3] }}>{err}</div>}
 
         {approved.length === 0 ? (
@@ -146,13 +157,18 @@ export default function BallLabelsTab() {
         </div>
         <AverySheetPicker index={labelIndex} onPick={pickIndex} fields={fields} />
 
-        <div style={{ marginTop: sp[5], display: 'flex', alignItems: 'center', gap: sp[3] }}>
-          <Btn variant="gold" onClick={print} disabled={!selected}>PRINT THIS LABEL</Btn>
+        <div style={{ marginTop: sp[5], display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: sp[3] }}>
+          <Btn variant="gold" onClick={() => printLabels(false)} disabled={!selected || printing || refreshing || !!err}>PRINT THIS LABEL</Btn>
+          <Btn variant="ghost" onClick={() => printLabels(true)} disabled={!approved.length || printing || refreshing || !!err}>PRINT ALL AVAILABLE ({approved.length})</Btn>
           {!selected && <span style={{ fontFamily: mono, fontSize: 11, color: P.faint }}>Pick a signup from the approved list first.</span>}
         </div>
         <p style={{ fontFamily: mono, fontSize: 11, color: P.faint, lineHeight: 1.7, marginTop: sp[3] }}>
-          Prints exactly one sticker at the cell you picked — the rest of the sheet stays blank, so a partially-used
-          Avery 5160 sheet feeds through clean. The next open cell is auto-selected after each print.
+          Print one selected tag, or all {approved.length} available tags in a single print job.
+          Required cadet and guest forms, full payment, verification and dress/attire approvals are rechecked before printing.
+          Both start at cell {labelIndex + 1}; unused cells before it stay blank.
+          {approved.length > 0 && ` Print all uses ${Math.ceil((labelIndex + approved.length) / AVERY_5160.count)} sheet(s).`}
+          {' '}Use fresh sheets after the first partially-used sheet. Print at 100% / actual size, with browser headers and footers off.
+          The next open cell is selected when the print window opens; reset it if you cancel printing.
         </p>
       </div>
     </div>
