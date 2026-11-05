@@ -5,6 +5,7 @@ import TvStandardLayout from './TvStandardLayout.jsx';
 import TvRaftingScreen from './TvRaftingScreen.jsx';
 import TvCongratsScreen from './TvCongratsScreen.jsx';
 import TvRifleTeamScreen from './TvRifleTeamScreen.jsx';
+import TvChiefBirthdayScreen from './TvChiefBirthdayScreen.jsx';
 import TvPreviewBadge from './TvPreviewBadge.jsx';
 import TvRefreshNotice from './TvRefreshNotice.jsx';
 
@@ -23,6 +24,15 @@ const RAIDER_CONGRATS_OUTSIDE_OVERRIDE = true;
 // precedence over the Raider congrats board; flip to false (or delete) to
 // restore it.
 const RIFLE_TEAM_CONGRATS_OVERRIDE = true;
+
+// Chief's 24th birthday: /tv shows the confetti board for this local date only,
+// then drops back to the override chain above without a redeploy.
+const CHIEF_BIRTHDAY_DATE = '2026-11-05';
+
+function localDateKey(date) {
+  const pad = (n) => String(n).padStart(2, '0');
+  return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}`;
+}
 
 /**
  * Outside — the original public kiosk, mounted at /tv. Thin per-screen
@@ -43,7 +53,9 @@ export default function TvKiosk() {
 
   return (
     <>
-      {RIFLE_TEAM_CONGRATS_OVERRIDE ? (
+      {localDateKey(now) === CHIEF_BIRTHDAY_DATE ? (
+        <TvChiefBirthdayScreen />
+      ) : RIFLE_TEAM_CONGRATS_OVERRIDE ? (
         <TvRifleTeamScreen />
       ) : RAIDER_CONGRATS_OUTSIDE_OVERRIDE ? (
         <TvCongratsScreen />
