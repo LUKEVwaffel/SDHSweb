@@ -39,8 +39,13 @@ export default function BallVipSignup() {
   const [submitted, setSubmitted] = useState(false);
 
   useEffect(() => {
-    SB.from('ball_config').select('signup_deadline, dress_code_text').maybeSingle()
-      .then(({ data }) => setDeadline(data || null));
+    // VIP-only deadline when set (ball_vip_signup_deadline.sql), else the
+    // shared cadet deadline. select('*') so it works before that column exists.
+    SB.from('ball_config').select('*').maybeSingle()
+      .then(({ data }) => setDeadline(data ? {
+        signup_deadline: data.vip_signup_deadline || data.signup_deadline,
+        dress_code_text: data.dress_code_text,
+      } : null));
   }, []);
 
   const set = (field) => (e) => setForm({ ...form, [field]: e.target.value });

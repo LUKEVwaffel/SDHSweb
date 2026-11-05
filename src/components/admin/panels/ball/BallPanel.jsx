@@ -66,6 +66,8 @@ export default function BallPanel() {
     const { error } = await SB.from('ball_config').update({
       ball_date: config.ball_date || null,
       signup_deadline: config.signup_deadline || null,
+      // Only once ball_vip_signup_deadline.sql has added the column.
+      ...('vip_signup_deadline' in config ? { vip_signup_deadline: config.vip_signup_deadline || null } : {}),
       payment_deadline: config.payment_deadline || null,
       dress_deadline: config.dress_deadline || null,
       event_time_text: config.event_time_text || null,
@@ -144,6 +146,13 @@ export default function BallPanel() {
             <div><Label>SIGNUP DEADLINE</Label><Input type="date" value={config.signup_deadline || ''} onChange={(e) => setField('signup_deadline', e.target.value)} /></div>
             <div><Label>EVENT TIME (text)</Label><Input value={config.event_time_text || ''} onChange={(e) => setField('event_time_text', e.target.value)} placeholder="5:00-9:00 PM" /></div>
           </div>
+
+          {'vip_signup_deadline' in config && (
+            <div style={{ marginBottom: sp[4], maxWidth: 360 }}>
+              <Label>VIP SIGNUP DEADLINE (/ball/vip — blank uses signup deadline)</Label>
+              <Input type="date" value={config.vip_signup_deadline || ''} onChange={(e) => setField('vip_signup_deadline', e.target.value)} />
+            </div>
+          )}
 
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: sp[3], marginBottom: sp[4] }}>
             <div><Label>PAYMENT / FORM DEADLINE (used in reminder emails)</Label><Input type="date" value={config.payment_deadline || ''} onChange={(e) => setField('payment_deadline', e.target.value)} /></div>

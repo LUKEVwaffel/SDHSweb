@@ -38,14 +38,16 @@ Deno.serve(async (req) => {
 
     const { data: cfg } = await svc
       .from("ball_config")
-      .select("signup_deadline")
+      .select("*")
       .maybeSingle();
 
-    // Same deadline gate as the cadet flow (ball-submit-signup) — no VIP
-    // signups after the cutoff either.
-    if (cfg?.signup_deadline) {
+    // VIP-only deadline (ball_vip_signup_deadline.sql) when set, else the
+    // shared cadet deadline (ball-submit-signup). select("*") so this still
+    // works before the vip_signup_deadline column exists.
+    const deadline = cfg?.vip_signup_deadline || cfg?.signup_deadline;
+    if (deadline) {
       const todayCentral = new Date().toLocaleDateString("en-CA", { timeZone: "America/Chicago" });
-      if (todayCentral > cfg.signup_deadline) {
+      if (todayCentral > deadline) {
         return json({ error: "Signups are closed — the deadline has passed." }, 403);
       }
     }
