@@ -4,7 +4,12 @@ import { P, mono } from '../../theme';
 import { Btn, Card, PanelHeader } from '../../shared/ui';
 
 const TABLE_CHECKS = ['page_content', 'personnel', 'dispatch_pages', 'dispatch_registry', 'element_styles'];
-const STORAGE_CHECKS = ['team-photos', 'personnel-photos', 'site-assets'];
+const STORAGE_CHECKS = ['personnel-photos', 'site-assets'];
+// Photos and videos are served from Cloudflare R2 through these Workers.
+const R2_CHECKS = [
+  { label: 'r2: photos', url: import.meta.env.VITE_OPTIC_R2_URL },
+  { label: 'r2: media', url: import.meta.env.VITE_R2_MEDIA_BASE || 'https://r2-media-reader.sdhs-battalion.workers.dev' },
+];
 
 export default function HealthPanel() {
   const [checks, setChecks] = useState([]);
@@ -28,6 +33,15 @@ export default function HealthPanel() {
         const { error } = await SB.storage.from(bucket).list('', { limit: 1 });
         add(`storage: ${bucket}`, error ? 'FAIL' : 'PASS', error ? error.message : 'accessible');
       } catch (e) { add(`storage: ${bucket}`, 'FAIL', e.message); }
+    }
+
+    for (const { label, url } of R2_CHECKS) {
+      if (!url) { add(label, 'FAIL', 'URL not set in env'); continue; }
+      try {
+        // Any answer (even 404 for the bare path) means the Worker is up.
+        const res = await fetch(url.replace(/\/+$/, '') + '/', { method: 'HEAD' });
+        add(label, res.status < 500 ? 'PASS' : 'FAIL', `HTTP ${res.status}`);
+      } catch (e) { add(label, 'FAIL', e.message); }
     }
 
     setChecks(results);
