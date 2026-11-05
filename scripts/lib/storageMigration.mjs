@@ -89,6 +89,41 @@ export async function r2Size(env, bucket, key) {
   return null;
 }
 
+// Every key in an R2 bucket -> size. One paged list call per 1,000 files,
+// much faster than checking thousands of files one by one.
+export async function listR2(env, bucket) {
+  const sizes = new Map();
+  let token = null;
+  do {
+    const url = new URL(`${env.r2Endpoint}/${bucket}`);
+    url.searchParams.set('list-type', '2');
+    url.searchParams.set('max-keys', '1000');
+    if (token) url.searchParams.set('continuation-token', token);
+    const res = await env.r2.fetch(url);
+    if (!res.ok) throw new Error(`R2 list ${bucket}: HTTP ${res.status}`);
+    const xml = await res.text();
+    for (const m of xml.matchAll(/<Contents>([\s\S]*?)<\/Contents>/g)) {
+      sizes.set(xmlDecode(m[1].match(/<Key>([\s\S]*?)<\/Key>/)[1]), Number(m[1].match(/<Size>(\d+)<\/Size>/)[1]));
+    }
+    token = (xml.match(/<NextContinuationToken>([\s\S]*?)<\/NextContinuationToken>/) || [])[1];
+  } while (token);
+  return sizes;
+}
+
+// Run `fn` over `items`, `limit` at a time. Returns results in order.
+export async function inPool(items, limit, fn) {
+  const results = new Array(items.length);
+  let next = 0;
+  async function worker() {
+    while (next < items.length) {
+      const i = next++;
+      results[i] = await fn(items[i], i);
+    }
+  }
+  await Promise.all(Array.from({ length: Math.min(limit, items.length) }, worker));
+  return results;
+}
+
 export async function r2Put(env, bucket, key, filePath, contentType) {
   const res = await env.r2.fetch(r2ObjectUrl(env, bucket, key), {
     method: 'PUT',
