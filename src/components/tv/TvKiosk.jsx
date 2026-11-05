@@ -25,7 +25,7 @@ const RAIDER_CONGRATS_OUTSIDE_OVERRIDE = true;
 // restore it.
 const RIFLE_TEAM_CONGRATS_OVERRIDE = true;
 
-// Chief's 24th birthday: /tv shows the confetti board for this local date only,
+// Chief's birthday: /tv shows the confetti board for this local date only,
 // then drops back to the override chain above without a redeploy.
 const CHIEF_BIRTHDAY_DATE = '2026-11-05';
 

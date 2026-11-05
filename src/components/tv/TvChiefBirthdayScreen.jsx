@@ -1,7 +1,7 @@
 import { useEffect, useRef } from 'react';
 import { P, mono, oswald, fraunces, fs, sp, ease } from '../admin/theme.js';
 
-// Full-screen /tv takeover for Chief's 24th birthday. Unlike the Ball portal
+// Full-screen /tv takeover for Chief's birthday. Unlike the Ball portal
 // version (ChiefBirthday.jsx), there is no dismiss button — the wall TV loops
 // confetti continuously. TvKiosk.jsx only mounts this on CHIEF_BIRTHDAY_DATE,
 // so the kiosk falls back to its normal board the next day on its own.
@@ -131,7 +131,7 @@ export default function TvChiefBirthdayScreen() {
           fontSize: 'clamp(1.75rem, 0.8rem + 2.6vw, 4rem)', letterSpacing: '0.04em',
           animationDelay: '350ms',
         }}>
-          Congrats on turning <strong style={{ color: P.bright }}>24</strong>
+          We love you
         </p>
       </main>
     </div>

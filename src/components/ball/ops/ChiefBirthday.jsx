@@ -124,7 +124,7 @@ export default function ChiefBirthday({ email }) {
           <span>CHIEF</span>
         </h1>
         <p id="bo-birthday-subtitle">
-          Congrats on turning <strong>24</strong>
+          We love you
         </p>
         <button
           ref={button}

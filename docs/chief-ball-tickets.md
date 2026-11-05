@@ -20,7 +20,7 @@ The user ran the combined script. Live verification confirmed **18/18 Alpha and 
 
 ## Birthday welcome
 
-After authorized entry to the portal, a full-screen confetti welcome says **HAPPY BIRTHDAY CHIEF — Congrats on turning 24**. It is shown once per account per browser using a dated local storage key. It can be dismissed with the button, close control or Escape, and respects reduced-motion settings. It does not modify reservation data or send messages. A separate dev-only preview is at `/tests/browser/chief-birthday.html`.
+After authorized entry to the portal, a full-screen confetti welcome says **HAPPY BIRTHDAY CHIEF — We love you**. It is shown once per account per browser using a dated local storage key. It can be dismissed with the button, close control or Escape, and respects reduced-motion settings. It does not modify reservation data or send messages. A separate dev-only preview is at `/tests/browser/chief-birthday.html`.
 
 ## Verification
 
