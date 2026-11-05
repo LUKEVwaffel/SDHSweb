@@ -1,23 +1,15 @@
 // One-off: upload the re-encoded Hurricane Haul (East Hamilton, male squad)
-// clips into the raider-videos bucket + public.raider_videos, replacing what
-// /videotv points at. Requires a service-role key since storage insert is
-// authenticated-only via RLS; run locally, never commit the key.
+// clips into the R2 raider-videos bucket + public.raider_videos, replacing
+// what /videotv points at. Uses the service-role key for the row insert and
+// the R2 keys for the upload; run locally, never commit either.
 //
-// Usage: node --env-file=.env --env-file=.env.local scripts/upload-hurricane-haul.mjs
-// (put SUPABASE_SERVICE_ROLE_KEY in .env.local — never commit it)
+// Usage: node --env-file=.env.migrate scripts/upload-hurricane-haul.mjs
 
-import { createClient } from '@supabase/supabase-js';
-import { readFileSync } from 'node:fs';
+import { statSync } from 'node:fs';
+import { loadEnv, supabaseAdmin, r2Put, r2Size, r2ObjectUrl } from './lib/storageMigration.mjs';
 
-const url = process.env.VITE_SUPABASE_URL;
-const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
-
-if (!url || !serviceKey) {
-  console.error('Missing VITE_SUPABASE_URL or SUPABASE_SERVICE_ROLE_KEY in env.');
-  process.exit(1);
-}
-
-const sb = createClient(url, serviceKey, { auth: { persistSession: false } });
+const env = loadEnv();
+const sb = supabaseAdmin(env);
 const BUCKET = 'raider-videos';
 const ts = Date.now();
 
@@ -38,12 +30,14 @@ const CLIPS = [
 
 for (const clip of CLIPS) {
   console.log(`Uploading ${clip.localPath} -> ${BUCKET}/${clip.storagePath} ...`);
-  const bytes = readFileSync(clip.localPath);
-  const { error: upErr } = await sb.storage.from(BUCKET).upload(clip.storagePath, bytes, {
-    contentType: 'video/mp4',
-    upsert: false,
-  });
-  if (upErr) { console.error(`Upload failed for ${clip.title}:`, upErr.message); process.exit(1); }
+  try {
+    await r2Put(env, BUCKET, clip.storagePath, clip.localPath, 'video/mp4');
+    const uploaded = await r2Size(env, BUCKET, clip.storagePath);
+    if (uploaded !== statSync(clip.localPath).size) throw new Error(`R2 has ${uploaded} bytes, expected ${statSync(clip.localPath).size}`);
+  } catch (e) {
+    console.error(`Upload failed for ${clip.title}:`, e.message);
+    process.exit(1);
+  }
 
   const { data, error: insErr } = await sb.from('raider_videos').insert({
     title: clip.title,
@@ -51,7 +45,12 @@ for (const clip of CLIPS) {
     duration_sec: clip.durationSec,
     created_by: 'bulk-import',
   }).select('id').single();
-  if (insErr) { console.error(`Row insert failed for ${clip.title}:`, insErr.message); process.exit(1); }
+  if (insErr) {
+    // No row, so don't leave an orphan file in R2 either.
+    await env.r2.fetch(r2ObjectUrl(env, BUCKET, clip.storagePath), { method: 'DELETE' });
+    console.error(`Row insert failed for ${clip.title}:`, insErr.message);
+    process.exit(1);
+  }
 
   console.log(`  done — id ${data.id}`);
 }
