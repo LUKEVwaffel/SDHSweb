@@ -5,6 +5,7 @@ import { supabase as SB } from '../../../../lib/supabaseClient';
 import '../../../review/review.css';
 import '../../../ball/portal.css';
 import BallVipList from './BallVipList';
+import { grid, groupHead, detailWrap, Field, EText, ESelect, ECheck, GENDER_OPTS } from './ballEditFields';
 import { openBallGuestVerifyPdf, openBallGuestVerifyPdfBatch } from '../../../../lib/ballGuestVerifyPdf';
 import { openBallReservationChoicePdf } from '../../../../lib/ballReservationChoicePdf';
 
@@ -38,12 +39,6 @@ const chip = (tone) => {
   };
 };
 
-const lbl = { fontFamily: "'JetBrains Mono', monospace", fontSize: 10, letterSpacing: '0.1em', textTransform: 'uppercase', color: 'var(--rv-faint)', marginBottom: 3 };
-const val = { fontFamily: "'JetBrains Mono', monospace", fontSize: 12, color: 'var(--rv-ink)', wordBreak: 'break-word' };
-const grid = { display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(150px, 1fr))', gap: 12 };
-const groupHead = { fontFamily: "'JetBrains Mono', monospace", fontSize: 10, letterSpacing: '0.16em', textTransform: 'uppercase', color: 'var(--rv-accent)', margin: '0 0 8px' };
-const detailWrap = { padding: '14px 16px 16px', borderTop: '1px solid var(--rv-border)', display: 'flex', flexDirection: 'column', gap: 16 };
-
 // This conflict spans more than one row — the cadet's existing partner is
 // often on a DIFFERENT signup than the one open here (e.g. the cadet is the
 // GUEST on someone else's reservation, not the host), so neither name can be
@@ -61,47 +56,6 @@ function printReservationChoice(r, guest) {
   openBallReservationChoicePdf(r, { guestName, thirdName, soloPrice });
 }
 
-function Field({ label, value }) {
-  return <div style={{ minWidth: 0 }}><div style={lbl}>{label}</div><div style={val}>{value ?? '—'}</div></div>;
-}
-
-// --- edit primitives -------------------------------------------------------
-const editSelect = {
-  width: '100%', boxSizing: 'border-box', border: '1px solid var(--rv-border-strong)',
-  borderRadius: 8, padding: '9px 11px', fontSize: 13, fontFamily: 'inherit',
-  color: 'var(--rv-ink)', background: '#fffefb',
-};
-function ELabel({ children }) {
-  return <div style={{ ...lbl, color: 'var(--rv-mute)', marginBottom: 6 }}>{children}</div>;
-}
-function EText({ label, value, onChange, ...rest }) {
-  return (
-    <div style={{ minWidth: 0 }}>
-      <ELabel>{label}</ELabel>
-      <input className="rv-textarea" value={value ?? ''} onChange={(e) => onChange(e.target.value)} style={{ padding: '9px 11px', fontSize: 13 }} {...rest} />
-    </div>
-  );
-}
-function ESelect({ label, value, onChange, options }) {
-  return (
-    <div style={{ minWidth: 0 }}>
-      <ELabel>{label}</ELabel>
-      <select value={value ?? ''} onChange={(e) => onChange(e.target.value || null)} style={editSelect}>
-        {options.map((o) => <option key={String(o.value)} value={o.value ?? ''}>{o.label}</option>)}
-      </select>
-    </div>
-  );
-}
-function ECheck({ label, checked, onChange }) {
-  return (
-    <label style={{ display: 'flex', alignItems: 'center', gap: 8, fontFamily: "'JetBrains Mono', monospace", fontSize: 12, color: 'var(--rv-ink)', cursor: 'pointer' }}>
-      <input type="checkbox" checked={!!checked} onChange={(e) => onChange(e.target.checked)} />
-      {label}
-    </label>
-  );
-}
-
-const GENDER_OPTS = [{ value: null, label: '—' }, { value: 'male', label: 'male' }, { value: 'female', label: 'female' }];
 const STATUS_OPTS = [{ value: 'guest_pending', label: 'guest_pending' }, { value: 'fully_verified', label: 'fully_verified' }];
 const ALLERGY_OPTS = [{ value: 'pending', label: 'pending' }, { value: 'contacted', label: 'contacted' }];
 const GTYPE_OPTS = [{ value: 'date', label: 'date' }, { value: 'friend', label: 'friend' }];
