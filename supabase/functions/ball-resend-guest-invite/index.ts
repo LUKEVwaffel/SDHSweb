@@ -21,7 +21,7 @@ import {invitationMatchesAddition} from '../_shared/ballGuestInvitation.ts';
 //   supabase functions deploy ball-resend-guest-invite
 import { json, preflight, escapeHtml, siteOrigin } from "../_shared/http.ts";
 import { BALL_NOTIFY_BCC } from "../_shared/ballNotify.ts";
-import { serviceClient, getCaller } from "../_shared/supabase.ts";
+import { serviceClient, getCaller, getReviewer } from "../_shared/supabase.ts";
 import { ballEmailShell } from "../_shared/ballEmail.ts";
 import type { BallEmailParticular } from "../_shared/ballEmail.ts";
 import { loadBallTemplate, pick, paras } from "../_shared/ballTemplate.ts";
@@ -63,12 +63,14 @@ Deno.serve(async (req) => {
 
   try {
     const caller = await getCaller(req);
-    if (!caller || caller.role !== "s6") return json({ error: "not authorized" }, 403);
+    const reviewer = await getReviewer(req);
+    const opsAllowed = reviewer?.canBallOps && !reviewer.mustChangePassword;
+    if ((!caller || caller.role !== "s6") && !opsAllowed) return json({ error: "not authorized" }, 403);
     // Service-role client below bypasses RLS — enforce the admin password gate
     // here, same as admin-set-reviewer-pin / ball-dress-set-pin.
-    if (caller.mustChangePassword) return json({ error: "set your own password first" }, 403);
+    if (caller?.mustChangePassword) return json({ error: "set your own password first" }, 403);
 
-    const { signup_id, change_id } = await req.json().catch(() => ({}));
+    const { signup_id, change_id, guest_id, expected_email } = await req.json().catch(() => ({}));
     if (!signup_id) return json({ error: "signup_id is required" }, 400);
 
     const svc = serviceClient();
@@ -88,10 +90,12 @@ Deno.serve(async (req) => {
       .maybeSingle();
     if (gErr) { console.error("ball-resend-guest-invite guest lookup", gErr); return json({ error: "internal error" }, 500); }
     if (!guest) return json({ error: "this signup has no guest" }, 400);
+    if (opsAllowed && caller?.role !== 's6' && (!guest_id || guest.id !== guest_id || guest.personal_email !== expected_email)) return json({error:'The guest or email changed. Refresh before sending the invitation.'},409);
     if (!guest.personal_email) return json({ error: "no guest email on file" }, 400);
     if (!guest.verification_token) return json({ error: "guest has no verification link" }, 400);
 
     if(change_id){
+      if(caller?.role!=='s6')return json({error:'S-6 required for proposal invitations'},403);
       const {data:change,error}=await svc.from('ball_reservation_changes').select('action,status,signup_id,result').eq('id',change_id).eq('admin_email',caller.email).maybeSingle();
       if(error||!invitationMatchesAddition(change,guest,signup_id))return json({error:'The guest or proposal changed. Review the invitation before retrying.'},409);
     }

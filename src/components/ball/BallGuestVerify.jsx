@@ -32,7 +32,7 @@ export default function BallGuestVerify() {
     SB.from('ball_config')
       .select('dress_code_text, ball_date')
       .maybeSingle()
-      .then(({ data }) => setConfig(data || null));
+      .then(({ data }) => setConfig(data || null)).catch(()=>setConfig(null));
   }, []);
 
   useEffect(() => {
@@ -60,7 +60,7 @@ export default function BallGuestVerify() {
     setState(data?.already_verified ? 'already' : 'done');
   }
 
-  if (!token) return null;
+  if (!token) return <div className="ball-root"><div style={{maxWidth:560,margin:'0 auto',padding:'56px 24px'}}><h1>Invitation unavailable</h1><p>Open the complete guest invitation link from your email or printed packet.</p><a href="/ball">Back to the Military Ball</a></div></div>;
   const busy = state === 'busy';
 
   return (
@@ -83,13 +83,13 @@ export default function BallGuestVerify() {
               </div>
               <p style={{ fontFamily: mono, fontSize: 13, color: P.mute }}>
                 {state === 'already'
-                  ? "You've already completed this step. Your spot for the Military Ball is confirmed."
-                  : 'Your info is submitted. Your spot for the Military Ball is confirmed.'}
+                  ? "You have already completed guest registration. Required payment, signed forms, and attire approval still apply."
+                  : 'Your guest registration is complete. Required payment, signed forms, and attire approval still apply.'}
               </p>
             </div>
 
             <div style={{ border: `1px solid ${P.hair}`, background: P.navy, padding: 20, marginTop: 14 }}>
-              <div style={{ fontFamily: mono, fontSize: 11, color: P.gold, letterSpacing: '0.14em', marginBottom: 10 }}>ONE STEP LEFT — VERIFY YOUR ATTIRE</div>
+              <div style={{ fontFamily: mono, fontSize: 11, color: P.gold, letterSpacing: '0.14em', marginBottom: 10 }}>ATTIRE REVIEW</div>
               <p style={{ fontFamily: mono, fontSize: 13, color: P.mute, lineHeight: 1.6 }}>
                 Your attire still has to be checked off. Text a photo of what you plan to wear to the right approver
                 below{' '}<strong style={{ color: P.cream }}>{byWhen}</strong>.

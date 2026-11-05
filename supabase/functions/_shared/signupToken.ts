@@ -66,7 +66,7 @@ export async function verifySignupToken(token: unknown): Promise<SignupTokenPayl
     const payloadBytes = unb64url(payloadPart);
     const sig = unb64url(sigPart);
     const key = await hmacKey();
-    const ok = await crypto.subtle.verify("HMAC", key, sig, payloadBytes);
+    const ok = await crypto.subtle.verify("HMAC", key, new Uint8Array(sig), new Uint8Array(payloadBytes));
     if (!ok) return null;
     const payload = JSON.parse(new TextDecoder().decode(payloadBytes)) as SignupTokenPayload;
     if (typeof payload.email !== "string" || typeof payload.exp !== "number") return null;

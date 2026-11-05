@@ -22,6 +22,31 @@ create table if not exists public.ball_ticket_deliveries (
   )
 );
 
+-- Historical handouts are recorded only through an explicit, service-owned
+-- exception. This does not grant permission to complete requirements or admit.
+create table if not exists public.ball_ticket_historical_receipts (
+ signup_id uuid primary key references public.ball_signups(id) on delete cascade,
+ host_company text not null check(host_company in ('alpha','staff')),
+ guest_id_at_recording uuid,
+ batch_id uuid not null,
+ note text not null check(length(trim(note))>0),
+ previous_delivery jsonb,
+ recorded_at timestamptz not null default now()
+);
+alter table public.ball_ticket_historical_receipts enable row level security;
+revoke all on public.ball_ticket_historical_receipts from public,anon,authenticated;
+grant all on public.ball_ticket_historical_receipts to service_role;
+
+create or replace function public.ball_ticket_historical_receipt_allowed(p_signup uuid,p_company text,p_guest uuid)
+returns boolean language sql stable security definer set search_path=public as $$
+ select exists(select 1 from public.ball_ticket_historical_receipts proof
+  where proof.signup_id=p_signup and proof.host_company=lower(trim(p_company))
+   and proof.guest_id_at_recording is not distinct from p_guest
+   and proof.recorded_at=transaction_timestamp())
+$$;
+revoke all on function public.ball_ticket_historical_receipt_allowed(uuid,text,uuid) from public,anon;
+grant execute on function public.ball_ticket_historical_receipt_allowed(uuid,text,uuid) to authenticated,service_role;
+
 create or replace function public.ball_ticket_delivery_guard()
 returns trigger language plpgsql set search_path=public as $$
 declare
@@ -53,8 +78,10 @@ begin
   end if;
 
   -- One authoritative predicate for server label generation and delivery writes.
-  if cardinality(public.ball_ticket_blockers(public.ball_effective_ticket_row(to_jsonb(h),'cadet'),case when has_guest then public.ball_effective_ticket_row(to_jsonb(g),'guest') else null end))>0 then
-    raise exception 'Reservation is incomplete: %',array_to_string(public.ball_ticket_blockers(public.ball_effective_ticket_row(to_jsonb(h),'cadet'),case when has_guest then public.ball_effective_ticket_row(to_jsonb(g),'guest') else null end),', ');
+  if not public.ball_ticket_historical_receipt_allowed(h.id,h.cadet_company,g.id) then
+    if cardinality(public.ball_ticket_blockers(public.ball_effective_ticket_row(to_jsonb(h),'cadet'),case when has_guest then public.ball_effective_ticket_row(to_jsonb(g),'guest') else null end))>0 then
+      raise exception 'Reservation is incomplete: %',array_to_string(public.ball_ticket_blockers(public.ball_effective_ticket_row(to_jsonb(h),'cadet'),case when has_guest then public.ball_effective_ticket_row(to_jsonb(g),'guest') else null end),', ');
+    end if;
   end if;
 
   -- One reservation has one pickup person: a friend ticket goes to the host;

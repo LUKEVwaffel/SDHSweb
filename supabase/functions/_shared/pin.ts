@@ -17,7 +17,7 @@ async function derive(pin: string, salt: Uint8Array, iterations: number): Promis
     "raw", new TextEncoder().encode(pin), "PBKDF2", false, ["deriveBits"],
   );
   const bits = await crypto.subtle.deriveBits(
-    { name: "PBKDF2", salt, iterations, hash: "SHA-256" }, key, KEY_BITS,
+    { name: "PBKDF2", salt: new Uint8Array(salt), iterations, hash: "SHA-256" }, key, KEY_BITS,
   );
   return new Uint8Array(bits);
 }

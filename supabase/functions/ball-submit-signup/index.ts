@@ -15,13 +15,18 @@
 //
 // Deploy WITHOUT jwt verification:
 //   supabase functions deploy ball-submit-signup --no-verify-jwt
-import { json, preflight, escapeHtml, siteOrigin } from "../_shared/http.ts";
+import { escapeHtml, json, preflight, siteOrigin } from "../_shared/http.ts";
 import { BALL_NOTIFY_BCC } from "../_shared/ballNotify.ts";
 import { serviceClient } from "../_shared/supabase.ts";
 import { verifySignupToken } from "../_shared/signupToken.ts";
 import { ballEmailShell } from "../_shared/ballEmail.ts";
 import type { BallEmailParticular } from "../_shared/ballEmail.ts";
-import { loadBallTemplate, isDisabled, pick, paras } from "../_shared/ballTemplate.ts";
+import {
+  isDisabled,
+  loadBallTemplate,
+  paras,
+  pick,
+} from "../_shared/ballTemplate.ts";
 import type { BallTemplate } from "../_shared/ballTemplate.ts";
 import { attireLineHtml, attireLineText } from "../_shared/ballApprovers.ts";
 
@@ -31,7 +36,10 @@ function required(v: unknown): string {
 
 function fmtLongDate(d: string): string {
   return new Date(`${d}T00:00:00`).toLocaleDateString("en-US", {
-    weekday: "long", month: "long", day: "numeric", year: "numeric",
+    weekday: "long",
+    month: "long",
+    day: "numeric",
+    year: "numeric",
   });
 }
 
@@ -53,26 +61,38 @@ function isSchoolEmail(e: string): boolean {
   const at = e.toLowerCase().lastIndexOf("@");
   if (at < 0) return false;
   const domain = e.slice(at + 1).toLowerCase();
-  return SCHOOL_EMAIL_DOMAINS.some((d) => domain === d || domain.endsWith(`.${d}`));
+  return SCHOOL_EMAIL_DOMAINS.some((d) =>
+    domain === d || domain.endsWith(`.${d}`)
+  );
 }
 
 // Field trip permission form as a Resend attachment (path = a public URL Resend
 // fetches). Empty when the S-6 hasn't uploaded the PDF yet.
-function fieldTripAttachment(cfg: BallCfg | null): Array<{ filename: string; path: string }> {
+function fieldTripAttachment(
+  cfg: BallCfg | null,
+): Array<{ filename: string; path: string }> {
   const url = cfg?.field_trip_form_pdf_url;
   return url ? [{ filename: "field-trip-permission-form.pdf", path: url }] : [];
 }
 
 function money(n: number | null): string | null {
-  return n == null ? null : `$${Number(n).toFixed(Number.isInteger(Number(n)) ? 0 : 2)}`;
+  return n == null
+    ? null
+    : `$${Number(n).toFixed(Number.isInteger(Number(n)) ? 0 : 2)}`;
 }
 
 // Event particulars shared by both emails — pre-escaped label/value rows.
 function eventParticulars(cfg: BallCfg | null): BallEmailParticular[] {
   const rows: BallEmailParticular[] = [];
-  if (cfg?.ball_date) rows.push({ label: "Date", value: escapeHtml(fmtLongDate(cfg.ball_date)) });
-  if (cfg?.event_time_text) rows.push({ label: "Time", value: escapeHtml(cfg.event_time_text) });
-  if (cfg?.venue_address) rows.push({ label: "Venue", value: escapeHtml(cfg.venue_address) });
+  if (cfg?.ball_date) {
+    rows.push({ label: "Date", value: escapeHtml(fmtLongDate(cfg.ball_date)) });
+  }
+  if (cfg?.event_time_text) {
+    rows.push({ label: "Time", value: escapeHtml(cfg.event_time_text) });
+  }
+  if (cfg?.venue_address) {
+    rows.push({ label: "Venue", value: escapeHtml(cfg.venue_address) });
+  }
   return rows;
 }
 
@@ -96,18 +116,26 @@ interface ConfirmInfo {
 // Registration receipt for the cadet. Not a click-to-verify link (that's the
 // guest flow) — a formal "your registration is received, here is what remains"
 // notice, rendered in the shared Ball email shell (SDHSweb design system).
-async function sendCadetConfirmation(to: string, info: ConfirmInfo): Promise<void> {
+async function sendCadetConfirmation(
+  to: string,
+  info: ConfirmInfo,
+): Promise<boolean> {
   const RESEND_API_KEY = Deno.env.get("RESEND_API_KEY");
-  const FROM = Deno.env.get("FROM_EMAIL") ?? "Trojan Battalion <onboarding@resend.dev>";
+  const FROM = Deno.env.get("FROM_EMAIL") ??
+    "Trojan Battalion <onboarding@resend.dev>";
   if (!RESEND_API_KEY) {
-    console.error("ball-submit-signup: RESEND_API_KEY not configured, cadet confirmation not sent");
-    return;
+    console.error(
+      "ball-submit-signup: RESEND_API_KEY not configured, cadet confirmation not sent",
+    );
+    return false;
   }
   const t = info.tmpl;
-  if (isDisabled(t)) return; // S-6 turned this email off
+  if (isDisabled(t)) return false; // S-6 turned this email off
 
   const amount = money(info.amountDue);
-  const formAttach = info.fieldTripFormRequired ? fieldTripAttachment(info.cfg) : [];
+  const formAttach = info.fieldTripFormRequired
+    ? fieldTripAttachment(info.cfg)
+    : [];
   const todo: string[] = [];
   if (info.fieldTripFormRequired) {
     todo.push(
@@ -127,26 +155,46 @@ async function sendCadetConfirmation(to: string, info: ConfirmInfo): Promise<voi
       ? "which you will bring in with your own"
       : "which they will pay or deliver themselves";
     todo.push(
-      `Your friend <strong>${escapeHtml(info.friendName)}</strong> owes their own${fa ? ` <strong>${fa}</strong>` : " payment"}, ${how}. This is separate from your total above.`,
+      `Your friend <strong>${
+        escapeHtml(info.friendName)
+      }</strong> owes their own${
+        fa ? ` <strong>${fa}</strong>` : " payment"
+      }, ${how}. This is separate from your total above.`,
     );
   }
   if (info.isFemale) {
-    todo.push("Obtain <strong>dress approval</strong>: text a photograph of your attire to one of the approvers listed on the registration page.");
+    todo.push(
+      "Obtain <strong>dress approval</strong>: text a photograph of your attire to one of the approvers listed on the registration page.",
+    );
   } else {
-    todo.push("Report in your <strong>full Class A uniform</strong> (JROTC-issued). Direct any questions to Weston.");
+    todo.push(
+      "Report in your <strong>full Class A uniform</strong> (JROTC-issued). Direct any questions to Weston.",
+    );
   }
   if (info.hasGuest) {
-    todo.push("Your <strong>guest</strong> has been sent a separate notice. Your registration is not fully verified until they complete it.");
+    todo.push(
+      "Your <strong>guest</strong> has been sent a separate notice. Your registration is not fully verified until they complete it.",
+    );
   }
   if (info.hasAllergy) {
-    todo.push("<strong>S-5 will contact you</strong> regarding food accommodations for your allergy.");
+    todo.push(
+      "<strong>S-5 will contact you</strong> regarding food accommodations for your allergy.",
+    );
   }
 
-  const meta = [info.letLevel ? `LET ${escapeHtml(info.letLevel)}` : "", info.company ? `${escapeHtml(info.company)} Company` : ""]
+  const meta = [
+    info.letLevel ? `LET ${escapeHtml(info.letLevel)}` : "",
+    info.company ? `${escapeHtml(info.company)} Company` : "",
+  ]
     .filter(Boolean).join(" &middot; ");
 
   const deadlinePretty = info.cfg?.signup_deadline
-    ? escapeHtml(new Date(`${info.cfg.signup_deadline}T00:00:00`).toLocaleDateString("en-US", { month: "long", day: "numeric", year: "numeric" }))
+    ? escapeHtml(
+      new Date(`${info.cfg.signup_deadline}T00:00:00`).toLocaleDateString(
+        "en-US",
+        { month: "long", day: "numeric", year: "numeric" },
+      ),
+    )
     : null;
 
   const metaParen = meta ? ` (${meta})` : "";
@@ -155,12 +203,16 @@ async function sendCadetConfirmation(to: string, info: ConfirmInfo): Promise<voi
     meta: metaParen,
     deadline: deadlinePretty ?? "",
     amount_due: amount ?? "",
-    ball_date: info.cfg?.ball_date ? escapeHtml(fmtLongDate(info.cfg.ball_date)) : "",
+    ball_date: info.cfg?.ball_date
+      ? escapeHtml(fmtLongDate(info.cfg.ball_date))
+      : "",
   };
   const noticeRendered = pick(
     t,
     "notice_html",
-    deadlinePretty ? "All items above must be completed on or before <strong>{{deadline}}</strong>." : "",
+    deadlinePretty
+      ? "All items above must be completed on or before <strong>{{deadline}}</strong>."
+      : "",
     vars,
   );
   const html = ballEmailShell({
@@ -187,28 +239,47 @@ async function sendCadetConfirmation(to: string, info: ConfirmInfo): Promise<voi
 
   const text = `${info.name},
 
-Your registration for the Trojan Battalion Military Ball has been received${meta ? ` (${meta.replace(/&middot;/g, "·")})` : ""}.
+Your registration for the Trojan Battalion Military Ball has been received${
+    meta ? ` (${meta.replace(/&middot;/g, "·")})` : ""
+  }.
 
-${info.cfg?.ball_date ? `Date:  ${fmtLongDate(info.cfg.ball_date)}\n` : ""}${info.cfg?.event_time_text ? `Time:  ${info.cfg.event_time_text}\n` : ""}${info.cfg?.venue_address ? `Venue: ${info.cfg.venue_address}\n` : ""}
+${info.cfg?.ball_date ? `Date:  ${fmtLongDate(info.cfg.ball_date)}\n` : ""}${
+    info.cfg?.event_time_text ? `Time:  ${info.cfg.event_time_text}\n` : ""
+  }${info.cfg?.venue_address ? `Venue: ${info.cfg.venue_address}\n` : ""}
 What remains:
 ${todo.map((t) => `- ${t.replace(/<[^>]+>/g, "")}`).join("\n")}
 ${deadlinePretty ? `\nAll items due on or before ${deadlinePretty}.` : ""}`;
 
-  await fetch("https://api.resend.com/emails", {
+  const response = await fetch("https://api.resend.com/emails", {
     method: "POST",
-    headers: { Authorization: `Bearer ${RESEND_API_KEY}`, "Content-Type": "application/json" },
+    signal: AbortSignal.timeout(10000),
+    headers: {
+      Authorization: `Bearer ${RESEND_API_KEY}`,
+      "Content-Type": "application/json",
+    },
     body: JSON.stringify({
       from: FROM,
       bcc: BALL_NOTIFY_BCC,
       to: [to],
-      subject: pick(t, "subject", "Trojan Battalion Military Ball: Registration Received", {
-        name: info.name, meta: metaParen, deadline: deadlinePretty ?? "",
-      }),
+      subject: pick(
+        t,
+        "subject",
+        "Trojan Battalion Military Ball: Registration Received",
+        {
+          name: info.name,
+          meta: metaParen,
+          deadline: deadlinePretty ?? "",
+        },
+      ),
       html,
       text,
       ...(formAttach.length ? { attachments: formAttach } : {}),
     }),
   });
+  if (!response.ok) {
+    console.error("ball-submit-signup cadet email rejected", response.status);
+  }
+  return response.ok;
 }
 
 Deno.serve(async (req) => {
@@ -218,7 +289,9 @@ Deno.serve(async (req) => {
   try {
     const body = await req.json().catch(() => ({}));
     const payload = await verifySignupToken(body?.signupToken);
-    if (!payload) return json({ error: "invalid or expired signup session" }, 401);
+    if (!payload) {
+      return json({ error: "invalid or expired signup session" }, 401);
+    }
 
     const svc = serviceClient();
 
@@ -241,12 +314,17 @@ Deno.serve(async (req) => {
       .eq("cadet_school_email", payload.email)
       .maybeSingle();
     if (existingSignup) {
-      return json({ error: "You already have a Ball signup on file. See Chief to change it." }, 409);
+      return json({
+        error:
+          "You already have a Ball signup on file. See Chief to change it.",
+      }, 409);
     }
 
     const { data: cfg } = await svc
       .from("ball_config")
-      .select("signup_deadline, ball_date, event_time_text, venue_address, price_cadet, price_couple, field_trip_form_pdf_url")
+      .select(
+        "signup_deadline, ball_date, event_time_text, venue_address, price_cadet, price_couple, field_trip_form_pdf_url",
+      )
       .maybeSingle();
 
     // Item 1: server-side deadline enforcement. The landing page disables its
@@ -255,9 +333,14 @@ Deno.serve(async (req) => {
     // calendar day in the event's local zone (US Central), and treat the
     // deadline day itself as still open.
     if (cfg?.signup_deadline) {
-      const todayCentral = new Date().toLocaleDateString("en-CA", { timeZone: "America/Chicago" });
+      const todayCentral = new Date().toLocaleDateString("en-CA", {
+        timeZone: "America/Chicago",
+      });
       if (todayCentral > cfg.signup_deadline) {
-        return json({ error: "Signups are closed — the deadline has passed." }, 403);
+        return json(
+          { error: "Signups are closed — the deadline has passed." },
+          403,
+        );
       }
     }
 
@@ -285,20 +368,30 @@ Deno.serve(async (req) => {
     }
     // Contact: phone preferred, personal email as an alternative. At least one
     // required. An email, if given, must be a valid non-school address.
-    const phoneOk = cadetPhone !== null && cadetPhone.replace(/\D/g, "").length >= 10;
+    const phoneOk = cadetPhone !== null &&
+      cadetPhone.replace(/\D/g, "").length >= 10;
     if (notificationEmail) {
       if (!EMAIL_RE.test(notificationEmail)) {
         return json({ error: "that email address looks invalid" }, 400);
       }
       if (isSchoolEmail(notificationEmail)) {
-        return json({ error: "use a personal (non-school) email — a school inbox won't receive these" }, 400);
+        return json({
+          error:
+            "use a personal (non-school) email — a school inbox won't receive these",
+        }, 400);
       }
     }
     if (!cadetNoPhone && !phoneOk) {
-      return json({ error: "a phone number is required — or check “I don’t have a cell phone” and give a personal email instead" }, 400);
+      return json({
+        error:
+          "a phone number is required — or check “I don’t have a cell phone” and give a personal email instead",
+      }, 400);
     }
     if (cadetNoPhone && !notificationEmail) {
-      return json({ error: "give a personal email — with no phone number there is no other way to reach you" }, 400);
+      return json({
+        error:
+          "give a personal email — with no phone number there is no other way to reach you",
+      }, 400);
     }
 
     const hasGuest = body?.guest != null;
@@ -312,11 +405,13 @@ Deno.serve(async (req) => {
     // A friend is out-of-program by definition — never trust an is_sdhs flag on
     // a friend, and never carry a roster match for one.
     const isSdhsJrotc = guestType === "date" && !!guest.is_sdhs_jrotc;
-    const friendPaymentMethod: "host_delivers" | "self_pays" | null = guestType === "friend"
-      ? (guest.friend_payment_method === "host_delivers" || guest.friend_payment_method === "self_pays"
-        ? guest.friend_payment_method
-        : null)
-      : null;
+    const friendPaymentMethod: "host_delivers" | "self_pays" | null =
+      guestType === "friend"
+        ? (guest.friend_payment_method === "host_delivers" ||
+            guest.friend_payment_method === "self_pays"
+          ? guest.friend_payment_method
+          : null)
+        : null;
     const guestName = required(guest.name);
     const guestAge = Number(guest.age);
     const guestGender = required(guest.gender);
@@ -325,50 +420,79 @@ Deno.serve(async (req) => {
     // NOT a cadet: school is fixed, the other-school questions don't apply.
     const goesToSdhs = !isSdhsJrotc && guest.goes_to_sdhs === true;
     const otherJrotc = !isSdhsJrotc && !goesToSdhs && !!guest.other_jrotc;
-    const otherJrotcSchool = otherJrotc ? required(guest.other_jrotc_school) : null;
+    const otherJrotcSchool = otherJrotc
+      ? required(guest.other_jrotc_school)
+      : null;
     const schoolAttended = isSdhsJrotc
       ? null
-      : (goesToSdhs ? "Soddy Daisy High School" : required(guest.school_attended));
+      : (goesToSdhs
+        ? "Soddy Daisy High School"
+        : required(guest.school_attended));
     const pocName = isSdhsJrotc ? null : required(guest.poc_name);
     const pocEmail = isSdhsJrotc ? null : required(guest.poc_email);
     const pocPhone = isSdhsJrotc ? null : required(guest.poc_phone);
     const personalEmail = required(guest.personal_email);
-    const sdhsMatchedCadetId = isSdhsJrotc ? (required(guest.sdhs_matched_cadet_id) || null) : null;
+    const sdhsMatchedCadetId = isSdhsJrotc
+      ? (required(guest.sdhs_matched_cadet_id) || null)
+      : null;
 
     if (hasGuest) {
-      if (!guestName || !Number.isFinite(guestAge) || guestAge <= 0 || !guestGender || !personalEmail) {
-        return json({ error: "guest name, age, gender, and personal email are required" }, 400);
+      if (
+        !guestName || !Number.isFinite(guestAge) || guestAge <= 0 ||
+        !guestGender || !personalEmail
+      ) {
+        return json({
+          error: "guest name, age, gender, and personal email are required",
+        }, 400);
       }
       if (!EMAIL_RE.test(personalEmail)) {
         return json({ error: "the guest's email address looks invalid" }, 400);
       }
       if (isSchoolEmail(personalEmail)) {
-        return json({ error: "the guest must give a personal (non-school) email" }, 400);
+        return json({
+          error: "the guest must give a personal (non-school) email",
+        }, 400);
       }
-      if (!isSdhsJrotc && (!schoolAttended || !pocName || !pocEmail || !pocPhone)) {
-        return json({ error: "school attended and POC name/email/phone are required for a non-SDHS guest" }, 400);
+      if (
+        !isSdhsJrotc && (!schoolAttended || !pocName || !pocEmail || !pocPhone)
+      ) {
+        return json({
+          error:
+            "school attended and POC name/email/phone are required for a non-SDHS guest",
+        }, 400);
       }
       if (guestType === "friend") {
         if (guest.is_sdhs_jrotc || guest.sdhs_matched_cadet_id) {
-          return json({ error: "a friend guest can't be an SDHS JROTC cadet — a cadet who wants to attend registers on their own" }, 400);
+          return json({
+            error:
+              "a friend guest can't be an SDHS JROTC cadet — a cadet who wants to attend registers on their own",
+          }, 400);
         }
         if (!friendPaymentMethod) {
-          return json({ error: "select how your friend's payment will reach the school" }, 400);
+          return json({
+            error: "select how your friend's payment will reach the school",
+          }, 400);
         }
         // Identity backstop: the friend's own email must not belong to a
         // program member (roster cadet or DISPATCH admin).
         const pe = personalEmail.toLowerCase();
         const [{ data: rosterHit }, { data: adminHit }] = await Promise.all([
-          svc.from("cadet_consent").select("id").eq("school_email", pe).maybeSingle(),
+          svc.from("cadet_consent").select("id").eq("school_email", pe)
+            .maybeSingle(),
           svc.from("admin_roles").select("email").eq("email", pe).maybeSingle(),
         ]);
         if (rosterHit || adminHit) {
-          return json({ error: "that email belongs to a program member — they must register on their own, not as a friend" }, 400);
+          return json({
+            error:
+              "that email belongs to a program member — they must register on their own, not as a friend",
+          }, 400);
         }
       }
 
       // A cadet can't list themselves as their own in-program date.
-      if (isSdhsJrotc && sdhsMatchedCadetId && sdhsMatchedCadetId === cadet.id) {
+      if (
+        isSdhsJrotc && sdhsMatchedCadetId && sdhsMatchedCadetId === cadet.id
+      ) {
         return json({ error: "you can't list yourself as your own date" }, 400);
       }
 
@@ -383,7 +507,10 @@ Deno.serve(async (req) => {
           .limit(1)
           .maybeSingle();
         if (dupeGuest) {
-          return json({ error: "that guest is already on another cadet's signup — each guest can attend with only one cadet" }, 409);
+          return json({
+            error:
+              "that guest is already on another cadet's signup — each guest can attend with only one cadet",
+          }, 409);
         }
       }
     }
@@ -391,9 +518,15 @@ Deno.serve(async (req) => {
     // Pricing snapshot (item 2/3): date → couple rate covers both; friend or
     // solo → host pays only their own rate and a friend owes theirs
     // separately. Null prices (config not filled yet) snapshot as null.
-    const priceCadet = cfg?.price_cadet != null ? Number(cfg.price_cadet) : null;
-    const priceCouple = cfg?.price_couple != null ? Number(cfg.price_couple) : null;
-    const hostAmountDue = (!hasGuest || guestType === "friend") ? priceCadet : priceCouple;
+    const priceCadet = cfg?.price_cadet != null
+      ? Number(cfg.price_cadet)
+      : null;
+    const priceCouple = cfg?.price_couple != null
+      ? Number(cfg.price_couple)
+      : null;
+    const hostAmountDue = (!hasGuest || guestType === "friend")
+      ? priceCadet
+      : priceCouple;
     const friendAmountDue = guestType === "friend" ? priceCadet : null;
     // Permission form: any SDHS student attending needs one. The cadet host
     // is ALWAYS an SDHS student, so this is always true regardless of guest —
@@ -437,29 +570,50 @@ Deno.serve(async (req) => {
       // The unique(lower(cadet_school_email)) index rejects a second signup for
       // the same cadet — surface it as a clear 409, not a generic 500.
       if (signupErr?.code === "23505") {
-        return json({ error: "You already have a Ball signup on file. See Chief to change it." }, 409);
+        return json({
+          error:
+            "You already have a Ball signup on file. See Chief to change it.",
+        }, 409);
       }
       return json({ error: "internal error" }, 500);
     }
 
     // Row committed — now burn the jti (single-use). Best-effort: a failure or
     // collision here must NOT fail the request, the signup already exists.
-    await svc.from("ball_signup_tokens_used").insert({ jti: payload.jti, email: payload.email })
-      .then(({ error }) => { if (error) console.error("ball-submit-signup jti burn (non-fatal)", error); });
+    await svc.from("ball_signup_tokens_used").insert({
+      jti: payload.jti,
+      email: payload.email,
+    })
+      .then(({ error }) => {
+        if (error) {
+          console.error("ball-submit-signup jti burn (non-fatal)", error);
+        }
+      });
 
     // Phone numbers go on in a separate, non-fatal update so a signup still
     // succeeds if ball_phone_numbers.sql hasn't been run yet (missing column).
     if (cadetPhone) {
-      const { error: phoneErr } = await svc.from("ball_signups").update({ cadet_phone: cadetPhone }).eq("id", signup.id);
-      if (phoneErr) console.error("ball-submit-signup cadet_phone (run ball_phone_numbers.sql)", phoneErr);
+      const { error: phoneErr } = await svc.from("ball_signups").update({
+        cadet_phone: cadetPhone,
+      }).eq("id", signup.id);
+      if (phoneErr) {
+        console.error(
+          "ball-submit-signup cadet_phone (run ball_phone_numbers.sql)",
+          phoneErr,
+        );
+      }
     }
 
     // Item 2: alert S-5 on a new allergy flag (fire-and-forget, same pattern
     // as the guest-invite email below — a failure here must not fail the
     // signup, which is already committed).
     if (cadetHasAllergy) {
-      svc.functions.invoke("notify-ball-allergy", { body: { signup_id: signup.id } })
-        .catch((e) => console.error("ball-submit-signup notify-ball-allergy", e));
+      svc.functions.invoke("notify-ball-allergy", {
+        body: { signup_id: signup.id },
+      })
+        .catch((e) =>
+          console.error("ball-submit-signup notify-ball-allergy", e)
+        );
     }
 
     // Alert the attire approvers on a new signup: female attendee → female-dress
@@ -467,38 +621,54 @@ Deno.serve(async (req) => {
     // is a guest, this runs again after the guest row exists (below) so the
     // guest's gender is seen. Fire-and-forget.
     if (!hasGuest) {
-      svc.functions.invoke("notify-ball-attire", { body: { signup_id: signup.id } })
-        .catch((e) => console.error("ball-submit-signup notify-ball-attire (solo)", e));
+      svc.functions.invoke("notify-ball-attire", {
+        body: { signup_id: signup.id },
+      })
+        .catch((e) =>
+          console.error("ball-submit-signup notify-ball-attire (solo)", e)
+        );
     }
 
-    // S-6-editable prose for the two signup emails (ball_email_templates).
-    // Loaded once here; null on any failure → each sender uses its defaults.
-    const tRegistration = await loadBallTemplate(svc, "registration_received");
+    async function notifyCadet() {
+      if(!cadet)return false;
+      // S-6-editable prose for the two signup emails (ball_email_templates).
+      // Loaded once here; null on any failure → each sender uses its defaults.
+      const tRegistration = await loadBallTemplate(
+        svc,
+        "registration_received",
+      );
 
-    // Confirmation / receipt email to the cadet (fire-and-forget). Address is
-    // notification_email, which equals the required allergy email whenever a
-    // food allergy was flagged. No address → the cadet opted out of emails.
-    if (notificationEmail) {
-      sendCadetConfirmation(notificationEmail, {
-        name: cadet.name,
-        letLevel: cadet.let_level,
-        company: cadet.company,
-        isFemale: cadetGender === "female",
-        hasGuest,
-        hasAllergy: cadetHasAllergy,
-        cfg: cfg ?? null,
-        amountDue: hostAmountDue,
-        fieldTripFormRequired,
-        guestType,
-        friendName: guestType === "friend" ? guestName : null,
-        friendAmountDue,
-        friendPaymentMethod,
-        tmpl: tRegistration,
-      }).catch((e) => console.error("ball-submit-signup cadet confirmation email", e));
+      // Send the confirmation only after all required reservation rows exist. Address is
+      // notification_email, which equals the required allergy email whenever a
+      // food allergy was flagged. No address → the cadet opted out of emails.
+      if (notificationEmail) {
+        return await sendCadetConfirmation(notificationEmail, {
+          name: cadet.name,
+          letLevel: cadet.let_level,
+          company: cadet.company,
+          isFemale: cadetGender === "female",
+          hasGuest,
+          hasAllergy: cadetHasAllergy,
+          cfg: cfg ?? null,
+          amountDue: hostAmountDue,
+          fieldTripFormRequired,
+          guestType,
+          friendName: guestType === "friend" ? guestName : null,
+          friendAmountDue,
+          friendPaymentMethod,
+          tmpl: tRegistration,
+        }).catch((e) => {
+          console.error("ball-submit-signup cadet confirmation email", e);
+          return false;
+        });
+      }
+
+      return false;
     }
 
     const resultPayload = {
       ok: true,
+      cadet_email_sent: false,
       signup_id: signup.id,
       amount_due: hostAmountDue,
       field_trip_form_required: fieldTripFormRequired,
@@ -509,10 +679,12 @@ Deno.serve(async (req) => {
     };
 
     if (!hasGuest) {
+      resultPayload.cadet_email_sent = await notifyCadet();
       return json(resultPayload);
     }
 
-    const verificationToken = crypto.randomUUID().replace(/-/g, "") + crypto.randomUUID().replace(/-/g, "");
+    const verificationToken = crypto.randomUUID().replace(/-/g, "") +
+      crypto.randomUUID().replace(/-/g, "");
 
     const { error: guestErr } = await svc.from("ball_guests").insert({
       signup_id: signup.id,
@@ -544,47 +716,72 @@ Deno.serve(async (req) => {
     // Guest phone (if the cadet pre-filled one) — non-fatal, same reason as
     // the cadet phone above. The guest confirms/sets it on their verify page.
     if (guestPhone) {
-      const { error: gpErr } = await svc.from("ball_guests").update({ guest_phone: guestPhone }).eq("signup_id", signup.id);
-      if (gpErr) console.error("ball-submit-signup guest_phone (run ball_phone_numbers.sql)", gpErr);
+      const { error: gpErr } = await svc.from("ball_guests").update({
+        guest_phone: guestPhone,
+      }).eq("signup_id", signup.id);
+      if (gpErr) {
+        console.error(
+          "ball-submit-signup guest_phone (run ball_phone_numbers.sql)",
+          gpErr,
+        );
+      }
     }
+
+    resultPayload.cadet_email_sent = await notifyCadet();
 
     // Attire approver alert — now that the guest row exists (female attendee →
     // female-dress staff, male guest → Weston). Fire-and-forget.
-    svc.functions.invoke("notify-ball-attire", { body: { signup_id: signup.id } })
+    svc.functions.invoke("notify-ball-attire", {
+      body: { signup_id: signup.id },
+    })
       .catch((e) => console.error("ball-submit-signup notify-ball-attire", e));
 
     const tGuest = await loadBallTemplate(svc, "guest_invitation");
     const RESEND_API_KEY = Deno.env.get("RESEND_API_KEY");
-    const FROM = Deno.env.get("FROM_EMAIL") ?? "Trojan Battalion <onboarding@resend.dev>";
+    const FROM = Deno.env.get("FROM_EMAIL") ??
+      "Trojan Battalion <onboarding@resend.dev>";
     const origin = siteOrigin();
+    let guestInvitationSent = false;
     if (RESEND_API_KEY && origin) {
       const link = `${origin}/ball/guest/${verificationToken}`;
       // SDHS-student guests must also complete the field trip permission form.
       // Attach the PDF when S-6 has uploaded it; otherwise just tell them.
-      const guestFormAttach = guestIsSdhsStudent ? fieldTripAttachment(cfg ?? null) : [];
+      const guestFormAttach = guestIsSdhsStudent
+        ? fieldTripAttachment(cfg ?? null)
+        : [];
       const guestFormHtml = guestIsSdhsStudent
         ? (cfg?.field_trip_form_pdf_url
           ? `<p style="margin:0 0 10px;"><strong style="color:#F4ECD8;">You attend Soddy Daisy High School</strong>, so a signed field trip permission form is also required. It is attached to this email &mdash; print it, sign it (physical signature only), and return it to Chief.</p>`
           : `<p style="margin:0 0 10px;"><strong style="color:#F4ECD8;">You attend Soddy Daisy High School</strong>, so a signed field trip permission form is also required. It will be sent separately &mdash; or pick one up from Chief's desk.</p>`)
         : "";
       const guestFormText = guestIsSdhsStudent
-        ? `\n\nYou attend Soddy Daisy High School, so a signed field trip permission form is also required${cfg?.field_trip_form_pdf_url ? " (attached to this email)" : " — it will be sent separately or picked up from Chief's desk"}. Physical signature only; return it to Chief.`
+        ? `\n\nYou attend Soddy Daisy High School, so a signed field trip permission form is also required${
+          cfg?.field_trip_form_pdf_url
+            ? " (attached to this email)"
+            : " — it will be sent separately or picked up from Chief's desk"
+        }. Physical signature only; return it to Chief.`
         : "";
       // S-6 prose overrides. This email is NOT gated by `enabled` — the guest
       // cannot confirm without the link, so it always sends.
       const gVars: Record<string, string> = {
         guest_name: escapeHtml(guestName),
-        cadet_name: `<strong style="color:#F4ECD8;">${escapeHtml(cadet.name)}</strong>`,
+        cadet_name: `<strong style="color:#F4ECD8;">${
+          escapeHtml(cadet.name)
+        }</strong>`,
         verify_url: escapeHtml(link),
       };
-      const guestClosing = paras(pick(
-        tGuest,
-        "closing_html",
-        "This step confirms any food allergies and your review of the attire requirements. Your host's registration is not complete until it is done.",
-        gVars,
-      ), { lastMargin: "10px" });
+      const guestClosing = paras(
+        pick(
+          tGuest,
+          "closing_html",
+          "This step confirms any food allergies and your review of the attire requirements. Your host's registration is not complete until it is done.",
+          gVars,
+        ),
+        { lastMargin: "10px" },
+      );
       const guestHtml = ballEmailShell({
-        preheader: `${cadet.name} has invited you to the Trojan Battalion Military Ball.`,
+        preheader:
+          `${cadet.name} has invited you to the Trojan Battalion Military Ball.`,
         heading: pick(tGuest, "heading", "You Are Invited", gVars),
         introHtml: paras(pick(
           tGuest,
@@ -597,25 +794,39 @@ Deno.serve(async (req) => {
         noticeHtml: pick(tGuest, "notice_html", "", gVars) || undefined,
         closingHtml: `${guestClosing}
 <p style="margin:0 0 10px;">${attireLineHtml(guestGender)}</p>
-${guestFormHtml}<p style="margin:0;font-size:12px;color:#8A8266;">If the button does not work, use this link:<br />${escapeHtml(link)}</p>`,
+${guestFormHtml}<p style="margin:0;font-size:12px;color:#8A8266;">If the button does not work, use this link:<br />${
+          escapeHtml(link)
+        }</p>`,
         siteUrl: `${origin}/ball`,
       });
-      await fetch("https://api.resend.com/emails", {
+      const guestResponse = await fetch("https://api.resend.com/emails", {
         method: "POST",
-        headers: { Authorization: `Bearer ${RESEND_API_KEY}`, "Content-Type": "application/json" },
+        signal: AbortSignal.timeout(10000),
+        headers: {
+          Authorization: `Bearer ${RESEND_API_KEY}`,
+          "Content-Type": "application/json",
+        },
         body: JSON.stringify({
           from: FROM,
           bcc: BALL_NOTIFY_BCC,
           to: [personalEmail],
-          subject: pick(tGuest, "subject", "Trojan Battalion Military Ball: Invitation", {
-            guest_name: guestName, cadet_name: cadet.name,
-          }),
+          subject: pick(
+            tGuest,
+            "subject",
+            "Trojan Battalion Military Ball: Invitation",
+            {
+              guest_name: guestName,
+              cadet_name: cadet.name,
+            },
+          ),
           html: guestHtml,
           ...(guestFormAttach.length ? { attachments: guestFormAttach } : {}),
           text: `${guestName},
 
 ${cadet.name} has requested the honor of your company at the Trojan Battalion Military Ball.
-${cfg?.ball_date ? `\nDate:  ${fmtLongDate(cfg.ball_date)}` : ""}${cfg?.event_time_text ? `\nTime:  ${cfg.event_time_text}` : ""}${cfg?.venue_address ? `\nVenue: ${cfg.venue_address}` : ""}
+${cfg?.ball_date ? `\nDate:  ${fmtLongDate(cfg.ball_date)}` : ""}${
+            cfg?.event_time_text ? `\nTime:  ${cfg.event_time_text}` : ""
+          }${cfg?.venue_address ? `\nVenue: ${cfg.venue_address}` : ""}
 
 Confirm your attendance here:
 ${link}
@@ -625,11 +836,23 @@ This step confirms any food allergies and your review of the attire requirements
 ${attireLineText(guestGender)}${guestFormText}`,
         }),
       }).catch((e) => console.error("ball-submit-signup guest email send", e));
+      guestInvitationSent = !!(guestResponse && guestResponse.ok);
+      if (guestResponse && !guestResponse.ok) {
+        console.error(
+          "ball-submit-signup guest email rejected",
+          guestResponse.status,
+        );
+      }
     } else {
-      console.error("ball-submit-signup: RESEND_API_KEY or WEBAUTHN_ORIGIN not configured, guest email not sent");
+      console.error(
+        "ball-submit-signup: RESEND_API_KEY or WEBAUTHN_ORIGIN not configured, guest email not sent",
+      );
     }
 
-    return json(resultPayload);
+    return json({
+      ...resultPayload,
+      guest_invitation_sent: guestInvitationSent,
+    });
   } catch (e) {
     console.error("ball-submit-signup", e);
     return json({ error: "internal error" }, 500);

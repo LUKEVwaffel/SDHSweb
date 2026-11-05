@@ -21,7 +21,7 @@ export default function SignupConfirmation({ cadetName, hasGuest, guestName, gue
   // Only auto-redirect when a confirmation email is on its way — a phone-only
   // signer has no other copy of what they owe / what to bring, so leave them
   // on this screen. When it does run, it's cancellable.
-  const [redirecting, setRedirecting] = useState(Boolean(notificationEmail));
+  const [redirecting, setRedirecting] = useState(Boolean(notificationEmail)&&result?.cadet_email_sent!==false&&result?.guest_invitation_sent!==false);
   const [count, setCount] = useState(REDIRECT_SECONDS);
   useEffect(() => {
     if (!redirecting) return undefined;
@@ -43,14 +43,15 @@ export default function SignupConfirmation({ cadetName, hasGuest, guestName, gue
       <p className="ball-fade-up ball-d1" style={para}>
         Thanks, {cadetName}. Your Military Ball signup is in.{' '}
         {notificationEmail
-          ? `A confirmation email is on its way to ${notificationEmail}.`
+          ? result?.cadet_email_sent===false ? `Your reservation is saved, but a confirmation email was not sent. Screenshot this page and contact Chief for a printed copy.` : `A confirmation email is on its way to ${notificationEmail}.`
           : 'No email was given — screenshot this screen now so you have the payment and next-step details, and watch for word from Chief.'}
       </p>
       <p className="ball-fade-up ball-d1" style={para}>
         {hasGuest
-          ? `Your guest, ${guestName || 'your guest'}, will get their own email to finish their part. You're not fully verified until they do — you'll get another email once they're confirmed.`
+          ? result?.guest_invitation_sent===false ? `Your guest still needs to complete their registration.` : `Your guest, ${guestName || 'your guest'}, will get their own email to finish their part. You're not fully verified until they do — you'll get another email once they're confirmed.`
           : "You're not bringing a guest, so nothing else is pending on that front — you're fully verified."}
       </p>
+      {hasGuest&&result?.guest_invitation_sent===false&&<p role="status" style={para}>The guest invitation email was not sent. Your reservation is saved. Ask Chief to resend the invitation or print a packet; do not submit another reservation.</p>}
       <p className="ball-fade-up ball-d2" style={para}>
         Next: bring {formRequired ? 'your signed field trip form and ' : ''}your payment{amount ? ` of ${amount}` : ''} (cash or check, in full) directly to Chief.
       </p>
