@@ -13,9 +13,11 @@
 // (HTTP 402/403) and the script stops early — nothing is changed for rows it
 // couldn't copy.
 //
-// Usage (put the secrets in .env.local — never commit them):
-//   node --env-file=.env --env-file=.env.local scripts/migrate-photos-to-r2.mjs --dry-run
-//   node --env-file=.env --env-file=.env.local scripts/migrate-photos-to-r2.mjs
+// Usage (secrets live in the gitignored .env.migrate; never commit them):
+//   node --env-file=.env.migrate scripts/migrate-photos-to-r2.mjs --dry-run
+//   node --env-file=.env.migrate scripts/migrate-photos-to-r2.mjs
+// Run scripts/migrate-team-photos.mjs first: then every file is already in
+// R2 and this only repoints the rows (no extra Supabase downloads).
 // Options: --dry-run  --event <event uuid>  --limit <n>  --concurrency <n> (default 3)
 //
 // Env:
