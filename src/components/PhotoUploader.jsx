@@ -2,7 +2,8 @@ import { useState, useRef, useEffect, useCallback } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { supabase as SB } from '../lib/supabaseClient';
 import { getDeviceId } from '../lib/fingerprint';
-import { resizeForUpload } from '../lib/imageResize';
+import { resizeForUpload, isRawFile } from '../lib/imageResize';
+import { putPhotoFile, removePhotoFiles } from '../lib/photoStorage';
 import { TEAMS } from '../lib/teams';
 import posthog from '../lib/posthog';
 
@@ -15,7 +16,6 @@ const P = {
 const mono = "'JetBrains Mono', monospace";
 const oswald = 'Oswald, sans-serif';
 const inter = 'Inter, sans-serif';
-const BUCKET = 'team-photos';
 
 // Upload targets = general Battalion (default, most photos) + the 4 specialty
 // teams. Battalion is NOT in lib/teams.js on purpose — it must not appear in the
@@ -102,8 +102,10 @@ export default function PhotoUploader({ presetTeam = null, onUploaded }) {
 
   const addFiles = useCallback((fileList) => {
     const files = Array.from(fileList || []);
-    const images = files.filter((f) => f.type.startsWith('image/'));
-    const skipped = files.filter((f) => !f.type.startsWith('image/'));
+    // RAW camera files can't be read by the browser, so they could never be
+    // resized; turn them away here with the other files we can't take.
+    const images = files.filter((f) => f.type.startsWith('image/') && !isRawFile(f));
+    const skipped = files.filter((f) => !f.type.startsWith('image/') || isRawFile(f));
     if (skipped.length) setRejected((r) => [...r, ...skipped.map((f) => f.name)]);
     if (images.length) {
       setItems((q) => [
@@ -154,13 +156,8 @@ export default function PhotoUploader({ presetTeam = null, onUploaded }) {
       const stamp = `${Date.now()}_${Math.random().toString(36).slice(2, 8)}`;
       const base = `${team}/${eventId}/${stamp}`;
 
-      const up1 = await SB.storage.from(BUCKET).upload(`${base}.jpg`, full, { contentType: 'image/jpeg' });
-      if (up1.error) throw up1.error;
-      const up2 = await SB.storage.from(BUCKET).upload(`${base}_t.jpg`, thumb, { contentType: 'image/jpeg' });
-      if (up2.error) throw up2.error;
-
-      const photoUrl = SB.storage.from(BUCKET).getPublicUrl(`${base}.jpg`).data.publicUrl;
-      const thumbUrl = SB.storage.from(BUCKET).getPublicUrl(`${base}_t.jpg`).data.publicUrl;
+      const photoUrl = await putPhotoFile(`${base}.jpg`, full);
+      const thumbUrl = await putPhotoFile(`${base}_t.jpg`, thumb);
 
       const { data, error } = await SB.from('photos').insert({
         team,
@@ -171,7 +168,13 @@ export default function PhotoUploader({ presetTeam = null, onUploaded }) {
         uploader_name: credit.trim() || null,
         uploader_fp: deviceId,
       }).select().single();
-      if (error) throw error;
+      if (error) {
+        // No row means nobody can ever see or delete these files. Best effort:
+        // R2 only lets a signed-in DISPATCH user delete, so for an anonymous
+        // submitter this quietly does nothing.
+        await removePhotoFiles([{ storage_path: `${base}.jpg`, photo_url: photoUrl }]).catch(() => {});
+        throw error;
+      }
 
       setItems((q) => q.map((it) => (it.id === item.id ? { ...it, status: 'done' } : it)));
       URL.revokeObjectURL(item.previewUrl);
@@ -319,7 +322,7 @@ export default function PhotoUploader({ presetTeam = null, onUploaded }) {
         </div>
         {rejected.length > 0 && (
           <div style={{ fontFamily: mono, fontSize: 9, color: P.red, letterSpacing: '0.06em', marginTop: 8 }}>
-            SKIPPED (NOT IMAGES): {rejected.join(', ')}
+            SKIPPED (NOT JPEG/PNG/HEIC PHOTOS, RAW CAMERA FILES MUST BE EXPORTED AS JPEG FIRST): {rejected.join(', ')}
           </div>
         )}
       </div>

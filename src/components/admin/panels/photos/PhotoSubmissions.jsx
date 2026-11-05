@@ -5,6 +5,7 @@ import { Btn, PanelHeader, EmptyState } from '../../shared/ui';
 import TvPhotosPanel from '../tvphotos/TvPhotosPanel';
 import TvTerminalManager from '../tvphotos/TvTerminalManager';
 import { applyOvalBlurToUrl } from '../../../../lib/imageResize';
+import { putPhotoFile, removePhotoFiles, withOriginal } from '../../../../lib/photoStorage';
 
 const DEFAULT_OVAL = { cx: 0.5, cy: 0.32, rx: 0.16, ry: 0.2 };
 const MIN_OVAL_RADIUS = 0.03;
@@ -17,7 +18,7 @@ const MIN_OVAL_RADIUS = 0.03;
 // set (Luke only), that category's curated TV Photos section (tv_photos
 // table — a separate table by design, see TvPhotosPanel.jsx) renders above
 // the submissions grid, so both photo pools live in one place per category.
-const BUCKET = 'team-photos';
+// Files live on R2 (lib/photoStorage.js); older rows may still be on Supabase.
 
 const FILTERS = [
   { id: 'all',       label: 'ALL' },
@@ -37,21 +38,26 @@ function thumbPath(storagePath) {
   return storagePath ? storagePath.replace(/\.jpg$/i, '_t.jpg') : null;
 }
 
-// team-photos storage policies only grant INSERT for new paths (see
-// PhotoUploader.jsx) — there is no update/overwrite permission, so an
-// upsert onto the existing path is silently rejected. Blurring writes to a
-// fresh path in the same folder instead, exactly like a new upload.
-function blurredPath(storagePath) {
-  const stamp = `${Date.now()}_${Math.random().toString(36).slice(2, 8)}`;
-  return storagePath.replace(/\.jpg$/i, `_blur_${stamp}.jpg`);
+// Old photos uploaded before events were required have no event_id, but the
+// R2 worker only accepts keys of the form <team>/<uuid>/<digits>_<a-z0-9>.jpg.
+const NO_EVENT_FOLDER = '00000000-0000-0000-0000-000000000000';
+
+// The R2 worker never overwrites a key, so a blur is uploaded to a fresh key
+// (which also dodges any cache still holding the sharp version). The `_blur`
+// marker matches lib/opticComp.js so the /lukepwa grid badges it too.
+function blurredPath(row) {
+  const stamp = `${Date.now()}_blur${Math.random().toString(36).slice(2, 8)}`;
+  return `${row.team || 'battalion'}/${row.event_id || NO_EVENT_FOLDER}/${stamp}.jpg`;
 }
 
-// Deletes the storage objects + row + audit log entry for one photo.
+// Deletes the files (including a kept sharp original) + row + audit log
+// entry for one photo. Files go first: if they can't be deleted, the row is
+// kept so the photo can be deleted again instead of staying public unseen.
 // Shared by the single-photo delete button and the batch delete action.
 async function deletePhotoRecord(row, adminId) {
-  const paths = [row.storage_path, thumbPath(row.storage_path)].filter(Boolean);
-  if (paths.length) await SB.storage.from(BUCKET).remove(paths);
-  await SB.from('photos').delete().eq('id', row.id);
+  await removePhotoFiles(withOriginal(row));
+  const { error } = await SB.from('photos').delete().eq('id', row.id);
+  if (error) throw error;
   await SB.from('change_log').insert({
     admin_id: adminId, page: 'photos', element: row.id,
     label: `DELETE PHOTO: ${row.team}${row.uploader_name ? ` · ${row.uploader_name}` : ''}`,
@@ -200,16 +206,9 @@ export default function PhotoSubmissions({ adminId, showTvPhotos = false }) {
     try {
       const { full, thumb } = await applyOvalBlurToUrl(viewerRow.photo_url, ovals);
 
-      const newPath = blurredPath(viewerRow.storage_path);
-      const newThumbPath = thumbPath(newPath);
-
-      const up1 = await SB.storage.from(BUCKET).upload(newPath, full, { contentType: 'image/jpeg' });
-      if (up1.error) throw up1.error;
-      const up2 = await SB.storage.from(BUCKET).upload(newThumbPath, thumb, { contentType: 'image/jpeg' });
-      if (up2.error) throw up2.error;
-
-      const newPhotoUrl = SB.storage.from(BUCKET).getPublicUrl(newPath).data.publicUrl;
-      const newThumbUrl = SB.storage.from(BUCKET).getPublicUrl(newThumbPath).data.publicUrl;
+      const newPath = blurredPath(viewerRow);
+      const newPhotoUrl = await putPhotoFile(newPath, full);
+      const newThumbUrl = await putPhotoFile(thumbPath(newPath), thumb);
 
       // The first blur pass preserves the pre-blur original so it can be
       // restored later. A second pass just chains onto the already-blurred
@@ -219,18 +218,22 @@ export default function PhotoSubmissions({ adminId, showTvPhotos = false }) {
         ? { orig_storage_path: viewerRow.storage_path, orig_photo_url: viewerRow.photo_url, orig_thumb_url: viewerRow.thumb_url }
         : {};
 
+      // grid_url is the small /lukepwa tile, made from the sharp photo.
+      // Clear it so the face never shows there; the grid falls back to the
+      // thumb and /lukepwa can rebuild a blurred tile later.
       const { error: updateError } = await SB.from('photos')
-        .update({ storage_path: newPath, photo_url: newPhotoUrl, thumb_url: newThumbUrl, ...origFields })
+        .update({ storage_path: newPath, photo_url: newPhotoUrl, thumb_url: newThumbUrl, grid_url: null, ...origFields })
         .eq('id', viewerRow.id);
-      if (updateError) throw updateError;
+      if (updateError) {
+        // Row still points at the old files; don't leave the new ones orphaned.
+        await removePhotoFiles([{ storage_path: newPath, photo_url: newPhotoUrl }]).catch(() => {});
+        throw updateError;
+      }
 
-      // Clean up the superseded objects — but only when they were an
+      // Clean up the superseded objects, but only when they were an
       // intermediate blurred version, never the true original (that's now
       // preserved under orig_storage_path for REMOVE BLUR to restore).
-      if (!isFirstBlur) {
-        const oldPaths = [viewerRow.storage_path, thumbPath(viewerRow.storage_path)].filter(Boolean);
-        if (oldPaths.length) await SB.storage.from(BUCKET).remove(oldPaths);
-      }
+      if (!isFirstBlur) await removePhotoFiles([viewerRow]).catch(() => {});
 
       await SB.from('change_log').insert({
         admin_id: adminId, page: 'photos', element: viewerRow.id,
@@ -238,7 +241,7 @@ export default function PhotoSubmissions({ adminId, showTvPhotos = false }) {
         value_before: { photo_url: viewerRow.photo_url, thumb_url: viewerRow.thumb_url },
         value_after: { photo_url: newPhotoUrl, thumb_url: newThumbUrl },
       });
-      setRows((prev) => prev.map((r) => (r.id === viewerRow.id ? { ...r, storage_path: newPath, photo_url: newPhotoUrl, thumb_url: newThumbUrl, ...origFields } : r)));
+      setRows((prev) => prev.map((r) => (r.id === viewerRow.id ? { ...r, storage_path: newPath, photo_url: newPhotoUrl, thumb_url: newThumbUrl, grid_url: null, ...origFields } : r)));
       setBlurMode(false);
       setOvals([]);
     } catch (err) {
@@ -266,8 +269,7 @@ export default function PhotoSubmissions({ adminId, showTvPhotos = false }) {
         .eq('id', viewerRow.id);
       if (updateError) throw updateError;
 
-      const blurredPaths = [viewerRow.storage_path, thumbPath(viewerRow.storage_path)].filter(Boolean);
-      if (blurredPaths.length) await SB.storage.from(BUCKET).remove(blurredPaths);
+      await removePhotoFiles([viewerRow]).catch(() => {});
 
       await SB.from('change_log').insert({
         admin_id: adminId, page: 'photos', element: viewerRow.id,
@@ -297,11 +299,16 @@ export default function PhotoSubmissions({ adminId, showTvPhotos = false }) {
   async function del(row) {
     if (!confirm('Delete this photo? Removes it from the public gallery and storage permanently.')) return;
     setBusy(row.id);
-    await deletePhotoRecord(row, adminId);
-    setRows((prev) => prev.filter((r) => r.id !== row.id));
-    setSelected((prev) => { const next = new Set(prev); next.delete(row.id); return next; });
-    if (viewerId === row.id) closeViewer();
-    setBusy('');
+    try {
+      await deletePhotoRecord(row, adminId);
+      setRows((prev) => prev.filter((r) => r.id !== row.id));
+      setSelected((prev) => { const next = new Set(prev); next.delete(row.id); return next; });
+      if (viewerId === row.id) closeViewer();
+    } catch (err) {
+      alert(`Could not delete this photo. It is still there, so try again.\n${err.message || err}`);
+    } finally {
+      setBusy('');
+    }
   }
 
   async function bulkHide(nextStatus) {
@@ -318,8 +325,10 @@ export default function PhotoSubmissions({ adminId, showTvPhotos = false }) {
     if (!targets.length) return;
     if (!confirm(`Delete ${targets.length} photo(s)? Removes them from the public gallery and storage permanently.`)) return;
     setBulkBusy(true);
-    await Promise.all(targets.map((row) => deletePhotoRecord(row, adminId)));
-    const deletedIds = new Set(targets.map((r) => r.id));
+    const results = await Promise.allSettled(targets.map((row) => deletePhotoRecord(row, adminId)));
+    const deletedIds = new Set(targets.filter((_, i) => results[i].status === 'fulfilled').map((r) => r.id));
+    const failed = targets.length - deletedIds.size;
+    if (failed) alert(`${failed} photo(s) could not be deleted and are still there. Try again.`);
     setRows((prev) => prev.filter((r) => !deletedIds.has(r.id)));
     if (viewerId && deletedIds.has(viewerId)) closeViewer();
     clearSelection();
