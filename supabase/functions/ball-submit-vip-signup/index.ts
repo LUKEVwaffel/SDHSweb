@@ -13,6 +13,7 @@
 //   supabase functions deploy ball-submit-vip-signup --no-verify-jwt
 import { json, preflight } from "../_shared/http.ts";
 import { serviceClient } from "../_shared/supabase.ts";
+import { normalizeVipRole, vipIdentityError, insertVipSignup } from "../_shared/ballVipSignup.ts";
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 const SCHOOL_EMAIL_DOMAINS = ["students.hcde.org", "hcde.org"];
@@ -26,7 +27,7 @@ function required(v: unknown): string {
   return typeof v === "string" ? v.trim() : "";
 }
 
-const ROLES = new Set(["visiting_leadership", "past_king_queen"]);
+
 
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return preflight();
@@ -53,7 +54,7 @@ Deno.serve(async (req) => {
     }
 
     const name = required(body?.name);
-    const role = required(body?.role);
+    const role = normalizeVipRole(body?.role);
     const homeSchool = required(body?.home_school);
     const age = Number(body?.age);
     const gender = required(body?.gender);
@@ -63,9 +64,8 @@ Deno.serve(async (req) => {
     const phone = required(body?.phone) || null;
     const dressCodeAccepted = body?.dress_code_accepted === true;
 
-    if (!name || !ROLES.has(role) || !homeSchool) {
-      return json({ error: "name, role, and home school/unit are required" }, 400);
-    }
+    const identityError = vipIdentityError(name, role, homeSchool);
+    if (identityError) return json({ error: identityError }, 400);
     if (!Number.isFinite(age) || age <= 0 || (gender !== "male" && gender !== "female")) {
       return json({ error: "age and gender are required" }, 400);
     }
@@ -102,7 +102,7 @@ Deno.serve(async (req) => {
       }
     }
 
-    const { data: signup, error: insertErr } = await svc.from("ball_vip_signups").insert({
+    const { data: signup, error: insertErr } = await insertVipSignup(svc, {
       name,
       role,
       home_school: homeSchool,
@@ -113,7 +113,7 @@ Deno.serve(async (req) => {
       personal_email: personalEmail,
       phone,
       dress_code_accepted_at: gender === "female" ? new Date().toISOString() : null,
-    }).select("id").single();
+    });
     if (insertErr || !signup) {
       console.error("ball-submit-vip-signup insert", insertErr);
       return json({ error: "internal error" }, 500);
