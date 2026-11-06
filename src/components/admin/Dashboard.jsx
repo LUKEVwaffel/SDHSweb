@@ -1,9 +1,11 @@
-import { Navigate, useLocation, useNavigate } from 'react-router-dom';
-import { P, inter, sp } from './theme';
+import { useState } from 'react';
+import { Navigate, useLocation } from 'react-router-dom';
+import { P, inter, sp, ease, glass } from './theme';
 import Sidebar from './nav/Sidebar';
+import { SIDEBAR_CONTENT_OFFSET } from './nav/navItems';
 import TopBar from './nav/TopBar';
-import StatusBar from './nav/StatusBar';
-import OverviewPanel from './panels/OverviewPanel';
+import useViewportBand from '../../hooks/useViewportBand';
+import TicketDeliveryPanel from './panels/TicketDeliveryPanel';
 import EventsPanel from './panels/EventsPanel';
 import AarsPanel from './panels/aars/AarsPanel';
 import PeoplePanel from './panels/people/PeoplePanel';
@@ -27,8 +29,8 @@ import RifleSignupsPanel from './panels/RifleSignupsPanel';
 import PortalAccessPanel from './panels/portal/PortalAccessPanel';
 import HalloweenMoviePollPanel from './panels/HalloweenMoviePollPanel';
 import ChristmasMusicPollPanel from './panels/ChristmasMusicPollPanel';
-import TicketDeliveryPanel from './panels/TicketDeliveryPanel';
 import BoardsPanel from './panels/boards/BoardsPanel';
+import PausedDispatchAiPanel from './panels/ai/PausedDispatchAiPanel';
 
 // Push-to-TV / TV Photos is intentionally restricted to this one account —
 // a deliberate departure from DISPATCH's usual "no per-email logic"
@@ -37,15 +39,6 @@ import BoardsPanel from './panels/boards/BoardsPanel';
 // changes. This is a render-gate ONLY — the real enforcement is server-side
 // RLS/edge functions, same split as every other admin surface here.
 const LUKE_EMAIL = 'lukevetsch77@gmail.com';
-
-const SECTION_LABEL = {
-  overview: 'OVERVIEW', events: 'EVENTS', aars: 'AAR TRACKER',
-  people: 'PEOPLE', photos: 'PHOTOS', questions: 'FAQ QUESTIONS', email: 'EMAIL LIST',
-  media: 'MEDIA', advanced: 'ADVANCED', account: 'MY ACCOUNT', messages: 'MESSAGES',
-  tvremote: 'TV REMOTE', beta: 'BETA FEATURES', rafting: 'RAFTING TRIP', checkin: 'SITE CHECK-IN',
-  feedback: 'EVENT FEEDBACK', ball: 'MILITARY BALL', ballallergy: 'BALL ALLERGIES', raidertv: 'RAIDER TV',
-  opticsurvey: 'OPTIC SURVEY', riflesignups: 'RIFLE SIGNUPS', ticketdelivery: 'TICKET DELIVERY', poll: 'CHRISTMAS MUSIC POLL', halloween: 'HALLOWEEN MOVIE POLL', boards: 'PROMOTION BOARDS',
-};
 
 // Which sections each role may see. s5 is scoped to the battalion calendar
 // plus the Raiders team calendar (OpticSend requires S-5 to tag Raiders
@@ -85,9 +78,15 @@ const SECTION_LABEL = {
 // supabase/dispatch_bc_role.sql widens ONLY the tv_notices write policy + the
 // tv_daily_settings emergency guard to accept is_bc(); is_admin()/is_s6()/
 // is_s5() are untouched, so every other admin table stays locked to him.
+// 'ai' (DISPATCH AI, supabase/functions/dispatch-ai-chat) is S-6/S-5 only,
+// matching is_admin() server side (admin_roles.sql) — not given to bc, same
+// one-section restriction as every other bc account. Listed second in both
+// arrays (not first) deliberately — allowed[0] sets the default route for
+// a bare /admin hit (Ticket Delivery for S-6, Events for S-5). Sidebar.jsx
+// still pins DISPATCH AI at the top regardless of this array's order.
 const ROLE_SECTIONS = {
-  s6: ['overview', 'events', 'people', 'photos', 'questions', 'email', 'media', 'messages', 'advanced', 'tvremote', 'raidertv', 'beta', 'feedback', 'ball', 'ballallergy', 'riflesignups', 'portalaccess', 'halloween', 'boards', 'poll', 'ticketdelivery'],
-  s5: ['events', 'aars', 'feedback', 'messages', 'account', 'tvremote', 'ballallergy', 'poll'],
+  s6: ['ticketdelivery', 'ai', 'account', 'events', 'people', 'photos', 'questions', 'email', 'media', 'messages', 'advanced', 'tvremote', 'raidertv', 'beta', 'feedback', 'ball', 'ballallergy', 'riflesignups', 'portalaccess', 'halloween', 'poll', 'boards'],
+  s5: ['events', 'ai', 'aars', 'feedback', 'messages', 'account', 'tvremote', 'ballallergy', 'poll'],
   bc: ['tvremote'],
 };
 
@@ -97,26 +96,59 @@ export default function Dashboard({ onLogout, adminId, role = 's6' }) {
   // S-5 has full events parity with S-6 (every team) — see
   // supabase/events_s5_full_access.sql for the matching RLS grant.
   const allowedTeams = undefined;
-  const navigate = useNavigate();
   const location = useLocation();
 
-  const section = location.pathname.replace(/^\/admin\/?/, '');
-  const goto = (next) => navigate(`/admin/${next}`);
+  // Sidebar display mode (see Sidebar.jsx): desktop honors the user's own
+  // collapse toggle, tablet starts as an expandable rail, and phone is a
+  // slide-over drawer that reserves no layout width. Lifted here (rather
+  // than owned inside Sidebar) because TopBar's new drawer-open button and
+  // the content area's left offset both need to agree with Sidebar on the
+  // current mode.
+  const band = useViewportBand();
+  const [manualCollapsed, setManualCollapsed] = useState(false);
+  const [tabletExpanded, setTabletExpanded] = useState(false);
+  const [drawerOpen, setDrawerOpen] = useState(false);
+  const sidebarMode = band === 'phone' ? 'drawer' : band === 'tablet' ? (tabletExpanded ? 'expanded' : 'rail') : (manualCollapsed ? 'rail' : 'expanded');
+  const contentOffset = SIDEBAR_CONTENT_OFFSET[sidebarMode];
+
+  const requestedSection = location.pathname.replace(/^\/admin\/?/, '');
+  const section = requestedSection === 'overview' ? 'ticketdelivery' : requestedSection;
 
   // A bare /admin hit, an unknown section, or a role-disallowed section
   // (e.g. s5 typing /admin/advanced directly) redirects synchronously —
   // before any panel below ever mounts — instead of rendering then bouncing.
+  if (requestedSection === 'overview') {
+    return <Navigate to="/admin/ticketdelivery" replace />;
+  }
   if (!allowed.includes(section)) {
     return <Navigate to={`/admin/${allowed[0]}`} replace />;
   }
 
   return (
-    <div style={{ height: '100vh', display: 'flex', flexDirection: 'column', background: P.ink, fontFamily: inter }}>
-      <TopBar adminId={adminId} onLogout={onLogout} />
+    <div style={{
+      height: '100dvh', display: 'flex', flexDirection: 'column', fontFamily: inter,
+      position: 'relative', background: `${glass.bgGlow}, ${P.ink}`,
+    }}>
+      {/* Faint grid texture, masked to a soft radial so it fades out toward
+          the edges instead of tiling harshly to the corners — matches the
+          mockup exactly. Sits above the glow, below everything else. */}
+      <div style={{
+        position: 'absolute', inset: 0, pointerEvents: 'none', opacity: 0.22, zIndex: 0,
+        backgroundImage: glass.gridTexture, backgroundSize: '64px 64px',
+        WebkitMaskImage: 'radial-gradient(ellipse 60% 50% at 55% 15%, black 0%, transparent 75%)',
+        maskImage: 'radial-gradient(ellipse 60% 50% at 55% 15%, black 0%, transparent 75%)',
+      }} />
+      <TopBar accountKey={adminId} notificationsEnabled={role === 's6' || role === 's5'} showMenuButton={band === 'phone'} onOpenMenu={() => setDrawerOpen(true)} contentOffset={contentOffset}  />
       <div style={{ flex: 1, display: 'flex', overflow: 'hidden' }}>
-        <Sidebar active={section} allowed={allowed} role={role} />
-        <div style={{ flex: 1, overflowY: 'auto', padding: `${sp[6]}px ${sp[8]}px`, maxWidth: 1500, width: '100%', margin: '0 auto' }}>
-          {section === 'overview' && <OverviewPanel adminId={adminId} goto={goto} />}
+        <Sidebar
+          active={section} allowed={allowed} role={role} adminId={adminId} onLogout={onLogout} band={band}
+          manualCollapsed={band === 'tablet' ? !tabletExpanded : manualCollapsed} onToggleCollapsed={() => band === 'tablet' ? setTabletExpanded(expanded => !expanded) : setManualCollapsed(collapsed => !collapsed)}
+          drawerOpen={drawerOpen} onCloseDrawer={() => setDrawerOpen(false)}
+        />
+        <div style={{ flex: 1, minWidth: 0, minHeight: 0, overflowY: section === 'ai' ? 'hidden' : 'auto', padding: section === 'ai' ? '8px 20px 12px' : `${sp[6]}px ${sp[8]}px`, paddingLeft: contentOffset + (section === 'ai' ? (band === 'phone' ? 12 : 20) : sp[8]), transition: `padding-left 0.28s ${ease}` }}>
+        <div style={{ maxWidth: 1500, width: '100%', margin: '0 auto', ...(section === 'ai' ? { height: '100%', minHeight: 0, display: 'flex', flexDirection: 'column' } : {}) }}>
+          {section === 'ai'       && <PausedDispatchAiPanel role={role} />}
+          {section === 'ticketdelivery' && <TicketDeliveryPanel />}
           {section === 'events'   && <EventsPanel adminId={adminId} allowedTeams={allowedTeams} />}
           {section === 'aars'     && <AarsPanel adminId={adminId} readOnly={role !== 's5'} />}
           {section === 'people'   && <PeoplePanel adminId={adminId} />}
@@ -139,12 +171,11 @@ export default function Dashboard({ onLogout, adminId, role = 's6' }) {
           {section === 'riflesignups' && <RifleSignupsPanel />}
           {section === 'boards' && <BoardsPanel />}
           {section === 'portalaccess' && <PortalAccessPanel />}
-          {section === 'ticketdelivery' && <TicketDeliveryPanel />}
-          {section === 'poll' && <ChristmasMusicPollPanel canManage={role === 's6'} />}
           {section === 'halloween' && <HalloweenMoviePollPanel />}
+          {section === 'poll' && <ChristmasMusicPollPanel canManage={role === 's6'} />}
+        </div>
         </div>
       </div>
-      <StatusBar sectionLabel={SECTION_LABEL[section] || section.toUpperCase()} />
     </div>
   );
 }

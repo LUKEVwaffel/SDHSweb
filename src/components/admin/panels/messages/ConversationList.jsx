@@ -1,4 +1,4 @@
-import { P, mono, inter, fs, sp, radius, ease } from '../../theme';
+import { P, mono, inter, fs, sp, radius, glass, ease } from '../../theme';
 import { EmptyState } from '../../shared/ui';
 import { PRESENCE_ONLINE_WINDOW_MS } from '../../../../hooks/useAdminPresence';
 
@@ -39,16 +39,25 @@ function timeLabel(iso) {
     : d.toLocaleDateString([], { month: 'short', day: 'numeric' });
 }
 
+const LIST_PANEL_STYLE = {
+  display: 'flex', flexDirection: 'column', gap: 4,
+  overflowY: 'auto', padding: sp[2],
+  borderRadius: radius.xl, background: glass.panelFill,
+  backdropFilter: glass.blur, WebkitBackdropFilter: glass.blur,
+  border: glass.border, boxShadow: `${glass.insetHi}, ${glass.outerGlow}`,
+};
+
 export default function ConversationList({ conversations, roster, presence, own, selectedId, onSelect }) {
   if (conversations === null) {
-    return <div style={{ fontFamily: mono, fontSize: fs.xs, color: P.faint, padding: sp[4] }}>LOADING…</div>;
+    return (
+      <div style={LIST_PANEL_STYLE}>
+        <div style={{ fontFamily: mono, fontSize: fs.xs, color: P.faint, padding: sp[4] }}>LOADING…</div>
+      </div>
+    );
   }
 
   return (
-    <div style={{
-      display: 'flex', flexDirection: 'column', gap: sp[2],
-      overflowY: 'auto', paddingRight: 4,
-    }}>
+    <div style={LIST_PANEL_STYLE}>
       {conversations.length === 0 && (
         <EmptyState icon="✉" title="NO CONVERSATIONS" hint="Start a new message to reach another admin." />
       )}
@@ -63,17 +72,19 @@ export default function ConversationList({ conversations, roster, presence, own,
             onClick={() => onSelect(c.id)}
             style={{
               display: 'flex', alignItems: 'center', gap: sp[3], textAlign: 'left', cursor: 'pointer',
-              background: on ? P.navy : 'transparent',
-              border: `1px solid ${on ? P.gold : P.hair}`,
-              borderRadius: radius.sm, padding: '10px 12px', transition: `all 0.14s ${ease}`,
+              background: on ? glass.navActiveFill : 'transparent',
+              border: 'none',
+              boxShadow: on ? glass.navActiveRing : 'none',
+              borderRadius: radius.md, padding: '10px 12px', transition: `all 0.14s ${ease}`,
             }}
           >
             <div style={{ position: 'relative', flexShrink: 0 }}>
               {avatar
-                ? <img src={avatar} alt="" style={{ width: 38, height: 38, borderRadius: '50%', objectFit: 'cover', border: `1px solid ${P.hairStrong}` }} />
+                ? <img src={avatar} alt="" style={{ width: 38, height: 38, borderRadius: '50%', objectFit: 'cover', boxShadow: '0 0 0 1px rgba(255,255,255,0.12)' }} />
                 : <div style={{
                     width: 38, height: 38, borderRadius: '50%',
-                    background: c.is_group ? P.goldWash : P.navy, border: `1px solid ${P.hair}`,
+                    background: c.is_group ? P.goldWash : glass.cardFill,
+                    boxShadow: glass.insetHi,
                     display: 'flex', alignItems: 'center', justifyContent: 'center',
                     fontFamily: mono, fontSize: fs.sm, color: P.gold,
                   }}>{c.is_group ? '⚭' : name.charAt(0).toUpperCase()}</div>}

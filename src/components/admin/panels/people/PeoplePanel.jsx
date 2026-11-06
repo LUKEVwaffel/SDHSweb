@@ -1,6 +1,6 @@
 import { useState, useEffect, useMemo, useRef } from 'react';
 import { supabase as SB } from '../../../../lib/supabaseClient';
-import { P, mono, inter, fs, sp, radius, shadow, ease } from '../../theme';
+import { P, mono, inter, fs, sp, radius, shadow, glass, ease } from '../../theme';
 import { Btn, Card, Label, Input, Select, PanelHeader } from '../../shared/ui';
 import ConsentSection from './ConsentSection';
 import PersonAchievements from './PersonAchievements';
@@ -189,7 +189,11 @@ export default function PeoplePanel({ adminId }) {
       {/* primary view switch — heavier weight (filled pill) than the company
           tabs one level down inside Cadet Database, so the two nav levels
           read as distinct rather than identical Btn rows. */}
-      <div style={{ display: 'inline-flex', gap: 2, padding: 4, background: P.navy, border: `1px solid ${P.hair}`, borderRadius: radius.md, alignSelf: 'flex-start' }}>
+      <div style={{
+        display: 'inline-flex', gap: 2, padding: 4, borderRadius: radius.lg, alignSelf: 'flex-start',
+        background: glass.cardFill, backdropFilter: glass.blur, WebkitBackdropFilter: glass.blur,
+        boxShadow: `${glass.insetHi}, 0 0 0 1px rgba(255,255,255,0.05)`,
+      }}>
         {[
           { id: 'directory', label: 'STAFF / COMMAND' },
           { id: 'consent',   label: 'CADET DATABASE' },
@@ -198,9 +202,9 @@ export default function PeoplePanel({ adminId }) {
           return (
             <button key={v.id} onClick={() => { flushAutosave(); setView(v.id); }} style={{
               fontFamily: mono, fontSize: fs.tiny, letterSpacing: '0.12em', fontWeight: 600,
-              padding: '10px 20px', borderRadius: 6, border: 'none', cursor: 'pointer',
-              background: active ? P.gold : 'transparent', color: active ? P.ink : P.mute,
-              boxShadow: active ? shadow.sm : 'none', transition: `all 0.15s ${ease}`,
+              padding: '10px 20px', borderRadius: radius.sm, border: 'none', cursor: 'pointer',
+              background: active ? glass.goldFillStrong : 'transparent', color: active ? P.ink : P.mute,
+              boxShadow: active ? `${glass.insetHi}, ${shadow.sm}` : 'none', transition: `all 0.15s ${ease}`,
             }}>{v.label}</button>
           );
         })}
@@ -237,7 +241,7 @@ export default function PeoplePanel({ adminId }) {
         <div style={{ display: 'flex', flexDirection: 'column', gap: sp[4] }}>
           {groups.map(([section, items]) => (
             <div key={section}>
-              <div style={{ fontFamily: mono, fontSize: fs.tiny, color: P.gold, letterSpacing: '0.18em', marginBottom: sp[2], display: 'flex', justifyContent: 'space-between', paddingBottom: 5, borderBottom: `1px solid ${P.hair}` }}>
+              <div style={{ fontFamily: mono, fontSize: fs.tiny, color: P.gold, letterSpacing: '0.18em', marginBottom: sp[2], display: 'flex', justifyContent: 'space-between', paddingBottom: 5, borderBottom: '1px solid rgba(255,255,255,0.08)' }}>
                 <span>{SECTION_LABEL[section] || section.toUpperCase()}</span>
                 <span style={{ color: P.mute }}>{items.length}</span>
               </div>
@@ -248,13 +252,16 @@ export default function PeoplePanel({ adminId }) {
                   return (
                   <div key={r.id} style={{
                     display: 'flex', alignItems: 'center', gap: sp[3],
-                    background: editing === r.id ? P.navy : P.deep,
-                    border: `1px solid ${editing === r.id ? P.gold : P.hair}`,
-                    borderRadius: 6, padding: '9px 11px', cursor: 'pointer',
+                    background: editing === r.id ? glass.navActiveFill : glass.cardFill,
+                    backdropFilter: glass.blur, WebkitBackdropFilter: glass.blur,
+                    border: 'none',
+                    boxShadow: editing === r.id ? glass.navActiveRing : `${glass.insetHi}, 0 0 0 1px rgba(255,255,255,0.05)`,
+                    borderRadius: radius.md, padding: '9px 11px', cursor: 'pointer',
+                    transition: `all 0.15s ${ease}`,
                   }} onClick={() => startEdit(r)}>
                     {r.photo_url
-                      ? <img src={r.photo_url} style={{ width: 36, height: 36, objectFit: 'cover', borderRadius: 5 }} alt="" />
-                      : <div style={{ width: 36, height: 36, borderRadius: 5, background: P.navy, border: `1px solid ${P.hair}`, display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: mono, fontSize: fs.sm, color: P.faint }}>{(r.name || '?').charAt(0)}</div>}
+                      ? <img src={r.photo_url} style={{ width: 36, height: 36, objectFit: 'cover', borderRadius: radius.sm }} alt="" />
+                      : <div style={{ width: 36, height: 36, borderRadius: radius.sm, background: glass.cardFill, border: 'none', boxShadow: glass.insetHi, display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: mono, fontSize: fs.sm, color: P.faint }}>{(r.name || '?').charAt(0)}</div>}
                     <div style={{ flex: 1, minWidth: 0 }}>
                       <div style={{ fontFamily: inter, fontSize: fs.sm, color: P.cream, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{r.name}</div>
                       <div style={{ fontFamily: mono, fontSize: fs.tiny, color: P.mute, marginTop: 2 }}>{r.role_short}</div>
@@ -293,7 +300,12 @@ export default function PeoplePanel({ adminId }) {
             {/* form status + school/parent email are edited in Cadet Database
                 → STAFF tab now, same as any other cadet — this tab is bios only. */}
             {form.section !== 'leadership' && (
-            <div style={{ background: P.deep, border: `1px solid ${P.hair}`, padding: '10px 12px', marginBottom: sp[3], display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: sp[2], flexWrap: 'wrap' }}>
+            <div style={{
+              borderRadius: radius.md, background: glass.cardFill,
+              backdropFilter: glass.blur, WebkitBackdropFilter: glass.blur,
+              border: 'none', boxShadow: `${glass.insetHi}, 0 0 0 1px rgba(255,255,255,0.05)`,
+              padding: '10px 12px', marginBottom: sp[3], display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: sp[2], flexWrap: 'wrap',
+            }}>
               <div style={{ fontFamily: mono, fontSize: fs.micro, color: P.mute, lineHeight: 1.6 }}>Consent status + school/parent email now live in Cadet Database → STAFF tab.</div>
               <Btn onClick={() => setView('consent')} variant="ghost" size="sm">GO TO CADET DATABASE →</Btn>
             </div>
