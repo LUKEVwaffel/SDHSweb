@@ -4,7 +4,6 @@ import { supabase as SB } from '../lib/supabaseClient';
 import RaiderCarousel from './RaiderCarousel';
 import RaiderCompetitionResults from './RaiderCompetitionResults';
 import useIsMobile from '../hooks/useIsMobile';
-import { COMP_EVENT_ID, COMP_EVENT_TITLE } from '../lib/raiderCompGallery';
 import { categoryColor, eventOccursOnDate, formatRecurrenceDays, formatEventTime, formatEventTimeRange, teamLabel, DEFAULT_POC } from '../lib/calendar';
 
 // Palette mirrors Rifle.jsx for a consistent specialty-team look. Green is the
@@ -218,12 +217,9 @@ function CommanderCard({ person, onOpen }) {
   );
 }
 
-// ── View Competition card → /raiders/comp ───────────────────────────────────
-// Shown only once a comp has photos or run footage posted (through the
-// RAIDER COMP tab in Dispatch → Photos). Cover frame is the first photo.
+// Permanent season archive entry point, with a hand-picked cover photo.
 function CompCard({ comp, onOpen }) {
   const [hover, setHover] = useState(false);
-  if (!comp || !comp.photoCount) return null;
   return (
     <button
       onClick={onOpen}
@@ -242,23 +238,23 @@ function CompCard({ comp, onOpen }) {
           // COMPETITION GALLERY
         </div>
         <h2 style={{ fontFamily: oswald, fontWeight: 700, fontSize: 34, color: P.cream, letterSpacing: '0.02em', margin: '0 0 10px', lineHeight: 1.1 }}>
-          {COMP_EVENT_TITLE.toUpperCase()}
+          RAIDER PHOTO ARCHIVE
         </h2>
         <p style={{ fontFamily: 'Inter, sans-serif', fontSize: 13, color: P.mute, lineHeight: 1.7, margin: '0 0 20px', maxWidth: 460 }}>
-          Photos and run footage by event: Tire Stacker, Gauntlet, CCR, Obstacle Course, One Rope Bridge, and Highland Games. A few are still being edited; up by Wednesday.
+          Browse every available competition, including past meets and parent photos. Filter by Raider team and event, then use arrows or swipe through full-size photos.
         </p>
         <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
           <span style={{
             background: P.gold, color: P.ink, fontFamily: mono, fontSize: 11, letterSpacing: '0.16em',
             fontWeight: 600, padding: '12px 22px',
-          }}>VIEW COMPETITION →</span>
+          }}>BROWSE ALL PHOTOS →</span>
           <span style={{ fontFamily: mono, fontSize: 9, color: P.gold, opacity: 0.6, letterSpacing: '0.16em' }}>
-            {comp.photoCount} PHOTO{comp.photoCount === 1 ? '' : 'S'}
+            {comp?.photoCount ? `${comp.photoCount.toLocaleString()} PHOTOS` : 'ALL COMPETITIONS'}
           </span>
         </div>
       </div>
       <div style={{ position: 'relative', background: P.navy, minHeight: 200 }}>
-        {comp.cover && (
+        {comp?.cover && (
           <img
             src={comp.cover}
             alt=""
@@ -550,13 +546,10 @@ export default function Raiders() {
   const [comp, setComp] = useState(null); // { photoCount, cover } for the View Competition card
 
   useEffect(() => {
-    // View Competition card — photo count gates whether the card shows. Cover
-    // frame is a fixed hand-picked shot (COMP_CARD_COVER), not the first DB row.
-    // Same filter as the gallery: Luke's own uploads (source='luke'), tagged to
-    // one of the 6 events, not hidden. Parent uploads are excluded here.
+    // Count the entire archive, with the same publication scope as its gallery.
     SB.from('photos').select('id', { count: 'exact', head: true })
-      .eq('event_id', COMP_EVENT_ID).eq('source', 'luke').eq('status', 'live')
-      .not('sub_event_id', 'is', null)
+      .eq('team', 'raiders').eq('status', 'live')
+      .or('source.eq.luke,visibility.eq.public')
       .then(({ count }) => setComp({ photoCount: count || 0, cover: COMP_CARD_COVER }))
       .then(null, () => setComp({ photoCount: 0, cover: COMP_CARD_COVER }));
   }, []);
@@ -630,13 +623,10 @@ export default function Raiders() {
           <RaiderCarousel />
         </div>
 
-        {/* ── View Competition gallery link — surfaced right under the hero so
-            families reach the full Rhea County set fast. ── */}
-        {comp && comp.photoCount > 0 && (
-          <div style={{ marginBottom: 40 }}>
-            <CompCard comp={comp} onOpen={() => navigate('/raiders/comp')} />
-          </div>
-        )}
+        {/* Keep the full archive reachable even while its count is loading. */}
+        <div style={{ marginBottom: 40 }}>
+          <CompCard comp={comp} onOpen={() => navigate('/raiders/comp')} />
+        </div>
 
         {/* ── Required-forms banner: surfaces whichever upcoming raider event
             has a permission slip attached (DB-driven via events_by_calendar,

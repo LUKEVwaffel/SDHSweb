@@ -1,116 +1,42 @@
-import { useState, useEffect, useCallback, useRef } from 'react';
+import { useState, useEffect } from 'react';
 import { supabase as SB } from '../lib/supabaseClient';
-import { COMP_EVENT_ID, COMP_EVENTS, sortSubEvents, compEventMeta } from '../lib/raiderCompGallery';
 
-// Public read model for /raiders/comp. One fetch per eventId - retrospective
-// gallery, no live-event pressure. Defaults to the current comp; pass a past
-// comp's id (see COMP_ARCHIVE) to load its gallery instead.
-//
-// A photo shows here when ALL of:
-//   event_id   = the comp
-//   source     = 'luke'          → only Luke's own uploads
-//   status     = 'live'          → not hidden in /lukepwa
-//   sub_event_id is not null     → tagged to a sub-event
-//
-// Parent uploads (source='parent') are excluded on purpose. `visibility` is
-// NOT filtered - Luke's dump defaults 'staged'; "tagged by Luke" is the
-// intent signal for this permanent gallery.
-//
-// ALL 6 canonical events are always returned, even with zero photos, so the
-// grid can show a "coming soon" state for the ones Luke hasn't posted yet.
-// Extra sub-event buckets (Luke's staging labels) show only once they have
-// photos.
+// Page every record: a season exceeds PostgREST's 1,000-row response cap.
+export async function fetchRaiderArchive(client = SB) {
+  const photos = [];
+  for (let start = 0; ; start += 1000) {
+    const { data, error } = await client.from('photos')
+      .select('id,event_id,photo_url,thumb_url,grid_url,uploader_name,sub_event_id,raider_team,created_at,taken_at,raider_sub_events(name,team)')
+      .eq('team', 'raiders').eq('status', 'live')
+      // Preserve Luke's existing archive scope; parent photos must be published.
+      .or('source.eq.luke,visibility.eq.public')
+      .order('id').range(start, start + 999);
+    if (error) throw error;
+    photos.push(...(data || []));
+    if (!data || data.length < 1000) break;
+  }
+  const { data: events, error } = await client.from('events').select('id,title,date').eq('team', 'raiders');
+  if (error) throw error;
+  photos.sort((a, b) => new Date(a.taken_at || a.created_at) - new Date(b.taken_at || b.created_at) || a.id.localeCompare(b.id));
+  const competitions = [...new Set(photos.map((p) => p.event_id))].map((id) => {
+    const event = events.find((e) => e.id === id);
+    return { id: id || 'general', title: event?.title || 'Other Raider photos', date: event?.date || '', photos: photos.filter((p) => p.event_id === id) };
+  }).sort((a, b) => b.date.localeCompare(a.date));
+  return { photos, competitions };
+}
 
-const slugify = (s) => (s || '').toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
-
-export function useCompGallery(eventId = COMP_EVENT_ID) {
-  const [subEvents, setSubEvents] = useState([]);
-  const [photos, setPhotos] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
-  const alive = useRef(true);
-
-  const load = useCallback(async () => {
-    setLoading(true);
-    const [se, ph] = await Promise.all([
-      SB.from('raider_sub_events').select('*').eq('event_id', eventId),
-      SB.from('photos')
-        .select('id, photo_url, thumb_url, uploader_name, sub_event_id, created_at')
-        .eq('event_id', eventId)
-        .eq('source', 'luke')
-        .eq('status', 'live')
-        .not('sub_event_id', 'is', null)
-        .order('created_at', { ascending: true }),
-    ]);
-    if (!alive.current) return;
-    const firstErr = se.error || ph.error;
-    setError(firstErr ? (firstErr.message || String(firstErr)) : null);
-    setSubEvents(sortSubEvents(se.data || []));
-    setPhotos(ph.data || []);
-    setLoading(false);
-  }, [eventId]);
-
+export function useCompGallery() {
+  const [state, setState] = useState({ photos: [], competitions: [], loading: true, error: null });
+  const [retry, setRetry] = useState(0);
   useEffect(() => {
-    alive.current = true;
-    load();
-    return () => { alive.current = false; };
-  }, [load]);
-
-  const photosFor = (subEventId) => photos.filter((p) => p.sub_event_id === subEventId);
-  const groupOf = (name, blurb, photoList, slug, hasVideo = false) => ({
-    slug,
-    name,
-    blurb: blurb || null,
-    photos: photoList,
-    cover: photoList[0]?.thumb_url || photoList[0]?.photo_url || null,
-    hasContent: photoList.length > 0,
-    hasVideo,
-  });
-
-  // 1. The canonical events, in chronological order - matched to a real
-  //    sub-event row if one exists, otherwise a placeholder with no photos.
-  //    Position = its index in COMP_EVENTS.
-  const matchedIds = new Set();
-  const canonical = COMP_EVENTS.map((ev, i) => {
-    const row = subEvents.find((s) => compEventMeta(s)?.name === ev.name);
-    if (row) matchedIds.add(row.id);
-    return { ...groupOf(ev.name, ev.blurb, row ? photosFor(row.id) : [], ev.key, ev.hasVideo), pos: i };
-  });
-
-  // 2. Any other sub-event bucket (Luke's staging labels) that has photos.
-  //    A name like "Before CCR" / "Pre Tire Stacker" anchors just before the
-  //    canonical event it names; "After …" anchors just after. Anything else
-  //    trails at the end in creation order.
-  const norm = (s) => (s || '').toLowerCase().replace(/[^a-z0-9]+/g, ' ').trim();
-  const ANCHOR_RE = /^(before|pre|after|post)\s+(.+)$/;
-  const eventIndex = (name) => {
-    const meta = compEventMeta({ name });
-    return meta ? COMP_EVENTS.findIndex((e) => e.name === meta.name) : -1;
-  };
-
-  const extras = subEvents
-    .filter((s) => !matchedIds.has(s.id))
-    .map((s, idx) => {
-      const g = groupOf(s.name, compEventMeta(s)?.blurb, photosFor(s.id), slugify(s.name));
-      let pos = 500 + idx;
-      const m = norm(s.name).match(ANCHOR_RE);
-      const ai = m ? eventIndex(m[2]) : -1;
-      if (ai >= 0) pos = ai + (m[1] === 'before' || m[1] === 'pre' ? -0.4 : 0.4);
-      return { ...g, pos };
-    })
-    .filter((g) => g.hasContent);
-
-  const groups = [...canonical, ...extras].sort((a, b) => a.pos - b.pos);
-
-  return {
-    groups,
-    totals: {
-      events: groups.length,
-      withPhotos: groups.filter((g) => g.hasContent).length,
-      photos: photos.length,
-    },
-    loading,
-    error,
-    refresh: load,
-  };
+    let cancelled = false;
+    setState((s) => ({ ...s, loading: true, error: null }));
+    fetchRaiderArchive().then((data) => {
+      if (!cancelled) setState({ ...data, loading: false, error: null });
+    }).catch((error) => {
+      if (!cancelled) setState({ photos: [], competitions: [], loading: false, error: error.message || 'Unable to load photos.' });
+    });
+    return () => { cancelled = true; };
+  }, [retry]);
+  return { ...state, refresh: () => setRetry((n) => n + 1) };
 }
