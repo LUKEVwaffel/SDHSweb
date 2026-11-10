@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, lazy, Suspense } from 'react';
 import { supabase as SB } from '../../../../lib/supabaseClient';
 import { P, mono, sp } from '../../theme';
 import { Btn, Input, Label, PanelHeader } from '../../shared/ui';
@@ -7,8 +7,11 @@ import BallEmailsTab from './BallEmailsTab';
 import BallLabelsTab from './BallLabelsTab';
 import { DRESS_APPROVERS, WESTON } from '../../../../lib/ballApprovers';
 
+const BallPresentationStudio = lazy(() => import('./studio/BallPresentationStudio'));
+
 const TABS = [
   { id: 'overview', label: 'OVERVIEW' },
+  { id: 'studio', label: 'BALL STUDIO' },
   { id: 'labels', label: 'LABELS' },
   { id: 'settings', label: 'SETTINGS' },
   { id: 'emails', label: 'EMAILS' },
@@ -21,8 +24,8 @@ const BUCKET = 'ball-assets';
 // reviewer account provisioning moved to the Portal Access panel (SYSTEM
 // nav) — it covers every non-DISPATCH staff portal in one place now,
 // not just the Ball ones.
-export default function BallPanel() {
-  const [tab, setTab] = useState('overview');
+export default function BallPanel({ adminId }) {
+  const [tab, setTab] = useState(() => new URLSearchParams(window.location.search).get('tab') === 'studio' ? 'studio' : 'overview');
   const [config, setConfig] = useState(null);
   const [gallery, setGallery] = useState([]);
   const [saving, setSaving] = useState(false);
@@ -129,13 +132,14 @@ export default function BallPanel() {
   if (!config) return <div style={{ fontFamily: mono, fontSize: 13, color: P.mute }}>LOADING…</div>;
 
   return (
-    <div style={{ maxWidth: 900 }}>
+    <div style={{ maxWidth: tab === 'studio' ? 'none' : 900 }}>
       <PanelHeader title="MILITARY BALL" sub="Public signup lives at /ball, linked from the main site nav" />
-      <div style={{ display: 'flex', gap: sp[2], marginBottom: sp[4] }}>
+      <div style={{ display: 'flex', flexWrap: 'wrap', gap: sp[2], marginBottom: sp[4] }}>
         {TABS.map((t) => <Btn key={t.id} variant={tab === t.id ? 'gold' : 'ghost'} size="sm" onClick={() => setTab(t.id)}>{t.label}</Btn>)}
       </div>
 
       {tab === 'overview' && <BallOverviewTab />}
+      {tab === 'studio' && <Suspense fallback={<div style={{ color: P.mute }}>Opening Ball Studio…</div>}><BallPresentationStudio adminId={adminId} /></Suspense>}
       {tab === 'labels' && <BallLabelsTab />}
       {tab === 'emails' && <BallEmailsTab />}
 

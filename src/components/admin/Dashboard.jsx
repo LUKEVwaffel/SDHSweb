@@ -166,7 +166,7 @@ export default function Dashboard({ onLogout, adminId, role = 's6' }) {
           {section === 'checkin'  && isLuke && <CheckinPanel />}
           {section === 'opticsurvey' && isLuke && <OpticSurveyPanel />}
           {section === 'feedback' && <EventFeedbackPanel />}
-          {section === 'ball'     && <BallPanel />}
+          {section === 'ball'     && <BallPanel adminId={adminId} />}
           {section === 'ballallergy' && <BallAllergyPanel />}
           {section === 'riflesignups' && <RifleSignupsPanel />}
           {section === 'boards' && <BoardsPanel />}

@@ -1,4 +1,5 @@
-import { useEffect } from 'react';
+import { useEffect, lazy, Suspense } from 'react';
+const BallStudioRemote = lazy(() => import('./components/admin/panels/ball/studio/BallStudioRemote'));
 import { Routes, Route, Navigate, useParams, useLocation } from 'react-router-dom';
 import TopNav from './components/TopNav';
 import Hero from './components/Hero';
@@ -134,6 +135,7 @@ export default function App() {
   // /balltv — hallway-TV promo loop for the Military Ball. Read-only slideshow,
   // no remote; reads ball_config + ball_gallery like /ball.
   if (location.pathname === '/balltv') return <BallTv />;
+  if (location.pathname === '/ballremote') return <Suspense fallback={<div style={{ padding: 24, color: '#e4c17b' }}>Opening Ball Remote…</div>}><BallStudioRemote /></Suspense>;
   // /videotv — hallway-TV loop of the whole Raider film library (muted, loop
   // order set per TV via EDIT LOOP) with the trophy case between every film.
   // Reads raider_videos (same library as /watchzone) + RaiderCompetitionResults' SEASON.
