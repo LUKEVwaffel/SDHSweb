@@ -156,3 +156,9 @@
 .bs-player-position strong {color:#e5c37e;}
 .bs-player-position span {font-size:11px;}
 .bs-player-position select {color:#fff;background:#192c42;padding:6px;border:1px solid #ffffff30;border-radius:4px;}
+
+.bs-player-delete-backdrop {position:absolute;inset:0;z-index:10;display:grid;place-items:center;padding:24px;background:#030911b8;}
+.bs-player-delete {width:min(100%,460px);padding:28px;border:1px solid #ffffff30;border-radius:12px;background:#101e32;color:#fff;box-shadow:0 24px 80px #0006;font:14px/1.5 Inter,sans-serif;}
+.bs-player-delete h2 {margin:0 0 12px;font:500 28px/1.2 Oswald,sans-serif;}
+.bs-player-delete p {overflow-wrap:anywhere;color:#c9d0dc;}
+.bs-player-delete > div {display:flex;gap:12px;justify-content:flex-end;margin-top:24px;}

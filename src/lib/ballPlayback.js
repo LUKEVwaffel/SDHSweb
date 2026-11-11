@@ -54,3 +54,14 @@ export function createCommandReceiver(getTotal, apply) {
     return true;
   };
 }
+
+// Keep preview pointed at a real slide when the editor adds or deletes slides.
+export function reconcilePlaybackSlides(state, slides, loop = false) {
+  const ids=slides.map(s=>s.id);
+  const durations=slides.map(s=>Math.max(1,Math.min(600,Number(s.duration)||8))*1000);
+  if(state.slideIds?.length===ids.length&&ids.every((id,i)=>state.slideIds[i]===id&&state.durations[i]===durations[i])&&state.loop===loop)return state;
+  const currentId=state.slideIds?.[state.index];
+  const retainedIndex=ids.indexOf(currentId);
+  const index=retainedIndex>=0?retainedIndex:Math.min(state.index,slides.length-1);
+  return {...createPlayback(slides.map(s=>s.duration),index,loop),slideIds:ids,blackout:state.blackout,visit:state.visit+1};
+}

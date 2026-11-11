@@ -139,3 +139,14 @@ test('preview arrows move cropped and contained photos in the requested screen d
  assert.ok(nudgePhoto({},slide,'ArrowLeft',bounds,true).focalX>nudgePhoto({},slide,'ArrowLeft',bounds).focalX);
  assert.equal(nudgePhoto({focalX:100},slide,'ArrowLeft',bounds).focalX,100);
 });
+
+import {reconcilePlaybackSlides} from '../src/lib/ballPlayback.js';
+test('deleting the previewed slide selects its successor or the last remaining slide and refreshes timing',()=>{
+ const slides=[{id:'a',duration:4},{id:'b',duration:8},{id:'c',duration:12}];
+ const state={...createPlayback([4,8,12],1),slideIds:['a','b','c'],playing:true};
+ const middle=reconcilePlaybackSlides(state,[slides[0],slides[2]]);
+ assert.equal(middle.index,1);assert.equal(middle.slideIds[middle.index],'c');assert.equal(middle.remaining,12000);assert.equal(middle.playing,false);assert.deepEqual(middle.durations,[4000,12000]);
+ const last=reconcilePlaybackSlides({...state,index:2},slides.slice(0,2));assert.equal(last.index,1);assert.equal(last.slideIds[last.index],'b');
+ const retained=reconcilePlaybackSlides({...state,index:2},slides.slice(1));assert.equal(retained.index,1);assert.equal(retained.slideIds[retained.index],'c');
+ assert.equal(reconcilePlaybackSlides(state,slides),state);
+});
