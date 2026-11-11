@@ -93,3 +93,21 @@ test('saving an existing presentation always advances its revision',async()=>{
  const client={from(){return {update(){return this;},eq(){return this;},async select(){return {data:[{}]};}};}};
  const next=await saveStudioCloud(client,deck,'staff');assert.ok(Date.parse(next)>Date.parse(deck.cloudRevision));
 });
+
+test('photo event filters exclude events with only hidden, pending, video, or missing photos',async()=>{
+ const events=['visible','hidden','pending','video','empty'].map(id=>({id,title:id}));
+ const rows=[{event_id:'visible',status:'live',photo_url:'https://example.com/a.jpg'},{event_id:'hidden',status:'hidden',photo_url:'https://example.com/b.jpg'},{event_id:'pending',status:'live',upload_status:'uploading',photo_url:'https://example.com/c.jpg'},{event_id:'video',status:'live',photo_url:'https://example.com/d.mp4'}].map((p,id)=>({...p,id}));
+ const client={from(table){return {select(){return this;},order(){return this;},async range(){return {data:table==='events'?events:table==='photos'?rows:[]};}};}};
+ const result=await loadStudioPhotos(client);
+ assert.deepEqual(result.events.map(e=>e.id),['visible']);
+ assert.equal(result.photos[0].event,'visible');
+});
+
+test('each photo retains its own position, zoom, fit, and editable event label through save and import',()=>{
+ const deck=makeDeck();deck.slides=[makeSlide('duo',{focalX:30,focalY:70,photos:[{url:'https://example.com/a.jpg',event:'Community service',focalX:12,focalY:82,zoom:1.8,fit:'contain',eventLabel:'Service day · October'},{url:'https://example.com/b.jpg',event:'Raider competition'}]})];
+ const photos=readDeck(JSON.parse(JSON.stringify(deck))).slides[0].photos;
+ assert.equal(photos[0].eventLabel,'Service day · October');assert.equal(photos[0].focalX,12);assert.equal(photos[0].focalY,82);assert.equal(photos[0].zoom,1.8);assert.equal(photos[0].fit,'contain');
+ assert.equal(photos[1].eventLabel,'Raider competition');assert.equal(photos[1].focalX,30);assert.equal(photos[1].focalY,70);
+ deck.slides[0].photos[0].eventLabel='';deck.slides[0].photos[0].zoom=100;
+ const restored=readDeck(deck).slides[0].photos[0];assert.equal(restored.eventLabel,'');assert.equal(restored.zoom,3);
+});

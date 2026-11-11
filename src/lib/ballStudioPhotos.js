@@ -26,5 +26,6 @@ export async function loadStudioPhotos(client) {
     if (result.status === 'rejected') { warnings.push(`${source.label}: ${result.reason.message}`); return []; }
     return result.value.map(p => ({ ...source.normalize(p), id: `${source.table}:${p.id}`, source: source.label, date: p.created_at, event: eventMap[p.event_id]?.title || source.label })).filter(p => p.url && !p.hidden && !/\.(mp4|mov|m4v|webm)(\?|$)/i.test(p.url));
   });
-  return { photos, events, warnings };
+  const photoEventIds = new Set(photos.map(p => p.eventId).filter(Boolean));
+  return { photos, events: events.filter(e => photoEventIds.has(e.id)), warnings };
 }

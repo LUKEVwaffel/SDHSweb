@@ -148,3 +148,6 @@
 .bs-presentation-save-state.is-saved {color:#9bddbc;}
 .bs-saved-search {margin:16px 0;}
 .bs-cloud-deck small {display:block;color:var(--bs-gold);font-size:11px;margin-top:8px;}
+
+.bs-position-preview {max-width:900px;margin:16px auto;}
+.bs-position-controls {display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:16px;margin:20px 0;}
