@@ -34,6 +34,7 @@ export const NAV_GROUPS = [
   {
     heading: 'SCREENS',
     items: [
+      { id: 'presentations', icon: '▥', label: 'Presentations' },
       { id: 'tvremote',    icon: '▥', label: 'TV Remote' },
       { id: 'raidertv',    icon: '▶', label: 'Raider TV' },
       { id: 'photos',      icon: '⊞', label: 'Photos' },

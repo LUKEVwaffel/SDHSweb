@@ -3,7 +3,7 @@ import { createPortal } from 'react-dom';
 import NavIcon from './NavIcon';
 import { groupIcon } from './navItems';
 
-const KEYWORDS = { ball:'reservation guest date payment cancellation dinner', ballallergy:'food dietary', portalaccess:'login credentials staff', advanced:'settings accounts', tvremote:'television emergency broadcast', photos:'optic gallery', people:'roster cadets consent', email:'mail newsletters', boards:'rank promotions', aars:'after action reports' };
+const KEYWORDS = { presentations:'slideshow slides presentation studio photos ball projector', ball:'reservation guest date payment cancellation dinner', ballallergy:'food dietary', portalaccess:'login credentials staff', advanced:'settings accounts', tvremote:'television emergency broadcast', photos:'optic gallery', people:'roster cadets consent', email:'mail newsletters', boards:'rank promotions', aars:'after action reports' };
 export default function ToolSearch({ groups, onNavigate, onClose }) {
   const [query,setQuery] = useState('');
   const [selected,setSelected] = useState(0);

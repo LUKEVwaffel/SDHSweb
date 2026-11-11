@@ -1,10 +1,11 @@
-import { useState } from 'react';
+import { lazy, Suspense, useState } from 'react';
 import { Navigate, useLocation } from 'react-router-dom';
 import { P, inter, sp, ease, glass } from './theme';
 import Sidebar from './nav/Sidebar';
 import { SIDEBAR_CONTENT_OFFSET } from './nav/navItems';
 import TopBar from './nav/TopBar';
 import useViewportBand from '../../hooks/useViewportBand';
+const BallPresentationStudio = lazy(() => import('./panels/ball/studio/BallPresentationStudio'));
 import TicketDeliveryPanel from './panels/TicketDeliveryPanel';
 import EventsPanel from './panels/EventsPanel';
 import AarsPanel from './panels/aars/AarsPanel';
@@ -85,7 +86,7 @@ const LUKE_EMAIL = 'lukevetsch77@gmail.com';
 // a bare /admin hit (Ticket Delivery for S-6, Events for S-5). Sidebar.jsx
 // still pins DISPATCH AI at the top regardless of this array's order.
 const ROLE_SECTIONS = {
-  s6: ['ticketdelivery', 'ai', 'account', 'events', 'people', 'photos', 'questions', 'email', 'media', 'messages', 'advanced', 'tvremote', 'raidertv', 'beta', 'feedback', 'ball', 'ballallergy', 'riflesignups', 'portalaccess', 'halloween', 'poll', 'boards'],
+  s6: ['ticketdelivery', 'presentations', 'ai', 'account', 'events', 'people', 'photos', 'questions', 'email', 'media', 'messages', 'advanced', 'tvremote', 'raidertv', 'beta', 'feedback', 'ball', 'ballallergy', 'riflesignups', 'portalaccess', 'halloween', 'poll', 'boards'],
   s5: ['events', 'ai', 'aars', 'feedback', 'messages', 'account', 'tvremote', 'ballallergy', 'poll'],
   bc: ['tvremote'],
 };
@@ -149,6 +150,7 @@ export default function Dashboard({ onLogout, adminId, role = 's6' }) {
         <div style={{ maxWidth: 1500, width: '100%', margin: '0 auto', ...(section === 'ai' ? { height: '100%', minHeight: 0, display: 'flex', flexDirection: 'column' } : {}) }}>
           {section === 'ai'       && <PausedDispatchAiPanel role={role} />}
           {section === 'ticketdelivery' && <TicketDeliveryPanel />}
+          {section === 'presentations' && <Suspense fallback={<div style={{ color: P.mute }}>Opening presentation studio…</div>}><BallPresentationStudio adminId={adminId} /></Suspense>}
           {section === 'events'   && <EventsPanel adminId={adminId} allowedTeams={allowedTeams} />}
           {section === 'aars'     && <AarsPanel adminId={adminId} readOnly={role !== 's5'} />}
           {section === 'people'   && <PeoplePanel adminId={adminId} />}
