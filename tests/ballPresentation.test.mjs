@@ -127,3 +127,15 @@ test('autosave can retry a failed save without marking edits saved or blocking t
  await assert.rejects(queue.request('deck'),/offline/);assert.equal(deck.cloudSavedVersion,undefined);
  await queue.request('deck');assert.equal(deck.cloudSavedVersion,'v1');assert.equal(attempts,2);
 });
+
+import {nudgePhoto} from '../src/lib/ballPhotoPosition.js';
+test('preview arrows move cropped and contained photos in the requested screen direction',()=>{
+ const bounds={width:160,height:90,naturalWidth:200,naturalHeight:100};const slide={fit:'cover',focalX:50,focalY:50};
+ assert.ok(nudgePhoto({},slide,'ArrowLeft',bounds).focalX>50);
+ assert.ok(nudgePhoto({},slide,'ArrowRight',bounds).focalX<50);
+ assert.ok(nudgePhoto({fit:'contain'},slide,'ArrowDown',bounds).focalY>50);
+ assert.deepEqual(nudgePhoto({},slide,'ArrowUp',bounds),{});
+ assert.ok(nudgePhoto({zoom:1.2},slide,'ArrowUp',bounds).focalY>50);
+ assert.ok(nudgePhoto({},slide,'ArrowLeft',bounds,true).focalX>nudgePhoto({},slide,'ArrowLeft',bounds).focalX);
+ assert.equal(nudgePhoto({focalX:100},slide,'ArrowLeft',bounds).focalX,100);
+});

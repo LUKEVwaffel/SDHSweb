@@ -15,7 +15,7 @@ export default function SlideCanvas({ slide, deck, index = 0, thumbnail = false,
         const x=photo.focalX ?? slide.focalX, y=photo.focalY ?? slide.focalY, zoom=photo.zoom ?? 1;
         const eventLabel=photo.eventLabel ?? photo.event ?? '';
         const src=thumbnail?(photo.thumb||photo.url):photo.url;
-        return <div className={`bs-photo-frame ${onPhotoPosition?'bs-photo-editable':''} ${onPhotoPosition&&selectedPhoto===i?'bs-photo-selected':''}`} data-fit={fit} key={i}
+        return <div className={`bs-photo-frame ${onPhotoPosition?'bs-photo-editable':''} ${onPhotoPosition&&selectedPhoto===i?'bs-photo-selected':''}`} data-fit={fit} data-photo-index={i} key={i}
           onPointerDown={onPhotoPosition ? e=>{
             if(e.button!==0)return;
             const img=e.currentTarget.querySelector('.bs-photo-main');

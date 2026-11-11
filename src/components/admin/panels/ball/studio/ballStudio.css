@@ -151,3 +151,8 @@
 
 .bs-position-preview {max-width:900px;margin:16px auto;}
 .bs-position-controls {display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:16px;margin:20px 0;}
+
+.bs-player-position {position:absolute;top:18px;left:50%;transform:translateX(-50%);z-index:3;display:flex;flex-direction:column;align-items:center;gap:6px;max-width:92vw;padding:14px 20px;border:1px solid #ffffff30;border-radius:10px;background:#0b172bf2;color:#fff;text-align:center;font:13px/1.4 Inter,sans-serif;}
+.bs-player-position strong {color:#e5c37e;}
+.bs-player-position span {font-size:11px;}
+.bs-player-position select {color:#fff;background:#192c42;padding:6px;border:1px solid #ffffff30;border-radius:4px;}
