@@ -52,7 +52,11 @@
 .bs-layout-photo.bs-frame-matte .bs-slide-footer {color:var(--slide-fg);}
 
 .bs-photo-placement {position:absolute;inset:0;}
-.bs-photo-event {position:absolute;z-index:2;left:4%;bottom:5%;max-width:88%;padding:.5cqw .8cqw;background:#000b;color:#fff;font:500 1.35cqw/1.4 Inter,sans-serif;white-space:pre-wrap;overflow-wrap:anywhere;pointer-events:none;}
+.bs-photo-event {position:absolute;z-index:2;left:4%;bottom:5%;max-width:80%;display:flex;align-items:center;gap:1.1cqw;color:#fff;font:500 2.25cqw/1.2 Oswald,sans-serif;letter-spacing:.025em;text-align:left;text-wrap:pretty;white-space:pre-wrap;overflow-wrap:anywhere;text-shadow:0 .12cqw .35cqw #000c,0 .3cqw 1.1cqw #0009;pointer-events:none;}
+.bs-photo-event::before {content:'';flex:0 0 auto;width:.23cqw;height:2.4cqw;background:var(--slide-accent);box-shadow:0 .1cqw .4cqw #0006;}
+.bs-layout-duo .bs-photo-event,.bs-layout-collage .bs-photo-event {font-size:1.65cqw;max-width:90%;gap:.7cqw;}
+.bs-layout-duo .bs-photo-event::before,.bs-layout-collage .bs-photo-event::before {height:1.8cqw;}
+
 .bs-layout-photo .bs-slide-footer {left:auto;gap:2cqw;}
 .bs-positioning .bs-slide-copy,.bs-positioning .bs-slide-shade,.bs-positioning .bs-slide-footer {pointer-events:none;}
 .bs-photo-editable {cursor:grab;touch-action:none;}

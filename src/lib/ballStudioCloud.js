@@ -13,3 +13,24 @@ export async function saveStudioCloud(client, deck, account) {
   if (result.error) throw new Error(`Cloud save failed: ${result.error.message}. Your browser copy is still available.`);
   return updatedAt;
 }
+
+// Serialize writes per presentation and read the latest revision after each write.
+// Edits made during a request remain dirty and are saved by the next request.
+export function createStudioSaveQueue({ getDeck, save, saved }) {
+  const pending = new Map();
+  function request(id) {
+    const previous = pending.get(id) || Promise.resolve();
+    const task = previous.catch(() => {}).then(async () => {
+      const deck = getDeck(id);
+      if (!deck || deck.cloudSavedVersion === deck.updatedAt) return deck?.updatedAt;
+      const revision = await save(deck);
+      saved(id, deck.updatedAt, revision);
+      return deck.updatedAt;
+    });
+    pending.set(id, task);
+    const clear = () => { if (pending.get(id) === task) pending.delete(id); };
+    task.then(clear, clear);
+    return task;
+  }
+  return { request };
+}

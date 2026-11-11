@@ -111,3 +111,19 @@ test('each photo retains its own position, zoom, fit, and editable event label t
  deck.slides[0].photos[0].eventLabel='';deck.slides[0].photos[0].zoom=100;
  const restored=readDeck(deck).slides[0].photos[0];assert.equal(restored.eventLabel,'');assert.equal(restored.zoom,3);
 });
+
+import {createStudioSaveQueue} from '../src/lib/ballStudioCloud.js';
+test('autosave serializes edits during an in-flight save using the latest revision',async()=>{
+ let deck={id:'deck',updatedAt:'v1'};const writes=[];let release;
+ const queue=createStudioSaveQueue({getDeck:()=>deck,save:async snapshot=>{writes.push({...snapshot});if(writes.length===1)await new Promise(resolve=>{release=resolve;});return `r${writes.length}`;},saved:(id,version,revision)=>{deck={...deck,cloudSavedVersion:version,cloudRevision:revision};}});
+ const first=queue.request('deck');await Promise.resolve();await Promise.resolve();
+ deck={...deck,updatedAt:'v2'};const second=queue.request('deck');release();await Promise.all([first,second]);
+ assert.equal(writes.length,2);assert.equal(writes[1].updatedAt,'v2');assert.equal(writes[1].cloudRevision,'r1');assert.equal(deck.cloudSavedVersion,'v2');
+ await queue.request('deck');assert.equal(writes.length,2);
+});
+test('autosave can retry a failed save without marking edits saved or blocking the queue',async()=>{
+ let deck={id:'deck',updatedAt:'v1'};let attempts=0;
+ const queue=createStudioSaveQueue({getDeck:()=>deck,save:async()=>{if(++attempts===1)throw new Error('offline');return 'r1';},saved:(id,version,revision)=>{deck={...deck,cloudSavedVersion:version,cloudRevision:revision};}});
+ await assert.rejects(queue.request('deck'),/offline/);assert.equal(deck.cloudSavedVersion,undefined);
+ await queue.request('deck');assert.equal(deck.cloudSavedVersion,'v1');assert.equal(attempts,2);
+});

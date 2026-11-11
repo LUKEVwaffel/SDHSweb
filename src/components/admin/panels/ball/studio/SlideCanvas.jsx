@@ -39,7 +39,6 @@ export default function SlideCanvas({ slide, deck, index = 0, thumbnail = false,
         </div>;
       })}
     </div>}
-    {slide.layout === 'photo' && slide.photos.length > 0 && <div className="bs-slide-shade" style={{ opacity: slide.overlay / 100 }} />}
     <div className="bs-slide-copy">
       {slide.eyebrow && <div className="bs-slide-eyebrow">{slide.eyebrow}</div>}
       {slide.title && <div className="bs-slide-title">{slide.layout === 'quote' && <span className="bs-quote-mark">“</span>}{slide.title}</div>}
