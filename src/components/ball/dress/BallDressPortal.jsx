@@ -382,6 +382,9 @@ function DressRow({ x, busy, onToggle, state }) {
         {x.kind === 'guest' && x.hostName && (
           <div className="bp-meta">Guest of {x.hostName}</div>
         )}
+        {x.kind === 'guest' && x.guest_company && (
+          <div className="bp-meta">{x.guest_let_level ? `LET ${x.guest_let_level} · ` : ''}{x.guest_company.toUpperCase()} Company · cadet guest</div>
+        )}
         {x.kind === 'vip' && (
           <div className="bp-meta">{x.role === 'past_king_queen' ? 'Past King/Queen' : 'Visiting XO/BC/CSM'} · {x.home_school}</div>
         )}

@@ -13,7 +13,7 @@ export function buildDressQueue(cadets, guests, vips, vipDates) {
     })),
     ...guests.map((g) => {
       const host = hosts.get(g.signup_id);
-      return { ...g, kind: 'guest', company: companyKey(host?.cadet_company), hostName: host?.cadet_name || '' };
+      return { ...g, kind: 'guest', company: companyKey(g.guest_company) || (g.guest_is_cadet ? '' : companyKey(host?.cadet_company)), hostName: host?.cadet_name || '' };
     }),
     ...vips.map((v) => ({ ...v, kind: 'vip', company: 'vip' })),
     ...vipDates.map((d) => ({ ...d, kind: 'vipdate', company: 'vip' })),

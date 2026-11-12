@@ -1063,6 +1063,7 @@ function LookupRow({ r, guest, ticket, onOpen, tone, selected, disabled }) {
           LET {r.cadet_let_level || "--"} ·{" "}
           {(r.cadet_company || "").toUpperCase()}
           {guest?.name ? ` · guest ${guest.name}` : ""}
+          {guest?.guest_company ? ` · ${guest.guest_company.toUpperCase()} Company` : ""}
         </div>
       </div>
       <div className="bo-row-status">
@@ -1184,6 +1185,11 @@ function PersonDetail(
           <p className="bo-guest-name">
             With {guest.name} <span>{guest.guest_type}</span>
           </p>
+        )}
+        {guest?.guest_company && (
+          <div className="bp-meta">
+            {guest.name}: {guest.guest_let_level ? `LET ${guest.guest_let_level} · ` : ""}{guest.guest_company.toUpperCase()} Company · cadet guest
+          </div>
         )}
         <div className="bp-meta" style={{ marginTop: 4 }}>
           LET {r.cadet_let_level || "--"} ·{" "}
