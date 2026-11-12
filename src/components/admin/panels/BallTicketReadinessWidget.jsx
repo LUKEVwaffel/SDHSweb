@@ -4,6 +4,7 @@ import { getBallTicketReadinessIssues, isBallLabelEligible } from '../../../lib/
 import {invokeError} from '../../../lib/supabaseFnError';
 import {readBallLiveSnapshot,readBallLabelBatch} from '../../../lib/ballLiveSnapshot';
 import { AVERY_5160, printBallEnvelopeLabels, printBallEnvelopeSeals } from '../../../lib/ballLabelPrint';
+import BallLabelQueue from './BallLabelQueue';
 import { P, mono, oswald, inter, radius } from '../theme';
 
 const collator = new Intl.Collator(undefined, { sensitivity: 'base', numeric: true });
@@ -42,6 +43,8 @@ export default function BallTicketReadinessWidget() {
   const [busy, setBusy] = useState('');
   const [company, setCompany] = useState('all');
   const [labelIndex, setLabelIndex] = useState(initialLabelIndex);
+  const [labelQueue,setLabelQueue]=useState([]);
+  function toggleQueued(record){setLabelQueue(items=>items.some(item=>item.id===record.host.id)?items.filter(item=>item.id!==record.host.id):[...items,{id:record.host.id,name:record.displayNames}]);}
   const [showNotReady, setShowNotReady] = useState(false);
 
   const load = useCallback(async () => {
@@ -246,6 +249,7 @@ export default function BallTicketReadinessWidget() {
       <div style={{ ...muted, marginBottom: 10 }}>Printing labels never marks tickets delivered. Use the checkbox after handing tickets to the pickup person; revoke a delivery if that record needs to be cleared.</div>
       <p style={muted}>Checks live records every 15 seconds · Last verified {checkedAt?new Date(checkedAt).toLocaleTimeString():'not yet'}</p>
       {error && <div role="alert" style={{ color: '#ff9b8f', fontFamily: mono, fontSize: 11, margin: '10px 0' }}>{error}</div>}
+      {labelQueue.length>0&&<BallLabelQueue items={labelQueue} disabled={!!busy||refreshing||!!error} onRemove={id=>setLabelQueue(items=>items.filter(item=>item.id!==id))} onClear={()=>setLabelQueue([])}/>}
       <div style={{ margin: '12px 0', borderTop: '1px solid rgba(255,255,255,0.08)', borderBottom: '1px solid rgba(255,255,255,0.08)' }}>
         <button type="button" aria-expanded={showNotReady} onClick={() => setShowNotReady(value => !value)} style={{ display: 'flex', alignItems: 'center', gap: 10, width: '100%', padding: '11px 4px', border: 0, background: 'transparent', color: P.cream, textAlign: 'left', cursor: 'pointer' }}>
           <span aria-hidden="true" style={{ color: blockedVisible.length ? P.gold : P.green }}>{showNotReady ? '⌄' : '›'}</span>
@@ -287,7 +291,7 @@ export default function BallTicketReadinessWidget() {
                     <span style={{ display: 'block', color: P.faint, fontFamily: inter, fontSize: 10, marginTop: 3 }}>Ticket pickup: <b style={{ color: P.mute, fontWeight: 500 }}>{delivered ? record.distribution?.recipient_name || record.name : record.name}</b></span>
                     {delivered && <span style={{ display: 'block', color: P.faint, fontFamily: mono, fontSize: 9, marginTop: 3 }}>Delivered{record.distribution?.distributed_at ? ` · ${new Date(record.distribution.distributed_at).toLocaleDateString()}` : ''}</span>}
                   </span>
-                  <button type="button" disabled={!!busy||refreshing||!!error} onClick={()=>printLabels(false,record)} aria-label={`${delivered?'Reprint':'Print'} one label for ${record.displayNames}`} style={{...buttonStyle,minHeight:40}}>{delivered?'Reprint one label':'Print one label'}</button>
+                  <button type="button" disabled={!!busy||refreshing||!!error} onClick={()=>toggleQueued(record)} aria-pressed={labelQueue.some(item=>item.id===record.host.id)} aria-label={`Queue label for ${record.displayNames}`} style={{...buttonStyle,minHeight:40,color:labelQueue.some(item=>item.id===record.host.id)?P.gold:P.cream}}>{labelQueue.some(item=>item.id===record.host.id)?'Queued ✓':'Print on next sheet'}</button>
                   <span style={{ ...statusPill(delivered), flex: '0 0 auto' }}>{delivered ? 'DELIVERED' : 'READY'}</span>
                   {delivered && <button type="button" disabled={!!busy||refreshing||!!error} onClick={() => { if (window.confirm(`Revoke the delivered status for ${record.displayNames}?`)) markDistributed(record, false); }} style={{ ...buttonStyle, padding: '6px 8px', color: P.mute, opacity: busy ? 0.55 : 1, cursor: busy ? 'wait' : 'pointer' }}>Revoke</button>}
                 </div>;
