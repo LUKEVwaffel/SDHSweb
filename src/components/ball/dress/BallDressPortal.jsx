@@ -4,6 +4,7 @@ import { supabase as SB } from '../../../lib/supabaseClient';
 import PortalMovedNotice from '../../portal/PortalMovedNotice';
 import { isPortalMoveNoticeActive } from '../../portal/portalMoveConfig';
 import { ERROR_CODES, reportError } from '../../../lib/errorCodes';
+import { buildDressQueue, groupDressQueue } from '../../../lib/ballDressQueue';
 import '../../review/review.css';
 import '../portal.css';
 
@@ -61,7 +62,7 @@ export default function BallDressPortal() {
 
   const loadAll = useCallback(async () => {
     const [{ data: c, error: cErr }, { data: g, error: gErr }, { data: v, error: vErr }, { data: vd, error: vdErr }] = await Promise.all([
-      SB.from('ball_signups_dress_view').select('*').eq('cadet_gender', 'female'),
+      SB.from('ball_signups_dress_view').select('*'),
       SB.from('ball_guests_dress_view').select('*').eq('gender', 'female'),
       SB.from('ball_vip_signups_dress_view').select('*').eq('gender', 'female'),
       SB.from('ball_vip_dates_dress_view').select('*').eq('gender', 'female'),
@@ -186,14 +187,9 @@ export default function BallDressPortal() {
   }
 
   const { pending, approved, total } = useMemo(() => {
-    const items = [
-      ...cadets.map((c) => ({ ...c, kind: 'cadet', name: c.cadet_name })),
-      ...guests.map((g) => ({ ...g, kind: 'guest' })),
-      ...vips.map((v) => ({ ...v, kind: 'vip' })),
-      ...vipDates.map((d) => ({ ...d, kind: 'vipdate' })),
-    ];
+    const items = buildDressQueue(cadets, guests, vips, vipDates);
     const term = q.trim().toLowerCase();
-    const v = term ? items.filter((x) => (x.name || '').toLowerCase().includes(term)) : items;
+    const v = term ? items.filter((x) => [x.name, x.hostName, x.company].some((value) => (value || '').toLowerCase().includes(term))) : items;
     const byName = (a, b) => (a.name || '').localeCompare(b.name || '');
     return {
       pending: v.filter((x) => !x.dress_approved).sort(byName),
@@ -291,11 +287,13 @@ export default function BallDressPortal() {
       </div>
 
       {total > 6 && (
-        <input className="bp-search" placeholder="Search by name…" value={q} onChange={(e) => setQ(e.target.value)} />
+        <input className="bp-search" aria-label="Search by name, host, or company" placeholder="Search by name, host, or company…" value={q} onChange={(e) => setQ(e.target.value)} />
       )}
 
       {total === 0 ? (
         <div className="bp-empty">No one needs dress approval yet.</div>
+      ) : !pending.length && !approved.length ? (
+        <div className="bp-empty">No dress approvals match your search.</div>
       ) : (
         <>
           <ApprovedSection
@@ -306,7 +304,7 @@ export default function BallDressPortal() {
             onToggleRow={toggle}
           />
           <Section title={`To approve · ${pending.length}`} hide={!pending.length} action={pending.length > 1 ? { label: bulkBusy ? 'Approving…' : 'Approve all', onClick: approveAllPending, disabled: bulkBusy } : null}>
-            {pending.map((x) => <DressRow key={`${x.kind}-${x.id}`} x={x} busy={busyId === x.id} onToggle={toggle} state="alert" />)}
+            <CompanyGroups items={pending} busyId={busyId} onToggle={toggle} state="alert" />
           </Section>
         </>
       )}
@@ -335,18 +333,25 @@ function ApprovedSection({ approved, open, onToggleOpen, busyId, onToggleRow }) 
   if (!approved.length) return null;
   return (
     <div className="bp-section">
-      <button type="button" className="bp-section-head bp-section-head-btn is-done" onClick={onToggleOpen}>
+      <button type="button" className="bp-section-head bp-section-head-btn is-done" aria-expanded={open} onClick={onToggleOpen}>
         <span>✓ Approved · {approved.length}</span>
         <span className="bp-chevron">{open ? '▲ hide' : '▼ view all'}</span>
       </button>
-      {open && approved.map((x) => (
-        <DressRow key={`${x.kind}-${x.id}`} x={x} busy={busyId === x.id} onToggle={onToggleRow} state="done" />
-      ))}
+      {open && <CompanyGroups items={approved} busyId={busyId} onToggle={onToggleRow} state="done" />}
     </div>
   );
 }
 
 const KIND_TAG = { cadet: 'cadet', guest: 'guest', vip: 'vip', vipdate: 'vip date' };
+
+function CompanyGroups({ items, busyId, onToggle, state }) {
+  return groupDressQueue(items).map((group) => (
+    <section className="bp-dress-company" key={group.key} aria-label={group.label}>
+      <h2 className="bp-dress-company-title">{group.label} <span>{group.items.length}</span></h2>
+      {group.items.map((x) => <DressRow key={`${x.kind}-${x.id}`} x={x} busy={busyId === x.id} onToggle={onToggle} state={state} />)}
+    </section>
+  ));
+}
 
 function DressRow({ x, busy, onToggle, state }) {
   const [showPhone, setShowPhone] = useState(false);
@@ -373,6 +378,9 @@ function DressRow({ x, busy, onToggle, state }) {
         )}
         {x.kind === 'cadet' && (
           <div className="bp-meta">LET {x.cadet_let_level || '--'} · {(x.cadet_company || '').toUpperCase()}</div>
+        )}
+        {x.kind === 'guest' && x.hostName && (
+          <div className="bp-meta">Guest of {x.hostName}</div>
         )}
         {x.kind === 'vip' && (
           <div className="bp-meta">{x.role === 'past_king_queen' ? 'Past King/Queen' : 'Visiting XO/BC/CSM'} · {x.home_school}</div>
