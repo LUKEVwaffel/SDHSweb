@@ -49,6 +49,7 @@ import CongratsPopup from './components/CongratsPopup';
 // up top. Restore this import + the /vote route below to bring it back.
 // import CompPhotoVote from './components/CompPhotoVote';
 import EventFeedbackForm from './components/EventFeedbackForm';
+import BallFeedbackForm from './components/ball/BallFeedbackForm';
 import EventFeedbackPicker from './components/EventFeedbackPicker';
 import OpticSurvey from './components/OpticSurvey';
 import HalloweenMoviePoll from './components/HalloweenMoviePoll';
@@ -149,6 +150,7 @@ export default function App() {
   if (location.pathname === '/blooddrive') return <BloodDrive />;
   // /lukescience: Luke's case that fall starts October 1. Static page.
   if (location.pathname === '/lukescience') return <LukeScience />;
+  if (location.pathname === '/ballfeedback' || location.pathname === '/ballfeedback/') return <BallFeedbackForm />;
   if (location.pathname === '/feedback') return <EventFeedbackPicker />;
   if (location.pathname.startsWith('/feedback/')) return <EventFeedbackForm />;
   // "Picture of the Comp" vote taken down 2026-09-08 — restore CompPhotoVote to bring it back.

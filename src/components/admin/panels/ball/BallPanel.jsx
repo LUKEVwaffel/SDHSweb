@@ -5,6 +5,7 @@ import { Btn, Input, Label, PanelHeader } from '../../shared/ui';
 import BallOverviewTab from './BallOverviewTab';
 import BallEmailsTab from './BallEmailsTab';
 import BallLabelsTab from './BallLabelsTab';
+import BallFeedbackTab from './BallFeedbackTab';
 import { DRESS_APPROVERS, WESTON } from '../../../../lib/ballApprovers';
 
 const BallPresentationStudio = lazy(() => import('./studio/BallPresentationStudio'));
@@ -13,6 +14,7 @@ const TABS = [
   { id: 'overview', label: 'OVERVIEW' },
   { id: 'studio', label: 'BALL STUDIO' },
   { id: 'labels', label: 'LABELS' },
+  { id: 'feedback', label: 'FEEDBACK' },
   { id: 'settings', label: 'SETTINGS' },
   { id: 'emails', label: 'EMAILS' },
 ];
@@ -141,6 +143,7 @@ export default function BallPanel({ adminId }) {
       {tab === 'overview' && <BallOverviewTab />}
       {tab === 'studio' && <Suspense fallback={<div style={{ color: P.mute }}>Opening Ball Studio…</div>}><BallPresentationStudio adminId={adminId} /></Suspense>}
       {tab === 'labels' && <BallLabelsTab />}
+      {tab === 'feedback' && <BallFeedbackTab />}
       {tab === 'emails' && <BallEmailsTab />}
 
       {tab === 'settings' && (
