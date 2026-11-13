@@ -46,7 +46,7 @@ function Sheet({ r }) {
           {CATEGORIES.map((c) => (
             <tr key={c.key}>
               <td>{c.label}{c.key === 'score_facing' && <><br />(Left, Right, About)</>}</td>
-              <td>{decision === 'absent' ? '—' : (r[c.key] ?? '—')} / 3</td>
+              <td>{decision === 'absent' ? '—' : (r[c.key] ?? '—')} / {c.max}</td>
             </tr>
           ))}
           <tr className="tb-print-total"><td>Total Points</td><td>{decision === 'absent' ? '—' : r.total} / {MAX_TOTAL}</td></tr>

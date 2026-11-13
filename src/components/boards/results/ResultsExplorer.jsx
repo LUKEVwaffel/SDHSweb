@@ -58,7 +58,7 @@ function Insights({ rows }) {
             <div key={c.key} style={{ display: 'grid', gridTemplateColumns: '130px 1fr 34px', gap: 10, alignItems: 'center', margin: '6px 0', fontSize: 12.5 }}>
               <span style={{ color: 'var(--mute)' }}>{c.label}</span>
               <div style={{ height: 7, borderRadius: 99, background: 'rgba(255,255,255,0.06)', overflow: 'hidden' }}>
-                <div style={{ width: `${(a / 3) * 100}%`, height: '100%', background: 'linear-gradient(90deg, var(--gold), var(--gold-hi))', transition: 'width 700ms var(--ease)' }} />
+                <div style={{ width: `${(a / c.max) * 100}%`, height: '100%', background: 'linear-gradient(90deg, var(--gold), var(--gold-hi))', transition: 'width 700ms var(--ease)' }} />
               </div>
               <span className="tb-mono" style={{ textAlign: 'right' }}>{a.toFixed(1)}</span>
             </div>
@@ -217,7 +217,7 @@ export default function ResultsExplorer({ initialQuarterId = null }) {
           <div className="tb-table-wrap" style={{ margin: '16px 0' }}>
             <table className="tb-table">
               <tbody>
-                {CATEGORIES.map((c) => <tr key={c.key}><td>{c.label}</td><td className="num"><span className="tb-pip" data-v={detail[c.key]}>{detail[c.key] ?? '—'}</span> / 3</td></tr>)}
+                {CATEGORIES.map((c) => <tr key={c.key}><td>{c.label}</td><td className="num"><span className="tb-pip" data-v={detail[c.key]}>{detail[c.key] ?? '—'}</span> / {c.max}</td></tr>)}
                 <tr><td><b>Total</b></td><td className="total">{detail.decision === 'absent' ? 'Absent' : `${detail.total} / ${MAX_TOTAL}`}</td></tr>
               </tbody>
             </table>

@@ -5,7 +5,7 @@ import { toCsv } from './csv.js';
 
 const row = {
   quarter_label: '2026-27 Q1', company: 'alpha', cadet_name: 'Avery Adams', let_level: '1', grade: '9',
-  rank_before: 'PVT', score_facing: 3, score_creed: 3, score_uniform: 2, score_jrotc: 3, score_class: 3, total: 14,
+  rank_before: 'PVT', score_address: 1, score_facing: 3, score_creed: 1, score_uniform: 9, score_jrotc: 3, score_class: 3, total: 20,
   decision: 'promote', promote_to: 'PV2', final_decision: 'promote', final_promote_to: 'PV2',
   comment: 'Sharp, "squared away", ready', sig_co_name: 'Cpt X',
 };
@@ -28,5 +28,5 @@ test('neutralizes spreadsheet formulas', () => {
 
 test('absent rows leave scores blank', () => {
   const line = toCsv([{ ...row, decision: 'absent', final_decision: 'absent' }]).split('\r\n')[1];
-  assert.match(line, /PVT,,,,,,,Absent/);
+  assert.match(line, /PVT,,,,,,,,Absent/);
 });

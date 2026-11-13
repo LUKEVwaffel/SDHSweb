@@ -2,6 +2,7 @@ import { useState } from 'react';
 import ResultsExplorer from '../../../boards/results/ResultsExplorer';
 import SaiConsole from '../../../boards/sai/SaiConsole';
 import BoardAccountsTab from './BoardAccountsTab';
+import BoardQuestionsTab from './BoardQuestionsTab';
 import '../../../boards/boards.css';
 
 // DISPATCH → Promotion Boards (S-6). Results + export, quarter open/close,
@@ -10,6 +11,7 @@ import '../../../boards/boards.css';
 const TABS = [
   { id: 'results', label: 'Results & export' },
   { id: 'quarters', label: 'Quarters & companies' },
+  { id: 'questions', label: 'Questions & answers' },
   { id: 'accounts', label: 'Board accounts' },
 ];
 
@@ -23,7 +25,7 @@ export default function BoardsPanel() {
           <h1 className="tb-h1">Promotion boards</h1>
           <p className="tb-sub">Company boards run at <b className="tb-mono">/boards</b>. Chief signs off there too. Everything is visible here.</p>
         </div>
-        <a className="tb-btn" href="/boards" target="_blank" rel="noopener noreferrer">Open /boards ↗</a>
+        <a className="tb-btn tb-btn--gold" href="/boards/meeting" target="_blank" rel="noopener noreferrer">Open meeting controls ↗</a>
       </div>
       <div className="tb-tabs" role="tablist">
         {TABS.map((t) => (
@@ -32,6 +34,7 @@ export default function BoardsPanel() {
       </div>
       {tab === 'results' && <ResultsExplorer />}
       {tab === 'quarters' && <div style={{ marginTop: -24 }}><SaiConsole readOnly /></div>}
+      {tab === 'questions' && <BoardQuestionsTab />}
       {tab === 'accounts' && <BoardAccountsTab />}
     </div>
   );

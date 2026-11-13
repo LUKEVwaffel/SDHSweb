@@ -2,6 +2,8 @@ import { useCallback, useEffect, useState } from 'react';
 import { boardApi, boardApiReady, isSandbox, pinErrorText } from './boardApi';
 import SandboxBar from './SandboxBar';
 import BoardLogin from './BoardLogin';
+import MeetingApp from './meeting/MeetingApp';
+import BoardGuide from './BoardGuide';
 import CompanyBoard from './company/CompanyBoard';
 import SaiConsole from './sai/SaiConsole';
 import ResultsExplorer from './results/ResultsExplorer';
@@ -62,6 +64,12 @@ function ChangePin({ onClose }) {
 }
 
 export default function BoardsApp() {
+  if (['/boards/meeting','/boards/practice'].includes(window.location.pathname.replace(/\/$/,''))) return <MeetingApp />;
+  return <LiveBoardsApp />;
+}
+
+function LiveBoardsApp() {
+  const [guideOpen, setGuideOpen] = useState(false);
   const [phase, setPhase] = useState('checking');
   const [me, setMe] = useState(null);
   const [error, setError] = useState('');
@@ -113,13 +121,15 @@ export default function BoardsApp() {
         <div className="tb-brand"><b>Trojan Battalion</b><span>Promotion boards</span></div>
         <div className="tb-top-spacer" />
         <div className="tb-whoami"><b>{me.display_name}</b><span>{roleLine(me)}</span></div>
+        <button type="button" className="tb-btn tb-btn--sm" onClick={() => setGuideOpen((v) => !v)}>{guideOpen ? 'Back to boards' : 'Leadership guide'}</button>
         {!me.is_s6 && <button type="button" className="tb-btn tb-btn--ghost tb-btn--sm" onClick={() => setPinOpen(true)}>PIN</button>}
         <button type="button" className="tb-btn tb-btn--sm" onClick={signOut}>Sign out</button>
       </header>
 
-      {isSeat && <CompanyBoard me={me} />}
-      {me.board_role === 'sai' && <SaiConsole />}
-      {me.board_role === 'viewer' && (
+      {guideOpen && <BoardGuide />}
+      {!guideOpen && isSeat && <CompanyBoard me={me} />}
+      {!guideOpen && me.board_role === 'sai' && <SaiConsole />}
+      {!guideOpen && me.board_role === 'viewer' && (
         <div className="tb-shell">
           <div className="tb-hero"><div><div className="tb-eyebrow">Battalion</div><h1 className="tb-h1">Board results</h1><p className="tb-sub">Filter any way you need, then export exactly what you see.</p></div></div>
           <ResultsExplorer />

@@ -1,5 +1,7 @@
 -- ============================================================================
 -- COMPANY PROMOTION BOARDS — digital replacement for the paper board sheet.
+-- BOOTSTRAP ONLY: then apply BOARD_RELIABILITY.sql and BOARD_QUESTIONS_SEED.sql.
+-- Never reapply this file alone over the v2 scoring functions.
 -- Run in the Supabase SQL editor (project bjgyvmdzcymruunzavni). Idempotent.
 -- Depends on: cadet_consent.sql (+ grade_let), admin_roles.sql (is_s6()),
 -- portal_hub.sql (my_portals()).

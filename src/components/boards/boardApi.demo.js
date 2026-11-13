@@ -4,6 +4,7 @@
 // boarding as a company then switching to the SAI shows the same sheets.
 // Every signature PIN is 1234. Names are fictional.
 import { totalScore, promotionEligibility, normalizeLet } from '../../lib/boardRules';
+import questionBank from './questionBank.json';
 import { STORE_KEY } from './sandboxConfig';
 
 const FIRST = ['Avery', 'Jordan', 'Riley', 'Casey', 'Morgan', 'Quinn', 'Rowan', 'Skyler', 'Emerson', 'Hayden', 'Reese', 'Parker', 'Logan', 'Sawyer', 'Drew', 'Blake', 'Kendall', 'Finley'];
@@ -67,7 +68,7 @@ export function createDemoApi(roleParam) {
     db.sessions.push(s);
     db.roster.filter((c) => c.company === company && !c.is_board_seat).slice(0, count).forEach((c, i) => {
       const v = (n) => [3, 2, 3, 1, 2, 3, 0, 2][(i + n) % 8];
-      const scores = { score_facing: v(0), score_creed: v(1), score_uniform: v(2), score_jrotc: v(3), score_class: v(4) };
+      const scores = { score_facing: v(0), score_address: 1, score_creed: 1, score_uniform: 9, score_jrotc: v(3), score_class: v(4) };
       const rank = c.cadet_rank ?? 'PVT';
       const elig = promotionEligibility({ scores, currentRank: rank, letLevel: c.let_level });
       const ladder = { PVT: 'PV2', PV2: 'PFC', PFC: 'CPL', CPL: 'SGT', SGT: 'SSG', SSG: 'SFC', SFC: 'MSG' };
@@ -114,6 +115,8 @@ export function createDemoApi(roleParam) {
     signIn: () => Promise.resolve(),
     signOut: () => { window.location.href = '/boards/sandbox'; return Promise.resolve(); },
     session: () => Promise.resolve({ demo: true }),
+    questions: (letLevel) => delay(questionBank.filter((q) => q.let_level === letLevel)),
+    saveQuestion: () => delay(null),
     whoami: () => delay([{ ...me, is_s6: role === 'viewer' }]),
     roster: (company) => delay(db.roster.filter((c) => c.company === company)),
     setRank: (id, rank) => { db.roster.find((c) => c.id === id).cadet_rank = rank; return delay(null); },
@@ -123,8 +126,8 @@ export function createDemoApi(roleParam) {
       if (p.rank_before) cadet.cadet_rank = p.rank_before;
       const s = openSession(cadet.company);
       let row = p.id ? db.sheets.find((x) => x.id === p.id) : null;
-      if (!row) { row = { id: uid(), quarter_id: db.quarter.id, session_id: s.id, cadet_id: cadet.id, cadet_name: cadet.name, company: cadet.company, let_level: String(normalizeLet(cadet.let_level)), grade: cadet.grade, created_at: now(), locked: false }; db.sheets.push(row); }
-      Object.assign(row, { ...p, id: row.id, total: totalScore(p), rank_before: p.rank_before ?? row.rank_before, completed_at: p.status === 'complete' ? now() : null });
+      if (!row) { row = { id: p.id ?? uid(), quarter_id: db.quarter.id, session_id: s.id, cadet_id: cadet.id, cadet_name: cadet.name, company: cadet.company, let_level: String(normalizeLet(cadet.let_level)), grade: cadet.grade, created_at: now(), locked: false }; db.sheets.push(row); }
+      Object.assign(row, { ...p, id: row.id, updated_at: now(), total: totalScore(p), rank_before: p.rank_before ?? row.rank_before, completed_at: p.status === 'complete' ? now() : null });
       return delay(row);
     },
     discardSheet: (id) => { db.sheets = db.sheets.filter((s) => s.id !== id); return delay(null); },

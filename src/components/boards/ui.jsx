@@ -13,33 +13,34 @@ const PIN_LENGTH = 4;
 export function PinPad({ onComplete, busy = false, resetKey = 0, error = '' }) {
   const [digits, setDigits] = useState('');
   const [shake, setShake] = useState(false);
-
-  useEffect(() => { setDigits(''); }, [resetKey]);
+  const digitsRef = useRef('');
+  const submitTimer = useRef(null);
+  const onCompleteRef = useRef(onComplete);
+  onCompleteRef.current = onComplete;
+  function cancelPending() { clearTimeout(submitTimer.current); submitTimer.current = null; }
+  function clear() { if (busy) return; cancelPending(); digitsRef.current = ''; setDigits(''); }
+  useEffect(() => { cancelPending(); digitsRef.current = ''; setDigits(''); }, [resetKey]);
+  useEffect(() => () => cancelPending(), []);
   useEffect(() => {
     if (!error) return undefined;
     setShake(true);
     const t = setTimeout(() => setShake(false), 420);
     return () => clearTimeout(t);
   }, [error, resetKey]);
-
-  // Side effect (onComplete) stays OUT of the state updater — StrictMode
-  // double-invokes updaters, which would submit the PIN twice.
   function press(d) {
-    if (busy || digits.length >= PIN_LENGTH) return;
-    const next = digits + d;
-    setDigits(next);
-    if (next.length === PIN_LENGTH) setTimeout(() => onComplete(next), 90);
+    if (busy || digitsRef.current.length >= PIN_LENGTH) return;
+    const next = digitsRef.current + d;
+    digitsRef.current = next; setDigits(next);
+    if (next.length === PIN_LENGTH) submitTimer.current = setTimeout(() => { submitTimer.current = null; onCompleteRef.current(next); }, 90);
   }
-  const back = () => !busy && setDigits((cur) => cur.slice(0, -1));
-
-  // Typing digits works too (board laptop keyboards).
-  const pressRef = useRef(press);
-  pressRef.current = press;
+  function back() { if (busy) return; cancelPending(); const next = digitsRef.current.slice(0, -1); digitsRef.current = next; setDigits(next); }
+  const actions = useRef({ press, back });
+  actions.current = { press, back };
   useEffect(() => {
     function onKey(e) {
-      if (e.target instanceof HTMLInputElement || e.target instanceof HTMLTextAreaElement) return;
-      if (/^\d$/.test(e.key)) pressRef.current(e.key);
-      else if (e.key === 'Backspace') setDigits((cur) => cur.slice(0, -1));
+      if (e.defaultPrevented || e.target instanceof HTMLInputElement || e.target instanceof HTMLTextAreaElement || e.target instanceof HTMLSelectElement) return;
+      if (/^\d$/.test(e.key)) { e.preventDefault(); actions.current.press(e.key); }
+      else if (e.key === 'Backspace') { e.preventDefault(); actions.current.back(); }
     }
     window.addEventListener('keydown', onKey);
     return () => window.removeEventListener('keydown', onKey);
@@ -56,7 +57,7 @@ export function PinPad({ onComplete, busy = false, resetKey = 0, error = '' }) {
         {['1', '2', '3', '4', '5', '6', '7', '8', '9'].map((d) => (
           <button key={d} type="button" className="tb-pinkey" onClick={() => press(d)} disabled={busy}>{d}</button>
         ))}
-        <button type="button" className="tb-pinkey tb-pinkey--fn" onClick={() => setDigits('')} disabled={busy}>Clear</button>
+        <button type="button" className="tb-pinkey tb-pinkey--fn" onClick={clear} disabled={busy}>Clear</button>
         <button type="button" className="tb-pinkey" onClick={() => press('0')} disabled={busy}>0</button>
         <button type="button" className="tb-pinkey tb-pinkey--fn" onClick={back} disabled={busy} aria-label="Delete digit">⌫</button>
       </div>
@@ -81,18 +82,33 @@ export function ProgressRing({ value, max, size = 92, label = 'DONE' }) {
 }
 
 export function Modal({ children, onClose, wide = false, label }) {
+  const dialog = useRef(null);
+  const close = useRef(onClose);
+  close.current = onClose;
   useEffect(() => {
-    const onKey = (e) => e.key === 'Escape' && onClose?.();
+    const previous = document.activeElement;
+    const focusable = () => [...(dialog.current?.querySelectorAll('button:not([disabled]),input:not([disabled]),select:not([disabled]),textarea:not([disabled]),a[href],[tabindex="0"]') ?? [])].filter((element) => element.getClientRects().length);
+    (focusable()[0] ?? dialog.current)?.focus();
+    function onKey(event) {
+      const dialogs = document.querySelectorAll('[data-board-dialog]');
+      if (dialogs[dialogs.length - 1] !== dialog.current) return;
+      if (event.key === 'Escape') { event.preventDefault(); close.current?.(); }
+      if (event.key === 'Tab') {
+        const items = focusable();
+        if (!items.length) { event.preventDefault(); dialog.current?.focus(); return; }
+        if (event.shiftKey && (document.activeElement === items[0] || !dialog.current?.contains(document.activeElement))) { event.preventDefault(); items[items.length - 1].focus(); }
+        else if (!event.shiftKey && (document.activeElement === items[items.length - 1] || !dialog.current?.contains(document.activeElement))) { event.preventDefault(); items[0].focus(); }
+      }
+    }
     window.addEventListener('keydown', onKey);
-    return () => window.removeEventListener('keydown', onKey);
-  }, [onClose]);
+    return () => { window.removeEventListener('keydown', onKey); if (previous?.isConnected) previous.focus(); };
+  }, []);
   return createPortal(
     <div className="tb tb-modal-back" style={{ minHeight: 0, background: 'rgba(3,6,12,0.72)' }} onMouseDown={(e) => e.target === e.currentTarget && onClose?.()}>
-      <div className={`tb-modal tb-card${wide ? ' tb-modal--wide' : ''}`} role="dialog" aria-modal="true" aria-label={label}>
+      <div ref={dialog} data-board-dialog tabIndex={-1} className={`tb-modal tb-card${wide ? ' tb-modal--wide' : ''}`} role="dialog" aria-modal="true" aria-label={label}>
         {children}
       </div>
-    </div>,
-    document.body,
+    </div>, document.body,
   );
 }
 

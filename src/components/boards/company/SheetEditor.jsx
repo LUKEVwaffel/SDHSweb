@@ -1,7 +1,7 @@
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import {
   CATEGORIES, MAX_TOTAL, allScored, totalScore, promotionOptions, promotionEligibility,
-  defaultPromotion, rankInfo, normalizeLet,
+  defaultPromotion, rankInfo, normalizeLet, uniformScore, UNIFORM_DEDUCTIONS, UNIFORM_REQUIRED,
 } from '../../../lib/boardRules';
 import RankInsignia from '../RankInsignia';
 import RankPicker from './RankPicker';
@@ -18,6 +18,24 @@ function initialScores(sheet) {
 }
 
 export default function SheetEditor({ cadet, sheet, onSaved, onClose, hasNext }) {
+  const identity = useRef({ id: sheet?.id ?? crypto.randomUUID(), revision: sheet?.updated_at ?? null });
+  const [leadershipPosition, setLeadershipPosition] = useState(sheet?.leadership_position ?? false);
+  const [uniform, setUniform] = useState(sheet?.uniform_inspection ?? { mode: '', noIssuedUniform: false, infractions: [], missing: [] });
+  function inspect(next) {
+    setUniform(next);
+    setScores((s) => ({ ...s, score_uniform: uniformScore(next) }));
+  }
+  function toggleInspection(field, key) {
+    inspect({ ...uniform, [field]: uniform[field].includes(key) ? uniform[field].filter((x) => x !== key) : [...uniform[field], key] });
+  }
+  const [questions, setQuestions] = useState(sheet?.question_snapshot ?? []);
+  const [questionError, setQuestionError] = useState('');
+  useEffect(() => {
+    if (sheet?.status === 'complete' && sheet.question_snapshot) return undefined;
+    let cancelled = false;
+    boardApi.questions(normalizeLet(cadet.let_level)).then((rows) => { if (!cancelled) setQuestions(rows); }).catch((err) => { if (!cancelled) setQuestionError(err.message); });
+    return () => { cancelled = true; };
+  }, [cadet.let_level, sheet]);
   const [rank, setRank] = useState(sheet?.rank_before ?? cadet.cadet_rank ?? null);
   const [askRank, setAskRank] = useState(!(sheet?.rank_before ?? cadet.cadet_rank));
   const [scores, setScores] = useState(() => initialScores(sheet));
@@ -32,9 +50,10 @@ export default function SheetEditor({ cadet, sheet, onSaved, onClose, hasNext })
   const total = totalScore(scores);
   const scored = allScored(scores);
   const options = useMemo(() => promotionOptions(rank, letLevel), [rank, letLevel]);
-  const elig = promotionEligibility({ scores, currentRank: rank, letLevel });
+  const elig = leadershipPosition ? { eligible: false, reason: 'Leadership positions receive an evaluation only' } : promotionEligibility({ scores, currentRank: rank, letLevel });
   const promoteInvalid = decision === 'promote' && (!elig.eligible || !options.includes(promoteTo));
-  const canComplete = scored && !!rank && !!decision && !promoteInvalid;
+  const questionsReady = ['jrotc', 'class'].every((category) => questions.filter((q) => q.category === category).length >= 3);
+  const canComplete = questionsReady && scored && !!rank && !!decision && !promoteInvalid;
 
   function setScore(key, v) {
     setScores((s) => ({ ...s, [key]: s[key] === v ? null : v }));
@@ -52,7 +71,10 @@ export default function SheetEditor({ cadet, sheet, onSaved, onClose, hasNext })
     setError('');
     try {
       const saved = await boardApi.saveSheet({
-        id: sheet?.id ?? null,
+        id: identity.current.id,
+        expected_updated_at: identity.current.revision,
+        leadership_position: leadershipPosition,
+        uniform_inspection: absent ? null : uniform,
         cadet_id: cadet.id,
         rank_before: rank,
         ...(absent ? {} : scores),
@@ -61,7 +83,8 @@ export default function SheetEditor({ cadet, sheet, onSaved, onClose, hasNext })
         comment,
         status,
       });
-      onSaved(saved, { next });
+      identity.current = { id: saved.id, revision: saved.updated_at };
+      await onSaved(saved, { next });
     } catch (err) {
       setError(err.message);
     } finally {
@@ -74,7 +97,7 @@ export default function SheetEditor({ cadet, sheet, onSaved, onClose, hasNext })
   return (
     <div>
       <div className="tb-toolbar" style={{ justifyContent: 'space-between' }}>
-        <button type="button" className="tb-btn tb-btn--ghost" onClick={onClose}>← Back to roster</button>
+        <button type="button" className="tb-btn tb-btn--ghost" disabled={saving} onClick={onClose}>← Back to roster</button>
         <div style={{ display: 'flex', gap: 8 }}>
           {!sheet?.locked && <button type="button" className="tb-btn tb-btn--sm" onClick={() => setConfirmAbsent(true)} disabled={saving}>Mark absent</button>}
         </div>
@@ -106,6 +129,30 @@ export default function SheetEditor({ cadet, sheet, onSaved, onClose, hasNext })
             <div className="tb-pf"><small>Date</small><b>{today}</b></div>
           </div>
 
+          <div className="tb-card" style={{ color: 'inherit', background: 'transparent' }}>
+            <label className="tb-field">Uniform worn
+              <select value={uniform.mode} onChange={(e) => inspect({ ...uniform, mode: e.target.value })} disabled={saving}>
+                <option value="">Select uniform</option><option value="class_a">Class A</option><option value="khaki_polo">Khakis and polo</option>
+              </select>
+            </label>
+            {uniform.mode === 'khaki_polo' && <label><input type="checkbox" checked={uniform.noIssuedUniform} onChange={(e) => inspect({ ...uniform, noIssuedUniform: e.target.checked })} disabled={saving} /> No uniform has been issued to this cadet (9 points)</label>}
+            {uniform.mode === 'class_a' && <>
+              <p>Mark missing required items. Any missing item gives 0 uniform points.</p>
+              {UNIFORM_REQUIRED.map(([key, label]) => <label key={key} style={{ display: 'block' }}><input type="checkbox" checked={uniform.missing.includes(key)} onChange={() => toggleInspection('missing', key)} disabled={saving} /> Missing {label}</label>)}
+              <p>Mark infractions: crooked, missing, wrong placement, or color.</p>
+              {UNIFORM_DEDUCTIONS.map(([key, label, points]) => <label key={key} style={{ display: 'block' }}><input type="checkbox" checked={uniform.infractions.includes(key)} onChange={() => toggleInspection('infractions', key)} disabled={saving} /> {label} (−{points})</label>)}
+            </>}
+          </div>
+          <section aria-label="Board questions and answers" style={{ padding: 20 }}>
+            <h3>LET {letLevel ?? '?'} questions &amp; correct answers</h3>
+            <p>Each board member asks one JROTC question and one class question. Answers are spoken aloud.</p>
+            {questionError && <p role="alert">{questionError}</p>}
+            {!questionsReady && <p role="status">This LET level still needs at least three questions in each section before a sheet can be completed. Drafts can be saved.</p>}
+            {['jrotc', 'class'].map((category) => <div key={category}>
+              <h4>{category === 'jrotc' ? 'JROTC knowledge' : 'Class knowledge'}</h4>
+              {questions.filter((q) => q.category === category).map((q) => <div key={q.id} style={{ marginBottom: 16 }}><b>{q.question}</b><p style={{ marginTop: 4 }}>Correct answer: {q.answer}</p></div>)}
+            </div>)}
+          </section>
           {CATEGORIES.map((c) => (
             <div className="tb-cat" key={c.key}>
               <div>
@@ -113,8 +160,8 @@ export default function SheetEditor({ cadet, sheet, onSaved, onClose, hasNext })
                 <p>{c.sub}</p>
               </div>
               <div className="tb-score" role="group" aria-label={`${c.label} score`}>
-                {[0, 1, 2, 3].map((v) => (
-                  <button key={v} type="button" data-v={v} aria-pressed={scores[c.key] === v} onClick={() => setScore(c.key, v)}>{v}</button>
+                {c.key === 'score_uniform' ? <b>{scores.score_uniform ?? '—'} / 9</b> : Array.from({ length: c.max + 1 }, (_, i) => i).map((v) => (
+                  <button key={v} type="button" disabled={saving} data-v={v} aria-pressed={scores[c.key] === v} onClick={() => setScore(c.key, v)}>{v}</button>
                 ))}
               </div>
             </div>
@@ -129,6 +176,7 @@ export default function SheetEditor({ cadet, sheet, onSaved, onClose, hasNext })
         <aside className="tb-rail">
           <div className="tb-card tb-card--flat">
             <div className="tb-eyebrow" style={{ marginBottom: 12 }}>Board decision</div>
+            <label><input type="checkbox" checked={leadershipPosition} disabled={saving} onChange={(e) => { setLeadershipPosition(e.target.checked); setDecision(null); }} /> Holds a leadership position (evaluation only)</label>
             <div className="tb-decide">
               <button type="button" className="is-promote" aria-pressed={decision === 'promote'} disabled={!elig.eligible} onClick={() => choose('promote')}>Promote</button>
               <button type="button" className="is-hold" aria-pressed={decision === 'no_promote'} disabled={!scored || !rank} onClick={() => choose('no_promote')}>Do not promote</button>
