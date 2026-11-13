@@ -27,6 +27,10 @@ export const identityApi = {
 };
 export const meetingApi = {
   load: (signal) => rpc('board_practice_state', undefined, signal),
+  openCadet: (sessionId, cadetId, focus) => rpc('board_practice_open_cadet', { p_session_id: sessionId, p_cadet_id: cadetId, p_expected_focus: focus }),
+  patchField: (sessionId, cadetId, focus, field, value, expected) => rpc('board_practice_patch_field', { p_session_id: sessionId, p_cadet_id: cadetId, p_focus: focus, p_field: field, p_value: value, p_expected_value: expected }).then((data) => { const row = Array.isArray(data) ? data[0] : data; if (!row?.id) throw new Error('The shared change could not be confirmed. Refresh the board.'); return row; }),
+  finishCadet: (sessionId, cadetId, focus, revision) => rpc('board_practice_finish_cadet', { p_session_id: sessionId, p_cadet_id: cadetId, p_focus: focus, p_expected_revision: revision }),
+  pauseCadet: (sessionId, cadetId, focus) => rpc('board_practice_pause_cadet', { p_session_id: sessionId, p_cadet_id: cadetId, p_focus: focus }),
   heartbeat: () => rpc('board_practice_heartbeat'),
   start: (title, company = null) => rpc('board_practice_start', { p_title: title, p_company: company }),
   end: (roundId, sessionId = null) => rpc('board_practice_end', { p_round_id: roundId, p_session_id: sessionId }),
