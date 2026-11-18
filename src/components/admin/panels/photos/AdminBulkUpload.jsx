@@ -1,6 +1,7 @@
 import { useState, useRef, useCallback, useEffect } from 'react';
 import { supabase as SB } from '../../../../lib/supabaseClient';
 import { resizeForUpload, isRawFile } from '../../../../lib/imageResize';
+import { convertCr2ToPng, isCr2 } from '../../../../lib/cr2Convert';
 import { P, mono, oswald, inter, fs, sp, radius, ease } from '../../theme';
 import { Btn, Card, Label, Input, Select, PanelHeader, EmptyState } from '../../shared/ui';
 import posthog from '../../../../lib/posthog';
@@ -15,9 +16,12 @@ export default function AdminBulkUpload({ adminId }) {
   const [events, setEvents] = useState([]);
   const [eventId, setEventId] = useState('');
   const [credit, setCredit] = useState('');
-  const [queue, setQueue] = useState([]); // { file, status: pending|uploading|done|error, error }
+  const [queue, setQueue] = useState([]); // { file, status: pending|converting|uploading|done|error, error }
   const [rejected, setRejected] = useState([]);
-  const [busy, setBusy] = useState(false);
+  const [uploading, setUploading] = useState(false);
+  const [pngTask, setPngTask] = useState(null);
+  const [pngError, setPngError] = useState('');
+  const busy = uploading || pngTask !== null;
   const [dragOver, setDragOver] = useState(false);
   const inputRef = useRef();
 
@@ -31,14 +35,15 @@ export default function AdminBulkUpload({ adminId }) {
 
   const addFiles = useCallback((fileList) => {
     const files = Array.from(fileList || []);
-    const images = files.filter((f) => f.type.startsWith('image/'));
-    const nonImages = files.filter((f) => !f.type.startsWith('image/'));
-    const raw = images.filter(isRawFile);
-    const usable = images.filter((f) => !isRawFile(f));
-    const newRejected = [
-      ...nonImages.map((f) => ({ name: f.name, reason: 'Not an image file' })),
-      ...raw.map((f) => ({ name: f.name, reason: 'RAW format not supported — export as JPEG first' })),
-    ];
+    const usable = [];
+    const newRejected = [];
+    for (const file of files) {
+      if (isCr2(file) || (file.type.startsWith('image/') && !isRawFile(file))) {
+        usable.push(file);
+      } else {
+        newRejected.push({ name: file.name, reason: isRawFile(file) ? 'Export this RAW format as JPEG or PNG first' : 'Not an image file' });
+      }
+    }
     if (newRejected.length) setRejected((r) => [...r, ...newRejected]);
     if (usable.length) setQueue((q) => [...q, ...usable.map((file) => ({ file, status: 'pending', error: null }))]);
   }, []);
@@ -47,6 +52,7 @@ export default function AdminBulkUpload({ adminId }) {
     setEventId(id);
     setQueue([]);
     setRejected([]);
+    setPngError('');
   }
 
   function removeFromQueue(idx) {
@@ -57,10 +63,35 @@ export default function AdminBulkUpload({ adminId }) {
     setQueue((q) => q.filter((it) => it.status !== 'error'));
   }
 
-  async function uploadOne(item, idx) {
-    setQueue((q) => q.map((it, i) => (i === idx ? { ...it, status: 'uploading' } : it)));
+  async function savePng(file, idx) {
+    if (busy) return;
+    setPngTask(idx);
+    setPngError('');
     try {
-      const { full, thumb } = await resizeForUpload(item.file);
+      const png = await convertCr2ToPng(file);
+      const link = document.createElement('a');
+      const url = URL.createObjectURL(png);
+      link.href = url;
+      link.download = png.name;
+      link.click();
+      setTimeout(() => URL.revokeObjectURL(url), 4000);
+    } catch (err) {
+      setPngError(`${file.name} · ${err.message || String(err)}`);
+    } finally {
+      setPngTask(null);
+    }
+  }
+
+  async function uploadOne(item, idx) {
+    const update = fields => setQueue(q => q.map((row, i) => i === idx ? { ...row, ...fields } : row));
+    try {
+      let input = item.file;
+      if (isCr2(input)) {
+        update({ status: 'converting', error: null });
+        input = await convertCr2ToPng(input);
+      }
+      update({ status: 'uploading', error: null });
+      const { full, thumb } = await resizeForUpload(input);
       const stamp = `${Date.now()}_${Math.random().toString(36).slice(2, 8)}_${idx}`;
       const base = `${eventTeam}/${eventId}/${stamp}`;
       const up1 = await SB.storage.from(BUCKET).upload(`${base}.jpg`, full, { contentType: 'image/jpeg' });
@@ -80,17 +111,18 @@ export default function AdminBulkUpload({ adminId }) {
         uploaded_by: adminId || null,
       });
       if (error) throw error;
-      setQueue((q) => q.map((it, i) => (i === idx ? { ...it, status: 'done' } : it)));
+      update({ status: 'done' });
       return true;
     } catch (err) {
-      setQueue((q) => q.map((it, i) => (i === idx ? { ...it, status: 'error', error: err.message || String(err) } : it)));
+      update({ status: 'error', error: err.message || String(err) });
       return false;
     }
   }
 
   async function uploadAll() {
     if (!eventId || busy) return;
-    setBusy(true);
+    setPngError('');
+    setUploading(true);
     let ok = 0;
     // Sequential on purpose — a 40+ photo batch shouldn't slam storage with
     // that many parallel uploads at once.
@@ -98,7 +130,7 @@ export default function AdminBulkUpload({ adminId }) {
       if (queue[i].status === 'done') { ok++; continue; }
       if (await uploadOne(queue[i], i)) ok++;
     }
-    setBusy(false);
+    setUploading(false);
     if (ok > 0) {
       posthog.capture('admin_bulk_photo_upload_completed', {
         photo_count: ok,
@@ -144,8 +176,8 @@ export default function AdminBulkUpload({ adminId }) {
       </Card>
 
       <input
-        ref={inputRef} type="file" accept="image/*" multiple style={{ display: 'none' }}
-        onChange={(e) => { addFiles(e.target.files); e.target.value = ''; }}
+        ref={inputRef} type="file" accept="image/*,.cr2" multiple style={{ display: 'none' }}
+        onChange={(e) => { if (eventId && !busy) addFiles(e.target.files); e.target.value = ''; }}
       />
       <div
         onClick={() => eventId && !busy && inputRef.current.click()}
@@ -169,7 +201,7 @@ export default function AdminBulkUpload({ adminId }) {
           {eventId ? 'DROP PHOTOS OR CLICK TO BROWSE' : 'SELECT AN EVENT FIRST'}
         </div>
         <div style={{ fontFamily: mono, fontSize: 9, color: P.mute, letterSpacing: '0.14em', marginTop: 8 }}>
-          MULTIPLE FILES OK · IMAGES ONLY · RAW (.CR2 ETC.) NOT SUPPORTED
+          IMAGES AND CANON .CR2 · CR2 CONVERTS TO PNG IN YOUR BROWSER
         </div>
       </div>
 
@@ -181,18 +213,20 @@ export default function AdminBulkUpload({ adminId }) {
         </div>
       )}
 
+      {pngError && <p role="alert" style={{ fontFamily: mono, fontSize: fs.tiny, color: P.red }}>{pngError}</p>}
+
       {queue.length > 0 ? (
         <>
           <PanelHeader
             title={`QUEUE · ${queue.length}`}
-            sub={busy ? `Uploading… ${doneCount}/${queue.length}` : `${doneCount} done · ${errorCount} failed · ${pendingCount} pending`}
+            sub={uploading ? `Uploading… ${doneCount}/${queue.length}` : `${doneCount} done · ${errorCount} failed · ${pendingCount} remaining`}
             action={
               <div style={{ display: 'flex', gap: sp[2] }}>
                 {!busy && errorCount > 0 && (
                   <Btn onClick={clearFailed} variant="ghost" size="sm">CLEAR {errorCount} FAILED</Btn>
                 )}
                 <Btn onClick={uploadAll} variant="gold" size="sm" disabled={busy || !eventId || pendingCount === 0}>
-                  {busy ? 'UPLOADING…' : `UPLOAD ${pendingCount}`}
+                  {uploading ? 'UPLOADING…' : `UPLOAD ${pendingCount}`}
                 </Btn>
               </div>
             }
@@ -209,13 +243,18 @@ export default function AdminBulkUpload({ adminId }) {
                 <div style={{ aspectRatio: '4/3', background: P.ink, display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: inter, fontSize: 10, color: P.mute, padding: 6, textAlign: 'center', overflow: 'hidden' }}>
                   {item.file.name}
                 </div>
-                <div style={{ padding: '4px 6px', fontFamily: mono, fontSize: 8, color: item.status === 'error' ? P.red : item.status === 'done' ? P.green : item.status === 'uploading' ? P.gold : P.mute }}>
+                <div style={{ padding: '4px 6px', fontFamily: mono, fontSize: 8, color: item.status === 'error' ? P.red : item.status === 'done' ? P.green : ['converting', 'uploading'].includes(item.status) ? P.gold : P.mute }}>
                   {item.status.toUpperCase()}
                 </div>
                 {item.status === 'error' && item.error && (
                   <div style={{ padding: '0 6px 5px', fontFamily: inter, fontSize: 9, lineHeight: 1.3, color: P.red }} title={item.error}>
                     {item.error}
                   </div>
+                )}
+                {isCr2(item.file) && (
+                  <Btn size="sm" variant="ghost" style={{ margin: '0 6px 6px' }} disabled={busy} aria-label={`Save PNG for ${item.file.name}`} onClick={() => savePng(item.file, idx)}>
+                    {pngTask === idx ? 'Converting…' : 'Save PNG'}
+                  </Btn>
                 )}
                 {(item.status === 'pending' || item.status === 'error') && !busy && (
                   <button onClick={() => removeFromQueue(idx)} style={{ position: 'absolute', top: 2, right: 2, background: 'rgba(6,16,31,0.82)', border: 'none', color: P.red, cursor: 'pointer', fontSize: 12, padding: '1px 5px' }}>×</button>
