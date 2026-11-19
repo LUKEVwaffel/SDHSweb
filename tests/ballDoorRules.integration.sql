@@ -1,0 +1,66 @@
+-- Disposable Ball fixture database only. Every fixture and decision rolls back.
+begin;
+set test.role='service_role'; set test.email='rules@example.invalid';
+insert into public.ball_checkin_staff(email,display_name) values('rules@example.invalid','Door Staff');
+insert into public.ball_dress_staff(email,name,pin_hash,active) values('agillott1414@gmail.com','Aubry Gillott','fixture-hash',true),('kylierocks404@gmail.com','Kylie Gray','fixture-hash-2',true);
+insert into public.ball_door_approvers(key,email) values('aubry','agillott1414@gmail.com'),('kylie','kylierocks404@gmail.com');
+do $$
+declare h uuid; g uuid; v uuid; result jsonb; failed boolean;
+begin
+ insert into public.ball_signups(cadet_school_email,cadet_name,notification_email,status,amount_due,amount_paid,cash_received,cadet_gender,field_trip_form_required,field_trip_form_received,dress_approved)
+ values('rules@school.invalid','Rules Host','rules@example.invalid','fully_verified',50,0,false,'male',false,false,false) returning id into h;
+ insert into public.ball_guests(signup_id,name,personal_email,verification_token,guest_type,verified_at,field_trip_form_required,field_trip_form_received,dress_approved,school_attended)
+ values(h,'SDHS Noncadet Guest','guest@example.invalid','private','date',now(),false,false,null,'Soddy Daisy High School') returning id into g;
+ assert (select attire_status='uniform' from public.ball_door_people() where person_id=h),'Stored approval false blocked a standard-uniform cadet';
+ assert (select form_required and not form_received and not payment_complete from public.ball_door_people() where person_id=h),'Host legacy false form flag bypassed school requirement';
+ assert (select form_required from public.ball_door_people() where person_id=g),'Non-JROTC SDHS guest bypassed form';
+ failed:=false;
+ begin perform public.ball_set_arrival('cadet',h,true); exception when others then failed:=position('Cash is not accepted' in sqlerrm)>0; end;
+ assert failed,'Unpaid host admitted';
+ failed:=false;
+ begin perform public.ball_receive_door_form('rules@example.invalid','cadet',h,'Test Parent',false); exception when others then failed:=true; end;
+ assert failed and not exists(select 1 from public.ball_door_forms where person_id=h),'Unsigned form accepted';
+ perform public.ball_receive_door_form('rules@example.invalid','cadet',h,'Test Parent',true);
+ assert (select field_trip_form_received from public.ball_signups where id=h),'Host receipt not reflected in Chief portal';
+ assert (select not field_trip_form_received from public.ball_guests where id=g),'Host form cleared guest form';
+ failed:=false;
+ begin perform public.ball_decide_door_attire('rules@example.invalid','guest',g,'weston','fixture-hash',true,'pending',false); exception when others then failed:=true; end;
+ assert failed,'Non-authorized reviewer allowed';
+ failed:=false;
+ begin perform public.ball_decide_door_attire('rules@example.invalid','guest',g,'aubry','wrong-hash',true,'pending',false); exception when others then failed:=true; end;
+ assert failed,'Changed credential accepted';
+ perform public.ball_decide_door_attire('rules@example.invalid','guest',g,'aubry','fixture-hash',true,'pending',true);
+ assert not exists(select 1 from public.ball_door_attire where person_id=g),'Sandbox approval wrote attire';
+ assert (select attire_status='pending' from public.ball_door_people() where person_id=g),'Sandbox altered live attire state';
+ perform public.ball_decide_door_attire('rules@example.invalid','guest',g,'kylie','fixture-hash-2',false,'pending',false);
+ assert (select attire_status='denied' from public.ball_door_people() where person_id=g),'Denial not retained';
+ update public.ball_signups set amount_paid=50 where id=h;
+ perform public.ball_receive_door_form('rules@example.invalid','guest',g,'Guest Parent',true);
+ failed:=false;
+ begin perform public.ball_set_arrival('guest',g,true); exception when others then failed:=position('Attire denied' in sqlerrm)>0; end;
+ assert failed,'Denied attendee admitted after form/payment cleared';
+ failed:=false;
+ begin perform public.ball_decide_door_attire('rules@example.invalid','guest',g,'aubry','fixture-hash',true,'pending',false); exception when others then failed:=position('changed' in sqlerrm)>0; end;
+ assert failed,'Stale approval overwrote denial';
+ perform public.ball_decide_door_attire('rules@example.invalid','guest',g,'aubry','fixture-hash',true,'denied',false);
+ perform public.ball_set_arrival('guest',g,true);
+ perform public.ball_set_arrival('cadet',h,true);
+ assert (select count(*)=2 from public.ball_arrivals),'Cleared attendees could not enter';
+ insert into public.ball_vip_signups(name,dress_approved) values('School Unknown VIP',true) returning id into v;
+ assert (select student_status_unknown from public.ball_door_people() where person_id=v),'Unknown school treated as outside SDHS';
+ failed:=false;
+ begin perform public.ball_set_arrival('vip',v,true); exception when others then failed:=true; end;
+ assert failed,'Unknown enrollment bypassed form check';
+ perform public.ball_confirm_door_student('rules@example.invalid','vip',v,true);
+ assert (select form_required and not form_received from public.ball_door_people() where person_id=v),'SDHS VIP not held for signed form';
+ perform public.ball_receive_door_form('rules@example.invalid','vip',v,'VIP Parent',true);
+ perform public.ball_set_arrival('vip',v,true);
+ update public.ball_dress_staff set active=false where email='agillott1414@gmail.com';
+ failed:=false;
+ begin perform public.ball_decide_door_attire('rules@example.invalid','guest',g,'aubry','fixture-hash',false,'approved',true); exception when others then failed:=true; end;
+ assert failed,'Disabled approver allowed';
+ assert not has_function_privilege('authenticated','public.ball_decide_door_attire(text,text,uuid,text,text,boolean,text,boolean)','execute'),'PIN verification can be bypassed by browser RPC';
+ assert not has_function_privilege('authenticated','public.ball_receive_door_form(text,text,uuid,text,boolean)','execute'),'Browser can impersonate receipt actor';
+ raise notice 'Door rule tests passed: all SDHS forms, independent receipt, unpaid block, denial block, approver allowlist, credential changes, sandbox, stale decision, school identification and RPC isolation.';
+end $$;
+rollback;

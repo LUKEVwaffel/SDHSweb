@@ -6,12 +6,14 @@ import BallOverviewTab from './BallOverviewTab';
 import BallEmailsTab from './BallEmailsTab';
 import BallLabelsTab from './BallLabelsTab';
 import BallFeedbackTab from './BallFeedbackTab';
+import BallCheckinSetup from './BallCheckinSetup';
 import { DRESS_APPROVERS, WESTON } from '../../../../lib/ballApprovers';
 
 const BallPresentationStudio = lazy(() => import('./studio/BallPresentationStudio'));
 
 const TABS = [
   { id: 'overview', label: 'OVERVIEW' },
+  { id: 'checkin', label: 'CHECK-IN' },
   { id: 'studio', label: 'BALL STUDIO' },
   { id: 'labels', label: 'LABELS' },
   { id: 'feedback', label: 'FEEDBACK' },
@@ -141,6 +143,7 @@ export default function BallPanel({ adminId }) {
       </div>
 
       {tab === 'overview' && <BallOverviewTab />}
+      {tab === 'checkin' && <BallCheckinSetup />}
       {tab === 'studio' && <Suspense fallback={<div style={{ color: P.mute }}>Opening Ball Studio…</div>}><BallPresentationStudio adminId={adminId} /></Suspense>}
       {tab === 'labels' && <BallLabelsTab />}
       {tab === 'feedback' && <BallFeedbackTab />}

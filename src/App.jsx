@@ -66,6 +66,7 @@ import BallSignupWizard from './components/ball/signup/BallSignupWizard';
 import BallVipSignup from './components/ball/signup/BallVipSignup';
 import BallGuestVerify from './components/ball/BallGuestVerify';
 import BallOpsPortal from './components/ball/ops/BallOpsPortal';
+import BallCheckin from './components/ball/checkin/BallCheckin.jsx';
 import BallDressPortal from './components/ball/dress/BallDressPortal';
 import BallAttirePortal from './components/ball/attire/BallAttirePortal';
 import PortalHub from './components/portal/PortalHub';
@@ -160,6 +161,7 @@ export default function App() {
   if (location.pathname === '/poll' || location.pathname === '/poll/') return <ChristmasMusicPoll />;
   if (location.pathname === '/halloween') return <HalloweenMoviePoll />;
   if (location.pathname.startsWith('/ball/guest/')) return <BallGuestVerify />;
+  if (location.pathname === '/ball/checkin' || location.pathname.startsWith('/ball/checkin/')) return <BallCheckin />;
   if (location.pathname === '/ball/ops' || location.pathname.startsWith('/ball/ops/')) return <BallOpsPortal />;
   if (location.pathname === '/ball/dress' || location.pathname.startsWith('/ball/dress/')) return <BallDressPortal />;
   if (location.pathname === '/ball/attire' || location.pathname.startsWith('/ball/attire/')) return <BallAttirePortal />;
