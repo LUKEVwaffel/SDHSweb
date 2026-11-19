@@ -74,4 +74,4 @@
 .bs-slide-list.bs-list-columns > div { gap: .8cqw; padding: .43cqw 0; break-inside: avoid; }
 .bs-slide-list.bs-list-columns > div > span { min-width: 1.3cqw; }
 .bs-layout-split .bs-photo-frame[data-photo-kind="qr"] .bs-photo-backdrop { display: none; }
-.bs-layout-split .bs-photo-frame[data-photo-kind="qr"] { inset: 9% 8% 9% 0; }
+.bs-layout-split .bs-slide-images:has(.bs-photo-frame[data-photo-kind="qr"]) { inset: 9% 5% 9% 51%; }
