@@ -103,6 +103,27 @@ test('photo event filters exclude events with only hidden, pending, video, or mi
  assert.equal(result.photos[0].event,'visible');
 });
 
+test('photo event options follow event dates and same-day start times', async () => {
+ const events = [
+  { id: 'a', title: 'A afternoon event', date: '2026-10-15', event_time: '15:00:00' },
+  { id: 'b', title: 'B undated event', date: null },
+  { id: 'c', title: 'C next month', date: '2026-11-01' },
+  { id: 'd', title: 'D morning event', date: '2026-10-15', event_time: '08:00:00' },
+  { id: 'e', title: 'E earlier event', date: '2026-09-30' },
+ ];
+ const photos = events.map(({ id }, index) => ({
+  id, event_id: id, status: 'live', photo_url: `https://example.com/${id}.jpg`, created_at: `2026-11-0${index + 2}`,
+ }));
+ const client = { from(table) {
+  return { select() { return this; }, order() { return this; }, async range() {
+   return { data: table === 'events' ? events : table === 'photos' ? photos : [] };
+  } };
+ } };
+ const result = await loadStudioPhotos(client);
+ assert.deepEqual(result.events.map(event => event.id), ['e', 'd', 'a', 'c', 'b']);
+ assert.deepEqual(result.photos.map(photo => photo.id), ['photos:a', 'photos:b', 'photos:c', 'photos:d', 'photos:e']);
+});
+
 test('each photo retains its own position, zoom, fit, and editable event label through save and import',()=>{
  const deck=makeDeck();deck.slides=[makeSlide('duo',{focalX:30,focalY:70,photos:[{url:'https://example.com/a.jpg',event:'Community service',focalX:12,focalY:82,zoom:1.8,fit:'contain',eventLabel:'Service day · October'},{url:'https://example.com/b.jpg',event:'Raider competition'}]})];
  const photos=readDeck(JSON.parse(JSON.stringify(deck))).slides[0].photos;

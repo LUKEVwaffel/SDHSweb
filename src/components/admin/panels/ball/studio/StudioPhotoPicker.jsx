@@ -1,6 +1,9 @@
 import { useState, useMemo } from 'react';
 import { useStudioPhotos } from './useStudioPhotos';
 import StudioModal from './StudioModal';
+
+const eventDate = new Intl.DateTimeFormat('en-US', { month: 'short', day: 'numeric', year: 'numeric', timeZone: 'UTC' });
+
 export default function StudioPhotoPicker({ onClose, onAdd, replace = false, usedIds = [] }) {
   const {photos,events,warnings,loading,refresh}=useStudioPhotos();
   const [query,setQuery]=useState('');const [source,setSource]=useState('all');const [team,setTeam]=useState('all');const [event,setEvent]=useState('all');
@@ -19,7 +22,12 @@ export default function StudioPhotoPicker({ onClose, onAdd, replace = false, use
       <input aria-label="Search photos" placeholder="Search event, team, caption or credit…" value={query} onChange={e=>change(setQuery,e.target.value)}/>
       <select aria-label="Photo collection" value={source} onChange={e=>change(setSource,e.target.value)}><option value="all">All collections</option>{['Photo archive','TV collection','Curated gallery','Rafting trip','Ball gallery'].map(s=><option key={s}>{s}</option>)}</select>
       <select aria-label="Photo team" value={team} onChange={e=>change(setTeam,e.target.value)}><option value="all">All teams</option>{['battalion','raiders','rifle','academic','drill'].map(t=><option key={t}>{t}</option>)}</select>
-      <select aria-label="Photo event" value={event} onChange={e=>change(setEvent,e.target.value)}><option value="all">All events</option>{events.map(e=><option value={e.id} key={e.id}>{e.title}</option>)}</select>
+      <select aria-label="Photo event" value={event} onChange={e=>change(setEvent,e.target.value)}>
+        <option value="all">All events</option>
+        {events.map(e=><option value={e.id} key={e.id}>
+          {e.date ? `${e.title} · ${eventDate.format(new Date(`${e.date}T00:00:00Z`))}` : e.title}
+        </option>)}
+      </select>
       <select aria-label="Photo sort order" value={sort} onChange={e=>change(setSort,e.target.value)}><option value="newest">Newest first</option><option value="oldest">Oldest first</option><option value="event">By event</option></select>
     </div>
     <div className="bs-row bs-library-summary"><span>{loading?'Loading every collection…':`${filtered.length.toLocaleString()} photos · ${selected.length} selected`}</span><label className="bs-check"><input type="checkbox" checked={onlyUnused} onChange={e=>setOnlyUnused(e.target.checked)}/>Unused photos only</label><button onClick={refresh} disabled={loading}>Refresh</button>{!replace&&<button onClick={()=>setSelected(s=>[...new Set([...s,...filtered.slice(0,visible).map(p=>p.id)])])}>Select visible</button>}<button onClick={()=>setSelected([])} disabled={!selected.length}>Clear selection</button></div>

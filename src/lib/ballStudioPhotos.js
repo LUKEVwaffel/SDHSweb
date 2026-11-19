@@ -16,7 +16,7 @@ export async function loadStudioPhotos(client) {
     { table: 'gallery', columns: 'id,photo_url,caption,team,created_at', label: 'Curated gallery', normalize: p => ({ url: p.photo_url, thumb: p.photo_url, caption: p.caption || '', team: p.team }) },
     { table: 'ball_gallery', columns: 'id,photo_url,caption,created_at', label: 'Ball gallery', normalize: p => ({ url: p.photo_url, thumb: p.photo_url, caption: p.caption || 'Military Ball', team: 'battalion' }) },
   ];
-  const results = await Promise.allSettled([allRows(client, 'events', 'id,title,date'), ...sources.map(s => allRows(client, s.table, s.columns))]);
+  const results = await Promise.allSettled([allRows(client, 'events', 'id,title,date,event_time'), ...sources.map(s => allRows(client, s.table, s.columns))]);
   const events = results[0].status === 'fulfilled' ? results[0].value : [];
   const eventMap = Object.fromEntries(events.map(e => [e.id,e]));
   const warnings = [];
@@ -27,5 +27,10 @@ export async function loadStudioPhotos(client) {
     return result.value.map(p => ({ ...source.normalize(p), id: `${source.table}:${p.id}`, source: source.label, date: p.created_at, event: eventMap[p.event_id]?.title || source.label })).filter(p => p.url && !p.hidden && !/\.(mp4|mov|m4v|webm)(\?|$)/i.test(p.url));
   });
   const photoEventIds = new Set(photos.map(p => p.eventId).filter(Boolean));
-  return { photos, events: events.filter(e => photoEventIds.has(e.id)), warnings };
+  const photoEvents = events.filter(e => photoEventIds.has(e.id)).sort((a, b) =>
+    (a.date || '9999-12-31').localeCompare(b.date || '9999-12-31') ||
+    (a.event_time || '24:00:00').localeCompare(b.event_time || '24:00:00') ||
+    a.title.localeCompare(b.title)
+  );
+  return { photos, events: photoEvents, warnings };
 }
