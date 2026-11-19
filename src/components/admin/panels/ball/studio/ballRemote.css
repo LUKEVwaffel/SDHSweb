@@ -37,3 +37,9 @@
 .br-error,.br-connection-note {padding:12px 14px;border:1px solid #e4c17b50;background:#e4c17b10;color:#f0cf8e;border-radius:8px;font-size:12px;margin-bottom:18px;}
 .ball-remote footer {color:#8fa2b8;font-size:10px;text-align:center;margin-top:25px;}
 body:has(>.ball-remote),body:has(#root .ball-remote) {background:#081320;}
+
+.br-show-cues { display: grid; gap: 6px; margin-top: 20px; }
+.br-show-cues h2 { margin: 0 0 4px; font-size: 17px; }
+.br-show-cues button { display: flex; justify-content: space-between; align-items: center; gap: 12px; text-align: left; min-height: 46px; }
+.br-show-cues button[aria-current=true] { border-color: #e5c37e; color: #e5c37e; }
+.br-show-cues small { white-space: nowrap; color: #e5c37e; }

@@ -62,3 +62,16 @@
 .bs-photo-editable {cursor:grab;touch-action:none;}
 .bs-photo-editable:active {cursor:grabbing;}
 .bs-photo-selected {outline:3px solid var(--slide-accent);outline-offset:-3px;}
+
+.bs-show-countdown {
+  position: absolute; z-index: 3; right: 3%; bottom: 4%;
+  display: grid; justify-items: end; gap: .25em; padding: .58em .85em;
+  border: 1px solid #e5c37e88; background: #081729ed; color: #f7f0df;
+  font: 400 clamp(12px, 1.4vw, 26px)/1.2 Inter, sans-serif;
+}
+.bs-show-countdown strong { color: #e5c37e; font: 600 1.8em/1 Oswald, sans-serif; font-variant-numeric: tabular-nums; }
+.bs-slide-list.bs-list-columns { columns: 2; column-gap: 3.5cqw; margin-top: 1.8cqw; font-size: 1.5cqw; }
+.bs-slide-list.bs-list-columns > div { gap: .8cqw; padding: .43cqw 0; break-inside: avoid; }
+.bs-slide-list.bs-list-columns > div > span { min-width: 1.3cqw; }
+.bs-layout-split .bs-photo-frame[data-photo-kind="qr"] .bs-photo-backdrop { display: none; }
+.bs-layout-split .bs-photo-frame[data-photo-kind="qr"] { inset: 9% 8% 9% 0; }

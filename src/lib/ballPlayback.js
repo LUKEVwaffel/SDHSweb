@@ -37,7 +37,7 @@ export function playbackAction(state, action, now = Date.now()) {
 }
 export function validateRemoteCommand(message, total) {
   if (!message || typeof message.id !== 'string' || !/^[a-zA-Z0-9-]{16,80}$/.test(message.id)) return null;
-  if (!['next','previous','goto','restart','play','pause','blackout','loop'].includes(message.action)) return null;
+  if (!['next','previous','goto','restart','play','pause','blackout','loop','start-show'].includes(message.action)) return null;
   if (message.action === 'goto' && (!Number.isInteger(message.index) || message.index < 0 || message.index >= total)) return null;
   return { type: message.action, ...(message.action === 'goto' ? {index:message.index} : {}) };
 }
@@ -64,4 +64,65 @@ export function reconcilePlaybackSlides(state, slides, loop = false) {
   const retainedIndex=ids.indexOf(currentId);
   const index=retainedIndex>=0?retainedIndex:Math.min(state.index,slides.length-1);
   return {...createPlayback(slides.map(s=>s.duration),index,loop),slideIds:ids,blackout:state.blackout,visit:state.visit+1};
+}
+
+// A configured show loops the preshow until the ceremony clock takes over.
+export function resolveBallShow(deck) {
+  const { show, slides } = deck;
+  const startAt = Date.parse(show?.startAt);
+  const podium = slides.findIndex(slide => slide.id === show?.podiumId);
+  const welcome = slides.findIndex(slide => slide.id === show?.welcomeId);
+  if (!Number.isFinite(startAt) || podium < 1 || welcome !== podium + 1) return null;
+  const podiumSeconds = Math.max(1, Math.min(600, Number(slides[podium].duration) || 120));
+  return { startAt, podium, welcome, welcomeAt: startAt + podiumSeconds * 1000 };
+}
+
+export function startBallShow(state, show, now = Date.now()) {
+  const first = playbackAction(state, { type: 'goto', index: 0 }, now);
+  return ballShowAction({ ...first, playing: true, showPhase: 'preshow' }, { type: 'tick' }, show, now);
+}
+
+export function ballShowAction(state, action, show, now = Date.now()) {
+  if (!show) return playbackAction(state, action, now);
+  if (action.type === 'start-show') return startBallShow(state, show, now);
+  if (!state.showPhase) {
+    if (state.index >= show.podium && ['play', 'toggle-play', 'loop'].includes(action.type)) return state;
+    const next = playbackAction(state, action, now);
+    return next.playing && next.index >= show.podium ? { ...next, playing: false } : next;
+  }
+
+  // An explicit jump is a manual takeover. The clock must leave that cue on screen.
+  if (action.type === 'goto') {
+    const manual = playbackAction(state, action, now);
+    return { ...manual, playing: false, showPhase: null };
+  }
+  if (action.type === 'tick') {
+    if (now >= show.welcomeAt) {
+      return { ...playbackAction(state, { type: 'goto', index: show.welcome }, now), playing: false, showPhase: null };
+    }
+    if (now >= show.startAt) {
+      if (state.showPhase === 'podium') return state;
+      return { ...playbackAction(state, { type: 'goto', index: show.podium }, now), playing: false, showPhase: 'podium' };
+    }
+  }
+  if (state.showPhase === 'podium') return action.type === 'blackout' ? playbackAction(state, action, now) : state;
+  if (action.type === 'next' || (action.type === 'tick' && state.playing && !state.blackout && remainingTime(state, now) <= 1)) {
+    return playbackAction(state, { type: 'goto', index: (state.index + 1) % show.podium }, now);
+  }
+  return playbackAction(state, action, now);
+}
+
+export function nextPlaybackWake(state, show, now = Date.now()) {
+  const slide = state.playing && !state.blackout ? remainingTime(state, now) : Infinity;
+  const deadline = show && state.showPhase ? (state.showPhase === 'preshow' ? show.startAt : show.welcomeAt) - now : Infinity;
+  return Math.min(slide, deadline);
+}
+
+export function ballCountdown(milliseconds) {
+  const seconds = Math.max(0, Math.ceil(milliseconds / 1000));
+  const minutes = Math.floor(seconds / 60);
+  const rest = String(seconds % 60).padStart(2, '0');
+  return minutes >= 60
+    ? `${Math.floor(minutes / 60)}:${String(minutes % 60).padStart(2, '0')}:${rest}`
+    : `${minutes}:${rest}`;
 }

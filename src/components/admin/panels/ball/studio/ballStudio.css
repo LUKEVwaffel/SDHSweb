@@ -162,3 +162,5 @@
 .bs-player-delete h2 {margin:0 0 12px;font:500 28px/1.2 Oswald,sans-serif;}
 .bs-player-delete p {overflow-wrap:anywhere;color:#c9d0dc;}
 .bs-player-delete > div {display:flex;gap:12px;justify-content:flex-end;margin-top:24px;}
+
+.bs-player-stage { position: relative; }

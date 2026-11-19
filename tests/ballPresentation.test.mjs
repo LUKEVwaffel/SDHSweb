@@ -171,3 +171,51 @@ test('deleting the previewed slide selects its successor or the last remaining s
  const retained=reconcilePlaybackSlides({...state,index:2},slides.slice(1));assert.equal(retained.index,1);assert.equal(retained.slideIds[retained.index],'c');
  assert.equal(reconcilePlaybackSlides(state,slides),state);
 });
+
+import { ballCountdown, ballShowAction, nextPlaybackWake, resolveBallShow, startBallShow } from '../src/lib/ballPlayback.js';
+
+test('preshow loops its photos and keeps the ceremony clock running while autoplay is paused', () => {
+ const show = { startAt: 10000, podium: 2, welcome: 3, welcomeAt: 130000 };
+ let state = startBallShow(createPlayback([2, 2, 120, 8, 8]), show, 0);
+ assert.equal(state.showPhase, 'preshow');
+ assert.equal(state.index, 0);
+ state = ballShowAction(state, { type: 'tick' }, show, 2000);
+ assert.equal(state.index, 1);
+ state = ballShowAction(state, { type: 'tick' }, show, 4000);
+ assert.equal(state.index, 0);
+ state = ballShowAction(state, { type: 'pause' }, show, 9000);
+ assert.equal(nextPlaybackWake(state, show, 9000), 1000);
+ state = ballShowAction(state, { type: 'tick' }, show, 10000);
+ assert.equal(state.showPhase, 'podium');
+ assert.equal(state.index, 2);
+ assert.equal(nextPlaybackWake(state, show, 10000), 120000);
+ assert.equal(ballShowAction(state, { type: 'tick' }, show, 129999).index, 2);
+ state = ballShowAction(state, { type: 'tick' }, show, 130000);
+ assert.equal(state.index, 3);
+ assert.equal(state.showPhase, null);
+ assert.equal(state.playing, false);
+ assert.equal(ballShowAction(state, { type: 'play' }, show, 131000), state);
+ assert.equal(ballShowAction(state, { type: 'next' }, show, 132000).index, 4);
+});
+
+test('jumping to a phone cue cancels automation until preshow is explicitly restarted', () => {
+ const show = { startAt: 10000, podium: 2, welcome: 3, welcomeAt: 130000 };
+ let state = startBallShow(createPlayback([2, 2, 120, 8, 8]), show, 0);
+ state = ballShowAction(state, { type: 'goto', index: 4 }, show, 5000);
+ assert.equal(nextPlaybackWake(state, show, 5000), Infinity);
+ assert.equal(ballShowAction(state, { type: 'tick' }, show, 130000).index, 4);
+ state = ballShowAction(state, { type: 'start-show' }, show, 130000);
+ assert.equal(state.index, 3);
+ assert.equal(ballCountdown(3660100), '1:01:01');
+});
+
+test('deck round trips retain the podium and welcome links and feedback QR metadata', () => {
+ const deck = makeDeck();
+ deck.slides[1].duration = 120;
+ deck.slides[3] = makeSlide('split', { photos: [{ kind: 'qr', url: 'data:image/png;base64,AAA=' }] });
+ deck.show = { startAt: '2026-11-21T22:30:00.000Z', podiumId: deck.slides[1].id, welcomeId: deck.slides[2].id };
+ const copy = readDeck(JSON.parse(JSON.stringify(deck)));
+ assert.notEqual(copy.slides[1].id, deck.slides[1].id);
+ assert.deepEqual(resolveBallShow(copy), { startAt: Date.parse(deck.show.startAt), podium: 1, welcome: 2, welcomeAt: Date.parse(deck.show.startAt) + 120000 });
+ assert.equal(copy.slides[3].photos[0].kind, 'qr');
+});

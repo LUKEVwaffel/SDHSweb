@@ -5,6 +5,7 @@ import './slideCanvas.css';
 export default function SlideCanvas({ slide, deck, index = 0, thumbnail = false, presenting = false, onPhotoPosition, selectedPhoto = 0 }) {
   const drag = useRef(null);
   const theme = THEMES[deck.theme] || THEMES.midnight;
+  const list = slide.layout === 'agenda' || slide.layout === 'recognition' ? slide.subtitle.split('\n').filter(Boolean) : null;
   const count = LAYOUTS.find(l => l.id === slide.layout)?.photos || 0;
   return <div className={`bs-slide bs-layout-${slide.layout} ${thumbnail ? 'bs-thumbnail' : ''} ${presenting ? 'bs-presenting' : ''} ${onPhotoPosition ? 'bs-positioning' : ''} bs-motion-${slide.motion || 'none'} bs-frame-${slide.frame || 'edge'}`} style={{ '--slide-bg': theme.background, '--slide-fg': theme.foreground, '--slide-accent': theme.accent, '--slide-title-size': `${slide.titleSize / 12.8}cqw`, textAlign: slide.align, '--slide-font': slide.font, '--slide-motion-duration': `${Math.max(8,slide.duration)}s` }}>
     {count > 0 && <div className="bs-slide-images">
@@ -15,7 +16,7 @@ export default function SlideCanvas({ slide, deck, index = 0, thumbnail = false,
         const x=photo.focalX ?? slide.focalX, y=photo.focalY ?? slide.focalY, zoom=photo.zoom ?? 1;
         const eventLabel=photo.eventLabel ?? photo.event ?? '';
         const src=thumbnail?(photo.thumb||photo.url):photo.url;
-        return <div className={`bs-photo-frame ${onPhotoPosition?'bs-photo-editable':''} ${onPhotoPosition&&selectedPhoto===i?'bs-photo-selected':''}`} data-fit={fit} data-photo-index={i} key={i}
+        return <div className={`bs-photo-frame ${onPhotoPosition?'bs-photo-editable':''} ${onPhotoPosition&&selectedPhoto===i?'bs-photo-selected':''}`} data-fit={fit} data-photo-kind={photo.kind} data-photo-index={i} key={i}
           onPointerDown={onPhotoPosition ? e=>{
             if(e.button!==0)return;
             const img=e.currentTarget.querySelector('.bs-photo-main');
@@ -42,8 +43,8 @@ export default function SlideCanvas({ slide, deck, index = 0, thumbnail = false,
     <div className="bs-slide-copy">
       {slide.eyebrow && <div className="bs-slide-eyebrow">{slide.eyebrow}</div>}
       {slide.title && <div className="bs-slide-title">{slide.layout === 'quote' && <span className="bs-quote-mark">“</span>}{slide.title}</div>}
-      {slide.subtitle && (slide.layout === 'agenda' || slide.layout === 'recognition' ? <div className="bs-slide-list">{slide.subtitle.split('\n').filter(Boolean).map((line,i) => <div key={i}><span>{slide.layout === 'agenda' ? String(i + 1).padStart(2,'0') : '✦'}</span>{line}</div>)}</div> : <div className="bs-slide-subtitle">{slide.subtitle}</div>)}
+      {slide.subtitle && (list ? <div className={`bs-slide-list ${slide.layout==='recognition'&&list.length>8?'bs-list-columns':''}`}>{list.map((line,i) => <div key={i}><span>{slide.layout === 'agenda' ? String(i + 1).padStart(2,'0') : '✦'}</span>{line}</div>)}</div> : <div className="bs-slide-subtitle">{slide.subtitle}</div>)}
     </div>
-    <div className="bs-slide-footer"><span>Trojan Battalion</span>{deck.showNumbers && <span>{String(index + 1).padStart(2,'0')}</span>}</div>
+    {!(deck.show && slide.layout === 'photo')&&<div className="bs-slide-footer"><span>Trojan Battalion</span>{deck.showNumbers && <span>{String(index + 1).padStart(2,'0')}</span>}</div>}
   </div>;
 }

@@ -14,7 +14,21 @@ export function useStudioHost(deck, playback) {
     const publish=()=>{
       const {deck,playback}=current.current;const state=playback.stateRef.current;
       const payload={kind:'state',seq:++sequence,ack:lastAck,deckName:deck.name,theme:deck.theme,showNumbers:deck.showNumbers,index:state.index,total:deck.slides.length,current:deck.slides[state.index],next:deck.slides[state.index+1]||(state.loop?deck.slides[0]:null),playing:state.playing,blackout:state.blackout,loop:state.loop,remaining:remainingTime(state)};
-      // Thumbnail URLs are omitted on the wire; the phone only renders two slides.
+      if (playback.show) {
+        const { podium, welcome, startAt, welcomeAt } = playback.show;
+        if (state.showPhase === 'preshow') {
+          payload.nextIndex = (state.index + 1) % podium;
+          payload.next = deck.slides[payload.nextIndex];
+        }
+        payload.showPhase = state.showPhase;
+        payload.countdown = state.showPhase === 'preshow' ? Math.max(0, startAt - Date.now())
+          : state.showPhase === 'podium' ? Math.max(0, welcomeAt - Date.now()) : null;
+        payload.manualCues = state.index >= podium;
+        payload.cues = deck.slides.slice(welcome).map((slide, i) => ({
+          index: welcome + i, title: slide.title || 'Untitled cue', time: i ? slide.eyebrow : '',
+        }));
+      }
+      // The phone renders only the current and next slides.
       return transport.current?.send(payload).then(()=>setStatus('READY')).catch(()=>setStatus('RECONNECTING'));
     };
     const connection=studioChannel(SB,token,message=>{
