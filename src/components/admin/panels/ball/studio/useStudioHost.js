@@ -2,8 +2,8 @@ import {useState,useRef,useEffect,useCallback} from 'react';
 import {supabase as SB} from '../../../../../lib/supabaseClient';
 import {studioChannel,createRemoteToken} from '../../../../../lib/ballStudioRemote';
 import {remainingTime,createCommandReceiver} from '../../../../../lib/ballPlayback';
-export function useStudioHost(deck, playback) {
-  const [token,setToken]=useState(null);
+export function useStudioHost(deck, playback, pairOnOpen = false) {
+  const [token,setToken]=useState(() => pairOnOpen ? createRemoteToken() : null);
   const [status,setStatus]=useState('OFF');
   const [phoneSeen,setPhoneSeen]=useState(0);
   const transport=useRef();const current=useRef();current.current={deck,playback};

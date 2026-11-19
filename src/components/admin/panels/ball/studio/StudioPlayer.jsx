@@ -16,11 +16,11 @@ function ShowCountdown({ until }) {
   },[]);
   return <div className="bs-show-countdown"><span>Ceremony begins in</span><strong>{ballCountdown(until-now)}</strong></div>;
 }
-export default function StudioPlayer({deck,startIndex=0,runShow=false,onClose,onPhotoEdit,onDeleteSlide}) {
+export default function StudioPlayer({deck,startIndex=0,runShow=false,pairOnOpen=false,onClose,onPhotoEdit,onDeleteSlide}) {
   const playback=useStudioPlayback(deck,startIndex,runShow);const {state,send}=playback;
   const {index,playing,blackout}=state;const slide=deck.slides[index];
-  const host=useStudioHost(deck,playback);
-  const [notes,setNotes]=useState(false);const [hint,setHint]=useState('');const [fullscreen,setFullscreen]=useState(false);const [pairing,setPairing]=useState(false);
+  const host=useStudioHost(deck,playback,pairOnOpen);
+  const [notes,setNotes]=useState(false);const [hint,setHint]=useState('');const [fullscreen,setFullscreen]=useState(false);const [pairing,setPairing]=useState(pairOnOpen);
   const [deleteTarget,setDeleteTarget]=useState(null);
   const deleteRef=useRef(null);
   const confirmRef=useRef(null);
