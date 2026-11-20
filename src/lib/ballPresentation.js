@@ -15,6 +15,7 @@ export const LAYOUTS = [
 ];
 export const THEMES = {
   midnight: { name: 'Midnight & gold', background: '#081729', foreground: '#f7f0df', accent: '#e5c37e' },
+  formal: { name: 'Formal navy & gold', background: '#0b1829', foreground: '#f7f0df', accent: '#e4c183' },
   ivory: { name: 'Ivory formal', background: '#f3efe5', foreground: '#16243a', accent: '#856520' },
   crimson: { name: 'Crimson ceremony', background: '#260e17', foreground: '#fff2e3', accent: '#e8bc7a' },
   black: { name: 'Black tie', background: '#090909', foreground: '#f4f4ef', accent: '#ccccb8' },

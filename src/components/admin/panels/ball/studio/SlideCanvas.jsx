@@ -7,7 +7,7 @@ export default function SlideCanvas({ slide, deck, index = 0, thumbnail = false,
   const theme = THEMES[deck.theme] || THEMES.midnight;
   const list = slide.layout === 'agenda' || slide.layout === 'recognition' ? slide.subtitle.split('\n').filter(Boolean) : null;
   const count = LAYOUTS.find(l => l.id === slide.layout)?.photos || 0;
-  return <div className={`bs-slide bs-layout-${slide.layout} ${thumbnail ? 'bs-thumbnail' : ''} ${presenting ? 'bs-presenting' : ''} ${onPhotoPosition ? 'bs-positioning' : ''} bs-motion-${slide.motion || 'none'} bs-frame-${slide.frame || 'edge'}`} style={{ '--slide-bg': theme.background, '--slide-fg': theme.foreground, '--slide-accent': theme.accent, '--slide-title-size': `${slide.titleSize / 12.8}cqw`, textAlign: slide.align, '--slide-font': slide.font, '--slide-motion-duration': `${Math.max(8,slide.duration)}s` }}>
+  return <div className={`bs-slide ${theme === THEMES.formal ? 'bs-theme-formal' : ''} bs-layout-${slide.layout} ${thumbnail ? 'bs-thumbnail' : ''} ${presenting ? 'bs-presenting' : ''} ${onPhotoPosition ? 'bs-positioning' : ''} bs-motion-${slide.motion || 'none'} bs-frame-${slide.frame || 'edge'}`} style={{ '--slide-bg': theme.background, '--slide-fg': theme.foreground, '--slide-accent': theme.accent, '--slide-title-size': `${slide.titleSize / 12.8}cqw`, textAlign: slide.align, '--slide-font': slide.font, '--slide-motion-duration': `${Math.max(8,slide.duration)}s` }}>
     {count > 0 && <div className="bs-slide-images">
       {Array.from({ length: count }, (_, i) => {
         const photo=slide.photos[i];

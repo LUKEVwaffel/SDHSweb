@@ -116,3 +116,24 @@
   outline: 1px solid var(--slide-accent);
   outline-offset: .8cqw;
 }
+
+.bs-theme-formal::after {
+  position: absolute;
+  z-index: 2;
+  inset: 2.5%;
+  border: 1px solid color-mix(in srgb, var(--slide-accent) 42%, transparent);
+  content: '';
+  pointer-events: none;
+}
+
+.bs-theme-formal.bs-layout-photo::after {
+  border-color: color-mix(in srgb, var(--slide-accent) 62%, transparent);
+  box-shadow: 0 0 0 1px #101b2b45;
+}
+
+.bs-theme-formal .bs-slide-footer { bottom: 4.4%; }
+.bs-theme-formal .bs-slide-title { text-wrap: balance; }
+.bs-theme-formal.bs-layout-title .bs-slide-copy { inset: 12% 11% 14%; }
+.bs-theme-formal.bs-layout-title .bs-slide-copy::before { height: 1px; margin-bottom: 2.4cqw; }
+.bs-theme-formal.bs-layout-title .bs-slide-subtitle { margin: 2cqw auto 0; max-width: 62cqw; }
+.bs-theme-formal.bs-layout-recognition .bs-slide-title { color: var(--slide-accent); }
