@@ -18,7 +18,7 @@ export default function OfflineDeskControls({ desk, setDesk, session, online, bu
   const email = checkinActor(session);
   const signedIn = Boolean(email && (!desk || email === desk.actor));
   const expired = desk && deskTime(desk) > Date.parse(desk.expiresAt);
-  const needsReviewers = desk && new Set(desk.reviewers.map(reviewer => reviewer.key)).size < 2;
+  const needsReviewers = desk && new Set(desk.reviewers.map(reviewer => reviewer.key)).size < 4;
 
   function start() {
     return run(async () => {
@@ -91,8 +91,8 @@ export default function OfflineDeskControls({ desk, setDesk, session, online, bu
     <div aria-live="polite">
       <strong>{expired ? 'Offline work window ended' : needsReviewers ? 'Offline roster ready · reviewer setup incomplete' : 'Offline station ready'}</strong>
       <p>Roster saved at {new Date(desk.issuedAt).toLocaleString('en-US', { dateStyle: 'short', timeStyle: 'short', timeZone: 'America/New_York' })}. {desk.pending.length ? `${desk.pending.length} action${desk.pending.length === 1 ? '' : 's'} waiting to sync.` : 'No actions waiting to sync.'} {!online && 'No internet connection.'}</p>
-      <p>{desk.reviewers.length ? `Reviewers enrolled: ${[...new Set(desk.reviewers.map(reviewer => reviewer.name))].join(', ')}.` : 'Enroll Aubry and Kylie while connected to enable offline attire reviews.'}</p>
-      {needsReviewers && desk.reviewers.length > 0 && <p>Enroll the remaining reviewer before leaving the connection.</p>}
+      <p>{desk.reviewers.length ? `Reviewers enrolled: ${[...new Set(desk.reviewers.map(reviewer => reviewer.name))].join(', ')}.` : 'Enroll Aubry, Kylie, Luke, and Danielle while connected to enable offline attire reviews.'}</p>
+      {needsReviewers && desk.reviewers.length > 0 && <p>Enroll the remaining reviewers while connected.</p>}
       {!signedIn && online && <p>Sign back in as {desk.actor} to sync or enroll a reviewer.</p>}
     </div>
     <div className="door-offline-buttons">

@@ -28,3 +28,10 @@ test('Existing reviewer lockout is honored', async () => {
   const result=await identifyDoorReviewer('1001',[{...reviewers[0],pin_locked_until:new Date(Date.now()+60000).toISOString()}]);
   assert.equal(result.reviewer,null); assert.match(result.error,/locked/);
 });
+
+test('The dedicated door code identifies Luke and remains distinct from the original reviewers', async () => {
+  const luke = {key:'luke',email:'luke@example.invalid',name:'Luke Vetsch',pin_hash:await hashPin('4004'),active:true};
+  assert.equal((await identifyDoorReviewer('4004',[...reviewers,luke])).reviewer.name,'Luke Vetsch');
+  assert.equal((await identifyDoorReviewer('4004',[...reviewers,{...luke,pin_hash:null}])).reviewer,null);
+  assert.equal((await identifyDoorReviewer('1001',[...reviewers,{...luke,pin_hash:aubryHash}])).reviewer,null);
+});

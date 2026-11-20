@@ -7,15 +7,14 @@ import { verifyDoorReview } from '../_shared/doorOfflineProof.js';
 const uuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
 async function verifyReviewer(svc: ReturnType<typeof serviceClient>, email: string, pin: string) {
-  if (!PIN_RE.test(pin)) return { failure: json({ error: 'Aubry or Kylie must enter their four-digit code' }, 400) };
+  if (!PIN_RE.test(pin)) return { failure: json({ error: 'An authorized reviewer must enter their four-digit code' }, 400) };
   const attempt = await svc.rpc('ball_reserve_door_pin', { p_actor: email });
   if (attempt.error) return { failure: json({ error: 'Could not verify code. Try again later' }, 503) };
   if (attempt.data?.allowed !== true) return { failure: json({ error: 'Too many code attempts at this station. Wait 15 minutes before trying again.' }, 423) };
-  const { data: accounts, error: accountError } = await svc.from('ball_door_approvers').select('key,email').in('key', ['aubry','kylie']);
-  if (accountError || !accounts?.length) return { failure: json({ error: 'Reviewers are not configured' }, 403) };
-  const { data: staff, error: staffError } = await svc.from('ball_dress_staff').select('email,name,active,pin_hash,pin_locked_until').in('email', accounts.map(account => account.email));
+  const { data: staff, error: staffError } = await svc.rpc('ball_door_reviewer_credentials');
   if (staffError) return { failure: json({ error: 'Could not verify reviewer codes' }, 503) };
-  const identity = await identifyDoorReviewer(pin, (staff || []).map(person => ({ ...person, key: accounts.find(account => account.email === person.email)?.key })));
+  if (!staff?.length) return { failure: json({ error: 'Reviewers are not configured' }, 403) };
+  const identity = await identifyDoorReviewer(pin, staff);
   if (identity.error || !identity.reviewer) return { failure: json({ error: identity.error }, 401) };
   const cleared = await svc.from('ball_door_pin_attempts').update({ fail_count: 0, locked_until: null }).eq('actor', email);
   if (cleared.error) return { failure: json({ error: 'Could not complete code verification. Please retry' }, 503) };

@@ -5,7 +5,7 @@ import { P } from '../../theme';
 import { Btn, Input } from '../../shared/ui';
 
 export default function BallDoorPinReset() {
-  return <section style={{ marginBottom: 28 }}><h3 style={{ fontSize: 18 }}>On-site attire passcodes</h3><p style={{ color: P.mute, fontSize: 13 }}>Only S-6 can reset these codes. A reset takes effect immediately and clears that reviewer’s code lockout. Station attempt limits still apply. Aubry and Kylie must use different codes. These are the reviewers’ real codes, also used when testing attire review in the sandbox.</p>{[['aubry','Aubry Gillott'],['kylie','Kylie Gray']].map(([id, name]) => <Reviewer key={id} id={id} name={name} />)}</section>;
+  return <section style={{ marginBottom: 28 }}><h3 style={{ fontSize: 18 }}>On-site attire passcodes</h3><p style={{ color: P.mute, fontSize: 13 }}>Only S-6 can reset these codes. A reset takes effect immediately and clears that reviewer’s code lockout. Station attempt limits still apply. Each reviewer must use a different code. Luke’s and Danielle’s codes apply only at the door. These are the reviewers’ real codes, also used when testing attire review in the sandbox.</p>{[['aubry','Aubry Gillott'],['kylie','Kylie Gray'],['luke','Luke Vetsch'],['danielle','Danielle']].map(([id, name]) => <Reviewer key={id} id={id} name={name} />)}</section>;
 }
 function Reviewer({ id, name }) {
   const [pin, setPin] = useState(''); const [confirmation, setConfirmation] = useState('');

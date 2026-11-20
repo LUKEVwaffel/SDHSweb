@@ -29,10 +29,10 @@ The operator records the parent’s name and confirms the parent is present and
 the signed paper has been received. Host and guest receipt are independent.
 Recording a form cannot bypass payment or attire.
 
-Only Aubry Gillott and Kylie Gray may approve or deny attire at the door. The
+Aubry Gillott, Kylie Gray, Luke Vetsch, and Danielle can approve or deny attire at the door. The
 reviewer opens Verify on site, chooses approve or deny with the arrow keys,
-presses Enter, and enters their existing four-digit dress passcode. The code
-automatically identifies Aubry or Kylie; the popup displays who verified it.
+presses Enter, and enters their four-digit attire passcode. The code
+automatically identifies the reviewer; the popup displays who verified it.
 Incorrect-code limits apply per desk operator in sandbox too. Reviewer codes
 must differ; duplicate codes fail closed and S-6 must reset one. No
 passcode is saved in roster state or audit records. Denied attire blocks entry;
@@ -57,8 +57,8 @@ private contacts, medical details and verification tokens are excluded.
    **Prepare offline station**. It downloads the roster, switches the desk to
    local recording and gives staff a 24-hour work window. Prepare it after
    final payment and verification updates are in the roster.
-2. While still connected, have Aubry and Kylie each choose **Enroll an
-   offline reviewer** and enter their usual PIN. Each reviewer privately saves
+2. While still connected, have Aubry, Kylie, Luke, and Danielle each choose **Enroll an
+   offline reviewer** and enter their attire passcode. Each reviewer privately saves
    their generated offline code for this station. During an offline review,
    the reviewer enters that code. The station saves verification keys and
    signed decisions. The PIN and offline code stay out of the saved roster
@@ -113,6 +113,9 @@ the S-6-only `ball_offline_receipts` table.
   `ball-checkin-issue-pin` and `ball-door-action` with JWT verification, and
   `ball-checkin-pin-login` with `--no-verify-jwt` for the pre-auth PIN exchange.
   The SQL rate limit applies before a PIN can be matched.
+- Apply `supabase/BALL_DOOR_ADDITIONAL_REVIEWERS.sql` after the desk PIN migration,
+  then redeploy `ball-door-action` and `ball-door-reset-pin`. Configure Luke’s and Danielle’s
+  separate door attire codes under **Military Ball → Check-in**.
 - Attendance is scoped to the 2026 Ball; prepare a new event scope before reusing
   the system for another year's event.
 
