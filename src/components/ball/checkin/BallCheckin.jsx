@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { supabase as SB } from '../../../lib/supabaseClient';
+import { checkinActor, getCheckinAuth } from '../../../lib/ballCheckinAuth';
 import { doorGroups, personKey } from './doorRoster';
 import DoorRequirements from './DoorRequirements';
 import { invokeError } from '../../../lib/supabaseFnError';
@@ -12,8 +13,14 @@ const mode = new URLSearchParams(window.location.search);
 const sandbox = mode.get('sandbox') === '1' || mode.get('demo') === '1';
 const time = value => value ? new Date(value).toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', timeZone: 'America/New_York' }) : '';
 export default function BallCheckin() {
-  const [session, setSession] = useState(undefined);
+  const checkinAuth = getCheckinAuth();
+  const [pinSession, setPinSession] = useState(undefined);
+  const [existingSession, setExistingSession] = useState(null);
   const [desk, setDesk] = useState(sandbox ? null : undefined);
+  // Previously prepared desks can finish syncing with their original session.
+  const existingDeskSession = desk && checkinActor(existingSession) === desk.actor ? existingSession : null;
+  const session = pinSession === undefined ? undefined : pinSession || existingDeskSession;
+  const client = session && !pinSession ? SB : checkinAuth;
   const accountId = desk === null ? session?.user?.id : undefined;
   const [livePhase, setPhase] = useState('loading');
   const [livePeople, setPeople] = useState([]);
@@ -41,8 +48,8 @@ export default function BallCheckin() {
   const writeLock = useRef(false);
   const loadVersion = useRef(0);
   const invalidateLoads = useCallback(() => { loadVersion.current += 1; }, []);
-  const invoke = useCallback(body => SB.functions.invoke('ball-door-action', { body }), []);
-  const source = useMemo(() => createDoorSource((name, args) => SB.rpc(name, args), sandbox, invoke), [invoke]);
+  const invoke = useCallback(body => client.functions.invoke('ball-door-action', { body }), [client]);
+  const source = useMemo(() => createDoorSource((name, args) => client.rpc(name, args), sandbox, invoke), [client, invoke]);
 
   useEffect(() => {
     if (sandbox) return;
@@ -58,10 +65,13 @@ export default function BallCheckin() {
   }, []);
 
   useEffect(() => {
-    SB.auth.getSession().then(({ data }) => setSession(data.session)).catch(() => setSession(null));
-    const { data } = SB.auth.onAuthStateChange((_event, next) => setSession(next));
-    return () => data.subscription.unsubscribe();
-  }, []);
+    const pin = checkinAuth.auth.onAuthStateChange((_event, next) => setPinSession(next));
+    const existing = SB.auth.onAuthStateChange((_event, next) => setExistingSession(next));
+    return () => {
+      pin.data.subscription.unsubscribe();
+      existing.data.subscription.unsubscribe();
+    };
+  }, [checkinAuth]);
 
   const load = useCallback(async () => {
     const version = ++loadVersion.current;
@@ -223,7 +233,7 @@ export default function BallCheckin() {
 
   return <main className="ball-door">
     <header className="door-top"><a href={sandbox ? "/ball/checkin?sandbox=1" : "/ball/checkin"} className="door-brand">Trojan Battalion <span>2026 SDHS AJROTC Ball</span></a>
-      {session && !desk && <div className="door-account"><span>{session.user.email}</span><button onClick={() => SB.auth.signOut()}>Sign out</button></div>}
+      {session && !desk && <div className="door-account"><span>{session.user.app_metadata?.ball_checkin_name || checkinActor(session)}</span><button onClick={() => checkinAuth.auth.signOut({ scope: 'local' })}>Sign out</button></div>}
       {desk && <div className="door-account door-offline-account"><span>{desk.actor}</span></div>}
     </header>
     {sandbox && <div className="door-demo"><strong>Sandbox · Real guest list</strong><span>Real roster. Practice arrivals, attire decisions and form receipts stay in this tab.</span>{session && <button disabled={!!busy} onClick={() => { source.reset(); next(); setNotice('Sandbox practice decisions cleared.'); load(); }}>Reset practice</button>}</div>}
@@ -234,8 +244,8 @@ export default function BallCheckin() {
       <div aria-live="polite" className="door-announcements">{notice && <div className="door-success">{notice}<button onClick={() => setNotice('')} aria-label="Dismiss check-in confirmation">Dismiss</button></div>}</div>
       {error && <div className="door-error" role="alert">{error}{!desk && <button disabled={!!busy} onClick={load}>Refresh roster</button>}</div>}
       {!sandbox && (desk || phase === 'ready') && <OfflineDeskControls desk={desk} setDesk={setDesk} session={session} online={online} busy={!!busy}
-        run={runOffline} invoke={invoke} onRenew={() => setRenewLogin(value => !value)} prepare={() => SB.rpc('ball_prepare_offline_station')} />}
-      {desk && online && (renewLogin || session?.user?.email?.toLowerCase() !== desk.actor)
+        run={runOffline} invoke={invoke} onRenew={() => setRenewLogin(value => !value)} prepare={() => client.rpc('ball_prepare_offline_station')} />}
+      {desk && online && (renewLogin || checkinActor(session) !== desk.actor)
         && <DoorLogin actor={desk.actor} onSignedIn={() => setRenewLogin(false)} />}
       {!desk && !online && <div className="door-error" role="alert">You are offline. Check-in is paused until the connection returns. No arrivals are saved offline.</div>}
       {phase === 'loading' ? <div className="door-centered" role="status">Loading the guest list…</div> : phase === 'error' ? <div className="door-empty"><h2>Check-in isn’t available yet</h2><p>Your account needs check-in access. Ask the organizer to add you under Military Ball → Check-in.</p><button onClick={load}>Try again</button></div> : <>
@@ -270,16 +280,48 @@ export default function BallCheckin() {
 }
 
 function DoorLogin({ actor, onSignedIn }) {
-  const [email, setEmail] = useState(actor || ''); const [password, setPassword] = useState(''); const [busy, setBusy] = useState(false); const [error, setError] = useState('');
+  const checkinAuth = getCheckinAuth();
+  const [pin, setPin] = useState('');
+  const [busy, setBusy] = useState(false);
+  const [error, setError] = useState('');
+
   async function submit(event) {
-    event.preventDefault(); setBusy(true); setError('');
+    event.preventDefault();
+    if (busy || pin.length !== 4) return;
+    setBusy(true);
+    setError('');
     try {
-      const { error: problem } = await SB.auth.signInWithPassword({ email: email.trim().toLowerCase(), password });
-      if (problem) throw problem;
+      const { data, error: problem } = await checkinAuth.functions.invoke('ball-checkin-pin-login', {
+        body: { pin, ...(actor ? { expected_actor: actor } : {}) },
+      });
+      if (problem || !data?.token_hash) {
+        throw new Error(await invokeError(data, problem, 'Could not open check-in. Try again.'));
+      }
+      const { error: sessionError } = await checkinAuth.auth.verifyOtp({ token_hash: data.token_hash, type: 'magiclink' });
+      if (sessionError) throw new Error('Could not open check-in. Enter your PIN again.');
       onSignedIn?.();
+    } catch (problem) {
+      setError(problem.message);
+    } finally {
+      setPin('');
+      setBusy(false);
     }
-    catch { setError('Could not sign in. Check the email and password provided by the organizer.'); }
-    finally { setBusy(false); }
   }
-  return <section className="door-login"><p className="door-eyebrow">Welcome desk</p><h1>{actor ? 'Sign in to sync' : 'Ball check-in'}</h1><p>Sign in with your check-in staff account.</p><form onSubmit={submit}><label htmlFor="door-email">Email</label><input id="door-email" type="email" autoComplete="username" readOnly={!!actor} required value={email} onChange={event => setEmail(event.target.value)} /><label htmlFor="door-password">Password</label><input id="door-password" type="password" autoComplete="current-password" required value={password} onChange={event => setPassword(event.target.value)} />{error && <p role="alert" className="door-login-error">{error}</p>}<button className="door-checkin" disabled={busy}>{busy ? 'Signing in…' : actor ? 'Sign in' : 'Open check-in'}</button></form><p className="door-login-note">Need an account or a password reset? Ask the Ball organizer.</p></section>;
+
+  return <section className="door-login">
+    <p className="door-eyebrow">Welcome desk</p>
+    <h1>{actor ? 'Sign in to sync' : 'Ball check-in'}</h1>
+    <p>Enter your four-digit check-in PIN.</p>
+    <form onSubmit={submit}>
+      <label htmlFor="door-staff-pin">Check-in PIN</label>
+      <input id="door-staff-pin" type="password" inputMode="numeric" autoComplete="off"
+        pattern="[0-9]{4}" maxLength={4} required value={pin}
+        onChange={event => setPin(event.target.value.replace(/\D/g, ''))} />
+      {error && <p role="alert" className="door-login-error">{error}</p>}
+      <button className="door-checkin" disabled={busy || pin.length !== 4}>
+        {busy ? 'Signing in…' : actor ? 'Sign in' : 'Open check-in'}
+      </button>
+    </form>
+    <p className="door-login-note">Need a PIN? Ask the Ball organizer.</p>
+  </section>;
 }

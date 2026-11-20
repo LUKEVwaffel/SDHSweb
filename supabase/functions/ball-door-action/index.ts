@@ -72,27 +72,30 @@ Deno.serve(async req => {
     const caller = await getCaller(req);
     if (!caller || caller.mustChangePassword) return json({ error: 'Sign in to check-in first' }, 403);
     const svc = serviceClient();
-    const permission = await svc.rpc('ball_door_actor_allowed', { p_actor: caller.email });
+    const actorResult = await svc.rpc('ball_resolve_checkin_actor', { p_auth_email: caller.email });
+    const actor = actorResult.data;
+    if (actorResult.error || !actor) return json({ error: 'Check-in access required' }, 403);
+    const permission = await svc.rpc('ball_door_actor_allowed', { p_actor: actor });
     if (permission.error || permission.data !== true) return json({ error: 'Check-in access required' }, 403);
     const body = await req.json();
-    if (body.action === 'offline_enroll' || body.action === 'offline_sync') return await offlineAction(svc, caller.email, body);
+    if (body.action === 'offline_enroll' || body.action === 'offline_sync') return await offlineAction(svc, actor, body);
     if (typeof body.sandbox !== 'boolean' || !['cadet','guest','vip','vip_date'].includes(body.kind) || !/^[0-9a-f-]{36}$/i.test(body.person_id || '')) return json({ error: 'Attendee and explicit sandbox mode required' }, 400);
     if (body.action === 'confirm_student') {
       if (body.sandbox || typeof body.sdhs_student !== 'boolean') return json({ error: 'Use local sandbox confirmation or supply school status' }, 400);
-      const { data, error } = await svc.rpc('ball_confirm_door_student', { p_actor: caller.email, p_kind: body.kind, p_person: body.person_id, p_sdhs: body.sdhs_student });
+      const { data, error } = await svc.rpc('ball_confirm_door_student', { p_actor: actor, p_kind: body.kind, p_person: body.person_id, p_sdhs: body.sdhs_student });
       return error ? json({ error: error.message }, 409) : json({ result: data });
     }
     if (body.action === 'receive_form') {
       // Sandbox form receipts are handled in tab memory, never this writer.
       if (body.sandbox) return json({ error: 'Use local sandbox form receipt' }, 400);
-      const { data, error } = await svc.rpc('ball_receive_door_form', { p_actor: caller.email, p_kind: body.kind, p_person: body.person_id, p_parent: body.parent_name, p_signed: body.parent_present_signed === true });
+      const { data, error } = await svc.rpc('ball_receive_door_form', { p_actor: actor, p_kind: body.kind, p_person: body.person_id, p_parent: body.parent_name, p_signed: body.parent_present_signed === true });
       return error ? json({ error: error.message }, 409) : json({ result: data });
     }
     if (body.action !== 'attire' || typeof body.approved !== 'boolean') return json({ error: 'Choose an attire decision' }, 400);
-    const { reviewer, failure } = await verifyReviewer(svc, caller.email, String(body.pin ?? ''));
+    const { reviewer, failure } = await verifyReviewer(svc, actor, String(body.pin ?? ''));
     if (!reviewer) return failure!;
     const { data, error } = await svc.rpc('ball_decide_door_attire', {
-      p_actor: caller.email, p_kind: body.kind, p_person: body.person_id,
+      p_actor: actor, p_kind: body.kind, p_person: body.person_id,
       p_approver: reviewer.key, p_hash: reviewer.pin_hash, p_approved: body.approved,
       p_expected: body.expected_attire, p_sandbox: body.sandbox,
     });

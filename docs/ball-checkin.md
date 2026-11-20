@@ -1,18 +1,19 @@
 # Ball check-in
 
-The desk page is `/ball/checkin`. It has its own email/password sign-in.
+The desk page is `/ball/checkin`. Staff sign in with a four-digit check-in PIN.
 
 ## Set up a staff member
 
 1. In DISPATCH, open Military Ball → CHECK-IN.
-2. Enter the staff member's name and email, then grant access.
-3. Give them the check-in URL and generated password privately. Existing
-   logins retain their current password; this does not reset other accounts.
-4. Have them sign in on the device they will use at the desk.
-5. Disable the account from that same tab when its check-in access is no longer needed.
+2. Enter the staff member’s name and email and choose **Generate PIN**.
+3. Give the PIN and check-in URL to that staff member privately. Their email
+   identifies them in the audit log. They only enter the PIN at the desk.
+4. Have them enter the PIN on the device they will use at the desk.
+5. Disable the staff member from the same tab when access is no longer needed.
 
-Only check-in access is granted. Other existing permissions are unchanged.
-Password resets use Portal Access → AUTH.
+A PIN lasts 72 hours. Generate a replacement for the same staff email if it
+expires or needs changing. A PIN signs into a separate desk-only identity, so
+the staff member’s other sign-ins and DISPATCH privileges are unaffected.
 
 ## At the door
 
@@ -75,8 +76,8 @@ registrations or payments require a new roster prepared while connected.
 
 ## After reconnecting
 
-Choose **Sync saved actions** while signed in as the account that prepared the
-station. If the login expired, sign back in as that account. Check that the
+Choose **Sync saved actions** with the same staff identity that prepared the
+station. If the login expired, enter that staff member’s PIN again. Check that the
 waiting count reaches zero, then choose **Return to live & clear device**.
 Sync rechecks current entry requirements and revisions, preserves the original
 arrival time and desk operator, and records the server receipt separately.
@@ -108,6 +109,10 @@ the S-6-only `ball_offline_receipts` table.
   automatic PIN migrations, then redeploy `ball-door-action`. Publish the
   production frontend through the usual pipeline. Offline preparation uses
   the built assets and requires HTTPS or localhost.
+- Apply `supabase/BALL_CHECKIN_PIN.sql` after the offline migration. Deploy
+  `ball-checkin-issue-pin` and `ball-door-action` with JWT verification, and
+  `ball-checkin-pin-login` with `--no-verify-jwt` for the pre-auth PIN exchange.
+  The SQL rate limit applies before a PIN can be matched.
 - Attendance is scoped to the 2026 Ball; prepare a new event scope before reusing
   the system for another year's event.
 

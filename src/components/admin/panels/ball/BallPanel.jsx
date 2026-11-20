@@ -29,7 +29,10 @@ const BUCKET = 'ball-assets';
 // nav) — it covers every non-DISPATCH staff portal in one place now,
 // not just the Ball ones.
 export default function BallPanel({ adminId }) {
-  const [tab, setTab] = useState(() => new URLSearchParams(window.location.search).get('tab') === 'studio' ? 'studio' : 'overview');
+  const [tab, setTab] = useState(() => {
+    const requested = new URLSearchParams(window.location.search).get('tab');
+    return TABS.some(item => item.id === requested) ? requested : 'overview';
+  });
   const [config, setConfig] = useState(null);
   const [gallery, setGallery] = useState([]);
   const [saving, setSaving] = useState(false);

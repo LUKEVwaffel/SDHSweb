@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { checkinActor } from '../../../lib/ballCheckinAuth.js';
 import { createReviewerCode } from '../../../../supabase/functions/_shared/doorOfflineProof.js';
 import { invokeError } from '../../../lib/supabaseFnError.js';
 import { deskTime, prepareCheckinShell, saveOfflineDesk } from './doorOffline.js';
@@ -14,7 +15,7 @@ export default function OfflineDeskControls({ desk, setDesk, session, online, bu
   const [pin, setPin] = useState('');
   const [code, setCode] = useState(null);
   const [showConflict, setShowConflict] = useState(false);
-  const email = session?.user?.email?.toLowerCase();
+  const email = checkinActor(session);
   const signedIn = Boolean(email && (!desk || email === desk.actor));
   const expired = desk && deskTime(desk) > Date.parse(desk.expiresAt);
   const needsReviewers = desk && new Set(desk.reviewers.map(reviewer => reviewer.key)).size < 2;
