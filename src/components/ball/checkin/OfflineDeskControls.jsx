@@ -14,11 +14,13 @@ export default function OfflineDeskControls({ desk, setDesk, session, online, bu
   const [enrolling, setEnrolling] = useState(false);
   const [pin, setPin] = useState('');
   const [code, setCode] = useState(null);
+  const [copied, setCopied] = useState(false);
   const [showConflict, setShowConflict] = useState(false);
   const email = checkinActor(session);
   const signedIn = Boolean(email && (!desk || email === desk.actor));
   const expired = desk && deskTime(desk) > Date.parse(desk.expiresAt);
-  const needsReviewers = desk && new Set(desk.reviewers.map(reviewer => reviewer.key)).size < 4;
+  const reviewers = [...new Set(desk?.reviewers.map(reviewer => reviewer.name))];
+  const canManage = !busy && online && signedIn && !code;
 
   function start() {
     return run(async () => {
@@ -47,11 +49,12 @@ export default function OfflineDeskControls({ desk, setDesk, session, online, bu
       const { result } = await send(invoke, { action: 'offline_enroll', station_id: desk.id, pin: enteredPin, public_key: publicKey });
       setDesk(await saveOfflineDesk(desk, { ...desk, reviewers: [...desk.reviewers, result] }));
       setEnrolling(false);
+      setCopied(false);
       setCode({ name: result.name, value: reviewerCode });
     });
   }
 
-  async function sync() {
+  async function finish() {
     await run(async () => {
       let current = desk;
       const blocked = new Set();
@@ -67,7 +70,13 @@ export default function OfflineDeskControls({ desk, setDesk, session, online, bu
         current = await saveOfflineDesk(current, { ...current, pending });
         setDesk(current);
       }
-      if (blocked.size) setShowConflict(true);
+      if (blocked.size) {
+        setShowConflict(true);
+        return;
+      }
+      setDesk(await saveOfflineDesk(current, null));
+      setEnrolling(false);
+      setCode(null);
     });
   }
 
@@ -81,44 +90,60 @@ export default function OfflineDeskControls({ desk, setDesk, session, online, bu
     setTimeout(() => URL.revokeObjectURL(url), 1000);
   }
 
-  if (!desk) return <section className="door-offline-tools" aria-label="Offline setup">
-    <p><strong>Venue Wi-Fi uncertain?</strong> While connected, download the latest roster on the computer you’ll use at the welcome desk.</p>
-    <button disabled={busy || !online || !signedIn} onClick={start}>Prepare offline station</button>
+  if (!desk) return <section className="door-offline-tools door-offline-summary" aria-label="Offline setup">
+    <div><strong>Offline check-in</strong><p>Save the guest list here before you lose Wi-Fi.</p></div>
+    <button disabled={!canManage} onClick={start}>{busy ? 'Working…' : 'Set up offline check-in'}</button>
   </section>;
 
   const conflicts = desk.pending.filter(row => row.conflict);
+  const waiting = desk.pending.length;
   return <section className="door-offline-tools" aria-label="Offline station">
-    <div aria-live="polite">
-      <strong>{expired ? 'Offline work window ended' : needsReviewers ? 'Offline roster ready · reviewer setup incomplete' : 'Offline station ready'}</strong>
-      <p>Roster saved at {new Date(desk.issuedAt).toLocaleString('en-US', { dateStyle: 'short', timeStyle: 'short', timeZone: 'America/New_York' })}. {desk.pending.length ? `${desk.pending.length} action${desk.pending.length === 1 ? '' : 's'} waiting to sync.` : 'No actions waiting to sync.'} {!online && 'No internet connection.'}</p>
-      <p>{desk.reviewers.length ? `Reviewers enrolled: ${[...new Set(desk.reviewers.map(reviewer => reviewer.name))].join(', ')}.` : 'Enroll Aubry, Kylie, Luke, and Danielle while connected to enable offline attire reviews.'}</p>
-      {needsReviewers && desk.reviewers.length > 0 && <p>Enroll the remaining reviewers while connected.</p>}
-      {!signedIn && online && <p>Sign back in as {desk.actor} to sync or enroll a reviewer.</p>}
+    <div className="door-offline-summary">
+      <div aria-live="polite">
+        <strong>{expired ? 'Offline check-in expired' : 'Offline check-in ready'}</strong>
+        <p>{expired ? 'Reconnect to upload saved arrivals.' : 'Use this browser to check in guests, with or without Wi-Fi.'}</p>
+        <p>{waiting ? `${waiting} saved ${waiting === 1 ? 'action' : 'actions'} to upload.` : 'No saved actions to upload.'}{!online && ' Wi-Fi is offline.'}</p>
+        {online && !signedIn && <p>Sign in again below to finish or add a reviewer.</p>}
+      </div>
+      {online && signedIn && <button className="door-offline-primary" disabled={!canManage || enrolling} onClick={finish}>
+        {busy ? 'Working…' : waiting ? 'Upload and return to live' : 'Return to live check-in'}
+      </button>}
     </div>
-    <div className="door-offline-buttons">
-      {!expired && <button disabled={busy || !online || !signedIn || !!code} onClick={() => setEnrolling(value => !value)}>{enrolling ? 'Cancel reviewer setup' : 'Enroll an offline reviewer'}</button>}
-      <button disabled={busy || !online || !signedIn || !desk.pending.length} onClick={sync}>Sync saved actions</button>
-      {online && signedIn && <button disabled={busy} onClick={onRenew}>Renew sign-in</button>}
-      {desk.pending.length > 0 && <button disabled={busy} onClick={exportPending}>Export unsynced actions</button>}
-      <button disabled={busy || !online || !signedIn || !!desk.pending.length} onClick={() => run(async () => {
-        setDesk(await saveOfflineDesk(desk, null));
-        setEnrolling(false);
-        setCode(null);
-      })}>Return to live &amp; clear device</button>
-    </div>
-    {enrolling && <form className="door-offline-enroll" onSubmit={enroll}>
-      <label>Reviewer’s existing four-digit passcode <input type="password" autoComplete="off" inputMode="numeric" pattern="[0-9]{4}" maxLength={4} value={pin} onChange={event => setPin(event.target.value.replace(/\D/g, ''))} required disabled={busy || !online} /></label>
-      <button disabled={busy || !online || !signedIn || pin.length !== 4}>Create offline reviewer code</button>
-    </form>}
-    {code && <div className="door-rule">
-      <strong>{code.name}’s offline reviewer code</strong>
-      <p>Have the reviewer save this code privately on their own device. It is shown once and works on this station.</p>
-      <code className="door-reviewer-code">{code.value}</code>
-      <button type="button" onClick={() => setCode(null)}>Hide code</button>
+    {!expired && <div className="door-offline-reviewers">
+      <div><strong>Offline attire review</strong>
+        <p>{reviewers.length ? `Ready for ${reviewers.join(', ')}.` : 'Add anyone who will review outfits without Wi-Fi.'}</p>
+      </div>
+      {online && signedIn && !code && <button disabled={!canManage} onClick={() => {
+        setPin('');
+        setEnrolling(value => !value);
+      }}>{enrolling ? 'Cancel' : 'Add attire reviewer'}</button>}
     </div>}
+    {enrolling && !expired && <form className="door-offline-enroll" onSubmit={enroll}>
+      <label>Reviewer’s four-digit attire passcode <input type="password" autoComplete="off" inputMode="numeric" pattern="[0-9]{4}" maxLength={4} value={pin} onChange={event => setPin(event.target.value.replace(/\D/g, ''))} required disabled={!canManage} /></label>
+      <button disabled={!canManage || pin.length !== 4}>Create offline code</button>
+    </form>}
+    {code && <div className="door-rule door-offline-code">
+      <strong>{code.name}’s offline code</strong>
+      <p>Copy this code somewhere private. Enter it when reviewing attire without Wi-Fi on this station.</p>
+      <code className="door-reviewer-code">{code.value}</code>
+      <div className="door-offline-buttons">
+        <button type="button" onClick={async () => {
+          try { await navigator.clipboard.writeText(code.value); setCopied(true); }
+          catch { setCopied(false); }
+        }}>{copied ? 'Copied' : 'Copy code'}</button>
+        <button type="button" onClick={() => setCode(null)}>Done</button>
+      </div>
+    </div>}
+    {(waiting > 0 || (online && signedIn)) && <details className="door-offline-options">
+      <summary>More options</summary>
+      <div className="door-offline-buttons">
+        {online && signedIn && <button disabled={busy} onClick={onRenew}>Sign in again</button>}
+        {waiting > 0 && <button disabled={busy} onClick={exportPending}>Export unsynced actions</button>}
+      </div>
+    </details>}
     {conflicts.length > 0 && <details open={showConflict} onToggle={event => setShowConflict(event.currentTarget.open)}>
       <summary>{conflicts.length} sync {conflicts.length === 1 ? 'conflict needs' : 'conflicts need'} organizer review</summary>
-      <p>Export the unsynced actions for the organizer. Later actions for the same attendee stay queued behind the conflict.</p>
+      <p>Export the unsynced actions from More options and give the file to the organizer.</p>
       <ul>{conflicts.map(({ attendee, operation, conflict }) => <li key={operation.id}>{attendee} · {conflict}</li>)}</ul>
     </details>}
   </section>;

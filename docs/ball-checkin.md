@@ -55,11 +55,10 @@ private contacts, medical details and verification tokens are excluded.
 
 1. Use one supervised welcome-desk computer for offline check-in. Open
    `/ball/checkin` in its normal browser profile, sign in, and choose
-   **Prepare offline station**. It downloads the roster, switches the desk to
+   **Set up offline check-in**. It downloads the roster, switches the desk to
    local recording and gives staff a 24-hour work window. Prepare it after
    final payment and verification updates are in the roster.
-2. While still connected, have Aubry, Kylie, Luke, and Danielle each choose **Enroll an
-   offline reviewer** and enter their attire passcode. Each reviewer privately saves
+2. While still connected, have each on-duty attire reviewer choose **Add attire reviewer** and enter their attire passcode. Choose **Copy code**. Each reviewer privately saves
    their generated offline code for this station. During an offline review,
    the reviewer enters that code. The station saves verification keys and
    signed decisions. The PIN and offline code stay out of the saved roster
@@ -77,14 +76,13 @@ registrations or payments require a new roster prepared while connected.
 
 ## After reconnecting
 
-Choose **Sync saved actions** with the same staff identity that prepared the
-station. If the login expired, enter that staff member’s PIN again. Check that the
-waiting count reaches zero, then choose **Return to live & clear device**.
+Choose **Upload and return to live** with the same staff identity that prepared the
+station. If the login expired, enter that staff member’s PIN again. The desk returns to live check-in once every saved action uploads.
 Sync rechecks current entry requirements and revisions, preserves the original
 arrival time and desk operator, and records the server receipt separately.
 Retrying the same action after an interrupted upload does not duplicate it.
 
-If a conflict appears, export the unsynced actions and hand the file privately
+If a conflict appears, open **More options**, export the unsynced actions, and hand the file privately
 to the organizer. The upload continues for other attendees. The conflicting
 action and later actions for that attendee stay on the device for review.
 Keep the device supervised and signed into its normal browser profile until

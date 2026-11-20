@@ -43,7 +43,9 @@ self.addEventListener('fetch', event => {
   } else if (url.pathname.startsWith('/assets/')) {
     event.respondWith((async () => {
       const cache = await caches.open(SHELL);
-      return (await cache.match(request)) || fetch(request);
+      // The same-origin, hashed build assets are prefetched by URL. Match that
+      // URL so module requests carrying an Origin header use the same copy.
+      return (await cache.match(url.pathname)) || fetch(request);
     })());
   }
 });

@@ -24,7 +24,7 @@ export default function DoorRequirements({ person, busy, disabled, onAction, off
     </form>}</div>}
     {person.attire_status && <div className={person.attire_status === 'denied' ? 'door-stop' : person.attire_status === 'pending' || review ? 'door-rule' : 'door-attire-cleared'}><strong>{person.attire_status === 'denied' ? 'Attire denied · Do not admit' : person.attire_status === 'pending' ? 'On-site attire review needed' : 'Attire cleared'}</strong>{person.attire_status === 'denied' && <p>Hold entry until an authorized reviewer approves a corrected outfit.{person.attire_by && ` Decision by ${person.attire_by}.`}</p>}
       <button className="door-verify-site" disabled={locked || !attireReady} onClick={() => setReview(true)}>{person.attire_status === 'denied' ? 'Review corrected attire' : 'Verify on site'}</button>
-      {!attireReady && <p>Enroll a reviewer while connected to use on-site review offline.</p>}
+      {!attireReady && <p>While connected, use Add attire reviewer above to enable offline attire review.</p>}
       {review && <DoorAttireDialog offline={offline} person={person} busy={busy} onAction={onAction} onClose={() => setReview(false)} />}
     </div>}
     {person.verification_complete === false && <div className="door-rule"><strong>Registration is incomplete</strong><p>Send this attendee to Chief. Verification must be completed before entry.</p></div>}

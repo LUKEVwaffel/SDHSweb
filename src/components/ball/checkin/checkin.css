@@ -126,3 +126,26 @@
   .door-pair { margin-top: 16px; flex-wrap: wrap; }
   .ball-door .door-checkin-both { width: 100%; }
 }
+
+.door-offline-summary, .door-offline-reviewers {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px 16px;
+  flex-wrap: wrap;
+}
+
+.door-offline-summary > div, .door-offline-reviewers > div { flex: 1 1 245px; }
+.door-offline-summary p:last-child, .door-offline-reviewers p:last-child { margin-bottom: 0; }
+.door-offline-reviewers {
+  padding-top: 10px;
+  border-top: 1px solid var(--door-line);
+}
+.ball-door .door-offline-primary {
+  background: var(--door-navy);
+  border-color: var(--door-navy);
+  color: #fff;
+}
+.ball-door .door-offline-primary:hover:not(:disabled) { background: #203c61; }
+.door-offline-options .door-offline-buttons { margin-top: 8px; }
+.door-offline-code { margin-top: 0; }
