@@ -35,13 +35,15 @@ export function useStudioHost(deck, playback, pairOnOpen = false) {
         payload.cues = ballShowCues(playback.show, deck.slides.length).map(index => {
           const slide=deck.slides[index];
           const grog=playback.show.grog?.includes(index) || false;
+          const group=grog ? 'grog' : playback.show.toasts?.includes(index) ? 'toasts'
+            : playback.show.seniors?.includes(index) ? 'seniors' : null;
           return {
-            index, title: slide.title || 'Untitled cue', grog,
-            ...(grog ? { card: {
+            index, title: slide.title || 'Untitled cue', grog, group,
+            ...(group ? { card: {
               layout:slide.layout, title:slide.title, subtitle:slide.subtitle, eyebrow:slide.eyebrow,
               font:slide.font, titleSize:slide.titleSize, align:slide.align, duration:slide.duration,
               photos:slide.photos,
-            } } : { time: index > welcome ? slide.eyebrow : '' }),
+            } } : { time: index > welcome && /^\d{1,2}:\d{2}(?:\s*[AP]M)?$/i.test(slide.eyebrow) ? slide.eyebrow : '' }),
           };
         });
       }

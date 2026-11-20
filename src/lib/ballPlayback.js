@@ -85,13 +85,18 @@ export function resolveBallShow(deck) {
   const dinnerPhotos = dinner > welcome
     ? slides.slice(0, podium).flatMap((slide, index) => slide.layout === 'photo' && slide.photos.some(Boolean) ? [index] : [])
     : [];
-  const grog = Array.isArray(show.grogIds)
-    ? [...new Set(show.grogIds.map(id => slides.findIndex(slide => slide.id === id)))].filter(index => index > welcome)
+  const afterWelcome = ids => Array.isArray(ids)
+    ? [...new Set(ids.map(id => slides.findIndex(slide => slide.id === id)))].filter(index => index > welcome)
     : [];
+  const grog = afterWelcome(show.grogIds);
+  const toasts = afterWelcome(show.toastIds);
+  const seniors = afterWelcome(show.seniorIds);
   return {
     startAt, podium, welcome, welcomeAt: startAt + podiumSeconds * 1000,
     ...(dinnerPhotos.length ? { dinner, dinnerPhotos } : {}),
     ...(grog.length ? { grog } : {}),
+    ...(toasts.length ? { toasts } : {}),
+    ...(seniors.length ? { seniors } : {}),
     ...(preshow ? { preshow: preshow.length ? preshow : [0] } : {}),
     ...(Number.isFinite(preshowAt) && preshowAt < startAt ? { preshowAt } : {}),
     ...(featured.length ? { featured } : {}),

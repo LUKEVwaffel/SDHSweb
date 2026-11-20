@@ -44,6 +44,8 @@ function BallPresentationEditor({ adminId }) {
   const groups=[{id:'all',label:'All slides',indices:deck.slides.map((_,i)=>i)}];
   if(preshow.length)groups.push({id:'preshow',label:'Preshow cards',indices:preshow});
   if(show?.grog?.length)groups.push({id:'grog',label:'Grog ingredients',indices:show.grog});
+  if(show?.toasts?.length)groups.push({id:'toasts',label:'Toast responses',indices:show.toasts});
+  if(show?.seniors?.length)groups.push({id:'seniors',label:'Senior recognition',indices:show.seniors});
   const group=groups.find(option=>option.id===slideGroup)||groups[0];
   const allSlides=group.id==='all';
   const index=group.indices.find(i=>deck.slides[i].id===selectedId)??group.indices[0];

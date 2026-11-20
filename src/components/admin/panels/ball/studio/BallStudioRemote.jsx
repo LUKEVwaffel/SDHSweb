@@ -5,6 +5,8 @@ import {studioChannel,readRemoteToken,REMOTE_STALE_MS} from '../../../../../lib/
 import {usePresentationWake} from './usePresentationWake';
 import SlideCanvas from './SlideCanvas';
 import './ballRemote.css';
+const cueGroups={grog:'Grog cards',toasts:'Toast responses',seniors:'Senior recognition'};
+const cueSection=cue=>Object.hasOwn(cueGroups,cue.group) ? cue.group : cue.grog ? 'grog' : null;
 const seconds=ms=>`${Math.floor(Math.max(0,ms)/60000)}:${String(Math.floor(Math.max(0,ms)/1000)%60).padStart(2,'0')}`;
 export default function BallStudioRemote({client=SB,initialToken=''}={}) {
   const [token,setToken]=useState(()=>readRemoteToken(window.location.hash)||readRemoteToken(initialToken));const [link,setLink]=useState('');
@@ -45,8 +47,8 @@ export default function BallStudioRemote({client=SB,initialToken=''}={}) {
     transmit();
   }
   const cues = snapshot?.cues;
-  const firstGrog = cues?.findIndex(cue => cue.grog);
-  const grogCues = firstGrog >= 0 ? cues.filter(cue => cue.grog) : [];
+  const grouped = Object.fromEntries(Object.keys(cueGroups).map(group => [group,(cues || []).filter(cue => cueSection(cue)===group)]));
+  const grogCues = grouped.grog;
   const cueButton = cue => <button key={cue.index} disabled={!connected||!!pending||snapshot.scheduleActive} aria-current={snapshot.index===cue.index?'true':undefined} onClick={()=>command('goto',cue.index)}>
     <span>{cue.title}</span>{cue.time&&<small>{cue.time}</small>}
   </button>;
@@ -74,11 +76,16 @@ export default function BallStudioRemote({client=SB,initialToken=''}={}) {
         {snapshot.dinnerSlideshow&&<button className="br-primary br-dinner" disabled={!connected||!!pending||snapshot.scheduleActive} onClick={()=>command(snapshot.showPhase==='dinner'?'end-dinner':'start-dinner')}>
           {snapshot.showPhase==='dinner'?'Stop dinner slideshow':'Start dinner slideshow'}
         </button>}
-        {cues.map((cue,i) => !cue.grog ? cueButton(cue) : i===firstGrog ? <details key="grog" ref={grogGroup} className="br-grog" open={grogCues.some(item=>item.index===snapshot.index)||undefined}>
-          <summary>Grog cards <span>{grogCues.length}</span></summary>
+        {cues.map(cue => {
+          const group=cueSection(cue);
+          if(!group)return cueButton(cue);
+          const groupCues=grouped[group];
+          if(cue!==groupCues[0])return null;
+          return <details key={group} ref={group==='grog'?grogGroup:undefined} className="br-grog" open={groupCues.some(item=>item.index===snapshot.index)||undefined}>
+          <summary>{cueGroups[group]} <span>{groupCues.length}</span></summary>
           {snapshot.scheduleActive&&<p className="br-grog-status">Preview the cards now. TV controls unlock after Welcome.</p>}
           <div className="br-grog-cards">
-            {grogCues.map(cue=><article className="br-grog-card" key={cue.index} aria-label={cue.title}>
+            {groupCues.map(cue=><article className="br-grog-card" key={cue.index} aria-label={cue.title}>
               {cue.card ? <SlideCanvas slide={cue.card} deck={{theme:snapshot.theme,showNumbers:false}} index={cue.index}/> : <h3>{cue.title}</h3>}
               <div className="br-grog-card-actions">
                 {cue.card?.subtitle&&<p>{cue.card.subtitle}</p>}
@@ -88,7 +95,8 @@ export default function BallStudioRemote({client=SB,initialToken=''}={}) {
               </div>
             </article>)}
           </div>
-        </details> : null)}
+        </details>;
+        })}
       </section>}
       {snapshot.next&&<details className="br-next-preview"><summary>Up next · {snapshot.next.title||'Photo'}</summary><SlideCanvas slide={snapshot.next} deck={{theme:snapshot.theme,showNumbers:false}} index={snapshot.nextIndex ?? (snapshot.index+1)%snapshot.total}/></details>}
       <details className="br-more"><summary>More controls</summary><form onSubmit={e=>{e.preventDefault();const n=Number(target);if(Number.isInteger(n)&&n>=1&&n<=snapshot.total)command('goto',n-1);}}><label>Jump to slide<input type="number" min={1} max={snapshot.total} required value={target} onChange={e=>setTarget(e.target.value)} inputMode="numeric"/></label><button disabled={!connected||!!pending||snapshot.scheduleActive}>Go</button></form><button disabled={!connected||!!pending||snapshot.scheduleActive} onClick={()=>command('restart')}>Return to beginning</button>{!Array.isArray(snapshot.cues)&&<button disabled={!connected||!!pending} onClick={()=>command('loop')}>{snapshot.loop?'Turn looping off':'Loop presentation'}</button>}</details>

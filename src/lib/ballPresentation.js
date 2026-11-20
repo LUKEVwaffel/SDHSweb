@@ -71,6 +71,8 @@ export function readDeck(input) {
       ...(show.preshow ? { preshowIds: show.preshow.map(index => deck.slides[index].id) } : {}),
       ...(show.dinnerPhotos ? { dinnerId: deck.slides[show.dinner].id } : {}),
       ...(show.grog ? { grogIds: show.grog.map(index => deck.slides[index].id) } : {}),
+      ...(show.toasts ? { toastIds: show.toasts.map(index => deck.slides[index].id) } : {}),
+      ...(show.seniors ? { seniorIds: show.seniors.map(index => deck.slides[index].id) } : {}),
     };
   }
   return deck;

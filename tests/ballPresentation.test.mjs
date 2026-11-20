@@ -340,3 +340,21 @@ test('scheduled TV holds standby and advances automatically even when a remote s
  assert.equal(welcome.index,3);
  assert.equal(send(welcome,'start-dinner',startAt+1800000).showPhase,'dinner');
 });
+
+test('saved decks retain the toast responses and senior recognition as manual cues', () => {
+ const deck=makeDeck();
+ const toast=makeSlide('title',{title:'Please remain silent'});
+ const senior=makeSlide('title',{title:'Graduate'});
+ deck.slides.push(toast,senior);
+ deck.show={
+  startAt:'2026-11-21T22:30:00.000Z',
+  podiumId:deck.slides[1].id,welcomeId:deck.slides[2].id,
+  toastIds:[toast.id],seniorIds:[senior.id],
+ };
+ const copy=readDeck(deck);
+ const show=resolveBallShow(copy);
+ assert.deepEqual(show.toasts,[4]);
+ assert.deepEqual(show.seniors,[5]);
+ assert.ok(ballShowCues(show,copy.slides.length).includes(4));
+ assert.ok(ballShowCues(show,copy.slides.length).includes(5));
+});
