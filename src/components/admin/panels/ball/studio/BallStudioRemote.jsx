@@ -1,4 +1,4 @@
-import {ballCountdown} from '../../../../../lib/ballPlayback';
+import {ballCountdown,ballScheduleTime} from '../../../../../lib/ballPlayback';
 import {useState,useRef,useEffect} from 'react';
 import {supabase as SB} from '../../../../../lib/supabaseClient';
 import {studioChannel,readRemoteToken,REMOTE_STALE_MS} from '../../../../../lib/ballStudioRemote';
@@ -33,6 +33,7 @@ export default function BallStudioRemote({client=SB,initialToken=''}={}) {
   const connected=!!snapshot&&status==='CONNECTED'&&now-received<REMOTE_STALE_MS;
   const waiting=!received&&now-pairedAt.current>10000;
   const remaining=snapshot?Math.max(0,snapshot.remaining-(snapshot.playing&&!snapshot.blackout?Math.max(0,now-received):0)):0;
+  const scheduledTime = Number.isFinite(snapshot?.preshowAt) ? ballScheduleTime(snapshot.preshowAt) : '';
   const showClock = Number.isFinite(snapshot?.countdown) ? ballCountdown(snapshot.countdown - Math.max(0, now - received)) : null;
   function command(action,index){
     if(!connected||pendingRef.current)return;
@@ -46,7 +47,7 @@ export default function BallStudioRemote({client=SB,initialToken=''}={}) {
   const cues = snapshot?.cues;
   const firstGrog = cues?.findIndex(cue => cue.grog);
   const grogCues = firstGrog >= 0 ? cues.filter(cue => cue.grog) : [];
-  const cueButton = cue => <button key={cue.index} disabled={!connected||!!pending} aria-current={snapshot.index===cue.index?'true':undefined} onClick={()=>command('goto',cue.index)}>
+  const cueButton = cue => <button key={cue.index} disabled={!connected||!!pending||snapshot.scheduleActive} aria-current={snapshot.index===cue.index?'true':undefined} onClick={()=>command('goto',cue.index)}>
     <span>{cue.title}</span>{cue.time&&<small>{cue.time}</small>}
   </button>;
   function showGrogCues(){
@@ -61,16 +62,16 @@ export default function BallStudioRemote({client=SB,initialToken=''}={}) {
     {!token?<form className="br-pair-form" onSubmit={e=>{e.preventDefault();const next=readRemoteToken(link);if(!next){setError('Paste the complete private remote link from the TV.');return;}window.history.replaceState(null,'',`#${next}`);setError('');setToken(next);}}><p>On the TV, open your presentation and choose <strong>Connect phone</strong>. Scan its QR code with your phone’s camera, or paste the private link here.</p><label>Private remote link<textarea value={link} onChange={e=>setLink(e.target.value)} rows={3} autoCapitalize="none" autoCorrect="off" spellCheck={false}/></label><button className="br-primary" type="submit">Connect to TV</button></form>:<>
       {!connected&&<div className="br-connection-note">{received?'Waiting to reconnect. TV controls are paused until a fresh status arrives.':waiting?'Keep the presentation open on the TV. If it was closed, scan the new QR code from a new playback session.':'Controls unlock when the TV confirms its current slide.'}</div>}
       {snapshot&&<><div className="br-deck-name">{snapshot.deckName}</div><section className="br-current"><div className="br-section-label"><span>ON SCREEN · {snapshot.index+1} / {snapshot.total}</span><span>{snapshot.blackout?'BLACKOUT':snapshot.showPhase==='waiting'?'STANDBY':snapshot.playing?'AUTOPLAY':'MANUAL'}</span></div><SlideCanvas slide={snapshot.current} deck={{theme:snapshot.theme,showNumbers:snapshot.showNumbers}} index={snapshot.index}/></section>
-      <div className="br-timing"><span>{showClock ? (snapshot.showPhase==='podium'?'Welcome in':'Ceremony begins in') : snapshot.showPhase==='waiting'?'Waiting for preshow':snapshot.blackout?'Timer paused for blackout':snapshot.playing?'Time remaining':snapshot.manualCues?'Advance manually':'Autoplay paused'}</span><strong>{showClock || (snapshot.showPhase==='waiting'||snapshot.manualCues?'':seconds(remaining))}</strong></div>
+      <div className="br-timing"><span>{showClock ? (snapshot.showPhase==='podium'?'Welcome in':'Ceremony begins in') : snapshot.showPhase==='waiting'?(scheduledTime?`Preshow starts automatically at ${scheduledTime}`:'Waiting for preshow'):snapshot.blackout?'Timer paused for blackout':snapshot.playing?'Time remaining':snapshot.manualCues?'Advance manually':'Autoplay paused'}</span><strong>{showClock || (snapshot.showPhase==='waiting'||snapshot.manualCues?'':seconds(remaining))}</strong></div>
       <section className="br-controls" aria-label="TV controls">
-        <button disabled={!connected||!!pending||snapshot.manualCues} onClick={()=>command(snapshot.playing?'pause':'play')}>{snapshot.playing?'Pause autoplay':'Start autoplay'}</button>
+        {(!snapshot.scheduledTv||snapshot.showPhase==='dinner')&&<button disabled={!connected||!!pending||snapshot.manualCues} onClick={()=>command(snapshot.playing?'pause':'play')}>{snapshot.playing?'Pause autoplay':'Start autoplay'}</button>}
         <button className={snapshot.blackout?'br-black-active':''} disabled={!connected||!!pending} onClick={()=>command('blackout')}>{snapshot.blackout?'Show presentation':'Blackout TV'}</button>
       </section>
       {snapshot.current.notes&&<section className="br-notes"><h2>Speaker notes</h2><p>{snapshot.current.notes}</p><small>Only visible on this phone</small></section>}
       {Array.isArray(snapshot.cues)&&<section className="br-show-cues" aria-label="Ball timeline cues">
         <div className="br-timeline-header"><h2>Ball timeline</h2>{grogCues.length>0&&<button onClick={showGrogCues}>Jump to grog</button>}</div>
-        {snapshot.manualCues&&snapshot.showPhase!=='waiting'&&<button disabled={!connected||!!pending} onClick={()=>command('start-show')}>Start preshow</button>}
-        {snapshot.dinnerSlideshow&&<button className="br-primary br-dinner" disabled={!connected||!!pending} onClick={()=>command(snapshot.showPhase==='dinner'?'end-dinner':'start-dinner')}>
+        {!snapshot.scheduledTv&&snapshot.manualCues&&snapshot.showPhase!=='waiting'&&<button disabled={!connected||!!pending} onClick={()=>command('start-show')}>Start preshow</button>}
+        {snapshot.dinnerSlideshow&&<button className="br-primary br-dinner" disabled={!connected||!!pending||snapshot.scheduleActive} onClick={()=>command(snapshot.showPhase==='dinner'?'end-dinner':'start-dinner')}>
           {snapshot.showPhase==='dinner'?'Stop dinner slideshow':'Start dinner slideshow'}
         </button>}
         {cues.map((cue,i) => !cue.grog ? cueButton(cue) : i===firstGrog ? <details key="grog" ref={grogGroup} className="br-grog" open={grogCues.some(item=>item.index===snapshot.index)||undefined}>
@@ -79,7 +80,7 @@ export default function BallStudioRemote({client=SB,initialToken=''}={}) {
         </details> : null)}
       </section>}
       {snapshot.next&&<details className="br-next-preview"><summary>Up next · {snapshot.next.title||'Photo'}</summary><SlideCanvas slide={snapshot.next} deck={{theme:snapshot.theme,showNumbers:false}} index={snapshot.nextIndex ?? (snapshot.index+1)%snapshot.total}/></details>}
-      <details className="br-more"><summary>More controls</summary><form onSubmit={e=>{e.preventDefault();const n=Number(target);if(Number.isInteger(n)&&n>=1&&n<=snapshot.total)command('goto',n-1);}}><label>Jump to slide<input type="number" min={1} max={snapshot.total} required value={target} onChange={e=>setTarget(e.target.value)} inputMode="numeric"/></label><button disabled={!connected||!!pending}>Go</button></form><button disabled={!connected||!!pending} onClick={()=>command('restart')}>Return to beginning</button>{!Array.isArray(snapshot.cues)&&<button disabled={!connected||!!pending} onClick={()=>command('loop')}>{snapshot.loop?'Turn looping off':'Loop presentation'}</button>}</details>
+      <details className="br-more"><summary>More controls</summary><form onSubmit={e=>{e.preventDefault();const n=Number(target);if(Number.isInteger(n)&&n>=1&&n<=snapshot.total)command('goto',n-1);}}><label>Jump to slide<input type="number" min={1} max={snapshot.total} required value={target} onChange={e=>setTarget(e.target.value)} inputMode="numeric"/></label><button disabled={!connected||!!pending||snapshot.scheduleActive}>Go</button></form><button disabled={!connected||!!pending||snapshot.scheduleActive} onClick={()=>command('restart')}>Return to beginning</button>{!Array.isArray(snapshot.cues)&&<button disabled={!connected||!!pending} onClick={()=>command('loop')}>{snapshot.loop?'Turn looping off':'Loop presentation'}</button>}</details>
       </>}
       <button className="br-disconnect" onClick={disconnect}>Disconnect this phone</button>
     </>}
@@ -91,8 +92,8 @@ export default function BallStudioRemote({client=SB,initialToken=''}={}) {
         <span className="br-command-status" aria-live="polite">{pending?'Sending control…':connected?'Ready':'TV disconnected'}</span>
       </div>
       <div className="br-transport-buttons">
-        <button disabled={!connected||!!pending||snapshot.index===0} onClick={()=>command('previous')}>Previous</button>
-        <button className="br-next" disabled={!connected||!!pending||snapshot.showPhase==='waiting'||(!snapshot.loop&&snapshot.index===snapshot.total-1)} onClick={()=>command('next')}>Next slide</button>
+        <button disabled={!connected||!!pending||snapshot.scheduleActive||snapshot.index===0} onClick={()=>command('previous')}>Previous</button>
+        <button className="br-next" disabled={!connected||!!pending||snapshot.scheduleActive||snapshot.showPhase==='waiting'||(!snapshot.loop&&snapshot.index===snapshot.total-1)} onClick={()=>command('next')}>Next slide</button>
       </div>
     </nav>}
   </main>;

@@ -320,3 +320,23 @@ test('dinner loops only shuffled photos and stops at the Dinner card or the sele
  assert.equal(cue.index,7);
  assert.equal(cue.showPhase,null);
 });
+
+test('scheduled TV holds standby and advances automatically even when a remote sends a cue early', () => {
+ const preshowAt = Date.parse('2026-11-21T22:00:00Z');
+ const startAt = preshowAt + 30 * 60000;
+ const show = { preshowAt, startAt, podium: 2, welcome: 3, welcomeAt: startAt + 120000, dinner: 4, dinnerPhotos: [1], preshow:[0] };
+ const waiting = startBallShow(createPlayback([30, 8, 120, 8, 8]),show,preshowAt-10000);
+ const send = (state,type,at,index) => ballShowAction(state,{type,index},show,at,true);
+ assert.equal(waiting.showPhase,'waiting');
+ assert.equal(send(waiting,'goto',preshowAt-1000,3),waiting);
+ const preshow = send(waiting,'tick',preshowAt);
+ assert.equal(preshow.showPhase,'preshow');
+ assert.equal(ballCountdown(show.startAt - preshowAt),'30:00');
+ assert.equal(send(preshow,'start-dinner',preshowAt+1000),preshow);
+ assert.equal(send(preshow,'pause',preshowAt+1000),preshow);
+ const podium = send(preshow,'tick',startAt);
+ assert.equal(podium.index,2);
+ const welcome = send(podium,'tick',startAt+120000);
+ assert.equal(welcome.index,3);
+ assert.equal(send(welcome,'start-dinner',startAt+1800000).showPhase,'dinner');
+});

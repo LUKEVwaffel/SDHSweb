@@ -128,3 +128,4 @@ html:has(.ball-remote.has-transport) {
   .br-deck-name { margin-bottom: 8px; }
   .br-show-cues { margin-top: 14px; }
 }
+.br-controls button:only-child { grid-column: 1 / -1; }

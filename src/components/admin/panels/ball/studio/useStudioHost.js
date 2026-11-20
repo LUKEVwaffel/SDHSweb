@@ -1,7 +1,7 @@
 import {useState,useRef,useEffect,useCallback} from 'react';
 import {supabase as SB} from '../../../../../lib/supabaseClient';
 import {studioChannel,createRemoteToken} from '../../../../../lib/ballStudioRemote';
-import {ballShowCues,nextDinnerSlide,nextPreshowSlide,remainingTime,createCommandReceiver} from '../../../../../lib/ballPlayback';
+import {ballShowCues,isBallScheduleActive,nextDinnerSlide,nextPreshowSlide,remainingTime,createCommandReceiver} from '../../../../../lib/ballPlayback';
 export function useStudioHost(deck, playback, pairOnOpen = false) {
   const [token,setToken]=useState(() => pairOnOpen ? createRemoteToken() : null);
   const [status,setStatus]=useState('OFF');
@@ -15,7 +15,7 @@ export function useStudioHost(deck, playback, pairOnOpen = false) {
       const {deck,playback}=current.current;const state=playback.stateRef.current;
       const payload={kind:'state',seq:++sequence,ack:lastAck,deckName:deck.name,theme:deck.theme,showNumbers:deck.showNumbers,index:state.index,total:deck.slides.length,current:deck.slides[state.index],next:deck.slides[state.index+1]||(state.loop?deck.slides[0]:null),playing:state.playing,blackout:state.blackout,loop:state.loop,remaining:remainingTime(state)};
       if (playback.show) {
-        const { podium, welcome, startAt, welcomeAt } = playback.show;
+        const { podium, welcome, startAt, welcomeAt, preshowAt } = playback.show;
         if (state.showPhase === 'preshow') {
           payload.nextIndex = nextPreshowSlide(playback.show, state.index);
           payload.next = deck.slides[payload.nextIndex];
@@ -26,6 +26,9 @@ export function useStudioHost(deck, playback, pairOnOpen = false) {
         }
         payload.dinnerSlideshow = Boolean(playback.show.dinnerPhotos);
         payload.showPhase = state.showPhase;
+        payload.scheduleActive = playback.protectSchedule && isBallScheduleActive(state);
+        payload.preshowAt = preshowAt;
+        payload.scheduledTv = playback.protectSchedule;
         payload.countdown = state.showPhase === 'preshow' ? Math.max(0, startAt - Date.now())
           : state.showPhase === 'podium' ? Math.max(0, welcomeAt - Date.now()) : null;
         payload.manualCues = state.showPhase === 'waiting' || state.index >= podium;

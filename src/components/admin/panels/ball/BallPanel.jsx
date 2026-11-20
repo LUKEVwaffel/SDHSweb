@@ -136,7 +136,7 @@ export default function BallPanel({ adminId }) {
     load();
   }
 
-  if (!config) return <div style={{ fontFamily: mono, fontSize: 13, color: P.mute }}>LOADING…</div>;
+  if (!config && tab !== 'studio') return <div style={{ fontFamily: mono, fontSize: 13, color: P.mute }}>LOADING…</div>;
 
   return (
     <div style={{ maxWidth: tab === 'studio' ? 'none' : 900 }}>

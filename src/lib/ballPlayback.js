@@ -142,8 +142,23 @@ export function startBallShow(state, show, now = Date.now()) {
   }, { type: 'tick' }, show, now);
 }
 
-export function ballShowAction(state, action, show, now = Date.now()) {
+export function isBallScheduleActive(state) {
+  return ['waiting', 'preshow', 'podium'].includes(state.showPhase);
+}
+
+export function ballScheduleTime(timestamp) {
+  return new Intl.DateTimeFormat('en-US', {
+    hour: 'numeric', minute: '2-digit', timeZone: 'America/New_York',
+  }).format(timestamp) + ' Eastern';
+}
+
+export function ballShowAction(state, action, show, now = Date.now(), protectSchedule = false) {
   if (!show) return playbackAction(state, action, now);
+  if (protectSchedule) {
+    if (isBallScheduleActive(state) && !['tick', 'blackout'].includes(action.type)) return state;
+    if (action.type === 'start-show') return state;
+    if (state.showPhase !== 'dinner' && ['play', 'pause', 'toggle-play', 'loop'].includes(action.type)) return state;
+  }
   if (action.type === 'start-show') return startBallShow(state, show, now);
   if (action.type === 'start-dinner' && show.dinnerPhotos) {
     return { ...playbackAction(state, { type: 'goto', index: show.dinnerPhotos[0] }, now), playing: true, showPhase: 'dinner' };

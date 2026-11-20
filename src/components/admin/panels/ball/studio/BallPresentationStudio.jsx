@@ -7,6 +7,7 @@ import SlideCanvas from './SlideCanvas';
 import StudioPhotoPositioner from './StudioPhotoPositioner';
 import StudioPhotoPicker from './StudioPhotoPicker';
 import StudioPlayer from './StudioPlayer';
+import ScheduledBallTV from './ScheduledBallTV';
 import StudioModal from './StudioModal';
 import StudioNewPresentation from './StudioNewPresentation';
 import StudioPreflight from './StudioPreflight';
@@ -16,6 +17,10 @@ const showTime = new Intl.DateTimeFormat('en-US',{timeZone:'America/New_York',ti
 const fmt = seconds => `${Math.floor(seconds/60)}:${String(seconds%60).padStart(2,'0')}`;
 function Field({label,children}) {return <label className="bs-field"><span>{label}</span>{children}</label>;}
 export default function BallPresentationStudio({ adminId }) {
+  const scheduledDeckId = new URLSearchParams(window.location.search).get('show');
+  return scheduledDeckId ? <ScheduledBallTV key={scheduledDeckId} deckId={scheduledDeckId} /> : <BallPresentationEditor adminId={adminId} />;
+}
+function BallPresentationEditor({ adminId }) {
   const store=useStudioDecks(adminId);
   const {deck,decks,edit,undo,redo}=store;
   const [selectedId,setSelectedId]=useState(deck.slides[0].id);
@@ -36,6 +41,7 @@ export default function BallPresentationStudio({ adminId }) {
   const index=Math.max(0,deck.slides.findIndex(s=>s.id===selectedId));
   const slide=deck.slides[index];
   const show=resolveBallShow(deck);
+  const hasTvLink=show?.preshowAt&&deck.cloudRevision;
   const closeModal=useCallback(()=>{setModal(null);setReplaceIndex(null);},[]);
   const closePlayer=useCallback(()=>setPlayer(null),[]);
   const usedIds=useMemo(()=>deck.slides.flatMap(s=>s.photos.filter(Boolean).map(p=>p.id)),[deck.slides]);
@@ -74,7 +80,7 @@ export default function BallPresentationStudio({ adminId }) {
   useEffect(()=>{if(!expanded)return;const before=document.body.style.overflow;document.body.style.overflow='hidden';return()=>{document.body.style.overflow=before;};},[expanded]);
 
   const content=<div className={`ball-studio ${expanded?'bs-expanded':''}`}>
-    <header className="bs-topbar"><div><div className="bs-eyebrow">Trojan Battalion · Creative studio</div><h1>Presentation Studio<span>Build a story for any occasion.</span></h1></div><div className="bs-row"><button className="bs-primary" onClick={()=>setModal('new')}>New presentation</button><button onClick={()=>setExpanded(v=>!v)}>{expanded?'Return to admin':'Expand studio'}</button><button onClick={()=>setPlayer({index:0,runShow:true,pairOnOpen:true})}>Connect phone</button><button className="bs-primary" onClick={()=>setPlayer({index:0,runShow:true})}>{show?'Start preshow':'Present from start'}</button></div></header>
+    <header className="bs-topbar"><div><div className="bs-eyebrow">Trojan Battalion · Creative studio</div><h1>Presentation Studio<span>Build a story for any occasion.</span></h1></div><div className="bs-row"><button className="bs-primary" onClick={()=>setModal('new')}>New presentation</button><button onClick={()=>setExpanded(v=>!v)}>{expanded?'Return to admin':'Expand studio'}</button>{!hasTvLink&&<button onClick={()=>setPlayer({index:0,runShow:true,pairOnOpen:true})}>Connect phone</button>}{hasTvLink?<a className="bs-primary bs-scheduled-link" href={`/admin/ball?tab=studio&show=${encodeURIComponent(deck.id)}`} target="_blank" rel="noreferrer">Open scheduled TV</a>:<button className="bs-primary" onClick={()=>setPlayer({index:0,runShow:true})}>{show?'Open scheduled preshow':'Present from start'}</button>}</div></header>
     <div className="bs-deckbar"><input className="bs-deck-name" aria-label="Presentation name" maxLength={150} value={deck.name} onChange={e=>edit(d=>({...d,name:e.target.value}))}/><div className="bs-row"><span className="bs-save-status">{store.localSaved?'Browser recovery saved':'Saving browser recovery…'}</span><span className={`bs-presentation-save-state ${deck.cloudSavedVersion===deck.updatedAt?'is-saved':''}`}>{store.cloudSaving?'Saving automatically…':store.cloudError?'Autosave needs attention':deck.cloudSavedVersion===deck.updatedAt?`Saved automatically · ${new Intl.DateTimeFormat('en-US',{timeZone:'America/New_York',month:'short',day:'numeric',hour:'numeric',minute:'2-digit'}).format(new Date(deck.cloudSavedAt))}`:'Waiting to autosave…'}</span>{store.cloudError&&<button disabled={busy||store.cloudSaving} onClick={cloudSave}>Retry save</button>}<button disabled={busy} onClick={cloudOpen}>Saved presentations</button><button onClick={()=>setModal('files')}>Decks & export</button><button onClick={()=>setModal('preflight')}>Pre-show check</button><button onClick={()=>setModal('help')} aria-label="Studio help">Help</button></div></div>
     {store.cloudError&&<div className="bs-warning" role="alert">{store.cloudError} Your edits remain in this browser. Connection failures retry automatically.</div>}
     {store.storageError&&<div className="bs-warning" role="alert">{store.storageError}</div>}

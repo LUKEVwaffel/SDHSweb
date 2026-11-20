@@ -164,3 +164,8 @@
 .bs-player-delete > div {display:flex;gap:12px;justify-content:flex-end;margin-top:24px;}
 
 .bs-player-stage { position: relative; }
+
+.bs-scheduled-link { display: inline-block; border: 1px solid; border-radius: 6px; padding: 8px 11px; font: 600 12px/1.4 Inter,sans-serif; text-decoration: none; }
+.bs-scheduled-link:focus-visible { outline: 2px solid var(--bs-gold); outline-offset: 3px; }
+.bs-scheduled-status { padding: 24px; }
+.bs-scheduled-status p { margin: 12px 0; }

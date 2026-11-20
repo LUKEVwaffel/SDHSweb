@@ -1,4 +1,4 @@
-import {ballCountdown,nextDinnerSlide,nextPreshowSlide} from '../../../../../lib/ballPlayback';
+import {ballCountdown,ballScheduleTime,nextDinnerSlide,nextPreshowSlide} from '../../../../../lib/ballPlayback';
 import {LAYOUTS} from '../../../../../lib/ballPresentation';
 import {nudgePhoto} from '../../../../../lib/ballPhotoPosition';
 import {useState,useEffect,useRef} from 'react';
@@ -16,11 +16,18 @@ function ShowCountdown({ until }) {
   },[]);
   return <div className="bs-show-countdown"><span>Ceremony begins in</span><strong>{ballCountdown(until-now)}</strong></div>;
 }
-export default function StudioPlayer({deck,startIndex=0,runShow=false,pairOnOpen=false,onClose,onPhotoEdit,onDeleteSlide}) {
-  const playback=useStudioPlayback(deck,startIndex,runShow);const {state,send}=playback;
+export default function StudioPlayer({deck,startIndex=0,runShow=false,pairOnOpen=false,scheduledTv=false,onClose,onPhotoEdit,onDeleteSlide}) {
+  const playback=useStudioPlayback(deck,startIndex,runShow,scheduledTv);const {state,send}=playback;
   const {index,playing,blackout}=state;const slide=deck.slides[index];
   const host=useStudioHost(deck,playback,pairOnOpen);
   const [notes,setNotes]=useState(false);const [hint,setHint]=useState('');const [fullscreen,setFullscreen]=useState(false);const [pairing,setPairing]=useState(pairOnOpen);
+  const autoPair = useRef(scheduledTv && pairOnOpen);
+  useEffect(()=>{
+    if(!autoPair.current || (!host.phoneSeen && state.showPhase==='waiting'))return;
+    autoPair.current=false;
+    setPairing(false);
+    root.current?.focus();
+  },[host.phoneSeen,state.showPhase]);
   const [deleteTarget,setDeleteTarget]=useState(null);
   const deleteRef=useRef(null);
   const confirmRef=useRef(null);
@@ -124,16 +131,16 @@ export default function StudioPlayer({deck,startIndex=0,runShow=false,pairOnOpen
     {positioning&&<div className="bs-player-position" role="status"><strong>Positioning photo {photoIndex+1}</strong><span>Arrows move · Shift moves faster · + / − zoom · M fits photo · K or Esc finishes</span>{photoSlots>1&&<select aria-label="Photo to position" value={photoIndex} onChange={e=>{setPhotoIndex(Number(e.target.value));root.current?.focus();}}>{slide.photos.slice(0,photoSlots).map((p,i)=>p&&<option key={i} value={i}>Photo {i+1}</option>)}</select>}<span>{Math.round((slide.photos[photoIndex]?.zoom??1)*100)}% zoom · Changes save automatically</span></div>}
     {blackout&&<div className="bs-blackout-label">Blackout · press B to return</div>}
     <nav className="bs-player-controls" aria-label="Presentation controls">
-      <button onClick={onClose}>Exit</button>{onPhotoEdit&&<button aria-pressed={positioning} disabled={!positionable} onClick={togglePosition}>{positioning?'Finish positioning (K)':'Position photo (K)'}</button>}{onPhotoEdit&&<button disabled={!positionable} aria-pressed={showingWhole&&positionable} onClick={togglePhotoFit}>{showingWhole?'Fill frame (M)':'Show whole photo (M)'}</button>}<button onClick={()=>send({type:'previous'})} disabled={index===0&&!(state.showPhase==='preshow'&&playback.show?.preshow)}>Previous</button><span>{index+1} / {deck.slides.length}</span><button onClick={()=>send({type:'next'})} disabled={state.showPhase==='waiting'}>Next</button>
-      <button disabled={!!playback.show&&(state.showPhase==='waiting'||index>=playback.show.podium)} onClick={()=>{setPositionSlide(null);send({type:'toggle-play'});}}>{playing?'Pause':'Autoplay'}</button><button onClick={()=>send({type:'blackout'})}>{blackout?'Show slides':'Blackout'}</button><button onClick={()=>setNotes(n=>!n)}>{notes?'Hide notes':'Notes'}</button><button onClick={toggleFull}>{fullscreen?'Leave full screen':'Full screen'}</button>
-      {playback.show&&<>{index>=playback.show.podium&&<button onClick={()=>send({type:'start-show'})}>Start preshow</button>}<button onClick={()=>send({type:'goto',index:playback.show.welcome})}>Welcome</button></>}
-      {playback.show?.dinnerPhotos&&<button onClick={()=>send({type:state.showPhase==='dinner'?'end-dinner':'start-dinner'})}>{state.showPhase==='dinner'?'Stop dinner slideshow':'Start dinner slideshow'}</button>}
+      <button onClick={onClose}>Exit</button>{onPhotoEdit&&<button aria-pressed={positioning} disabled={!positionable} onClick={togglePosition}>{positioning?'Finish positioning (K)':'Position photo (K)'}</button>}{onPhotoEdit&&<button disabled={!positionable} aria-pressed={showingWhole&&positionable} onClick={togglePhotoFit}>{showingWhole?'Fill frame (M)':'Show whole photo (M)'}</button>}<button onClick={()=>send({type:'previous'})} disabled={playback.scheduleActive||(index===0&&!(state.showPhase==='preshow'&&playback.show?.preshow))}>Previous</button><span>{index+1} / {deck.slides.length}</span><button onClick={()=>send({type:'next'})} disabled={playback.scheduleActive||state.showPhase==='waiting'}>Next</button>
+      {(!scheduledTv||state.showPhase==='dinner')&&<button disabled={!!playback.show&&(state.showPhase==='waiting'||index>=playback.show.podium)} onClick={()=>{setPositionSlide(null);send({type:'toggle-play'});}}>{playing?'Pause':'Autoplay'}</button>}<button onClick={()=>send({type:'blackout'})}>{blackout?'Show slides':'Blackout'}</button><button onClick={()=>setNotes(n=>!n)}>{notes?'Hide notes':'Notes'}</button><button onClick={toggleFull}>{fullscreen?'Leave full screen':'Full screen'}</button>
+      {playback.show&&<>{!scheduledTv&&index>=playback.show.podium&&<button onClick={()=>send({type:'start-show'})}>Start preshow</button>}<button disabled={playback.scheduleActive} onClick={()=>send({type:'goto',index:playback.show.welcome})}>Welcome</button></>}
+      {playback.show?.dinnerPhotos&&<button disabled={playback.scheduleActive} onClick={()=>send({type:state.showPhase==='dinner'?'end-dinner':'start-dinner'})}>{state.showPhase==='dinner'?'Stop dinner slideshow':'Start dinner slideshow'}</button>}
       <button onClick={()=>{if(!host.token)host.start();setPairing(true);}}>{host.token?'Phone remote':'Connect phone'}</button>
-      <select aria-label="Jump to slide" value={index} onChange={e=>send({type:'goto',index:Number(e.target.value)})}>{deck.slides.map((s,i)=><option key={s.id} value={i}>{i+1}. {s.title||s.layout}</option>)}</select>
+      <select aria-label="Jump to slide" disabled={playback.scheduleActive} value={index} onChange={e=>send({type:'goto',index:Number(e.target.value)})}>{deck.slides.map((s,i)=><option key={s.id} value={i}>{i+1}. {s.title||s.layout}</option>)}</select>
       <small>← → advance · K position photo · M fit photo · D delete slide · P play/pause · B blackout · Phone remote {host.status.toLowerCase()}</small>
     </nav>
     {notes&&<aside className="bs-player-notes"><strong>Speaker notes · visible on this screen</strong><p>{slide.notes||'No notes for this slide.'}</p><small>Next: {deck.slides[['preshow','dinner'].includes(state.showPhase)?nextIndex:index+1]?.title||'End of presentation'}</small></aside>}
     {hint&&<div className="bs-player-hint" role="status">{hint} <button onClick={()=>setHint('')}>Dismiss</button></div>}
-    {pairing&&host.token&&<StudioPairPanel host={host} onClose={()=>setPairing(false)}/>}
+    {pairing&&host.token&&<StudioPairPanel host={host} schedule={scheduledTv&&state.showPhase==='waiting'?ballScheduleTime(playback.show.preshowAt):null} onClose={()=>{autoPair.current=false;setPairing(false);}}/>}
   </div>,document.body);
 }
