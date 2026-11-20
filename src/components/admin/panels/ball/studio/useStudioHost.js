@@ -32,13 +32,19 @@ export function useStudioHost(deck, playback, pairOnOpen = false) {
         payload.countdown = state.showPhase === 'preshow' ? Math.max(0, startAt - Date.now())
           : state.showPhase === 'podium' ? Math.max(0, welcomeAt - Date.now()) : null;
         payload.manualCues = state.showPhase === 'waiting' || state.index >= podium;
-        payload.cues = ballShowCues(playback.show, deck.slides.length).map(index => ({
-          index, title: deck.slides[index].title || 'Untitled cue',
-          grog: playback.show.grog?.includes(index) || false,
-          time: index > welcome && !playback.show.grog?.includes(index) ? deck.slides[index].eyebrow : '',
-        }));
+        payload.cues = ballShowCues(playback.show, deck.slides.length).map(index => {
+          const slide=deck.slides[index];
+          const grog=playback.show.grog?.includes(index) || false;
+          return {
+            index, title: slide.title || 'Untitled cue', grog,
+            ...(grog ? { card: {
+              layout:slide.layout, title:slide.title, subtitle:slide.subtitle, eyebrow:slide.eyebrow,
+              font:slide.font, titleSize:slide.titleSize, align:slide.align, duration:slide.duration,
+              photos:slide.photos,
+            } } : { time: index > welcome ? slide.eyebrow : '' }),
+          };
+        });
       }
-      // The phone renders only the current and next slides.
       return transport.current?.send(payload).then(()=>setStatus('READY')).catch(()=>setStatus('RECONNECTING'));
     };
     const connection=studioChannel(SB,token,message=>{

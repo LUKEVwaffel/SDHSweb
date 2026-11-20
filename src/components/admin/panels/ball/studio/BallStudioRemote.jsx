@@ -75,8 +75,19 @@ export default function BallStudioRemote({client=SB,initialToken=''}={}) {
           {snapshot.showPhase==='dinner'?'Stop dinner slideshow':'Start dinner slideshow'}
         </button>}
         {cues.map((cue,i) => !cue.grog ? cueButton(cue) : i===firstGrog ? <details key="grog" ref={grogGroup} className="br-grog" open={grogCues.some(item=>item.index===snapshot.index)||undefined}>
-          <summary>Grog ingredients</summary>
-          {grogCues.map(cueButton)}
+          <summary>Grog cards <span>{grogCues.length}</span></summary>
+          {snapshot.scheduleActive&&<p className="br-grog-status">Preview the cards now. TV controls unlock after Welcome.</p>}
+          <div className="br-grog-cards">
+            {grogCues.map(cue=><article className="br-grog-card" key={cue.index} aria-label={cue.title}>
+              {cue.card ? <SlideCanvas slide={cue.card} deck={{theme:snapshot.theme,showNumbers:false}} index={cue.index}/> : <h3>{cue.title}</h3>}
+              <div className="br-grog-card-actions">
+                {cue.card?.subtitle&&<p>{cue.card.subtitle}</p>}
+                <button aria-label={`Show ${cue.title} on TV`} disabled={!connected||!!pending||snapshot.scheduleActive||snapshot.index===cue.index} onClick={()=>command('goto',cue.index)}>
+                  {snapshot.index===cue.index?'On TV':'Show on TV'}
+                </button>
+              </div>
+            </article>)}
+          </div>
         </details> : null)}
       </section>}
       {snapshot.next&&<details className="br-next-preview"><summary>Up next · {snapshot.next.title||'Photo'}</summary><SlideCanvas slide={snapshot.next} deck={{theme:snapshot.theme,showNumbers:false}} index={snapshot.nextIndex ?? (snapshot.index+1)%snapshot.total}/></details>}
@@ -92,7 +103,7 @@ export default function BallStudioRemote({client=SB,initialToken=''}={}) {
           <span>Slide {snapshot.index+1} of {snapshot.total}</span>
           <span className="br-command-status" aria-live="polite">{pending?'Sending control…':connected?'Ready':'TV disconnected'}</span>
         </div>
-        {grogCues.length>0&&<button className="br-grog-shortcut" onClick={showGrogCues}>Grog ingredients <span>{grogCues.length}</span></button>}
+        {grogCues.length>0&&<button className="br-grog-shortcut" onClick={showGrogCues}>Grog cards <span>{grogCues.length}</span></button>}
       </div>
       <div className="br-transport-buttons">
         <button disabled={!connected||!!pending||snapshot.scheduleActive||snapshot.index===0} onClick={()=>command('previous')}>Previous</button>

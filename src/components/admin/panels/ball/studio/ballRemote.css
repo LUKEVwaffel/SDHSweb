@@ -47,7 +47,7 @@ body:has(>.ball-remote),body:has(#root .ball-remote) {background:#081320;}
 .br-dinner { margin-bottom: 6px; }
 .br-grog { padding: 6px 0; }
 .br-grog summary { cursor: pointer; padding: 10px 0; font-weight: 600; }
-.br-grog button { width: 100%; margin-top: 4px; }
+
 
 .ball-remote {
   padding-inline: max(16px, env(safe-area-inset-left)) max(16px, env(safe-area-inset-right));
@@ -133,3 +133,12 @@ html:has(.br-transport.has-grog) { scroll-padding-bottom: calc(140px + env(safe-
   .br-show-cues { margin-top: 14px; }
 }
 .br-controls button:only-child { grid-column: 1 / -1; }
+
+
+.br-grog-status { margin: 0 0 10px; color: #b5c4d4; font-size: 12px; }
+.br-grog-cards { display: grid; gap: 12px; }
+.br-grog-card { overflow: hidden; border: 1px solid #e4c17b35; border-radius: 8px; background: #102238; }
+.br-grog-card h3 { margin: 10px 12px; }
+.br-grog-card-actions { display: grid; gap: 7px; padding: 9px 10px 10px; }
+.br-grog-card-actions p { margin: 0; font-size: 13px; color: #dbe3eb; }
+.br-grog-card-actions button { width: 100%; justify-content: center; min-height: 44px; text-align: center; }
