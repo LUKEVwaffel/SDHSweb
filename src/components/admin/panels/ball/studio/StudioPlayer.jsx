@@ -1,4 +1,4 @@
-import {ballCountdown,nextPreshowSlide} from '../../../../../lib/ballPlayback';
+import {ballCountdown,nextDinnerSlide,nextPreshowSlide} from '../../../../../lib/ballPlayback';
 import {LAYOUTS} from '../../../../../lib/ballPresentation';
 import {nudgePhoto} from '../../../../../lib/ballPhotoPosition';
 import {useState,useEffect,useRef} from 'react';
@@ -114,7 +114,9 @@ export default function StudioPlayer({deck,startIndex=0,runShow=false,pairOnOpen
   },[deck.slides.length,onClose,pairing,send]);
   async function toggleFull(){try{if(document.fullscreenElement)await document.exitFullscreen();else await root.current.requestFullscreen();}catch{setHint('Full screen was blocked. Use your browser’s full-screen control.');}}
   const nextIndex=state.showPhase==='preshow'&&playback.show
-    ? nextPreshowSlide(playback.show,index) : (index+1)%deck.slides.length;
+    ? nextPreshowSlide(playback.show,index)
+    : state.showPhase==='dinner'&&playback.show?.dinnerPhotos ? nextDinnerSlide(playback.show,index)
+      : (index+1)%deck.slides.length;
   useEffect(()=>{deck.slides[nextIndex].photos.filter(Boolean).forEach(p=>{const img=new Image();img.src=p.url;});},[deck.slides,nextIndex]);
   return createPortal(<div className={`bs-player ${blackout?'bs-is-black':''}`} ref={root} tabIndex={-1} role="dialog" aria-modal="true" aria-label="Ball presentation playback">
     <div className="bs-player-stage"><StudioSlideStage slide={slide} deck={deck} index={index} visit={state.visit} positioning={positioning}/>{state.showPhase==='preshow'&&playback.show&&<ShowCountdown until={playback.show.startAt}/>}</div>
@@ -125,11 +127,12 @@ export default function StudioPlayer({deck,startIndex=0,runShow=false,pairOnOpen
       <button onClick={onClose}>Exit</button>{onPhotoEdit&&<button aria-pressed={positioning} disabled={!positionable} onClick={togglePosition}>{positioning?'Finish positioning (K)':'Position photo (K)'}</button>}{onPhotoEdit&&<button disabled={!positionable} aria-pressed={showingWhole&&positionable} onClick={togglePhotoFit}>{showingWhole?'Fill frame (M)':'Show whole photo (M)'}</button>}<button onClick={()=>send({type:'previous'})} disabled={index===0&&!(state.showPhase==='preshow'&&playback.show?.preshow)}>Previous</button><span>{index+1} / {deck.slides.length}</span><button onClick={()=>send({type:'next'})} disabled={state.showPhase==='waiting'}>Next</button>
       <button disabled={!!playback.show&&(state.showPhase==='waiting'||index>=playback.show.podium)} onClick={()=>{setPositionSlide(null);send({type:'toggle-play'});}}>{playing?'Pause':'Autoplay'}</button><button onClick={()=>send({type:'blackout'})}>{blackout?'Show slides':'Blackout'}</button><button onClick={()=>setNotes(n=>!n)}>{notes?'Hide notes':'Notes'}</button><button onClick={toggleFull}>{fullscreen?'Leave full screen':'Full screen'}</button>
       {playback.show&&<>{index>=playback.show.podium&&<button onClick={()=>send({type:'start-show'})}>Start preshow</button>}<button onClick={()=>send({type:'goto',index:playback.show.welcome})}>Welcome</button></>}
+      {playback.show?.dinnerPhotos&&<button onClick={()=>send({type:state.showPhase==='dinner'?'end-dinner':'start-dinner'})}>{state.showPhase==='dinner'?'Stop dinner slideshow':'Start dinner slideshow'}</button>}
       <button onClick={()=>{if(!host.token)host.start();setPairing(true);}}>{host.token?'Phone remote':'Connect phone'}</button>
       <select aria-label="Jump to slide" value={index} onChange={e=>send({type:'goto',index:Number(e.target.value)})}>{deck.slides.map((s,i)=><option key={s.id} value={i}>{i+1}. {s.title||s.layout}</option>)}</select>
       <small>← → advance · K position photo · M fit photo · D delete slide · P play/pause · B blackout · Phone remote {host.status.toLowerCase()}</small>
     </nav>
-    {notes&&<aside className="bs-player-notes"><strong>Speaker notes · visible on this screen</strong><p>{slide.notes||'No notes for this slide.'}</p><small>Next: {deck.slides[state.showPhase==='preshow'?nextIndex:index+1]?.title||'End of presentation'}</small></aside>}
+    {notes&&<aside className="bs-player-notes"><strong>Speaker notes · visible on this screen</strong><p>{slide.notes||'No notes for this slide.'}</p><small>Next: {deck.slides[['preshow','dinner'].includes(state.showPhase)?nextIndex:index+1]?.title||'End of presentation'}</small></aside>}
     {hint&&<div className="bs-player-hint" role="status">{hint} <button onClick={()=>setHint('')}>Dismiss</button></div>}
     {pairing&&host.token&&<StudioPairPanel host={host} onClose={()=>setPairing(false)}/>}
   </div>,document.body);

@@ -43,3 +43,8 @@ body:has(>.ball-remote),body:has(#root .ball-remote) {background:#081320;}
 .br-show-cues button { display: flex; justify-content: space-between; align-items: center; gap: 12px; text-align: left; min-height: 46px; }
 .br-show-cues button[aria-current=true] { border-color: #e5c37e; color: #e5c37e; }
 .br-show-cues small { white-space: nowrap; color: #e5c37e; }
+
+.br-dinner { margin-bottom: 6px; }
+.br-grog { padding: 6px 0; }
+.br-grog summary { cursor: pointer; padding: 10px 0; font-weight: 600; }
+.br-grog button { width: 100%; margin-top: 4px; }

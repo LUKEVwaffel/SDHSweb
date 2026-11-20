@@ -43,6 +43,12 @@ export default function BallStudioRemote({client=SB,initialToken=''}={}) {
     if(pendingRef.current?.id===payload.id){pendingTimers.current=[setTimeout(transmit,1200),setTimeout(transmit,2600),setTimeout(()=>{if(pendingRef.current?.id===payload.id){pendingRef.current=null;setPending(null);setError('The TV did not acknowledge this control. Check the current slide before trying again.');}},5000)];}
     transmit();
   }
+  const cues = snapshot?.cues;
+  const firstGrog = cues?.findIndex(cue => cue.grog);
+  const grogCues = firstGrog >= 0 ? cues.filter(cue => cue.grog) : [];
+  const cueButton = cue => <button key={cue.index} disabled={!connected||!!pending} aria-current={snapshot.index===cue.index?'true':undefined} onClick={()=>command('goto',cue.index)}>
+    <span>{cue.title}</span>{cue.time&&<small>{cue.time}</small>}
+  </button>;
   function disconnect(){window.history.replaceState(null,'',window.location.pathname);setToken('');setSnapshot(null);setError('');}
   return <main className="ball-remote"><header><div className="br-eyebrow">Trojan Battalion</div><h1>Ball Remote</h1><div className={`br-status ${connected?'is-live':''}`} role="status">{connected?'TV connected':status==='ENDED'?'Session ended':received?'TV connection lost':waiting?'Waiting for the TV':token?'Connecting to presentation':'Pair with your presentation'}</div></header>
     {!token?<form className="br-pair-form" onSubmit={e=>{e.preventDefault();const next=readRemoteToken(link);if(!next){setError('Paste the complete private remote link from the TV.');return;}window.history.replaceState(null,'',`#${next}`);setError('');setToken(next);}}><p>On the TV, open your presentation and choose <strong>Connect phone</strong>. Scan its QR code with your phone’s camera, or paste the private link here.</p><label>Private remote link<textarea value={link} onChange={e=>setLink(e.target.value)} rows={3} autoCapitalize="none" autoCorrect="off" spellCheck={false}/></label><button className="br-primary" type="submit">Connect to TV</button></form>:<>
@@ -53,9 +59,13 @@ export default function BallStudioRemote({client=SB,initialToken=''}={}) {
       {Array.isArray(snapshot.cues)&&<section className="br-show-cues" aria-label="Ball timeline cues">
         <h2>Ball timeline</h2>
         {snapshot.manualCues&&snapshot.showPhase!=='waiting'&&<button disabled={!connected||!!pending} onClick={()=>command('start-show')}>Start preshow</button>}
-        {snapshot.cues.map(cue=><button key={cue.index} disabled={!connected||!!pending} aria-current={snapshot.index===cue.index?'true':undefined} onClick={()=>command('goto',cue.index)}>
-          <span>{cue.title}</span>{cue.time&&<small>{cue.time}</small>}
-        </button>)}
+        {snapshot.dinnerSlideshow&&<button className="br-dinner" disabled={!connected||!!pending} onClick={()=>command(snapshot.showPhase==='dinner'?'end-dinner':'start-dinner')}>
+          {snapshot.showPhase==='dinner'?'Stop dinner slideshow':'Start dinner slideshow'}
+        </button>}
+        {cues.map((cue,i) => !cue.grog ? cueButton(cue) : i===firstGrog ? <details key="grog" className="br-grog" open={grogCues.some(item=>item.index===snapshot.index)||undefined}>
+          <summary>Grog ingredients</summary>
+          {grogCues.map(cueButton)}
+        </details> : null)}
       </section>}
       <div className="br-command-status" aria-live="polite">{pending?'Sending control…':connected?'Ready': 'TV connection lost · controls paused'}</div>
       <section className="br-notes"><h2>Speaker notes</h2><p>{snapshot.current.notes||'No speaker notes for this slide.'}</p><small>These notes stay on your phone.</small></section>

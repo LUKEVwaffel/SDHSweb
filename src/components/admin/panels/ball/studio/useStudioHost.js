@@ -1,7 +1,7 @@
 import {useState,useRef,useEffect,useCallback} from 'react';
 import {supabase as SB} from '../../../../../lib/supabaseClient';
 import {studioChannel,createRemoteToken} from '../../../../../lib/ballStudioRemote';
-import {ballShowCues,nextPreshowSlide,remainingTime,createCommandReceiver} from '../../../../../lib/ballPlayback';
+import {ballShowCues,nextDinnerSlide,nextPreshowSlide,remainingTime,createCommandReceiver} from '../../../../../lib/ballPlayback';
 export function useStudioHost(deck, playback, pairOnOpen = false) {
   const [token,setToken]=useState(() => pairOnOpen ? createRemoteToken() : null);
   const [status,setStatus]=useState('OFF');
@@ -20,12 +20,19 @@ export function useStudioHost(deck, playback, pairOnOpen = false) {
           payload.nextIndex = nextPreshowSlide(playback.show, state.index);
           payload.next = deck.slides[payload.nextIndex];
         }
+        if (state.showPhase === 'dinner') {
+          payload.nextIndex = nextDinnerSlide(playback.show, state.index);
+          payload.next = deck.slides[payload.nextIndex];
+        }
+        payload.dinnerSlideshow = Boolean(playback.show.dinnerPhotos);
         payload.showPhase = state.showPhase;
         payload.countdown = state.showPhase === 'preshow' ? Math.max(0, startAt - Date.now())
           : state.showPhase === 'podium' ? Math.max(0, welcomeAt - Date.now()) : null;
         payload.manualCues = state.showPhase === 'waiting' || state.index >= podium;
         payload.cues = ballShowCues(playback.show, deck.slides.length).map(index => ({
-          index, title: deck.slides[index].title || 'Untitled cue', time: index > welcome ? deck.slides[index].eyebrow : '',
+          index, title: deck.slides[index].title || 'Untitled cue',
+          grog: playback.show.grog?.includes(index) || false,
+          time: index > welcome && !playback.show.grog?.includes(index) ? deck.slides[index].eyebrow : '',
         }));
       }
       // The phone renders only the current and next slides.

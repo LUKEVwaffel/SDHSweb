@@ -69,6 +69,8 @@ export function readDeck(input) {
       ...(show.preshowAt ? { preshowAt: new Date(show.preshowAt).toISOString() } : {}),
       ...(show.featured ? { featuredIds: show.featured.map(index => deck.slides[index].id) } : {}),
       ...(show.preshow ? { preshowIds: show.preshow.map(index => deck.slides[index].id) } : {}),
+      ...(show.dinnerPhotos ? { dinnerId: deck.slides[show.dinner].id } : {}),
+      ...(show.grog ? { grogIds: show.grog.map(index => deck.slides[index].id) } : {}),
     };
   }
   return deck;

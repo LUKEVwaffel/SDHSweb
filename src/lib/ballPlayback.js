@@ -37,7 +37,7 @@ export function playbackAction(state, action, now = Date.now()) {
 }
 export function validateRemoteCommand(message, total) {
   if (!message || typeof message.id !== 'string' || !/^[a-zA-Z0-9-]{16,80}$/.test(message.id)) return null;
-  if (!['next','previous','goto','restart','play','pause','blackout','loop','start-show'].includes(message.action)) return null;
+  if (!['next','previous','goto','restart','play','pause','blackout','loop','start-show','start-dinner','end-dinner'].includes(message.action)) return null;
   if (message.action === 'goto' && (!Number.isInteger(message.index) || message.index < 0 || message.index >= total)) return null;
   return { type: message.action, ...(message.action === 'goto' ? {index:message.index} : {}) };
 }
@@ -81,8 +81,17 @@ export function resolveBallShow(deck) {
   const preshow = Array.isArray(show.preshowIds)
     ? [...new Set(show.preshowIds.map(id => slides.findIndex(slide => slide.id === id)))].filter(index => index >= 0 && index < podium)
     : null;
+  const dinner = slides.findIndex(slide => slide.id === show.dinnerId);
+  const dinnerPhotos = dinner > welcome
+    ? slides.slice(0, podium).flatMap((slide, index) => slide.layout === 'photo' && slide.photos.some(Boolean) ? [index] : [])
+    : [];
+  const grog = Array.isArray(show.grogIds)
+    ? [...new Set(show.grogIds.map(id => slides.findIndex(slide => slide.id === id)))].filter(index => index > welcome)
+    : [];
   return {
     startAt, podium, welcome, welcomeAt: startAt + podiumSeconds * 1000,
+    ...(dinnerPhotos.length ? { dinner, dinnerPhotos } : {}),
+    ...(grog.length ? { grog } : {}),
     ...(preshow ? { preshow: preshow.length ? preshow : [0] } : {}),
     ...(Number.isFinite(preshowAt) && preshowAt < startAt ? { preshowAt } : {}),
     ...(featured.length ? { featured } : {}),
@@ -102,10 +111,17 @@ export function ballPreshowSlides(show) {
 }
 
 export function nextPreshowSlide(show, index, direction = 1) {
-  const rotation = ballPreshowSlides(show);
+  return nextInRotation(ballPreshowSlides(show), index, direction);
+}
+
+function nextInRotation(rotation, index, direction) {
   const position = rotation.indexOf(index);
   if (position === -1) return rotation[0];
   return rotation[(position + direction + rotation.length) % rotation.length];
+}
+
+export function nextDinnerSlide(show, index, direction = 1) {
+  return nextInRotation(show.dinnerPhotos, index, direction);
 }
 
 export function startBallShow(state, show, now = Date.now()) {
@@ -129,6 +145,22 @@ export function startBallShow(state, show, now = Date.now()) {
 export function ballShowAction(state, action, show, now = Date.now()) {
   if (!show) return playbackAction(state, action, now);
   if (action.type === 'start-show') return startBallShow(state, show, now);
+  if (action.type === 'start-dinner' && show.dinnerPhotos) {
+    return { ...playbackAction(state, { type: 'goto', index: show.dinnerPhotos[0] }, now), playing: true, showPhase: 'dinner' };
+  }
+  if (state.showPhase === 'dinner') {
+    if (action.type === 'goto' || action.type === 'end-dinner') {
+      const index = action.type === 'goto' ? action.index : show.dinner;
+      return { ...playbackAction(state, { type: 'goto', index }, now), playing: false, showPhase: null };
+    }
+    if (action.type === 'restart') return playbackAction(state, { type: 'goto', index: show.dinnerPhotos[0] }, now);
+    if (action.type === 'next' || action.type === 'previous'
+      || (action.type === 'tick' && state.playing && !state.blackout && remainingTime(state, now) <= 1)) {
+      const index = nextDinnerSlide(show, state.index, action.type === 'previous' ? -1 : 1);
+      return playbackAction(state, { type: 'goto', index }, now);
+    }
+    return playbackAction(state, action, now);
+  }
   if (!state.showPhase) {
     if (state.index >= show.podium && ['play', 'toggle-play', 'loop'].includes(action.type)) return state;
     const next = playbackAction(state, action, now);
@@ -165,7 +197,7 @@ export function ballShowAction(state, action, show, now = Date.now()) {
 
 export function nextPlaybackWake(state, show, now = Date.now()) {
   const slide = state.playing && !state.blackout ? remainingTime(state, now) : Infinity;
-  if (!show || !state.showPhase) return slide;
+  if (!show || !state.showPhase || state.showPhase === 'dinner') return slide;
   const deadlines = { waiting: show.preshowAt, preshow: show.startAt, podium: show.welcomeAt };
   return Math.min(slide, deadlines[state.showPhase] - now);
 }

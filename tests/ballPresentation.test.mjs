@@ -286,3 +286,37 @@ test('an explicit intro rotation skips photo slides and keeps later ceremony cue
  assert.deepEqual(ballShowCues(show, imported.slides.length), [4, 5, 2]);
  assert.equal(ballShowAction(podiumCard, {type:'goto',index:5}, show, startAt).index, deck.slides.indexOf(dinner));
 });
+
+test('dinner loops only shuffled photos and stops at the Dinner card or the selected manual cue', () => {
+ const deck = makeDeck();
+ deck.slides = [
+  makeSlide('title'), makeSlide('photo', {photos:[{url:'/photo-a.png'}]}), makeSlide('title'),
+  makeSlide('photo', {photos:[{url:'/photo-b.png'}]}), makeSlide('title'), makeSlide('title'),
+  makeSlide('title', {title:'Dinner'}), makeSlide('title', {title:'Grog Base'}),
+ ];
+ const [cover,,,,podium,welcome,dinner,grog] = deck.slides;
+ deck.show = {
+  startAt:'2026-11-21T22:30:00.000Z', podiumId:podium.id, welcomeId:welcome.id,
+  preshowIds:[cover.id], dinnerId:dinner.id, grogIds:[grog.id],
+ };
+ const imported=readDeck(deck);
+ const show=resolveBallShow(imported);
+ assert.deepEqual(show.dinnerPhotos,[1,3]);
+ assert.deepEqual(show.grog,[7]);
+ assert.ok(ballShowCues(show, imported.slides.length).includes(7));
+ const state=createPlayback(imported.slides.map(s=>s.duration),6);
+ const start=ballShowAction(state,{type:'start-dinner'},show,5000000000000);
+ assert.equal(start.index,1);
+ assert.equal(start.showPhase,'dinner');
+ assert.equal(nextPlaybackWake(start,show,5000000000000),8000);
+ const second=ballShowAction(start,{type:'tick'},show,5000000008000);
+ assert.equal(second.index,3);
+ const first=ballShowAction(second,{type:'next'},show,5000000009000);
+ assert.equal(first.index,1);
+ const end=ballShowAction(first,{type:'end-dinner'},show,5000000009000);
+ assert.equal(end.index,6);
+ assert.equal(end.playing,false);
+ const cue=ballShowAction(first,{type:'goto',index:7},show,5000000009000);
+ assert.equal(cue.index,7);
+ assert.equal(cue.showPhase,null);
+});
