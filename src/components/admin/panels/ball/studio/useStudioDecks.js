@@ -7,7 +7,7 @@ export function useStudioDecks(account) {
   const [initial] = useState(() => {
     try {
       const saved = JSON.parse(localStorage.getItem(key));
-      if (saved?.decks?.length) return { decks: saved.decks.map(d => ({ ...readDeck(d), id:d.id, cloudRevision:d.cloudRevision,cloudSavedVersion:d.cloudSavedVersion,cloudSavedAt:d.cloudSavedAt,updatedAt:d.updatedAt })), active:saved.active, error:'' };
+      if (saved?.decks?.length) return { decks: saved.decks.map(d => ({ ...readDeck(d, { preserveSlideIds: true }), id:d.id, cloudRevision:d.cloudRevision,cloudSavedVersion:d.cloudSavedVersion,cloudSavedAt:d.cloudSavedAt,updatedAt:d.updatedAt })), active:saved.active, error:'' };
     } catch { return {decks:[makeDeck()],error:'Browser recovery could not be read. Your old recovery data has not been overwritten; download a backup before continuing.'}; }
     return {decks:[makeDeck()],error:''};
   });
@@ -96,7 +96,7 @@ export function useStudioDecks(account) {
     return data;
   }
   function openCloud(row) {
-    const next = {...readDeck(row.value), id:row.key.slice(PREFIX.length),cloudRevision:row.updated_at,cloudSavedVersion:row.value.updatedAt,cloudSavedAt:row.updated_at,updatedAt:row.value.updatedAt};
+    const next = {...readDeck(row.value, { preserveSlideIds: true }), id:row.key.slice(PREFIX.length),cloudRevision:row.updated_at,cloudSavedVersion:row.value.updatedAt,cloudSavedAt:row.updated_at,updatedAt:row.value.updatedAt};
     // Preserve local work as a separate recovery deck before replacing it.
     setDecks(all => { const local = all.find(d => d.id === next.id); const rest=all.filter(d=>d.id!==next.id); if (local && local.updatedAt !== row.value.updatedAt) rest.push({...local,id:crypto.randomUUID(),name:`${local.name} · local recovery`,cloudRevision:null,cloudSavedVersion:null,cloudSavedAt:null}); return [...rest,next]; });
     switchDeck(next.id);

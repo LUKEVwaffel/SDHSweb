@@ -17,21 +17,39 @@ export default function ScheduledBallTV({ deckId, client = SB }) {
 
   useEffect(() => {
     let active = true;
-    async function open() {
+    let busy = false;
+    let revision = null;
+    async function sync() {
+      if (busy) return;
+      busy = true;
       try {
         if (!/^[\da-f-]{36}$/i.test(deckId)) throw new Error('This presentation link is invalid.');
-        const { data, error } = await client.from('admin_settings').select('value').eq('key', CLOUD_DECK_PREFIX + deckId).single();
-        if (error || !data?.value) throw new Error('Could not open the saved presentation. Check your connection and sign-in.');
-        const deck = readDeck(data.value);
+        const query = client.from('admin_settings').select('value,updated_at').eq('key', CLOUD_DECK_PREFIX + deckId);
+        const { data, error } = await (revision ? query.gt('updated_at', revision).maybeSingle() : query.single());
+        if (!active) return;
+        if (error || (!revision && !data?.value)) throw new Error('Could not open the saved presentation. Check your connection and sign-in.');
+        if (!data?.value) return;
+        const deck = readDeck(data.value, { preserveSlideIds: true });
         const show = resolveBallShow(deck);
         if (!show?.preshowAt) throw new Error('This presentation has no scheduled preshow.');
-        if (active) setLoaded({ deck, pairOnOpen: Date.now() < show.preshowAt });
+        revision = data.updated_at;
+        setLoaded(previous => ({ deck, pairOnOpen: previous?.pairOnOpen ?? (Date.now() < show.preshowAt) }));
+        setError('');
       } catch (problem) {
-        if (active) setError(problem.message);
+        // Keep the last valid deck playing when the connection drops.
+        if (active && !revision) setError(problem.message);
+      } finally {
+        busy = false;
       }
     }
-    void open();
-    return () => { active = false; };
+    void sync();
+    const interval = setInterval(sync, 5000);
+    window.addEventListener('online', sync);
+    return () => {
+      active = false;
+      clearInterval(interval);
+      window.removeEventListener('online', sync);
+    };
   }, [attempt, client, deckId]);
 
   if (loaded) return <StudioPlayer deck={loaded.deck} runShow scheduledTv pairOnOpen={loaded.pairOnOpen} onClose={exit} />;

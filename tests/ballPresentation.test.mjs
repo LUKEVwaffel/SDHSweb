@@ -358,3 +358,31 @@ test('saved decks retain the toast responses and senior recognition as manual cu
  assert.ok(ballShowCues(show,copy.slides.length).includes(4));
  assert.ok(ballShowCues(show,copy.slides.length).includes(5));
 });
+
+test('scheduled preshow never includes the photo reel, even when opening an older draft', () => {
+ const deck=makeDeck();
+ const cover=makeSlide('title');
+ const photo=makeSlide('photo',{photos:[{url:'/dinner.png'}]});
+ const feedback=makeSlide('split',{photos:[{kind:'qr',url:'data:image/png;base64,AAA='}]});
+ const podium=makeSlide('title'), welcome=makeSlide('title');
+ deck.slides=[photo,cover,photo,feedback,podium,welcome];
+ deck.show={
+  startAt:'2026-11-21T22:30:00.000Z',preshowAt:'2026-11-21T22:00:00.000Z',
+  featuredIds:[feedback.id,photo.id],podiumId:podium.id,welcomeId:welcome.id,
+ };
+ let show=resolveBallShow(deck);
+ assert.deepEqual(show.preshow,[1,3]);
+ assert.equal(startBallShow(createPlayback(deck.slides.map(s=>s.duration)),show,show.preshowAt-1000).index,1);
+ deck.show.preshowIds=[photo.id,cover.id,feedback.id];
+ show=resolveBallShow(readDeck(deck));
+ assert.deepEqual(show.preshow,[1,3]);
+});
+
+test('opening a saved deck keeps slide IDs and photo captions across edits', () => {
+ const deck=makeDeck();
+ deck.slides[0]=makeSlide('photo',{photos:[{url:'/photo.png',eventLabel:'County Championship'}]});
+ const copy=readDeck(deck,{preserveSlideIds:true});
+ assert.deepEqual(copy.slides.map(slide=>slide.id),deck.slides.map(slide=>slide.id));
+ assert.equal(copy.slides[0].photos[0].eventLabel,'County Championship');
+ assert.notEqual(readDeck(deck).slides[0].id,deck.slides[0].id);
+});

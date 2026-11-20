@@ -53,11 +53,16 @@ export function safePhotoUrl(value) {
   if (/^data:image\/(png|jpeg|webp|gif);base64,[a-z0-9+/=]+$/i.test(value)) return value;
   try { const url = new URL(value, 'https://local.invalid'); return ['http:', 'https:'].includes(url.protocol) ? value : ''; } catch { return ''; }
 }
-export function readDeck(input) {
+export function readDeck(input, { preserveSlideIds = false } = {}) {
   if (!input || input.version !== STUDIO_VERSION || !Array.isArray(input.slides) || input.slides.length < 1 || input.slides.length > 1000) throw new Error('Choose a Ball Studio deck with 1–1,000 slides.');
+  const savedIds = new Set();
   const deck = { version: STUDIO_VERSION, id: uid(), name: text(input.name, 150) || 'Imported deck', theme: Object.hasOwn(THEMES, input.theme) ? input.theme : 'midnight', loop: !!input.loop, showNumbers: !!input.showNumbers, updatedAt: new Date().toISOString(), slides: input.slides.map(s => {
     if (!s || !LAYOUTS.some(l => l.id === s.layout)) throw new Error('This file contains an unsupported slide layout.');
     const base = makeSlide(s.layout);
+    if (preserveSlideIds && typeof s.id === 'string' && s.id.length > 0 && s.id.length <= 200 && !savedIds.has(s.id)) {
+      base.id = s.id;
+      savedIds.add(s.id);
+    }
     return { ...base, title: text(s.title, 500), subtitle: text(s.subtitle), eyebrow: text(s.eyebrow, 200), notes: text(s.notes), duration: number(s.duration, 8, 1, 600), titleSize: number(s.titleSize, 76, 30, 120), overlay: number(s.overlay, 0, 0, 90), focalX: number(s.focalX, 50, 0, 100), focalY: number(s.focalY, 50, 0, 100), transition: ['fade','rise','cut'].includes(s.transition) ? s.transition : 'fade', font: ['Oswald','Inter','Fraunces'].includes(s.font) ? s.font : 'Oswald', align: ['left','center','right'].includes(s.align) ? s.align : 'center', fit: s.fit === 'contain' ? 'contain' : 'cover', motion: ['zoom','pan'].includes(s.motion) ? s.motion : 'none', frame: s.frame === 'matte' ? 'matte' : 'edge', photos: Array.isArray(s.photos) ? Array.from(s.photos.slice(0,4), p => p && safePhotoUrl(p.url) ? ({ id: text(p?.id, 200), url: safePhotoUrl(p?.url), thumb: safePhotoUrl(p?.thumb), caption: text(p?.caption, 500), ...(p.kind === 'qr' ? { kind: 'qr' } : {}), eventLabel: text(p.eventLabel ?? p.event, 200), focalX: number(p.focalX, number(s.focalX, 50, 0, 100), 0, 100), focalY: number(p.focalY, number(s.focalY, 50, 0, 100), 0, 100), zoom: number(p.zoom, 1, 1, 3), fit: p.fit === 'contain' ? 'contain' : p.fit === 'cover' ? 'cover' : (s.fit === 'contain' ? 'contain' : 'cover') }) : null) : [] };
   }) };
   const show = resolveBallShow(input);

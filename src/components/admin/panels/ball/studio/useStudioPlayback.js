@@ -1,14 +1,22 @@
-import { useState, useRef, useCallback, useEffect } from 'react';
-import { createPlayback, ballShowAction, isBallScheduleActive, nextPlaybackWake, reconcilePlaybackSlides, resolveBallShow } from '../../../../../lib/ballPlayback';
+import { useState, useRef, useCallback, useEffect, useMemo } from 'react';
+import { createPlayback, ballShowAction, isBallScheduleActive, nextPlaybackWake, reconcilePlaybackSlides, resolveBallShow, startBallShow } from '../../../../../lib/ballPlayback';
 
 export function useStudioPlayback(deck, startIndex, runShow, protectSchedule) {
-  const show = resolveBallShow(deck);
+  const show = useMemo(() => resolveBallShow(deck), [deck]);
   const [stored, setState] = useState(() => {
     const initial = { ...createPlayback(deck.slides.map(slide => slide.duration), startIndex, deck.loop), slideIds: deck.slides.map(slide => slide.id) };
     return runShow ? ballShowAction(initial, { type: 'start-show' }, show) : initial;
   });
-  const state = reconcilePlaybackSlides(stored, deck.slides, deck.loop);
-  if (state !== stored) setState(state);
+  let state = reconcilePlaybackSlides(stored, deck.slides, deck.loop);
+  if (state !== stored) {
+    if (protectSchedule && show && isBallScheduleActive(stored)) {
+      state = startBallShow(state, show);
+    } else if (protectSchedule && show?.dinnerPhotos && stored.showPhase === 'dinner') {
+      if (!show.dinnerPhotos.includes(state.index)) state = ballShowAction(state, { type: 'start-dinner' }, show);
+      state = { ...state, showPhase: 'dinner', playing: stored.playing };
+    }
+    setState(state);
+  }
   const ref = useRef(state);
   const showRef = useRef(show);
   ref.current = state;
@@ -28,6 +36,6 @@ export function useStudioPlayback(deck, startIndex, runShow, protectSchedule) {
       clearTimeout(timer);
       document.removeEventListener('visibilitychange', onVisible);
     };
-  }, [state, send]);
+  }, [state, send, show]);
   return { state, send, stateRef: ref, show, protectSchedule, scheduleActive: protectSchedule && isBallScheduleActive(state) };
 }

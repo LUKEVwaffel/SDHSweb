@@ -75,12 +75,22 @@ export function resolveBallShow(deck) {
   if (!Number.isFinite(startAt) || podium < 1 || welcome !== podium + 1) return null;
   const podiumSeconds = Math.max(1, Math.min(600, Number(slides[podium].duration) || 120));
   const preshowAt = Date.parse(show.preshowAt);
+  const scheduled = Number.isFinite(preshowAt) && preshowAt < startAt;
   const featured = Array.isArray(show.featuredIds)
     ? [...new Set(show.featuredIds.map(id => slides.findIndex(slide => slide.id === id)))].filter(index => index > 0 && index < podium)
     : [];
-  const preshow = Array.isArray(show.preshowIds)
+  let preshow = Array.isArray(show.preshowIds)
     ? [...new Set(show.preshowIds.map(id => slides.findIndex(slide => slide.id === id)))].filter(index => index >= 0 && index < podium)
     : null;
+  if (scheduled) {
+    const isIntro = slide => ['title','section','quote','agenda','recognition','closing'].includes(slide.layout)
+      || (slide.layout === 'split' && slide.photos?.some(photo => photo?.kind === 'qr'));
+    const cover = slides.slice(0, podium).findIndex(isIntro);
+    if (cover < 0) return null;
+    // Older saved drafts may have featured cards but no explicit intro list.
+    preshow = [...new Set(preshow?.length ? preshow : [cover, ...featured])].filter(index => isIntro(slides[index]));
+    if (!preshow.length) preshow = [cover];
+  }
   const dinner = slides.findIndex(slide => slide.id === show.dinnerId);
   const dinnerPhotos = dinner > welcome
     ? slides.slice(0, podium).flatMap((slide, index) => slide.layout === 'photo' && slide.photos.some(Boolean) ? [index] : [])
@@ -98,7 +108,7 @@ export function resolveBallShow(deck) {
     ...(toasts.length ? { toasts } : {}),
     ...(seniors.length ? { seniors } : {}),
     ...(preshow ? { preshow: preshow.length ? preshow : [0] } : {}),
-    ...(Number.isFinite(preshowAt) && preshowAt < startAt ? { preshowAt } : {}),
+    ...(scheduled ? { preshowAt } : {}),
     ...(featured.length ? { featured } : {}),
   };
 }
@@ -130,11 +140,11 @@ export function nextDinnerSlide(show, index, direction = 1) {
 }
 
 export function startBallShow(state, show, now = Date.now()) {
-  const first = playbackAction(state, { type: 'goto', index: 0 }, now);
+  const rotation = ballPreshowSlides(show);
+  const first = playbackAction(state, { type: 'goto', index: rotation[0] }, now);
   if (now < show.preshowAt) return { ...first, playing: false, showPhase: 'waiting' };
   // Opening late joins the rotation at the slide scheduled for this wall-clock time.
   let elapsed = show.preshowAt ? Math.max(0, now - show.preshowAt) : 0;
-  const rotation = ballPreshowSlides(show);
   const loop = rotation.map(index => first.durations[index]);
   elapsed %= loop.reduce((sum, duration) => sum + duration, 0);
   const position = loop.findIndex(duration => {
