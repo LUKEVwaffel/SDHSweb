@@ -65,6 +65,8 @@ export function readDeck(input) {
       startAt: new Date(show.startAt).toISOString(),
       podiumId: deck.slides[show.podium].id,
       welcomeId: deck.slides[show.welcome].id,
+      ...(show.preshowAt ? { preshowAt: new Date(show.preshowAt).toISOString() } : {}),
+      ...(show.featured ? { featuredIds: show.featured.map(index => deck.slides[index].id) } : {}),
     };
   }
   return deck;

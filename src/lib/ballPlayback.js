@@ -74,12 +74,40 @@ export function resolveBallShow(deck) {
   const welcome = slides.findIndex(slide => slide.id === show?.welcomeId);
   if (!Number.isFinite(startAt) || podium < 1 || welcome !== podium + 1) return null;
   const podiumSeconds = Math.max(1, Math.min(600, Number(slides[podium].duration) || 120));
-  return { startAt, podium, welcome, welcomeAt: startAt + podiumSeconds * 1000 };
+  const preshowAt = Date.parse(show.preshowAt);
+  const featured = Array.isArray(show.featuredIds)
+    ? [...new Set(show.featuredIds.map(id => slides.findIndex(slide => slide.id === id)))].filter(index => index > 0 && index < podium)
+    : [];
+  return {
+    startAt, podium, welcome, welcomeAt: startAt + podiumSeconds * 1000,
+    ...(Number.isFinite(preshowAt) && preshowAt < startAt ? { preshowAt } : {}),
+    ...(featured.length ? { featured } : {}),
+  };
+}
+
+export function ballShowCues(show, slideCount) {
+  return [
+    show.welcome,
+    ...Array.from({ length: slideCount - show.welcome - 1 }, (_, i) => show.welcome + i + 1),
+    ...(show.featured ?? []),
+  ];
 }
 
 export function startBallShow(state, show, now = Date.now()) {
   const first = playbackAction(state, { type: 'goto', index: 0 }, now);
-  return ballShowAction({ ...first, playing: true, showPhase: 'preshow' }, { type: 'tick' }, show, now);
+  if (now < show.preshowAt) return { ...first, playing: false, showPhase: 'waiting' };
+  // Opening late joins the rotation at the slide scheduled for this wall-clock time.
+  let elapsed = show.preshowAt ? Math.max(0, now - show.preshowAt) : 0;
+  const loop = first.durations.slice(0, show.podium);
+  elapsed %= loop.reduce((sum, duration) => sum + duration, 0);
+  const index = loop.findIndex(duration => {
+    if (elapsed < duration) return true;
+    elapsed -= duration;
+    return false;
+  });
+  return ballShowAction({
+    ...first, index, remaining: loop[index] - elapsed, playing: true, showPhase: 'preshow',
+  }, { type: 'tick' }, show, now);
 }
 
 export function ballShowAction(state, action, show, now = Date.now()) {
@@ -95,6 +123,10 @@ export function ballShowAction(state, action, show, now = Date.now()) {
   if (action.type === 'goto') {
     const manual = playbackAction(state, action, now);
     return { ...manual, playing: false, showPhase: null };
+  }
+  if (state.showPhase === 'waiting') {
+    if (action.type === 'tick' && now >= show.preshowAt) return startBallShow(state, show, now);
+    return action.type === 'blackout' ? playbackAction(state, action, now) : state;
   }
   if (action.type === 'tick') {
     if (now >= show.welcomeAt) {
@@ -114,8 +146,9 @@ export function ballShowAction(state, action, show, now = Date.now()) {
 
 export function nextPlaybackWake(state, show, now = Date.now()) {
   const slide = state.playing && !state.blackout ? remainingTime(state, now) : Infinity;
-  const deadline = show && state.showPhase ? (state.showPhase === 'preshow' ? show.startAt : show.welcomeAt) - now : Infinity;
-  return Math.min(slide, deadline);
+  if (!show || !state.showPhase) return slide;
+  const deadlines = { waiting: show.preshowAt, preshow: show.startAt, podium: show.welcomeAt };
+  return Math.min(slide, deadlines[state.showPhase] - now);
 }
 
 export function ballCountdown(milliseconds) {

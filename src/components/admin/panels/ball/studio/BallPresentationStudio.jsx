@@ -12,6 +12,7 @@ import StudioNewPresentation from './StudioNewPresentation';
 import StudioPreflight from './StudioPreflight';
 import './ballStudio.css';
 
+const showTime = new Intl.DateTimeFormat('en-US',{timeZone:'America/New_York',timeStyle:'short'});
 const fmt = seconds => `${Math.floor(seconds/60)}:${String(seconds%60).padStart(2,'0')}`;
 function Field({label,children}) {return <label className="bs-field"><span>{label}</span>{children}</label>;}
 export default function BallPresentationStudio({ adminId }) {
@@ -110,7 +111,7 @@ export default function BallPresentationStudio({ adminId }) {
       {inspector==='playback'&&<div className="bs-inspector-body">
         <Field label="Time on this slide (seconds)"><input type="number" min={1} max={600} value={slide.duration} onChange={e=>editSlide({duration:Math.max(1,Math.min(600,Number(e.target.value)||1))})}/></Field><button onClick={()=>edit(d=>({...d,slides:d.slides.map(s=>({...s,duration:slide.duration}))}))}>Apply timing to every slide</button>
         <Field label="Entrance transition"><select value={slide.transition} onChange={e=>editSlide({transition:e.target.value})}><option value="fade">Fade in</option><option value="rise">Rise in</option><option value="cut">Instant cut</option></select></Field><button onClick={()=>edit(d=>({...d,slides:d.slides.map(s=>({...s,transition:slide.transition}))}))}>Apply transition to all slides</button>
-        {!show&&<label className="bs-check"><input type="checkbox" checked={deck.loop} onChange={e=>edit(d=>({...d,loop:e.target.checked}))}/>Loop presentation continuously</label>}<p className="bs-muted">{show?`Ceremony begins ${new Intl.DateTimeFormat('en-US',{timeZone:'America/New_York',dateStyle:'medium',timeStyle:'short'}).format(show.startAt)} Eastern. The preshow hands off to the podium, then Welcome. Choose later cues from your phone.`:'Shows open in manual mode. Turn on autoplay when you’re ready. Blackout pauses the timer.'}</p><button className="bs-primary" onClick={()=>setPlayer({index:0})}>Rehearse the whole deck</button>
+        {!show&&<label className="bs-check"><input type="checkbox" checked={deck.loop} onChange={e=>edit(d=>({...d,loop:e.target.checked}))}/>Loop presentation continuously</label>}<p className="bs-muted">{show?`${show.preshowAt?`Preshow begins at ${showTime.format(show.preshowAt)} Eastern. `:''}Ceremony begins at ${showTime.format(show.startAt)} Eastern. The preshow hands off to the podium, then Welcome. Choose later cues from your phone.`:'Shows open in manual mode. Turn on autoplay when you’re ready. Blackout pauses the timer.'}</p><button className="bs-primary" onClick={()=>setPlayer({index:0})}>Rehearse the whole deck</button>
       </div>}
       </aside>
     </div>

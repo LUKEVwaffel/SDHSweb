@@ -172,7 +172,7 @@ test('deleting the previewed slide selects its successor or the last remaining s
  assert.equal(reconcilePlaybackSlides(state,slides),state);
 });
 
-import { ballCountdown, ballShowAction, nextPlaybackWake, resolveBallShow, startBallShow } from '../src/lib/ballPlayback.js';
+import { ballCountdown, ballShowCues, ballShowAction, nextPlaybackWake, resolveBallShow, startBallShow } from '../src/lib/ballPlayback.js';
 
 test('preshow loops its photos and keeps the ceremony clock running while autoplay is paused', () => {
  const show = { startAt: 10000, podium: 2, welcome: 3, welcomeAt: 130000 };
@@ -218,4 +218,42 @@ test('deck round trips retain the podium and welcome links and feedback QR metad
  assert.notEqual(copy.slides[1].id, deck.slides[1].id);
  assert.deepEqual(resolveBallShow(copy), { startAt: Date.parse(deck.show.startAt), podium: 1, welcome: 2, welcomeAt: Date.parse(deck.show.startAt) + 120000 });
  assert.equal(copy.slides[3].photos[0].kind, 'qr');
+});
+
+test('a scheduled preshow holds the cover until 5 and starts a 30-minute countdown', () => {
+ const preshowAt = Date.parse('2026-11-21T22:00:00Z');
+ const startAt = preshowAt + 30 * 60000;
+ const show = { preshowAt, startAt, podium: 2, welcome: 3, welcomeAt: startAt + 120000 };
+ const playback = createPlayback([10, 60, 120, 8]);
+ let state = startBallShow(playback, show, preshowAt - 60000);
+ assert.equal(state.showPhase, 'waiting');
+ assert.equal(state.index, 0);
+ assert.equal(state.playing, false);
+ assert.equal(nextPlaybackWake(state, show, preshowAt - 60000), 60000);
+ assert.equal(ballShowAction(state, { type: 'next' }, show, preshowAt - 60000), state);
+ state = ballShowAction(state, { type: 'tick' }, show, preshowAt);
+ assert.equal(ballCountdown(show.startAt - preshowAt), '30:00');
+ assert.equal(state.showPhase, 'preshow');
+ assert.equal(state.index, 0);
+ const joinedLate = startBallShow(playback, show, preshowAt + 12000);
+ assert.equal(joinedLate.index, 1);
+ assert.equal(joinedLate.remaining, 58000);
+ state = ballShowAction(state, { type: 'tick' }, show, startAt);
+ assert.equal(state.index, 2);
+ state = ballShowAction(state, { type: 'tick' }, show, show.welcomeAt);
+ assert.equal(state.index, 3);
+ assert.equal(state.playing, false);
+});
+
+test('featured preshow cards retain their manual cue links when a deck is reopened', () => {
+ const deck = makeDeck();
+ deck.show = {
+  startAt: '2026-11-21T22:30:00.000Z', preshowAt: '2026-11-21T22:00:00.000Z',
+  featuredIds: [deck.slides[1].id], podiumId: deck.slides[2].id, welcomeId: deck.slides[3].id,
+ };
+ const imported = readDeck(deck);
+ assert.deepEqual(imported.show.featuredIds, [imported.slides[1].id]);
+ const show = resolveBallShow(imported);
+ assert.deepEqual(ballShowCues(show, imported.slides.length), [3, 1]);
+ assert.equal(show.preshowAt, Date.parse(deck.show.preshowAt));
 });
