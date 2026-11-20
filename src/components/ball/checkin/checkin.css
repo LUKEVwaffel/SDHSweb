@@ -149,3 +149,20 @@
 .ball-door .door-offline-primary:hover:not(:disabled) { background: #203c61; }
 .door-offline-options .door-offline-buttons { margin-top: 8px; }
 .door-offline-code { margin-top: 0; }
+
+.door-dress-code {
+  margin: 10px 0 4px;
+  padding: 8px 12px;
+  border: 1px solid #d7c6a8;
+  border-radius: 6px;
+  background: #fffdf8;
+  color: var(--door-ink);
+}
+
+.door-dress-code summary { cursor: pointer; font-weight: 700; }
+.door-dress-code .door-collapse, .door-dress-code[open] .door-expand { display: none; }
+.door-dress-code[open] .door-collapse { display: inline; }
+.door-dress-code-groups { padding-top: 6px; }
+.door-dress-code h4 { margin: 10px 0 6px; font-size: 14px; }
+.door-dress-code ul { padding-left: 18px; margin: 5px 0 10px; }
+.door-dress-code li + li { margin-top: 3px; }

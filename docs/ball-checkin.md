@@ -25,15 +25,17 @@ verification still goes to Chief. Every attending SDHS student needs their own
 signed form, including non-cadet guests. If school enrollment is unknown, the
 desk must establish whether the attendee currently attends SDHS first.
 
-Extra paper forms may be used only when the parent comes to the desk and signs.
+Offer a paper form only when the required form is missing. A parent must come
+to the venue and sign at the desk. Turn the attendee away if a parent cannot come and sign.
 The operator records the parent’s name and confirms the parent is present and
 the signed paper has been received. Host and guest receipt are independent.
 Recording a form cannot bypass payment or attire.
 
 Aubry Gillott, Kylie Gray, Luke Vetsch, and Danielle can approve or deny attire at the door. The
-reviewer opens Verify on site, chooses approve or deny with the arrow keys,
-presses Enter, and enters their four-digit attire passcode. The code
-automatically identifies the reviewer; the popup displays who verified it.
+reviewer opens **Expand dress code** for the Ball’s posted rules, then selects
+**Verify on site** and chooses approve or deny with the arrow keys,
+presses Enter, and enters their four-digit attire passcode. The desk offers review for pending attire and corrected outfits
+after a denial. The code automatically identifies the reviewer; the popup displays who verified it.
 Incorrect-code limits apply per desk operator in sandbox too. Reviewer codes
 must differ; duplicate codes fail closed and S-6 must reset one. No
 passcode is saved in roster state or audit records. Denied attire blocks entry;
@@ -115,6 +117,8 @@ the S-6-only `ball_offline_receipts` table.
 - Apply `supabase/BALL_DOOR_ADDITIONAL_REVIEWERS.sql` after the desk PIN migration,
   then redeploy `ball-door-action` and `ball-door-reset-pin`. Configure Luke’s and Danielle’s
   separate door attire codes under **Military Ball → Check-in**.
+- Apply `supabase/BALL_DOOR_REVIEW_ONLY_WHEN_REQUIRED.sql` to limit door
+  reviews to unverified or denied attire.
 - Apply `supabase/BALL_CHECKIN_PAIR.sql` for the paired arrival button. The
   live action uses one transaction and keeps the usual per-person audit.
 - Attendance is scoped to the 2026 Ball; prepare a new event scope before reusing

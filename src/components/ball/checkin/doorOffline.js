@@ -1,5 +1,5 @@
 import { signDoorReview, verifyDoorReview } from '../../../../supabase/functions/_shared/doorOfflineProof.js';
-import { withDoorOverride } from './doorAdmission.js';
+import { needsAttireReview, withDoorOverride } from './doorAdmission.js';
 import { canCheckInBoth, personKey } from './doorRoster.js';
 
 let database;
@@ -124,6 +124,7 @@ async function prepareOfflineOperation(desk, person, action, input, now) {
     operation.payload = { parent, signed: true };
     changes = { form_received: true };
   } else if (action === 'attire') {
+    if (!needsAttireReview(person)) throw new Error('This attendee’s attire is already cleared.');
     if (person.checked_in_at) throw new Error('Undo check-in before recording an attire decision.');
     for (const reviewer of desk.reviewers) {
       operation.payload = { reviewer_id: reviewer.id, approved: input.approved, expected: person.attire_status };

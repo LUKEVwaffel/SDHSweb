@@ -1,4 +1,4 @@
-import { withDoorOverride } from './doorAdmission.js';
+import { needsAttireReview, withDoorOverride } from './doorAdmission.js';
 import { canCheckInBoth, personKey } from './doorRoster.js';
 
 // Sandbox always reads the authenticated live roster, but attendance writes
@@ -13,6 +13,9 @@ export function createDoorSource(rpc, sandbox, invoke) {
       return { ...response, data: { ...response.data, people: response.data.people.map(person => withDoorOverride(person, overrides.get(personKey(person)) || {})) } };
     },
     async decideAttire(person, pin, approved) {
+      if (!needsAttireReview(withDoorOverride(person, overrides.get(personKey(person)) || {}))) {
+        return { data: { error: 'This attendee’s attire is already cleared.' }, error: null };
+      }
       const response = await invoke({ action: 'attire', kind: person.person_kind, person_id: person.person_id, pin, approved, expected_attire: person.attire_status, sandbox });
       if (response.error || response.data?.error) return response;
       if (sandbox) overrides.set(personKey(person), { ...overrides.get(personKey(person)), ...response.data.result });

@@ -53,3 +53,11 @@ test('School confirmation cannot skip the SDHS student form requirement', async 
   assert.equal(updated.student_status_unknown,false);
   assert.ok(updated.issues.some(issue=>issue.includes('Parent must attend')));
 });
+
+test('Previously cleared attire and standard uniforms skip the door verifier', async () => {
+  const source=createDoorSource(roster,true,()=>assert.fail('A cleared attendee was sent for attire review'));
+  for (const attire_status of ['approved','uniform']) {
+    const result=await source.decideAttire({...person,attire_status},'0000',false);
+    assert.match(result.data.error,/already cleared/);
+  }
+});
