@@ -66,15 +66,6 @@ html:has(.ball-remote.has-transport) {
   outline-offset: 3px;
 }
 
-.br-timeline-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  gap: 8px;
-}
-
-.br-timeline-header button { background: transparent; font-size: 12px; }
-
 .br-controls {
   grid-template-columns: 1fr 1fr;
   gap: 8px;
@@ -116,6 +107,19 @@ html:has(.ball-remote.has-transport) {
   color: #b5c4d4;
   font-size: 11px;
 }
+
+.ball-remote:has(.br-transport.has-grog) { padding-bottom: calc(150px + env(safe-area-inset-bottom)); }
+html:has(.br-transport.has-grog) { scroll-padding-bottom: calc(140px + env(safe-area-inset-bottom)); }
+.br-transport-meta { display: flex; flex: 1; justify-content: space-between; gap: 2px 8px; }
+.br-transport.has-grog .br-transport-meta { flex-direction: column; }
+.br-transport .br-grog-shortcut {
+  min-height: 44px;
+  padding: 6px 11px;
+  border-color: #e4c17b70;
+  color: #e4c17b;
+  font-size: 12px;
+}
+.br-grog-shortcut span { margin-left: 4px; font-variant-numeric: tabular-nums; }
 
 .br-transport .br-command-status { min-height: 0; padding: 0; }
 .br-transport-buttons { display: grid; grid-template-columns: 2fr 3fr; gap: 8px; }

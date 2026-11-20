@@ -69,7 +69,7 @@ export default function BallStudioRemote({client=SB,initialToken=''}={}) {
       </section>
       {snapshot.current.notes&&<section className="br-notes"><h2>Speaker notes</h2><p>{snapshot.current.notes}</p><small>Only visible on this phone</small></section>}
       {Array.isArray(snapshot.cues)&&<section className="br-show-cues" aria-label="Ball timeline cues">
-        <div className="br-timeline-header"><h2>Ball timeline</h2>{grogCues.length>0&&<button onClick={showGrogCues}>Jump to grog</button>}</div>
+        <h2>Ball timeline</h2>
         {!snapshot.scheduledTv&&snapshot.manualCues&&snapshot.showPhase!=='waiting'&&<button disabled={!connected||!!pending} onClick={()=>command('start-show')}>Start preshow</button>}
         {snapshot.dinnerSlideshow&&<button className="br-primary br-dinner" disabled={!connected||!!pending||snapshot.scheduleActive} onClick={()=>command(snapshot.showPhase==='dinner'?'end-dinner':'start-dinner')}>
           {snapshot.showPhase==='dinner'?'Stop dinner slideshow':'Start dinner slideshow'}
@@ -86,10 +86,13 @@ export default function BallStudioRemote({client=SB,initialToken=''}={}) {
     </>}
     {error&&<p className="br-error" role="alert">{error}</p>}
     <footer>Keep this page open while presenting. Full screen is controlled on the TV.</footer>
-    {snapshot&&<nav className="br-transport" aria-label="Slide navigation">
+    {snapshot&&<nav className={`br-transport${grogCues.length ? ' has-grog' : ''}`} aria-label="Slide navigation">
       <div className="br-transport-header">
-        <span>Slide {snapshot.index+1} of {snapshot.total}</span>
-        <span className="br-command-status" aria-live="polite">{pending?'Sending control…':connected?'Ready':'TV disconnected'}</span>
+        <div className="br-transport-meta">
+          <span>Slide {snapshot.index+1} of {snapshot.total}</span>
+          <span className="br-command-status" aria-live="polite">{pending?'Sending control…':connected?'Ready':'TV disconnected'}</span>
+        </div>
+        {grogCues.length>0&&<button className="br-grog-shortcut" onClick={showGrogCues}>Grog ingredients <span>{grogCues.length}</span></button>}
       </div>
       <div className="br-transport-buttons">
         <button disabled={!connected||!!pending||snapshot.scheduleActive||snapshot.index===0} onClick={()=>command('previous')}>Previous</button>

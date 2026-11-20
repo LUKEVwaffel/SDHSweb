@@ -169,3 +169,23 @@
 .bs-scheduled-link:focus-visible { outline: 2px solid var(--bs-gold); outline-offset: 3px; }
 .bs-scheduled-status { padding: 24px; }
 .bs-scheduled-status p { margin: 12px 0; }
+
+.bs-slide-groups { display: grid; gap: 5px; margin: 2px 0 10px; }
+.bs-slide-groups button {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 6px;
+  min-height: 38px;
+  text-align: left;
+}
+.bs-slide-groups button[aria-pressed=true] {
+  border-color: #e4c17b99;
+  color: #e4c17b;
+  background: #e4c17b12;
+}
+.bs-slide-groups span { font-variant-numeric: tabular-nums; }
+@media (max-width: 600px) {
+  .bs-slide-groups { display: flex; flex-wrap: wrap; }
+  .bs-slide-groups button { flex: 1 1 auto; }
+}
