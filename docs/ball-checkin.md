@@ -18,8 +18,9 @@ the staff member’s other sign-ins and DISPATCH privileges are unaffected.
 ## At the door
 
 Search a cadet, guest or VIP by name, select the reservation, confirm the person
-is physically present, then press Check in. Record each person separately when
-they arrive. Undo asks for confirmation. Unpaid tickets block entry and cash is never accepted at the door. Missing
+is physically present, then press **Check in**. If both people are present and
+cleared, choose **Check in both**. Each person keeps a separate arrival record.
+Use the **VIPs** filter to browse VIP reservations by either person’s name. Undo asks for confirmation. Unpaid tickets block entry and cash is never accepted at the door. Missing
 verification still goes to Chief. Every attending SDHS student needs their own
 signed form, including non-cadet guests. If school enrollment is unknown, the
 desk must establish whether the attendee currently attends SDHS first.
@@ -116,6 +117,8 @@ the S-6-only `ball_offline_receipts` table.
 - Apply `supabase/BALL_DOOR_ADDITIONAL_REVIEWERS.sql` after the desk PIN migration,
   then redeploy `ball-door-action` and `ball-door-reset-pin`. Configure Luke’s and Danielle’s
   separate door attire codes under **Military Ball → Check-in**.
+- Apply `supabase/BALL_CHECKIN_PAIR.sql` for the paired arrival button. The
+  live action uses one transaction and keeps the usual per-person audit.
 - Attendance is scoped to the 2026 Ball; prepare a new event scope before reusing
   the system for another year's event.
 

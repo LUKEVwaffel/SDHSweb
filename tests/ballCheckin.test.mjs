@@ -27,3 +27,12 @@ test('Search ignores punctuation and accents without combining distinct groups',
   assert.equal(doorGroups(people, 'o brien').length, 1);
   assert.equal(doorGroups(people, 'ALPHA').length, 1);
 });
+
+test('VIP filter and name search include the VIP and their date in one reservation', () => {
+  const vip = { person_kind: 'vip', person_id: 'vip', name: 'Visiting Leader', group_key: 'vip:vip', issues: [] };
+  const date = { person_kind: 'vip_date', person_id: 'date', name: 'Robin Guest', group_key: vip.group_key, issues: [] };
+  const people = [...makeDoorPreview().filter(person => person.person_kind !== 'vip'), date, vip];
+  assert.deepEqual(doorGroups(people, 'guest robin')[0].people, [vip, date]);
+  assert.deepEqual(doorGroups(people, 'leader', 'vip')[0].people, [vip, date]);
+  assert.equal(doorGroups(people, '', 'vip').length, 1);
+});

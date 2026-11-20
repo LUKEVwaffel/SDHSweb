@@ -1,6 +1,6 @@
 import { signDoorReview, verifyDoorReview } from '../../../../supabase/functions/_shared/doorOfflineProof.js';
 import { withDoorOverride } from './doorAdmission.js';
-import { personKey } from './doorRoster.js';
+import { canCheckInBoth, personKey } from './doorRoster.js';
 
 let database;
 let changes;
@@ -82,7 +82,28 @@ export function deskTime(desk) {
 }
 
 export async function recordOffline(desk, person, action, input) {
+  const { operation, changes } = await prepareOfflineOperation(desk, person, action, input, deskTime(desk));
+  const next = await saveOfflineDesk(desk, {
+    ...desk,
+    people: desk.people.map(row => row === person ? withDoorOverride(row, changes) : row),
+    pending: [...desk.pending, { operation, attendee: person.name }],
+  });
+  return { next, changes };
+}
+
+export async function recordOfflinePair(desk, people) {
+  if (!canCheckInBoth(people)) throw new Error('Both people must be cleared and waiting.');
   const now = deskTime(desk);
+  const arrivals = await Promise.all(people.map(person => prepareOfflineOperation(desk, person, 'arrival', { present: true }, now)));
+  const entries = new Map(people.map((person, index) => [person, arrivals[index]]));
+  return saveOfflineDesk(desk, {
+    ...desk,
+    people: desk.people.map(row => entries.has(row) ? withDoorOverride(row, entries.get(row).changes) : row),
+    pending: [...desk.pending, ...arrivals.map(({ operation }, index) => ({ operation, attendee: people[index].name }))],
+  });
+}
+
+async function prepareOfflineOperation(desk, person, action, input, now) {
   if (now > Date.parse(desk.expiresAt) || now < Date.parse(desk.issuedAt)) throw new Error('The offline work window has ended or the device clock changed. Reconnect to sync saved actions.');
   const current = desk.people.find(row => personKey(row) === personKey(person));
   if (!current || current !== person) throw new Error('The attendee changed. Review the roster and try again.');
@@ -115,10 +136,5 @@ export async function recordOffline(desk, person, action, input) {
     }
     if (!changes) throw new Error('This reviewer code does not match an enrolled reviewer on this station.');
   } else throw new Error('Unknown door action.');
-  const next = await saveOfflineDesk(desk, {
-    ...desk,
-    people: desk.people.map(row => row === person ? withDoorOverride(row, changes) : row),
-    pending: [...desk.pending, { operation, attendee: person.name }],
-  });
-  return { next, changes };
+  return { operation, changes };
 }

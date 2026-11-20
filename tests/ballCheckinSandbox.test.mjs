@@ -33,3 +33,17 @@ test('Live mode retains revision-protected attendance writes', async () => {
   assert.equal(call.args.p_person, person.person_id);
   assert.equal(call.args.p_present, true);
 });
+
+test('Practice pair arrival blocks an uncleared member and safely checks in both cleared members', async () => {
+  const host = { ...person, group_key: 'couple', issues: [] };
+  const guest = { ...host, person_id: 'real-guest', person_kind: 'guest' };
+  const source = createDoorSource(async name => {
+    assert.equal(name, 'ball_checkin_roster');
+    return { data: { people: [host, guest] }, error: null };
+  }, true);
+  assert.ok((await source.checkInBoth([host, { ...guest, issues: ['Unpaid'] }])).error);
+  assert.ok((await source.checkInBoth([host, host])).error);
+  assert.ok((await source.load()).data.people.every(row => !row.checked_in_at));
+  assert.equal((await source.checkInBoth([host, guest])).data.length, 2);
+  assert.ok((await source.load()).data.people.every(row => row.checked_in_at));
+});

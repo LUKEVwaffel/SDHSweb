@@ -1,12 +1,12 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { supabase as SB } from '../../../lib/supabaseClient';
 import { checkinActor, getCheckinAuth } from '../../../lib/ballCheckinAuth';
-import { doorGroups, personKey } from './doorRoster';
+import { canCheckInBoth, doorGroups, isVip, personKey } from './doorRoster';
 import DoorRequirements from './DoorRequirements';
 import { invokeError } from '../../../lib/supabaseFnError';
 import { createDoorSource } from './doorSource';
 import OfflineDeskControls from './OfflineDeskControls';
-import { deskTime, loadOfflineDesk, recordOffline, watchOfflineDesk } from './doorOffline';
+import { deskTime, loadOfflineDesk, recordOffline, recordOfflinePair, watchOfflineDesk } from './doorOffline';
 import './checkin.css';
 
 const mode = new URLSearchParams(window.location.search);
@@ -43,7 +43,7 @@ export default function BallCheckin() {
   const results = useRef(null);
   const focusPrimary = useCallback(() => {
     const panel = detail.current;
-    (panel?.querySelector('.door-checkin:not(:disabled)') || panel?.querySelector('.door-verify-site:not(:disabled)') || panel?.querySelector('.door-person button:not(:disabled)') || panel?.querySelector('button'))?.focus();
+    (panel?.querySelector('.door-checkin-both:not(:disabled)') || panel?.querySelector('.door-checkin:not(:disabled)') || panel?.querySelector('.door-verify-site:not(:disabled)') || panel?.querySelector('.door-person button:not(:disabled)') || panel?.querySelector('button'))?.focus();
   }, []);
   const writeLock = useRef(false);
   const loadVersion = useRef(0);
@@ -174,6 +174,27 @@ export default function BallCheckin() {
       await load(); setError(message);
     } finally { writeLock.current = false; setBusy(null); }
   }
+  async function checkInBoth(pair) {
+    if (writeLock.current || !canWrite || !canCheckInBoth(pair)) return;
+    const names = pair.map(person => person.name).join(' and ');
+    if (desk) return runOffline(async () => {
+      setDesk(await recordOfflinePair(desk, pair));
+      setNotice(`${names} are checked in on this device.`);
+    }, { key: 'pair' });
+    writeLock.current = true; setBusy('pair'); setError(''); setNotice(''); invalidateLoads();
+    try {
+      const { data, error: problem } = await source.checkInBoth(pair);
+      if (problem) throw problem;
+      const updated = new Map(data.map(row => [personKey(row), row]));
+      setPeople(previous => previous.map(row => updated.has(personKey(row)) ? { ...row, ...updated.get(personKey(row)) } : row));
+      setNotice(`${sandbox ? 'Sandbox only: ' : ''}${names} are checked in.`);
+      await load();
+    } catch (problem) {
+      await load();
+      setError(problem.message || 'Could not confirm both arrivals. Refresh the roster before retrying.');
+    } finally { writeLock.current = false; setBusy(null); }
+  }
+
   async function doorAction(person, action, input) {
     if (writeLock.current || !canWrite) return false;
     if (desk) return runOffline(async () => {
@@ -229,6 +250,7 @@ export default function BallCheckin() {
     else if (event.key === 'ArrowRight') { event.preventDefault(); openGroup(id); }
   }
   const complete = current?.people.every(person => person.checked_in_at);
+  const pairReady = canCheckInBoth(current?.people);
   const showResults = query.trim() || browsing || filter !== 'all';
 
   return <main className="ball-door">
@@ -239,7 +261,7 @@ export default function BallCheckin() {
     {sandbox && <div className="door-demo"><strong>Sandbox · Real guest list</strong><span>Real roster. Practice arrivals, attire decisions and form receipts stay in this tab.</span>{session && <button disabled={!!busy} onClick={() => { source.reset(); next(); setNotice('Sandbox practice decisions cleared.'); load(); }}>Reset practice</button>}</div>}
     {desk === undefined || (!desk && session === undefined) ? <div className="door-centered" role="status">Opening check-in…</div> : !desk && !session ? <DoorLogin /> : <>
       <section className="door-intro"><div><h1>Ball check-in</h1><p>{current ? 'Check in only the people standing at the desk.' : 'Start with a cadet, guest or VIP’s name.'}</p></div>
-        {phase === 'ready' && <div className="door-total"><b>{arrived}<span> / {people.length}</span></b><span>people checked in</span></div>}
+        {phase === 'ready' && <div className="door-total"><b>{arrived}<span> / {people.length}</span></b><span>people checked in</span><progress value={arrived} max={Math.max(1, people.length)} aria-label="Check-in progress" /></div>}
       </section>
       <div aria-live="polite" className="door-announcements">{notice && <div className="door-success">{notice}<button onClick={() => setNotice('')} aria-label="Dismiss check-in confirmation">Dismiss</button></div>}</div>
       {error && <div className="door-error" role="alert">{error}{!desk && <button disabled={!!busy} onClick={load}>Refresh roster</button>}</div>}
@@ -252,27 +274,29 @@ export default function BallCheckin() {
         <div className="door-entry-policy"><b>Entry rules</b><span>Tickets must already be paid. <strong>No cash at the door.</strong></span><span>Every attending SDHS student needs a signed form.</span><span>Attire approval: Aubry, Kylie, Luke, or Danielle + {desk ? 'offline reviewer code' : 'passcode'}.</span></div>
         <div className="door-tools"><div className="door-search"><label htmlFor="door-search">Find a cadet, guest or VIP</label><input ref={search} id="door-search" type="search" autoComplete="off" value={query} onChange={event => changeSearch(event.target.value)} onKeyDown={searchKeys} placeholder="Who’s arriving?" /><span>↑ ↓ browse results · Enter opens · Esc returns to search</span></div>
           {!desk && <div className="door-sync"><span>{fresh && online ? `Updated ${time(updated)}` : 'Roster needs refreshing'}</span><button disabled={!!busy} onClick={load}>Refresh</button></div>}</div>
-        {!current && <div className="door-filters" role="group" aria-label="Filter arrivals">{[['all', 'Everyone', people.length], ['waiting', 'Not here yet', people.length - arrived], ['arrived', 'Checked in', arrived], ['help', 'Needs attention', help]].map(([key, label, count]) => <button key={key} aria-pressed={filter === key} onClick={() => setFilter(key)}>{label} <span>{count}</span></button>)}</div>}
+        {!current && <div className="door-filters" role="group" aria-label="Filter arrivals">{[['all', 'Everyone', people.length], ['waiting', 'Not here yet', people.length - arrived], ['arrived', 'Checked in', arrived], ['help', 'Needs attention', help], ['vip', 'VIPs', people.filter(isVip).length]].map(([key, label, count]) => <button key={key} aria-pressed={filter === key} onClick={() => setFilter(key)}>{label} <span>{count}</span></button>)}</div>}
         <div className={`door-workspace ${current ? 'has-detail' : ''}`}>
           {!current && (showResults ? <section ref={results} className="door-results" aria-label="Matching reservations"><div className="door-list-heading"><b>{groups.length} {groups.length === 1 ? 'reservation' : 'reservations'}</b><span>Arrival is recorded for each person</span></div>
             {groups.length ? groups.map(group => {
               const count = group.people.filter(person => person.checked_in_at).length;
               const needsHelp = group.people.some(person => !person.checked_in_at && person.issues.length);
               return <button className={`door-result ${selected === group.id ? 'is-selected' : ''}`} key={group.id} aria-pressed={selected === group.id} onKeyDown={event => resultKeys(event, group.id)} onClick={() => openGroup(group.id)}>
-                <div><strong>{group.people[0].name}</strong>{group.people[1] && <span className="door-companion">with {group.people[1].name}</span>}<small>{group.people[0].company || 'Cadet'}{group.people[0].person_kind === 'guest' ? ' guest' : ''}</small></div>
+                <div><strong>{group.people[0].name}</strong>{group.people[1] && <span className="door-companion">with {group.people[1].name}</span>}<small>{isVip(group.people[0]) ? 'VIP reservation' : group.people[0].company || 'Cadet'}</small></div>
                 <span className={`door-status ${count === group.people.length ? 'arrived' : needsHelp ? 'help' : ''}`}>{count === group.people.length ? 'Checked in' : count ? `${count} of ${group.people.length} here` : needsHelp ? 'Needs attention' : 'Not here yet'}</span>
               </button>;
             }) : <div className="door-empty"><h2>{query ? 'No matching names' : 'No reservations in this view'}</h2><p>{query ? 'Try the other person’s name or check the spelling. If they are still missing, send them to Chief.' : 'Choose Everyone to see the full guest list.'}</p><button onClick={() => { setQuery(''); setFilter('all'); }}>Show everyone</button></div>}
-          </section> : <section className="door-start"><span className="door-start-label">Ready for the next arrival</span><h2>Ask for their name.</h2><p>Find the reservation, then confirm who is here. Dates and friends can arrive separately.</p><button onClick={() => setBrowsing(true)}>Browse the guest list</button></section>)}
-          {current && <aside ref={detail} className="door-detail" aria-label="Selected reservation">{!current ? <div className="door-empty door-prompt"><span className="door-step">1</span><h2>Who’s arriving?</h2><p>Search for a name, then select their reservation to check them in.</p><p>Dates and friends can arrive separately.</p></div> : <>
+          </section> : <section className="door-start"><h2>Find a reservation</h2><p>Search by either person’s name, including VIPs and their guests.</p><button onClick={() => setBrowsing(true)}>Browse the guest list</button></section>)}
+          {current && <aside ref={detail} className="door-detail" aria-label="Selected reservation">
             <div className="door-detail-heading"><div><p className="door-eyebrow">{complete ? 'Arrival complete' : 'Confirm the names below'}</p><h2>{complete ? 'You’re all set.' : 'Who is here?'}</h2></div><button onClick={() => { setSelected(null); setConfirmUndo(null); search.current?.focus(); }}>Back to results</button></div>
             {current.people.map(person => {
               const key = personKey(person); const checked = !!person.checked_in_at;
-              return <article className="door-person" key={key}><div className="door-person-heading"><div><h3>{person.name}</h3><p>{person.person_kind === 'cadet' ? 'Cadet' : person.person_kind === 'guest' ? 'Guest' : person.person_kind === 'vip' ? 'VIP' : 'VIP guest'}{person.company ? ` · ${person.company}` : ''}</p></div><span className={`door-status ${checked ? 'arrived' : person.issues.length ? 'help' : ''}`}>{checked ? 'Checked in' : person.attire_status === 'denied' || person.payment_complete === false ? 'Do not admit' : person.issues.length ? 'Not cleared' : 'Ready'}</span></div>
+              return <article className="door-person" key={key}><div className="door-person-heading"><div><h3>{person.name}</h3><p>{person.person_kind === 'cadet' ? 'Cadet' : person.person_kind === 'guest' ? 'Guest' : person.person_kind === 'vip' ? 'VIP' : 'VIP guest'}{person.company && !isVip(person) ? ` · ${person.company}` : ''}</p></div><span className={`door-status ${checked ? 'arrived' : person.issues.length ? 'help' : ''}`}>{checked ? 'Checked in' : person.attire_status === 'denied' || person.payment_complete === false ? 'Do not admit' : person.issues.length ? 'Not cleared' : 'Ready'}</span></div>
                 {checked ? <><p className="door-arrival-time">Arrived at {time(person.checked_in_at)}</p>{confirmUndo === key ? <div className="door-undo-confirm"><p>Undo check-in for {person.name}?</p><button disabled={!!busy || !canWrite} onClick={() => mark(person, false)}>Yes, undo check-in</button><button disabled={!!busy} onClick={() => setConfirmUndo(null)}>Keep checked in</button></div> : <button className="door-undo" disabled={!!busy || !canWrite} onClick={() => setConfirmUndo(key)}>Undo check-in</button>}</> : <><DoorRequirements offline={!!desk} attireReady={!desk || desk.reviewers.length > 0} person={person} busy={busy === key} disabled={!!busy || !canWrite} onAction={doorAction} />{!person.issues.length && <><p className="door-ready">Ready for entry</p><button className="door-checkin" aria-label={`Check in ${person.name}`} disabled={!!busy || !canWrite} onClick={() => mark(person, true)}>{busy === key ? 'Saving check-in…' : `Check in ${person.name.split(' ')[0]}`}</button></>}</>}
               </article>;
-            })}<div className="door-next"><p>{complete ? 'Everyone on this reservation is checked in.' : 'Someone arriving later? Leave them unchecked.'}</p><button className={complete ? 'door-checkin' : ''} disabled={!!busy} onClick={next}>Next arrival →</button></div>
-          </>}</aside>}
+            })}
+            {pairReady && <div className="door-pair"><p>Use this when both people are at the desk.</p><button className="door-checkin door-checkin-both" disabled={!!busy || !canWrite} onClick={() => checkInBoth(current.people)}>{busy === 'pair' ? 'Saving both arrivals…' : 'Check in both'}</button></div>}
+            <div className="door-next"><p>{complete ? 'Everyone on this reservation is checked in.' : 'Someone arriving later? Leave them unchecked.'}</p><button className={complete ? 'door-checkin' : ''} disabled={!!busy} onClick={next}>Next arrival →</button></div>
+          </aside>}
         </div>
       </>}
     </>}
