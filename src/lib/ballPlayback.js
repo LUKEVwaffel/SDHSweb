@@ -78,8 +78,12 @@ export function resolveBallShow(deck) {
   const featured = Array.isArray(show.featuredIds)
     ? [...new Set(show.featuredIds.map(id => slides.findIndex(slide => slide.id === id)))].filter(index => index > 0 && index < podium)
     : [];
+  const preshow = Array.isArray(show.preshowIds)
+    ? [...new Set(show.preshowIds.map(id => slides.findIndex(slide => slide.id === id)))].filter(index => index >= 0 && index < podium)
+    : null;
   return {
     startAt, podium, welcome, welcomeAt: startAt + podiumSeconds * 1000,
+    ...(preshow ? { preshow: preshow.length ? preshow : [0] } : {}),
     ...(Number.isFinite(preshowAt) && preshowAt < startAt ? { preshowAt } : {}),
     ...(featured.length ? { featured } : {}),
   };
@@ -93,20 +97,32 @@ export function ballShowCues(show, slideCount) {
   ];
 }
 
+export function ballPreshowSlides(show) {
+  return show.preshow ?? Array.from({ length: show.podium }, (_, index) => index);
+}
+
+export function nextPreshowSlide(show, index, direction = 1) {
+  const rotation = ballPreshowSlides(show);
+  const position = rotation.indexOf(index);
+  if (position === -1) return rotation[0];
+  return rotation[(position + direction + rotation.length) % rotation.length];
+}
+
 export function startBallShow(state, show, now = Date.now()) {
   const first = playbackAction(state, { type: 'goto', index: 0 }, now);
   if (now < show.preshowAt) return { ...first, playing: false, showPhase: 'waiting' };
   // Opening late joins the rotation at the slide scheduled for this wall-clock time.
   let elapsed = show.preshowAt ? Math.max(0, now - show.preshowAt) : 0;
-  const loop = first.durations.slice(0, show.podium);
+  const rotation = ballPreshowSlides(show);
+  const loop = rotation.map(index => first.durations[index]);
   elapsed %= loop.reduce((sum, duration) => sum + duration, 0);
-  const index = loop.findIndex(duration => {
+  const position = loop.findIndex(duration => {
     if (elapsed < duration) return true;
     elapsed -= duration;
     return false;
   });
   return ballShowAction({
-    ...first, index, remaining: loop[index] - elapsed, playing: true, showPhase: 'preshow',
+    ...first, index: rotation[position], remaining: loop[position] - elapsed, playing: true, showPhase: 'preshow',
   }, { type: 'tick' }, show, now);
 }
 
@@ -138,8 +154,11 @@ export function ballShowAction(state, action, show, now = Date.now()) {
     }
   }
   if (state.showPhase === 'podium') return action.type === 'blackout' ? playbackAction(state, action, now) : state;
-  if (action.type === 'next' || (action.type === 'tick' && state.playing && !state.blackout && remainingTime(state, now) <= 1)) {
-    return playbackAction(state, { type: 'goto', index: (state.index + 1) % show.podium }, now);
+  if (action.type === 'restart' && show.preshow) return playbackAction(state, { type: 'goto', index: show.preshow[0] }, now);
+  if (action.type === 'next' || (action.type === 'previous' && show.preshow)
+    || (action.type === 'tick' && state.playing && !state.blackout && remainingTime(state, now) <= 1)) {
+    const index = nextPreshowSlide(show, state.index, action.type === 'previous' ? -1 : 1);
+    return playbackAction(state, { type: 'goto', index }, now);
   }
   return playbackAction(state, action, now);
 }

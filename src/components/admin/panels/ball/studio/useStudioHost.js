@@ -1,7 +1,7 @@
 import {useState,useRef,useEffect,useCallback} from 'react';
 import {supabase as SB} from '../../../../../lib/supabaseClient';
 import {studioChannel,createRemoteToken} from '../../../../../lib/ballStudioRemote';
-import {ballShowCues,remainingTime,createCommandReceiver} from '../../../../../lib/ballPlayback';
+import {ballShowCues,nextPreshowSlide,remainingTime,createCommandReceiver} from '../../../../../lib/ballPlayback';
 export function useStudioHost(deck, playback, pairOnOpen = false) {
   const [token,setToken]=useState(() => pairOnOpen ? createRemoteToken() : null);
   const [status,setStatus]=useState('OFF');
@@ -17,7 +17,7 @@ export function useStudioHost(deck, playback, pairOnOpen = false) {
       if (playback.show) {
         const { podium, welcome, startAt, welcomeAt } = playback.show;
         if (state.showPhase === 'preshow') {
-          payload.nextIndex = (state.index + 1) % podium;
+          payload.nextIndex = nextPreshowSlide(playback.show, state.index);
           payload.next = deck.slides[payload.nextIndex];
         }
         payload.showPhase = state.showPhase;

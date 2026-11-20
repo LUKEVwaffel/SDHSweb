@@ -1,4 +1,4 @@
-import {ballCountdown} from '../../../../../lib/ballPlayback';
+import {ballCountdown,nextPreshowSlide} from '../../../../../lib/ballPlayback';
 import {LAYOUTS} from '../../../../../lib/ballPresentation';
 import {nudgePhoto} from '../../../../../lib/ballPhotoPosition';
 import {useState,useEffect,useRef} from 'react';
@@ -113,21 +113,23 @@ export default function StudioPlayer({deck,startIndex=0,runShow=false,pairOnOpen
     return()=>{window.removeEventListener('keydown',key);document.removeEventListener('fullscreenchange',changed);document.body.style.overflow=before;previousFocus?.focus();};
   },[deck.slides.length,onClose,pairing,send]);
   async function toggleFull(){try{if(document.fullscreenElement)await document.exitFullscreen();else await root.current.requestFullscreen();}catch{setHint('Full screen was blocked. Use your browser’s full-screen control.');}}
-  useEffect(()=>{const next=deck.slides[(index+1)%deck.slides.length];next.photos.filter(Boolean).forEach(p=>{const img=new Image();img.src=p.url;});},[deck.slides,index]);
+  const nextIndex=state.showPhase==='preshow'&&playback.show
+    ? nextPreshowSlide(playback.show,index) : (index+1)%deck.slides.length;
+  useEffect(()=>{deck.slides[nextIndex].photos.filter(Boolean).forEach(p=>{const img=new Image();img.src=p.url;});},[deck.slides,nextIndex]);
   return createPortal(<div className={`bs-player ${blackout?'bs-is-black':''}`} ref={root} tabIndex={-1} role="dialog" aria-modal="true" aria-label="Ball presentation playback">
     <div className="bs-player-stage"><StudioSlideStage slide={slide} deck={deck} index={index} visit={state.visit} positioning={positioning}/>{state.showPhase==='preshow'&&playback.show&&<ShowCountdown until={playback.show.startAt}/>}</div>
     {deleteTarget&&<div className="bs-player-delete-backdrop"><section ref={confirmRef} tabIndex={-1} className="bs-player-delete" role="alertdialog" aria-modal="true" aria-labelledby="bs-delete-title" aria-describedby="bs-delete-description"><h2 id="bs-delete-title">Delete slide {deleteTarget.number}?</h2><p id="bs-delete-description">{deleteTarget.label}</p><p>You can undo this in the editor after exiting preview.</p><div><button onClick={cancelDelete}>Cancel (Esc)</button><button className="bs-danger" onClick={confirmDelete}>Delete slide (Enter)</button></div></section></div>}
     {positioning&&<div className="bs-player-position" role="status"><strong>Positioning photo {photoIndex+1}</strong><span>Arrows move · Shift moves faster · + / − zoom · M fits photo · K or Esc finishes</span>{photoSlots>1&&<select aria-label="Photo to position" value={photoIndex} onChange={e=>{setPhotoIndex(Number(e.target.value));root.current?.focus();}}>{slide.photos.slice(0,photoSlots).map((p,i)=>p&&<option key={i} value={i}>Photo {i+1}</option>)}</select>}<span>{Math.round((slide.photos[photoIndex]?.zoom??1)*100)}% zoom · Changes save automatically</span></div>}
     {blackout&&<div className="bs-blackout-label">Blackout · press B to return</div>}
     <nav className="bs-player-controls" aria-label="Presentation controls">
-      <button onClick={onClose}>Exit</button>{onPhotoEdit&&<button aria-pressed={positioning} disabled={!positionable} onClick={togglePosition}>{positioning?'Finish positioning (K)':'Position photo (K)'}</button>}{onPhotoEdit&&<button disabled={!positionable} aria-pressed={showingWhole&&positionable} onClick={togglePhotoFit}>{showingWhole?'Fill frame (M)':'Show whole photo (M)'}</button>}<button onClick={()=>send({type:'previous'})} disabled={index===0}>Previous</button><span>{index+1} / {deck.slides.length}</span><button onClick={()=>send({type:'next'})} disabled={state.showPhase==='waiting'}>Next</button>
+      <button onClick={onClose}>Exit</button>{onPhotoEdit&&<button aria-pressed={positioning} disabled={!positionable} onClick={togglePosition}>{positioning?'Finish positioning (K)':'Position photo (K)'}</button>}{onPhotoEdit&&<button disabled={!positionable} aria-pressed={showingWhole&&positionable} onClick={togglePhotoFit}>{showingWhole?'Fill frame (M)':'Show whole photo (M)'}</button>}<button onClick={()=>send({type:'previous'})} disabled={index===0&&!(state.showPhase==='preshow'&&playback.show?.preshow)}>Previous</button><span>{index+1} / {deck.slides.length}</span><button onClick={()=>send({type:'next'})} disabled={state.showPhase==='waiting'}>Next</button>
       <button disabled={!!playback.show&&(state.showPhase==='waiting'||index>=playback.show.podium)} onClick={()=>{setPositionSlide(null);send({type:'toggle-play'});}}>{playing?'Pause':'Autoplay'}</button><button onClick={()=>send({type:'blackout'})}>{blackout?'Show slides':'Blackout'}</button><button onClick={()=>setNotes(n=>!n)}>{notes?'Hide notes':'Notes'}</button><button onClick={toggleFull}>{fullscreen?'Leave full screen':'Full screen'}</button>
       {playback.show&&<>{index>=playback.show.podium&&<button onClick={()=>send({type:'start-show'})}>Start preshow</button>}<button onClick={()=>send({type:'goto',index:playback.show.welcome})}>Welcome</button></>}
       <button onClick={()=>{if(!host.token)host.start();setPairing(true);}}>{host.token?'Phone remote':'Connect phone'}</button>
       <select aria-label="Jump to slide" value={index} onChange={e=>send({type:'goto',index:Number(e.target.value)})}>{deck.slides.map((s,i)=><option key={s.id} value={i}>{i+1}. {s.title||s.layout}</option>)}</select>
       <small>← → advance · K position photo · M fit photo · D delete slide · P play/pause · B blackout · Phone remote {host.status.toLowerCase()}</small>
     </nav>
-    {notes&&<aside className="bs-player-notes"><strong>Speaker notes · visible on this screen</strong><p>{slide.notes||'No notes for this slide.'}</p><small>Next: {deck.slides[index+1]?.title||'End of presentation'}</small></aside>}
+    {notes&&<aside className="bs-player-notes"><strong>Speaker notes · visible on this screen</strong><p>{slide.notes||'No notes for this slide.'}</p><small>Next: {deck.slides[state.showPhase==='preshow'?nextIndex:index+1]?.title||'End of presentation'}</small></aside>}
     {hint&&<div className="bs-player-hint" role="status">{hint} <button onClick={()=>setHint('')}>Dismiss</button></div>}
     {pairing&&host.token&&<StudioPairPanel host={host} onClose={()=>setPairing(false)}/>}
   </div>,document.body);

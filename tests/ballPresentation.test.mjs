@@ -257,3 +257,32 @@ test('featured preshow cards retain their manual cue links when a deck is reopen
  assert.deepEqual(ballShowCues(show, imported.slides.length), [3, 1]);
  assert.equal(show.preshowAt, Date.parse(deck.show.preshowAt));
 });
+
+test('an explicit intro rotation skips photo slides and keeps later ceremony cues', () => {
+ const deck = makeDeck();
+ deck.slides = [makeSlide('title'), makeSlide('photo'), makeSlide('title'), makeSlide('title', {duration:120}), makeSlide('title'), makeSlide('title')];
+ const [cover,,thanks,podium,welcome,dinner] = deck.slides;
+ const startAt = Date.parse('2026-11-21T22:30:00Z');
+ const preshowAt = startAt - 1800000;
+ deck.show = {
+  preshowAt: new Date(preshowAt).toISOString(), startAt: new Date(startAt).toISOString(),
+  preshowIds: [cover.id, thanks.id], podiumId: podium.id, welcomeId: welcome.id, featuredIds: [thanks.id],
+ };
+ const imported = readDeck(deck);
+ assert.deepEqual(imported.show.preshowIds, [imported.slides[0].id, imported.slides[2].id]);
+ const show = resolveBallShow(imported);
+ const initial = createPlayback([30, 1, 30, 120, 8, 8], 0);
+ const opening = startBallShow(initial, show, preshowAt);
+ const late = startBallShow(initial, show, preshowAt + 45000);
+ assert.equal(late.index, 2);
+ assert.equal(late.remaining, 15000);
+ const thanksCard = ballShowAction(opening, { type: 'tick' }, show, preshowAt + 30000);
+ assert.equal(thanksCard.index, 2);
+ assert.equal(ballShowAction(thanksCard, { type: 'next' }, show, preshowAt + 40000).index, 0);
+ assert.equal(ballShowAction(opening, { type: 'previous' }, show, preshowAt + 5000).index, 2);
+ const podiumCard = ballShowAction(thanksCard, { type: 'tick' }, show, startAt);
+ assert.equal(podiumCard.index, 3);
+ assert.equal(ballShowAction(podiumCard, { type: 'tick' }, show, startAt + 120000).index, 4);
+ assert.deepEqual(ballShowCues(show, imported.slides.length), [4, 5, 2]);
+ assert.equal(ballShowAction(podiumCard, {type:'goto',index:5}, show, startAt).index, deck.slides.indexOf(dinner));
+});
