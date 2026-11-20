@@ -6,13 +6,14 @@ import {usePresentationWake} from './usePresentationWake';
 import SlideCanvas from './SlideCanvas';
 import './ballRemote.css';
 const cueGroups={grog:'Grog cards',toasts:'Toast responses',seniors:'Senior recognition'};
+const cueShortcuts={grog:'Grog cards',toasts:'Toasts',seniors:'Senior Walk'};
 const cueSection=cue=>Object.hasOwn(cueGroups,cue.group) ? cue.group : cue.grog ? 'grog' : null;
 const seconds=ms=>`${Math.floor(Math.max(0,ms)/60000)}:${String(Math.floor(Math.max(0,ms)/1000)%60).padStart(2,'0')}`;
 export default function BallStudioRemote({client=SB,initialToken=''}={}) {
   const [token,setToken]=useState(()=>readRemoteToken(window.location.hash)||readRemoteToken(initialToken));const [link,setLink]=useState('');
   const [snapshot,setSnapshot]=useState(null);const [received,setReceived]=useState(0);const [now,setNow]=useState(Date.now());
   const [status,setStatus]=useState('CONNECTING');const [error,setError]=useState('');const [pending,setPending]=useState(null);const [target,setTarget]=useState('');
-  const grogGroup=useRef(null);const channel=useRef();const pendingRef=useRef(null);const latestSeq=useRef(0);const pendingTimers=useRef([]);const pairedAt=useRef(Date.now());
+  const cueGroupRefs=useRef({});const channel=useRef();const pendingRef=useRef(null);const latestSeq=useRef(0);const pendingTimers=useRef([]);const pairedAt=useRef(Date.now());
   usePresentationWake(!!token);
   useEffect(()=>{const t=setInterval(()=>setNow(Date.now()),500);return()=>clearInterval(t);},[]);
   useEffect(()=>{
@@ -48,12 +49,14 @@ export default function BallStudioRemote({client=SB,initialToken=''}={}) {
   }
   const cues = snapshot?.cues;
   const grouped = Object.fromEntries(Object.keys(cueGroups).map(group => [group,(cues || []).filter(cue => cueSection(cue)===group)]));
-  const grogCues = grouped.grog;
+  const shortcuts=Object.keys(cueShortcuts).filter(group=>grouped[group].length);
+  const nextTitle=snapshot&&!snapshot.scheduleActive ? snapshot.next?.title : '';
+  const activeGroup=shortcuts.find(group=>grouped[group].some(cue=>cue.index===snapshot.index));
   const cueButton = cue => <button key={cue.index} disabled={!connected||!!pending||snapshot.scheduleActive} aria-current={snapshot.index===cue.index?'true':undefined} onClick={()=>command('goto',cue.index)}>
     <span>{cue.title}</span>{cue.time&&<small>{cue.time}</small>}
   </button>;
-  function showGrogCues(){
-    const group=grogGroup.current;
+  function openCueGroup(key){
+    const group=cueGroupRefs.current[key];
     if(!group)return;
     group.open=true;
     group.scrollIntoView({block:'start'});
@@ -81,7 +84,7 @@ export default function BallStudioRemote({client=SB,initialToken=''}={}) {
           if(!group)return cueButton(cue);
           const groupCues=grouped[group];
           if(cue!==groupCues[0])return null;
-          return <details key={group} ref={group==='grog'?grogGroup:undefined} className="br-grog" open={groupCues.some(item=>item.index===snapshot.index)||undefined}>
+          return <details key={group} ref={element=>{cueGroupRefs.current[group]=element;}} className="br-grog" open={groupCues.some(item=>item.index===snapshot.index)||undefined}>
           <summary>{cueGroups[group]} <span>{groupCues.length}</span></summary>
           {snapshot.scheduleActive&&<p className="br-grog-status">Preview the cards now. TV controls unlock after Welcome.</p>}
           <div className="br-grog-cards">
@@ -105,17 +108,23 @@ export default function BallStudioRemote({client=SB,initialToken=''}={}) {
     </>}
     {error&&<p className="br-error" role="alert">{error}</p>}
     <footer>Keep this page open while presenting. Full screen is controlled on the TV.</footer>
-    {snapshot&&<nav className={`br-transport${grogCues.length ? ' has-grog' : ''}`} aria-label="Slide navigation">
+    {snapshot&&<nav className={`br-transport${shortcuts.length ? ' has-cue-shortcuts' : ''}`} aria-label="Slide navigation">
       <div className="br-transport-header">
         <div className="br-transport-meta">
-          <span>Slide {snapshot.index+1} of {snapshot.total}</span>
+          <span>{snapshot.current.title || `Slide ${snapshot.index+1} of ${snapshot.total}`}</span>
           <span className="br-command-status" aria-live="polite">{pending?'Sending control…':connected?'Ready':'TV disconnected'}</span>
         </div>
-        {grogCues.length>0&&<button className="br-grog-shortcut" onClick={showGrogCues}>Grog cards <span>{grogCues.length}</span></button>}
       </div>
+      {shortcuts.length>0&&<div className="br-cue-shortcuts" role="group" aria-label="Jump to ceremony section">
+        {shortcuts.map(group=><button key={group} aria-current={activeGroup===group?'true':undefined} onClick={()=>openCueGroup(group)}>
+          {cueShortcuts[group]}{group==='grog'&&<span>{grouped.grog.length}</span>}
+        </button>)}
+      </div>}
       <div className="br-transport-buttons">
         <button disabled={!connected||!!pending||snapshot.scheduleActive||snapshot.index===0} onClick={()=>command('previous')}>Previous</button>
-        <button className="br-next" disabled={!connected||!!pending||snapshot.scheduleActive||snapshot.showPhase==='waiting'||(!snapshot.loop&&snapshot.index===snapshot.total-1)} onClick={()=>command('next')}>Next slide</button>
+        <button className="br-next" aria-label="Next slide" aria-describedby={nextTitle?'br-next-title':undefined} disabled={!connected||!!pending||snapshot.scheduleActive||snapshot.showPhase==='waiting'||(!snapshot.loop&&snapshot.index===snapshot.total-1)} onClick={()=>command('next')}>
+          <span>Next slide</span>{nextTitle&&<small id="br-next-title">{nextTitle}</small>}
+        </button>
       </div>
     </nav>}
   </main>;

@@ -108,18 +108,25 @@ html:has(.ball-remote.has-transport) {
   font-size: 11px;
 }
 
-.ball-remote:has(.br-transport.has-grog) { padding-bottom: calc(150px + env(safe-area-inset-bottom)); }
-html:has(.br-transport.has-grog) { scroll-padding-bottom: calc(140px + env(safe-area-inset-bottom)); }
-.br-transport-meta { display: flex; flex: 1; justify-content: space-between; gap: 2px 8px; }
-.br-transport.has-grog .br-transport-meta { flex-direction: column; }
-.br-transport .br-grog-shortcut {
+.ball-remote:has(.br-transport.has-cue-shortcuts) { padding-bottom: calc(180px + env(safe-area-inset-bottom)); }
+html:has(.br-transport.has-cue-shortcuts) { scroll-padding-bottom: calc(170px + env(safe-area-inset-bottom)); }
+.br-transport-meta { display: flex; flex: 1; align-items: center; justify-content: space-between; min-width: 0; gap: 2px 8px; }
+.br-transport-meta > span:first-child { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.br-transport-meta .br-command-status { flex-shrink: 0; }
+.br-cue-shortcuts { display: flex; gap: 6px; margin-bottom: 7px; }
+.br-cue-shortcuts button { flex: 1; }
+.br-transport .br-cue-shortcuts button {
+  min-width: 0;
   min-height: 44px;
-  padding: 6px 11px;
+  padding: 6px 3px;
   border-color: #e4c17b70;
   color: #e4c17b;
   font-size: 12px;
 }
-.br-grog-shortcut span { margin-left: 4px; font-variant-numeric: tabular-nums; }
+.br-transport .br-cue-shortcuts button[aria-current=true] { background: #e4c17b25; border-color: #e4c17b; }
+.br-cue-shortcuts span { margin-left: 4px; font-variant-numeric: tabular-nums; }
+.br-transport .br-next { min-height: 58px; min-width: 0; }
+.br-transport .br-next small { display: block; margin-top: 2px; font-size: 11px; overflow-wrap: anywhere; }
 
 .br-transport .br-command-status { min-height: 0; padding: 0; }
 .br-transport-buttons { display: grid; grid-template-columns: 2fr 3fr; gap: 8px; }
