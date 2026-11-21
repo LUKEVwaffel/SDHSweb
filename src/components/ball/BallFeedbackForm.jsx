@@ -1,6 +1,5 @@
-import { useState } from 'react';
+import { useRef, useState } from 'react';
 import { supabase as SB } from '../../lib/supabaseClient';
-import { getDeviceId } from '../../lib/fingerprint';
 import posthog from '../../lib/posthog';
 
 // Public /ballfeedback — short QR-code form handed out at the Ball. No login,
@@ -40,11 +39,26 @@ const emptyForm = () => ({
   best_part: '', improve: '', submitter_name: '',
 });
 
+function feedbackDevice() {
+  const key = 'tb_ball_feedback_device';
+  const fresh = crypto.randomUUID();
+  try {
+    const saved = localStorage.getItem(key);
+    if (saved) return saved;
+    localStorage.setItem(key, fresh);
+  } catch {
+    // The form still works when browser storage is unavailable.
+  }
+  return fresh;
+}
+
 export default function BallFeedbackForm() {
   const [form, setForm] = useState(emptyForm);
   const [honeypot, setHoneypot] = useState('');
   const [status, setStatus] = useState('idle'); // idle | busy | ok | err
   const [errMsg, setErrMsg] = useState('');
+  const sending = useRef(false);
+  const submission = useRef(null);
 
   const set = (field, value) => setForm((f) => ({ ...f, [field]: value }));
   const toggleIssue = (value) => setForm((f) => ({
@@ -59,30 +73,43 @@ export default function BallFeedbackForm() {
   async function submit(e) {
     e.preventDefault();
     if (honeypot) { setStatus('ok'); return; }
-    if (!canSubmit || status === 'busy') return;
+    if (!canSubmit || sending.current) return;
+    sending.current = true;
     setStatus('busy');
     setErrMsg('');
-    const fp = await getDeviceId().catch(() => null);
-    const { error } = await SB.from('ball_feedback').insert({
-      attendee_type: form.attendee_type,
-      ball_rating: form.ball_rating,
-      setup_rating: form.setup_rating || null,
-      setup_issues: form.setup_issues,
-      best_part: form.best_part.trim() || null,
-      improve: form.improve.trim() || null,
-      submitter_name: form.submitter_name.trim() || null,
-      submitter_fp: fp,
-    });
-    if (error) {
-      console.error('ball_feedback insert failed', error);
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), 15000);
+    try {
+      // A retry reuses its response ID so a dropped connection after an insert
+      // cannot turn a single response into two anonymous rows.
+      submission.current ??= {
+        id: crypto.randomUUID(),
+        attendee_type: form.attendee_type,
+        ball_rating: form.ball_rating,
+        setup_rating: form.setup_rating || null,
+        setup_issues: form.setup_issues,
+        best_part: form.best_part.trim() || null,
+        improve: form.improve.trim() || null,
+        submitter_name: form.submitter_name.trim() || null,
+        submitter_fp: feedbackDevice(),
+      };
+      const response = await SB.from('ball_feedback').insert(submission.current).abortSignal(controller.signal);
+      if (response.error && response.error.code !== '23505') throw response.error;
+      setStatus('ok');
+      if (!response.error) {
+        try {
+          posthog.capture('ball_feedback_submitted', { ball_rating: submission.current.ball_rating, setup_rating: submission.current.setup_rating });
+        } catch { /* Feedback is saved even if analytics are unavailable. */ }
+      }
+    } catch (error) {
       setStatus('err');
       setErrMsg(/too many/i.test(error.message || '')
-        ? 'Looks like you already sent feedback — thank you!'
-        : 'Could not send — check your signal and try again.');
-      return;
+        ? 'This browser has reached its feedback limit. Try again later, or use another device if you’re sharing this one.'
+        : 'Could not confirm your response. Check your signal and tap Send feedback to retry.');
+    } finally {
+      clearTimeout(timeout);
+      sending.current = false;
     }
-    posthog.capture('ball_feedback_submitted', { ball_rating: form.ball_rating, setup_rating: form.setup_rating || null });
-    setStatus('ok');
   }
 
   if (status === 'ok') {
@@ -168,7 +195,7 @@ export default function BallFeedbackForm() {
 const inputStyle = {
   width: '100%', boxSizing: 'border-box', background: P.deep, color: P.cream,
   border: `1px solid ${P.hair}`, borderRadius: 2, padding: '12px 13px',
-  fontFamily: SANS, fontSize: 15, outline: 'none',
+  fontFamily: SANS, fontSize: 16, outline: 'none',
 };
 
 function Shell({ children }) {
@@ -177,7 +204,7 @@ function Shell({ children }) {
 
 function Field({ label, hint, required, children }) {
   return (
-    <fieldset style={{ border: 0, padding: 0, margin: '0 0 24px' }}>
+    <fieldset style={{ border: 0, padding: 0, minInlineSize: 0, margin: '0 0 24px' }}>
       <legend style={{ fontFamily: SANS, fontSize: 15, fontWeight: 600, color: P.cream, marginBottom: hint ? 4 : 10, padding: 0 }}>
         {label}{required && <span style={{ color: P.gold }}> *</span>}
       </legend>
@@ -199,7 +226,7 @@ function Divider({ label }) {
 
 function Scale({ labels, value, onChange }) {
   return (
-    <div role="radiogroup" style={{ display: 'grid', gridTemplateColumns: 'repeat(5, 1fr)', gap: 6 }}>
+    <div role="radiogroup" style={{ display: 'grid', gridTemplateColumns: 'repeat(5, minmax(0, 1fr))', gap: 6 }}>
       {labels.map((label, i) => {
         const n = i + 1;
         const active = value === n;
@@ -211,7 +238,7 @@ function Scale({ labels, value, onChange }) {
             fontFamily: SANS, fontSize: 10.5, fontWeight: active ? 700 : 400, lineHeight: 1.2,
           }}>
             <span style={{ fontFamily: SERIF, fontSize: 22, lineHeight: 1 }}>{n}</span>
-            <span>{label}</span>
+            <span style={{ overflowWrap: 'anywhere', maxWidth: '100%' }}>{label}</span>
           </button>
         );
       })}
