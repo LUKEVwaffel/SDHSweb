@@ -67,7 +67,12 @@ export default function StudioPlayer({deck,startIndex=0,runShow=false,pairOnOpen
     root.current?.focus();
   }
   useEffect(()=>{if(deleteTarget)confirmRef.current?.focus();},[deleteTarget]);
-  const current=useRef();current.current={slide,photoIndex,positioning,togglePosition,togglePhotoFit,onPhotoEdit,requestDelete,cancelDelete,confirmDelete};
+  function openPairing(){
+    autoPair.current=false;
+    if(!host.token)host.start();
+    setPairing(true);
+  }
+  const current=useRef();current.current={slide,photoIndex,positioning,togglePosition,togglePhotoFit,onPhotoEdit,requestDelete,cancelDelete,confirmDelete,openPairing};
   useEffect(()=>{
     const previousFocus=document.activeElement;root.current?.focus();
     const key=e=>{
@@ -77,6 +82,12 @@ export default function StudioPlayer({deck,startIndex=0,runShow=false,pairOnOpen
         else if(e.key==='Tab'){
           e.preventDefault();const buttons=[...confirmRef.current.querySelectorAll('button')];const next=buttons.find(b=>b!==document.activeElement);next?.focus();
         }else e.preventDefault();
+        return;
+      }
+      if(e.key.toLowerCase()==='w'&&!e.metaKey&&!e.ctrlKey&&!e.altKey&&!e.target.isContentEditable
+        && !e.target.matches?.('input:not([readonly]), textarea, select')){
+        e.preventDefault();
+        if(!e.repeat)current.current.openPairing();
         return;
       }
       if(pairing){if(e.key==='Escape'){e.preventDefault();setPairing(false);}return;}
@@ -135,9 +146,9 @@ export default function StudioPlayer({deck,startIndex=0,runShow=false,pairOnOpen
       {(!scheduledTv||state.showPhase==='dinner')&&<button disabled={!!playback.show&&(state.showPhase==='waiting'||index>=playback.show.podium)} onClick={()=>{setPositionSlide(null);send({type:'toggle-play'});}}>{playing?'Pause':'Autoplay'}</button>}<button onClick={()=>send({type:'blackout'})}>{blackout?'Show slides':'Blackout'}</button><button onClick={()=>setNotes(n=>!n)}>{notes?'Hide notes':'Notes'}</button><button onClick={toggleFull}>{fullscreen?'Leave full screen':'Full screen'}</button>
       {playback.show&&<>{!scheduledTv&&index>=playback.show.podium&&<button onClick={()=>send({type:'start-show'})}>Start preshow</button>}<button disabled={playback.scheduleActive} onClick={()=>send({type:'goto',index:playback.show.welcome})}>Welcome</button></>}
       {playback.show?.dinnerPhotos&&<button disabled={playback.scheduleActive} onClick={()=>send({type:state.showPhase==='dinner'?'end-dinner':'start-dinner'})}>{state.showPhase==='dinner'?'Stop dinner slideshow':'Start dinner slideshow'}</button>}
-      <button onClick={()=>{if(!host.token)host.start();setPairing(true);}}>{host.token?'Phone remote':'Connect phone'}</button>
+      <button onClick={openPairing} aria-keyshortcuts="W" title="Open phone pairing (W)">{host.token?'Phone remote':'Connect phone'}</button>
       <select aria-label="Jump to slide" disabled={playback.scheduleActive} value={index} onChange={e=>send({type:'goto',index:Number(e.target.value)})}>{deck.slides.map((s,i)=><option key={s.id} value={i}>{i+1}. {s.title||s.layout}</option>)}</select>
-      <small>← → advance · K position photo · M fit photo · D delete slide · P play/pause · B blackout · Phone remote {host.status.toLowerCase()}</small>
+      <small>← → advance · K position photo · M fit photo · D delete slide · P play/pause · B blackout · W phone pairing · Remote {host.status.toLowerCase()}</small>
     </nav>
     {notes&&<aside className="bs-player-notes"><strong>Speaker notes · visible on this screen</strong><p>{slide.notes||'No notes for this slide.'}</p><small>Next: {deck.slides[['preshow','dinner'].includes(state.showPhase)?nextIndex:index+1]?.title||'End of presentation'}</small></aside>}
     {hint&&<div className="bs-player-hint" role="status">{hint} <button onClick={()=>setHint('')}>Dismiss</button></div>}

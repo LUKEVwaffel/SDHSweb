@@ -189,3 +189,6 @@
   .bs-slide-groups { display: flex; flex-wrap: wrap; }
   .bs-slide-groups button { flex: 1 1 auto; }
 }
+
+.bs-pair-field { display: block; color: #bac8d8; font-size: 12px; }
+.bs-pair-panel .bs-pair-field input { display: block; margin: 4px 0 9px; }
