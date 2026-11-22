@@ -17,7 +17,7 @@ async function read(response) {
 export async function photoDesk(action, payload={}, uploadToken='') {
   const headers={'Content-Type':'application/json',apikey:import.meta.env.VITE_SUPABASE_ANON_KEY};
   if(uploadToken)headers['x-ball-upload']=uploadToken;
-  else if(action!=='unlock'){
+  else if(action!=='unlock'&&action!=='vote'){
     const {data}=await SB.auth.getSession();
     if(data.session?.access_token)headers.Authorization='Bearer '+data.session.access_token;
   }

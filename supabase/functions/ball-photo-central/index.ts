@@ -6,6 +6,8 @@ const MAX_ORIGINAL = 100 * 1024 * 1024;
 const MAX_ZIP = 48 * 1024 * 1024;
 const ZIP_FILES = 24;
 const PAGE_SIZE = 48;
+const GALLERY_PAGE_SIZE = 24;
+const publicThumbnails = new Map<string,{url:string;refreshAt:number}>();
 const ALLOWED_EXT = new Set(['jpg','jpeg','png','webp','gif','heic','heif','tif','tiff','cr2','cr3','nef','nrw','arw','dng','raf','orf','rw2','pef','srw']);
 const UUID = /^[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}$/i;
 const SESSION = /^[a-f0-9]{64}$/i;
@@ -78,8 +80,22 @@ function requireAdmin(actor: Uploader) {
 }
 async function signedRows(db: Service, rows: FileRow[], privateRows: boolean) {
   const paths = rows.filter(row => row.photo_bytes).map(row => thumb(row.id));
-  const signed = paths.length ? verify(await db.storage.from(BUCKET).createSignedUrls(paths,900)) : [];
-  const urls = new Map(signed.map(entry => [entry.path,entry.signedUrl]));
+  const now=Date.now();
+  const urls=new Map<string,string>();
+  if(!privateRows){
+    for(const path of paths){
+      const cached=publicThumbnails.get(path);
+      if(cached&&cached.refreshAt>now) urls.set(path,cached.url);
+    }
+  }
+  const missing=paths.filter(path=>!urls.has(path));
+  const signed=missing.length?verify(await db.storage.from(BUCKET).createSignedUrls(missing,900)):[];
+  if(publicThumbnails.size>500)publicThumbnails.clear();
+  for(const {path,signedUrl} of signed){
+    if(!path||!signedUrl) continue;
+    urls.set(path,signedUrl);
+    if(!privateRows)publicThumbnails.set(path,{url:signedUrl,refreshAt:now+180000});
+  }
   return rows.map(row => ({
     id:row.id, credit:row.credit, captured_at:row.captured_at, width:row.width, height:row.height,
     bytes:row.photo_bytes, thumb:urls.get(thumb(row.id)) || '',
@@ -102,7 +118,7 @@ async function get(req: Request, db: Service) {
     const offset = Number(params.get('offset')||0);
     if (!Number.isInteger(offset)||offset<0||offset>100000) throw new Problem(400,'Invalid gallery page.');
     const q = await db.from('ball_photo_items').select(FILE_FIELDS,{count:'exact'}).eq('status','published')
-      .order('captured_at',{ascending:true,nullsFirst:false}).order('id').range(offset,offset+PAGE_SIZE-1);
+      .order('captured_at',{ascending:true,nullsFirst:false}).order('id').range(offset,offset+GALLERY_PAGE_SIZE-1);
     return response({photos:await signedRows(db,verify(q),false),total:q.count??0});
   }
   if (action==='view'||action==='download') {
@@ -196,12 +212,31 @@ async function post(req: Request, db: Service) {
     if (!name) throw new Problem(401,invalid);
     return response({name,token});
   }
+  if (action==='vote') {
+    const voter=await tag('ball-photo-voter:'+readId(body.voter));
+    const photoId=readId(body.photoId);
+    const accepted=verify(await db.rpc('ball_photo_cast_vote',{p_voter_tag:voter,p_photo_id:photoId}));
+    if (!accepted) throw new Problem(404,'This photo is no longer available for voting.');
+    return response({photoId});
+  }
   const actor=await uploader(req,db);
   if (action==='whoami') return response({name:actor.name,admin:actor.admin});
   if (action==='prepare') return prepare(db,actor,body);
   if (action==='finish') return finish(db,actor,body);
   requireAdmin(actor);
 
+  if (action==='vote-results') {
+    const counts=verify(await db.rpc('ball_photo_vote_results')) as {photo_id:string;votes:number}[];
+    if (!counts.length) return response({results:[]});
+    const items=verify(await db.from('ball_photo_items').select(FILE_FIELDS)
+      .in('id',counts.map(entry=>entry.photo_id)).eq('status','published'));
+    const byId=new Map((await signedRows(db,items,true)).map(item=>[item.id,item]));
+    const results=counts.flatMap(entry=>{
+      const item=byId.get(entry.photo_id);
+      return item?[{...item,votes:entry.votes}]:[];
+    });
+    return response({results});
+  }
   if (action==='invites') {
     const rows=verify(await db.from('ball_photo_invites').select('id,name,active').order('created_at',{ascending:false}));
     return response({invites:rows});

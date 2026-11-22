@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
-import { photoDesk, PHOTO_CENTRAL, PHOTO_DESK, PHOTO_LIMIT } from '../../../lib/ballPhotoApi';
+import { photoDesk, photoLink, PHOTO_CENTRAL, PHOTO_DESK, PHOTO_LIMIT } from '../../../lib/ballPhotoApi';
 import { droppedPhotos, SUPPORTED_PHOTO, uploadBallPhoto } from '../../../lib/ballPhotoUpload';
 import { photoTime } from '../../../lib/ballPhotoTime';
 import './ballPhotoCentral.css';
@@ -231,6 +231,31 @@ function PhotoReview() {
   </section>;
 }
 
+function VoteResults() {
+  const [results,setResults]=useState(null);
+  const [error,setError]=useState('');
+  const [refresh,setRefresh]=useState(0);
+  useEffect(()=>{
+    let active=true;
+    photoDesk('vote-results').then(data=>{if(active)setResults(data.results);})
+      .catch(e=>{if(active)setError(failed(e));});
+    return ()=>{active=false;};
+  },[refresh]);
+  return <section className="bp-panel">
+    <div className="ball-photo-row bp-between"><h2>Best photo votes</h2><button onClick={()=>{setError('');setRefresh(n=>n+1);}}>Refresh votes</button></div>
+    {error&&<p role="alert" className="bp-error">{error}</p>}
+    {!results&&!error&&<p role="status">Loading votes…</p>}
+    {results?.length===0&&<p className="bp-muted">No votes yet.</p>}
+    {results?.length>0&&<div className="bp-review-grid bp-review-tabs">
+      {results.map(photo=><article className="bp-review-card bp-vote-card" key={photo.id}>
+        <a href={photoLink('view',{id:photo.id})} target="_blank" rel="noreferrer" aria-label={'Open '+photo.filename}><img src={photo.thumb} loading="lazy" alt=""/></a>
+        <strong>{photo.votes} {photo.votes===1?'vote':'votes'}</strong>
+        <span className="bp-muted">{photo.credit}</span>
+      </article>)}
+    </div>}
+  </section>;
+}
+
 export default function BallPhotoDesk() {
   const photographerOnly=new URLSearchParams(location.search).get('photographer')==='1';
   const [auth,setAuth]=useState(null);
@@ -267,11 +292,12 @@ export default function BallPhotoDesk() {
       {!auth?<PhotographerSignIn onAuth={setAuth} photographerOnly={photographerOnly}/>
         : <>
           {auth.admin&&<div className="ball-photo-row bp-desk-tabs" role="group" aria-label="Upload desk sections">
-            {[['upload','Upload files'],['review','Review gallery'],['invites','Photographers']].map(([id,label])=><button key={id} aria-pressed={view===id} onClick={()=>setView(id)}>{label}</button>)}
+            {[['upload','Upload files'],['review','Review gallery'],['invites','Photographers'],['votes','Best photo votes']].map(([id,label])=><button key={id} aria-pressed={view===id} onClick={()=>setView(id)}>{label}</button>)}
           </div>}
           <div hidden={view!=='upload'}><UploadQueue token={auth.token}/></div>
           {view==='invites'&&auth.admin&&<Photographers/>}
           {view==='review'&&auth.admin&&<PhotoReview/>}
+          {view==='votes'&&auth.admin&&<VoteResults/>}
         </>}
     </section>
   </main>;

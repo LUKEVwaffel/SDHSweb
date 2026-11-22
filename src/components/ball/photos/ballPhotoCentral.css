@@ -27,18 +27,7 @@
 .bp-bar nav {display:flex;align-items:center;gap:22px;font-size:.85rem}
 .bp-bar nav a {padding-block:12px}
 .bp-bar nav a:first-child {color:var(--bp-primary)}
-.bp-hero {display:grid;grid-template-columns:minmax(380px,1fr) minmax(0,1.1fr);align-items:center;padding-block:52px 56px;gap:34px}
-.bp-hero-copy {position:relative;z-index:1}
 .bp-kicker {font-size:.73rem;font-weight:700;letter-spacing:.13em;text-transform:uppercase;color:var(--bp-primary)}
-.bp-hero h1 {font-size:clamp(3.8rem,7.5vw,8rem);line-height:.92;color:#f8f9fd;margin:20px 0 22px}
-.bp-hero-copy p:not(.bp-kicker) {color:var(--bp-mute);max-width:37ch}
-.bp-hero-copy .bp-button {margin-top:24px}
-.bp-hero-frame {aspect-ratio:1.42;position:relative;border:1px solid #896e4f;box-shadow:10px 10px 0 -1px var(--bp-ink),10px 10px 0 0 #735e49;isolation:isolate;background:#102540}
-.bp-hero-frame::before,.bp-hero-frame::after {content:'';position:absolute;inset:4%;border:1px solid #ffe7ae5e;pointer-events:none;z-index:1}
-.bp-hero-frame::after {inset:12% -5% -10% 14%;border-color:#b3c8df52;z-index:-1}
-.bp-hero-frame button {display:block;border:0;border-radius:0;width:100%;height:100%;padding:0}
-.bp-hero-frame img {display:block;width:100%;height:100%;object-fit:cover}
-.bp-hero-frame .bp-hero-mark {position:absolute;inset:15% 20%;width:60%;height:70%;object-fit:contain;opacity:.65}
 .bp-gallery {border-top:1px solid var(--bp-line);padding-top:24px;scroll-margin-top:12px}
 .bp-gallery-heading {display:flex;justify-content:space-between;align-items:end;gap:12px;margin-bottom:20px}
 .bp-gallery-heading h2,.bp-footer h2,.bp-download h2 {font-size:clamp(2rem,4vw,3.1rem);line-height:1.04}
@@ -68,8 +57,6 @@
 .bp-download-links {display:grid;gap:8px;margin:16px 0}
 @media(max-width:900px) {
   .bp-width {width:calc(100% - 40px)}
-  .bp-hero {grid-template-columns:1fr 1fr;gap:22px}
-  .bp-hero h1 {font-size:clamp(3rem,8vw,5.5rem)}
   .bp-grid {grid-template-columns:repeat(3,minmax(0,1fr))}
 }
 @media(max-width:620px) {
@@ -77,12 +64,6 @@
   .bp-bar {min-height:58px}
   .bp-bar nav {gap:9px;font-size:.72rem}
   .bp-brand {font-size:.88rem}
-  .bp-hero {display:flex;flex-direction:column;align-items:stretch;padding-block:30px 32px;gap:20px}
-  .bp-hero-frame {width:calc(100% - 18px);margin-right:18px;aspect-ratio:1.66}
-  .bp-hero:not(.has-cover) .bp-hero-frame {display:none}
-  .bp-hero h1 {margin:14px 0;font-size:clamp(3.05rem,13vw,5rem)}
-  .bp-hero-copy .bp-button {margin-top:16px}
-  .bp-desktop-break {display:none}
   .bp-gallery-heading {align-items:start;flex-direction:column;margin-bottom:12px}
   .bp-grid {grid-template-columns:repeat(2,minmax(0,1fr));gap:7px}
   .bp-footer {align-items:flex-start;flex-direction:column}
@@ -144,4 +125,61 @@
   .bp-queue li {grid-template-columns:minmax(0,1fr);gap:4px}
   .bp-invite-form {grid-template-columns:1fr}
   .bp-review-grid {grid-template-columns:repeat(2,minmax(0,1fr))}
+}
+
+.bp-public-gallery {
+  --bp-ink:#0c1726;--bp-panel:#172438;--bp-line:#354154;--bp-primary:#f1d6a2;
+}
+.bp-album-intro {display:grid;grid-template-columns:minmax(0,1fr) auto;align-items:center;gap:18px;padding-block:23px 25px}
+.bp-album-intro h1 {font-size:clamp(2.45rem,7vw,5.9rem);line-height:.98;margin:7px 0 9px;color:#fff7e6}
+.bp-album-intro p:not(.bp-kicker) {font-size:.9rem;color:var(--bp-mute)}
+.bp-root .bp-album-cover {padding:4px;min-width:0;width:clamp(90px,16vw,220px);aspect-ratio:1.5;border-radius:3px;border-color:#b7a17d;background:#172438}
+.bp-album-cover img {width:100%;height:100%;object-fit:cover;display:block}
+.bp-public-gallery .bp-grid {gap:5px}
+.bp-public-gallery .bp-tile {border:0;border-radius:3px;background:#192a40}
+.bp-public-gallery .bp-tile-time {background:#07121bbe}
+.bp-gallery-tools {gap:7px}
+
+.bp-root .bp-photo-reel {
+  position:fixed;inset:0;margin:auto;padding:0;width:min(100%,980px);height:min(100dvh,1080px);
+  max-width:100%;max-height:100%;border-radius:0;overflow:hidden;background:#070d16;
+}
+.bp-photo-reel[open] {display:grid;grid-template-rows:auto minmax(0,1fr) auto}
+.bp-reel-header {
+  display:grid;grid-template-columns:1fr auto 1fr;gap:10px;align-items:center;
+  padding:max(9px,env(safe-area-inset-top)) 13px 9px;background:#0c1726;border-bottom:1px solid #29384b;
+}
+.bp-reel-header button:first-child {justify-self:start}
+.bp-reel-header button:last-child {justify-self:end}
+.bp-reel-header span {color:var(--bp-mute);font-size:.82rem;font-variant-numeric:tabular-nums}
+.bp-reel-scroll {min-height:0;overflow-y:auto;scroll-snap-type:y mandatory;overscroll-behavior:contain;scrollbar-width:none}
+.bp-reel-scroll::-webkit-scrollbar {display:none}
+.bp-reel-slide {height:100%;scroll-snap-align:start;scroll-snap-stop:always}
+.bp-reel-image {height:100%;width:100%;position:relative}
+.bp-reel-image img {position:absolute;inset:0;display:block;width:100%;height:100%;object-fit:contain}
+.bp-reel-image img[alt]:not([alt=""]) {opacity:0}
+.bp-reel-image img.is-ready[alt] {opacity:1}
+.bp-reel-footer {padding:9px 13px max(7px,env(safe-area-inset-bottom));border-top:1px solid #29384b;background:#0c1726}
+.bp-reel-meta,.bp-reel-nav {display:flex;justify-content:space-between;align-items:center;gap:8px;color:var(--bp-mute);font-size:.8rem}
+.bp-reel-meta span:first-child {overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.bp-reel-meta span:last-child {flex-shrink:0}
+.bp-reel-actions {display:grid;grid-template-columns:1.1fr 1.2fr auto;gap:6px;margin-top:7px}
+.bp-root .bp-reel-actions [aria-pressed=true] {border-color:var(--bp-primary);color:var(--bp-primary);opacity:1}
+.bp-reel-nav button {border:0;background:transparent;min-height:42px;font-size:1.13rem}
+.bp-reel-nav span {text-align:center}
+.bp-vote-card {display:grid;gap:8px;padding:8px}
+.bp-vote-card img {display:block;width:100%;aspect-ratio:4/3;object-fit:cover;border-radius:3px}
+@media(max-width:620px) {
+  .bp-album-intro {gap:12px;padding-block:22px}
+  .bp-album-intro h1 {font-size:clamp(2.35rem,10vw,3.5rem)}
+  .bp-album-intro .bp-kicker {font-size:.63rem;letter-spacing:.09em}
+  .bp-album-intro p:not(.bp-kicker) {font-size:.83rem}
+  .bp-root .bp-album-cover {width:72px;aspect-ratio:.85}
+  .bp-public-gallery .bp-gallery {padding-top:13px}
+  .bp-public-gallery .bp-gallery-heading h2 {font-size:2rem}
+  .bp-public-gallery .bp-gallery-heading p {font-size:.83rem}
+  .bp-root .bp-photo-reel {border:0;max-height:none}
+  .bp-reel-header button,.bp-reel-actions button,.bp-reel-actions .bp-button {padding-inline:7px;font-size:.77rem}
+  .bp-public-gallery .bp-selection {padding-inline:8px;gap:5px}
+  .bp-public-gallery .bp-selection button {padding-inline:8px;font-size:.78rem}
 }
