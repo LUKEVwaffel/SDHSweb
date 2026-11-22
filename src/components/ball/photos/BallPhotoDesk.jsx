@@ -18,9 +18,9 @@ function PhotographerSignIn({ invite, onAuth, onBack }) {
     if(busy)return;
     setBusy(true);setError('');
     try{
-      const {token,name}=await photoDesk('unlock',{invite,name,phone});
+      const {token,name:creditName}=await photoDesk('unlock',{invite,name,phone});
       try { sessionStorage.setItem(sessionKey(invite),token); } catch { /* Upload still works in this tab. */ }
-      onAuth({name,admin:false,token});
+      onAuth({name:creditName,admin:false,token});
     }catch(error){setError(failed(error));}
     finally{setBusy(false);}
   }
