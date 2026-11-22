@@ -164,7 +164,7 @@ async function prepare(db: Service, actor: Uploader, body: Record<string,unknown
   if (insert.error) throw new Error('Could not reserve photo.');
   const row=verify(await db.from('ball_photo_items').select(FILE_FIELDS+',original_bytes').eq('owner_key',actor.key).eq('digest',body.digest).single());
   if (row.original_bytes!==bytes) throw new Problem(409,'The uploaded file no longer matches the batch.');
-  if (row.status!=='uploading') return response({id:row.id,complete:true,preview:Boolean(row.photo_bytes)});
+  if (row.status!=='uploading') return response({id:row.id,complete:true,preview:Boolean(row.photo_bytes),status:row.status});
   const storage=db.storage.from(BUCKET);
   const existing=verify(await storage.list(row.id));
   const paths=[original(row),...(body.preview?[display(row.id),thumb(row.id)]:[])];
@@ -179,7 +179,7 @@ async function finish(db: Service, actor: Uploader, body: Record<string,unknown>
   const id=readId(body.id);
   const row=verify(await db.from('ball_photo_items').select(FILE_FIELDS+',original_bytes').eq('id',id).eq('owner_key',actor.key).maybeSingle());
   if (!row) throw new Problem(404,'Upload not found.');
-  if (row.status!=='uploading') return response({id,preview:Boolean(row.photo_bytes)});
+  if (row.status!=='uploading') return response({id,preview:Boolean(row.photo_bytes),status:row.status});
   const objects=verify(await db.storage.from(BUCKET).list(id));
   const object=objects.find(item=>`${id}/${item.name}`===original(row));
   if (Number(object?.metadata?.size)!==Number(row.original_bytes)) throw new Problem(409,'Original upload is incomplete. Retry the file.');
@@ -189,11 +189,15 @@ async function finish(db: Service, actor: Uploader, body: Record<string,unknown>
   const preview=validJpeg(photo,6000000)&&validJpeg(thumbnail,600000);
   if (body.preview && !preview) throw new Problem(409,'Preview upload is incomplete. Retry the file.');
   const dimension=(value: unknown)=>Number.isInteger(value)&&Number(value)>0&&Number(value)<=10000?value:null;
-  verify(await db.from('ball_photo_items').update({
-    status:'review',finished_at:new Date().toISOString(),photo_bytes:preview?Number(photo!.metadata.size):null,
+  const autoPublish=!actor.admin&&preview;
+  const completedAt=new Date().toISOString();
+  const updated=verify(await db.from('ball_photo_items').update({
+    status:autoPublish?'published':'review',finished_at:completedAt,photo_bytes:preview?Number(photo!.metadata.size):null,
     width:preview?dimension(body.width):null,height:preview?dimension(body.height):null,
-  }).eq('id',id).eq('status','uploading'));
-  return response({id,preview});
+    published_at:autoPublish?completedAt:null,published_by:autoPublish?actor.key:null,
+  }).eq('id',id).eq('status','uploading').select('status,photo_bytes').maybeSingle());
+  const outcome=updated??verify(await db.from('ball_photo_items').select('status,photo_bytes').eq('id',id).single());
+  return response({id,preview:Boolean(outcome.photo_bytes),status:outcome.status});
 }
 
 async function post(req: Request, db: Service) {

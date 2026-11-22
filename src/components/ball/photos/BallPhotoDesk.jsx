@@ -74,8 +74,10 @@ function UploadQueue({ token }) {
         const {id,file}=pending[next++];
         patch(id,{error:''});
         try{
-          const preview=await uploadBallPhoto(file,token,(status,progress)=>patch(id,{status,progress}),ctrl.signal);
-          patch(id,{status:preview?'Delivered for review':'Original delivered · preview unavailable',progress:1,done:true});
+          const result=await uploadBallPhoto(file,token,(status,progress)=>patch(id,{status,progress}),ctrl.signal);
+          const status=result.status==='published'?'Published to gallery'
+            :result.preview?'Delivered for review':'Original delivered · preview unavailable';
+          patch(id,{status,progress:1,done:true});
         }catch(error){
           patch(id,{status:ctrl.signal.aborted?'Paused':'Retry needed',error:ctrl.signal.aborted?'':failed(error)});
         }
@@ -90,6 +92,7 @@ function UploadQueue({ token }) {
       <h2>Add your photos</h2>
       <p className="bp-upload-pointer">Choose photos or drop a folder from your SD card.</p>
       <p className="bp-upload-touch">Select multiple photos from your photo library or Files.</p>
+      {token&&<p>Photos with previews are published automatically.</p>}
       <div className="ball-photo-row bp-picker-actions">
         <button className="bp-gold" disabled={busy} onClick={()=>fileInput.current.click()}>Choose photos</button>
         <button disabled={busy} onClick={()=>folderInput.current.click()}>Choose folder</button>

@@ -94,7 +94,7 @@ export async function uploadBallPhoto(file, session, update, signal) {
   const preview=await derivatives(file,exifr).catch(()=>null);
   if(signal.aborted)throw new Error('Upload paused.');
   const prepared=await photoDesk('prepare',{filename:file.name,bytes:file.size,digest,captured_at,preview:Boolean(preview)},session);
-  if(prepared.complete)return prepared.preview;
+  if(prepared.complete)return prepared;
   for(const part of prepared.uploads){
     const name=part.path.split('/').at(-1);
     const isOriginal=name.startsWith('original.');
@@ -103,8 +103,7 @@ export async function uploadBallPhoto(file, session, update, signal) {
     await sendPart(part,blob,isOriginal?'application/octet-stream':'image/jpeg',progress,signal);
   }
   if(signal.aborted)throw new Error('Upload paused.');
-  const result=await photoDesk('finish',{id:prepared.id,preview:Boolean(preview),width:preview?.width,height:preview?.height},session);
-  return result.preview;
+  return photoDesk('finish',{id:prepared.id,preview:Boolean(preview),width:preview?.width,height:preview?.height},session);
 }
 
 export async function droppedPhotos(transfer) {
