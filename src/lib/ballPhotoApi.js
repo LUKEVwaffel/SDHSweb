@@ -8,7 +8,6 @@ export const BALL_EVENT_ID='e879b7f6-1789-4f72-ab92-21573da9c42a';
 export const PHOTO_CENTRAL='/ballphotos';
 export const PHOTO_DESK='/ballphotos/upload';
 export const photoLink=(action, params={})=>api+'?'+new URLSearchParams({action,...params});
-export const inviteLink=id=>location.origin+PHOTO_DESK+'#invite='+id;
 
 async function read(response) {
   const value=await response.json();

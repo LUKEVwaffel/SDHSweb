@@ -1,14 +1,15 @@
 import { useEffect, useRef, useState } from 'react';
-import { inviteLink, photoDesk, PHOTO_CENTRAL, PHOTO_LIMIT } from '../../../lib/ballPhotoApi';
+import { photoDesk, PHOTO_CENTRAL, PHOTO_LIMIT } from '../../../lib/ballPhotoApi';
 import { droppedPhotos, SUPPORTED_PHOTO, uploadBallPhoto } from '../../../lib/ballPhotoUpload';
 import { photoTime } from '../../../lib/ballPhotoTime';
 import './ballPhotoCentral.css';
 
 const desktop = window.matchMedia('(min-width: 800px) and (any-pointer: fine)');
 const failed = error => error instanceof Error ? error.message : String(error?.message || error);
-const sessionKey = invite => 'ball-photo-session:'+invite;
+const sessionKey = invite => 'ball-photo-session:'+(invite || 'photographer');
 
-function InvitationForm({ invite, onAuth }) {
+function PhotographerSignIn({ invite, onAuth, onBack }) {
+  const [name,setName]=useState('');
   const [phone,setPhone]=useState('');
   const [error,setError]=useState('');
   const [busy,setBusy]=useState(false);
@@ -17,7 +18,7 @@ function InvitationForm({ invite, onAuth }) {
     if(busy)return;
     setBusy(true);setError('');
     try{
-      const {token,name}=await photoDesk('unlock',{invite,phone});
+      const {token,name}=await photoDesk('unlock',{invite,name,phone});
       try { sessionStorage.setItem(sessionKey(invite),token); } catch { /* Upload still works in this tab. */ }
       onAuth({name,admin:false,token});
     }catch(error){setError(failed(error));}
@@ -25,9 +26,11 @@ function InvitationForm({ invite, onAuth }) {
   }
   return <form className="bp-panel bp-form" onSubmit={submit}>
     <h2>Photographer sign-in</h2>
-    <label>Phone number<input type="password" inputMode="tel" autoComplete="off" required maxLength={20} value={phone} onChange={e=>setPhone(e.target.value)}/></label>
+    {!invite&&<label>Full name<input autoComplete="username" maxLength={100} required value={name} onChange={e=>setName(e.target.value)}/></label>}
+    <label>Phone number (password)<input type="password" inputMode="tel" autoComplete="current-password" required maxLength={20} value={phone} onChange={e=>setPhone(e.target.value)}/></label>
     {error&&<p role="alert">{error}</p>}
-    <button className="bp-gold" disabled={busy}>{busy?'Signing in…':'Open upload desk'}</button>
+    <div className="ball-photo-row"><button className="bp-gold" disabled={busy}>{busy?'Signing in…':'Open upload desk'}</button>
+      {onBack&&<button type="button" onClick={onBack} disabled={busy}>Back</button>}</div>
   </form>;
 }
 
@@ -111,11 +114,10 @@ function UploadQueue({ token }) {
   </section>;
 }
 
-function Invites() {
+function Photographers() {
   const [items,setItems]=useState([]);
   const [name,setName]=useState('');
   const [phone,setPhone]=useState('');
-  const [link,setLink]=useState('');
   const [error,setError]=useState('');
   const [busy,setBusy]=useState(false);
 
@@ -124,32 +126,26 @@ function Invites() {
     event.preventDefault();setBusy(true);setError('');
     try{
       const entry=await photoDesk('create-invite',{name,phone});
-      setItems(old=>[entry,...old]);setName('');setPhone('');setLink(inviteLink(entry.id));
+      setItems(old=>[entry,...old]);setName('');setPhone('');
     }catch(e){setError(failed(e));}
     finally{setBusy(false);}
-  }
-  async function copy(id){
-    const url=inviteLink(id);
-    setLink(url);
-    try{await navigator.clipboard.writeText(url);}catch{ /* The link below can be selected manually. */ }
   }
   async function disable(id){
     try{await photoDesk('disable-invite',{id});setItems(old=>old.map(item=>item.id===id?{...item,active:false}:item));}
     catch(e){setError(failed(e));}
   }
   return <section className="bp-panel">
-    <h2>Photographer invitations</h2>
-    <p className="bp-muted">Create one private link per photographer. They sign in using their phone number.</p>
+    <h2>Photographer accounts</h2>
+    <p className="bp-muted">Photographers open the upload desk and sign in with their name and phone number.</p>
     <form className="bp-invite-form bp-form" onSubmit={create}>
       <label>Name for photo credit<input value={name} onChange={e=>setName(e.target.value)} maxLength={100} required/></label>
       <label>Phone number<input type="password" inputMode="tel" autoComplete="off" maxLength={20} value={phone} onChange={e=>setPhone(e.target.value)} required/></label>
-      <button className="bp-gold" disabled={busy}>Create private link</button>
+      <button className="bp-gold" disabled={busy}>Add photographer</button>
     </form>
     {error&&<p className="bp-error" role="alert">{error}</p>}
-    {link&&<label className="bp-link-field">Private upload link<input readOnly value={link} onFocus={e=>e.target.select()}/></label>}
     <ul className="bp-invites">{items.map(item=><li className="ball-photo-row bp-between" key={item.id}>
       <strong>{item.name} {item.active?'':'· Disabled'}</strong>
-      {item.active&&<div className="ball-photo-row"><button onClick={()=>copy(item.id)}>Copy link</button><button onClick={()=>disable(item.id)}>Disable</button></div>}
+      {item.active&&<button onClick={()=>disable(item.id)}>Disable</button>}
     </li>)}</ul>
   </section>;
 }
@@ -242,6 +238,7 @@ export default function BallPhotoDesk() {
   const [auth,setAuth]=useState(null);
   const [loading,setLoading]=useState(true);
   const [view,setView]=useState('upload');
+  const [showPhotographer,setShowPhotographer]=useState(false);
   const invite=new URLSearchParams(location.hash.slice(1)).get('invite')||'';
   useEffect(()=>{
     const change=()=>setIsDesktop(desktop.matches);
@@ -252,25 +249,35 @@ export default function BallPhotoDesk() {
     if(!isDesktop)return;
     let active=true;
     let token='';
-    try{if(invite)token=sessionStorage.getItem(sessionKey(invite))||'';}catch { /* Storage is optional. */ }
+    try{token=sessionStorage.getItem(sessionKey(invite))||'';}catch { /* Storage is optional. */ }
     if(invite&&!token){setLoading(false);return;}
-    photoDesk('whoami',{},token).then(data=>{if(active)setAuth({...data,token});})
+    async function restoreSession() {
+      try {
+        return {...await photoDesk('whoami',{},token),token};
+      } catch (error) {
+        if(!token)throw error;
+        try{sessionStorage.removeItem(sessionKey(invite));}catch { /* Storage is optional. */ }
+        if(invite)throw error;
+        return {...await photoDesk('whoami'),token:''};
+      }
+    }
+    restoreSession().then(data=>{if(active)setAuth(data);})
       .catch(()=>{if(active)setAuth(null);}).finally(()=>{if(active)setLoading(false);});
     return ()=>{active=false;};
   },[invite,isDesktop]);
   return <main className="bp-root bp-desk">
-    <header className="bp-bar bp-width"><a href={PHOTO_CENTRAL} className="bp-brand">Ball Photo Central</a><nav><a href={PHOTO_CENTRAL}>View gallery</a></nav></header>
+    <header className="bp-bar bp-width"><a href={PHOTO_CENTRAL} className="bp-brand">Ball Photo Central</a><nav aria-label="Upload desk links"><a href={PHOTO_CENTRAL}>View gallery</a></nav></header>
     <section className="bp-width bp-desk-main">
       <div className="bp-desk-heading"><p className="bp-kicker">Military Ball · November 21, 2026</p><h1>Photo upload desk</h1>{auth&&<p className="bp-muted">Signed in as {auth.name}</p>}</div>
       {!isDesktop?<div className="bp-panel"><h2>Open the upload desk on a computer</h2><p>Browse and download Ball photos on your phone.</p><a className="bp-button bp-gold" href={PHOTO_CENTRAL}>View gallery</a></div>
         : loading?<p role="status">Opening the upload desk…</p>
-        : !auth?invite?<InvitationForm invite={invite} onAuth={setAuth}/>:<div className="bp-panel"><h2>Sign in to upload</h2><p>Staff use their DISPATCH account. Photographers open their private invitation.</p><a className="bp-button bp-gold" href="/admin">Sign in to DISPATCH</a></div>
+        : !auth?(invite||showPhotographer)?<PhotographerSignIn invite={invite} onAuth={setAuth} onBack={invite?undefined:()=>setShowPhotographer(false)}/>:<div className="bp-panel"><h2>Sign in to upload</h2><div className="ball-photo-row bp-sign-in-options"><button className="bp-gold" onClick={()=>setShowPhotographer(true)}>Photographer sign-in</button><a className="bp-button" href="/admin">Sign in to DISPATCH</a></div></div>
         : <>
           {auth.admin&&<div className="ball-photo-row bp-desk-tabs" role="group" aria-label="Upload desk sections">
-            {[['upload','Upload files'],['review','Review gallery'],['invites','Photographer invites']].map(([id,label])=><button key={id} aria-pressed={view===id} onClick={()=>setView(id)}>{label}</button>)}
+            {[['upload','Upload files'],['review','Review gallery'],['invites','Photographers']].map(([id,label])=><button key={id} aria-pressed={view===id} onClick={()=>setView(id)}>{label}</button>)}
           </div>}
           <div hidden={view!=='upload'}><UploadQueue token={auth.token}/></div>
-          {view==='invites'&&auth.admin&&<Invites/>}
+          {view==='invites'&&auth.admin&&<Photographers/>}
           {view==='review'&&auth.admin&&<PhotoReview/>}
         </>}
     </section>

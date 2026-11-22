@@ -42,6 +42,9 @@ async function tag(value: string) {
   const key = await crypto.subtle.importKey('raw', encoding.encode(secret), {name:'HMAC',hash:'SHA-256'}, false, ['sign']);
   return hex(new Uint8Array(await crypto.subtle.sign('HMAC', key, encoding.encode(value))));
 }
+function photographerName(value: unknown) {
+  return typeof value === 'string' ? value.normalize('NFKC').trim().replace(/\s+/g,' ') : '';
+}
 function phoneDigits(value: unknown) {
   const raw = typeof value === 'string' ? value.replace(/[^0-9]/g,'') : '';
   const phone = raw.length === 11 && raw.startsWith('1') ? raw.slice(1) : raw;
@@ -189,13 +192,24 @@ async function post(req: Request, db: Service) {
   if (!body || typeof body!=='object') throw new Problem(400,'Invalid request.');
   const action=String(body.action||'');
   if (action==='unlock') {
-    const id=readId(body.invite);
     const phone=phoneDigits(body.phone);
+    const nameKey=photographerName(body.name).toLowerCase();
+    const invalid='The name or phone number is incorrect. After several attempts, wait 15 minutes and try again.';
+    let id: string;
+    if (body.invite) {
+      id=readId(body.invite);
+    } else {
+      if (!nameKey || nameKey.length>100) throw new Problem(401,invalid);
+      const account=verify(await db.from('ball_photo_invites').select('id')
+        .eq('sign_in_name',nameKey).eq('active',true).maybeSingle());
+      if (!account) throw new Problem(401,invalid);
+      id=account.id;
+    }
     const token=hex(crypto.getRandomValues(new Uint8Array(32)));
     const name=verify(await db.rpc('ball_photo_unlock',{
       p_invite:id,p_phone_tag:await tag(`phone:${id}:${phone}`),p_session_tag:await tag('session:'+token),
     }));
-    if (!name) throw new Problem(401,'This invitation or password is invalid. If you’ve tried several times, wait 15 minutes.');
+    if (!name) throw new Problem(401,invalid);
     return response({name,token});
   }
   const actor=await uploader(req,db);
@@ -209,11 +223,13 @@ async function post(req: Request, db: Service) {
     return response({invites:rows});
   }
   if (action==='create-invite') {
-    const name=typeof body.name==='string'?body.name.trim():'';
+    const name=photographerName(body.name);
     if (!name||name.length>100) throw new Problem(400,'Enter a photographer name.');
     const id=crypto.randomUUID();
     const phone_tag=await tag(`phone:${id}:${phoneDigits(body.phone)}`);
-    verify(await db.from('ball_photo_invites').insert({id,name,phone_tag}));
+    const created=await db.from('ball_photo_invites').insert({id,name,phone_tag,sign_in_name:name.toLowerCase()});
+    if (created.error?.code==='23505') throw new Problem(409,'That photographer already has an active account.');
+    verify(created);
     return response({id,name,active:true});
   }
   if (action==='disable-invite') {

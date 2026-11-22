@@ -101,19 +101,18 @@
 .bp-panel,.bp-drop {background:#10233a;border:1px solid var(--bp-line);border-radius:8px;padding:20px}
 .bp-panel h2,.bp-drop h2 {font-size:clamp(1.9rem,3.4vw,2.5rem);line-height:1.18}
 .bp-panel p,.bp-drop p {margin-top:5px}
-.bp-panel > a {margin-top:14px}
+.bp-panel > a,.bp-sign-in-options {margin-top:14px}
 .bp-drop {border-style:dashed;padding:32px;display:grid;gap:10px}
 .bp-drop.is-drag {border-color:var(--bp-primary);background:#1a3550}
 .bp-drop p {color:var(--bp-mute)}
 .bp-upload {display:grid;gap:15px}
 .bp-form {display:grid;gap:12px}
 .bp-form > button {justify-self:start}
-.bp-form label,.bp-link-field {display:grid;gap:5px;min-width:0}
-.bp-form input,.bp-link-field input {
+.bp-form label {display:grid;gap:5px;min-width:0}
+.bp-form input {
   min-width:0;width:100%;min-height:44px;padding:8px 10px;background:#091525;border:1px solid var(--bp-line);border-radius:5px;color:var(--bp-text);
 }
 .bp-invite-form {grid-template-columns:1fr 1fr auto;align-items:end;margin:16px 0}
-.bp-link-field {margin:12px 0}
 .bp-invites,.bp-queue {list-style:none;padding:0;margin:14px 0 0}
 .bp-invites li,.bp-queue li {border-top:1px solid var(--bp-line);padding:11px 0}
 .bp-queue {max-height:480px;overflow:auto}
