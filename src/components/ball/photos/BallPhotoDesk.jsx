@@ -1,14 +1,13 @@
 import { useEffect, useRef, useState } from 'react';
-import { photoDesk, PHOTO_CENTRAL, PHOTO_LIMIT } from '../../../lib/ballPhotoApi';
+import { photoDesk, PHOTO_CENTRAL, PHOTO_DESK, PHOTO_LIMIT } from '../../../lib/ballPhotoApi';
 import { droppedPhotos, SUPPORTED_PHOTO, uploadBallPhoto } from '../../../lib/ballPhotoUpload';
 import { photoTime } from '../../../lib/ballPhotoTime';
 import './ballPhotoCentral.css';
 
-const desktop = window.matchMedia('(min-width: 800px) and (any-pointer: fine)');
 const failed = error => error instanceof Error ? error.message : String(error?.message || error);
 const PHOTOGRAPHER_SESSION_KEY = 'ball-photo-session:photographer';
 
-function PhotographerSignIn({ onAuth, onBack }) {
+function PhotographerSignIn({ onAuth, photographerOnly }) {
   const [name,setName]=useState('');
   const [error,setError]=useState('');
   const [busy,setBusy]=useState(false);
@@ -27,8 +26,10 @@ function PhotographerSignIn({ onAuth, onBack }) {
     <h2>Photographer sign-in</h2>
     <label>First and last name only<input autoComplete="name" maxLength={100} required value={name} onChange={e=>setName(e.target.value)}/></label>
     {error&&<p role="alert">{error}</p>}
-    <div className="ball-photo-row"><button className="bp-gold" disabled={busy}>{busy?'Signing in…':'Open upload desk'}</button>
-      <button type="button" onClick={onBack} disabled={busy}>Back</button></div>
+    <div className="ball-photo-row bp-sign-in-options">
+      <button className="bp-gold" disabled={busy}>{busy?'Signing in…':'Sign in as photographer'}</button>
+      <a className="bp-button" href={photographerOnly?PHOTO_DESK:'/admin'}>{photographerOnly?'Back to upload desk':'Sign in to DISPATCH'}</a>
+    </div>
   </form>;
 }
 
@@ -86,11 +87,12 @@ function UploadQueue({ token }) {
   const completed=queue.filter(item=>item.done).length;
   return <section className="bp-upload">
     <div className={`bp-drop${drag?' is-drag':''}`} onDragOver={e=>{e.preventDefault();if(!busy)setDrag(true);}} onDragLeave={()=>setDrag(false)} onDrop={drop}>
-      <h2>Drop your photos here</h2>
-      <p>Drop the DCIM folder or choose individual photos. Originals stay with the Ball team.</p>
-      <div className="ball-photo-row">
-        <button className="bp-gold" disabled={busy} onClick={()=>folderInput.current.click()}>Choose folder</button>
-        <button disabled={busy} onClick={()=>fileInput.current.click()}>Choose files</button>
+      <h2>Add your photos</h2>
+      <p className="bp-upload-pointer">Choose photos or drop a folder from your SD card.</p>
+      <p className="bp-upload-touch">Select multiple photos from your photo library or Files.</p>
+      <div className="ball-photo-row bp-picker-actions">
+        <button className="bp-gold" disabled={busy} onClick={()=>fileInput.current.click()}>Choose photos</button>
+        <button disabled={busy} onClick={()=>folderInput.current.click()}>Choose folder</button>
       </div>
       <input ref={folderInput} type="file" multiple webkitdirectory="" hidden onChange={e=>{add(e.target.files);e.target.value='';}}/>
       <input ref={fileInput} type="file" multiple hidden onChange={e=>{add(e.target.files);e.target.value='';}}/>
@@ -230,41 +232,39 @@ function PhotoReview() {
 }
 
 export default function BallPhotoDesk() {
-  const [isDesktop,setIsDesktop]=useState(desktop.matches);
+  const photographerOnly=new URLSearchParams(location.search).get('photographer')==='1';
   const [auth,setAuth]=useState(null);
-  const [loading,setLoading]=useState(true);
   const [view,setView]=useState('upload');
-  const [showPhotographer,setShowPhotographer]=useState(false);
   useEffect(()=>{
-    const change=()=>setIsDesktop(desktop.matches);
-    desktop.addEventListener('change',change);
-    return ()=>desktop.removeEventListener('change',change);
-  },[]);
-  useEffect(()=>{
-    if(!isDesktop)return;
     let active=true;
     let token='';
     try{token=sessionStorage.getItem(PHOTOGRAPHER_SESSION_KEY)||'';}catch { /* Storage is optional. */ }
     async function restoreSession() {
-      try {
-        return {...await photoDesk('whoami',{},token),token};
-      } catch (error) {
-        if(!token)throw error;
-        try{sessionStorage.removeItem(PHOTOGRAPHER_SESSION_KEY);}catch { /* Storage is optional. */ }
-        return {...await photoDesk('whoami'),token:''};
+      if(token){
+        try {
+          const profile=await photoDesk('whoami',{},token);
+          return {...profile,token};
+        }catch {
+          try{sessionStorage.removeItem(PHOTOGRAPHER_SESSION_KEY);}catch { /* Storage is optional. */ }
+        }
       }
+      if(photographerOnly)return null;
+      return {...await photoDesk('whoami'),token:''};
     }
-    restoreSession().then(data=>{if(active)setAuth(data);})
-      .catch(()=>{if(active)setAuth(null);}).finally(()=>{if(active)setLoading(false);});
+    restoreSession().then(data=>{if(active&&data)setAuth(current=>current||data);}).catch(()=>{});
     return ()=>{active=false;};
-  },[isDesktop]);
+  },[photographerOnly]);
   return <main className="bp-root bp-desk">
-    <header className="bp-bar bp-width"><a href={PHOTO_CENTRAL} className="bp-brand">Ball Photo Central</a><nav aria-label="Upload desk links"><a href={PHOTO_CENTRAL}>View gallery</a></nav></header>
+    <header className="bp-bar bp-width">
+      <a href={PHOTO_CENTRAL} className="bp-brand">Ball Photo Central</a>
+      <nav aria-label="Upload desk links">
+        {auth?.admin&&<a href={PHOTO_DESK+'?photographer=1'}>Photographer sign-in</a>}
+        <a href={PHOTO_CENTRAL}>View gallery</a>
+      </nav>
+    </header>
     <section className="bp-width bp-desk-main">
       <div className="bp-desk-heading"><p className="bp-kicker">Military Ball · November 21, 2026</p><h1>Photo upload desk</h1>{auth&&<p className="bp-muted">Signed in as {auth.name}</p>}</div>
-      {!isDesktop?<div className="bp-panel"><h2>Open the upload desk on a computer</h2><p>Browse and download Ball photos on your phone.</p><a className="bp-button bp-gold" href={PHOTO_CENTRAL}>View gallery</a></div>
-        : loading?<p role="status">Opening the upload desk…</p>
-        : !auth?showPhotographer?<PhotographerSignIn onAuth={setAuth} onBack={()=>setShowPhotographer(false)}/>:<div className="bp-panel"><h2>Sign in to upload</h2><div className="ball-photo-row bp-sign-in-options"><button className="bp-gold" onClick={()=>setShowPhotographer(true)}>Photographer sign-in</button><a className="bp-button" href="/admin">Sign in to DISPATCH</a></div></div>
+      {!auth?<PhotographerSignIn onAuth={setAuth} photographerOnly={photographerOnly}/>
         : <>
           {auth.admin&&<div className="ball-photo-row bp-desk-tabs" role="group" aria-label="Upload desk sections">
             {[['upload','Upload files'],['review','Review gallery'],['invites','Photographers']].map(([id,label])=><button key={id} aria-pressed={view===id} onClick={()=>setView(id)}>{label}</button>)}
