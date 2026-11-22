@@ -112,7 +112,7 @@
 .bp-form input {
   min-width:0;width:100%;min-height:44px;padding:8px 10px;background:#091525;border:1px solid var(--bp-line);border-radius:5px;color:var(--bp-text);
 }
-.bp-invite-form {grid-template-columns:1fr 1fr auto;align-items:end;margin:16px 0}
+.bp-invite-form {grid-template-columns:minmax(0,360px) auto;justify-content:start;align-items:end;margin:16px 0}
 .bp-invites,.bp-queue {list-style:none;padding:0;margin:14px 0 0}
 .bp-invites li,.bp-queue li {border-top:1px solid var(--bp-line);padding:11px 0}
 .bp-queue {max-height:480px;overflow:auto}
