@@ -6,7 +6,9 @@ import { Btn, Input, Label, PanelHeader, EmptyState } from '../shared/ui';
 // Storage buckets DISPATCH manages. `documents` is private (signed URLs,
 // s6-only — see supabase/documents.sql) and carries title + confidentiality
 // metadata in public.document_meta. The others stay public site images.
-const BUCKETS = ['site-assets', 'team-photos', 'personnel-photos', 'achievement-icons', 'documents'];
+// Team/event photos are NOT here: they live on R2 and are managed from
+// Photo Submissions, Raider Polls and /lukepwa (lib/photoStorage.js).
+const BUCKETS = ['site-assets', 'personnel-photos', 'achievement-icons', 'documents'];
 const DOCS_BUCKET = 'documents';
 const SIGNED_URL_TTL = 60 * 10; // 10 min — plenty for a preview/copy/print session
 

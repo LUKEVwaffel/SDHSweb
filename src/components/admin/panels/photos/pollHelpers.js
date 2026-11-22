@@ -1,4 +1,3 @@
-export const RAIDER_BUCKET = 'team-photos';
 
 export const RCATS = [
   { key: 'funny', label: 'FUNNY', field: 'votes_funny' },

@@ -1,0 +1,31 @@
+# Public read-only Worker for the R2 media buckets (raider videos, beta
+# event photos, TV photos). Serves GET/HEAD with byte-range support.
+# The site reads through it via VITE_R2_MEDIA_BASE (src/lib/r2Storage.js).
+# Deploy: see ./README.md.
+name = "r2-media-reader"
+main = "src/index.js"
+compatibility_date = "2026-09-01"
+workers_dev = true
+
+# One block per bucket. The binding name must match BUCKET_BINDINGS in
+# src/index.js. Adding a bucket here makes it PUBLICLY readable, so never add
+# a private bucket (documents, permission-slips, chat-attachments).
+[[r2_buckets]]
+binding = "BETA_EVENT_PHOTOS"
+bucket_name = "beta-event-photos"
+
+[[r2_buckets]]
+binding = "EVENT_PHOTOS"
+bucket_name = "event-photos"
+
+[[r2_buckets]]
+binding = "RAIDER_VIDEOS"
+bucket_name = "raider-videos"
+
+[[r2_buckets]]
+binding = "TV_DAILY_PHOTOS"
+bucket_name = "tv-daily-photos"
+
+[[r2_buckets]]
+binding = "TV_TEAM_PHOTOS"
+bucket_name = "tv-team-photos"

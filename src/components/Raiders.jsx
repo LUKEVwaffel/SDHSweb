@@ -20,7 +20,7 @@ const oswald = 'Oswald, sans-serif';
 // Hand-picked cover for the "View Competition" card (right-hand image). Fixed
 // URL rather than the first gallery photo so it stays the intended shot.
 const COMP_CARD_COVER =
-  'https://bjgyvmdzcymruunzavni.supabase.co/storage/v1/object/public/team-photos/raiders/e8a305fe-86cf-4092-a580-5865423271b9/1788013805333_og3xef.jpg';
+  'https://optic-photos.sdhs-battalion.workers.dev/raiders/e8a305fe-86cf-4092-a580-5865423271b9/1788013805333_og3xef.jpg';
 
 function initials(name) {
   return name.split(/\s+/).map((w) => w[0]).join('').slice(0, 2).toUpperCase();

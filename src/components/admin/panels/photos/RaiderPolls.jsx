@@ -3,7 +3,8 @@ import { supabase as SB } from '../../../../lib/supabaseClient';
 import { P, mono, oswald, fs, sp } from '../../theme';
 import { Btn, Card, Label, PanelHeader, EmptyState } from '../../shared/ui';
 import { downloadWinnerCard } from '../../lib/winnerCard';
-import { RAIDER_BUCKET, RCATS, defaultCloses } from './pollHelpers';
+import { RCATS, defaultCloses } from './pollHelpers';
+import { removePhotoFiles, withOriginal } from '../../../../lib/photoStorage';
 
 export default function RaiderPolls({ adminId }) {
   const [events, setEvents] = useState([]);
@@ -57,10 +58,16 @@ export default function RaiderPolls({ adminId }) {
 
   async function deletePhoto(photo) {
     if (!confirm('Delete this photo?')) return;
-    if (photo.storage_path) {
-      await SB.storage.from(RAIDER_BUCKET).remove([photo.storage_path, photo.storage_path.replace('.jpg', '_t.jpg')]);
+    // Files first (R2 or the old Supabase bucket, plus any kept sharp
+    // original). If that fails the row stays, so the photo can't end up
+    // deleted here but still public at its URL.
+    try {
+      await removePhotoFiles(withOriginal(photo));
+      const { error } = await SB.from('photos').delete().eq('id', photo.id);
+      if (error) throw error;
+    } catch (err) {
+      alert(`Could not delete this photo. It is still there, so try again.\n${err.message || err}`);
     }
-    await SB.from('photos').delete().eq('id', photo.id);
     loadPhotos(selEvt);
   }
 

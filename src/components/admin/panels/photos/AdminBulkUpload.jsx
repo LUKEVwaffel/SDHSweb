@@ -2,12 +2,11 @@ import { useState, useRef, useCallback, useEffect } from 'react';
 import { BALL_EVENT_ID, PHOTO_DESK } from '../../../../lib/ballPhotoApi';
 import { supabase as SB } from '../../../../lib/supabaseClient';
 import { resizeForUpload, isRawFile } from '../../../../lib/imageResize';
+import { putPhotoFile, removePhotoFiles } from '../../../../lib/photoStorage';
 import { convertCr2ToPng, isCr2 } from '../../../../lib/cr2Convert';
 import { P, mono, oswald, inter, fs, sp, radius, ease } from '../../theme';
 import { Btn, Card, Label, Input, Select, PanelHeader, EmptyState } from '../../shared/ui';
 import posthog from '../../../../lib/posthog';
-
-const BUCKET = 'team-photos';
 
 // Staff-side multi-file upload, tied to one posted event. Mirrors the public
 // PhotoUploader's storage path scheme (team/event/stamp[.jpg|_t.jpg]) so
@@ -97,14 +96,12 @@ export default function AdminBulkUpload({ adminId }) {
       }
       update({ status: 'uploading', error: null });
       const { full, thumb } = await resizeForUpload(input);
-      const stamp = `${Date.now()}_${Math.random().toString(36).slice(2, 8)}_${idx}`;
+      // <digits>_<a-z0-9> only: the R2 worker refuses any other key shape,
+      // so the queue index is glued onto the random part, not a third segment.
+      const stamp = `${Date.now()}_${Math.random().toString(36).slice(2, 8)}${idx}`;
       const base = `${eventTeam}/${eventId}/${stamp}`;
-      const up1 = await SB.storage.from(BUCKET).upload(`${base}.jpg`, full, { contentType: 'image/jpeg' });
-      if (up1.error) throw up1.error;
-      const up2 = await SB.storage.from(BUCKET).upload(`${base}_t.jpg`, thumb, { contentType: 'image/jpeg' });
-      if (up2.error) throw up2.error;
-      const photoUrl = SB.storage.from(BUCKET).getPublicUrl(`${base}.jpg`).data.publicUrl;
-      const thumbUrl = SB.storage.from(BUCKET).getPublicUrl(`${base}_t.jpg`).data.publicUrl;
+      const photoUrl = await putPhotoFile(`${base}.jpg`, full);
+      const thumbUrl = await putPhotoFile(`${base}_t.jpg`, thumb);
       const { error } = await SB.from('photos').insert({
         team: eventTeam,
         event_id: eventId,
@@ -115,7 +112,11 @@ export default function AdminBulkUpload({ adminId }) {
         uploader_fp: null,
         uploaded_by: adminId || null,
       });
-      if (error) throw error;
+      if (error) {
+        // No row, so don't leave the files behind in R2.
+        await removePhotoFiles([{ storage_path: `${base}.jpg`, photo_url: photoUrl }]).catch(() => {});
+        throw error;
+      }
       update({ status: 'done' });
       return true;
     } catch (err) {
@@ -215,7 +216,7 @@ export default function AdminBulkUpload({ adminId }) {
       {rejected.length > 0 && (
         <div style={{ fontFamily: mono, fontSize: fs.tiny, color: P.red, marginBottom: sp[3] }}>
           {rejected.map((r, i) => (
-            <div key={i}>SKIPPED: {r.name} — {r.reason}</div>
+            <div key={i}>SKIPPED: {r.name} · {r.reason}</div>
           ))}
         </div>
       )}

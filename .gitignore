@@ -30,3 +30,9 @@ dist-ssr
 
 # Stray PhotoRec recovery project file, not part of this site
 photorec.se2
+.vercel
+.env*
+
+# R2 migration: local backups + logs (never commit)
+storage-backup/
+migration-log-*.csv
