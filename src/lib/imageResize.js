@@ -177,15 +177,15 @@ export async function gridThumbFromUrl(url, maxEdge) {
 // looks soft, but full-size (1600px) there made scrolling lag and burned
 // bandwidth.
 // `gridMax` (optional) also returns a small `grid` blob for photo-grid tiles.
-export async function resizeForUpload(file, { thumbMax = THUMB_MAX, gridMax = 0 } = {}) {
+export async function resizeForUpload(file, { thumbMax = THUMB_MAX, gridMax = 0, fullMax = FULL_MAX, quality = QUALITY } = {}) {
   if (isRawFile(file)) {
     throw new Error('RAW files (.CR2, .NEF, etc.) aren\'t supported — export as JPEG first.');
   }
   const img = await loadImage(file);
-  const fullCanvas = drawScaled(img, FULL_MAX);
+  const fullCanvas = drawScaled(img, fullMax);
   const thumbCanvas = drawScaled(img, thumbMax);
   const [full, thumb, grid] = await Promise.all([
-    toBlob(fullCanvas),
+    toBlob(fullCanvas, quality),
     toBlob(thumbCanvas),
     gridMax ? toBlob(drawScaled(img, gridMax), GRID_QUALITY) : null,
   ]);

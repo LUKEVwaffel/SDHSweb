@@ -115,6 +115,11 @@ export default function BallLanding() {
               </FadeUp>
             </div>
 
+            <FadeUp delay={2} style={{ marginTop: 26, display: 'flex', gap: 16, flexWrap: 'wrap' }}>
+              <a href="/ballphotos" style={{ color: P.gold, fontWeight: 650 }}>Ball Photo Central →</a>
+              <a href="/ballfeedback" style={{ color: P.cream }}>Share Ball feedback</a>
+            </FadeUp>
+
             {/* INVITATION FRAME — venue */}
             {config.venue_address && (
               <FadeUp delay={3} style={{ position: 'relative', border: `1px solid ${P.hairStrong}`, background: P.navy, padding: '40px 28px', marginTop: 30, textAlign: 'center' }}>

@@ -145,6 +145,7 @@ export default function BallPanel({ adminId }) {
         {TABS.map((t) => <Btn key={t.id} variant={tab === t.id ? 'gold' : 'ghost'} size="sm" onClick={() => setTab(t.id)}>{t.label}</Btn>)}
       </div>
 
+      <div style={{ marginBottom: sp[3] }}><a href="/ballphotos/upload" style={{ color: P.gold }}>Open Ball Photo Central upload desk</a></div>
       {tab === 'overview' && <BallOverviewTab />}
       {tab === 'checkin' && <BallCheckinSetup />}
       {tab === 'studio' && <Suspense fallback={<div style={{ color: P.mute }}>Opening Ball Studio…</div>}><BallPresentationStudio adminId={adminId} /></Suspense>}

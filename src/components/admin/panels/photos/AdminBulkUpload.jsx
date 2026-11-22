@@ -1,4 +1,5 @@
 import { useState, useRef, useCallback, useEffect } from 'react';
+import { BALL_EVENT_ID, PHOTO_DESK } from '../../../../lib/ballPhotoApi';
 import { supabase as SB } from '../../../../lib/supabaseClient';
 import { resizeForUpload, isRawFile } from '../../../../lib/imageResize';
 import { convertCr2ToPng, isCr2 } from '../../../../lib/cr2Convert';
@@ -49,6 +50,10 @@ export default function AdminBulkUpload({ adminId }) {
   }, []);
 
   function changeEvent(id) {
+    if (id === BALL_EVENT_ID) {
+      window.location.assign(PHOTO_DESK);
+      return;
+    }
     setEventId(id);
     setQueue([]);
     setRejected([]);
@@ -120,6 +125,7 @@ export default function AdminBulkUpload({ adminId }) {
   }
 
   async function uploadAll() {
+    if (eventId === BALL_EVENT_ID) { window.location.assign(PHOTO_DESK); return; }
     if (!eventId || busy) return;
     setPngError('');
     setUploading(true);
@@ -154,6 +160,7 @@ export default function AdminBulkUpload({ adminId }) {
 
       <Card style={{ marginBottom: sp[4] }}>
         <Label>EVENT <span style={{ color: P.red }}>*</span></Label>
+        <p style={{ margin: '5px 0 10px', color: P.mute, fontSize: 12 }}>Military Ball photo uploads go through <a style={{ color: P.gold }} href={PHOTO_DESK}>Ball Photo Central</a>.</p>
         <Select
           value={eventId}
           onChange={(e) => changeEvent(e.target.value)}

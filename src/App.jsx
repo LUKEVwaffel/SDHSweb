@@ -1,4 +1,6 @@
 import { useEffect, lazy, Suspense } from 'react';
+const BallPhotoGallery = lazy(() => import('./components/ball/photos/BallPhotoGallery'));
+const BallPhotoDesk = lazy(() => import('./components/ball/photos/BallPhotoDesk'));
 const BallStudioRemote = lazy(() => import('./components/admin/panels/ball/studio/BallStudioRemote'));
 import { Routes, Route, Navigate, useParams, useLocation } from 'react-router-dom';
 import TopNav from './components/TopNav';
@@ -151,6 +153,11 @@ export default function App() {
   if (location.pathname === '/blooddrive') return <BloodDrive />;
   // /lukescience: Luke's case that fall starts October 1. Static page.
   if (location.pathname === '/lukescience') return <LukeScience />;
+  if (/^\/ballphotos(?:\/upload)?\/?$/.test(location.pathname)) {
+    return <Suspense fallback={<main style={{padding:24}}>Opening Ball Photo Central…</main>}>
+      {location.pathname.includes('/upload') ? <BallPhotoDesk /> : <BallPhotoGallery />}
+    </Suspense>;
+  }
   if (location.pathname === '/ballfeedback' || location.pathname === '/ballfeedback/') return <BallFeedbackForm />;
   if (location.pathname === '/feedback') return <EventFeedbackPicker />;
   if (location.pathname.startsWith('/feedback/')) return <EventFeedbackForm />;

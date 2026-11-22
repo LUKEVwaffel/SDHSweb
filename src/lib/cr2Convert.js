@@ -1,12 +1,7 @@
 const CR2_EXTENSION = /\.cr2$/i;
 export const isCr2 = file => CR2_EXTENSION.test(file.name);
 
-async function decodeCr2(file) {
-  const header = new Uint8Array(await file.slice(0, 12).arrayBuffer());
-  if (header[8] !== 0x43 || header[9] !== 0x52 || header[10] !== 2) {
-    throw new Error('This file is not a readable Canon CR2 photo.');
-  }
-
+async function decodeCameraRaw(file) {
   const { default: LibRaw } = await import('libraw-wasm');
   const bytes = new Uint8Array(await file.arrayBuffer());
   const decoder = new LibRaw();
@@ -28,7 +23,15 @@ async function decodeCr2(file) {
 }
 
 export async function convertCr2ToPng(file) {
-  const decoded = await decodeCr2(file);
+  const header = new Uint8Array(await file.slice(0, 12).arrayBuffer());
+  if (header[8] !== 0x43 || header[9] !== 0x52 || header[10] !== 2) {
+    throw new Error('This file is not a readable Canon CR2 photo.');
+  }
+  return convertCameraRawToPng(file);
+}
+
+export async function convertCameraRawToPng(file) {
+  const decoded = await decodeCameraRaw(file);
   const { width, height, colors, bits, data } = decoded ?? {};
   if (!width || !height || bits !== 8 || colors !== 3 || data?.length !== width * height * colors) {
     throw new Error('Could not convert the RAW pixels to an RGB image.');
@@ -50,7 +53,7 @@ export async function convertCr2ToPng(file) {
     ctx.putImageData(image, 0, 0);
     const png = await new Promise(resolve => canvas.toBlob(resolve, 'image/png'));
     if (!png?.size) throw new Error('Could not save this RAW photo as PNG.');
-    return new File([png], file.name.replace(CR2_EXTENSION, '.png'), { type: 'image/png', lastModified: file.lastModified });
+    return new File([png], file.name.replace(/\.[^.]+$/, '.png'), { type: 'image/png', lastModified: file.lastModified });
   } finally {
     canvas.width = 0;
     canvas.height = 0;
