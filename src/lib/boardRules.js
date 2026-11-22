@@ -1,19 +1,31 @@
 // Company promotion boards — the rules from the paper board sheet, in one
 // place. Mirrored server-side by board_validate_sheet() in
-// supabase/company_boards.sql; if a rule changes here it MUST change there too
+// supabase/BOARD_RELIABILITY.sql; if a rule changes here it MUST change there too
 // (the database is what actually enforces it, this module drives the UI).
 
-/** The five scored categories, in paper-sheet order. Each is scored 0–3. */
+/** The five scored categories, in paper-sheet order. Each has its own maximum. */
 export const CATEGORIES = [
-  { key: 'score_facing',  label: 'Facing Movements', sub: 'Left, Right, About' },
-  { key: 'score_creed',   label: 'Cadet Creed',      sub: 'Recited from memory' },
-  { key: 'score_uniform', label: 'Wear of Uniform',  sub: 'Khakis + polo, worn to standard' },
-  { key: 'score_jrotc',   label: 'JROTC Knowledge',  sub: 'Program, chain of command, history' },
-  { key: 'score_class',   label: 'Class Knowledge',  sub: 'Current LET curriculum' },
+  { key: 'score_address', label: 'Addressing the Board', sub: 'Correctly address the president of the board', max: 1 },
+  { key: 'score_facing', label: 'Facing Movements', sub: 'Left, Right, About', max: 3 },
+  { key: 'score_creed', label: 'Cadet Creed', sub: 'Complete from memory; pauses and stutters do not fail', max: 1 },
+  { key: 'score_uniform', label: 'Wear of Uniform', sub: 'Inspection checklist', max: 9 },
+  { key: 'score_jrotc', label: 'JROTC Knowledge', sub: 'One question per board member', max: 3 },
+  { key: 'score_class', label: 'Class Knowledge', sub: 'One question per board member', max: 3 },
 ];
-
-export const MAX_PER_CATEGORY = 3;
-export const MAX_TOTAL = CATEGORIES.length * MAX_PER_CATEGORY;
+export const MAX_PER_CATEGORY = 9;
+export const MAX_TOTAL = CATEGORIES.reduce((sum, c) => sum + c.max, 0);
+export const UNIFORM_DEDUCTIONS = [
+  ['ranks', 'Ranks', 1], ['nametag', 'Nametag', 1], ['ribbons', 'Ribbons', 1],
+  ['arcs', 'Arcs', 1], ['star', 'Star', 1], ['crest', 'Unit crest', 1],
+  ['socks', 'Socks', 1], ['tie', 'Tie / neck tab', 2], ['belt', 'Belt', 2],
+];
+export const UNIFORM_REQUIRED = [['jacket', 'Jacket'], ['shirt', 'Grey shirt'], ['pants', 'Pants'], ['shoes', 'Shoes']];
+export function uniformScore({ mode, noIssuedUniform = false, infractions = [], missing = [] }) {
+  if (mode === 'khaki_polo') return noIssuedUniform ? 9 : null;
+  if (mode !== 'class_a') return null;
+  if (missing.length) return 0;
+  return Math.max(0, 9 - UNIFORM_DEDUCTIONS.reduce((n, [key, , points]) => n + (infractions.includes(key) ? points : 0), 0));
+}
 
 /**
  * Every rank a cadet can hold, low → high. `ladder` is the comparable
@@ -49,7 +61,7 @@ export const MAX_RANK_BY_LET = { 1: 'CPL', 2: 'SSG', 3: 'SFC', 4: 'MSG' };
  * Minimum total to promote. Leadership-only information — the UI must never
  * print these numbers where a cadet could read them (BC directive).
  */
-export const MIN_SCORE_BY_LET = { 1: 10, 2: 12, 3: 12, 4: 12 };
+export const MIN_SCORE_BY_LET = { 1: 16, 2: 17, 3: 17, 4: 17 };
 
 const RANK_BY_CODE = Object.fromEntries(RANKS.map((r) => [r.code, r]));
 
@@ -82,7 +94,7 @@ export function totalScore(scores) {
 
 /** @param {Record<string, number | null | undefined>} scores */
 export function allScored(scores) {
-  return CATEGORIES.every((c) => Number.isInteger(scores?.[c.key]));
+  return CATEGORIES.every((c) => Number.isInteger(scores?.[c.key]) && scores[c.key] >= 0 && scores[c.key] <= c.max);
 }
 
 /**
@@ -97,7 +109,7 @@ export function promotionOptions(currentRank, letLevel) {
   const fromLadder = rankInfo(currentRank)?.ladder ?? 0;
   return PROMOTABLE.filter((code) => {
     const l = rankInfo(code).ladder;
-    return l > fromLadder && l <= maxLadder;
+    return l === fromLadder + 1 && l <= maxLadder;
   });
 }
 
@@ -109,7 +121,7 @@ export function promotionEligibility({ scores, currentRank, letLevel }) {
   const let_ = normalizeLet(letLevel);
   if (!let_) return { eligible: false, reason: 'LET level missing — fix it on the roster first' };
   if (!currentRank) return { eligible: false, reason: 'Enter current rank first' };
-  if (!allScored(scores)) return { eligible: false, reason: 'Score all five categories' };
+  if (!allScored(scores)) return { eligible: false, reason: 'Score all six categories' };
   if (promotionOptions(currentRank, let_).length === 0) {
     return { eligible: false, reason: `Already at or above the LET ${let_} maximum` };
   }

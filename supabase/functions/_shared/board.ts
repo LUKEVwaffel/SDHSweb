@@ -90,29 +90,5 @@ export async function checkBoardPin(email: string, pin: string): Promise<PinChec
   return { ok: true };
 }
 
-/** Hex SHA-256 of a string. */
-export async function sha256Hex(input: string): Promise<string> {
-  const buf = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(input));
-  return Array.from(new Uint8Array(buf)).map((b) => b.toString(16).padStart(2, "0")).join("");
-}
-
-/** Stable JSON (sorted keys) so a seal can be recomputed and compared later. */
-export function canonical(value: unknown): string {
-  if (Array.isArray(value)) return `[${value.map(canonical).join(",")}]`;
-  if (value && typeof value === "object") {
-    const o = value as Record<string, unknown>;
-    return `{${Object.keys(o).sort().map((k) => `${JSON.stringify(k)}:${canonical(o[k])}`).join(",")}}`;
-  }
-  return JSON.stringify(value ?? null);
-}
-
-/** The fields a board signature attests to. */
-export const SEALED_FIELDS = [
-  "id", "quarter_id", "cadet_id", "cadet_name", "company", "let_level", "grade", "rank_before",
-  "score_facing", "score_creed", "score_uniform", "score_jrotc", "score_class", "total",
-  "decision", "promote_to", "comment",
-] as const;
-
-export function sealPayload(sheet: Record<string, unknown>): Record<string, unknown> {
-  return Object.fromEntries(SEALED_FIELDS.map((k) => [k, sheet[k] ?? null]));
-}
+// Seals are computed inside board_commit_signature / board_commit_sai_signoff
+// so the signed rows and their hashes are committed atomically.

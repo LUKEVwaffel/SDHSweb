@@ -2,3 +2,7 @@ node_modules/
 dist/
 .env
 .git/
+
+# Temporary deployment copies and compiled artifacts are not project source.
+tmp/boards-release/
+**/.vercel/output/

@@ -80,7 +80,7 @@ export default function CompanyBoard({ me }) {
         <p className="tb-sub">
           {signoff
             ? `Signed off by ${signoff.signed_name}. ${signoff.promotions_applied} promotion${signoff.promotions_applied === 1 ? '' : 's'} applied.`
-            : 'Score every cadet on the five categories, then all three of you sign once.'}
+            : 'Score every cadet on the six categories, then all three of you sign once.'}
         </p>
       </div>
       <ProgressRing value={done} max={cadets.length} size={112} label="BOARDED" />

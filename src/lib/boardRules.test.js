@@ -3,15 +3,15 @@ import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import {
   promotionOptions, promotionEligibility, totalScore, allScored,
-  normalizeLet, rankFromRoleTitle, defaultPromotion, quarterLabel, MAX_TOTAL,
+  normalizeLet, rankFromRoleTitle, defaultPromotion, quarterLabel, MAX_TOTAL, uniformScore,
 } from './boardRules.js';
 
-const full = (n) => ({ score_facing: n, score_creed: n, score_uniform: n, score_jrotc: n, score_class: n });
+const full = (n) => ({ score_facing: n, score_address: Math.min(n,1), score_creed: Math.min(n,1), score_uniform: n * 3, score_jrotc: n, score_class: n });
 
-test('max total is 15', () => assert.equal(MAX_TOTAL, 15));
+test('max total is 20', () => assert.equal(MAX_TOTAL, 20));
 
 test('totals and completeness', () => {
-  assert.equal(totalScore(full(3)), 15);
+  assert.equal(totalScore(full(3)), 20);
   assert.equal(totalScore({ score_facing: 2 }), 2);
   assert.equal(allScored({ score_facing: 2 }), false);
   assert.equal(allScored(full(0)), true);
@@ -25,7 +25,7 @@ test('normalizeLet accepts legacy "LET 3" strings', () => {
 });
 
 test('LET 1 caps at CPL', () => {
-  assert.deepEqual(promotionOptions('PVT', 1), ['PV2', 'PFC', 'CPL']);
+  assert.deepEqual(promotionOptions('PVT', 1), ['PV2']);
   assert.deepEqual(promotionOptions('CPL', 1), []);
 });
 
@@ -40,14 +40,25 @@ test('officers and 1SG have nothing to promote to', () => {
   assert.deepEqual(promotionOptions('1SG', 4), []);
 });
 
-test('minimum score: 10 for LET 1, 12 otherwise', () => {
-  const nine = { ...full(2), score_class: 1 }; // 9
-  const ten = full(2);                          // 10
-  const eleven = { ...full(2), score_class: 3 }; // 11
-  assert.equal(promotionEligibility({ scores: nine, currentRank: 'PVT', letLevel: 1 }).eligible, false);
-  assert.equal(promotionEligibility({ scores: ten, currentRank: 'PVT', letLevel: 1 }).eligible, true);
-  assert.equal(promotionEligibility({ scores: eleven, currentRank: 'PV2', letLevel: 2 }).eligible, false);
-  assert.equal(promotionEligibility({ scores: full(3), currentRank: 'PV2', letLevel: 2 }).eligible, true);
+test('minimum score: 16 for LET 1, 17 otherwise', () => {
+  const sixteen = { ...full(3), score_uniform: 5 };
+  assert.equal(totalScore(sixteen), 16);
+  assert.equal(promotionEligibility({ scores: { ...sixteen, score_address: 0 }, currentRank: 'PVT', letLevel: 1 }).eligible, false);
+  assert.equal(promotionEligibility({ scores: sixteen, currentRank: 'PVT', letLevel: 1 }).eligible, true);
+  assert.equal(promotionEligibility({ scores: sixteen, currentRank: 'PV2', letLevel: 2 }).eligible, false);
+  assert.equal(promotionEligibility({ scores: { ...sixteen, score_uniform: 6 }, currentRank: 'PV2', letLevel: 2 }).eligible, true);
+});
+test('uniform inspection follows Class A deductions and approved alternative', () => {
+  assert.equal(uniformScore({ mode: 'class_a' }), 9);
+  assert.equal(uniformScore({ mode: 'class_a', infractions: ['tie', 'belt', 'ranks'] }), 4);
+  assert.equal(uniformScore({ mode: 'class_a', missing: ['jacket'] }), 0);
+  assert.equal(uniformScore({ mode: 'khaki_polo', noIssuedUniform: true }), 9);
+  assert.equal(uniformScore({ mode: 'khaki_polo', noIssuedUniform: false }), null);
+});
+test('category bounds reject invalid scores', () => {
+  assert.equal(allScored({ ...full(3), score_creed: 2 }), false);
+  assert.equal(allScored({ ...full(3), score_address: -1 }), false);
+  assert.equal(allScored({ ...full(3), score_uniform: 10 }), false);
 });
 
 test('ineligibility reasons never leak the minimum number', () => {
@@ -78,4 +89,9 @@ test('quarterLabel follows the school year', () => {
   assert.equal(quarterLabel(new Date(2027, 0, 10)), '2026-27 Q2');
   assert.equal(quarterLabel(new Date(2027, 2, 1)), '2026-27 Q3');
   assert.equal(quarterLabel(new Date(2027, 4, 1)), '2026-27 Q4');
+});
+
+test('uniform deductions clamp at zero and do not double-count an item', () => {
+  assert.equal(uniformScore({ mode: 'class_a', infractions: ['tie', 'tie'] }), 7);
+  assert.equal(uniformScore({ mode: 'class_a', infractions: ['ranks','nametag','ribbons','arcs','star','crest','socks','tie','belt'] }), 0);
 });

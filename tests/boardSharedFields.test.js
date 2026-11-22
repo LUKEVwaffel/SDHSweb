@@ -1,0 +1,6 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import {sharedField,applyPendingFields,newerSharedRow} from '../src/components/boards/meeting/sharedFields.js';
+test('late poll cannot replace newer shared grades',()=>{const current={edit_sequence:8};assert.equal(newerSharedRow(current,{edit_sequence:7}),current);assert.equal(newerSharedRow(current,null),current);});
+test('individual uniform edits preserve other shared checks',()=>{const row={uniform_inspection:{mode:'class_a',infractions:['belt'],missing:[]}};const form=applyPendingFields(row,{'uniform.infractions.ranks':{value:true}});assert.deepEqual(form.uniform.infractions,['belt','ranks']);assert.deepEqual(row.uniform_inspection.infractions,['belt']);assert.equal(sharedField(row,'uniform.infractions.belt'),true);});
+test('optimistic scores retain other leaders grades and rank change resets decision',()=>{const row={scores:{score_facing:3,score_creed:1},decision:'promote',promote_to:'PV2'};const f=applyPendingFields(row,{score_jrotc:{value:3},rank_before:{value:'PFC'}});assert.equal(f.scores.score_facing,3);assert.equal(f.scores.score_creed,1);assert.equal(f.scores.score_jrotc,3);assert.equal(f.decision,'');assert.equal(f.target,'');});

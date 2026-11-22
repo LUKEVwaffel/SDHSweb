@@ -1,0 +1,14 @@
+do $$ begin create role anon; exception when duplicate_object then null; end $$;
+do $$ begin create role authenticated; exception when duplicate_object then null; end $$;
+do $$ begin create role service_role; exception when duplicate_object then null; end $$;
+create schema auth;
+create function auth.jwt() returns jsonb language sql stable as $$ select jsonb_build_object('email',current_setting('test.email',true)) $$;
+create function public.is_s6() returns boolean language sql stable as $$ select coalesce(current_setting('test.s6',true),'')='yes' $$;
+create function public.is_email_reviewer() returns boolean language sql as $$ select false $$;
+create function public.is_ball_ops_reviewer() returns boolean language sql as $$ select false $$;
+create function public.is_rifle_signups_reviewer() returns boolean language sql as $$ select false $$;
+create function public.is_ball_dress() returns boolean language sql as $$ select false $$;
+create function public.is_ball_attire() returns boolean language sql as $$ select false $$;
+create table public.rifle_admins(email text,active boolean,must_change_password boolean);
+create table public.cadet_consent(id uuid primary key default gen_random_uuid(),name text,company text,role text,school_email text,birthdate date,let_level text,grade text,gender text);
+create table public.personnel(cadet_consent_id uuid);

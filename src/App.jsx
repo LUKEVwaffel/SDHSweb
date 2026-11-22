@@ -1,4 +1,7 @@
-import { useEffect } from 'react';
+import { useEffect, lazy, Suspense } from 'react';
+const BallPhotoGallery = lazy(() => import('./components/ball/photos/BallPhotoGallery'));
+const BallPhotoDesk = lazy(() => import('./components/ball/photos/BallPhotoDesk'));
+const BallStudioRemote = lazy(() => import('./components/admin/panels/ball/studio/BallStudioRemote'));
 import { Routes, Route, Navigate, useParams, useLocation } from 'react-router-dom';
 import TopNav from './components/TopNav';
 import Hero from './components/Hero';
@@ -48,6 +51,7 @@ import CongratsPopup from './components/CongratsPopup';
 // up top. Restore this import + the /vote route below to bring it back.
 // import CompPhotoVote from './components/CompPhotoVote';
 import EventFeedbackForm from './components/EventFeedbackForm';
+import BallFeedbackForm from './components/ball/BallFeedbackForm';
 import EventFeedbackPicker from './components/EventFeedbackPicker';
 import OpticSurvey from './components/OpticSurvey';
 import HalloweenMoviePoll from './components/HalloweenMoviePoll';
@@ -64,6 +68,7 @@ import BallSignupWizard from './components/ball/signup/BallSignupWizard';
 import BallVipSignup from './components/ball/signup/BallVipSignup';
 import BallGuestVerify from './components/ball/BallGuestVerify';
 import BallOpsPortal from './components/ball/ops/BallOpsPortal';
+import BallCheckin from './components/ball/checkin/BallCheckin.jsx';
 import BallDressPortal from './components/ball/dress/BallDressPortal';
 import BallAttirePortal from './components/ball/attire/BallAttirePortal';
 import PortalHub from './components/portal/PortalHub';
@@ -134,6 +139,7 @@ export default function App() {
   // /balltv — hallway-TV promo loop for the Military Ball. Read-only slideshow,
   // no remote; reads ball_config + ball_gallery like /ball.
   if (location.pathname === '/balltv') return <BallTv />;
+  if (location.pathname === '/ballremote') return <Suspense fallback={<div style={{ padding: 24, color: '#e4c17b' }}>Opening Ball Remote…</div>}><BallStudioRemote /></Suspense>;
   // /videotv — hallway-TV loop of the whole Raider film library (muted, loop
   // order set per TV via EDIT LOOP) with the trophy case between every film.
   // Reads raider_videos (same library as /watchzone) + RaiderCompetitionResults' SEASON.
@@ -147,6 +153,12 @@ export default function App() {
   if (location.pathname === '/blooddrive') return <BloodDrive />;
   // /lukescience: Luke's case that fall starts October 1. Static page.
   if (location.pathname === '/lukescience') return <LukeScience />;
+  if (/^\/ballphotos(?:\/upload)?\/?$/.test(location.pathname)) {
+    return <Suspense fallback={<main style={{padding:24}}>Opening Ball Photo Central…</main>}>
+      {location.pathname.includes('/upload') ? <BallPhotoDesk /> : <BallPhotoGallery />}
+    </Suspense>;
+  }
+  if (location.pathname === '/ballfeedback' || location.pathname === '/ballfeedback/') return <BallFeedbackForm />;
   if (location.pathname === '/feedback') return <EventFeedbackPicker />;
   if (location.pathname.startsWith('/feedback/')) return <EventFeedbackForm />;
   // "Picture of the Comp" vote taken down 2026-09-08 — restore CompPhotoVote to bring it back.
@@ -156,6 +168,7 @@ export default function App() {
   if (location.pathname === '/poll' || location.pathname === '/poll/') return <ChristmasMusicPoll />;
   if (location.pathname === '/halloween') return <HalloweenMoviePoll />;
   if (location.pathname.startsWith('/ball/guest/')) return <BallGuestVerify />;
+  if (location.pathname === '/ball/checkin' || location.pathname.startsWith('/ball/checkin/')) return <BallCheckin />;
   if (location.pathname === '/ball/ops' || location.pathname.startsWith('/ball/ops/')) return <BallOpsPortal />;
   if (location.pathname === '/ball/dress' || location.pathname.startsWith('/ball/dress/')) return <BallDressPortal />;
   if (location.pathname === '/ball/attire' || location.pathname.startsWith('/ball/attire/')) return <BallAttirePortal />;

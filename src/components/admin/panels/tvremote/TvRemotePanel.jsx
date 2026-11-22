@@ -12,7 +12,7 @@ import StepRangeNotices from '../../../tv/control-center/StepRangeNotices.jsx';
 import StepRangeSlideshow from '../../../tv/control-center/StepRangeSlideshow.jsx';
 import EmergencyPushPanel from '../tvphotos/EmergencyPushPanel.jsx';
 import { supabase as SB } from '../../../../lib/supabaseClient.js';
-import { P, mono, oswald, inter, fs, sp, radius, ease } from '../../theme.js';
+import { P, mono, oswald, inter, fs, sp, radius, glass, ease } from '../../theme.js';
 import { Btn, PanelHeader } from '../../shared/ui.jsx';
 import { useTvRemoteOnboarding } from '../../../../hooks/useTvRemoteOnboarding.js';
 import TabIntro from './TabIntro.jsx';
@@ -369,19 +369,21 @@ export default function TvRemotePanel({ adminId, role } = {}) {
       {isBC ? (
         <div style={{
           display: 'flex', alignItems: 'center', gap: sp[3], marginBottom: sp[6],
-          padding: `${sp[3]}px ${sp[4]}px`, borderRadius: radius.md,
-          border: `1px solid ${P.hair}`, background: P.goldWash,
+          padding: `${sp[3]}px ${sp[4]}px`, borderRadius: radius.lg,
+          background: glass.cardFill, backdropFilter: glass.blur, WebkitBackdropFilter: glass.blur,
+          border: 'none', boxShadow: `${glass.insetHi}, 0 0 0 1px rgba(201,169,97,0.35)`,
         }}>
           {bcProfile?.photo_url ? (
             <img
               src={bcProfile.photo_url}
               alt=""
-              style={{ width: 40, height: 40, borderRadius: '50%', objectFit: 'cover', flexShrink: 0, border: `1px solid ${P.hairStrong}` }}
+              style={{ width: 40, height: 40, borderRadius: '50%', objectFit: 'cover', flexShrink: 0, boxShadow: '0 0 0 1px rgba(201,169,97,0.4)' }}
             />
           ) : (
             <div style={{
               width: 40, height: 40, borderRadius: '50%', flexShrink: 0,
-              background: P.navy, border: `1px solid ${P.hairStrong}`,
+              background: 'linear-gradient(180deg,#2A4C82,#142847)',
+              boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.15), 0 0 0 1px rgba(201,169,97,0.4)',
               display: 'flex', alignItems: 'center', justifyContent: 'center',
               fontFamily: oswald, fontSize: fs.md, color: P.gold,
             }}>
@@ -412,9 +414,11 @@ export default function TvRemotePanel({ adminId, role } = {}) {
                   key={s.slug}
                   onClick={() => selectScreen(s.slug)}
                   style={{
-                    flex: 1, textAlign: 'left', padding: `${sp[3]}px ${sp[4]}px`, borderRadius: radius.md,
-                    border: `1px solid ${on ? P.gold : P.hair}`,
-                    background: on ? P.goldWash : 'transparent',
+                    flex: 1, textAlign: 'left', padding: `${sp[3]}px ${sp[4]}px`, borderRadius: radius.lg,
+                    background: on ? glass.cardFillHover : glass.cardFill,
+                    backdropFilter: glass.blur, WebkitBackdropFilter: glass.blur,
+                    border: 'none',
+                    boxShadow: on ? `${glass.insetHi}, 0 0 0 1px rgba(201,169,97,0.35)` : `${glass.insetHi}, 0 0 0 1px rgba(255,255,255,0.05)`,
                     cursor: 'pointer', transition: `all 150ms ${ease}`,
                   }}
                 >
@@ -441,8 +445,9 @@ export default function TvRemotePanel({ adminId, role } = {}) {
           for real, not a re-derived approximation - it can never drift out
           of sync with the kiosk the way a hand-rolled summary could. */}
       <div style={{
-        marginBottom: sp[6], borderRadius: radius.md, border: `1px solid ${P.hairStrong}`,
-        background: 'rgba(39,174,96,0.05)', overflow: 'hidden',
+        marginBottom: sp[6], borderRadius: radius.lg, overflow: 'hidden',
+        background: glass.cardFill, backdropFilter: glass.blur, WebkitBackdropFilter: glass.blur,
+        border: 'none', boxShadow: `${glass.insetHi}, 0 0 0 1px rgba(39,174,96,0.3)`,
       }}>
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: sp[3], padding: sp[4], flexWrap: 'wrap' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: sp[3], minWidth: 0 }}>
@@ -468,8 +473,9 @@ export default function TvRemotePanel({ adminId, role } = {}) {
               href={SCREENS.find((s) => s.slug === selectedScreen)?.path ?? '/tv'}
               target="_blank" rel="noopener noreferrer"
               style={{
-                padding: `${sp[2]}px ${sp[4]}px`, borderRadius: radius.sm,
-                border: `1px solid ${P.hairStrong}`, color: P.mute, textDecoration: 'none',
+                padding: `${sp[2]}px ${sp[4]}px`, borderRadius: radius.pill,
+                background: glass.hoverWash, boxShadow: '0 0 0 1px rgba(255,255,255,0.08)',
+                color: P.mute, textDecoration: 'none',
                 fontFamily: mono, fontSize: fs.micro, letterSpacing: '0.1em',
               }}
             >
@@ -482,10 +488,11 @@ export default function TvRemotePanel({ adminId, role } = {}) {
         </div>
 
         {liveViewOpen && (
-          <div style={{ borderTop: `1px solid ${P.hair}`, padding: sp[4] }}>
+          <div style={{ borderTop: '1px solid rgba(255,255,255,0.08)', padding: sp[4] }}>
             <div style={{
-              width: '100%', maxWidth: 640, aspectRatio: '16 / 9', borderRadius: radius.sm,
-              border: `1px solid ${P.hair}`, overflow: 'hidden', background: P.ink, position: 'relative',
+              width: '100%', maxWidth: 640, aspectRatio: '16 / 9', borderRadius: radius.md,
+              boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.06), 0 0 0 1px rgba(255,255,255,0.08)',
+              overflow: 'hidden', background: P.ink, position: 'relative',
             }}>
               <div style={{ width: 1920, height: 1080, transform: 'scale(0.3333)', transformOrigin: 'top left', position: 'absolute' }}>
                 <iframe
@@ -512,8 +519,9 @@ export default function TvRemotePanel({ adminId, role } = {}) {
           works and why it's safe (browser-local, opt-in query param, real
           kiosks never load it). */}
       <div style={{
-        marginBottom: sp[6], borderRadius: radius.md, border: `1px solid ${P.hair}`,
-        background: 'rgba(201,169,97,0.03)', overflow: 'hidden',
+        marginBottom: sp[6], borderRadius: radius.lg, overflow: 'hidden',
+        background: glass.cardFill, backdropFilter: glass.blur, WebkitBackdropFilter: glass.blur,
+        border: 'none', boxShadow: `${glass.insetHi}, 0 0 0 1px rgba(255,255,255,0.05)`,
       }}>
         <button
           onClick={() => setPreviewOpen((v) => !v)}
@@ -537,8 +545,9 @@ export default function TvRemotePanel({ adminId, role } = {}) {
                 value={previewDatetime}
                 onChange={(e) => setPreviewDatetime(e.target.value)}
                 style={{
-                  padding: sp[3], borderRadius: radius.sm, border: `1px solid ${P.hair}`,
-                  background: P.deep, color: P.cream, fontFamily: inter, fontSize: 14,
+                  padding: sp[3], borderRadius: radius.sm, border: 'none',
+                  background: 'rgba(3,8,16,0.5)', boxShadow: 'inset 0 1px 2px rgba(0,0,0,0.5), 0 0 0 1px rgba(255,255,255,0.08)',
+                  color: P.cream, fontFamily: inter, fontSize: 14,
                 }}
               />
             </div>
@@ -568,10 +577,11 @@ export default function TvRemotePanel({ adminId, role } = {}) {
                   onClick={() => setActiveTab(t.id)}
                   style={{
                     width: '100%', textAlign: 'left', display: 'flex', alignItems: 'center', gap: sp[3],
-                    padding: `${sp[3]}px ${sp[3]}px`, borderRadius: radius.sm,
+                    padding: `${sp[3]}px ${sp[3]}px`, borderRadius: radius.md,
                     borderLeft: `3px solid ${on ? (t.danger ? P.red : P.gold) : 'transparent'}`,
                     borderTop: 'none', borderRight: 'none', borderBottom: 'none',
-                    background: on ? (t.danger ? 'rgba(192,57,43,0.14)' : P.goldWash) : 'transparent',
+                    background: on ? (t.danger ? 'rgba(192,57,43,0.16)' : glass.navActiveFill) : 'transparent',
+                    boxShadow: on ? (t.danger ? '0 0 0 1px rgba(192,57,43,0.4)' : glass.navActiveRing) : 'none',
                     color: on ? (t.danger ? P.red : P.bright) : (t.danger ? P.red : P.mute),
                     fontFamily: inter, fontSize: fs.base, fontWeight: on ? 700 : 400,
                     cursor: 'pointer', transition: `all 150ms ${ease}`,
@@ -609,9 +619,11 @@ export default function TvRemotePanel({ adminId, role } = {}) {
                 <button
                   onClick={() => patch({ bellScheduleMode: 'auto' })}
                   style={{
-                    flex: 1, padding: '16px 12px', borderRadius: radius.md,
-                    border: `1px solid ${draft.bellScheduleMode === 'auto' ? P.gold : P.hair}`,
-                    background: draft.bellScheduleMode === 'auto' ? P.goldWash : 'transparent',
+                    flex: 1, padding: '16px 12px', borderRadius: radius.lg,
+                    background: draft.bellScheduleMode === 'auto' ? glass.cardFillHover : glass.cardFill,
+                    backdropFilter: glass.blur, WebkitBackdropFilter: glass.blur,
+                    border: 'none',
+                    boxShadow: draft.bellScheduleMode === 'auto' ? `${glass.insetHi}, 0 0 0 1px rgba(201,169,97,0.35)` : `${glass.insetHi}, 0 0 0 1px rgba(255,255,255,0.05)`,
                     color: draft.bellScheduleMode === 'auto' ? P.bright : P.mute,
                     fontFamily: oswald, fontSize: 17, cursor: 'pointer',
                     transition: `all 150ms ${ease}`,
@@ -622,9 +634,11 @@ export default function TvRemotePanel({ adminId, role } = {}) {
                 <button
                   onClick={() => patch({ bellScheduleMode: 'manual' })}
                   style={{
-                    flex: 1, padding: '16px 12px', borderRadius: radius.md,
-                    border: `1px solid ${draft.bellScheduleMode === 'manual' ? P.gold : P.hair}`,
-                    background: draft.bellScheduleMode === 'manual' ? P.goldWash : 'transparent',
+                    flex: 1, padding: '16px 12px', borderRadius: radius.lg,
+                    background: draft.bellScheduleMode === 'manual' ? glass.cardFillHover : glass.cardFill,
+                    backdropFilter: glass.blur, WebkitBackdropFilter: glass.blur,
+                    border: 'none',
+                    boxShadow: draft.bellScheduleMode === 'manual' ? `${glass.insetHi}, 0 0 0 1px rgba(201,169,97,0.35)` : `${glass.insetHi}, 0 0 0 1px rgba(255,255,255,0.05)`,
                     color: draft.bellScheduleMode === 'manual' ? P.bright : P.mute,
                     fontFamily: oswald, fontSize: 17, cursor: 'pointer',
                     transition: `all 150ms ${ease}`,
@@ -640,9 +654,11 @@ export default function TvRemotePanel({ adminId, role } = {}) {
                       key={key}
                       onClick={() => patch({ bellSchedule: key })}
                       style={{
-                        flex: 1, padding: '16px 12px', borderRadius: radius.md,
-                        border: `1px solid ${draft.bellSchedule === key ? P.gold : P.hair}`,
-                        background: draft.bellSchedule === key ? P.goldWash : 'transparent',
+                        flex: 1, padding: '16px 12px', borderRadius: radius.lg,
+                        background: draft.bellSchedule === key ? glass.cardFillHover : glass.cardFill,
+                        backdropFilter: glass.blur, WebkitBackdropFilter: glass.blur,
+                        border: 'none',
+                        boxShadow: draft.bellSchedule === key ? `${glass.insetHi}, 0 0 0 1px rgba(201,169,97,0.35)` : `${glass.insetHi}, 0 0 0 1px rgba(255,255,255,0.05)`,
                         color: draft.bellSchedule === key ? P.bright : P.mute,
                         fontFamily: oswald, fontSize: 17, cursor: 'pointer',
                         transition: `all 150ms ${ease}`,
@@ -745,8 +761,9 @@ export default function TvRemotePanel({ adminId, role } = {}) {
 
       {saveError && (
         <div style={{
-          marginTop: sp[5], padding: sp[4], borderRadius: radius.md,
-          background: 'rgba(192,57,43,0.12)', border: `1px solid ${P.red}`,
+          marginTop: sp[5], padding: sp[4], borderRadius: radius.lg,
+          background: 'rgba(192,57,43,0.14)', backdropFilter: glass.blur, WebkitBackdropFilter: glass.blur,
+          border: 'none', boxShadow: `${glass.insetHi}, 0 0 0 1px rgba(192,57,43,0.45)`,
           fontFamily: inter, fontSize: 14, color: P.cream, lineHeight: 1.5,
         }}>
           <strong style={{ color: P.red }}>Didn't save.</strong> {saveError} Your choices are still here - press Save again.
@@ -761,8 +778,9 @@ export default function TvRemotePanel({ adminId, role } = {}) {
       {PER_ACTION_TABS.has(activeTab) && !isDirty ? (
         <div style={{
           display: 'flex', alignItems: 'center', gap: sp[3], marginTop: sp[6],
-          padding: `${sp[3]}px ${sp[4]}px`, borderRadius: radius.md,
-          border: `1px solid ${P.hair}`, background: P.goldWash,
+          padding: `${sp[3]}px ${sp[4]}px`, borderRadius: radius.lg,
+          background: glass.cardFill, backdropFilter: glass.blur, WebkitBackdropFilter: glass.blur,
+          border: 'none', boxShadow: `${glass.insetHi}, 0 0 0 1px rgba(201,169,97,0.3)`,
           fontFamily: inter, fontSize: fs.sm, color: P.mute, lineHeight: 1.5,
         }}>
           <span style={{ fontSize: 15 }} aria-hidden>✓</span>
@@ -778,8 +796,9 @@ export default function TvRemotePanel({ adminId, role } = {}) {
 
         {flash ? (
           <div style={{
-            display: 'flex', alignItems: 'center', gap: 8, padding: '10px 16px', borderRadius: radius.sm,
-            background: 'rgba(39,174,96,0.14)', border: `1px solid ${P.green}`,
+            display: 'flex', alignItems: 'center', gap: 8, padding: '10px 16px', borderRadius: radius.pill,
+            background: 'rgba(39,174,96,0.16)', border: 'none',
+            boxShadow: `${glass.insetHi}, 0 0 0 1px rgba(39,174,96,0.4)`,
             fontFamily: mono, fontSize: fs.tiny, color: P.green, letterSpacing: '0.05em',
           }}>
             <span>✓</span>{flash}

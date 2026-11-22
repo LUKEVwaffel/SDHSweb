@@ -69,7 +69,7 @@ export default function SignTab({ session, lastSealed, sheets, members, onSigned
         <div className="tb-stat"><b style={{ color: 'var(--mute)' }}>{absent}</b><span>Absent</span></div>
         <div className="tb-stat"><b style={{ color: drafts.length ? 'var(--amber)' : 'var(--mute)' }}>{drafts.length}</b><span>Drafts</span></div>
         <p className="tb-sub" style={{ flex: '1 1 240px', fontSize: 13.5 }}>
-          Each board member signs <b>once</b> for every sheet below. The CMMDR&rsquo;s signature seals the session — sheets can&rsquo;t be edited after that.
+          Each board member signs <b>once</b> for every sheet below. The CMMDR&rsquo;s signature seals the session — sheets freeze when the first signature is recorded.
         </p>
       </div>
 

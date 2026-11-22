@@ -1,0 +1,388 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import {makeDeck,makeSlide,moveSlide,readDeck,totalDuration,safePhotoUrl} from '../src/lib/ballPresentation.js';
+import {loadStudioPhotos} from '../src/lib/ballStudioPhotos.js';
+test('deck round trips with safe editable content and stable photo slots',()=>{
+  const deck=makeDeck();deck.slides.push(makeSlide('duo',{photos:[null,{id:'photo',url:'https://photos.example/1.jpg',caption:'<script>text only</script>'}]}));
+  const imported=readDeck(JSON.parse(JSON.stringify(deck)));
+  assert.notEqual(imported.id,deck.id);assert.equal(imported.slides.length,5);assert.equal(imported.slides[4].photos[0],null);assert.equal(imported.slides[4].photos[1].caption,'<script>text only</script>');assert.equal(totalDuration(imported),40);
+});
+test('deck import rejects invalid shape and constrains unsafe values',()=>{
+  assert.throws(()=>readDeck({version:1,slides:[]}));assert.throws(()=>readDeck({version:1,slides:[{layout:'script'}]}));
+  const d=makeDeck();Object.assign(d.slides[0],{duration:-100,titleSize:10000,transition:'evil',font:'url(bad)',photos:[{url:'javascript:alert(1)'}]});
+  const s=readDeck(d).slides[0];assert.equal(s.duration,1);assert.equal(s.titleSize,120);assert.equal(s.transition,'fade');assert.equal(s.font,'Oswald');assert.equal(s.photos[0],null);
+  assert.equal(safePhotoUrl('data:image/svg+xml;base64,PHN2Zz4='),'');assert.equal(safePhotoUrl('javascript:alert(1)'),'');
+});
+test('reordering preserves identity and never mutates the prior sequence',()=>{
+  const slides=makeDeck().slides;const ids=slides.map(s=>s.id);const moved=moveSlide(slides,0,3);assert.deepEqual(slides.map(s=>s.id),ids);assert.equal(moved[3].id,ids[0]);assert.deepEqual(new Set(moved.map(s=>s.id)),new Set(ids));assert.equal(moveSlide(slides,-1,2),slides);
+});
+test('library pages beyond API limits and isolates source failures',async()=>{
+  const calls=[];
+  const client={from(table){return {select(){return this;},order(){return this;},async range(start,end){calls.push({table,start,end});if(table==='tv_photos')return {error:{message:'offline'}};if(table==='events')return {data:[{id:'event',title:'Raider event'}]};if(table!=='photos')return {data:[]};return {data:Array.from({length:Math.max(0,Math.min(500,1203-start))},(_,i)=>({id:start+i,photo_url:`https://photos.example/${start+i}.jpg`,status:start+i===0?'hidden':'live',upload_status:'done',event_id:'event',team:'raiders'}))};}};}};
+  const result=await loadStudioPhotos(client);assert.equal(result.photos.length,1202);assert.equal(result.photos.at(-1).id,'photos:1202');assert.equal(result.photos[0].event,'Raider event');assert.equal(result.warnings.length,1);assert.ok(calls.some(c=>c.table==='photos'&&c.start===1000));
+});
+
+import {saveStudioCloud} from '../src/lib/ballStudioCloud.js';
+test('cloud saves use the known revision and refuse conflicting writes',async()=>{
+  const filters=[];let inserted=false;
+  const client={from(table){assert.equal(table,'admin_settings');return {update(){return this;},insert(){inserted=true;return this;},eq(key,value){filters.push([key,value]);return this;},async select(){return {data:[]};}};}};
+  const deck={...makeDeck(),cloudRevision:'2026-11-10T12:00:00.000Z'};
+  await assert.rejects(()=>saveStudioCloud(client,deck,'staff'),/changed on another device/);
+  assert.deepEqual(filters,[['key',`ball_presentation:${deck.id}`],['updated_at',deck.cloudRevision]]);assert.equal(inserted,false);
+});
+test('a new cloud deck is inserted and does not overwrite an existing record',async()=>{
+  let payload;
+  const client={from(){return {insert(row){payload=row;return this;},async select(){return {data:[{updated_at:payload.updated_at}]};}};}};
+  const deck=makeDeck();const revision=await saveStudioCloud(client,deck,'staff');assert.equal(payload.key,`ball_presentation:${deck.id}`);assert.equal(payload.updated_by,'staff');assert.equal(payload.value,deck);assert.equal(revision,payload.updated_at);
+});
+test('cloud permission and network failures remain visible',async()=>{
+  const client={from(){return {insert(){return this;},async select(){return {error:{message:'Permission denied'}};}};}};
+  await assert.rejects(()=>saveStudioCloud(client,makeDeck(),'staff'),/Permission denied.*browser copy/);
+});
+
+import {createPlayback,remainingTime,playbackAction,validateRemoteCommand} from '../src/lib/ballPlayback.js';
+import {createRemoteToken,validRemoteToken,readRemoteToken,remoteUrl} from '../src/lib/ballStudioRemote.js';
+import {auditPresentation} from '../src/lib/ballStudioAudit.js';
+test('blackout freezes remaining autoplay time and resumes from that point',()=>{
+ let s=createPlayback([8,10],0,false,0);s=playbackAction(s,{type:'play'},0);s=playbackAction(s,{type:'blackout'},3000);assert.equal(remainingTime(s,20000),5000);s=playbackAction(s,{type:'blackout'},20000);assert.equal(remainingTime(s,24000),1000);s=playbackAction(s,{type:'tick'},25000);assert.equal(s.index,1);assert.equal(s.remaining,10000);
+});
+test('pause, resume, manual moves, boundaries and looping behave consistently',()=>{
+ let s=playbackAction(createPlayback([8,8],0,false,0),{type:'play'},0);s=playbackAction(s,{type:'pause'},2000);assert.equal(remainingTime(s,9000),6000);s=playbackAction(s,{type:'play'},10000);s=playbackAction(s,{type:'tick'},16000);assert.equal(s.index,1);s=playbackAction(s,{type:'tick'},24000);assert.equal(s.playing,false);assert.equal(s.remaining,0);s=playbackAction(s,{type:'play'},25000);assert.equal(s.remaining,8000);s=playbackAction(s,{type:'loop'},25000);s=playbackAction(s,{type:'next'},26000);assert.equal(s.index,0);assert.equal(s.playing,true);s=playbackAction(s,{type:'previous'},26000);assert.equal(s.index,0);
+});
+test('autoplay ignores early ticks, bad jumps and unknown actions',()=>{
+ const s=createPlayback([8,8],0,false,0);assert.equal(playbackAction(s,{type:'tick'},10000),s);assert.equal(playbackAction(s,{type:'goto',index:NaN},0),s);assert.equal(playbackAction(s,{type:'delete-deck'},0),s);const play=playbackAction(s,{type:'play'},0);assert.equal(playbackAction(play,{type:'tick'},2000),play);
+});
+test('single-slide loops restart the entrance without changing slides',()=>{
+ let s=playbackAction(createPlayback([1],0,true,0),{type:'play'},0);s=playbackAction(s,{type:'tick'},1000);assert.equal(s.index,0);assert.equal(s.visit,1);assert.equal(s.playing,true);
+});
+test('remote links use 256-bit session secrets and reject short or malformed links',()=>{
+ const a=createRemoteToken(),b=createRemoteToken();assert.notEqual(a,b);assert.equal(validRemoteToken(a),true);assert.equal(a.length,64);assert.equal(readRemoteToken(remoteUrl('https://school.example',a)),a);assert.equal(readRemoteToken('ABC123'),'');assert.equal(validRemoteToken('x'.repeat(64)),false);
+});
+test('remote accepts only the playback control vocabulary and valid slide targets',()=>{
+ const base={id:crypto.randomUUID()};assert.deepEqual(validateRemoteCommand({...base,action:'next'},4),{type:'next'});assert.equal(validateRemoteCommand({...base,action:'goto',index:4},4),null);assert.equal(validateRemoteCommand({...base,action:'goto',index:1.5},4),null);assert.equal(validateRemoteCommand({...base,action:'delete'},4),null);assert.equal(validateRemoteCommand({id:'bad',action:'next'},4),null);
+});
+test('pre-show audit finds empty slots, unavailable photos and low resolution, checking each URL once',async()=>{
+ const deck=makeDeck();deck.slides=[makeSlide('duo',{photos:[{url:'https://photo.example/a.jpg'},null]}),makeSlide('photo',{photos:[{url:'https://photo.example/a.jpg'}]}),makeSlide('photo',{photos:[{url:'https://photo.example/b.jpg'}]})];const calls=[];
+ const result=await auditPresentation(deck,async url=>{calls.push(url);if(url.endsWith('b.jpg'))throw Error('offline');return {width:640,height:480};});assert.equal(calls.length,2);assert.equal(result.checkedPhotos,2);assert.equal(result.issues.filter(i=>i.kind==='missing').length,1);assert.equal(result.issues.filter(i=>i.kind==='resolution').length,2);assert.equal(result.issues.filter(i=>i.kind==='unavailable').length,1);
+});
+test('photo motion and matte framing survive editable deck export and import',()=>{
+ const deck=makeDeck();deck.slides=[makeSlide('photo',{motion:'zoom',frame:'matte'})];const s=readDeck(deck).slides[0];assert.equal(s.motion,'zoom');assert.equal(s.frame,'matte');
+});
+
+import {createCommandReceiver} from '../src/lib/ballPlayback.js';
+test('remote retries acknowledge the same command without advancing twice',()=>{
+ const actions=[];const receive=createCommandReceiver(()=>5,a=>actions.push(a));const message={id:crypto.randomUUID(),action:'next'};
+ assert.equal(receive(message),true);assert.equal(receive(message),true);assert.equal(receive(message),true);assert.equal(actions.length,1);assert.equal(receive({id:crypto.randomUUID(),action:'goto',index:99}),false);
+});
+
+test('a saved presentation can be reopened, edited and saved repeatedly under the same identity',async()=>{
+ const rows=new Map();
+ const client={from(){let action,payload,filters=[];return {insert(row){action='insert';payload=row;return this;},update(row){action='update';payload=row;return this;},eq(k,v){filters.push([k,v]);return this;},async select(){if(action==='insert'){if(rows.has(payload.key))return {error:{message:'duplicate'}};rows.set(payload.key,payload);return {data:[{updated_at:payload.updated_at}]};}const key=filters.find(([k])=>k==='key')[1];const old=rows.get(key);if(!old||!filters.every(([k,v])=>old[k]===v))return {data:[]};rows.set(key,{...old,...payload});return {data:[{updated_at:payload.updated_at}]};}};}};
+ let deck=makeDeck();const originalId=deck.id;
+ deck.cloudRevision=await saveStudioCloud(client,deck,'staff');
+ for(const title of ['Revised welcome','Final welcome']){
+  const row=rows.get(`ball_presentation:${originalId}`);
+  deck={...readDeck(JSON.parse(JSON.stringify(row.value))),id:originalId,cloudRevision:row.updated_at};
+  deck.slides[0].title=title;deck.cloudRevision=await saveStudioCloud(client,deck,'staff');
+ }
+ assert.equal(rows.size,1);assert.equal(rows.get(`ball_presentation:${originalId}`).value.slides[0].title,'Final welcome');
+});
+
+test('saving an existing presentation always advances its revision',async()=>{
+ const deck={...makeDeck(),cloudRevision:'2099-01-01T00:00:00.000Z'};
+ const client={from(){return {update(){return this;},eq(){return this;},async select(){return {data:[{}]};}};}};
+ const next=await saveStudioCloud(client,deck,'staff');assert.ok(Date.parse(next)>Date.parse(deck.cloudRevision));
+});
+
+test('photo event filters exclude events with only hidden, pending, video, or missing photos',async()=>{
+ const events=['visible','hidden','pending','video','empty'].map(id=>({id,title:id}));
+ const rows=[{event_id:'visible',status:'live',photo_url:'https://example.com/a.jpg'},{event_id:'hidden',status:'hidden',photo_url:'https://example.com/b.jpg'},{event_id:'pending',status:'live',upload_status:'uploading',photo_url:'https://example.com/c.jpg'},{event_id:'video',status:'live',photo_url:'https://example.com/d.mp4'}].map((p,id)=>({...p,id}));
+ const client={from(table){return {select(){return this;},order(){return this;},async range(){return {data:table==='events'?events:table==='photos'?rows:[]};}};}};
+ const result=await loadStudioPhotos(client);
+ assert.deepEqual(result.events.map(e=>e.id),['visible']);
+ assert.equal(result.photos[0].event,'visible');
+});
+
+test('photo event options follow event dates and same-day start times', async () => {
+ const events = [
+  { id: 'a', title: 'A afternoon event', date: '2026-10-15', event_time: '15:00:00' },
+  { id: 'b', title: 'B undated event', date: null },
+  { id: 'c', title: 'C next month', date: '2026-11-01' },
+  { id: 'd', title: 'D morning event', date: '2026-10-15', event_time: '08:00:00' },
+  { id: 'e', title: 'E earlier event', date: '2026-09-30' },
+ ];
+ const photos = events.map(({ id }, index) => ({
+  id, event_id: id, status: 'live', photo_url: `https://example.com/${id}.jpg`, created_at: `2026-11-0${index + 2}`,
+ }));
+ const client = { from(table) {
+  return { select() { return this; }, order() { return this; }, async range() {
+   return { data: table === 'events' ? events : table === 'photos' ? photos : [] };
+  } };
+ } };
+ const result = await loadStudioPhotos(client);
+ assert.deepEqual(result.events.map(event => event.id), ['e', 'd', 'a', 'c', 'b']);
+ assert.deepEqual(result.photos.map(photo => photo.id), ['photos:a', 'photos:b', 'photos:c', 'photos:d', 'photos:e']);
+});
+
+test('each photo retains its own position, zoom, fit, and editable event label through save and import',()=>{
+ const deck=makeDeck();deck.slides=[makeSlide('duo',{focalX:30,focalY:70,photos:[{url:'https://example.com/a.jpg',event:'Community service',focalX:12,focalY:82,zoom:1.8,fit:'contain',eventLabel:'Service day · October'},{url:'https://example.com/b.jpg',event:'Raider competition'}]})];
+ const photos=readDeck(JSON.parse(JSON.stringify(deck))).slides[0].photos;
+ assert.equal(photos[0].eventLabel,'Service day · October');assert.equal(photos[0].focalX,12);assert.equal(photos[0].focalY,82);assert.equal(photos[0].zoom,1.8);assert.equal(photos[0].fit,'contain');
+ assert.equal(photos[1].eventLabel,'Raider competition');assert.equal(photos[1].focalX,30);assert.equal(photos[1].focalY,70);
+ deck.slides[0].photos[0].eventLabel='';deck.slides[0].photos[0].zoom=100;
+ const restored=readDeck(deck).slides[0].photos[0];assert.equal(restored.eventLabel,'');assert.equal(restored.zoom,3);
+});
+
+import {createStudioSaveQueue} from '../src/lib/ballStudioCloud.js';
+test('autosave serializes edits during an in-flight save using the latest revision',async()=>{
+ let deck={id:'deck',updatedAt:'v1'};const writes=[];let release;
+ const queue=createStudioSaveQueue({getDeck:()=>deck,save:async snapshot=>{writes.push({...snapshot});if(writes.length===1)await new Promise(resolve=>{release=resolve;});return `r${writes.length}`;},saved:(id,version,revision)=>{deck={...deck,cloudSavedVersion:version,cloudRevision:revision};}});
+ const first=queue.request('deck');await Promise.resolve();await Promise.resolve();
+ deck={...deck,updatedAt:'v2'};const second=queue.request('deck');release();await Promise.all([first,second]);
+ assert.equal(writes.length,2);assert.equal(writes[1].updatedAt,'v2');assert.equal(writes[1].cloudRevision,'r1');assert.equal(deck.cloudSavedVersion,'v2');
+ await queue.request('deck');assert.equal(writes.length,2);
+});
+test('autosave can retry a failed save without marking edits saved or blocking the queue',async()=>{
+ let deck={id:'deck',updatedAt:'v1'};let attempts=0;
+ const queue=createStudioSaveQueue({getDeck:()=>deck,save:async()=>{if(++attempts===1)throw new Error('offline');return 'r1';},saved:(id,version,revision)=>{deck={...deck,cloudSavedVersion:version,cloudRevision:revision};}});
+ await assert.rejects(queue.request('deck'),/offline/);assert.equal(deck.cloudSavedVersion,undefined);
+ await queue.request('deck');assert.equal(deck.cloudSavedVersion,'v1');assert.equal(attempts,2);
+});
+
+import {nudgePhoto} from '../src/lib/ballPhotoPosition.js';
+test('preview arrows move cropped and contained photos in the requested screen direction',()=>{
+ const bounds={width:160,height:90,naturalWidth:200,naturalHeight:100};const slide={fit:'cover',focalX:50,focalY:50};
+ assert.ok(nudgePhoto({},slide,'ArrowLeft',bounds).focalX>50);
+ assert.ok(nudgePhoto({},slide,'ArrowRight',bounds).focalX<50);
+ assert.ok(nudgePhoto({fit:'contain'},slide,'ArrowDown',bounds).focalY>50);
+ assert.deepEqual(nudgePhoto({},slide,'ArrowUp',bounds),{});
+ assert.ok(nudgePhoto({zoom:1.2},slide,'ArrowUp',bounds).focalY>50);
+ assert.ok(nudgePhoto({},slide,'ArrowLeft',bounds,true).focalX>nudgePhoto({},slide,'ArrowLeft',bounds).focalX);
+ assert.equal(nudgePhoto({focalX:100},slide,'ArrowLeft',bounds).focalX,100);
+});
+
+import {reconcilePlaybackSlides} from '../src/lib/ballPlayback.js';
+test('deleting the previewed slide selects its successor or the last remaining slide and refreshes timing',()=>{
+ const slides=[{id:'a',duration:4},{id:'b',duration:8},{id:'c',duration:12}];
+ const state={...createPlayback([4,8,12],1),slideIds:['a','b','c'],playing:true};
+ const middle=reconcilePlaybackSlides(state,[slides[0],slides[2]]);
+ assert.equal(middle.index,1);assert.equal(middle.slideIds[middle.index],'c');assert.equal(middle.remaining,12000);assert.equal(middle.playing,false);assert.deepEqual(middle.durations,[4000,12000]);
+ const last=reconcilePlaybackSlides({...state,index:2},slides.slice(0,2));assert.equal(last.index,1);assert.equal(last.slideIds[last.index],'b');
+ const retained=reconcilePlaybackSlides({...state,index:2},slides.slice(1));assert.equal(retained.index,1);assert.equal(retained.slideIds[retained.index],'c');
+ assert.equal(reconcilePlaybackSlides(state,slides),state);
+});
+
+import { ballCountdown, ballShowCues, ballShowAction, nextPlaybackWake, resolveBallShow, startBallShow } from '../src/lib/ballPlayback.js';
+
+test('preshow loops its photos and keeps the ceremony clock running while autoplay is paused', () => {
+ const show = { startAt: 10000, podium: 2, welcome: 3, welcomeAt: 130000 };
+ let state = startBallShow(createPlayback([2, 2, 120, 8, 8]), show, 0);
+ assert.equal(state.showPhase, 'preshow');
+ assert.equal(state.index, 0);
+ state = ballShowAction(state, { type: 'tick' }, show, 2000);
+ assert.equal(state.index, 1);
+ state = ballShowAction(state, { type: 'tick' }, show, 4000);
+ assert.equal(state.index, 0);
+ state = ballShowAction(state, { type: 'pause' }, show, 9000);
+ assert.equal(nextPlaybackWake(state, show, 9000), 1000);
+ state = ballShowAction(state, { type: 'tick' }, show, 10000);
+ assert.equal(state.showPhase, 'podium');
+ assert.equal(state.index, 2);
+ assert.equal(nextPlaybackWake(state, show, 10000), 120000);
+ assert.equal(ballShowAction(state, { type: 'tick' }, show, 129999).index, 2);
+ state = ballShowAction(state, { type: 'tick' }, show, 130000);
+ assert.equal(state.index, 3);
+ assert.equal(state.showPhase, null);
+ assert.equal(state.playing, false);
+ assert.equal(ballShowAction(state, { type: 'play' }, show, 131000), state);
+ assert.equal(ballShowAction(state, { type: 'next' }, show, 132000).index, 4);
+});
+
+test('jumping to a phone cue cancels automation until preshow is explicitly restarted', () => {
+ const show = { startAt: 10000, podium: 2, welcome: 3, welcomeAt: 130000 };
+ let state = startBallShow(createPlayback([2, 2, 120, 8, 8]), show, 0);
+ state = ballShowAction(state, { type: 'goto', index: 4 }, show, 5000);
+ assert.equal(nextPlaybackWake(state, show, 5000), Infinity);
+ assert.equal(ballShowAction(state, { type: 'tick' }, show, 130000).index, 4);
+ state = ballShowAction(state, { type: 'start-show' }, show, 130000);
+ assert.equal(state.index, 3);
+ assert.equal(ballCountdown(3660100), '1:01:01');
+});
+
+test('deck round trips retain the podium and welcome links and feedback QR metadata', () => {
+ const deck = makeDeck();
+ deck.slides[1].duration = 120;
+ deck.slides[3] = makeSlide('split', { photos: [{ kind: 'qr', url: 'data:image/png;base64,AAA=' }] });
+ deck.show = { startAt: '2026-11-21T22:30:00.000Z', podiumId: deck.slides[1].id, welcomeId: deck.slides[2].id };
+ const copy = readDeck(JSON.parse(JSON.stringify(deck)));
+ assert.notEqual(copy.slides[1].id, deck.slides[1].id);
+ assert.deepEqual(resolveBallShow(copy), { startAt: Date.parse(deck.show.startAt), podium: 1, welcome: 2, welcomeAt: Date.parse(deck.show.startAt) + 120000 });
+ assert.equal(copy.slides[3].photos[0].kind, 'qr');
+});
+
+test('a scheduled preshow holds the cover until 5 and starts a 30-minute countdown', () => {
+ const preshowAt = Date.parse('2026-11-21T22:00:00Z');
+ const startAt = preshowAt + 30 * 60000;
+ const show = { preshowAt, startAt, podium: 2, welcome: 3, welcomeAt: startAt + 120000 };
+ const playback = createPlayback([10, 60, 120, 8]);
+ let state = startBallShow(playback, show, preshowAt - 60000);
+ assert.equal(state.showPhase, 'waiting');
+ assert.equal(state.index, 0);
+ assert.equal(state.playing, false);
+ assert.equal(nextPlaybackWake(state, show, preshowAt - 60000), 60000);
+ assert.equal(ballShowAction(state, { type: 'next' }, show, preshowAt - 60000), state);
+ state = ballShowAction(state, { type: 'tick' }, show, preshowAt);
+ assert.equal(ballCountdown(show.startAt - preshowAt), '30:00');
+ assert.equal(state.showPhase, 'preshow');
+ assert.equal(state.index, 0);
+ const joinedLate = startBallShow(playback, show, preshowAt + 12000);
+ assert.equal(joinedLate.index, 1);
+ assert.equal(joinedLate.remaining, 58000);
+ state = ballShowAction(state, { type: 'tick' }, show, startAt);
+ assert.equal(state.index, 2);
+ state = ballShowAction(state, { type: 'tick' }, show, show.welcomeAt);
+ assert.equal(state.index, 3);
+ assert.equal(state.playing, false);
+});
+
+test('featured preshow cards retain their manual cue links when a deck is reopened', () => {
+ const deck = makeDeck();
+ deck.show = {
+  startAt: '2026-11-21T22:30:00.000Z', preshowAt: '2026-11-21T22:00:00.000Z',
+  featuredIds: [deck.slides[1].id], podiumId: deck.slides[2].id, welcomeId: deck.slides[3].id,
+ };
+ const imported = readDeck(deck);
+ assert.deepEqual(imported.show.featuredIds, [imported.slides[1].id]);
+ const show = resolveBallShow(imported);
+ assert.deepEqual(ballShowCues(show, imported.slides.length), [3, 1]);
+ assert.equal(show.preshowAt, Date.parse(deck.show.preshowAt));
+});
+
+test('an explicit intro rotation skips photo slides and keeps later ceremony cues', () => {
+ const deck = makeDeck();
+ deck.slides = [makeSlide('title'), makeSlide('photo'), makeSlide('title'), makeSlide('title', {duration:120}), makeSlide('title'), makeSlide('title')];
+ const [cover,,thanks,podium,welcome,dinner] = deck.slides;
+ const startAt = Date.parse('2026-11-21T22:30:00Z');
+ const preshowAt = startAt - 1800000;
+ deck.show = {
+  preshowAt: new Date(preshowAt).toISOString(), startAt: new Date(startAt).toISOString(),
+  preshowIds: [cover.id, thanks.id], podiumId: podium.id, welcomeId: welcome.id, featuredIds: [thanks.id],
+ };
+ const imported = readDeck(deck);
+ assert.deepEqual(imported.show.preshowIds, [imported.slides[0].id, imported.slides[2].id]);
+ const show = resolveBallShow(imported);
+ const initial = createPlayback([30, 1, 30, 120, 8, 8], 0);
+ const opening = startBallShow(initial, show, preshowAt);
+ const late = startBallShow(initial, show, preshowAt + 45000);
+ assert.equal(late.index, 2);
+ assert.equal(late.remaining, 15000);
+ const thanksCard = ballShowAction(opening, { type: 'tick' }, show, preshowAt + 30000);
+ assert.equal(thanksCard.index, 2);
+ assert.equal(ballShowAction(thanksCard, { type: 'next' }, show, preshowAt + 40000).index, 0);
+ assert.equal(ballShowAction(opening, { type: 'previous' }, show, preshowAt + 5000).index, 2);
+ const podiumCard = ballShowAction(thanksCard, { type: 'tick' }, show, startAt);
+ assert.equal(podiumCard.index, 3);
+ assert.equal(ballShowAction(podiumCard, { type: 'tick' }, show, startAt + 120000).index, 4);
+ assert.deepEqual(ballShowCues(show, imported.slides.length), [4, 5, 2]);
+ assert.equal(ballShowAction(podiumCard, {type:'goto',index:5}, show, startAt).index, deck.slides.indexOf(dinner));
+});
+
+test('dinner loops only shuffled photos and stops at the Dinner card or the selected manual cue', () => {
+ const deck = makeDeck();
+ deck.slides = [
+  makeSlide('title'), makeSlide('photo', {photos:[{url:'/photo-a.png'}]}), makeSlide('title'),
+  makeSlide('photo', {photos:[{url:'/photo-b.png'}]}), makeSlide('title'), makeSlide('title'),
+  makeSlide('title', {title:'Dinner'}), makeSlide('title', {title:'Grog Base'}),
+ ];
+ const [cover,,,,podium,welcome,dinner,grog] = deck.slides;
+ deck.show = {
+  startAt:'2026-11-21T22:30:00.000Z', podiumId:podium.id, welcomeId:welcome.id,
+  preshowIds:[cover.id], dinnerId:dinner.id, grogIds:[grog.id],
+ };
+ const imported=readDeck(deck);
+ const show=resolveBallShow(imported);
+ assert.deepEqual(show.dinnerPhotos,[1,3]);
+ assert.deepEqual(show.grog,[7]);
+ assert.ok(ballShowCues(show, imported.slides.length).includes(7));
+ const state=createPlayback(imported.slides.map(s=>s.duration),6);
+ const start=ballShowAction(state,{type:'start-dinner'},show,5000000000000);
+ assert.equal(start.index,1);
+ assert.equal(start.showPhase,'dinner');
+ assert.equal(nextPlaybackWake(start,show,5000000000000),8000);
+ const second=ballShowAction(start,{type:'tick'},show,5000000008000);
+ assert.equal(second.index,3);
+ const first=ballShowAction(second,{type:'next'},show,5000000009000);
+ assert.equal(first.index,1);
+ const end=ballShowAction(first,{type:'end-dinner'},show,5000000009000);
+ assert.equal(end.index,6);
+ assert.equal(end.playing,false);
+ const cue=ballShowAction(first,{type:'goto',index:7},show,5000000009000);
+ assert.equal(cue.index,7);
+ assert.equal(cue.showPhase,null);
+});
+
+test('scheduled TV holds standby and advances automatically even when a remote sends a cue early', () => {
+ const preshowAt = Date.parse('2026-11-21T22:00:00Z');
+ const startAt = preshowAt + 30 * 60000;
+ const show = { preshowAt, startAt, podium: 2, welcome: 3, welcomeAt: startAt + 120000, dinner: 4, dinnerPhotos: [1], preshow:[0] };
+ const waiting = startBallShow(createPlayback([30, 8, 120, 8, 8]),show,preshowAt-10000);
+ const send = (state,type,at,index) => ballShowAction(state,{type,index},show,at,true);
+ assert.equal(waiting.showPhase,'waiting');
+ assert.equal(send(waiting,'goto',preshowAt-1000,3),waiting);
+ const preshow = send(waiting,'tick',preshowAt);
+ assert.equal(preshow.showPhase,'preshow');
+ assert.equal(ballCountdown(show.startAt - preshowAt),'30:00');
+ assert.equal(send(preshow,'start-dinner',preshowAt+1000),preshow);
+ assert.equal(send(preshow,'pause',preshowAt+1000),preshow);
+ const podium = send(preshow,'tick',startAt);
+ assert.equal(podium.index,2);
+ const welcome = send(podium,'tick',startAt+120000);
+ assert.equal(welcome.index,3);
+ assert.equal(send(welcome,'start-dinner',startAt+1800000).showPhase,'dinner');
+});
+
+test('saved decks retain the toast responses and senior recognition as manual cues', () => {
+ const deck=makeDeck();
+ const toast=makeSlide('title',{title:'Please remain silent'});
+ const senior=makeSlide('title',{title:'Graduate'});
+ deck.slides.push(toast,senior);
+ deck.show={
+  startAt:'2026-11-21T22:30:00.000Z',
+  podiumId:deck.slides[1].id,welcomeId:deck.slides[2].id,
+  toastIds:[toast.id],seniorIds:[senior.id],
+ };
+ const copy=readDeck(deck);
+ const show=resolveBallShow(copy);
+ assert.deepEqual(show.toasts,[4]);
+ assert.deepEqual(show.seniors,[5]);
+ assert.ok(ballShowCues(show,copy.slides.length).includes(4));
+ assert.ok(ballShowCues(show,copy.slides.length).includes(5));
+});
+
+test('scheduled preshow never includes the photo reel, even when opening an older draft', () => {
+ const deck=makeDeck();
+ const cover=makeSlide('title');
+ const photo=makeSlide('photo',{photos:[{url:'/dinner.png'}]});
+ const feedback=makeSlide('split',{photos:[{kind:'qr',url:'data:image/png;base64,AAA='}]});
+ const podium=makeSlide('title'), welcome=makeSlide('title');
+ deck.slides=[photo,cover,photo,feedback,podium,welcome];
+ deck.show={
+  startAt:'2026-11-21T22:30:00.000Z',preshowAt:'2026-11-21T22:00:00.000Z',
+  featuredIds:[feedback.id,photo.id],podiumId:podium.id,welcomeId:welcome.id,
+ };
+ let show=resolveBallShow(deck);
+ assert.deepEqual(show.preshow,[1,3]);
+ assert.equal(startBallShow(createPlayback(deck.slides.map(s=>s.duration)),show,show.preshowAt-1000).index,1);
+ deck.show.preshowIds=[photo.id,cover.id,feedback.id];
+ show=resolveBallShow(readDeck(deck));
+ assert.deepEqual(show.preshow,[1,3]);
+});
+
+test('opening a saved deck keeps slide IDs and photo captions across edits', () => {
+ const deck=makeDeck();
+ deck.slides[0]=makeSlide('photo',{photos:[{url:'/photo.png',eventLabel:'County Championship'}]});
+ const copy=readDeck(deck,{preserveSlideIds:true});
+ assert.deepEqual(copy.slides.map(slide=>slide.id),deck.slides.map(slide=>slide.id));
+ assert.equal(copy.slides[0].photos[0].eventLabel,'County Championship');
+ assert.notEqual(readDeck(deck).slides[0].id,deck.slides[0].id);
+});

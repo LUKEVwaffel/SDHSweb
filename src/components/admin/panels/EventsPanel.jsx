@@ -1,6 +1,6 @@
 import { useState, useEffect, useMemo } from 'react';
 import { supabase as SB } from '../../../lib/supabaseClient';
-import { P, mono, inter, fs, sp } from '../theme';
+import { P, mono, inter, fs, sp, radius, glass, ease } from '../theme';
 import { Btn, Card, Label, Input, Select, Modal, PanelHeader, EmptyState } from '../shared/ui';
 import { EVENT_CATEGORIES, EVENT_TEAMS, UNIFORM_TYPES, DEFAULT_POC, WEEKDAY_SHORT, categoryColor, teamLabel, MONTHS, MON3, toCalendarItem, groupByMonth } from '../../../lib/calendar';
 import { openEventsCalendarPdf } from '../../../lib/eventsPdfPrint';
@@ -430,23 +430,35 @@ export default function EventsPanel({ adminId, allowedTeams }) {
           <div style={{ display: 'flex', flexDirection: 'column', gap: sp[4] }}>
             {groups.map((g) => (
               <div key={g.key}>
-                <div style={{ display: 'flex', alignItems: 'baseline', gap: 10, marginBottom: sp[2], paddingBottom: 5, borderBottom: `1px solid ${P.hair}` }}>
+                <div style={{ display: 'flex', alignItems: 'baseline', gap: 10, marginBottom: sp[2], paddingBottom: 5, borderBottom: '1px solid rgba(255,255,255,0.08)' }}>
                   <span style={{ fontFamily: mono, fontSize: fs.tiny, color: P.gold, letterSpacing: '0.18em' }}>{MONTHS[g.m]} {g.y}</span>
                   <span style={{ fontFamily: mono, fontSize: fs.micro, color: P.mute }}>{g.items.length}</span>
                 </div>
-                <div style={{ display: 'flex', flexDirection: 'column', gap: sp[1] }}>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: sp[2] }}>
                   {g.items.map((it) => {
                     const r = rowById[it.id];
                     if (!r) return null;
                     const posted = r.status === 'posted';
+                    const active = editing === r.id;
                     return (
-                      <Card key={r.id} style={{ padding: `${sp[2]}px ${sp[3]}px`, border: `1px solid ${editing === r.id ? P.gold : P.hair}`, cursor: 'pointer' }} onClick={() => startEdit(r)}>
+                      <Card
+                        key={r.id}
+                        style={{
+                          padding: `${sp[2]}px ${sp[3]}px`, cursor: 'pointer',
+                          background: active ? glass.cardFillHover : glass.cardFill,
+                          backdropFilter: glass.blur, WebkitBackdropFilter: glass.blur,
+                          border: 'none', borderRadius: radius.lg,
+                          boxShadow: active ? `${glass.insetHi}, 0 0 0 1px rgba(201,169,97,0.35)` : `${glass.insetHi}, 0 0 0 1px rgba(255,255,255,0.05)`,
+                          transition: `all 0.15s ${ease}`,
+                        }}
+                        onClick={() => startEdit(r)}
+                      >
                         <div style={{ display: 'flex', alignItems: 'center', gap: sp[3] }}>
                           <div style={{ minWidth: 34, textAlign: 'center' }}>
                             <div style={{ fontFamily: mono, fontSize: fs.md, color: P.cream, lineHeight: 1 }}>{it.d2 ? `${it.d}–${it.d2}` : String(it.d).padStart(2, '0')}</div>
                             <div style={{ fontFamily: mono, fontSize: 8, color: P.mute }}>{MON3[it.m]}</div>
                           </div>
-                          <span style={{ width: 7, height: 7, background: categoryColor(it.cat), flexShrink: 0 }} />
+                          <span style={{ width: 7, height: 7, borderRadius: radius.pill, background: categoryColor(it.cat), flexShrink: 0 }} />
                           <div style={{ flex: 1, minWidth: 0 }}>
                             <div style={{ fontFamily: inter, fontSize: fs.sm, color: P.cream, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{r.title}</div>
                             <div style={{ fontFamily: mono, fontSize: 8, color: P.mute, marginTop: 2 }}>
@@ -908,7 +920,12 @@ export default function EventsPanel({ adminId, allowedTeams }) {
               {positions.map((p, idx) => {
                 const patch = (fields) => setPositions((ps) => ps.map((row, i) => (i === idx ? { ...row, ...fields } : row)));
                 return (
-                  <div key={idx} style={{ border: `1px solid ${P.hair}`, borderRadius: 5, padding: sp[3] }}>
+                  <div key={idx} style={{
+                    background: glass.cardFill, backdropFilter: glass.blur, WebkitBackdropFilter: glass.blur,
+                    border: 'none', borderRadius: radius.lg,
+                    boxShadow: `${glass.insetHi}, 0 0 0 1px rgba(255,255,255,0.05)`,
+                    padding: sp[3],
+                  }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: sp[2], marginBottom: sp[2] }}>
                       <div style={{ flex: 1 }}>
                         <Label style={{ marginBottom: 4 }}>
@@ -974,7 +991,12 @@ export default function EventsPanel({ adminId, allowedTeams }) {
               {honorPositions.map((p, idx) => {
                 const patch = (fields) => setHonorPositions((ps) => ps.map((row, i) => (i === idx ? { ...row, ...fields } : row)));
                 return (
-                  <div key={idx} style={{ border: `1px solid ${P.hair}`, borderRadius: 5, padding: sp[3] }}>
+                  <div key={idx} style={{
+                    background: glass.cardFill, backdropFilter: glass.blur, WebkitBackdropFilter: glass.blur,
+                    border: 'none', borderRadius: radius.lg,
+                    boxShadow: `${glass.insetHi}, 0 0 0 1px rgba(255,255,255,0.05)`,
+                    padding: sp[3],
+                  }}>
                     <div style={{ marginBottom: sp[2] }}>
                       <Label style={{ marginBottom: 4 }}>
                         {p.position_label}<span style={{ color: P.red }}> *</span>
@@ -1007,7 +1029,9 @@ function CadetPicker({ value, name, roster, onChange }) {
     return (
       <div style={{
         display: 'inline-flex', alignItems: 'center', gap: 6, fontFamily: inter, fontSize: fs.sm, color: P.cream,
-        background: P.deep, border: `1px solid ${P.hair}`, borderRadius: 5, padding: '8px 10px',
+        background: glass.cardFill, backdropFilter: glass.blur, WebkitBackdropFilter: glass.blur,
+        border: 'none', borderRadius: radius.sm, boxShadow: `${glass.insetHi}, 0 0 0 1px rgba(255,255,255,0.08)`,
+        padding: '8px 10px',
       }}>
         {name || 'Assigned cadet'}
         <button onClick={() => onChange(null, '')} aria-label="Change" style={{
@@ -1033,8 +1057,9 @@ function CadetPicker({ value, name, roster, onChange }) {
       {open && matches.length > 0 && (
         <div style={{
           position: 'absolute', top: '100%', left: 0, right: 0, zIndex: 10, marginTop: 4,
-          background: P.navy, border: `1px solid ${P.hairStrong}`, borderRadius: 5, boxShadow: '0 8px 20px rgba(0,0,0,0.4)',
-          maxHeight: 220, overflowY: 'auto',
+          background: glass.panelFill, backdropFilter: glass.blur, WebkitBackdropFilter: glass.blur,
+          border: glass.border, borderRadius: radius.lg, boxShadow: `${glass.insetHi}, ${glass.outerGlow}`,
+          maxHeight: 220, overflowY: 'auto', overflowX: 'hidden',
         }}>
           {matches.map((c) => (
             <div
@@ -1042,7 +1067,7 @@ function CadetPicker({ value, name, roster, onChange }) {
               onMouseDown={() => { onChange(c.id, c.name); setQuery(''); setOpen(false); }}
               style={{
                 padding: '8px 10px', cursor: 'pointer', fontFamily: inter, fontSize: fs.sm, color: P.cream,
-                borderBottom: `1px solid ${P.hair}`,
+                borderBottom: '1px solid rgba(255,255,255,0.08)',
               }}
             >
               {c.name} <span style={{ fontFamily: mono, fontSize: fs.micro, color: P.faint }}>· {c.company}</span>
@@ -1056,5 +1081,5 @@ function CadetPicker({ value, name, roster, onChange }) {
 
 const selectStyle = {
   width: '100%', background: P.deep, border: `1px solid ${P.hair}`, color: P.cream,
-  fontFamily: inter, fontSize: fs.sm, padding: '10px 12px', outline: 'none', cursor: 'pointer', borderRadius: 5, boxSizing: 'border-box',
+  fontFamily: inter, fontSize: fs.sm, padding: '10px 12px', outline: 'none', cursor: 'pointer', borderRadius: radius.sm, boxSizing: 'border-box',
 };

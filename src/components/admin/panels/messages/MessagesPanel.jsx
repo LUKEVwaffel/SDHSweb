@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { supabase as SB } from '../../../../lib/supabaseClient';
-import { P, sp } from '../../theme';
+import { P, mono, fs, sp, radius, glass } from '../../theme';
 import { PanelHeader, Btn, EmptyState } from '../../shared/ui';
 import useIsMobile from '../../../../hooks/useIsMobile';
 import { PRESENCE_HEARTBEAT_MS } from '../../../../hooks/useAdminPresence';
@@ -142,9 +142,16 @@ export default function MessagesPanel({ adminId }) {
         sub="Internal DISPATCH chat — S-6 / S-5 only"
         action={<Btn onClick={() => setShowNew(true)} variant="gold" size="sm">NEW MESSAGE</Btn>}
       />
-      {err && <div style={{ color: P.red, fontFamily: 'monospace', fontSize: 12, marginBottom: sp[3] }}>{err}</div>}
+      {err && (
+        <div style={{
+          fontFamily: mono, fontSize: fs.tiny, color: P.red, marginBottom: sp[3],
+          padding: '8px 12px', borderRadius: radius.sm, background: 'rgba(192,57,43,0.12)',
+        }}>{err}</div>
+      )}
 
       <div style={{
+        borderRadius: radius.xl, background: glass.hoverWash,
+        border: glass.border, boxShadow: glass.insetHi, padding: sp[3],
         display: 'grid',
         gridTemplateColumns: isMobile ? '1fr' : '320px 1fr',
         gap: sp[4],

@@ -1,390 +1,119 @@
-import { useState, useEffect, useCallback } from 'react';
-import { useNavigate, useSearchParams } from 'react-router-dom';
+import { useState, useEffect, useRef, useCallback, useMemo } from 'react';
+import { createPortal } from 'react-dom';
+import { Link, useSearchParams } from 'react-router-dom';
 import { useCompGallery } from '../../hooks/useCompGallery';
-import { COMP_EVENT_ID, COMP_ARCHIVE } from '../../lib/raiderCompGallery';
+import './compGallery.css';
+import { compEventMeta } from '../../lib/raiderCompGallery';
 
-// Public "View Competition" gallery - /raiders/comp. Retrospective, per-event
-// cut of whichever comp is selected: Luke's photos only, grouped by the 9
-// canonical events. ?comp=<id> switches between comps (COMP_ARCHIVE - every
-// comp the battalion has run), ?event=<slug> deep-links a single event within
-// it. Both are shareable and survive the back button.
-// Palette mirrors Raiders.jsx so it reads as the same specialty-team surface.
+const teamName = (team) => ({ male: 'Male team', coed: 'Coed team', both: 'Both teams' }[team] || 'Team not tagged');
+const eventName = (photo) => compEventMeta(photo.raider_sub_events)?.name || photo.raider_sub_events?.name || 'General photos';
+const eventKey = (photo) => compEventMeta(photo.raider_sub_events)?.key || eventName(photo).toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
+const dateLabel = (date) => date ? new Date(`${date}T12:00:00`).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) : '';
 
-const P = {
-  ink: '#06101F', navy: '#142847', deep: '#0A1628',
-  gold: '#C9A961', bright: '#E8C77A', cream: '#F4ECD8',
-  mute: 'rgba(244,236,216,0.55)', hair: 'rgba(201,169,97,0.22)',
-  hairStrong: 'rgba(201,169,97,0.5)', green: '#7EC87E',
-};
-const mono = "'JetBrains Mono', monospace";
-const oswald = 'Oswald, sans-serif';
-
-// Copy for the not-yet-posted slots. Photos have a Wednesday target; run
-// footage is looser - Luke's slammed and it drops later.
-const PHOTO_SOON = "Still being edited. Luke's a bit backed up. Up by Wednesday.";
-const VIDEO_SOON = "Run footage for this event comes out later. Luke's very busy right now.";
-
-function Brackets({ size = 14, opacity = 0.4 }) {
-  const s = `1px solid rgba(201,169,97,${opacity})`;
-  return (
-    <>
-      {[
-        { top: 0, left: 0, borderTop: s, borderLeft: s },
-        { top: 0, right: 0, borderTop: s, borderRight: s },
-        { bottom: 0, left: 0, borderBottom: s, borderLeft: s },
-        { bottom: 0, right: 0, borderBottom: s, borderRight: s },
-      ].map((st, i) => (
-        <div key={i} style={{ position: 'absolute', width: size, height: size, ...st, pointerEvents: 'none' }} />
-      ))}
-    </>
-  );
-}
-
-// ── Lightbox ────────────────────────────────────────────────────────────────
-function Lightbox({ photos, index, onClose, onIndex }) {
-  const has = index != null && index >= 0 && index < photos.length;
-
-  const step = useCallback((d) => {
-    onIndex((cur) => {
-      const next = cur + d;
-      if (next < 0 || next >= photos.length) return cur;
-      return next;
-    });
-  }, [photos.length, onIndex]);
-
+function Viewer({ photos, initial, onClose }) {
+  const [index, setIndex] = useState(initial);
+  const [failed, setFailed] = useState(false);
+  const closeRef = useRef(null);
+  const touch = useRef(null);
+  const step = useCallback((direction) => setIndex((i) => (i + direction + photos.length) % photos.length), [photos.length]);
   useEffect(() => {
-    if (!has) return undefined;
+    const previous = document.activeElement;
+    const overflow = document.body.style.overflow;
+    document.body.style.overflow = 'hidden';
+    closeRef.current?.focus();
     const onKey = (e) => {
       if (e.key === 'Escape') onClose();
-      else if (e.key === 'ArrowRight') step(1);
-      else if (e.key === 'ArrowLeft') step(-1);
+      if (e.key === 'ArrowRight' || e.key === 'ArrowLeft') { e.preventDefault(); step(e.key === 'ArrowRight' ? 1 : -1); }
+      if (e.key === 'Tab') {
+        const controls = [...closeRef.current.closest('[role="dialog"]').querySelectorAll('button,a[href]')].filter((el) => !el.disabled);
+        const current = controls.indexOf(document.activeElement);
+        e.preventDefault();
+        controls[(current + (e.shiftKey ? -1 : 1) + controls.length) % controls.length]?.focus();
+      }
     };
     window.addEventListener('keydown', onKey);
-    const prevOverflow = document.body.style.overflow;
-    document.body.style.overflow = 'hidden';
-    return () => {
-      window.removeEventListener('keydown', onKey);
-      document.body.style.overflow = prevOverflow;
-    };
-  }, [has, step, onClose]);
-
-  if (!has) return null;
-  const photo = photos[index];
-
-  return (
-    <div
-      onClick={onClose}
-      style={{
-        position: 'fixed', inset: 0, zIndex: 200, background: 'rgba(6,16,31,0.94)',
-        display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 20,
-        backdropFilter: 'blur(6px)',
-      }}
-    >
-      <button
-        onClick={onClose}
-        aria-label="Close"
-        style={{
-          position: 'absolute', top: 16, right: 20, background: 'none', border: `1px solid ${P.hair}`,
-          color: P.cream, fontFamily: mono, fontSize: 14, cursor: 'pointer', padding: '6px 12px',
-        }}
-      >
-        ✕ ESC
-      </button>
-
-      {index > 0 && (
-        <button onClick={(e) => { e.stopPropagation(); step(-1); }} aria-label="Previous" style={navArrow('left')}>‹</button>
-      )}
-      {index < photos.length - 1 && (
-        <button onClick={(e) => { e.stopPropagation(); step(1); }} aria-label="Next" style={navArrow('right')}>›</button>
-      )}
-
-      <figure onClick={(e) => e.stopPropagation()} style={{ margin: 0, maxWidth: '100%', maxHeight: '100%', textAlign: 'center' }}>
-        <img
-          src={photo.photo_url || photo.thumb_url}
-          alt=""
-          style={{ maxWidth: '100%', maxHeight: '82vh', objectFit: 'contain', border: `1px solid ${P.hair}` }}
-        />
-        <figcaption style={{ marginTop: 10, fontFamily: mono, fontSize: 9, letterSpacing: '0.16em', color: P.mute }}>
-          {index + 1} / {photos.length}{photo.uploader_name ? ` · ${photo.uploader_name}` : ''}
-        </figcaption>
-      </figure>
-    </div>
-  );
-}
-
-function navArrow(side) {
-  return {
-    position: 'absolute', [side]: 12, top: '50%', transform: 'translateY(-50%)',
-    background: 'rgba(6,16,31,0.7)', border: `1px solid ${P.hair}`, color: P.gold,
-    fontFamily: oswald, fontSize: 32, lineHeight: 1, cursor: 'pointer', padding: '10px 18px',
-  };
-}
-
-// ── Photo grid ──────────────────────────────────────────────────────────────
-function PhotoGrid({ photos, onOpen }) {
-  if (!photos.length) return null;
-  return (
-    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(180px, 1fr))', gap: 8 }}>
-      {photos.map((p, i) => (
-        <button
-          key={p.id}
-          onClick={() => onOpen(i)}
-          style={{
-            border: `1px solid ${P.hair}`, background: P.navy, padding: 0, cursor: 'pointer',
-            aspectRatio: '1 / 1', overflow: 'hidden', position: 'relative',
-          }}
-        >
-          <img
-            src={p.thumb_url || p.photo_url}
-            alt=""
-            loading="lazy"
-            style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }}
-          />
-        </button>
-      ))}
-    </div>
-  );
-}
-
-// ── "coming soon" panel (shared by empty photo + video slots) ───────────────
-function ComingSoon({ kind, note }) {
-  return (
-    <div style={{
-      border: `1px dashed ${P.hairStrong}`, background: 'rgba(201,169,97,0.03)',
-      padding: '30px 24px', display: 'flex', alignItems: 'center', gap: 16,
-    }}>
-      <span aria-hidden="true" style={{ fontSize: 22, color: P.gold, opacity: 0.6 }}>
-        {kind === 'video' ? '▶' : '◱'}
-      </span>
-      <div>
-        <div style={{ fontFamily: oswald, fontWeight: 700, fontSize: 16, color: P.cream, letterSpacing: '0.05em' }}>
-          {kind === 'video' ? 'RUN FOOTAGE COMING' : 'PHOTOS COMING'}
-        </div>
-        <div style={{ fontFamily: 'Inter, sans-serif', fontSize: 12.5, color: P.mute, marginTop: 4 }}>
-          {note}
-        </div>
+    return () => { document.body.style.overflow = overflow; window.removeEventListener('keydown', onKey); previous?.focus(); };
+  }, [onClose, step]);
+  useEffect(() => {
+    setFailed(false);
+    for (const offset of [-1, 1]) {
+      const next = photos[(index + offset + photos.length) % photos.length];
+      const image = new Image(); image.src = next.photo_url || next.thumb_url;
+    }
+  }, [index, photos]);
+  const photo = photos[Math.min(index, photos.length - 1)];
+  return createPortal(
+    <div className="rg-viewer" role="dialog" aria-modal="true" aria-label="Raider photo viewer">
+      <header><span>RAIDER ARCHIVE</span><button ref={closeRef} onClick={onClose} aria-label="Close photo viewer">Close ×</button></header>
+      <div className="rg-stage" onTouchStart={(e) => { const p = e.touches[0]; touch.current = { x: p.clientX, y: p.clientY }; }} onTouchEnd={(e) => {
+        if (!touch.current) return;
+        const p = e.changedTouches[0], dx = p.clientX - touch.current.x, dy = p.clientY - touch.current.y;
+        if (Math.abs(dx) > 55 && Math.abs(dx) > Math.abs(dy)) step(dx < 0 ? 1 : -1);
+        touch.current = null;
+      }}>
+        {failed ? <p>Photo could not load. Try opening the full-size image below.</p> : <img key={photo.id} src={photo.photo_url || photo.thumb_url} alt={`${eventName(photo)} · ${teamName(photo.raider_team)}`} onError={() => setFailed(true)} />}
       </div>
-    </div>
+      <footer>
+        <div className="rg-view-controls"><button onClick={() => step(-1)} disabled={photos.length < 2} aria-label="Previous photo">←</button><span aria-live="polite">{index + 1} / {photos.length}</span><button onClick={() => step(1)} disabled={photos.length < 2} aria-label="Next photo">→</button></div>
+        <div className="rg-caption">{eventName(photo)} · {teamName(photo.raider_team)}{photo.uploader_name ? ` · ${photo.uploader_name}` : ''}</div>
+        <a href={photo.photo_url || photo.thumb_url} target="_blank" rel="noopener noreferrer">Open full-size photo ↗</a>
+      </footer>
+    </div>, document.body,
   );
 }
 
-// ── Standing notice - top of every view ────────────────────────────────────
-function TopNotice() {
-  return (
-    <div style={{
-      border: `1px solid ${P.hairStrong}`, background: 'rgba(201,169,97,0.05)',
-      padding: '14px 18px', marginBottom: 28, display: 'flex', gap: 12, alignItems: 'flex-start',
-    }}>
-      <span aria-hidden="true" style={{ fontSize: 14, color: P.gold, lineHeight: 1.5 }}>ⓘ</span>
-      <div style={{ fontFamily: 'Inter, sans-serif', fontSize: 12.5, color: P.cream, lineHeight: 1.65 }}>
-        This is Luke&apos;s set for now. Parent-submitted photos will be added later, once he&apos;s caught up.
-        There&apos;s a large batch of Obstacle Course shots. Run footage for some events also drops later; Luke&apos;s very busy right now.
-      </div>
-    </div>
-  );
-}
-
-// ── Event card (index view) ─────────────────────────────────────────────────
-function EventCard({ group, onOpen }) {
-  const [hover, setHover] = useState(false);
-  const { hasContent } = group;
-  return (
-    <button
-      onClick={onOpen}
-      onMouseEnter={() => setHover(true)}
-      onMouseLeave={() => setHover(false)}
-      style={{
-        border: `1px solid ${hover ? P.hairStrong : P.hair}`, background: P.deep, cursor: 'pointer',
-        padding: 0, textAlign: 'left', position: 'relative', overflow: 'hidden',
-        transition: 'border-color 0.2s', opacity: hasContent ? 1 : 0.82,
-      }}
-    >
-      <Brackets size={16} opacity={hover ? 0.7 : 0.3} />
-      <div style={{ aspectRatio: '4 / 3', background: P.navy, position: 'relative', overflow: 'hidden' }}>
-        {hasContent ? (
-          <img
-            src={group.cover}
-            alt=""
-            loading="lazy"
-            style={{
-              width: '100%', height: '100%', objectFit: 'cover', display: 'block',
-              transform: hover ? 'scale(1.04)' : 'scale(1)', transition: 'transform 0.4s',
-            }}
-          />
-        ) : (
-          <div style={{
-            width: '100%', height: '100%', display: 'flex', flexDirection: 'column', gap: 6,
-            alignItems: 'center', justifyContent: 'center',
-            background: `repeating-linear-gradient(135deg, ${P.deep} 0 10px, ${P.navy} 10px 11px)`,
-          }}>
-            <span style={{ fontSize: 20, color: P.gold, opacity: 0.5 }}>◱</span>
-            <span style={{ fontFamily: mono, fontSize: 8, color: `${P.gold}99`, letterSpacing: '0.22em' }}>
-              COMING SOON
-            </span>
-          </div>
-        )}
-        <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to bottom, transparent 55%, rgba(6,16,31,0.9))' }} />
-      </div>
-      <div style={{ padding: '14px 16px 16px' }}>
-        <div style={{ fontFamily: oswald, fontWeight: 700, fontSize: 20, color: P.cream, letterSpacing: '0.03em' }}>
-          {group.name}
-        </div>
-        <div style={{ fontFamily: mono, fontSize: 8.5, color: P.gold, letterSpacing: '0.18em', opacity: 0.75, marginTop: 6 }}>
-          {hasContent
-            ? `${group.photos.length} PHOTO${group.photos.length === 1 ? '' : 'S'}`
-            : (group.hasVideo ? 'PHOTOS + VIDEO SOON' : 'PHOTOS SOON')}
-        </div>
-      </div>
-    </button>
-  );
-}
-
-// ── Event detail view ──────────────────────────────────────────────────────
-function EventDetail({ group, onBack }) {
-  const [lb, setLb] = useState(null);
-  return (
-    <div>
-      <button onClick={onBack} style={backBtn}>← ALL EVENTS</button>
-      <h2 style={{ fontFamily: oswald, fontWeight: 700, fontSize: 44, color: P.cream, letterSpacing: '0.03em', margin: '14px 0 6px' }}>
-        {group.name}
-      </h2>
-      {group.blurb && (
-        <p style={{ fontFamily: 'Inter, sans-serif', fontSize: 13, color: P.mute, margin: '0 0 28px', maxWidth: 560 }}>
-          {group.blurb}
-        </p>
-      )}
-
-      <div style={{ marginBottom: group.hasVideo ? 34 : 0 }}>
-        <SectionRule label={group.hasContent ? `// PHOTOS · ${group.photos.length}` : '// PHOTOS'} />
-        {group.hasContent
-          ? <PhotoGrid photos={group.photos} onOpen={setLb} />
-          : <ComingSoon kind="photos" note={PHOTO_SOON} />}
-      </div>
-
-      {/* Run footage - only for the events that actually have clips coming
-          (Gauntlet, CCR, OC, One Rope, Highland). No player yet; the slot is
-          here so families know where it'll land. */}
-      {group.hasVideo && (
-        <>
-          <SectionRule label="// RUN FOOTAGE" />
-          <ComingSoon kind="video" note={VIDEO_SOON} />
-        </>
-      )}
-
-      <Lightbox photos={group.photos} index={lb} onClose={() => setLb(null)} onIndex={setLb} />
-    </div>
-  );
-}
-
-function SectionRule({ label }) {
-  return (
-    <div style={{ display: 'flex', alignItems: 'center', gap: 12, margin: '0 0 16px' }}>
-      <div style={{ fontFamily: mono, fontSize: 9, color: P.gold, letterSpacing: '0.28em', opacity: 0.7 }}>{label}</div>
-      <div style={{ flex: 1, height: 1, background: P.hair }} />
-    </div>
-  );
-}
-
-const backBtn = {
-  background: 'transparent', border: 'none', cursor: 'pointer', color: P.gold,
-  fontFamily: mono, fontSize: 10, letterSpacing: '0.22em', padding: '4px 0',
-};
-
-// ── Comp picker (index view only) — switches which comp's gallery loads ────
-function CompPicker({ activeId, onPick }) {
-  if (COMP_ARCHIVE.length < 2) return null;
-  return (
-    <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', marginBottom: 24 }}>
-      {COMP_ARCHIVE.map((c) => {
-        const on = c.id === activeId;
-        return (
-          <button
-            key={c.id}
-            onClick={() => onPick(c.id)}
-            style={{
-              fontFamily: mono, fontSize: 9, letterSpacing: '0.14em', cursor: 'pointer',
-              padding: '9px 14px', background: on ? P.gold : 'transparent', color: on ? P.ink : P.mute,
-              border: `1px solid ${on ? P.gold : P.hair}`,
-            }}
-          >
-            {c.title.toUpperCase()} · {c.date.toUpperCase()}
-          </button>
-        );
-      })}
-    </div>
-  );
-}
-
-// ── Page ───────────────────────────────────────────────────────────────────
 export default function CompGallery() {
-  const navigate = useNavigate();
+  const { photos, competitions, loading, error, refresh } = useCompGallery();
   const [params, setParams] = useSearchParams();
-
-  const compId = params.get('comp') || COMP_EVENT_ID;
-  const activeComp = COMP_ARCHIVE.find((c) => c.id === compId) || COMP_ARCHIVE[0];
-  const { groups, totals, loading, error } = useCompGallery(activeComp.id);
-
-  const activeSlug = params.get('event');
-  const active = groups.find((g) => g.slug === activeSlug) || null;
-
-  useEffect(() => { window.scrollTo(0, 0); }, [activeSlug, compId]);
-
-  const openEvent = (slug) => {
-    const next = {};
-    if (compId !== COMP_EVENT_ID) next.comp = compId;
-    if (slug) next.event = slug;
-    setParams(next);
+  const [viewer, setViewer] = useState(null);
+  const [page, setPage] = useState(0);
+  const close = useCallback(() => setViewer(null), []);
+  const filterKey = params.toString();
+  useEffect(() => { setViewer(null); setPage(0); }, [filterKey]);
+  const selected = competitions.find((c) => c.id === params.get('comp'));
+  const team = params.get('team') || 'all';
+  const event = params.get('event') || 'all';
+  const base = selected?.photos || photos;
+  const events = useMemo(() => [...new Map(base.map((p) => [eventKey(p), eventName(p)])).entries()].sort((a, b) => a[1].localeCompare(b[1])), [base]);
+  const filtered = useMemo(() => base.filter((p) => (team === 'all' || (team === 'untagged' ? !p.raider_team : p.raider_team === team)) && (event === 'all' || (eventKey(p) === event || p.sub_event_id === event))), [base, team, event]);
+  const pageSize = 60;
+  const pages = Math.ceil(filtered.length / pageSize);
+  const currentPage = Math.min(page, Math.max(0, pages - 1));
+  const change = (key, value) => {
+    const next = new URLSearchParams(params);
+    if (value === 'all') next.delete(key); else next.set(key, value);
+    if (key === 'comp') next.delete('event');
+    setViewer(null); setPage(0); setParams(next);
   };
-  const openComp = (id) => setParams(id !== COMP_EVENT_ID ? { comp: id } : {});
-
-  return (
-    <div style={{ background: P.ink, minHeight: '100vh', fontFamily: 'Inter, sans-serif' }}>
-      <div style={{ maxWidth: 1200, margin: '0 auto', padding: '60px 40px 100px' }}>
-
-        <button onClick={() => navigate('/raiders')} style={{ ...backBtn, letterSpacing: '0.28em', marginBottom: 22 }}>
-          ← RAIDERS
-        </button>
-
-        {!active && <CompPicker activeId={activeComp.id} onPick={openComp} />}
-
-        {!loading && !error && <TopNotice />}
-
-        {!active && !loading && (
-          <div style={{ marginBottom: 40 }}>
-            <div style={{ fontFamily: mono, fontSize: 11, color: P.gold, letterSpacing: '0.38em', opacity: 0.75, marginBottom: 10 }}>
-              VIEW COMPETITION
-            </div>
-            <h1 style={{ fontFamily: oswald, fontWeight: 700, fontSize: 60, color: P.cream, letterSpacing: '0.02em', margin: 0, lineHeight: 1 }}>
-              {activeComp.title.toUpperCase()}
-            </h1>
-            <div style={{ fontFamily: mono, fontSize: 9, letterSpacing: '0.2em', color: P.gold, opacity: 0.6, marginTop: 16 }}>
-              {totals.withPhotos} OF {totals.events} EVENTS POSTED · {totals.photos} PHOTO{totals.photos === 1 ? '' : 'S'}
-            </div>
-          </div>
-        )}
-
-        {loading && (
-          <div style={{ fontFamily: mono, fontSize: 10, color: P.mute, letterSpacing: '0.2em' }}>LOADING…</div>
-        )}
-
-        {error && !loading && (
-          <div style={{ border: `1px solid ${P.hairStrong}`, background: P.deep, padding: '20px 24px', fontFamily: mono, fontSize: 10, color: P.bright }}>
-            COULD NOT LOAD GALLERY: {error}
-          </div>
-        )}
-
-        {!loading && !error && active && (
-          <EventDetail group={active} onBack={() => openEvent(null)} />
-        )}
-
-        {!loading && !error && !active && groups.length > 0 && (
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: 20 }}>
-            {groups.map((g) => (
-              <EventCard key={g.slug} group={g} onOpen={() => openEvent(g.slug)} />
-            ))}
-          </div>
-        )}
-      </div>
+  const movePage = (direction) => { setPage(currentPage + direction); document.getElementById('rg-results')?.scrollIntoView({ block: 'start' }); };
+  return <main className="rg">
+    <div className="rg-wrap">
+      <Link className="rg-back" to="/raiders">← Raiders</Link>
+      <div className="rg-eyebrow">THE SEASON IN PHOTOS</div>
+      <h1>RAIDER PHOTO ARCHIVE</h1>
+      <p className="rg-intro">Every available competition, in one place. Choose a competition, team, or event, then open a photo and browse with the arrows. Swipe on your phone or use your keyboard’s arrow keys.</p>
+      {!loading && !error && <p className="rg-total">{photos.length.toLocaleString()} photos · {competitions.length} albums</p>}
+      {loading ? <p role="status">Loading the photo archive…</p> : error ? <div role="alert"><p>We couldn’t load the archive. Please try again.</p><button onClick={refresh}>Try again</button></div> : <>
+        <div className="rg-albums" aria-label="Competition albums">
+          <button className={!selected ? 'active' : ''} onClick={() => change('comp', 'all')}>All competitions <span>{photos.length}</span></button>
+          {competitions.map((c) => <button key={c.id} className={selected?.id === c.id ? 'active' : ''} onClick={() => change('comp', c.id)}>{c.title}<small>{dateLabel(c.date)} · {c.photos.length} photos</small></button>)}
+        </div>
+        <div className="rg-filters">
+          <label>Raider team<select value={team} onChange={(e) => change('team', e.target.value)}><option value="all">All teams</option><option value="male">Male team</option><option value="coed">Coed team</option><option value="both">Both teams</option><option value="untagged">Team not tagged</option></select></label>
+          <label>Event<select value={events.some(([id]) => id === event) ? event : 'all'} onChange={(e) => change('event', e.target.value)}><option value="all">All events</option>{events.map(([id, name]) => <option key={id} value={id}>{name}</option>)}</select></label>
+          <p>Company labels are not available for these photos. Untagged shots are included in General photos.</p>
+        </div>
+        <div className="rg-result-heading" id="rg-results"><h2>{selected?.title || 'All competitions'}</h2><span role="status">{filtered.length.toLocaleString()} photos</span></div>
+        {!filtered.length && <p>No photos match these filters. Choose another team or event.</p>}
+        <div className="rg-grid">
+          {filtered.slice(currentPage * pageSize, (currentPage + 1) * pageSize).map((p, i) => <button key={p.id} className="rg-tile" onClick={() => setViewer(currentPage * pageSize + i)} aria-label={`View ${eventName(p)}, ${teamName(p.raider_team)}, photo ${currentPage * pageSize + i + 1}`}>
+            <img src={p.grid_url || p.thumb_url || p.photo_url} alt="" loading="lazy" onError={(e) => { if (e.currentTarget.dataset.fallback) return; e.currentTarget.dataset.fallback = '1'; e.currentTarget.src = p.thumb_url || p.photo_url; }} />
+            <span>{eventName(p)}<small>{teamName(p.raider_team)}</small></span>
+          </button>)}
+        </div>
+        {pages > 1 && <nav className="rg-pagination" aria-label="Photo pages"><button disabled={currentPage === 0} onClick={() => movePage(-1)}>← Previous</button><span>Page {currentPage + 1} of {pages}</span><button disabled={currentPage === pages - 1} onClick={() => movePage(1)}>Next →</button></nav>}
+      </>}
     </div>
-  );
+    {viewer != null && filtered.length > 0 && <Viewer photos={filtered} initial={viewer} onClose={close} />}
+  </main>;
 }

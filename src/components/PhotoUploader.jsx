@@ -1,9 +1,10 @@
 import { useState, useRef, useEffect, useCallback } from 'react';
-import { useSearchParams } from 'react-router-dom';
+import { Navigate, useSearchParams } from 'react-router-dom';
 import { supabase as SB } from '../lib/supabaseClient';
 import { getDeviceId } from '../lib/fingerprint';
 import { resizeForUpload, isRawFile } from '../lib/imageResize';
 import { putPhotoFile, removePhotoFiles } from '../lib/photoStorage';
+import { BALL_EVENT_ID, PHOTO_DESK } from '../lib/ballPhotoApi';
 import { TEAMS } from '../lib/teams';
 import posthog from '../lib/posthog';
 
@@ -146,7 +147,7 @@ export default function PhotoUploader({ presetTeam = null, onUploaded }) {
   }
 
   const pendingCount = items.filter((it) => it.status !== 'done').length;
-  const canSubmit = items.length > 0 && eventId && phase !== 'uploading' && pendingCount > 0;
+  const canSubmit = items.length > 0 && eventId && eventId !== BALL_EVENT_ID && phase !== 'uploading' && pendingCount > 0;
 
   async function uploadOne(item) {
     setItems((q) => q.map((it) => (it.id === item.id ? { ...it, status: 'uploading' } : it)));
@@ -208,6 +209,8 @@ export default function PhotoUploader({ presetTeam = null, onUploaded }) {
     // Drop everything that finished; anything still errored stays queued for retry.
     setItems((q) => q.filter((it) => it.status !== 'done'));
   }
+
+  if (eventId === BALL_EVENT_ID || urlEventId === BALL_EVENT_ID) return <Navigate to={PHOTO_DESK} replace />;
 
   const allDone = phase === 'idle' && items.length === 0 && postedCount > 0;
 

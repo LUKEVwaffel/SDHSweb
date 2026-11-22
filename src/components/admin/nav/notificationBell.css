@@ -1,0 +1,47 @@
+.dispatch-notifications { position:relative; flex-shrink:0; font-family:Inter,Arial,sans-serif; }
+.dispatch-notification-bell { position:relative; width:36px; height:36px; border-radius:50%; border:1px solid rgba(255,255,255,.08); background:rgba(255,255,255,.04); color:#f4ecd8; cursor:pointer; display:grid; place-items:center; }
+.dispatch-notification-bell:hover { background:rgba(232,199,122,.12); }
+.dispatch-notification-bell:focus-visible,.dispatch-notification-panel button:focus-visible { outline:2px solid #c9a961; outline-offset:3px; }
+.dispatch-notification-badge { position:absolute; right:-5px; top:-4px; min-width:17px; height:17px; padding:0 4px; border-radius:20px; display:grid; place-items:center; box-sizing:border-box; font-size:9px; font-weight:700; background:#e8c77a; color:#171b18; }
+.dispatch-notification-panel { position:fixed; top:54px; right:18px; width:min(440px,calc(100vw - 24px)); max-height:calc(100dvh - 72px); display:flex; flex-direction:column; background:#171d19; color:#f4ecd8; border:1px solid rgba(232,199,122,.2); border-radius:18px; box-shadow:0 24px 80px rgba(0,0,0,.5); z-index:4000; outline:none; overflow:auto; }
+.dispatch-notification-panel header { display:flex; align-items:center; justify-content:space-between; padding:20px 20px 15px; }
+.dispatch-reminder-eyebrow { display:block; color:#bea363; font-size:9px; letter-spacing:.13em; }
+.dispatch-notification-panel h2 { font-size:21px; margin:6px 0 0; font-weight:600; }
+.dispatch-notification-panel button,.dispatch-reminder-toast button { cursor:pointer; font:inherit; }
+.dispatch-notification-close { background:none; border:none; color:#b5b6ac; width:32px; height:32px; font-size:24px!important; }
+.dispatch-notification-tabs { display:flex; align-items:center; gap:5px; padding:0 14px 12px; border-bottom:1px solid rgba(255,255,255,.07); }
+.dispatch-notification-tabs button { border:0; border-radius:8px; padding:8px; color:#aaa; background:none; font-size:12px; white-space:nowrap; }
+.dispatch-notification-tabs button[aria-pressed=true] { background:rgba(232,199,122,.1); color:#e8c77a; }
+.dispatch-notification-tabs button span { margin-left:4px; font-size:10px; }
+.dispatch-notification-tabs .dispatch-reminder-add { margin-left:auto; color:#e8c77a; }
+.dispatch-reminder-list { flex:1; min-height:90px; }
+.dispatch-reminder-item { padding:17px 20px; border-bottom:1px solid rgba(255,255,255,.06); }
+.dispatch-reminder-item[data-unread=true] { background:rgba(232,199,122,.035); }
+.dispatch-reminder-item-title { display:flex; align-items:center; gap:10px; }
+.dispatch-reminder-item strong { font-size:14px; line-height:1.5; overflow-wrap:anywhere; }
+.dispatch-reminder-item time { display:block; margin-top:5px; font-size:11px; color:#bba66e; }
+.dispatch-reminder-item p { margin:9px 0; white-space:pre-wrap; overflow-wrap:anywhere; color:#a9aaa1; font-size:12px; line-height:1.6; }
+.dispatch-reminder-unread { flex-shrink:0; width:6px; height:6px; border-radius:50%; background:#e8c77a; }
+.dispatch-reminder-actions { display:flex; flex-wrap:wrap; gap:6px; margin-top:12px; }
+.dispatch-reminder-actions button { border:1px solid rgba(255,255,255,.12); border-radius:7px; background:transparent; color:#c4c3b9; padding:6px 9px; font-size:11px; }
+.dispatch-reminder-actions button:hover { color:#e8c77a; border-color:#9d854d; }
+.dispatch-notification-panel button:disabled { opacity:.4; cursor:default; }
+.dispatch-reminder-read-all { margin:12px 20px 0; align-self:flex-start; background:none; border:0; color:#bfa465; font-size:11px!important; }
+.dispatch-reminder-empty { margin:0; padding:27px 20px; font-size:12px; color:#a3a79c; line-height:1.7; }
+.dispatch-reminder-empty strong { color:#e0ddcf; font-size:14px; }
+.dispatch-reminder-empty p { margin:7px 0 0; }
+.dispatch-notification-panel footer { padding:13px 20px; font-size:10px; color:#93988b; line-height:1.6; border-top:1px solid rgba(255,255,255,.06); }
+.dispatch-reminder-error { margin:12px 20px; color:#f0a795; font-size:12px; line-height:1.6; }
+.dispatch-reminder-form { margin:16px; padding:14px; border:1px solid rgba(232,199,122,.2); border-radius:11px; }
+.dispatch-reminder-form label { display:block; margin-bottom:12px; font-size:11px; color:#c8c7b9; }
+.dispatch-reminder-form label span { color:#8e9586; }
+.dispatch-reminder-form input,.dispatch-reminder-form textarea,.dispatch-reminder-form select { display:block; box-sizing:border-box; width:100%; margin-top:6px; padding:9px; border-radius:7px; border:1px solid rgba(255,255,255,.13); background:#101612; color:#f4ecd8; font:inherit; font-size:13px; color-scheme:dark; }
+.dispatch-reminder-form button { border:0; border-radius:7px; background:#d7b76c; color:#161d17; padding:9px 13px; font-size:12px; }
+.dispatch-reminder-toast { position:fixed; right:20px; top:60px; width:min(360px,calc(100vw - 40px)); padding:18px; box-sizing:border-box; border-radius:14px; border:1px solid rgba(232,199,122,.4); background:#1c241e; color:#f4ecd8; box-shadow:0 16px 50px rgba(0,0,0,.4); z-index:3500; }
+.dispatch-reminder-toast strong { display:block; font-size:15px; line-height:1.5; margin:8px 0; overflow-wrap:anywhere; }
+.dispatch-reminder-toast>span:last-of-type { color:#b5b6a9; font-size:11px; }
+.dispatch-reminder-live-count { display:block; margin-top:8px!important; color:#e8c77a!important; font-size:12px!important; }
+.dispatch-reminder-live-count b { color:#f4ecd8; font-size:15px; }
+.dispatch-reminder-toast div { display:flex; gap:12px; margin-top:14px; }
+.dispatch-reminder-toast button { background:none; border:0; padding:0; font-size:12px; color:#e8c77a; }
+@media(max-width:600px) { .dispatch-notification-panel { right:12px; top:56px; } .dispatch-notification-bell { width:40px; height:40px; } }

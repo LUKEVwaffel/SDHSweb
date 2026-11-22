@@ -1,0 +1,131 @@
+import {ballCountdown,ballScheduleTime} from '../../../../../lib/ballPlayback';
+import {useState,useRef,useEffect} from 'react';
+import {supabase as SB} from '../../../../../lib/supabaseClient';
+import {studioChannel,readRemoteToken,REMOTE_STALE_MS} from '../../../../../lib/ballStudioRemote';
+import {usePresentationWake} from './usePresentationWake';
+import SlideCanvas from './SlideCanvas';
+import './ballRemote.css';
+const cueGroups={grog:'Grog cards',toasts:'Toast responses',seniors:'Senior recognition'};
+const cueShortcuts={grog:'Grog cards',toasts:'Toasts',seniors:'Senior Walk'};
+const cueSection=cue=>Object.hasOwn(cueGroups,cue.group) ? cue.group : cue.grog ? 'grog' : null;
+const seconds=ms=>`${Math.floor(Math.max(0,ms)/60000)}:${String(Math.floor(Math.max(0,ms)/1000)%60).padStart(2,'0')}`;
+export default function BallStudioRemote({client=SB,initialToken=''}={}) {
+  const [token,setToken]=useState(()=>readRemoteToken(window.location.hash)||readRemoteToken(initialToken));const [link,setLink]=useState('');
+  const [snapshot,setSnapshot]=useState(null);const [received,setReceived]=useState(0);const [now,setNow]=useState(Date.now());
+  const [status,setStatus]=useState('CONNECTING');const [error,setError]=useState('');const [pending,setPending]=useState(null);const [target,setTarget]=useState('');
+  const cueGroupRefs=useRef({});const channel=useRef();const pendingRef=useRef(null);const latestSeq=useRef(0);const pendingTimers=useRef([]);const pairedAt=useRef(Date.now());
+  usePresentationWake(!!token);
+  useEffect(()=>{const t=setInterval(()=>setNow(Date.now()),500);return()=>clearInterval(t);},[]);
+  useEffect(()=>{
+    if(!token)return;
+    let subscribed=false;latestSeq.current=0;pairedAt.current=Date.now();setSnapshot(null);setReceived(0);setStatus('CONNECTING');
+    const connection=studioChannel(client,token,message=>{
+      if(message.kind==='closed'){setStatus('ENDED');setError('The TV ended this remote session. Scan a new QR code to reconnect.');setSnapshot(null);return;}
+      if(message.kind!=='state'||!Number.isInteger(message.seq)||message.seq<=latestSeq.current||!Number.isInteger(message.index)||!message.current||!Number.isInteger(message.total)||message.total<1||message.index<0||message.index>=message.total)return;
+      latestSeq.current=message.seq;setSnapshot(message);setReceived(Date.now());setStatus('CONNECTED');
+      if(message.ack&&message.ack===pendingRef.current?.id){pendingRef.current=null;setPending(null);pendingTimers.current.forEach(clearTimeout);pendingTimers.current=[];setError('');}
+    },state=>{
+      subscribed=state==='SUBSCRIBED';if(!subscribed)setStatus('RECONNECTING');
+      if(subscribed)connection.send({kind:'hello'}).catch(()=>setError('Could not reach the TV. Check your connection.'));
+    });
+    channel.current=connection;
+    const hello=setInterval(()=>{if(subscribed)connection.send({kind:'hello'}).catch(()=>{});},2500);
+    const visible=()=>{if(document.visibilityState==='visible')connection.send({kind:'hello'}).catch(()=>{});};document.addEventListener('visibilitychange',visible);
+    return()=>{clearInterval(hello);pendingTimers.current.forEach(clearTimeout);pendingTimers.current=[];pendingRef.current=null;setPending(null);document.removeEventListener('visibilitychange',visible);connection.close();channel.current=null;};
+  },[token,client]);
+  const connected=!!snapshot&&status==='CONNECTED'&&now-received<REMOTE_STALE_MS;
+  const waiting=!received&&now-pairedAt.current>10000;
+  const remaining=snapshot?Math.max(0,snapshot.remaining-(snapshot.playing&&!snapshot.blackout?Math.max(0,now-received):0)):0;
+  const scheduledTime = Number.isFinite(snapshot?.preshowAt) ? ballScheduleTime(snapshot.preshowAt) : '';
+  const showClock = Number.isFinite(snapshot?.countdown) ? ballCountdown(snapshot.countdown - Math.max(0, now - received)) : null;
+  function command(action,index){
+    if(!connected||pendingRef.current)return;
+    const payload={kind:'command',id:crypto.randomUUID(),action,...(Number.isInteger(index)?{index}:{})};
+    pendingRef.current=payload;setPending(payload);setError('');
+    const transmit=()=>channel.current?.send(payload).catch(()=>{if(pendingRef.current?.id===payload.id)setError('Connection interrupted. Waiting for the TV to acknowledge…');});
+    // Retry the same command ID. The TV deduplicates it, so Next never advances twice.
+    if(pendingRef.current?.id===payload.id){pendingTimers.current=[setTimeout(transmit,1200),setTimeout(transmit,2600),setTimeout(()=>{if(pendingRef.current?.id===payload.id){pendingRef.current=null;setPending(null);setError('The TV did not acknowledge this control. Check the current slide before trying again.');}},5000)];}
+    transmit();
+  }
+  const cues = snapshot?.cues;
+  const grouped = Object.fromEntries(Object.keys(cueGroups).map(group => [group,(cues || []).filter(cue => cueSection(cue)===group)]));
+  const shortcuts=Object.keys(cueShortcuts).filter(group=>grouped[group].length);
+  const nextTitle=snapshot&&!snapshot.scheduleActive ? snapshot.next?.title : '';
+  const activeGroup=shortcuts.find(group=>grouped[group].some(cue=>cue.index===snapshot.index));
+  const cueButton = cue => <button key={cue.index} disabled={!connected||!!pending||snapshot.scheduleActive} aria-current={snapshot.index===cue.index?'true':undefined} onClick={()=>command('goto',cue.index)}>
+    <span>{cue.title}</span>{cue.time&&<small>{cue.time}</small>}
+  </button>;
+  function openCueGroup(key){
+    const group=cueGroupRefs.current[key];
+    if(!group)return;
+    group.open=true;
+    group.scrollIntoView({block:'start'});
+    group.querySelector('summary')?.focus({preventScroll:true});
+  }
+  function disconnect(){window.history.replaceState(null,'',window.location.pathname);setToken('');setSnapshot(null);setError('');}
+  return <main className={`ball-remote${snapshot ? ' has-transport' : ''}`}><header><div className="br-eyebrow">Trojan Battalion</div><h1>Ball Remote</h1><div className={`br-status ${connected?'is-live':''}`} role="status">{connected?'TV connected':status==='ENDED'?'Session ended':received?'TV connection lost':waiting?'Waiting for the TV':token?'Connecting to presentation':'Pair with your presentation'}</div></header>
+    {!token?<form className="br-pair-form" onSubmit={e=>{e.preventDefault();const next=readRemoteToken(link);if(!next){setError('Paste the pairing code or private link from the TV.');return;}window.history.replaceState(null,'',`#${next}`);setError('');setToken(next);}}><p>On the TV, open your presentation and choose <strong>Connect phone</strong>. Scan its QR code with your phone’s camera, or paste the pairing code here.</p><label>Pairing code or private link<textarea value={link} onChange={e=>setLink(e.target.value)} rows={3} autoCapitalize="none" autoCorrect="off" spellCheck={false}/></label><button className="br-primary" type="submit">Connect to TV</button></form>:<>
+      {!connected&&<div className="br-connection-note">{received?'Waiting to reconnect. TV controls are paused until a fresh status arrives.':waiting?'Keep the presentation open on the TV. If it was closed, scan the new QR code from a new playback session.':'Controls unlock when the TV confirms its current slide.'}</div>}
+      {snapshot&&<><div className="br-deck-name">{snapshot.deckName}</div><section className="br-current"><div className="br-section-label"><span>ON SCREEN · {snapshot.index+1} / {snapshot.total}</span><span>{snapshot.blackout?'BLACKOUT':snapshot.showPhase==='waiting'?'STANDBY':snapshot.playing?'AUTOPLAY':'MANUAL'}</span></div><SlideCanvas slide={snapshot.current} deck={{theme:snapshot.theme,showNumbers:snapshot.showNumbers}} index={snapshot.index}/></section>
+      <div className="br-timing"><span>{showClock ? (snapshot.showPhase==='podium'?'Welcome in':'Ceremony begins in') : snapshot.showPhase==='waiting'?(scheduledTime?`Preshow starts automatically at ${scheduledTime}`:'Waiting for preshow'):snapshot.blackout?'Timer paused for blackout':snapshot.playing?'Time remaining':snapshot.manualCues?'Advance manually':'Autoplay paused'}</span><strong>{showClock || (snapshot.showPhase==='waiting'||snapshot.manualCues?'':seconds(remaining))}</strong></div>
+      <section className="br-controls" aria-label="TV controls">
+        {(!snapshot.scheduledTv||snapshot.showPhase==='dinner')&&<button disabled={!connected||!!pending||snapshot.manualCues} onClick={()=>command(snapshot.playing?'pause':'play')}>{snapshot.playing?'Pause autoplay':'Start autoplay'}</button>}
+        <button className={snapshot.blackout?'br-black-active':''} disabled={!connected||!!pending} onClick={()=>command('blackout')}>{snapshot.blackout?'Show presentation':'Blackout TV'}</button>
+      </section>
+      {snapshot.current.notes&&<section className="br-notes"><h2>Speaker notes</h2><p>{snapshot.current.notes}</p><small>Only visible on this phone</small></section>}
+      {Array.isArray(snapshot.cues)&&<section className="br-show-cues" aria-label="Ball timeline cues">
+        <h2>Ball timeline</h2>
+        {!snapshot.scheduledTv&&snapshot.manualCues&&snapshot.showPhase!=='waiting'&&<button disabled={!connected||!!pending} onClick={()=>command('start-show')}>Start preshow</button>}
+        {snapshot.dinnerSlideshow&&<button className="br-primary br-dinner" disabled={!connected||!!pending||snapshot.scheduleActive} onClick={()=>command(snapshot.showPhase==='dinner'?'end-dinner':'start-dinner')}>
+          {snapshot.showPhase==='dinner'?'Stop dinner slideshow':'Start dinner slideshow'}
+        </button>}
+        {cues.map(cue => {
+          const group=cueSection(cue);
+          if(!group)return cueButton(cue);
+          const groupCues=grouped[group];
+          if(cue!==groupCues[0])return null;
+          return <details key={group} ref={element=>{cueGroupRefs.current[group]=element;}} className="br-grog" open={groupCues.some(item=>item.index===snapshot.index)||undefined}>
+          <summary>{cueGroups[group]} <span>{groupCues.length}</span></summary>
+          {snapshot.scheduleActive&&<p className="br-grog-status">Preview the cards now. TV controls unlock after Welcome.</p>}
+          <div className="br-grog-cards">
+            {groupCues.map(cue=><article className="br-grog-card" key={cue.index} aria-label={cue.title}>
+              {cue.card ? <SlideCanvas slide={cue.card} deck={{theme:snapshot.theme,showNumbers:false}} index={cue.index}/> : <h3>{cue.title}</h3>}
+              <div className="br-grog-card-actions">
+                {cue.card?.subtitle&&<p>{cue.card.subtitle}</p>}
+                <button aria-label={`Show ${cue.title} on TV`} disabled={!connected||!!pending||snapshot.scheduleActive||snapshot.index===cue.index} onClick={()=>command('goto',cue.index)}>
+                  {snapshot.index===cue.index?'On TV':'Show on TV'}
+                </button>
+              </div>
+            </article>)}
+          </div>
+        </details>;
+        })}
+      </section>}
+      {snapshot.next&&<details className="br-next-preview"><summary>Up next · {snapshot.next.title||'Photo'}</summary><SlideCanvas slide={snapshot.next} deck={{theme:snapshot.theme,showNumbers:false}} index={snapshot.nextIndex ?? (snapshot.index+1)%snapshot.total}/></details>}
+      <details className="br-more"><summary>More controls</summary><form onSubmit={e=>{e.preventDefault();const n=Number(target);if(Number.isInteger(n)&&n>=1&&n<=snapshot.total)command('goto',n-1);}}><label>Jump to slide<input type="number" min={1} max={snapshot.total} required value={target} onChange={e=>setTarget(e.target.value)} inputMode="numeric"/></label><button disabled={!connected||!!pending||snapshot.scheduleActive}>Go</button></form><button disabled={!connected||!!pending||snapshot.scheduleActive} onClick={()=>command('restart')}>Return to beginning</button>{!Array.isArray(snapshot.cues)&&<button disabled={!connected||!!pending} onClick={()=>command('loop')}>{snapshot.loop?'Turn looping off':'Loop presentation'}</button>}</details>
+      </>}
+      <button className="br-disconnect" onClick={disconnect}>Disconnect this phone</button>
+    </>}
+    {error&&<p className="br-error" role="alert">{error}</p>}
+    <footer>Keep this page open while presenting. Full screen is controlled on the TV.</footer>
+    {snapshot&&<nav className={`br-transport${shortcuts.length ? ' has-cue-shortcuts' : ''}`} aria-label="Slide navigation">
+      <div className="br-transport-header">
+        <div className="br-transport-meta">
+          <span>{snapshot.current.title || `Slide ${snapshot.index+1} of ${snapshot.total}`}</span>
+          <span className="br-command-status" aria-live="polite">{pending?'Sending control…':connected?'Ready':'TV disconnected'}</span>
+        </div>
+      </div>
+      {shortcuts.length>0&&<div className="br-cue-shortcuts" role="group" aria-label="Jump to ceremony section">
+        {shortcuts.map(group=><button key={group} aria-current={activeGroup===group?'true':undefined} onClick={()=>openCueGroup(group)}>
+          {cueShortcuts[group]}{group==='grog'&&<span>{grouped.grog.length}</span>}
+        </button>)}
+      </div>}
+      <div className="br-transport-buttons">
+        <button disabled={!connected||!!pending||snapshot.scheduleActive||snapshot.index===0} onClick={()=>command('previous')}>Previous</button>
+        <button className="br-next" aria-label="Next slide" aria-describedby={nextTitle?'br-next-title':undefined} disabled={!connected||!!pending||snapshot.scheduleActive||snapshot.showPhase==='waiting'||(!snapshot.loop&&snapshot.index===snapshot.total-1)} onClick={()=>command('next')}>
+          <span>Next slide</span>{nextTitle&&<small id="br-next-title">{nextTitle}</small>}
+        </button>
+      </div>
+    </nav>}
+  </main>;
+}

@@ -1,119 +1,76 @@
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
+import { createPortal } from 'react-dom';
 import { useNavigate } from 'react-router-dom';
-import { P, mono, oswald, fs, sp, ease } from '../theme';
+import { NAV_GROUPS, groupIcon } from './navItems';
+import NavIcon from './NavIcon';
+import ToolSearch from './ToolSearch';
+import './sidebar.css';
 
-// Grouped, text-labelled navigation. Daily tasks up top; dev/danger tools
-// isolated at the bottom under SYSTEM. Emergency Push lives inside TV
-// Remote now (first tab there) rather than its own top-level item.
-export const NAV_GROUPS = [
-  {
-    heading: 'DAILY',
-    items: [
-      { id: 'overview', icon: '◉', label: 'Overview' },
-      { id: 'tvremote', icon: '▥', label: 'TV Remote' },
-      { id: 'events',   icon: '◷', label: 'Events' },
-      { id: 'aars',     icon: '▤', label: 'AAR Tracker' },
-      { id: 'feedback', icon: '✎', label: 'Event Feedback' },
-      { id: 'people',   icon: '☰', label: 'People' },
-      { id: 'boards',   icon: '★', label: 'Promotion Boards' },
-      { id: 'photos',   icon: '⊞', label: 'Photos' },
-      { id: 'questions', icon: '?', label: 'FAQ Questions' },
-      { id: 'email',    icon: '✉', label: 'Email List' },
-      { id: 'messages', icon: '◈', label: 'Messages' },
-      { id: 'checkin', icon: '◔', label: 'Site Check-In' },
-      { id: 'poll', icon: '◷', label: 'Poll Results' },
-      { id: 'opticsurvey', icon: '◎', label: 'OPTIC Survey' },
-    ],
-  },
-  {
-    heading: 'LIBRARY',
-    items: [
-      { id: 'media', icon: '⊡', label: 'Media' },
-      { id: 'raidertv', icon: '▶', label: 'Raider TV' },
-      { id: 'ball', icon: '♛', label: 'Military Ball' },
-      { id: 'ticketdelivery', icon: '✓', label: 'Ticket Delivery' },
-      { id: 'ballallergy', icon: '⚕', label: 'Ball Allergies' },
-      { id: 'riflesignups', icon: '⊙', label: 'Rifle Signups' },
-      { id: 'halloween', icon: '🎃', label: 'Halloween Movie Poll' },
-    ],
-  },
-  {
-    heading: 'BETA',
-    items: [
-      { id: 'beta', icon: '✦', label: 'Beta Features' },
-    ],
-  },
-  {
-    heading: 'SYSTEM',
-    items: [
-      { id: 'portalaccess', icon: '⚷', label: 'Portal Access' },
-      { id: 'advanced', icon: '⚙', label: 'Advanced', danger: true },
-    ],
-  },
-  {
-    heading: 'ACCOUNT',
-    items: [
-      { id: 'account', icon: '⚿', label: 'My Account' },
-    ],
-  },
-];
+const ROLE_TAG={s6:'S-6 · Net control',s5:'S-5 · Operations',bc:'Battalion command'};
 
-function NavItem({ item, on, onClick }) {
-  const [hover, setHover] = useState(false);
-  const dangerColor = 'rgba(192,57,43,0.9)';
-  const restColor = item.danger ? dangerColor : P.mute;
-  return (
-    <button
-      onClick={onClick}
-      onMouseEnter={() => setHover(true)}
-      onMouseLeave={() => setHover(false)}
-      style={{
-        width: '100%', textAlign: 'left', display: 'flex', alignItems: 'center', gap: sp[3],
-        background: on ? P.navy : (hover ? P.goldWash : 'transparent'),
-        borderLeft: `3px solid ${on ? P.gold : 'transparent'}`,
-        borderTop: 'none', borderRight: 'none', borderBottom: 'none',
-        color: on ? P.cream : restColor,
-        cursor: 'pointer', fontFamily: mono, fontSize: fs.sm, letterSpacing: '0.06em',
-        padding: '13px 20px', transition: `all 0.14s ${ease}`,
-      }}
-    >
-      <span style={{ fontSize: fs.md, color: on ? P.gold : (hover ? P.gold : 'inherit'), width: 20, transition: `color 0.14s ${ease}` }}>{item.icon}</span>
-      {item.label}
-    </button>
-  );
-}
-
-const ROLE_TAG = {
-  s6: 'S-6 · NET CONTROL',
-  s5: 'S-5 · CALENDAR',
-  bc: 'BC · RANGE TV',
-};
-
-export default function Sidebar({ active, allowed = null, role = 's6' }) {
-  const navigate = useNavigate();
-  // allowed = list of section ids this role may see; null = all.
-  const groups = allowed
-    ? NAV_GROUPS.map((g) => ({ ...g, items: g.items.filter((i) => allowed.includes(i.id)) })).filter((g) => g.items.length)
-    : NAV_GROUPS;
-  return (
-    <div style={{
-      width: 244, background: P.deep, borderRight: `1px solid ${P.hairStrong}`,
-      display: 'flex', flexDirection: 'column', flexShrink: 0, overflowY: 'auto', paddingBottom: sp[4],
-    }}>
-      <div style={{ padding: '20px 20px 16px', borderBottom: `1px solid ${P.hair}`, marginBottom: sp[3] }}>
-        <div style={{ fontFamily: oswald, fontSize: fs.lg, color: P.cream, letterSpacing: '0.26em', fontWeight: 600 }}>DISPATCH</div>
-        <div style={{ fontFamily: mono, fontSize: fs.micro, color: P.gold, letterSpacing: '0.2em', marginTop: 5 }}>{ROLE_TAG[role] || ROLE_TAG.s6}</div>
-      </div>
-      {groups.map((group) => (
-        <div key={group.heading} style={{ marginBottom: sp[3] }}>
-          <div style={{ fontFamily: mono, fontSize: fs.micro, color: P.faint, letterSpacing: '0.24em', padding: '6px 20px 8px' }}>
-            {group.heading}
-          </div>
-          {group.items.map((item) => (
-            <NavItem key={item.id} item={item} on={active === item.id} onClick={() => navigate(`/admin/${item.id}`)} />
-          ))}
-        </div>
-      ))}
-    </div>
-  );
+export default function Sidebar({active,allowed=null,role='s6',adminId,onLogout,band='desktop',manualCollapsed=false,onToggleCollapsed,drawerOpen=false,onCloseDrawer}) {
+  const navigate=useNavigate();
+  const [menu,setMenu]=useState(null);
+  const [searchOpen,setSearchOpen]=useState(false);
+  const panelRef=useRef(null);
+  const menuRef=useRef(null);
+  const triggerRef=useRef(null);
+  const searchRef=useRef(null);
+  const collapsed=band!=='phone' && manualCollapsed;
+  const mode=band==='phone'?'drawer':collapsed?'rail':'expanded';
+  const groups=(allowed ? NAV_GROUPS.map(group=>({...group,items:group.items.filter(item=>allowed.includes(item.id))})).filter(group=>group.items.length) : NAV_GROUPS).filter(group=>group.heading!=='ACCOUNT');
+  const canAccount=!allowed || allowed.includes('account');
+  const goTo=id=>{setMenu(null);setSearchOpen(false);navigate(`/admin/${id}`);if(mode==='drawer')onCloseDrawer?.();};
+  useEffect(()=>{
+    const onKey=event=>{if((event.metaKey||event.ctrlKey)&&event.key.toLowerCase()==='k'){event.preventDefault();setMenu(null);setSearchOpen(open=>!open);}if(event.key==='Escape'){setMenu(null);onCloseDrawer?.();triggerRef.current?.focus();}};
+    window.addEventListener('keydown',onKey);
+    return()=>window.removeEventListener('keydown',onKey);
+  },[onCloseDrawer]);
+  useEffect(()=>{
+    if(!menu)return;
+    const outside=event=>{if(!menuRef.current?.contains(event.target)&&!panelRef.current?.contains(event.target))setMenu(null);};
+    const resize=()=>setMenu(null);
+    window.addEventListener('pointerdown',outside);
+    window.addEventListener('resize',resize);
+    menuRef.current?.querySelector('[role="menuitem"]')?.focus();
+    return()=>{window.removeEventListener('pointerdown',outside);window.removeEventListener('resize',resize);};
+  },[menu]);
+  const openGroup=(group,event)=>{
+    if(menu?.heading===group.heading){setMenu(null);return;}
+    triggerRef.current=event.currentTarget;
+    const rect=event.currentTarget.getBoundingClientRect();
+    const height=68+group.items.length*46;
+    const mobile=mode==='drawer';
+    setMenu({...group,top:Math.max(12,Math.min(rect.top,window.innerHeight-height-12)),left:mobile?20:(collapsed?96:280),mobile});
+  };
+  const displayName=(adminId || role).split('@')[0];
+  const searchGroups=canAccount?[...groups,{heading:'ACCOUNT',items:[{id:'account',label:'My Account'}]}]:groups;
+  return <>
+    {mode==='drawer'&&drawerOpen&&<button className="dispatch-sidebar-scrim" aria-label="Close navigation" onClick={onCloseDrawer}/>}
+    <aside ref={panelRef} className={`dispatch-sidebar is-${mode} ${drawerOpen?'is-open':''}`} aria-label="Dispatch navigation" inert={mode==='drawer'&&!drawerOpen?true:undefined}>
+      <header className="dispatch-sidebar-brand">
+        <button className="dispatch-brand-mark" aria-label={collapsed?'Expand sidebar':'Go to Dispatch AI'} title={collapsed?'Expand sidebar':'Dispatch AI'} onClick={()=>{setMenu(null);if(collapsed)onToggleCollapsed?.();else goTo(allowed?.includes('ai')||!allowed?'ai':allowed[0]);}}><span/></button>
+        {!collapsed&&<><div className="dispatch-brand-copy"><strong>DISPATCH</strong><span>Trojan Battalion</span></div><button className="dispatch-icon-button dispatch-collapse" aria-label={mode==='drawer'?'Close navigation':'Collapse sidebar'} title={mode==='drawer'?'Close navigation':'Collapse sidebar'} onClick={()=>{setMenu(null);if(mode==='drawer')onCloseDrawer?.();else onToggleCollapsed?.();}}><NavIcon name={mode==='drawer'?'close':'panel'} size={17}/></button></>}
+      </header>
+      <button ref={searchRef} className="dispatch-sidebar-search" aria-label="Search tools" title="Search tools (⌘K / Ctrl+K)" onClick={()=>{setMenu(null);setSearchOpen(true);}}><NavIcon name="search"/>{!collapsed&&<><span>Search tools</span><kbd>⌘ K</kbd></>}</button>
+      <nav className="dispatch-sidebar-navigation" aria-label="Tools">
+        {groups.filter(group=>!group.heading).flatMap(group=>group.items).map(item=><button key={item.id} className={`dispatch-nav-item ${active===item.id?'is-active':''}`} aria-label={item.label} aria-current={active===item.id?'page':undefined} title={collapsed?item.label:undefined} onClick={()=>goTo(item.id)}><NavIcon name={item.id}/>{!collapsed&&<span>{item.label}</span>}{!collapsed&&active===item.id&&<i/>}</button>)}
+        <div className="dispatch-nav-divider"/>
+        {!collapsed&&<div className="dispatch-nav-caption">WORKSPACE</div>}
+        {groups.filter(group=>group.heading).map(group=>{
+          const activeItem=group.items.find(item=>item.id===active);
+          return <button key={group.heading} className={`dispatch-nav-item dispatch-nav-group ${activeItem?'is-active-group':''} ${menu?.heading===group.heading?'is-menu-open':''}`} aria-label={group.heading.toLowerCase().replace(/\b\w/g,char=>char.toUpperCase())} aria-haspopup="menu" aria-expanded={menu?.heading===group.heading} title={collapsed?`${group.heading}${activeItem?`: ${activeItem.label}`:''}`:undefined} onClick={event=>openGroup(group,event)}><NavIcon name={groupIcon(group.heading)}/>{!collapsed&&<><span>{group.heading.toLowerCase().replace(/\b\w/g,char=>char.toUpperCase())}{activeItem&&<small>{activeItem.label}</small>}</span><NavIcon name="chevron" size={13}/></>}</button>;
+        })}
+      </nav>
+      <footer className="dispatch-sidebar-footer">
+        <button className={`dispatch-profile ${active==='account'?'is-active':''}`} aria-label="My Account" title={collapsed?`${displayName} · My Account`:undefined} disabled={!canAccount} onClick={()=>goTo('account')}><span className="dispatch-avatar">{role.toUpperCase().replace('S','S-')}</span>{!collapsed&&<span className="dispatch-profile-copy"><strong>{displayName}</strong><small>{ROLE_TAG[role]||role}</small></span>}</button>
+        <button className="dispatch-signout" aria-label="Sign out" title="Sign out" onClick={onLogout}><NavIcon name="signout" size={17}/>{!collapsed&&<span>Sign out</span>}</button>
+      </footer>
+    </aside>
+    {menu&&createPortal(<section ref={menuRef} className={`dispatch-section-menu ${menu.mobile?'is-mobile':''}`} style={{top:menu.top,left:menu.left}} aria-label={`${menu.heading.toLowerCase()} tools`} onKeyDown={event=>{
+      if(event.key==='Escape'){event.preventDefault();event.stopPropagation();setMenu(null);triggerRef.current?.focus();}
+      if(event.key==='ArrowDown'||event.key==='ArrowUp'){event.preventDefault();const buttons=[...event.currentTarget.querySelectorAll('[role="menuitem"]')];const index=buttons.indexOf(document.activeElement);buttons[(index+(event.key==='ArrowDown'?1:-1)+buttons.length)%buttons.length]?.focus();}
+    }}><header><div><span>WORKSPACE</span><strong>{menu.heading.toLowerCase().replace(/\b\w/g,char=>char.toUpperCase())}</strong></div><button className="dispatch-icon-button" aria-label="Close section menu" onClick={()=>{setMenu(null);triggerRef.current?.focus();}}><NavIcon name="close" size={16}/></button></header><div role="menu">{menu.items.map(item=><button role="menuitem" key={item.id} className={`dispatch-section-link ${active===item.id?'is-active':''}`} onClick={()=>goTo(item.id)}><span>{item.label}</span><NavIcon name="arrow" size={16}/></button>)}</div></section>,document.body)}
+    {searchOpen&&<ToolSearch groups={searchGroups} onNavigate={goTo} onClose={()=>{setSearchOpen(false);searchRef.current?.focus();}}/>}
+  </>;
 }

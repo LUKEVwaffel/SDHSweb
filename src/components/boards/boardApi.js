@@ -65,6 +65,8 @@ export const boardApi = {
   signOut: () => SB.auth.signOut(),
   session: async () => (await SB.auth.getSession()).data.session,
 
+  questions: (letLevel) => select(SB.from('board_questions').select('*').eq('let_level', letLevel).eq('active', true).order('category').order('id')),
+  saveQuestion: (question) => rpc('board_save_question', { p: question }),
   whoami: async () => (await rpc('board_whoami')) ?? [],
   roster: (company) => rpc('board_roster', { p_company: company }),
   setRank: (cadetId, rank) => rpc('board_set_rank', { p_cadet_id: cadetId, p_rank: rank }),
